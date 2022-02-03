@@ -561,6 +561,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setCurrLoc2Unrecognized,
             PreAdjFissClaim::getCurrLoc2,
             PreAdjFissClaim.Fields.currLoc2,
+            0,
             5);
   }
 
@@ -740,6 +741,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setLobCdUnrecognized,
             claim -> String.valueOf(claim.getLobCd()),
             PreAdjFissClaim.Fields.lobCd,
+            0,
             1);
   }
 
@@ -770,6 +772,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setFreqCdUnrecognized,
             PreAdjFissClaim::getFreqCd,
             PreAdjFissClaim.Fields.freqCd,
+            0,
             1);
   }
 
@@ -835,6 +838,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setAdjReqCdUnrecognized,
             PreAdjFissClaim::getAdjReqCd,
             PreAdjFissClaim.Fields.adjReqCd,
+            0,
             1);
   }
 
@@ -879,6 +883,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setCancAdjCdUnrecognized,
             PreAdjFissClaim::getCancAdjCd,
             PreAdjFissClaim.Fields.cancAdjCd,
+            0,
             1);
   }
 
@@ -922,6 +927,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setAdmSourceUnrecognized,
             PreAdjFissClaim::getAdmSource,
             PreAdjFissClaim.Fields.admSource,
+            0,
             1);
   }
 
@@ -937,6 +943,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setPrimaryPayerCodeUnrecognized,
             PreAdjFissClaim::getPrimaryPayerCode,
             PreAdjFissClaim.Fields.primaryPayerCode,
+            0,
             1);
   }
 
@@ -992,6 +999,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setAttendPhysFlagUnrecognized,
             PreAdjFissClaim::getAttendPhysFlag,
             PreAdjFissClaim.Fields.attendPhysFlag,
+            0,
             1);
   }
 
@@ -1047,6 +1055,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setOperPhysFlagUnrecognized,
             PreAdjFissClaim::getOperPhysFlag,
             PreAdjFissClaim.Fields.operPhysFlag,
+            0,
             1);
   }
 
@@ -1102,6 +1111,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setOthPhysFlagUnrecognized,
             PreAdjFissClaim::getOthPhysFlag,
             PreAdjFissClaim.Fields.othPhysFlag,
+            0,
             1);
   }
 
@@ -1127,6 +1137,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setProcNewHicIndUnrecognized,
             PreAdjFissClaim::getProcNewHicInd,
             PreAdjFissClaim.Fields.procNewHicInd,
+            0,
             1);
   }
 
@@ -1152,6 +1163,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setReposIndUnrecognized,
             PreAdjFissClaim::getReposInd,
             PreAdjFissClaim.Fields.reposInd,
+            0,
             1);
   }
 
@@ -1177,6 +1189,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setMbiSubmBeneIndUnrecognized,
             PreAdjFissClaim::getMbiSubmBeneInd,
             PreAdjFissClaim.Fields.mbiSubmBeneInd,
+            0,
             1);
   }
 
@@ -1193,6 +1206,7 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setAdjMbiIndUnrecognized,
             PreAdjFissClaim::getAdjMbiInd,
             PreAdjFissClaim.Fields.adjMbiInd,
+            0,
             1);
   }
 
@@ -1263,6 +1277,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setPayersIdUnrecognized,
             PreAdjFissPayer::getPayersId,
             PreAdjFissPayer.Fields.payersId,
+            0,
             1);
   }
 
@@ -1288,6 +1303,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setRelIndUnrecognized,
             PreAdjFissPayer::getRelInd,
             PreAdjFissPayer.Fields.relInd,
+            0,
             1);
   }
 
@@ -1303,6 +1319,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setAssignIndUnrecognized,
             PreAdjFissPayer::getAssignInd,
             PreAdjFissPayer.Fields.assignInd,
+            0,
             1);
   }
 
@@ -1356,6 +1373,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setBeneRelUnrecognized,
             PreAdjFissPayer::getBeneRel,
             PreAdjFissPayer.Fields.beneRel,
+            0,
             2);
   }
 
@@ -1430,6 +1448,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setBeneSexUnrecognized,
             PreAdjFissPayer::getBeneSex,
             PreAdjFissPayer.Fields.beneSex,
+            0,
             1);
   }
 
@@ -1455,6 +1474,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setInsuredSexUnrecognized,
             PreAdjFissPayer::getInsuredSex,
             PreAdjFissPayer.Fields.insuredSex,
+            0,
             1);
   }
 
@@ -1470,6 +1490,7 @@ public class FissClaimTransformerTest {
             FissBeneZPayer.Builder::setInsuredRelX12Unrecognized,
             PreAdjFissPayer::getInsuredRelX12,
             PreAdjFissPayer.Fields.insuredRelX12,
+            0,
             2);
   }
 
@@ -1488,6 +1509,7 @@ public class FissClaimTransformerTest {
             FissInsuredPayer.Builder::setPayersIdUnrecognized,
             PreAdjFissPayer::getPayersId,
             PreAdjFissPayer.Fields.payersId,
+            0,
             1);
   }
 
@@ -1513,6 +1535,7 @@ public class FissClaimTransformerTest {
             FissInsuredPayer.Builder::setRelIndUnrecognized,
             PreAdjFissPayer::getRelInd,
             PreAdjFissPayer.Fields.relInd,
+            0,
             1);
   }
 
@@ -1528,6 +1551,7 @@ public class FissClaimTransformerTest {
             FissInsuredPayer.Builder::setAssignIndUnrecognized,
             PreAdjFissPayer::getAssignInd,
             PreAdjFissPayer.Fields.assignInd,
+            0,
             1);
   }
 
@@ -1581,6 +1605,7 @@ public class FissClaimTransformerTest {
             FissInsuredPayer.Builder::setInsuredRelUnrecognized,
             PreAdjFissPayer::getInsuredRel,
             PreAdjFissPayer.Fields.insuredRel,
+            0,
             2);
   }
 
@@ -1646,6 +1671,7 @@ public class FissClaimTransformerTest {
             FissInsuredPayer.Builder::setInsuredSexUnrecognized,
             PreAdjFissPayer::getInsuredSex,
             PreAdjFissPayer.Fields.insuredSex,
+            0,
             1);
   }
 
@@ -1661,6 +1687,7 @@ public class FissClaimTransformerTest {
             FissInsuredPayer.Builder::setInsuredRelX12Unrecognized,
             PreAdjFissPayer::getInsuredRelX12,
             PreAdjFissPayer.Fields.insuredRelX12,
+            0,
             2);
   }
 

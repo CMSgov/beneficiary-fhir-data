@@ -341,6 +341,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrClaimTypeUnrecognized,
             PreAdjMcsClaim::getIdrClaimType,
             PreAdjMcsClaim.Fields.idrClaimType,
+            0,
             1);
   }
 
@@ -386,6 +387,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrBeneSexUnrecognized,
             PreAdjMcsClaim::getIdrBeneSex,
             PreAdjMcsClaim.Fields.idrBeneSex,
+            0,
             1);
   }
 
@@ -478,6 +480,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrBillProvGroupIndUnrecognized,
             PreAdjMcsClaim::getIdrBillProvGroupInd,
             PreAdjMcsClaim.Fields.idrBillProvGroupInd,
+            0,
             1);
   }
 
@@ -550,6 +553,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrBillProvStatusCdUnrecognized,
             PreAdjMcsClaim::getIdrBillProvStatusCd,
             PreAdjMcsClaim.Fields.idrBillProvStatusCd,
+            0,
             1);
   }
 
@@ -613,6 +617,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrAssignmentUnrecognized,
             PreAdjMcsClaim::getIdrAssignment,
             PreAdjMcsClaim.Fields.idrAssignment,
+            0,
             1);
   }
 
@@ -628,6 +633,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrClmLevelIndUnrecognized,
             PreAdjMcsClaim::getIdrClmLevelInd,
             PreAdjMcsClaim.Fields.idrClmLevelInd,
+            0,
             1);
   }
 
@@ -650,6 +656,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
             PreAdjMcsClaim::getIdrHdrAuditInd,
             PreAdjMcsClaim.Fields.idrHdrAuditInd,
+            0,
             1);
   }
 
@@ -665,6 +672,7 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrUSplitReasonUnrecognized,
             PreAdjMcsClaim::getIdrUSplitReason,
             PreAdjMcsClaim.Fields.idrUSplitReason,
+            0,
             1);
   }
 
@@ -921,6 +929,7 @@ public class McsClaimTransformerTest {
             McsAudit.Builder::setIdrJAuditIndUnrecognized,
             PreAdjMcsAudit::getIdrJAuditInd,
             PreAdjMcsAudit.Fields.idrJAuditInd,
+            0,
             1);
   }
 
@@ -936,6 +945,7 @@ public class McsClaimTransformerTest {
             McsAudit.Builder::setIdrJAuditDispUnrecognized,
             PreAdjMcsAudit::getIdrJAuditDisp,
             PreAdjMcsAudit.Fields.idrJAuditDisp,
+            0,
             1);
   }
 
@@ -965,6 +975,7 @@ public class McsClaimTransformerTest {
             McsDiagnosisCode.Builder::setIdrDiagIcdTypeUnrecognized,
             PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
             PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
+            0,
             1);
   }
 
@@ -983,6 +994,7 @@ public class McsClaimTransformerTest {
             McsDetail.Builder::setIdrDtlStatusUnrecognized,
             PreAdjMcsDetail::getIdrDtlStatus,
             PreAdjMcsDetail.Fields.idrDtlStatus,
+            0,
             1);
   }
 
@@ -1066,6 +1078,7 @@ public class McsClaimTransformerTest {
             McsDetail.Builder::setIdrDtlDiagIcdTypeUnrecognized,
             PreAdjMcsDetail::getIdrDtlDiagIcdType,
             PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
+            0,
             1);
   }
 
@@ -1181,6 +1194,7 @@ public class McsClaimTransformerTest {
             McsDetail.Builder::setIdrTosUnrecognized,
             PreAdjMcsDetail::getIdrTos,
             PreAdjMcsDetail.Fields.idrTos,
+            0,
             1);
   }
 
@@ -1196,6 +1210,7 @@ public class McsClaimTransformerTest {
             McsDetail.Builder::setIdrTwoDigitPosUnrecognized,
             PreAdjMcsDetail::getIdrTwoDigitPos,
             PreAdjMcsDetail.Fields.idrTwoDigitPos,
+            0,
             2);
   }
 
@@ -1404,6 +1419,7 @@ public class McsClaimTransformerTest {
             McsLocation.Builder::setIdrLocActvCodeUnrecognized,
             PreAdjMcsLocation::getIdrLocActvCode,
             PreAdjMcsLocation.Fields.idrLocActvCode,
+            0,
             1);
   }
 
