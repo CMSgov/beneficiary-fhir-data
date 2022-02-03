@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Used to create a sample of data from various sources, enforcing sampling ratios per source.
+ * Used to create a sample of data from various sources, enforcing sampling proportions per source.
  *
  * <p>Data is stored up to a configured maximum size. If the size is exceeded, values are dropped
- * from each source that is over their ratio thresholds until the total data set size is no longer
- * above the configured maximum size.
+ * from each source that is over their proportion thresholds until the total data set size is no
+ * longer above the configured maximum size.
  *
  * <p>There is no random sampling being utilized, aside from the arbitrary order of the utilized
  * data structures' backing hash tables.
@@ -21,19 +21,19 @@ import java.util.Set;
 public class DataSampler<T> implements Iterable<T> {
   private final Map<Integer, Set<T>> dataSet = new HashMap<>();
 
-  private final Map<Integer, Float> sampleRatios;
+  private final Map<Integer, Float> sampleProportions;
   private final int maxValues;
 
-  private DataSampler(int maxValues, Map<Integer, Float> sampleRatios) {
+  private DataSampler(int maxValues, Map<Integer, Float> sampleProportions) {
     this.maxValues = maxValues;
 
-    // Normalize ratios in case they didn't add up to 1.0
-    float totalRatios = sampleRatios.values().stream().reduce(0.0f, Float::sum);
-    float coef = 1.0f / totalRatios;
-    this.sampleRatios = sampleRatios;
-    this.sampleRatios.replaceAll((k, v) -> v * coef);
+    // Normalize proportions in case they didn't add up to 1.0
+    float totalProportions = sampleProportions.values().stream().reduce(0.0f, Float::sum);
+    float coef = 1.0f / totalProportions;
+    this.sampleProportions = sampleProportions;
+    this.sampleProportions.replaceAll((k, v) -> v * coef);
 
-    for (Integer id : this.sampleRatios.keySet()) {
+    for (Integer id : this.sampleProportions.keySet()) {
       dataSet.put(id, new HashSet<>());
     }
   }
@@ -42,10 +42,10 @@ public class DataSampler<T> implements Iterable<T> {
    * Attempts to add a given data value, associating it to the given sampleSetId.
    *
    * <p>The sampleSetId is the value used when invoking {@link Builder#registerSampleSet(int,
-   * float)} to configure the ratio for the sample set.
+   * float)} to configure the proportion for the sample set.
    *
    * <p>If the total dataset size is greater than the configured maxValues size, {@link
-   * #rebalance()} is called and data will be dropped based on it's configured ratio threshold.
+   * #rebalance()} is called and data will be dropped based on it's configured proportion threshold.
    *
    * @param sampleSetId The id of the sample set that was previously configured.
    * @param value The value to add that is associated with the given sample set id.
@@ -74,19 +74,19 @@ public class DataSampler<T> implements Iterable<T> {
   /**
    * Checks to see if the size of the currently stored data has exceeded the maximum configured
    * size. If it has, it will go through and systematically drop data from different sources if they
-   * are exceeding their current ratio configuration until the currently stored data is no longer
-   * exceeding it's size restriction.
+   * are exceeding their current proportion configuration until the currently stored data is no
+   * longer exceeding it's size restriction.
    */
   private void rebalance() {
     long totalValues = dataSet.values().stream().map(Set::size).reduce(0, Integer::sum);
 
-    Iterator<Integer> mapIterator = sampleRatios.keySet().iterator();
+    Iterator<Integer> mapIterator = sampleProportions.keySet().iterator();
 
     while (totalValues > maxValues && mapIterator.hasNext()) {
       Integer key = mapIterator.next();
 
       // Calculate maximum size of current sample set based on configurations
-      int setMaxSize = (int) (maxValues * sampleRatios.get(key));
+      int setMaxSize = (int) (maxValues * sampleProportions.get(key));
 
       Set<T> setData = dataSet.get(key);
 
@@ -128,7 +128,7 @@ public class DataSampler<T> implements Iterable<T> {
    */
   public static class Builder<T> {
     private int maxValues = Integer.MAX_VALUE;
-    private final Map<Integer, Float> sampleRatios = new HashMap<>();
+    private final Map<Integer, Float> sampleProportions = new HashMap<>();
 
     /**
      * Define the maximum number of data values the created {@link DataSampler} will be configured
@@ -143,20 +143,21 @@ public class DataSampler<T> implements Iterable<T> {
     }
 
     /**
-     * Registers a new sample set id for configuring ratios and tracking future data additions.
+     * Registers a new sample set id for configuring proportions and tracking future data additions.
      *
      * <p>The sample set id is just an arbitrary integer defined by the caller to be used in future
      * calls to designate which sample set to apply values to.
      *
-     * <p>The configured ratio is the PREFERRED maximum ratio, but if there is not enough data to
-     * meet these desired levels, one or more sets could fall over/under their configured ratio.
+     * <p>The configured proportion is the PREFERRED maximum proportion, but if there is not enough
+     * data to meet these desired levels, one or more sets could fall over/under their configured
+     * proportion.
      *
      * @param id The id for the sample set to start tracking.
-     * @param ratio The preferred maximum ratio of values to store for this sample set id.
+     * @param proportion The preferred maximum proportion of values to store for this sample set id.
      * @return The current {@link Builder} instance.
      */
-    public Builder<T> registerSampleSet(int id, float ratio) {
-      sampleRatios.put(id, ratio);
+    public Builder<T> registerSampleSet(int id, float proportion) {
+      sampleProportions.put(id, proportion);
       return this;
     }
 
@@ -166,7 +167,7 @@ public class DataSampler<T> implements Iterable<T> {
      * @return A new {@link DataSampler} object instance.
      */
     public DataSampler<T> build() {
-      return new DataSampler<>(maxValues, sampleRatios);
+      return new DataSampler<>(maxValues, sampleProportions);
     }
   }
 

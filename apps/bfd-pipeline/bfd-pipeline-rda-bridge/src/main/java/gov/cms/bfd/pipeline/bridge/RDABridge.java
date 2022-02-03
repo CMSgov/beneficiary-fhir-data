@@ -181,20 +181,18 @@ public class RDABridge {
       final int MCS_ID = 1;
 
       // Grab given ratios for fiss/mcs attribution output
-      float fissRatio = config.floatOption(AppConfig.Fields.attributionFissRatio).orElse(0.5f);
+      float fissRatio = config.floatOption(AppConfig.Fields.attributionFissRatio).orElse(1.0f);
 
-      // Calculate actual individual values
-      if (fissRatio > 1.0f) {
-        fissRatio = 1.0f - (1.0f / (1.0f + fissRatio));
-      }
+      // Convert ratio to proportion
+      float fissProportion = 1.0f - (1.0f / (1.0f + fissRatio));
 
-      float mcsRatio = 1.0f - fissRatio;
+      float mcsProportion = 1.0f - fissRatio;
 
       DataSampler<String> mbiSampler =
           DataSampler.<String>builder()
               .maxValues(config.intOption(AppConfig.Fields.attributionSetSize).orElse(10_000))
-              .registerSampleSet(FISS_ID, fissRatio)
-              .registerSampleSet(MCS_ID, mcsRatio)
+              .registerSampleSet(FISS_ID, fissProportion)
+              .registerSampleSet(MCS_ID, mcsProportion)
               .build();
 
       try (Sink<MessageOrBuilder> fissSink =

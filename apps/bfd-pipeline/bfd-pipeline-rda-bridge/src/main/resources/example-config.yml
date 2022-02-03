@@ -8,7 +8,7 @@ buildAttributionSet: true
 attributionSetSize: 100
 attributionTemplateFile: attribution-template.sql # Input template file
 attributionScriptFile: attribution-data.sql # Output script file
-attributionFissRatio: 0.5 # Ratio of fiss claims to MCS (0.5 means 50% fiss, 1.5 means 60% fiss)
+attributionFissRatio: 1.0 # Ratio of fiss claims to MCS (0.5 means 33% fiss, 1.0 means 50% fiss, 1.5 means 60% fiss)
 fissSources:
   - inpatient.csv
   - outpatient.csv
