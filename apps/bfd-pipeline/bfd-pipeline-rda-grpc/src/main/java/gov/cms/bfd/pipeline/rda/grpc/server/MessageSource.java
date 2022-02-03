@@ -25,8 +25,6 @@ public interface MessageSource<T> extends AutoCloseable {
    *
    * @return the next claim in the sequence
    * @throws Exception any error in reading data could throw an exception here
-   * @throws NoSuchElementException if this method is called when hasNext() would have returned
-   *     false
    */
   T next() throws Exception;
 
@@ -36,6 +34,7 @@ public interface MessageSource<T> extends AutoCloseable {
    *
    * @param numberToSkip number of records to skip past
    * @return this source after skipping the records
+   * @throws Exception if there is an issue getting the next claim
    */
   default MessageSource<T> skip(long numberToSkip) throws Exception {
     while (numberToSkip-- > 0 && hasNext()) {
