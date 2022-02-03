@@ -10,7 +10,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,12 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AttributionBuilder {
 
-  private static final String LABEL_GROUP = "label";
-  private static final String COUNT_GROUP = "count";
-
-  private static final Pattern attributionMarker =
-      Pattern.compile("%%(?<" + LABEL_GROUP + ">.+)-(?<" + COUNT_GROUP + ">\\d+)%%");
-
   private final String attributionTemplate;
   private final String attributionScript;
 
@@ -64,16 +57,26 @@ public class AttributionBuilder {
     TemplateLoader loader = new FileTemplateLoader(baseDir, "");
     Handlebars handlebars = new Handlebars(loader);
 
+    // This will apply the helper logic to any {{#SQLValues}} block.
     handlebars.registerHelper("SQLValues", sqlValuesHelper());
 
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
       Template template = handlebars.compile(attributionTemplate);
+      // Template#apply() seems to parse the entire thing into a single string, not
+      // sure if this will cause issues with larger data sets.
       writer.write(template.apply(dataSampler));
     } catch (IOException e) {
       log.error("Unable to create attribution sql script", e);
     }
   }
 
+  /**
+   * Helper for the Handlebars templating library. This defines how to process a particular template
+   * "block", as well as defining how to treat the data for it. In this case, we're saying it's an
+   * {@link Iterable<String>}.
+   *
+   * @return The helper to be used by the templating library.
+   */
   private Helper<Iterable<String>> sqlValuesHelper() {
     return (objects, options) -> {
       int subListSize = options.param(0, 0);
@@ -90,6 +93,9 @@ public class AttributionBuilder {
       while (iterator.hasNext() && i < subListSize) {
         String value = iterator.next();
 
+        // If this is the last entry in the iterator, we need to set the @last flag to true
+        // which is used in the template.  If other flags (such as @first) are desired,
+        // additional logic would need to be added for those.
         if (iterator.hasNext() && i < (subListSize - 1)) {
           sb.append(options.fn(value));
         } else {

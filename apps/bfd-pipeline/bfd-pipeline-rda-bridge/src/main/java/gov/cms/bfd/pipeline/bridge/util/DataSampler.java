@@ -27,9 +27,9 @@ public class DataSampler<T> implements Iterable<T> {
   private DataSampler(int maxValues, Map<Integer, Float> sampleRatios) {
     this.maxValues = maxValues;
 
+    // Normalize ratios in case they didn't add up to 1.0
     float totalRatios = sampleRatios.values().stream().reduce(0.0f, Float::sum);
     float coef = 1.0f / totalRatios;
-
     this.sampleRatios = sampleRatios;
     this.sampleRatios.replaceAll((k, v) -> v * coef);
 
@@ -49,6 +49,7 @@ public class DataSampler<T> implements Iterable<T> {
    *
    * @param sampleSetId The id of the sample set that was previously configured.
    * @param value The value to add that is associated with the given sample set id.
+   * @throws IllegalArgumentException If the given sampleSetId was never registered.
    */
   public void add(int sampleSetId, T value) {
     if (dataSet.containsKey(sampleSetId)) {
@@ -146,6 +147,9 @@ public class DataSampler<T> implements Iterable<T> {
      *
      * <p>The sample set id is just an arbitrary integer defined by the caller to be used in future
      * calls to designate which sample set to apply values to.
+     *
+     * <p>The configured ratio is the PREFERRED maximum ratio, but if there is not enough data to
+     * meet these desired levels, one or more sets could fall over/under their configured ratio.
      *
      * @param id The id for the sample set to start tracking.
      * @param ratio The preferred maximum ratio of values to store for this sample set id.
