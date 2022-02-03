@@ -123,7 +123,7 @@ public class ConfigLoader {
 
     try {
       return Float.parseFloat(value);
-    } catch (NumberFormatException ex) {
+    } catch (Exception ex) {
       throw new ConfigException(name, NOT_VALID_FLOAT, ex);
     }
   }
@@ -145,7 +145,7 @@ public class ConfigLoader {
     try {
       return Float.parseFloat(optional.get());
     } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
     }
   }
 
