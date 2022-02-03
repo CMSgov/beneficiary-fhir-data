@@ -245,7 +245,7 @@ public final class TransformerConstants {
   public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Tax ID number";
 
   /**
-   * The standard {@link Coding#gCode()} for {@link Identifier#getType()} entries where the
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is an MC.
    */
   public static final String CODED_IDENTIFIER_TYPE_MC = "MC";

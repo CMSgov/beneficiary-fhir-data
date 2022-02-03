@@ -7,8 +7,11 @@ public class ReflectionUtils {
   /**
    * Helper function to look up method names and optionally attempt to execute
    *
-   * @return an Optional result, cast to the generic type. If the method did not exist, or
-   *     invocation failed, this returns {@link Optional#empty()}
+   * @param <T> the type parameter
+   * @param obj the object with the specified method
+   * @param methodName the method name
+   * @return an Optional result, cast to the generic type. If the method did not exist, or if
+   *     invocation failed, returns {@link Optional#empty()}.
    */
   @SuppressWarnings("unchecked")
   public static <T> Optional<T> tryMethod(Object obj, String methodName) {
