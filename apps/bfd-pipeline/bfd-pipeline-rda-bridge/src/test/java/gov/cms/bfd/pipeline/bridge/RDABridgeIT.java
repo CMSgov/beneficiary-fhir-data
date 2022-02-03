@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,8 +34,14 @@ import org.junit.jupiter.api.Test;
 class RDABridgeIT {
 
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
+
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
+  private static final String EXPECTED_ATTRIBUTION = "expected-attribution.sql";
+
+  private static final String ACTUAL_FISS = "rda-fiss-test-5-18.ndjson";
+  private static final String ACTUAL_MCS = "rda-mcs-test-1-4.ndjson";
+  private static final String ACTUAL_ATTRIBUTION = "attribution.sql";
 
   @Test
   void shouldGenerateCorrectOutput() throws IOException {
@@ -76,20 +83,28 @@ class RDABridgeIT {
           "-q",
           outputDir.resolve("attribution.sql").toString(),
           "-t",
-          resourcesDir.resolve("example-attribution-template.sql").toString(),
+          resourcesDir.resolve("attribution-template.sql").toString(),
           rifDir
         });
 
     Set<String> ignorePaths = Collections.singleton("/timestamp");
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
-    List<String> actualFissJson =
-        Files.readAllLines(outputDir.resolve("rda-fiss-test-5-18.ndjson"));
+    List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));
     assertJsonEquals(expectedFissJson, actualFissJson, ignorePaths);
 
     List<String> expectedMcsJson = Files.readAllLines(expectedDir.resolve(EXPECTED_MCS));
-    List<String> actualMcsJson = Files.readAllLines(outputDir.resolve("rda-mcs-test-1-4.ndjson"));
+    List<String> actualMcsJson = Files.readAllLines(outputDir.resolve(ACTUAL_MCS));
     assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
+
+    String expectedAttribution =
+        String.join("\n", Files.readAllLines(expectedDir.resolve(EXPECTED_ATTRIBUTION)));
+    String actualAttribution =
+        String.join("\n", Files.readAllLines(outputDir.resolve(ACTUAL_ATTRIBUTION)));
+    assertEquals(
+        expectedAttribution,
+        actualAttribution,
+        "Generated attribution file does not match expected.");
   }
 
   /**

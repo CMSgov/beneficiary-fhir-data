@@ -236,11 +236,11 @@ public class RDABridge {
 
       if (config.booleanValue(AppConfig.Fields.buildAttributionSet, false)) {
         String templateFileName =
-            config.stringOption(AppConfig.Fields.attributionScriptFile).orElse(DEFAULT_OUTPUT_FILE);
-        String outputFileName =
             config
                 .stringOption(AppConfig.Fields.attributionTemplateFile)
                 .orElse(DEFAULT_INPUT_FILE);
+        String outputFileName =
+            config.stringOption(AppConfig.Fields.attributionScriptFile).orElse(DEFAULT_OUTPUT_FILE);
 
         AttributionBuilder builder = new AttributionBuilder(templateFileName, outputFileName);
         builder.run(mbiSampler);

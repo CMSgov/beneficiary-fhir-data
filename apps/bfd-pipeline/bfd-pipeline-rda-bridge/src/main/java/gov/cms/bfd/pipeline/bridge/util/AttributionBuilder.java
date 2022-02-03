@@ -1,12 +1,15 @@
 package gov.cms.bfd.pipeline.bridge.util;
 
-import java.io.BufferedReader;
+import com.github.jknack.handlebars.Context;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,38 +58,48 @@ public class AttributionBuilder {
    * @param dataSampler The {@link DataSampler} set to pull data from.
    */
   public void run(DataSampler<String> dataSampler) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(attributionTemplate));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
-      String line;
+    // Handlebars needs to be told if this is a relative or absolute path
+    String baseDir = attributionTemplate.charAt(0) == '/' ? "/" : ".";
 
-      while ((line = reader.readLine()) != null) {
-        Matcher matcher = attributionMarker.matcher(line.trim());
+    TemplateLoader loader = new FileTemplateLoader(baseDir, "");
+    Handlebars handlebars = new Handlebars(loader);
 
-        if (matcher.matches()) {
-          String label = matcher.group(LABEL_GROUP);
-          long count = Long.parseLong(matcher.group(COUNT_GROUP));
+    handlebars.registerHelper("SQLValues", sqlValuesHelper());
 
-          Iterator<String> attribution = dataSampler.iterator();
-
-          long i = -1;
-
-          while (attribution.hasNext() && ++i < count) {
-            if (i > 0) {
-              writer.write(",\n");
-            }
-
-            writer.write("(" + label + ", '" + attribution.next() + "')");
-          }
-
-          writer.write(";");
-        } else {
-          writer.write(line);
-        }
-
-        writer.newLine();
-      }
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
+      Template template = handlebars.compile(attributionTemplate);
+      writer.write(template.apply(dataSampler));
     } catch (IOException e) {
       log.error("Unable to create attribution sql script", e);
     }
+  }
+
+  private Helper<Iterable<String>> sqlValuesHelper() {
+    return (objects, options) -> {
+      int subListSize = options.param(0, 0);
+
+      if (subListSize < 0) {
+        subListSize = 0;
+      }
+
+      StringBuilder sb = new StringBuilder();
+
+      Iterator<String> iterator = objects.iterator();
+
+      int i = 0;
+      while (iterator.hasNext() && i < subListSize) {
+        String value = iterator.next();
+
+        if (iterator.hasNext() && i < (subListSize - 1)) {
+          sb.append(options.fn(value));
+        } else {
+          sb.append(options.fn(Context.newBuilder(value).combine("last", true).build()));
+        }
+
+        ++i;
+      }
+
+      return sb.toString();
+    };
   }
 }
