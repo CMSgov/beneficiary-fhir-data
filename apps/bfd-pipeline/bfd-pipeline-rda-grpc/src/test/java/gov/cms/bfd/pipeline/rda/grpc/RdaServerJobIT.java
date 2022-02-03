@@ -95,12 +95,13 @@ public class RdaServerJobIT {
     Bucket bucket = null;
     try {
       bucket = createTestBucket(s3Client);
+      final String directoryPath = "files-go-here";
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
               .serverName(SERVER_NAME)
               .s3Bucket(bucket.getName())
-              .s3Directory("files-go-here")
+              .s3Directory(directoryPath)
               .build();
       final String fissObjectKey = config.getS3Sources().createFissObjectKey();
       final String mcsObjectKey = config.getS3Sources().createMcsObjectKey();
