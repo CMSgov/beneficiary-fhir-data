@@ -66,7 +66,7 @@ public abstract class IcdCode {
     return icdCode;
   }
 
-  /** @return the {@link IcdVersion} of this {@link IcdCode} */
+  /** @return the version of this {@link IcdCode} */
   public Character getVersion() {
     return icdVersionCode;
   }
