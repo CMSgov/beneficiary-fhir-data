@@ -42,7 +42,7 @@ public class FissTransformer extends AbstractTransformer {
       WrappedCounter sequenceNumber, Parser.Data<String> data, WrappedMessage message) {
     FissClaimChange claimToReturn;
 
-    int lineNumber = getLineNumber(data);
+    int lineNumber = getLineNumber(data, Fiss.CLM_LINE_NUM);
 
     if (message.getMessage() instanceof FissClaimChange) {
       // There is an existing claim from a previous run
@@ -158,25 +158,6 @@ public class FissTransformer extends AbstractTransformer {
         .setClaim(claimBuilder.build())
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .build();
-  }
-
-  @VisibleForTesting
-  int getLineNumber(Parser.Data<String> data) {
-    int lineNumber;
-
-    Optional<String> lineNumberString = data.get(Fiss.CLM_LINE_NUM);
-
-    if (lineNumberString.isPresent()) {
-      try {
-        lineNumber = Integer.parseInt(lineNumberString.get());
-      } catch (NumberFormatException e) {
-        throw new IllegalStateException("Line number expected to be a valid numeric value");
-      }
-    } else {
-      throw new IllegalStateException("Line number expected to be a valid numeric value");
-    }
-
-    return lineNumber;
   }
 
   @VisibleForTesting

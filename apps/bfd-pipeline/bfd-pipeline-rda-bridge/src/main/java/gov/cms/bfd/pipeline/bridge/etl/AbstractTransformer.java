@@ -83,4 +83,34 @@ public abstract class AbstractTransformer {
   public <T> void consumeIfNotNull(T value, Consumer<T> consumer) {
     consumeIf(value, Objects::nonNull, consumer);
   }
+
+  /**
+   * Gets the line number from the given {@link Parser.Data} object.
+   *
+   * @param data The {@link Parser.Data} object to pull the line number from.
+   * @param identifier The reference to use to pull the line number from the {@link Parser.Data}
+   *     object.
+   * @return The line number pulled from the {@link Parser.Data} object.
+   */
+  protected int getLineNumber(Parser.Data<String> data, String identifier) {
+    int lineNumber;
+
+    Optional<String> lineNumberString = data.get(identifier);
+
+    if (lineNumberString.isPresent()) {
+      try {
+        lineNumber = Integer.parseInt(lineNumberString.get());
+      } catch (NumberFormatException e) {
+        throw new IllegalStateException(
+            "(entry "
+                + data.getEntryNumber()
+                + ") Line number expected to be a valid numeric value");
+      }
+    } else {
+      throw new IllegalStateException(
+          "(entry " + data.getEntryNumber() + ") Line number expected to be a valid numeric value");
+    }
+
+    return lineNumber;
+  }
 }

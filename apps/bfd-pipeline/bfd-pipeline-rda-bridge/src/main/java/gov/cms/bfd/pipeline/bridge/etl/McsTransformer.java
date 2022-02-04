@@ -39,7 +39,7 @@ public class McsTransformer extends AbstractTransformer {
       WrappedCounter sequenceNumber, Parser.Data<String> data, WrappedMessage message) {
     McsClaimChange claimToReturn;
 
-    int lineNumber = getLineNumber(data);
+    int lineNumber = getLineNumber(data, Mcs.LINE_NUM);
 
     if (message.getMessage() instanceof McsClaimChange) {
       // There is an existing claim from a previous run
@@ -151,13 +151,6 @@ public class McsTransformer extends AbstractTransformer {
   }
 
   @VisibleForTesting
-  boolean isFirstLineNum(Parser.Data<String> data) {
-    Optional<String> lineNum = data.get(Mcs.LINE_NUM);
-
-    return lineNum.isEmpty() || lineNum.get().equals("1");
-  }
-
-  @VisibleForTesting
   String convertIcn(Parser.Data<String> data) {
     String claimId =
         data.get(Mcs.CLM_ID)
@@ -190,24 +183,5 @@ public class McsTransformer extends AbstractTransformer {
                                   .orElse(-1))
                           .build()));
     }
-  }
-
-  @VisibleForTesting
-  int getLineNumber(Parser.Data<String> data) {
-    int lineNumber;
-
-    Optional<String> lineNumberString = data.get(Mcs.LINE_NUM);
-
-    if (lineNumberString.isPresent()) {
-      try {
-        lineNumber = Integer.parseInt(lineNumberString.get());
-      } catch (NumberFormatException e) {
-        throw new IllegalStateException("Line number expected to be a valid numeric value");
-      }
-    } else {
-      throw new IllegalStateException("Line number expected to be a valid numeric value");
-    }
-
-    return lineNumber;
   }
 }
