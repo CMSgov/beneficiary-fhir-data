@@ -36,7 +36,7 @@ public abstract class ClaimTransformerFieldTester<
   /**
    * Verifies that a string field transformation is working properly. This includes verifying that a
    * value is properly copied from the message object to the entity object and that minimum and
-   * maximum length validations are performed.
+   * maximum length validations are performed. This method uses a minimum length of 0 for the field.
    *
    * @param setter method reference or lambda to set a value of the field being tested on a message
    *     object
@@ -51,29 +51,12 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      verifyStringFieldCopiedCorrectly(
+      verifyStringFieldCopiedCorrectlyEmptyOK(
           BiConsumer<TTestEntityBuilder, String> setter,
           Function<TTestEntity, String> getter,
           String fieldLabel,
-          int minLength,
           int maxLength) {
-    final BiConsumer<TClaimBuilder, String> wrappedSetter =
-        (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
-    final Function<TClaimEntity, String> wrappedGetter =
-        claim -> getter.apply(getTestEntity(claim));
-    final String wrappedFieldLabel = getLabel(fieldLabel);
-    // limits the length os string tested for clob/text fields
-    verifyStringFieldTransformationCorrect(
-        wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
-    if (minLength > 0) {
-      verifyStringFieldLengthLimitsEnforced(
-          wrappedSetter, wrappedFieldLabel, minLength, maxLength, minLength - 1);
-    }
-    if (maxLength < Integer.MAX_VALUE) {
-      verifyStringFieldLengthLimitsEnforced(
-          wrappedSetter, wrappedFieldLabel, minLength, maxLength, maxLength + 1);
-    }
-    return this;
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 0, maxLength);
   }
 
   /**
@@ -98,7 +81,50 @@ public abstract class ClaimTransformerFieldTester<
           Function<TTestEntity, String> getter,
           String fieldLabel,
           int maxLength) {
-    return verifyStringFieldCopiedCorrectly(setter, getter, fieldLabel, 1, maxLength);
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 1, maxLength);
+  }
+
+  /**
+   * Verifies that a string field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object and that minimum and
+   * maximum length validations are performed.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @param minLength minimum valid length for the string field
+   * @param maxLength maximum valid length for the string field
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyStringFieldCopiedCorrectlyImpl(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          String fieldLabel,
+          int minLength,
+          int maxLength) {
+    final BiConsumer<TClaimBuilder, String> wrappedSetter =
+        (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
+    final Function<TClaimEntity, String> wrappedGetter =
+        claim -> getter.apply(getTestEntity(claim));
+    final String wrappedFieldLabel = getLabel(fieldLabel);
+    // limits the length os string tested for clob/text fields
+    verifyStringFieldTransformationCorrect(
+        wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
+    if (minLength > 0) {
+      verifyStringFieldLengthLimitsEnforced(
+          wrappedSetter, wrappedFieldLabel, minLength, maxLength, minLength - 1);
+    }
+    if (maxLength < Integer.MAX_VALUE) {
+      verifyStringFieldLengthLimitsEnforced(
+          wrappedSetter, wrappedFieldLabel, minLength, maxLength, maxLength + 1);
+    }
+    return this;
   }
 
   /**
