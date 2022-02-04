@@ -62,8 +62,8 @@ public class FissTransformer extends AbstractTransformer {
         // If it's not the next claim or a new one starting at 1, then something is wrong.
         throw new IllegalStateException(
             String.format(
-                "Invalid row sequence (entry %d), previous line number: %d, current line number: %d",
-                data.getEntryNumber(), message.getLineNumber(), lineNumber));
+                "Invalid row sequence, previous line number: %d, current line number: %d",
+                message.getLineNumber(), lineNumber));
       }
     } else {
       // This must be the first run, store a new claim

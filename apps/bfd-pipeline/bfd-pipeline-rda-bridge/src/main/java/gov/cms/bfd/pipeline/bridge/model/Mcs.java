@@ -15,6 +15,7 @@ public class Mcs {
   public static final String ICD_DGNS_VRSN_CD = "ICD_DGNS_VRSN_CD";
   public static final String LINE_1ST_EXPNS_DT = "LINE_1ST_EXPNS_DT";
   public static final String LINE_ICD_DGNS_CD = "LINE_ICD_DGNS_CD";
+  public static final String LINE_ICD_DGNS_VRSN_CD = "LINE_ICD_DGNS_VRSN_CD";
   public static final String LINE_LAST_EXPNS_DT = "LINE_LAST_EXPNS_DT";
   public static final String LINE_NUM = "LINE_NUM";
   public static final String NCH_CARR_CLM_SBMTD_CHRG_AMT = "NCH_CARR_CLM_SBMTD_CHRG_AMT";

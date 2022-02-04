@@ -13,6 +13,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
+import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
 import java.util.Map;
@@ -59,8 +60,8 @@ public class McsTransformer extends AbstractTransformer {
         // If it's not the next claim or a new one starting at 1, then something is wrong.
         throw new IllegalStateException(
             String.format(
-                "Invalid row sequence (entry %d), previous line number: %d, current line number: %d",
-                data.getEntryNumber(), message.getLineNumber(), lineNumber));
+                "Invalid row sequence, previous line number: %d, current line number: %d",
+                message.getLineNumber(), lineNumber));
       }
     } else {
       // This must be the first run, store a new claim
@@ -76,7 +77,7 @@ public class McsTransformer extends AbstractTransformer {
   McsClaimChange addToExistingClaim(McsClaimChange mcsClaimChange, Parser.Data<String> data) {
     McsClaim.Builder claimBuilder = mcsClaimChange.getClaim().toBuilder();
 
-    // Not currently implemented for MCS claims, just store the same claim.
+    claimBuilder.addMcsDetails(buildDetails(data));
 
     return mcsClaimChange.toBuilder().setClaim(claimBuilder.build()).build();
   }
@@ -127,18 +128,7 @@ public class McsTransformer extends AbstractTransformer {
     data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).ifPresent(claimBuilder::setIdrTotBilledAmt);
     data.get(Mcs.ORG_NPI_NUM).ifPresent(claimBuilder::setIdrBillProvNpi);
 
-    McsDetail.Builder detailBuilder = McsDetail.newBuilder();
-
-    data.get(Mcs.LINE_ICD_DGNS_CD).ifPresent(detailBuilder::setIdrDtlPrimaryDiagCode);
-    data.get(Mcs.HCPCS_CD).ifPresent(detailBuilder::setIdrProcCode);
-    data.get(Mcs.HCPCS_1_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
-    data.get(Mcs.HCPCS_2_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
-    data.getFromType(Mcs.LINE_1ST_EXPNS_DT, Parser.Data.Type.DATE)
-        .ifPresent(detailBuilder::setIdrDtlFromDate);
-    data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
-        .ifPresent(detailBuilder::setIdrDtlToDate);
-
-    claimBuilder.addMcsDetails(detailBuilder.build());
+    claimBuilder.addMcsDetails(buildDetails(data));
 
     addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
 
@@ -183,5 +173,40 @@ public class McsTransformer extends AbstractTransformer {
                                   .orElse(-1))
                           .build()));
     }
+  }
+
+  private McsDiagnosisIcdType mapVersionCode(String code) {
+    McsDiagnosisIcdType icdType;
+
+    switch (code) {
+      case "0":
+        icdType = McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10;
+        break;
+      case "9":
+        icdType = McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9;
+        break;
+      default:
+        throw new IllegalStateException("Invalid diagnosis code type: '" + code + "'");
+    }
+
+    return icdType;
+  }
+
+  private McsDetail buildDetails(Parser.Data<String> data) {
+    McsDetail.Builder detailBuilder = McsDetail.newBuilder();
+
+    data.get(Mcs.LINE_ICD_DGNS_CD).ifPresent(detailBuilder::setIdrDtlPrimaryDiagCode);
+    data.get(Mcs.LINE_ICD_DGNS_VRSN_CD)
+        .map(this::mapVersionCode)
+        .ifPresent(detailBuilder::setIdrDtlDiagIcdTypeEnum);
+    data.get(Mcs.HCPCS_CD).ifPresent(detailBuilder::setIdrProcCode);
+    data.get(Mcs.HCPCS_1_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
+    data.get(Mcs.HCPCS_2_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
+    data.getFromType(Mcs.LINE_1ST_EXPNS_DT, Parser.Data.Type.DATE)
+        .ifPresent(detailBuilder::setIdrDtlFromDate);
+    data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
+        .ifPresent(detailBuilder::setIdrDtlToDate);
+
+    return detailBuilder.build();
   }
 }

@@ -214,12 +214,20 @@ public class RDABridge {
         WrappedMessage wrappedMessage = new WrappedMessage();
 
         while (parser.hasData()) {
-          Optional<MessageOrBuilder> message =
-              transformer.transform(sequenceCounter, parser.read(), wrappedMessage);
+          // When new claims are parsed, the previous claim is returned and the new one is stored in
+          // wrappedMessage
+          Parser.Data<String> data = parser.read();
 
-          if (message.isPresent()) {
-            sink.write(message.get());
-            ++claimsWritten;
+          try {
+            Optional<MessageOrBuilder> message =
+                transformer.transform(sequenceCounter, data, wrappedMessage);
+
+            if (message.isPresent()) {
+              sink.write(message.get());
+              ++claimsWritten;
+            }
+          } catch (IllegalStateException e) {
+            throw new IllegalStateException("Failed to parse entry #" + data.getEntryNumber());
           }
         }
 
