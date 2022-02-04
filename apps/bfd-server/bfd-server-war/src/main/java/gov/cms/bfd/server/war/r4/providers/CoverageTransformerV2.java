@@ -845,7 +845,10 @@ final class CoverageTransformerV2 {
    */
   static void addCoverageDecimalExtension(
       Coverage coverage, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
-    coverage.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal));
+    optVal.ifPresent(
+        value ->
+            coverage.addExtension(
+                TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get())));
   }
 
   /**

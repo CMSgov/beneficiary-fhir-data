@@ -262,7 +262,7 @@ final class BeneficiaryTransformerV2 {
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       patient.addExtension(
           TransformerUtilsV2.createExtensionDate(
-              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear().get()));
 
       transformMedicaidDualEligibility(patient, beneficiary);
     }

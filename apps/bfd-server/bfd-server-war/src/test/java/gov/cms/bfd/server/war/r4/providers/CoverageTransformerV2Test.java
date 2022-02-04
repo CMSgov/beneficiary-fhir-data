@@ -799,6 +799,7 @@ public final class CoverageTransformerV2Test {
       verifyCodedExtensionDoestNotExist(inCoverage, url);
     }
 
+    // buyin01 thru buyin12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/buyin%02d", i);
       verifyCodedExtensionDoestNotExist(inCoverage, url);
@@ -822,12 +823,13 @@ public final class CoverageTransformerV2Test {
       verifyCodedExtensionDoestNotExist(inCoverage, url);
     }
 
+    // cstshr01 thru cstshr12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/cstshr%02d", i);
       verifyCodedExtensionDoestNotExist(inCoverage, url);
     }
 
-    // rdsind01 thru rdsind10
+    // rdsind01 thru rdsind12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/rdsind%02d", i);
       verifyCodedExtensionDoestNotExist(inCoverage, url);

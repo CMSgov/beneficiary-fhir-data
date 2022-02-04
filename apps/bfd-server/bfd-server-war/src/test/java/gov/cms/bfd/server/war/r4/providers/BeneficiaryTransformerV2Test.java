@@ -426,12 +426,11 @@ public final class BeneficiaryTransformerV2Test {
 
     IBaseDatatype ex =
         TransformerUtilsV2.createExtensionDate(
-                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear())
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear().get())
             .getValue();
 
     IBaseDatatype compare =
-        TransformerUtilsV2.createExtensionDate(
-                CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
+        TransformerUtilsV2.createExtensionDate(CcwCodebookVariable.RFRNC_YR, new BigDecimal(3))
             .getValue();
 
     assertEquals(ex.toString().length(), compare.toString().length());
