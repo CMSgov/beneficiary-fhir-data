@@ -164,6 +164,25 @@ public class DataTransformer {
   }
 
   /**
+   * Same as copyString() but with a EnumStringExtractor.Result and minLength of 0.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable if the field should be nullable
+   * @param maxLength the max length
+   * @param enumResult the enum result
+   * @param copier Consumer to receive the character value as a String
+   * @return this data transformer
+   */
+  public DataTransformer copyEnumAsString(
+      String fieldName,
+      boolean nullable,
+      int maxLength,
+      EnumStringExtractor.Result enumResult,
+      Consumer<String> copier) {
+    return copyEnumAsString(fieldName, nullable, 0, maxLength, enumResult, copier);
+  }
+
+  /**
    * Same as copyString() but with a EnumStringExtractor.Result.
    *
    * @param fieldName name of the field from which the value originates
