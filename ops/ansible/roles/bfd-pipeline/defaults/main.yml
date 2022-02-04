@@ -38,8 +38,7 @@ data_pipeline_rda_grpc_auth_token: ''
 data_pipeline_rda_grpc_server_type: 'Remote'
 
 # Source of data to serve.  Can be S3 or Random.  Defaults to Random.
-# Random is only for benchmarking so we override the default to be S3.
-data_pipeline_rda_grpc_inproc_server_mode: 'S3'
+data_pipeline_rda_grpc_inproc_server_mode: ''
 
 # An InProcess server can serve data from NDJSON files in an S3 bucket.
 # These settings are defined in the vault rather than plain text but we 
