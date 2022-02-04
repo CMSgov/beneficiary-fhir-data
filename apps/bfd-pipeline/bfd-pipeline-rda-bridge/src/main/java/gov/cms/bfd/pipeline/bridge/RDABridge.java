@@ -16,6 +16,7 @@ import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.io.SinkArguments;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.FileNotFoundException;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -209,17 +211,28 @@ public class RDABridge {
 
         AbstractTransformer transformer = createTransformer(sourceType, mbiMap);
 
+        WrappedMessage wrappedMessage = new WrappedMessage();
+
         while (parser.hasData()) {
-          MessageOrBuilder message = transformer.transform(sequenceCounter, parser.read());
+          Optional<MessageOrBuilder> message =
+              transformer.transform(sequenceCounter, parser.read(), wrappedMessage);
 
-          if (message != null) {
-            sink.write(message);
+          if (message.isPresent()) {
+            sink.write(message.get());
+            ++claimsWritten;
           }
+        }
 
+        // The last claim to be processed wouldn't get returned, so print it from storage.
+        if (wrappedMessage.getMessage() != null) {
+          sink.write(wrappedMessage.getMessage());
           ++claimsWritten;
         }
 
         log.info("Wrote {} {} claims", claimsWritten, sourceName);
+      } catch (IllegalStateException e) {
+        throw new IllegalStateException(
+            "Failed to parse file: " + file.getFileName().toString(), e);
       }
     } else {
       throw new IllegalArgumentException("No support for parsing files of type '" + fileType + "'");

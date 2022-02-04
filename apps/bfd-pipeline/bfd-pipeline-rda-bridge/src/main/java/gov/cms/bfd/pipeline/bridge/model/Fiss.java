@@ -21,4 +21,6 @@ public class Fiss {
   public static final String PRCDR_DT = "PRCDR_DT";
   public static final String PRNCPAL_DGNS_CD = "PRNCPAL_DGNS_CD";
   public static final String PRVDR_NUM = "PRVDR_NUM";
+
+  private Fiss() {}
 }

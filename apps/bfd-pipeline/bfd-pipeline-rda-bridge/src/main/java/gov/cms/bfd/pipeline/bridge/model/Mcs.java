@@ -19,4 +19,6 @@ public class Mcs {
   public static final String LINE_NUM = "LINE_NUM";
   public static final String NCH_CARR_CLM_SBMTD_CHRG_AMT = "NCH_CARR_CLM_SBMTD_CHRG_AMT";
   public static final String ORG_NPI_NUM = "ORG_NPI_NUM";
+
+  private Mcs() {}
 }
