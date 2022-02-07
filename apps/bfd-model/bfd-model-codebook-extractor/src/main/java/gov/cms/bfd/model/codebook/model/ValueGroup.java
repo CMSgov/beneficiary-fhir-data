@@ -34,6 +34,9 @@ public final class ValueGroup {
   /**
    * Constructs a new {@link ValueGroup} instance for the CCWCodebookMissingVariable. Had to add new
    * constructor for instantiation of the CCWCodebookInterface
+   *
+   * @param description the description
+   * @param values the values
    */
   public ValueGroup(List<String> description, List<Value> values) {
     this.description = description;

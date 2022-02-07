@@ -23,6 +23,7 @@ public final class RifLayout {
   /**
    * Constructs a new {@link RifLayout} instance.
    *
+   * @param name the name of this {@link RifLayout}
    * @param rifFields the value to use for {@link #getRifFields()}
    */
   public RifLayout(String name, List<RifField> rifFields) {
