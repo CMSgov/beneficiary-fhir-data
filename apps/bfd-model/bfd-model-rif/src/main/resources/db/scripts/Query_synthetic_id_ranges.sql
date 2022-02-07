@@ -28,6 +28,23 @@ FROM groupings
 GROUP BY grouping
 ORDER BY MIN(id);
 
+-- Got this result on 2022-02-07 in prod_sbx:
+-- grouping_start  |  grouping_end   
+-- -----------------+-----------------
+-- -88888888888888 | -88888888888888
+-- -20140000010000 | -20140000000001
+-- -20000000010000 | -20000000000001
+-- -19990000010000 | -19990000000001
+-- -10000000019999 | -10000000000000
+--            -400 |            -400
+--            -223 |            -207
+--            -204 |            -201
+--               1 |        60000000
+-- (9 rows)
+--
+-- Time: 72010.398 ms
+
+
 -- Find  min claim Ids for all claims except Part D Events.
 -- The new synthetic data claim Id start should be 1 less than the value returned to avoid collisions with future synthetic data batches.
 select min(id) from (
@@ -59,7 +76,16 @@ select min(id) from (
 	from snf_claims
 	where bene_id LIKE '-%' AND clm_id LIKE '-%'
 	) as ids;
-	
+
+-- Got this result on 2022-02-07 in prod_sbx:
+--       min       
+-- -----------------
+-- -10000004523616
+-- (1 row)
+--
+-- Time: 40166.486 ms
+
+
 -- Find  min Part D Event (PDE) Ids.
 -- The new synthetic data PDE event Id start should be 1 less than the value returned to avoid collisions with future synthetic data batches.
 select min(id) from (
@@ -67,6 +93,15 @@ select min(id) from (
 	from partd_events
 	where bene_id LIKE '-%' AND pde_id LIKE '-%'
 	) as ids;
+
+-- Got this result on 2022-02-07 in prod_sbx:
+--     min      
+-- --------------
+-- -10000487656
+-- (1 row)
+-- 
+-- Time: 236.427 ms
+
 
 -- Find the claim group id range to avoid collisions with synthetic data. 
 -- The range should have a relatively large gap, preferably contiguous with the last range used.
@@ -112,3 +147,17 @@ SELECT MIN(id) AS grouping_start,
 FROM groupings
 GROUP BY grouping
 ORDER BY MIN(id);
+
+-- Got this result on 2022-02-07 in prod_sbx:
+--  grouping_start | grouping_end
+-- ----------------+--------------
+--    -99998681713 | -99998681713
+--    ... (lot of sparse ranges here, skipped for brevity)
+--    -115242507   | -115242507
+--    -105011273   | -105011249
+--    ... (lot of sparse ranges here, skipped for brevity)
+--     -4851772    |  -4851772
+--     -99999      |  -99999
+-- (592230 rows)
+-- 
+-- Time: 43919.703 ms
