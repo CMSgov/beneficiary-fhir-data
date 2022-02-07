@@ -5,11 +5,6 @@ ALTER INDEX beneficiary_monthly_year_month_partd_contract_bene_id_idx RENAME TO 
 -- select * from pg_stat_all_indexes where schemaname = 'public' and relname = 'beneficiary_monthly'
 DROP INDEX IF EXISTS beneficiary_monthly_partd_contract_number_year_month_idx;
 
--- the following are table that were created out-of-band and no longer being used.
-DROP TABLE IF EXISTS bene_hist_temp CASCADE;
-DROP TABLE IF EXISTS ccw_load_temp CASCADE;
-DROP TABLE IF EXISTS temp_bene CASCADE;
-
 DROP SEQUENCE IF EXISTS loaded_batches_loaded_batchid_seq restrict;
 DROP SEQUENCE IF EXISTS loaded_files_loaded_fileid_seq restrict;
 DROP SEQUENCE IF EXISTS beneficiaryhistory_bene_history_id_seq restrict;
