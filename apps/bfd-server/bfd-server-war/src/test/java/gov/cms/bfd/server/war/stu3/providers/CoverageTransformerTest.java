@@ -94,8 +94,8 @@ public final class CoverageTransformerTest {
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
     assertPartDMatches(beneficiary, partDCoverage);
 
-    // Test with null lastUpdated
-    beneficiary.setLastUpdated(null);
+    // Test with empty lastUpdated
+    beneficiary.setLastUpdated(Optional.empty());
     Coverage partACoverageNullLastUpdated =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverageNullLastUpdated);
