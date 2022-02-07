@@ -18,6 +18,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
    *
    * @param fileEvent the value to use for {@link #getFileEvent()}
    * @param recordAction the value to use for {@link #getRecordAction()}
+   * @param beneficiaryId the beneficiary id to use for {@link #getBeneficiaryId()}
    * @param record the value to use for {@link #getRecord()}
    */
   public RifRecordEvent(

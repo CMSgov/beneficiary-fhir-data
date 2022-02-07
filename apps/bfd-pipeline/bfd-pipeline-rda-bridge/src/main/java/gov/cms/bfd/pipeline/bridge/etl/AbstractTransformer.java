@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.protobuf.MessageOrBuilder;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -9,7 +10,8 @@ import java.util.function.UnaryOperator;
 
 public abstract class AbstractTransformer {
 
-  public abstract MessageOrBuilder transform(Parser.Data<String> data);
+  public abstract MessageOrBuilder transform(
+      WrappedCounter sequenceNumber, Parser.Data<String> data);
 
   /**
    * Returns the computed result of {@link Supplier} if value is null, otherwise returns value.
