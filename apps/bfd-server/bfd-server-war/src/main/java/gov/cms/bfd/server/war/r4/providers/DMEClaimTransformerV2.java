@@ -454,6 +454,8 @@ final class DMEClaimTransformerV2 {
    */
   static void addDecimalExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
-    eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get()));
+    if (optVal.isPresent()) {
+      eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get()));
+    }
   }
 }
