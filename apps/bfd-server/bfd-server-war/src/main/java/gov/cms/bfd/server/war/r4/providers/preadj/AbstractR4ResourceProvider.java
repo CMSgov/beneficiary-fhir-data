@@ -131,6 +131,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *
    * @param claimId The read operation takes one parameter, which must be of type {@link IdType} and
    *     must be annotated with the {@link IdParam} annotation.
+   * @param requestDetails the request details for the read
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
    *     exists.
    */

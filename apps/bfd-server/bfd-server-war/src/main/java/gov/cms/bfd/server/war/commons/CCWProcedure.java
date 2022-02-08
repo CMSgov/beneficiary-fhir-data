@@ -44,7 +44,7 @@ public final class CCWProcedure extends IcdCode {
    *     "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
    *     CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
    *     version, if any
-   * @param procedureDate
+   * @param procedureDate the date of the procedure
    * @return the new {@link CCWProcedure}, or {@link Optional#empty()} if no <code>icdCode</code>
    *     was present
    */

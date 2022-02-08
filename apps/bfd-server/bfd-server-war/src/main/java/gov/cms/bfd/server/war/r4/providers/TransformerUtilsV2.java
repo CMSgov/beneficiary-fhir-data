@@ -11,6 +11,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
@@ -1215,6 +1216,7 @@ public final class TransformerUtilsV2 {
    * Retrieves the NPI display value from an NPI code look up file
    *
    * @param npiCode - NPI code
+   * @return the npi code display string
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
 
@@ -1300,6 +1302,7 @@ public final class TransformerUtilsV2 {
    * Retrieves the Procedure code and display value from a Procedure code look up file
    *
    * @param procedureCode - Procedure code
+   * @return the procedure code display string
    */
   public static String retrieveProcedureCodeDisplay(String procedureCode) {
 
@@ -1368,6 +1371,7 @@ public final class TransformerUtilsV2 {
    * during the build process
    *
    * @param claimDrugCode - NDC value in claim records
+   * @return the fda drug code display string
    */
   public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
@@ -1416,6 +1420,8 @@ public final class TransformerUtilsV2 {
    * Products file which was downloaded during the build process.
    *
    * <p>See {@link FDADrugDataUtilityApp} for details.
+   *
+   * @return a map with drug codes and fields
    */
   public static Map<String, String> readFDADrugCodeFile() {
     Map<String, String> ndcProductHashMap = new HashMap<String, String>();
@@ -2107,7 +2113,7 @@ public final class TransformerUtilsV2 {
   /**
    * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
-   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
    * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
    *     </code> value
    */
@@ -2118,7 +2124,7 @@ public final class TransformerUtilsV2 {
   /**
    * maps a blue button claim type to a FHIR claim type
    *
-   * @param eobType the {@link CodeableConcept} that will get remapped
+   * @param eob the {@link CodeableConcept} that will get remapped
    * @param blueButtonClaimType the blue button {@link ClaimTypeV2} we are mapping from
    * @param ccwNearLineRecordIdCode if present, the blue button near line id code {@link
    *     Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
