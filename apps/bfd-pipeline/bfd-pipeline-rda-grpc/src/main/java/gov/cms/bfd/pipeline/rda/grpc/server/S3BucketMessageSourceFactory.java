@@ -1,8 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +33,9 @@ import lombok.ToString;
  * increasing order by sequence number.
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
-
   private final AmazonS3 s3Client;
   private final String bucketName;
+  private final String directoryPath;
   private final Function<String, MessageSource<T>> actualFactory;
   private final Function<T, Long> sequenceNumberGetter;
   private final Pattern matchPattern;
@@ -41,17 +43,20 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   public S3BucketMessageSourceFactory(
       AmazonS3 s3Client,
       String bucketName,
+      String directoryPath,
       String filePrefix,
       String fileSuffix,
       Function<String, MessageSource<T>> actualFactory,
       Function<T, Long> sequenceNumberGetter) {
     this.s3Client = s3Client;
     this.bucketName = bucketName;
+    this.directoryPath = directoryPath;
     this.actualFactory = actualFactory;
     this.sequenceNumberGetter = sequenceNumberGetter;
     matchPattern =
         Pattern.compile(
-            String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
+            String.format(
+                "^%s%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", directoryPath, filePrefix, fileSuffix),
             Pattern.CASE_INSENSITIVE);
   }
 
@@ -108,7 +113,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   @VisibleForTesting
   List<FileEntry> listFiles(long startingSequenceNumber) {
     List<FileEntry> entries = new ArrayList<>();
-    List<S3ObjectSummary> summaries = s3Client.listObjects(bucketName).getObjectSummaries();
+    List<S3ObjectSummary> summaries = getObjectListing().getObjectSummaries();
     for (S3ObjectSummary summary : summaries) {
       Matcher matcher = matchPattern.matcher(summary.getKey());
       if (matcher.matches()) {
@@ -129,6 +134,14 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     }
     entries.sort(FileEntry::compareTo);
     return entries;
+  }
+
+  private ObjectListing getObjectListing() {
+    if (Strings.isNullOrEmpty(directoryPath)) {
+      return s3Client.listObjects(bucketName);
+    } else {
+      return s3Client.listObjects(bucketName, directoryPath);
+    }
   }
 
   /**
