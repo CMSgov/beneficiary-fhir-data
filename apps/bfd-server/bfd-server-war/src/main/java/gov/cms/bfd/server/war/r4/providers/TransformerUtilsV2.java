@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -101,6 +102,7 @@ import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.util.Assert;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -3545,6 +3547,33 @@ public final class TransformerUtilsV2 {
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
       item.setQuantity(drugQuantity);
+    }
+
+    return item;
+  }
+
+  /**
+   * Maps the Revenue Status Indicator Code to the eob's item revenue as an extension, if the status
+   * code is present.
+   *
+   * <p>REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+   *
+   * @param item the item to add the extension to, if the required data is present
+   * @param eob the root eob (only used for logging purposes)
+   * @param statusCode the status code to check for and add data from if exists
+   * @return the {@link ItemComponent}
+   */
+  static ItemComponent mapEobCommonItemRevenueStatusCode(
+      @Nonnull ItemComponent item, @Nonnull ExplanationOfBenefit eob, Optional<String> statusCode) {
+
+    Assert.notNull(item, "Item must be non-null");
+    Assert.notNull(eob, "Eob must be non-null");
+
+    if (statusCode.isPresent()) {
+      item.getRevenue()
+          .addExtension(
+              TransformerUtilsV2.createExtensionCoding(
+                  eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, statusCode));
     }
 
     return item;

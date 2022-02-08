@@ -877,6 +877,33 @@ public class HHAClaimTransformerV2Test {
   }
 
   /**
+   * Ensure that when the revenue status code exists in the claim, it should be mapped to an
+   * extension.
+   *
+   * <p>The specific code value of the extension is tested in {@link
+   * TransformerUtilsV2Test#mapEobCommonItemRevenueStatusCodeWhenStatusCodeExistsExpectExtensionOnItem()}
+   */
+  @Test
+  public void shouldHaveRevenueStatusCode() {
+
+    String expectedExtensionUrl =
+        "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd";
+
+    assertNotNull(eob.getItem());
+    assertTrue(eob.getItem().size() > 0);
+    ExplanationOfBenefit.ItemComponent item = eob.getItem().get(0);
+    assertNotNull(item);
+    assertNotNull(item.getRevenue());
+    assertNotNull(item.getRevenue().getExtension());
+    assertEquals(1, item.getRevenue().getExtension().size());
+    Extension ext = item.getRevenue().getExtensionByUrl(expectedExtensionUrl);
+    assertNotNull(ext);
+    assertEquals(expectedExtensionUrl, ext.getUrl());
+    assertTrue(ext.getValue() instanceof Coding);
+    assertNotNull(((Coding) ext.getValue()).getCode());
+  }
+
+  /**
    * Serializes the EOB and prints to the command line
    *
    * @throws FHIRException
