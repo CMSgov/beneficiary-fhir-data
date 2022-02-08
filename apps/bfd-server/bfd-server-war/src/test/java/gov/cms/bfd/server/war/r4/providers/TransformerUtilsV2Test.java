@@ -10,13 +10,10 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Tests the utility methods within the {@link TransformerUtilsV2}. */
 public class TransformerUtilsV2Test {
-
-  @BeforeEach
-  public void before() {}
 
   /**
    * Ensures the revenue status code is correctly mapped to an item's revenue as an extension when
