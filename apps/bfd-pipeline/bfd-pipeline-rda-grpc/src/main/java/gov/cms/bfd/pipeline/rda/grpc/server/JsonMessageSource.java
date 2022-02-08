@@ -176,7 +176,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
    * that for use in our lambda expression. This is only expected to be implemented here in a static
    * method so it can be passed to our constructor.
    *
-   * @param <T>
+   * @param <T> the type parameter
    */
   @FunctionalInterface
   public interface Parser<T> {

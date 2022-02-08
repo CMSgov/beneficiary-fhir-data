@@ -17,7 +17,7 @@ import java.util.zip.GZIPInputStream;
  * data is streamed to the client directly from S3 rather than downloading and caching the data
  * locally.
  *
- * @param <T>
+ * @param <T> the type parameter
  */
 public class S3JsonMessageSource<T> implements MessageSource<T> {
   private final S3Object s3Object;

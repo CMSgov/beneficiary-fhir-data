@@ -208,17 +208,26 @@ public final class Diagnosis extends IcdCode {
         "admitting",
         "The diagnosis given as the reason why the patient was admitted to the hospital."),
 
-    /** Note: display text (mostly) matches {@link CcwCodebookVariable#FST_DGNS_E_CD}. */
+    /**
+     * Note: display text (mostly) matches {@link
+     * gov.cms.bfd.model.codebook.data.CcwCodebookVariable#FST_DGNS_E_CD}.
+     */
     FIRSTEXTERNAL(
         "external-first",
         "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."),
 
-    /** Note: display text (mostly) matches {@link CcwCodebookVariable#FST_DGNS_E_CD}. */
+    /**
+     * Note: display text (mostly) matches {@link
+     * gov.cms.bfd.model.codebook.data.CcwCodebookVariable#FST_DGNS_E_CD}.
+     */
     EXTERNAL(
         "external",
         "A code used to identify an external cause of injury, poisoning, or other adverse effect."),
 
-    /** Note: display text (mostly) matches {@link CcwCodebookVariable#RSN_VISIT_CD1}. */
+    /**
+     * Note: display text (mostly) matches {@link
+     * gov.cms.bfd.model.codebook.data.CcwCodebookVariable#RSN_VISIT_CD1}.
+     */
     REASONFORVISIT(
         "reason-for-visit",
         "A diagnosis code used to identify the patient's reason for the visit.");

@@ -350,7 +350,13 @@ public class SpringConfiguration {
   }
 
   /**
+   * Creates a new r4 resource provider list.
+   *
    * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
+   * @param r4CoverageResourceProvider the r4 coverage resource provider
+   * @param r4EOBResourceProvider the r4 eob resource provider
+   * @param r4ClaimResourceProvider the r4 claim resource provider
+   * @param r4ClaimResponseResourceProvider the r4 claim response resource provider
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
