@@ -20,6 +20,19 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SAMPLE_A_SNF,
       StaticRifResource.SAMPLE_A_DME),
 
+  SAMPLE_A_WITHOUT_REFERENCE_YEAR(
+      StaticRifResource.SAMPLE_A_BENES_WITHOUT_REFERENCE_YEAR,
+      StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
+      StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+      StaticRifResource.SAMPLE_A_CARRIER,
+      StaticRifResource.SAMPLE_A_PDE,
+      StaticRifResource.SAMPLE_A_INPATIENT,
+      StaticRifResource.SAMPLE_A_OUTPATIENT,
+      StaticRifResource.SAMPLE_A_HHA,
+      StaticRifResource.SAMPLE_A_HOSPICE,
+      StaticRifResource.SAMPLE_A_SNF,
+      StaticRifResource.SAMPLE_A_DME),
+
   SAMPLE_B(
       StaticRifResource.SAMPLE_B_BENES,
       StaticRifResource.SAMPLE_B_CARRIER,

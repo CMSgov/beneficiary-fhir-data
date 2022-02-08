@@ -584,15 +584,15 @@ public final class EndpointJsonResponseComparatorIT {
   public static String patientByIdentifierWithoutReferenceYear() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-
-    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -748,14 +748,15 @@ public final class EndpointJsonResponseComparatorIT {
   public static String coverageReadWithoutReferenceYear() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
