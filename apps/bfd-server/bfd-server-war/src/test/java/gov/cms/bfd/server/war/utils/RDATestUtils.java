@@ -63,11 +63,16 @@ public class RDATestUtils {
     }
   }
 
+  public EntityManager getEntityManager() {
+    return entityManager;
+  }
+
   /** Seed data into the database for testing. */
-  public void seedData() {
+  public void seedData(boolean includeOldHash) {
     doTransaction(
         em -> {
-          Mbi mbi = em.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(MBI_OLD_HASH).build());
+          String oldHash = includeOldHash ? MBI_OLD_HASH : null;
+          Mbi mbi = em.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(oldHash).build());
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
           em.merge(mcsTestDataA(mbi));

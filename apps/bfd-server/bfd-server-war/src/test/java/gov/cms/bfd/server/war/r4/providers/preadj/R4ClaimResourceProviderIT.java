@@ -28,7 +28,7 @@ public class R4ClaimResourceProviderIT {
   @BeforeAll
   public static void init() {
     testUtils.init();
-    testUtils.seedData();
+    testUtils.seedData(false);
   }
 
   @AfterAll

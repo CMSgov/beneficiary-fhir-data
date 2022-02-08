@@ -30,7 +30,7 @@ public class R4ClaimResponseResourceProviderIT {
   @BeforeAll
   public static void init() {
     testUtils.init();
-    testUtils.seedData();
+    testUtils.seedData(true);
   }
 
   @AfterAll
