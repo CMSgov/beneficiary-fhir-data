@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -561,21 +562,47 @@ public class HHAClaimTransformerV2Test {
   public void shouldHaveLineItemRevenue() {
     CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
 
-    CodeableConcept compare =
-        new CodeableConcept()
-            .setCoding(
-                Arrays.asList(
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/rev_cntr",
-                        "0023",
-                        "Home Health services paid under PPS submitted as TOB 32X and 33X, effective 10/00. This code may appear multiple times on a claim to identify different HIPPS/Home Health Resource Groups (HRG)."),
-                    new Coding("https://www.nubc.org/CodeSystem/RevenueCodes", "4", null),
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
-                        "4",
-                        "No charge or units associated with this revenue center code. (For multiple HCPCS per single revenue center code) For revenue center code 0001, the following MSP override values may be present:")));
+    Coding code1 =
+        revenue.getCoding().stream()
+            .filter(
+                coding ->
+                    coding
+                        .getSystem()
+                        .equals("https://bluebutton.cms.gov/resources/variables/rev_cntr"))
+            .findFirst()
+            .orElse(null);
+    Coding code2 =
+        revenue.getCoding().stream()
+            .filter(
+                coding -> coding.getSystem().equals("https://www.nubc.org/CodeSystem/RevenueCodes"))
+            .findFirst()
+            .orElse(null);
+    Coding code3 =
+        revenue.getCoding().stream()
+            .filter(
+                coding ->
+                    coding
+                        .getSystem()
+                        .equals(
+                            "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd"))
+            .findFirst()
+            .orElse(null);
 
-    assertTrue(compare.equalsDeep(revenue));
+    assertNotNull(code1, "Missing expected rev_cntr coding");
+    assertEquals("0023", code1.getCode());
+    assertEquals(
+        "Home Health services paid under PPS submitted as TOB 32X and 33X, effective 10/00. This code may appear multiple times on a claim to identify different HIPPS/Home Health Resource Groups (HRG).",
+        code1.getDisplay());
+
+    assertNotNull(code2, "Missing expected RevenueCodes coding");
+    assertEquals("4", code2.getCode());
+    assertNull(code2.getDisplay());
+
+    assertNotNull(code3, "Missing expected rev_cntr_ddctbl_coinsrnc_cd coding");
+    assertEquals("4", code3.getCode());
+    assertEquals(
+        "No charge or units associated with this revenue center code. (For multiple HCPCS per single revenue center code) For revenue center code 0001, the following MSP override values may be present:",
+        code3.getDisplay());
   }
 
   @Test
