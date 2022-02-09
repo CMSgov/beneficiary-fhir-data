@@ -17,7 +17,7 @@
  *       for all of the claim types (as evidenced by the claim types I didn't have to do filtering
  *       for, below).
  * 3. A quick peek at "claimGroupId" shows that those values are also all over the place.
- * 4. Given that "claimId" is a `varchar(15)` column and we're only up to numbers that use thirteen
+ * 4. Given that clm_idis a `varchar(15)` column and we're only up to numbers that use thirteen
  *    of those characters, we have plenty of remaining room there.
  * 5. Given that "claimGroupId" is a `numeric(12,0)` and the max value just for "CarrierClaims" is
  *    99,999,991,267, we're basically out of room there.
@@ -27,12 +27,12 @@
  */
 
 
--- Find the "Beneficiaries"."beneficiaryId" groupings.
+-- Find the beneficiaries.bene_id groupings.
 WITH ids AS (
   SELECT
-    CAST("beneficiaryId" AS numeric) AS id
-  FROM "Beneficiaries"
-  ORDER BY CAST("beneficiaryId" AS numeric)
+    CAST(bene_id AS bigint) AS id
+  FROM beneficiaries
+  ORDER BY 1
 ),
 groupings AS (
   SELECT
@@ -62,18 +62,18 @@ ORDER BY MIN(id);
 -- Time: 106524.199 ms
 
 
--- Find the "CarrierClaims"."claimId" groupings.
+-- Find the carrier_claims.clm_id groupings.
 WITH ids_filtered AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "CarrierClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM carrier_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    AND clm_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_rounded AS (
   SELECT DISTINCT
@@ -129,12 +129,12 @@ ORDER BY MIN(id);
 -- Time: 44374.912 ms
 
 
--- Find the "DMEClaims"."claimId" groupings.
+-- Find the dme_claims.clm_id groupings.
 WITH ids AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "DMEClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM dme_claims
+  ORDER BY 1
 ),
 groupings AS (
   SELECT
@@ -157,12 +157,12 @@ ORDER BY MIN(id);
 -- Time: 0.944 ms
 
 
--- Find the "HHAClaims"."claimId" groupings.
+-- Find the hha_claims.clm_id groupings.
 WITH ids AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "HHAClaims"
-  ORDER BY CAST("claimId" AS numeric)
+CAST(clm_id AS bigint) AS id
+  FROM hha_claims
+  ORDER 1
 ),
 groupings AS (
   SELECT
@@ -185,12 +185,12 @@ ORDER BY MIN(id);
 -- Time: 1.876 ms
 
 
--- Find the "HospiceClaims"."claimId" groupings.
+-- Find the hospice_claims.clm_id groupings.
 WITH ids AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "HospiceClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM hospice_claims
+  ORDER BY 1
 ),
 groupings AS (
   SELECT
@@ -213,18 +213,18 @@ ORDER BY MIN(id);
 -- Time: 1.259 ms
 
 
--- Find the "InpatientClaims"."claimId" groupings.
+-- Find the inpatient_claims.clm_id groupings.
 WITH ids_filtered AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "InpatientClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM inpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    AND clm_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_rounded AS (
   SELECT DISTINCT
@@ -273,18 +273,18 @@ ORDER BY MIN(id);
 -- Time: 8.198 ms
 
 
--- Find the "OutpatientClaims"."claimId" groupings.
+-- Find the outpatient_claims.clm_id groupings.
 WITH ids_filtered AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "OutpatientClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM outpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Note: it appears that for the synthetic outpatient claims ALL we have are ones with positive IDs.
-    -- AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    -- AND clm_idLIKE '-%'
+  ORDER BY 1
 ),
 ids_rounded AS (
   SELECT DISTINCT
@@ -330,12 +330,12 @@ ORDER BY MIN(id);
 -- Time: 210.042 ms
 
 
--- Find the "SNFClaims"."claimId" groupings.
+-- Find the snf_claims.clm_id groupings.
 WITH ids AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "SNFClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM snf_claims
+  ORDER BY 1
 ),
 groupings AS (
   SELECT
@@ -358,18 +358,18 @@ ORDER BY MIN(id);
 -- Time: 1.375 ms
 
 
--- Find the "PartDEvents"."claimId" groupings.
+-- Find the partd_events.pde_id groupings.
 WITH ids_filtered AS (
   SELECT
-    CAST("eventId" AS numeric) AS id
-  FROM "PartDEvents"
+    CAST(pde_id AS bigint) AS id
+  FROM partd_events
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "eventId" LIKE '-%'
-  ORDER BY CAST("eventId" AS numeric)
+    AND pde_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_rounded AS (
   SELECT DISTINCT
@@ -423,75 +423,75 @@ ORDER BY MIN(id);
 -- Find the combined claim groupings.
 WITH ids_filtered_carrier AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "CarrierClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM carrier_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    AND clm_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_dme AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "DMEClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM dme_claims
+  ORDER BY 1
 ),
 ids_hha AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "HHAClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM hha_claims
+  ORDER BY 1
 ),
 ids_hospice AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "HospiceClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM hospice_claims
+  ORDER BY 1
 ),
 ids_filtered_inpatient AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "InpatientClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM inpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    AND clm_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_filtered_outpatient AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "OutpatientClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM outpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Note: it appears that for the synthetic outpatient claims ALL we have are ones with positive IDs.
-    -- AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    -- AND clm_idLIKE '-%'
+  ORDER BY 1
 ),
 ids_snf AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "SNFClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM snf_claims
+  ORDER BY 1
 ),
 ids_filtered_pde AS (
   SELECT
-    CAST("eventId" AS numeric) AS id
-  FROM "PartDEvents"
+    CAST(pde_id AS bigint) AS id
+  FROM partd_events
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "eventId" LIKE '-%'
-  ORDER BY CAST("eventId" AS numeric)
+    AND pde_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_filtered_all AS (
   SELECT * FROM ids_filtered_carrier
@@ -561,75 +561,75 @@ ORDER BY MIN(id);
 -- Calculate how many synthetic claims we have, total.
 WITH ids_filtered_carrier AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "CarrierClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM carrier_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    AND clm_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_dme AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "DMEClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM dme_claims
+  ORDER BY 1
 ),
 ids_hha AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "HHAClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM hha_claims
+  ORDER BY 1
 ),
 ids_hospice AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "HospiceClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM hospice_claims
+  ORDER BY 1
 ),
 ids_filtered_inpatient AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "InpatientClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM inpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    AND clm_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_filtered_outpatient AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "OutpatientClaims"
+    CAST(clm_id AS bigint) AS id
+  FROM outpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Note: it appears that for the synthetic outpatient claims ALL we have are ones with positive IDs.
-    -- AND "claimId" LIKE '-%'
-  ORDER BY CAST("claimId" AS numeric)
+    -- AND clm_idLIKE '-%'
+  ORDER BY 1
 ),
 ids_snf AS (
   SELECT
-    CAST("claimId" AS numeric) AS id
-  FROM "SNFClaims"
-  ORDER BY CAST("claimId" AS numeric)
+    CAST(clm_id AS bigint) AS id
+  FROM snf_claims
+  ORDER BY 1
 ),
 ids_filtered_pde AS (
   SELECT
-    CAST("eventId" AS numeric) AS id
-  FROM "PartDEvents"
+    CAST(pde_id AS bigint) AS id
+  FROM partd_events
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
-    "beneficiaryId" LIKE '-%'
+    bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "eventId" LIKE '-%'
-  ORDER BY CAST("eventId" AS numeric)
+    AND pde_id LIKE '-%'
+  ORDER BY 1
 ),
 ids_filtered_all AS (
   SELECT * FROM ids_filtered_carrier
