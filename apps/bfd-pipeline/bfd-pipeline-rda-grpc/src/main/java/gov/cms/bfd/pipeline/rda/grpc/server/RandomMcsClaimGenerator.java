@@ -148,7 +148,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
         () -> claim.setIdrBillProvStatusCdUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrTotBilledAmt(randomAmount()));
     optional(() -> claim.setIdrClaimReceiptDate(randomDate()));
-    optional(() -> claim.setIdrClaimMbi(randomAlphaNumeric(1, 13)));
+    optional(() -> claim.setIdrClaimMbi(randomAlphaNumeric(11, 11)));
     // IdrHdrFromDos will be set later
     // IdrHdrToDos will be set later
     oneOf(

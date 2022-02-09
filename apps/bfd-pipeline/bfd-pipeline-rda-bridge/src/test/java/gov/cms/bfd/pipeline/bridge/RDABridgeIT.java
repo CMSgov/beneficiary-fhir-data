@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -168,9 +169,11 @@ class RDABridgeIT {
               MCS_ID);
 
           Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-          IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-          FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
-          McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
+          IdHasher.Config hasherConfig = new IdHasher.Config(10, "justsomestring");
+          FissClaimTransformer fissTransformer =
+              new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+          McsClaimTransformer mcsTransformer =
+              new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
           for (MessageOrBuilder message : results) {
             if (message instanceof FissClaimChange) {

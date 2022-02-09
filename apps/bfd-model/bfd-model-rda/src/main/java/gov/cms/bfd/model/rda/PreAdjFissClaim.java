@@ -12,6 +12,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -76,6 +78,10 @@ public class PreAdjFissClaim {
 
   @Column(name = "`npiNumber`", length = 10)
   private String npiNumber;
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`mbi`", length = 13)
   private String mbi;
@@ -320,11 +326,8 @@ public class PreAdjFissClaim {
 
   public enum ServTypeCdMapping {
     Normal,
-
     Clinic,
-
     SpecialFacility,
-
     Unrecognized
   }
 }
