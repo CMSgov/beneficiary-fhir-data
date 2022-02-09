@@ -1,34 +1,33 @@
 DELETE 
-FROM "public"."CarrierClaimLines"
-WHERE "parentClaim" IN (SELECT "claimId"
-FROM "public"."CarrierClaims"
-WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%');
-
-
-DELETE 
-FROM "public"."CarrierClaims"
-WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%';
+FROM carrier_claim_lines
+WHERE clm_id IN (SELECT clm_id
+FROM carrier_claims
+WHERE clm_id NOT LIKE '-%' AND bene_id LIKE '-%');
 
 DELETE 
-FROM "public"."InpatientClaimLines"
-WHERE "parentClaim" IN (SELECT "claimId"
-FROM "public"."InpatientClaims"
-WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%');
+FROM carrier_claims
+WHERE clm_id NOT LIKE '-%' AND bene_id LIKE '-%';
 
 DELETE 
-FROM "public"."InpatientClaims"
-WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%';
+FROM inpatient_claim_lines
+WHERE clm_id IN (SELECT clm_id
+FROM inpatient_claims
+WHERE clm_id NOT LIKE '-%' AND bene_id LIKE '-%');
 
 DELETE 
-FROM "public"."OutpatientClaimLines"
-WHERE "parentClaim" IN (SELECT "claimId"
-FROM "public"."OutpatientClaims"
-WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%');
+FROM inpatient_claims
+WHERE clm_id NOT LIKE '-%' AND bene_id LIKE '-%';
 
 DELETE 
-FROM "public"."OutpatientClaims"
-WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%';
+FROM outpatient_claim_lines
+WHERE clm_id IN (SELECT clm_id
+FROM outpatient_claims
+WHERE clm_id NOT LIKE '-%' AND bene_id LIKE '-%');
 
 DELETE 
-FROM "public"."PartDEvents"
-WHERE "eventId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%';
+FROM outpatient_claims
+WHERE clm_id NOT LIKE '-%' AND bene_id LIKE '-%';
+
+DELETE 
+FROM partd_events
+WHERE pde_id NOT LIKE '-%' AND bene_id LIKE '-%';
