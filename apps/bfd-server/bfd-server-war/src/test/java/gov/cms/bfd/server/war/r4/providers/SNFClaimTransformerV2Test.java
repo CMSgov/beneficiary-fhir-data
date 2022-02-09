@@ -777,6 +777,7 @@ public class SNFClaimTransformerV2Test {
 
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
     assertTrue(compare.equalsDeep(insurance));

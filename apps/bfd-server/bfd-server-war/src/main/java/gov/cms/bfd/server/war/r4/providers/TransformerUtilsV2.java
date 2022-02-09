@@ -1818,7 +1818,7 @@ public final class TransformerUtilsV2 {
         .setType(createC4BBClaimCodeableConcept());
 
     // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage (ref)
-    eob.addInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
+    eob.addInsurance().setFocal(true).setCoverage(referenceCoverage(beneficiaryId, coverageType));
 
     // BENE_ID => ExplanationOfBenefit.patient (reference)
     eob.setPatient(referencePatient(beneficiaryId));

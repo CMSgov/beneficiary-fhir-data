@@ -560,6 +560,7 @@
     }
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }

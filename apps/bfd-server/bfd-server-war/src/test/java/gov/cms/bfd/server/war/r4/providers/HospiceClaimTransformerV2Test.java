@@ -491,6 +491,7 @@ public final class HospiceClaimTransformerV2Test {
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
     assertTrue(compare.equalsDeep(insurance));
