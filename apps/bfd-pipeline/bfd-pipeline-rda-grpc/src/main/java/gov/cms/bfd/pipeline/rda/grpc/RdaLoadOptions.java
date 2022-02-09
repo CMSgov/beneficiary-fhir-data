@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.sink.CachingIdHasher;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.McsClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
@@ -22,7 +22,6 @@ import java.util.Optional;
  */
 public class RdaLoadOptions implements Serializable {
   private static final long serialVersionUID = 7635897362336183L;
-  private static final int HASH_CACHE_SIZE = 1000;
 
   private final AbstractRdaLoadJob.Config jobConfig;
   private final GrpcRdaSource.Config grpcConfig;
@@ -84,8 +83,7 @@ public class RdaLoadOptions implements Serializable {
                     new FissClaimRdaSink(
                         appState,
                         new FissClaimTransformer(
-                            appState.getClock(),
-                            new CachingIdHasher(idHasherConfig, HASH_CACHE_SIZE)),
+                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
                         autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
@@ -114,8 +112,7 @@ public class RdaLoadOptions implements Serializable {
                     new McsClaimRdaSink(
                         appState,
                         new McsClaimTransformer(
-                            appState.getClock(),
-                            new CachingIdHasher(idHasherConfig, HASH_CACHE_SIZE)),
+                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
                         autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
