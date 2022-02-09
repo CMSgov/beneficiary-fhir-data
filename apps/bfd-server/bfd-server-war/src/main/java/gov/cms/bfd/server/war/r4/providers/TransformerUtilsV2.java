@@ -3026,6 +3026,12 @@ public final class TransformerUtilsV2 {
           claimPrimaryPayerCode.get());
     }
 
+    // FI_NUM => ExplainationOfBenefit.supportingInfo
+    if (fiscalIntermediaryNumber.isPresent()) {
+      addInformationWithCode(
+          eob, CcwCodebookVariable.FI_NUM, CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber);
+    }
+
     // CLM_TOT_CHRG_AMT => ExplainationOfBenefit.total
     addTotal(
         eob,
