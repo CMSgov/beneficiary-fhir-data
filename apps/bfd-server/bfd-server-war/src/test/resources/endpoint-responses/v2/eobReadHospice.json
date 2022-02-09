@@ -278,6 +278,25 @@
         "display" : "Employer group health plan (EGHP) insurance for an aged beneficiary"
       } ]
     }
+  }, {
+    "sequence" : 7,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "display" : "FI or MAC Number"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "code" : "6666"
+      } ]
+    }
   } ],
   "diagnosis" : [ {
     "sequence" : 1,

@@ -233,6 +233,25 @@
         "display" : "Information"
       }, {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "display" : "FI or MAC Number"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "code" : "15999"
+      } ]
+    }
+  }, {
+    "sequence" : 6,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
         "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd",
         "display" : "Claim PPS Indicator Code"
       } ]
@@ -245,7 +264,7 @@
       } ]
     }
   }, {
-    "sequence" : 6,
+    "sequence" : 7,
     "category" : {
       "coding" : [ {
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -265,7 +284,7 @@
       } ]
     }
   }, {
-    "sequence" : 7,
+    "sequence" : 8,
     "category" : {
       "coding" : [ {
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -285,7 +304,7 @@
       } ]
     }
   }, {
-    "sequence" : 8,
+    "sequence" : 9,
     "category" : {
       "coding" : [ {
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -301,7 +320,7 @@
       "value" : 3
     }
   }, {
-    "sequence" : 9,
+    "sequence" : 10,
     "category" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",

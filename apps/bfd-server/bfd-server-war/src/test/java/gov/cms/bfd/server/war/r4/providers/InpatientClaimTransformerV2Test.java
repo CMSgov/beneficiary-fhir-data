@@ -224,7 +224,7 @@ public final class InpatientClaimTransformerV2Test {
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    assertEquals(11, eob.getSupportingInfo().size());
+    assertEquals(12, eob.getSupportingInfo().size());
   }
 
   @Test

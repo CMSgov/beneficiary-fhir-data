@@ -222,7 +222,7 @@ public final class OutpatientClaimTransformerV2Test {
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    assertEquals(5, eob.getSupportingInfo().size());
+    assertEquals(6, eob.getSupportingInfo().size());
   }
 
   @Test

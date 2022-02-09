@@ -203,7 +203,7 @@ public class HHAClaimTransformerV2Test {
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    assertEquals(9, eob.getSupportingInfo().size());
+    assertEquals(10, eob.getSupportingInfo().size());
   }
 
   @Test

@@ -144,6 +144,12 @@ public final class HospiceClaimTransformerV2Test {
     assertEquals(ExplanationOfBenefit.RemittanceOutcome.COMPLETE, eob.getOutcome());
   }
 
+  /** SupportingInfo items */
+  @Test
+  public void shouldHaveSupportingInfoList() {
+    assertEquals(7, eob.getSupportingInfo().size());
+  }
+
   /** Provider Local Reference */
   @Test
   public void shouldHaveProviderReference() {

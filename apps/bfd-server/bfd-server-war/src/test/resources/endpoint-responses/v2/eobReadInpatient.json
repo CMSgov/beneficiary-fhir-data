@@ -406,6 +406,25 @@
     "sequence" : 11,
     "category" : {
       "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "display" : "FI or MAC Number"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "code" : "8299"
+      } ]
+    }
+  }, {
+    "sequence" : 12,
+    "category" : {
+      "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
         "code" : "clmrecvddate",
         "display" : "Claim Received Date"
