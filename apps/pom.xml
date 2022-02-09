@@ -524,7 +524,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.3</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -660,6 +660,9 @@ checkJavaFormat
 						</goals>
 						<configuration>
 							<failOnError>false</failOnError>
+							<detectJavaApiLink>false</detectJavaApiLink>
+							<!-- Exclude javadocs on generated files, reduces build warnings -->
+							<excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
             			</configuration>
 					</execution>
 				</executions>

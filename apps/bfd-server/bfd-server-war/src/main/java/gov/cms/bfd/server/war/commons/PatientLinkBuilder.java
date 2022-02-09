@@ -151,6 +151,8 @@ public final class PatientLinkBuilder implements LinkBuilder {
    * be at least as big as the page size to ensure a full page but include at least one additional
    * record as a way to determine whether another page will be needed. In practice this means
    * returning one more than the page size.
+   *
+   * @return the query max size
    */
   public int getQueryMaxSize() {
     return getPageSize() + 1;

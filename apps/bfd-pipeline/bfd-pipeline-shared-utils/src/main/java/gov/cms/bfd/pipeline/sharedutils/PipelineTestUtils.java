@@ -115,7 +115,8 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Runs a <code>TRUNCATE</code> for all tables in the {@link #getUnpooledDataSource()} database.
+   * Runs a <code>TRUNCATE</code> for all tables in the {@link
+   * DatabaseTestUtils#getUnpooledDataSource()} database.
    */
   public void truncateTablesInDataSource() {
     List<Class<?>> entityTypes =

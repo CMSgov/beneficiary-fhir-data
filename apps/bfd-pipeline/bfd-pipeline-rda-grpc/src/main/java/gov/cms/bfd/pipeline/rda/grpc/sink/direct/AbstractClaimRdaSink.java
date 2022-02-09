@@ -247,6 +247,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    *
    * @param query JPAQL query string
    * @return result of the query or empty if no records matched
+   * @throws ProcessingException the processing exception
    */
   protected Optional<Long> readMaxExistingSequenceNumber(String query) throws ProcessingException {
     try {
