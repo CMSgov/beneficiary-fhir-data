@@ -188,4 +188,4 @@ This is a list of some improvements that could be made to the tests moving forwa
 - Since each test shares boilerplate setup, commonize what is inside the tasks to take the url and name of the test with any required setup params.
 - Currently, when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
 - Add the ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
-- Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common pull_hashed_mbis and pull_bene_ids files)
+- Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common db file)
