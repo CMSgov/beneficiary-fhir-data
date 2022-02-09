@@ -37,11 +37,11 @@ class RDABridgeIT {
 
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
-  private static final String EXPECTED_ATTRIBUTION = "expected-attribution.sql";
+  private static final String EXPECTED_ATTRIBUTION = "expected-attribution.json";
 
   private static final String ACTUAL_FISS = "rda-fiss-test-5-18.ndjson";
   private static final String ACTUAL_MCS = "rda-mcs-test-1-4.ndjson";
-  private static final String ACTUAL_ATTRIBUTION = "attribution.sql";
+  private static final String ACTUAL_ATTRIBUTION = "attribution.json";
 
   @Test
   void shouldGenerateCorrectOutput() throws IOException {
@@ -81,9 +81,9 @@ class RDABridgeIT {
           "-x",
           "4",
           "-q",
-          outputDir.resolve("attribution.sql").toString(),
+          outputDir.resolve("attribution.json").toString(),
           "-t",
-          resourcesDir.resolve("attribution-template.sql").toString(),
+          resourcesDir.resolve("attribution-template.json").toString(),
           rifDir
         });
 

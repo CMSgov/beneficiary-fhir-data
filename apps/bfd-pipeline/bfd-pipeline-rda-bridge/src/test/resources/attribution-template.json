@@ -1,0 +1,4 @@
+[
+  {{#SQLValues this 10}}"{{this}}"{{#unless @last}},{{/unless}}
+  {{/SQLValues}}
+]
