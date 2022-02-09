@@ -7,6 +7,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -14,6 +15,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.Clock;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 public class RdaPipelineTestUtils {
   public static void assertMeterReading(long expected, String meterName, Meter meter) {
@@ -55,6 +59,24 @@ public class RdaPipelineTestUtils {
         }
       }
     }
+  }
+
+  /**
+   * Looks for a record in the MbiCache table using the given EntityManager.
+   *
+   * @param entityManager used to perform the query
+   * @param mbi mbi string to look for
+   * @return null if not cached otherwise the Mbi record from database
+   */
+  public static Mbi lookupCachedMbi(EntityManager entityManager, String mbi) {
+    entityManager.getTransaction().begin();
+    final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+    final Root<Mbi> root = criteria.from(Mbi.class);
+    criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+    final var records = entityManager.createQuery(criteria).getResultList();
+    entityManager.getTransaction().commit();
+    return records.isEmpty() ? null : records.get(0);
   }
 
   @FunctionalInterface

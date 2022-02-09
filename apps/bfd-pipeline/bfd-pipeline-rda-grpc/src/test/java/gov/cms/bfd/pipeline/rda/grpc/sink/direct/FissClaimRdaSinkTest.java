@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.time.Clock;
@@ -34,6 +35,7 @@ public class FissClaimRdaSinkTest {
   private static final String VERSION = "version";
 
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+  private final IdHasher.Config hasherConfig = new IdHasher.Config(1, "notarealpepper");
 
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
@@ -50,6 +52,8 @@ public class FissClaimRdaSinkTest {
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
+    doReturn(MbiCache.computedCache(hasherConfig)).when(transformer).getMbiCache();
+    doReturn(transformer).when(transformer).withMbiCache(any());
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
