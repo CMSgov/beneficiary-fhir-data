@@ -6,82 +6,90 @@
  */
 
 -- Count the total number of beneficiaries, in several different ways.
+-- setup for parallel processing
+SET max_parallel_workers = 6;
+SET max_parallel_workers_per_gather = 6;
+SET parallel_leader_participation = off;
+SET parallel_tuple_cost = 0;
+SET parallel_setup_cost = 0;
+SET min_parallel_table_scan_size = 0;
+
 SELECT
   (
     SELECT count(*)
-    FROM "Beneficiaries"
+    FROM beneficiaries
   ) AS benes_all,
   (
     SELECT count(*)
-    FROM "Beneficiaries"
+    FROM beneficiaries
     WHERE
-      "beneficiaryDateOfDeath" IS NULL
-      OR "validDateOfDeathSw" <> 'V'
+      death_dt IS NULL
+      OR v_dod_sw <> 'V'
   ) AS benes_not_known_dead,
   (
     SELECT count(*)
-    FROM "Beneficiaries"
+    FROM beneficiaries
     WHERE
       (
-        "beneficiaryDateOfDeath" IS NULL
-        OR "validDateOfDeathSw" <> 'V'
+        death_dt IS NULL
+        OR v_dod_sw <> 'V'
       ) AND
       (
-        date_part('year',age("birthDate")) <= 110
+        date_part('year',age(bene_birth_dt)) <= 110
       )
   ) AS benes_not_assumed_dead,
   (
     SELECT count(*)
-    FROM "Beneficiaries"
+    FROM beneficiaries
     WHERE
-      "medicareBeneficiaryId" IS NOT NULL
+      mbi_num IS NOT NULL
   ) AS benes_with_mbis;
 
 -- Count the total numbers of beneficiaries and claims.
 with
   carrier_claim_counts as (
-    select "CarrierClaims"."beneficiaryId" as beneficiary_id, count(distinct "CarrierClaims"."claimId") as carrier_claim_count, count(*) as carrier_claim_line_count
-      from "CarrierClaims" inner join "CarrierClaimLines" on "CarrierClaims"."claimId" = "CarrierClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as carrier_claim_count, count(b.*) as carrier_claim_line_count
+      from carrier_claims a inner join carrier_claim_lines b on b.clm_id = a.clm_id
+      group by a.bene_id
   )
   ,dme_claim_counts as (
-    select "DMEClaims"."beneficiaryId" as beneficiary_id, count(distinct "DMEClaims"."claimId") as dme_claim_count, count(*) as dme_claim_line_count
-      from "DMEClaims" inner join "DMEClaimLines" on "DMEClaims"."claimId" = "DMEClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as dme_claim_count, count(b.*) as dme_claim_line_count
+      from dme_claims a inner join dme_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,hha_claim_counts as (
-    select "HHAClaims"."beneficiaryId" as beneficiary_id, count(distinct "HHAClaims"."claimId") as hha_claim_count, count(*) as hha_claim_line_count
-      from "HHAClaims" inner join "HHAClaimLines" on "HHAClaims"."claimId" = "HHAClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as hha_claim_count, count(b.*) as hha_claim_line_count
+      from hha_claims a inner join hha_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,hospice_claim_counts as (
-    select "HospiceClaims"."beneficiaryId" as beneficiary_id, count(distinct "HospiceClaims"."claimId") as hospice_claim_count, count(*) as hospice_claim_line_count
-      from "HospiceClaims" inner join "HospiceClaimLines" on "HospiceClaims"."claimId" = "HospiceClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as hospice_claim_count, count(b.*) as hospice_claim_line_count
+      from hospice_claims a inner join hospice_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,inpatient_claim_counts as (
-    select "InpatientClaims"."beneficiaryId" as beneficiary_id, count(distinct "InpatientClaims"."claimId") as inpatient_claim_count, count(*) as inpatient_claim_line_count
-      from "InpatientClaims" inner join "InpatientClaimLines" on "InpatientClaims"."claimId" = "InpatientClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as inpatient_claim_count, count(b.*) as inpatient_claim_line_count
+      from inpatient_claims a inner join inpatient_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,outpatient_claim_counts as (
-    select "OutpatientClaims"."beneficiaryId" as beneficiary_id, count(distinct "OutpatientClaims"."claimId") as outpatient_claim_count, count(*) as outpatient_claim_line_count
-      from "OutpatientClaims" inner join "OutpatientClaimLines" on "OutpatientClaims"."claimId" = "OutpatientClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as outpatient_claim_count, count(b.*) as outpatient_claim_line_count
+      from outpatient_claims a inner join outpatient_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,partd_event_counts as (
-    select "PartDEvents"."beneficiaryId" as beneficiary_id, count(*) as partd_event_count
-      from "PartDEvents"
-      group by beneficiary_id
+    select bene_id, count(*) as partd_event_count
+      from partd_events
+      group by bene_id
   )
   ,snf_claim_counts as (
-    select "SNFClaims"."beneficiaryId" as beneficiary_id, count(distinct "SNFClaims"."claimId") as snf_claim_count, count(*) as snf_claim_line_count
-      from "SNFClaims" inner join "SNFClaimLines" on "SNFClaims"."claimId" = "SNFClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as snf_claim_count, count(b.*) as snf_claim_line_count
+      from snf_claims a inner join snf_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
 select
-    count("Beneficiaries"."beneficiaryId") as beneficiaries_count
-    ,count("Beneficiaries"."beneficiaryId") filter (
+    count(b.bene_id) as beneficiaries_count
+    ,count(b.bene_id) filter (
       where (
         coalesce(carrier_claim_counts.carrier_claim_count, 0)
         + coalesce(dme_claim_counts.dme_claim_count, 0)
@@ -93,14 +101,14 @@ select
         + coalesce(snf_claim_counts.snf_claim_count, 0)
       ) > 0
     ) as beneficiaries_with_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(carrier_claim_counts.carrier_claim_count, 0) > 0) as beneficiaries_with_carrier_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(dme_claim_counts.dme_claim_count, 0) > 0) as beneficiaries_with_dme_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(hha_claim_counts.hha_claim_count, 0) > 0) as beneficiaries_with_hha_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(hospice_claim_counts.hospice_claim_count, 0) > 0) as beneficiaries_with_hospice_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(inpatient_claim_counts.inpatient_claim_count, 0) > 0) as beneficiaries_with_inpatient_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(outpatient_claim_counts.outpatient_claim_count, 0) > 0) as beneficiaries_with_outpatient_claims_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(partd_event_counts.partd_event_count, 0) > 0) as beneficiaries_with_partd_events_count
-    ,count("Beneficiaries"."beneficiaryId") filter (where coalesce(snf_claim_counts.snf_claim_count, 0) > 0) as beneficiaries_with_snf_claims_count
+    ,count(b.bene_id) filter (where coalesce(carrier_claim_counts.carrier_claim_count, 0) > 0) as beneficiaries_with_carrier_claims_count
+    ,count(b.bene_id) filter (where coalesce(dme_claim_counts.dme_claim_count, 0) > 0) as beneficiaries_with_dme_claims_count
+    ,count(b.bene_id) filter (where coalesce(hha_claim_counts.hha_claim_count, 0) > 0) as beneficiaries_with_hha_claims_count
+    ,count(b.bene_id) filter (where coalesce(hospice_claim_counts.hospice_claim_count, 0) > 0) as beneficiaries_with_hospice_claims_count
+    ,count(b.bene_id) filter (where coalesce(inpatient_claim_counts.inpatient_claim_count, 0) > 0) as beneficiaries_with_inpatient_claims_count
+    ,count(b.bene_id) filter (where coalesce(outpatient_claim_counts.outpatient_claim_count, 0) > 0) as beneficiaries_with_outpatient_claims_count
+    ,count(b.bene_id) filter (where coalesce(partd_event_counts.partd_event_count, 0) > 0) as beneficiaries_with_partd_events_count
+    ,count(b.bene_id) filter (where coalesce(snf_claim_counts.snf_claim_count, 0) > 0) as beneficiaries_with_snf_claims_count
     ,sum((
       coalesce(carrier_claim_counts.carrier_claim_count, 0)
       + coalesce(dme_claim_counts.dme_claim_count, 0)
@@ -120,15 +128,15 @@ select
     ,sum(coalesce(partd_event_counts.partd_event_count, 0)) as partd_events_count
     ,sum(coalesce(snf_claim_counts.snf_claim_count, 0)) as snf_claims_count
   from 
-    "Beneficiaries"
-    left join carrier_claim_counts on "Beneficiaries"."beneficiaryId" = carrier_claim_counts.beneficiary_id
-    left join dme_claim_counts on "Beneficiaries"."beneficiaryId" = dme_claim_counts.beneficiary_id
-    left join hha_claim_counts on "Beneficiaries"."beneficiaryId" = hha_claim_counts.beneficiary_id
-    left join hospice_claim_counts on "Beneficiaries"."beneficiaryId" = hospice_claim_counts.beneficiary_id
-    left join inpatient_claim_counts on "Beneficiaries"."beneficiaryId" = inpatient_claim_counts.beneficiary_id
-    left join outpatient_claim_counts on "Beneficiaries"."beneficiaryId" = outpatient_claim_counts.beneficiary_id
-    left join partd_event_counts on "Beneficiaries"."beneficiaryId" = partd_event_counts.beneficiary_id
-    left join snf_claim_counts on "Beneficiaries"."beneficiaryId" = snf_claim_counts.beneficiary_id;
+    beneficiaries b
+    left join carrier_claim_counts on b.bene_id = carrier_claim_counts.bene_id
+    left join dme_claim_counts on b.bene_id = dme_claim_counts.bene_id
+    left join hha_claim_counts on b.bene_id = hha_claim_counts.bene_id
+    left join hospice_claim_counts on b.bene_id = hospice_claim_counts.bene_id
+    left join inpatient_claim_counts on b.bene_id = inpatient_claim_counts.bene_id
+    left join outpatient_claim_counts on b.bene_id = outpatient_claim_counts.bene_id
+    left join partd_event_counts on b.bene_id = partd_event_counts.bene_id
+    left join snf_claim_counts on b.bene_id = snf_claim_counts.bene_id;
 
 -- Results for SAMPLE_C data:
 --  beneficiaries_count | beneficiaries_with_claims_count | beneficiaries_with_carrier_claims_count | beneficiaries_with_dme_claims_count | beneficiaries_with_hha_claims_count | beneficiaries_with_hospice_claims_count | beneficiaries_with_inpatient_claims_count | beneficiaries_with_outpatient_claims_count | beneficiaries_with_partd_events_count | beneficiaries_with_snf_claims_count | claims_count | carrier_claims_count | dme_claims_count | hha_claims_count | hospice_claims_count | inpatient_claims_count | outpatient_claims_count | partd_events_count | snf_claims_count 
@@ -147,47 +155,47 @@ select
 -- least one of every claim type.
 with
   carrier_claim_counts as (
-    select "CarrierClaims"."beneficiaryId" as beneficiary_id, count(distinct "CarrierClaims"."claimId") as carrier_claim_count, count(*) as carrier_claim_line_count
-      from "CarrierClaims" inner join "CarrierClaimLines" on "CarrierClaims"."claimId" = "CarrierClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as carrier_claim_count, count(b.*) as carrier_claim_line_count
+      from carrier_claims a inner join carrier_claim_lines b on b.clm_id = a.clm_id
+      group by a.bene_id
   )
   ,dme_claim_counts as (
-    select "DMEClaims"."beneficiaryId" as beneficiary_id, count(distinct "DMEClaims"."claimId") as dme_claim_count, count(*) as dme_claim_line_count
-      from "DMEClaims" inner join "DMEClaimLines" on "DMEClaims"."claimId" = "DMEClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as dme_claim_count, count(b.*) as dme_claim_line_count
+      from dme_claims a inner join dme_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,hha_claim_counts as (
-    select "HHAClaims"."beneficiaryId" as beneficiary_id, count(distinct "HHAClaims"."claimId") as hha_claim_count, count(*) as hha_claim_line_count
-      from "HHAClaims" inner join "HHAClaimLines" on "HHAClaims"."claimId" = "HHAClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as hha_claim_count, count(b.*) as hha_claim_line_count
+      from hha_claims a inner join hha_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,hospice_claim_counts as (
-    select "HospiceClaims"."beneficiaryId" as beneficiary_id, count(distinct "HospiceClaims"."claimId") as hospice_claim_count, count(*) as hospice_claim_line_count
-      from "HospiceClaims" inner join "HospiceClaimLines" on "HospiceClaims"."claimId" = "HospiceClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as hospice_claim_count, count(b.*) as hospice_claim_line_count
+      from hospice_claims a inner join hospice_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,inpatient_claim_counts as (
-    select "InpatientClaims"."beneficiaryId" as beneficiary_id, count(distinct "InpatientClaims"."claimId") as inpatient_claim_count, count(*) as inpatient_claim_line_count
-      from "InpatientClaims" inner join "InpatientClaimLines" on "InpatientClaims"."claimId" = "InpatientClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as inpatient_claim_count, count(b.*) as inpatient_claim_line_count
+      from inpatient_claims a inner join inpatient_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,outpatient_claim_counts as (
-    select "OutpatientClaims"."beneficiaryId" as beneficiary_id, count(distinct "OutpatientClaims"."claimId") as outpatient_claim_count, count(*) as outpatient_claim_line_count
-      from "OutpatientClaims" inner join "OutpatientClaimLines" on "OutpatientClaims"."claimId" = "OutpatientClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as outpatient_claim_count, count(b.*) as outpatient_claim_line_count
+      from outpatient_claims a inner join outpatient_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,partd_event_counts as (
-    select "PartDEvents"."beneficiaryId" as beneficiary_id, count(*) as partd_event_count
-      from "PartDEvents"
-      group by beneficiary_id
+    select bene_id, count(*) as partd_event_count
+      from partd_events
+      group by bene_id
   )
   ,snf_claim_counts as (
-    select "SNFClaims"."beneficiaryId" as beneficiary_id, count(distinct "SNFClaims"."claimId") as snf_claim_count, count(*) as snf_claim_line_count
-      from "SNFClaims" inner join "SNFClaimLines" on "SNFClaims"."claimId" = "SNFClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as snf_claim_count, count(b.*) as snf_claim_line_count
+      from snf_claims a inner join snf_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
 select
-    "Beneficiaries"."beneficiaryId" as beneficiary_id
+    b.bene_id
     ,(
       coalesce(carrier_claim_counts.carrier_claim_count, 0)
       + coalesce(dme_claim_counts.dme_claim_count, 0)
@@ -224,15 +232,15 @@ select
     ,coalesce(snf_claim_counts.snf_claim_count, 0) as snf_claim_count
     ,coalesce(snf_claim_counts.snf_claim_line_count, 0) as snf_claim_line_count
   from 
-    "Beneficiaries"
-    left join carrier_claim_counts on "Beneficiaries"."beneficiaryId" = carrier_claim_counts.beneficiary_id
-    left join dme_claim_counts on "Beneficiaries"."beneficiaryId" = dme_claim_counts.beneficiary_id
-    left join hha_claim_counts on "Beneficiaries"."beneficiaryId" = hha_claim_counts.beneficiary_id
-    left join hospice_claim_counts on "Beneficiaries"."beneficiaryId" = hospice_claim_counts.beneficiary_id
-    left join inpatient_claim_counts on "Beneficiaries"."beneficiaryId" = inpatient_claim_counts.beneficiary_id
-    left join outpatient_claim_counts on "Beneficiaries"."beneficiaryId" = outpatient_claim_counts.beneficiary_id
-    left join partd_event_counts on "Beneficiaries"."beneficiaryId" = partd_event_counts.beneficiary_id
-    left join snf_claim_counts on "Beneficiaries"."beneficiaryId" = snf_claim_counts.beneficiary_id
+    beneficiaries b
+    left join carrier_claim_counts on b.bene_id = carrier_claim_counts.bene_id
+    left join dme_claim_counts on b.bene_id = dme_claim_counts.bene_id
+    left join hha_claim_counts on b.bene_id = hha_claim_counts.bene_id
+    left join hospice_claim_counts on b.bene_id = hospice_claim_counts.bene_id
+    left join inpatient_claim_counts on b.bene_id = inpatient_claim_counts.bene_id
+    left join outpatient_claim_counts on b.bene_id = outpatient_claim_counts.bene_id
+    left join partd_event_counts on b.bene_id = partd_event_counts.bene_id
+    left join snf_claim_counts on b.bene_id = snf_claim_counts.bene_id
   -- The `*_count > 0` where clauses can be disabled. Only use them if you want to find beneficiaries who have at least 1 of ALL claim types.
   where
     carrier_claim_line_count > 0
@@ -259,44 +267,44 @@ select
 -- This version of the query returns line count percentiles, i.e. "X% of the beneficiaries have >= Y claim lines".
 with
   carrier_claim_counts as (
-    select "CarrierClaims"."beneficiaryId" as beneficiary_id, count(distinct "CarrierClaims"."claimId") as carrier_claim_count, count(*) as carrier_claim_line_count
-      from "CarrierClaims" inner join "CarrierClaimLines" on "CarrierClaims"."claimId" = "CarrierClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as carrier_claim_count, count(b.*) as carrier_claim_line_count
+      from carrier_claims a inner join carrier_claim_lines b on b.clm_id = a.clm_id
+      group by a.bene_id
   )
   ,dme_claim_counts as (
-    select "DMEClaims"."beneficiaryId" as beneficiary_id, count(distinct "DMEClaims"."claimId") as dme_claim_count, count(*) as dme_claim_line_count
-      from "DMEClaims" inner join "DMEClaimLines" on "DMEClaims"."claimId" = "DMEClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as dme_claim_count, count(b.*) as dme_claim_line_count
+      from dme_claims a inner join dme_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,hha_claim_counts as (
-    select "HHAClaims"."beneficiaryId" as beneficiary_id, count(distinct "HHAClaims"."claimId") as hha_claim_count, count(*) as hha_claim_line_count
-      from "HHAClaims" inner join "HHAClaimLines" on "HHAClaims"."claimId" = "HHAClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as hha_claim_count, count(b.*) as hha_claim_line_count
+      from hha_claims a inner join hha_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,hospice_claim_counts as (
-    select "HospiceClaims"."beneficiaryId" as beneficiary_id, count(distinct "HospiceClaims"."claimId") as hospice_claim_count, count(*) as hospice_claim_line_count
-      from "HospiceClaims" inner join "HospiceClaimLines" on "HospiceClaims"."claimId" = "HospiceClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as hospice_claim_count, count(b.*) as hospice_claim_line_count
+      from hospice_claims a inner join hospice_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,inpatient_claim_counts as (
-    select "InpatientClaims"."beneficiaryId" as beneficiary_id, count(distinct "InpatientClaims"."claimId") as inpatient_claim_count, count(*) as inpatient_claim_line_count
-      from "InpatientClaims" inner join "InpatientClaimLines" on "InpatientClaims"."claimId" = "InpatientClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as inpatient_claim_count, count(b.*) as inpatient_claim_line_count
+      from inpatient_claims a inner join inpatient_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,outpatient_claim_counts as (
-    select "OutpatientClaims"."beneficiaryId" as beneficiary_id, count(distinct "OutpatientClaims"."claimId") as outpatient_claim_count, count(*) as outpatient_claim_line_count
-      from "OutpatientClaims" inner join "OutpatientClaimLines" on "OutpatientClaims"."claimId" = "OutpatientClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as outpatient_claim_count, count(b.*) as outpatient_claim_line_count
+      from outpatient_claims a inner join outpatient_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
   ,partd_event_counts as (
-    select "PartDEvents"."beneficiaryId" as beneficiary_id, count(*) as partd_event_count
-      from "PartDEvents"
-      group by beneficiary_id
+    select bene_id, count(*) as partd_event_count
+      from partd_events
+      group by bene_id
   )
   ,snf_claim_counts as (
-    select "SNFClaims"."beneficiaryId" as beneficiary_id, count(distinct "SNFClaims"."claimId") as snf_claim_count, count(*) as snf_claim_line_count
-      from "SNFClaims" inner join "SNFClaimLines" on "SNFClaims"."claimId" = "SNFClaimLines"."parentClaim"
-      group by beneficiary_id
+    select a.bene_id, count(distinct a.clm_id) as snf_claim_count, count(b.*) as snf_claim_line_count
+      from snf_claims a inner join snf_claim_lines b on b.clm_id = a.clm_id
+      group by bene_id
   )
 select
     unnest(percentile_disc(array[0.25, 0.5, 0.75, 0.9, 0.99, 1])
@@ -312,15 +320,15 @@ select
       ))
     )
   from 
-    "Beneficiaries"
-    left join carrier_claim_counts on "Beneficiaries"."beneficiaryId" = carrier_claim_counts.beneficiary_id
-    left join dme_claim_counts on "Beneficiaries"."beneficiaryId" = dme_claim_counts.beneficiary_id
-    left join hha_claim_counts on "Beneficiaries"."beneficiaryId" = hha_claim_counts.beneficiary_id
-    left join hospice_claim_counts on "Beneficiaries"."beneficiaryId" = hospice_claim_counts.beneficiary_id
-    left join inpatient_claim_counts on "Beneficiaries"."beneficiaryId" = inpatient_claim_counts.beneficiary_id
-    left join outpatient_claim_counts on "Beneficiaries"."beneficiaryId" = outpatient_claim_counts.beneficiary_id
-    left join partd_event_counts on "Beneficiaries"."beneficiaryId" = partd_event_counts.beneficiary_id
-    left join snf_claim_counts on "Beneficiaries"."beneficiaryId" = snf_claim_counts.beneficiary_id;
+    beneficiaries b
+    left join carrier_claim_counts on b.bene_id = carrier_claim_counts.bene_id
+    left join dme_claim_counts on b.bene_id = dme_claim_counts.bene_id
+    left join hha_claim_counts on b.bene_id = hha_claim_counts.bene_id
+    left join hospice_claim_counts on b.bene_id = hospice_claim_counts.bene_id
+    left join inpatient_claim_counts on b.bene_id = inpatient_claim_counts.bene_id
+    left join outpatient_claim_counts on b.bene_id = outpatient_claim_counts.bene_id
+    left join partd_event_counts on b.bene_id = partd_event_counts.bene_id
+    left join snf_claim_counts on b.bene_id = snf_claim_counts.bene_id;
 
 -- When run against the SAMPLE_C data, this gave me the following (in 476630.642 ms):
 --  unnest 
