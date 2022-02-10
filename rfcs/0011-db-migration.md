@@ -91,7 +91,7 @@ of migrations:
 * This is forward-incompatible because the new application requires a column that is not present in the old schema.
 
 #### Renaming a column and updating the application references for that column
-* This is an fully-incompatible migration because old applications still reference the column by its old name and new
+* This is a fully-incompatible migration because old applications still reference the column by its old name and new
   applications reference the column by the new name.
 
 #### Dropping a column and changing the application so that it no longer references that column
@@ -163,7 +163,7 @@ place. This leads to another constraint:
 
 Lastly, due to BFD auto-scaling of the API servers, it is possible that additional API servers running the old software
 may come online and perform hibernate validation against the new database schema. Even if the migration is
-backward-compatible this can lead to errors (TODO: THINK OF AN EXAMPLE). This adds one more constraint:
+backward-compatible this can lead to errors. This adds one more constraint:
 
 * Hibernate validation must be turned off in a deployment prior to running a database migration (and so turned back
 on in a deployment following the migration deployments).
@@ -187,6 +187,34 @@ fragmented into multiple commits.
 This RFC proposes an architectural change to BFD that will allow any backward-compatible migration to be deployed
 as a single PR using a Jenkins deployment.
 
+### Background on execution time characteristics of migrations
+
+Execution time of a database migration plays a part in deciding how it will be deployed. Three categorizations exist:
+* Short-running (often seconds, but arbitrarily anything less than one hour)
+* Long-running asynchronous (run time is hours or days but can be run in the background by the DB server)
+* Long-running synchronous (run time is hours or days and cannot be run in the background)
+
+Short-running migrations are preferred when there are options available although frequently the task determines whether
+a short-running migration can be used. Examples of short-running migrations include creating new empty tables, adding,
+dropping, or renaming columns, granting permissions, and performing index/constraint builds on table that are empty or
+have a very small number of rows.
+
+For long-running migrations, asynchronous is preferred but not available for many operations. An example is index
+building in Postgres by specifying the CONCURRENT keyword. Care must be given to the fact that the application will be
+online while the operation is running (so dropping an index that the application needs while building a new one
+asynchronously is not acceptable).
+
+Long-running synchronous migrations are the least desirable and require the most care. Examples include creating
+a new table as a copy of an existing large table, altering the datatype of a column in a large table, creating an
+index in a large table without specifying the CONCURRENT keyword. Due to the Flyway migration
+being performed during the startup of the BFD Pipeline application, a long-running synchronous migration that is
+deployed with a Jenkins deployment will block the Pipeline application from consuming data for the duration of the
+migration. The impact of this limitation will become more significant as the pipeline RDA job goes into production.
+
+This RFC proposal addresses the concern of long-running synchronous migrations blocking the BFD Pipeline as well as
+improvements to the Jenkins deployment pipeline to better support these long-running migrations when they are
+necessary.
+
 #### Other shortcomings that can be addressed by this proposal
 
 In addition to optimizing the development and deployment of database migrations, the proposed changes can also solve
@@ -199,83 +227,79 @@ currently be done because the Flyway invocation is part of the BFD Pipeline Appl
 specific role that is appropriate for the pipeline but does not have the privileges to create roles or set privileges on
 existing objects.
 
-* TODO : LONG RUNNING MIGRATIONS A/C
-
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-
+The proposed solution is to remove the invocations of Flyway and Hibernate validation from the BFD applications
+and instead run Flyway and Hibernate validation as a step in the deployment that must complete successfully before
+deploying the new applications.
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
-This is the technical portion of the RFC. Explain the design in sufficient detail that:
+A new Java application 'bfd-db-migrator' will be introduced that performs two functions:
+* Invokes Flyway (and thereby runs all pending migrations)
+* Runs Hibernate validation against the BFD ORM (after Flyway finishes)
+* Exits with a return code that indicates whether all operations were successful or not
 
-* Its interaction with other features is clear.
-* It is reasonably clear how the feature would be implemented.
-* Corner cases are dissected by example.
+This new application will be deployed prior to deploying the other BFD applications in the Jenkins deployment. Once the
+application has exited, if all operations were successful, the deployment of the other applications proceeds as it does
+currently. In the event that this application indicates that not all operations were successful, the Jenkins deployment
+will halt and be marked as a failure.
 
-The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
+The new application will run under a new database role. This role will have all privileges needed to execute migrations
+and perform Hibernate validations.
+
+The new application will produce log files that contain the Flyway and Hibernate logging that is currently captured in
+the BFD Pipeline application logs. These new application logs will be sent to Splunk and Cloudwatch.
+
+Flyway invocations and hibernate validation will be removed from the BFD Pipeline and BFD API Server applications.
+
+Test infrastructure will be altered to mimic the deployment by running the new application prior to starting the local
+BFD server for tests that run the BFD server as a standalone process.
+Test infrastructure will be altered to invoke the new application logic via method call prior to running tests that
+require a BFD database but do not launch a BFD server.
+
+A new Flyway migration will be developed that creates all non-user roles and sets privileges correctly on all existing
+database objects.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
-Collect a list of action items to be resolved or officially deferred before this RFC is submitted for final comment, including:
+Where should this new app run? Should we provision an instance for it or run it on the existing
+ETL node? Need to consider logging, monitoring and alerting for this application particularly if we support
+long-running synchronous migrations.
 
-* What parts of the design do you expect to resolve through the RFC process before this gets merged?
-* What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-* What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
+Do we need to continue to invoke Hibernate validation at all? What benefit do we derive from this check that is not
+already derived from running the unit and integration tests? What sorts of problems would not be caught by the tests
+that would be caught by hibernate validation?
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
-Why should we *not* do this?
+This makes the Jenkins deployment more complicated and adds another failure mode.
+
+This makes the application more complicated and introduces a new point of failure.
+
+This makes debugging more complex. There will be new places (log files, possibly directories) where debugging
+information will be kept.
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
-* Why is this design the best in the space of possible designs?
-* What other designs have been considered and what is the rationale for not choosing them?
-* What is the impact of not doing this?
+Instead of running Flyway and Hibernate validation in a new application, Flyway could be invoked from the command line
+instead. These leaves the question as to where to invoke Hibernate validation. If it continues to be invoked in the
+applications, it is possible to encounter validation errors if auto-scaling of an old application occurs just after a
+new schema has been deployed. One possible answer is to not invoke Hibernate validation at all (see open questions).
 
 ## Prior Art
 [Prior Art]: #prior-art
 
-Discuss prior art, both the good and the bad, in relation to this proposal.
-A few examples of what this can include are:
-
-* For feature proposals:
-  Does this feature exist in other similar-ish APIs and what experience have their community had?
-* For architecture proposals:
-  Is this architecture used by other CMS or fedgov systems and what experience have they had?
-* For process proposals:
-  Is this process used by other CMS or fedgov programs and what experience have they had?
-* For other teams:
-  What lessons can we learn from what other communities have done here?
-* Papers and other references:
-  Are there any published papers or great posts that discuss this?
-  If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
-
-This section is intended to encourage you as an author to think about the lessons from other languages, provide readers of your RFC with a fuller picture.
-If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other languages.
-
-Note that while precedent set by other programs is some motivation, it does not on its own motivate an RFC.
-Please also take into consideration that we (and the government in general) sometimes intentionally diverge from common "best practices".
+Gitlab migration style guide:
+https://docs.gitlab.com/ee/development/migration_style_guide.html
 
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
-
-Think about what the natural extension and evolution of your proposal would be and how it would affect the language and project as a whole in a holistic way.
-Try to use this section as a tool to more fully consider all possible interactions with the project and language in your proposal.
-Also consider how the this all fits into the roadmap for the project and of the relevant sub-team.
-
-This is also a good place to "dump ideas", if they are out of scope for the RFC you are writing but otherwise related.
-
-If you have tried and cannot think of any future possibilities, you may simply state that you cannot think of anything.
-
-Note that having something written down in the future-possibilities section is not a reason to accept the current or a future RFC;
-  such notes should be in the section on motivation or rationale in this or subsequent RFCs.
-The section merely provides additional information.
 
 ## Addendums
 [Addendums]: #addendums
@@ -283,5 +307,3 @@ The section merely provides additional information.
 The following addendums are required reading before voting on this proposal:
 
 * (none at this time)
-
-Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
