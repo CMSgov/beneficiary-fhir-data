@@ -5,6 +5,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -188,6 +189,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     return metrics;
   }
 
+  abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
@@ -212,6 +215,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
+          var metaData = createMetaData(change);
+          entityManager.persist(metaData);
           entityManager.merge(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
