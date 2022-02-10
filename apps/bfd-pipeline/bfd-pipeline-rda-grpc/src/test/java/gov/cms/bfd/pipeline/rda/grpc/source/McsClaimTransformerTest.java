@@ -120,8 +120,6 @@ public class McsClaimTransformerTest {
     claim.setMbiRecord(
         new Mbi(
             1L, "54678912456", "717ac79ed263a61100f92f7ca67df9249501d52ee4d1af49ea43b457fcabf0d1"));
-    claim.setIdrClaimMbi(claim.getMbiRecord().getMbi());
-    claim.setIdrClaimMbiHash(claim.getMbiRecord().getHash());
     claim.setIdrHdrFromDateOfSvc(LocalDate.of(2020, 1, 7));
     claim.setIdrHdrToDateOfSvc(LocalDate.of(2020, 1, 14));
     claim.setLastUpdated(clock.instant());
