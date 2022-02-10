@@ -270,6 +270,11 @@ Where should this new app run? Should we provision an instance for it or run it 
 ETL node? Need to consider logging, monitoring and alerting for this application particularly if we support
 long-running synchronous migrations.
 
+How should we manage long-running synchronous migrations in Jenkins? If we were to allow the build to run for a long
+time (more than an hour) what sort of changes do we need? Renewal of AWS tokens? Should we make it possible to deploy
+other changes (not ones with migrations) during a long-running migration? Should we support a way of specifying that a
+certain migration should be run as a post-deploy migration (possibly in the background)?
+
 Do we need to continue to invoke Hibernate validation at all? What benefit do we derive from this check that is not
 already derived from running the unit and integration tests? What sorts of problems would not be caught by the tests
 that would be caught by hibernate validation?
