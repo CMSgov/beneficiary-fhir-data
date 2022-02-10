@@ -36,7 +36,33 @@ public abstract class ClaimTransformerFieldTester<
   /**
    * Verifies that a string field transformation is working properly. This includes verifying that a
    * value is properly copied from the message object to the entity object and that minimum and
-   * maximum length validations are performed.
+   * maximum length validations are performed. This method uses a minimum length of 0 for the field.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @param minLength minimum valid length for the string field
+   * @param maxLength maximum valid length for the string field
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyStringFieldCopiedCorrectlyEmptyOK(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          String fieldLabel,
+          int maxLength) {
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 0, maxLength);
+  }
+
+  /**
+   * Verifies that a string field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object and that minimum and
+   * maximum length validations are performed. This method uses a minimum length of 1 for the field.
    *
    * @param setter method reference or lambda to set a value of the field being tested on a message
    *     object
@@ -55,6 +81,33 @@ public abstract class ClaimTransformerFieldTester<
           Function<TTestEntity, String> getter,
           String fieldLabel,
           int maxLength) {
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 1, maxLength);
+  }
+
+  /**
+   * Verifies that a string field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object and that minimum and
+   * maximum length validations are performed.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @param minLength minimum valid length for the string field
+   * @param maxLength maximum valid length for the string field
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyStringFieldCopiedCorrectlyImpl(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          String fieldLabel,
+          int minLength,
+          int maxLength) {
     final BiConsumer<TClaimBuilder, String> wrappedSetter =
         (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
     final Function<TClaimEntity, String> wrappedGetter =
@@ -63,10 +116,13 @@ public abstract class ClaimTransformerFieldTester<
     // limits the length os string tested for clob/text fields
     verifyStringFieldTransformationCorrect(
         wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
-    verifyStringFieldLengthLimitsEnforced(wrappedSetter, wrappedFieldLabel, maxLength, 0);
+    if (minLength > 0) {
+      verifyStringFieldLengthLimitsEnforced(
+          wrappedSetter, wrappedFieldLabel, minLength, maxLength, minLength - 1);
+    }
     if (maxLength < Integer.MAX_VALUE) {
       verifyStringFieldLengthLimitsEnforced(
-          wrappedSetter, wrappedFieldLabel, maxLength, maxLength + 1);
+          wrappedSetter, wrappedFieldLabel, minLength, maxLength, maxLength + 1);
     }
     return this;
   }
@@ -338,11 +394,15 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   private void verifyStringFieldLengthLimitsEnforced(
-      BiConsumer<TClaimBuilder, String> setter, String fieldLabel, int maxLength, int length) {
+      BiConsumer<TClaimBuilder, String> setter,
+      String fieldLabel,
+      int minLength,
+      int maxLength,
+      int length) {
     verifyFieldTransformationFails(
         claimBuilder -> setter.accept(claimBuilder, createString(length)),
         fieldLabel,
-        String.format("invalid length: expected=[1,%d] actual=%d", maxLength, length));
+        String.format("invalid length: expected=[%d,%d] actual=%d", minLength, maxLength, length));
   }
 
   private <T> void verifyFieldTransformationSucceeds(
