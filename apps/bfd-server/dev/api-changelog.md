@@ -2,6 +2,11 @@
 
 ## BFD-1517
 
+Adding mapping for Fiscal Intermediary Number (FI_NUM)
+FI_NUM => ExplainationOfBenefit.supportingInfo
+
+## BFD-1518
+
 Added mapping for Revenue Status Code:
 REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
 
