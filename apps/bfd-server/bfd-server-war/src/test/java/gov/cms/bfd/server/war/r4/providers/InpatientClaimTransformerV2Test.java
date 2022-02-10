@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -1651,6 +1652,55 @@ public final class InpatientClaimTransformerV2Test {
             .setUsed(new UnsignedIntType(0));
 
     assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /**
+   * Ensure that when the fi number exists in the claim, it should be mapped to the supporting info
+   * as a category and coding.
+   */
+  @Test
+  public void shouldHaveFiNumber() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    assertNotNull(eob.getSupportingInfo());
+    assertTrue(eob.getSupportingInfo().size() > 0);
+    // Find the supporting info that has the fiNum details
+    ExplanationOfBenefit.SupportingInformationComponent fiNumSupportingInfo =
+        eob.getSupportingInfo().stream()
+            .filter(
+                si ->
+                    si.getCode().getCoding().stream()
+                        .anyMatch(c -> expectedDiscriminator.equals(c.getSystem())))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(fiNumSupportingInfo, "Found no supporting info which had FI_NUM coding within.");
+
+    assertFalse(fiNumSupportingInfo.isEmpty());
+    Optional<Coding> fiNumCoding =
+        fiNumSupportingInfo.getCategory().getCoding().stream()
+            .filter(c -> expectedDiscriminator.equals(c.getCode()))
+            .findFirst();
+    assertTrue(
+        fiNumCoding.isPresent(),
+        "Missing expected supporting info category coding for FI_NUM (fiscalIntermediaryNumber)");
+    Optional<Coding> infoCoding =
+        fiNumSupportingInfo.getCategory().getCoding().stream()
+            .filter(c -> "info".equals(c.getCode()))
+            .findFirst();
+    assertTrue(
+        infoCoding.isPresent(),
+        "Missing expected supporting info category coding for info (claim info category for FI_NUM)");
+
+    // Check Code exists with correct discriminator and value
+    Coding code =
+        fiNumSupportingInfo.getCode().getCoding().stream()
+            .filter(c -> expectedDiscriminator.equals(c.getSystem()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(code, "Missing expected eob.coding ");
+    assertEquals("8299", fiNumSupportingInfo.getCode().getCoding().get(0).getCode());
   }
 
   /**
