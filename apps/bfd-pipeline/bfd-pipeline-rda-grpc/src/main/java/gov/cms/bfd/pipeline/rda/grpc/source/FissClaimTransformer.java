@@ -589,10 +589,7 @@ public class FissClaimTransformer {
     if (from.hasMbi()) {
       final var mbi = from.getMbi();
       if (transformer.validateString(namePrefix + PreAdjFissClaim.Fields.mbi, false, 1, 11, mbi)) {
-        var mbiRecord = mbiCache.lookupMbi(mbi);
-        to.setMbiRecord(mbiRecord);
-        to.setMbi(mbiRecord.getMbi());
-        to.setMbiHash(mbiRecord.getHash());
+        to.setMbiRecord(mbiCache.lookupMbi(mbi));
       }
     }
     transformer.copyOptionalString(

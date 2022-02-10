@@ -120,12 +120,6 @@ public class PreAdjMcsClaim {
   @JoinColumn(name = "`mbiId`")
   private Mbi mbiRecord;
 
-  @Column(name = "`idrClaimMbi`", length = 13)
-  private String idrClaimMbi;
-
-  @Column(name = "`idrClaimMbiHash`", length = 64)
-  private String idrClaimMbiHash;
-
   @Column(name = "`idrHdrFromDateOfSvc`")
   private LocalDate idrHdrFromDateOfSvc;
 
@@ -245,4 +239,20 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjMcsLocation> locations = new HashSet<>();
+
+  public String getIdrClaimMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getIdrClaimMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String idrClaimMbi = "idrClaimMbi";
+  }
 }
