@@ -163,8 +163,8 @@ resource "aws_iam_policy" "fhir_parameter_store" {
                 "ssm:GetParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/${var.env_config.env}/shared/*",
-                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/${var.env_config.env}/server/*"
+                "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/shared/*",
+                "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/server/*"
             ]
         }
     ]
