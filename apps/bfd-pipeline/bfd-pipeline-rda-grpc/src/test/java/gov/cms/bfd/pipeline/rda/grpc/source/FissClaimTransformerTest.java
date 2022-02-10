@@ -6,12 +6,14 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -59,7 +61,8 @@ public class FissClaimTransformerTest {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, idHasher);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
   private FissClaimChange.Builder changeBuilder;
   private FissClaim.Builder claimBuilder;
   private PreAdjFissClaim claim;
@@ -113,8 +116,11 @@ public class FissClaimTransformerTest {
     claim.setAdmitDiagCode("1234567");
     claim.setPrincipleDiag("7654321");
     claim.setNpiNumber("npi-123456");
-    claim.setMbi("1234567890123");
-    claim.setMbiHash("50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0");
+    claim.setMbiRecord(
+        new Mbi(
+            1L, "12345678901", "3cf7b310f8fd6e7b275ddbdc6c3cd5b4eec0ea10bc9a504d471b086bd5d9b888"));
+    claim.setMbi(claim.getMbiRecord().getMbi());
+    claim.setMbiHash(claim.getMbiRecord().getHash());
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");
@@ -143,7 +149,7 @@ public class FissClaimTransformerTest {
         .setAdmDiagCode("1234567")
         .setPrincipleDiag("7654321")
         .setNpiNumber("npi-123456")
-        .setMbi("1234567890123")
+        .setMbi("12345678901")
         .setFedTaxNb("1234567890")
         .setPracLocAddr1("loc-address-1")
         .setPracLocAddr2("loc-address-2")
@@ -557,7 +563,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getCurrLoc2,
             FissCurrentLocation2.CURRENT_LOCATION_2_CABLE,
             "9000")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setCurrLoc2Unrecognized,
             PreAdjFissClaim::getCurrLoc2,
             PreAdjFissClaim.Fields.currLoc2,
@@ -645,9 +651,9 @@ public class FissClaimTransformerTest {
   public void testClaimMbi() {
     new ClaimFieldTester()
         .verifyStringFieldCopiedCorrectly(
-            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbi, PreAdjFissClaim.Fields.mbi, 13)
+            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbi, PreAdjFissClaim.Fields.mbi, 11)
         .verifyIdHashFieldPopulatedCorrectly(
-            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 13, idHasher);
+            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 11, idHasher);
   }
 
   @Test
@@ -736,7 +742,7 @@ public class FissClaimTransformerTest {
             claim -> String.valueOf(claim.getLobCd()),
             FissBillFacilityType.BILL_FACILITY_TYPE_HOME_HEALTH,
             "3")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setLobCdUnrecognized,
             claim -> String.valueOf(claim.getLobCd()),
             PreAdjFissClaim.Fields.lobCd,
@@ -766,7 +772,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getFreqCd,
             FissBillFrequency.BILL_FREQUENCY_ADJUSTMENT_CLAIM_F,
             "F")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setFreqCdUnrecognized,
             PreAdjFissClaim::getFreqCd,
             PreAdjFissClaim.Fields.freqCd,
@@ -831,7 +837,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getAdjReqCd,
             FissAdjustmentRequestorCode.ADJUSTMENT_REQUESTOR_CODE_FISCAL_INTERMEDIARY,
             "F")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setAdjReqCdUnrecognized,
             PreAdjFissClaim::getAdjReqCd,
             PreAdjFissClaim.Fields.adjReqCd,
@@ -875,7 +881,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getCancAdjCd,
             FissCancelAdjustmentCode.CANCEL_ADJUSTMENT_CODE_COVERAGE,
             "C")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setCancAdjCdUnrecognized,
             PreAdjFissClaim::getCancAdjCd,
             PreAdjFissClaim.Fields.cancAdjCd,
@@ -918,7 +924,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getAdmSource,
             FissSourceOfAdmission.SOURCE_OF_ADMISSION_CLINIC_REFERRAL,
             "2")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setAdmSourceUnrecognized,
             PreAdjFissClaim::getAdmSource,
             PreAdjFissClaim.Fields.admSource,
@@ -933,7 +939,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getPrimaryPayerCode,
             FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
             "D")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setPrimaryPayerCodeUnrecognized,
             PreAdjFissClaim::getPrimaryPayerCode,
             PreAdjFissClaim.Fields.primaryPayerCode,
@@ -988,7 +994,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getAttendPhysFlag,
             FissPhysicianFlag.PHYSICIAN_FLAG_NO,
             "N")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setAttendPhysFlagUnrecognized,
             PreAdjFissClaim::getAttendPhysFlag,
             PreAdjFissClaim.Fields.attendPhysFlag,
@@ -1043,7 +1049,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getOperPhysFlag,
             FissPhysicianFlag.PHYSICIAN_FLAG_NO,
             "N")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setOperPhysFlagUnrecognized,
             PreAdjFissClaim::getOperPhysFlag,
             PreAdjFissClaim.Fields.operPhysFlag,
@@ -1098,7 +1104,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getOthPhysFlag,
             FissPhysicianFlag.PHYSICIAN_FLAG_NO,
             "N")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setOthPhysFlagUnrecognized,
             PreAdjFissClaim::getOthPhysFlag,
             PreAdjFissClaim.Fields.othPhysFlag,
@@ -1123,7 +1129,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getProcNewHicInd,
             FissProcessNewHealthInsuranceClaimNumberIndicator.PROCESS_NEW_HIC_INDICATOR_Y,
             "Y")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setProcNewHicIndUnrecognized,
             PreAdjFissClaim::getProcNewHicInd,
             PreAdjFissClaim.Fields.procNewHicInd,
@@ -1148,7 +1154,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getReposInd,
             FissRepositoryIndicator.REPOSITORY_INDICATOR_HIC_HAS_BEEN_MOVED,
             "Y")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setReposIndUnrecognized,
             PreAdjFissClaim::getReposInd,
             PreAdjFissClaim.Fields.reposInd,
@@ -1173,7 +1179,7 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getMbiSubmBeneInd,
             FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.FISS_HIC_OR_MBI_IS_HIC,
             "H")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setMbiSubmBeneIndUnrecognized,
             PreAdjFissClaim::getMbiSubmBeneInd,
             PreAdjFissClaim.Fields.mbiSubmBeneInd,
@@ -1189,7 +1195,7 @@ public class FissClaimTransformerTest {
             FissAdjustmentMedicareBeneficiaryIdentifierIndicator
                 .ADJUSTMENT_MBI_INDICATOR_HIC_SUBMITTED_ON_ADJUSTMENT_OR_CANCEL_CLAIM,
             "H")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissClaim.Builder::setAdjMbiIndUnrecognized,
             PreAdjFissClaim::getAdjMbiInd,
             PreAdjFissClaim.Fields.adjMbiInd,
@@ -1259,7 +1265,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getPayersId,
             FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
             "D")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setPayersIdUnrecognized,
             PreAdjFissPayer::getPayersId,
             PreAdjFissPayer.Fields.payersId,
@@ -1284,7 +1290,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getRelInd,
             FissReleaseOfInformation.RELEASE_OF_INFORMATION_NO_RELEASE_ON_FILE,
             "N")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setRelIndUnrecognized,
             PreAdjFissPayer::getRelInd,
             PreAdjFissPayer.Fields.relInd,
@@ -1299,7 +1305,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getAssignInd,
             FissAssignmentOfBenefitsIndicator.ASSIGNMENT_OF_BENEFITS_INDICATOR_BENEFITS_ASSIGNED,
             "Y")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setAssignIndUnrecognized,
             PreAdjFissPayer::getAssignInd,
             PreAdjFissPayer.Fields.assignInd,
@@ -1352,7 +1358,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getBeneRel,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
             "00")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setBeneRelUnrecognized,
             PreAdjFissPayer::getBeneRel,
             PreAdjFissPayer.Fields.beneRel,
@@ -1426,7 +1432,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getBeneSex,
             FissBeneficiarySex.BENEFICIARY_SEX_FEMALE,
             "F")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setBeneSexUnrecognized,
             PreAdjFissPayer::getBeneSex,
             PreAdjFissPayer.Fields.beneSex,
@@ -1451,7 +1457,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getInsuredSex,
             FissBeneficiarySex.BENEFICIARY_SEX_FEMALE,
             "F")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setInsuredSexUnrecognized,
             PreAdjFissPayer::getInsuredSex,
             PreAdjFissPayer.Fields.insuredSex,
@@ -1466,7 +1472,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getInsuredRelX12,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
             "00")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissBeneZPayer.Builder::setInsuredRelX12Unrecognized,
             PreAdjFissPayer::getInsuredRelX12,
             PreAdjFissPayer.Fields.insuredRelX12,
@@ -1484,7 +1490,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getPayersId,
             FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
             "D")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissInsuredPayer.Builder::setPayersIdUnrecognized,
             PreAdjFissPayer::getPayersId,
             PreAdjFissPayer.Fields.payersId,
@@ -1509,7 +1515,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getRelInd,
             FissReleaseOfInformation.RELEASE_OF_INFORMATION_NO_RELEASE_ON_FILE,
             "N")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissInsuredPayer.Builder::setRelIndUnrecognized,
             PreAdjFissPayer::getRelInd,
             PreAdjFissPayer.Fields.relInd,
@@ -1524,7 +1530,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getAssignInd,
             FissAssignmentOfBenefitsIndicator.ASSIGNMENT_OF_BENEFITS_INDICATOR_BENEFITS_ASSIGNED,
             "Y")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissInsuredPayer.Builder::setAssignIndUnrecognized,
             PreAdjFissPayer::getAssignInd,
             PreAdjFissPayer.Fields.assignInd,
@@ -1577,7 +1583,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getInsuredRel,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_EMPLOYEE,
             "08")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissInsuredPayer.Builder::setInsuredRelUnrecognized,
             PreAdjFissPayer::getInsuredRel,
             PreAdjFissPayer.Fields.insuredRel,
@@ -1642,7 +1648,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getInsuredSex,
             FissBeneficiarySex.BENEFICIARY_SEX_UNKNOWN,
             "U")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissInsuredPayer.Builder::setInsuredSexUnrecognized,
             PreAdjFissPayer::getInsuredSex,
             PreAdjFissPayer.Fields.insuredSex,
@@ -1657,7 +1663,7 @@ public class FissClaimTransformerTest {
             PreAdjFissPayer::getInsuredRelX12,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
             "00")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             FissInsuredPayer.Builder::setInsuredRelX12Unrecognized,
             PreAdjFissPayer::getInsuredRelX12,
             PreAdjFissPayer.Fields.insuredRelX12,
