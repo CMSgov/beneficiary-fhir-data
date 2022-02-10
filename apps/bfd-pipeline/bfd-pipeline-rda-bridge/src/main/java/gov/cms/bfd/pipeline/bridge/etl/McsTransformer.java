@@ -73,6 +73,13 @@ public class McsTransformer extends AbstractTransformer {
     return Optional.ofNullable(claimToReturn);
   }
 
+  /**
+   * Adds additional line items to an existing claim.
+   *
+   * @param mcsClaimChange The claim to add line items to.
+   * @param data The data to grab new line items from.
+   * @return The newly constructed claim with additional line items added.
+   */
   @VisibleForTesting
   McsClaimChange addToExistingClaim(McsClaimChange mcsClaimChange, Parser.Data<String> data) {
     McsClaim.Builder claimBuilder = mcsClaimChange.getClaim().toBuilder();
@@ -82,6 +89,13 @@ public class McsTransformer extends AbstractTransformer {
     return mcsClaimChange.toBuilder().setClaim(claimBuilder.build()).build();
   }
 
+  /**
+   * Creates a new claim from the given {@link Parser.Data}.
+   *
+   * @param sequenceNumber The sequence number of the current claim.
+   * @param data The {@link Parser.Data} to pull claim data for building the claim.
+   * @return A new claim built from parsing the given {@link Parser.Data}.
+   */
   McsClaimChange transformNewClaim(WrappedCounter sequenceNumber, Parser.Data<String> data) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
 
@@ -140,6 +154,12 @@ public class McsTransformer extends AbstractTransformer {
         .build();
   }
 
+  /**
+   * Fallback method for creating a claim identifier from the CLM_ID field.
+   *
+   * @param data The data to pull from for claim data.
+   * @return The generated claim identifier.
+   */
   @VisibleForTesting
   String convertIcn(Parser.Data<String> data) {
     String claimId =
@@ -148,6 +168,12 @@ public class McsTransformer extends AbstractTransformer {
     return "-" + DigestUtils.sha256Hex(claimId).substring(0, 14);
   }
 
+  /**
+   * Adds diagnosis codes to the given claim, parsed from the given {@link Parser.Data}.
+   *
+   * @param claimBuilder The claim to add diagnosis codes to.
+   * @param data The {@link Parser.Data} to pull diagnosis codes from.
+   */
   @VisibleForTesting
   void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
     for (int i = 1; i <= MAX_DIAGNOSIS_CODES; ++i) {
@@ -175,6 +201,12 @@ public class McsTransformer extends AbstractTransformer {
     }
   }
 
+  /**
+   * Maps the MCS raw string value to a {@link McsDiagnosisIcdType}.
+   *
+   * @param code The raw MCS string value.
+   * @return The converted {@link McsDiagnosisIcdType}.
+   */
   private McsDiagnosisIcdType mapVersionCode(String code) {
     McsDiagnosisIcdType icdType;
 
@@ -192,6 +224,12 @@ public class McsTransformer extends AbstractTransformer {
     return icdType;
   }
 
+  /**
+   * Builds a list of details (line items), parsed from the given {@link Parser.Data}.
+   *
+   * @param data The {@link Parser.Data} to pull procedure codes from.
+   * @return The list of build {@link McsDetail}s.
+   */
   private McsDetail buildDetails(Parser.Data<String> data) {
     McsDetail.Builder detailBuilder = McsDetail.newBuilder();
 

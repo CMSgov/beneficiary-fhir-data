@@ -75,6 +75,15 @@ public class FissTransformer extends AbstractTransformer {
     return Optional.ofNullable(claimToReturn);
   }
 
+  /**
+   * Adds additional line items to an existing claim.
+   *
+   * <p>Not currently implemented for FISS claims.
+   *
+   * @param fissClaimChange The claim to add line items to.
+   * @param data The data to grab new line items from.
+   * @return The newly constructed claim with additional line items added.
+   */
   @VisibleForTesting
   FissClaimChange addToExistingClaim(FissClaimChange fissClaimChange, Parser.Data<String> data) {
     FissClaim.Builder claimBuilder = fissClaimChange.getClaim().toBuilder();
@@ -84,6 +93,13 @@ public class FissTransformer extends AbstractTransformer {
     return fissClaimChange.toBuilder().setClaim(claimBuilder.build()).build();
   }
 
+  /**
+   * Creates a new claim from the given {@link Parser.Data}.
+   *
+   * @param sequenceNumber The sequence number of the current claim.
+   * @param data The {@link Parser.Data} to pull claim data for building the claim.
+   * @return A new claim built from parsing the given {@link Parser.Data}.
+   */
   @VisibleForTesting
   FissClaimChange transformNewClaim(WrappedCounter sequenceNumber, Parser.Data<String> data) {
     String beneId = data.get(Fiss.BENE_ID).orElse("");
@@ -160,6 +176,12 @@ public class FissTransformer extends AbstractTransformer {
         .build();
   }
 
+  /**
+   * Fallback method for creating a claim identifier from the CLM_ID field.
+   *
+   * @param data The data to pull from for claim data.
+   * @return The generated claim identifier.
+   */
   @VisibleForTesting
   String convertDcn(Parser.Data<String> data) {
     String claimId =
@@ -168,6 +190,12 @@ public class FissTransformer extends AbstractTransformer {
     return "-" + DigestUtils.sha256Hex(claimId).substring(0, 22);
   }
 
+  /**
+   * Adds diagnosis codes to the given claim, parsed from the given {@link Parser.Data}.
+   *
+   * @param claimBuilder The claim to add diagnosis codes to.
+   * @param data The {@link Parser.Data} to pull diagnosis codes from.
+   */
   @VisibleForTesting
   void addDiagCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
     for (int i = 1; i <= MAX_DIAG_CODES; ++i) {
@@ -190,6 +218,12 @@ public class FissTransformer extends AbstractTransformer {
     }
   }
 
+  /**
+   * Adds procedure codes to the given claim, parsed from the given {@link Parser.Data}.
+   *
+   * @param claimBuilder The claim to add procedure codes to.
+   * @param data The {@link Parser.Data} to pull procedure codes from.
+   */
   @VisibleForTesting
   void addProcCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
     for (int i = 1; i <= MAX_PROC_CODES; ++i) {
