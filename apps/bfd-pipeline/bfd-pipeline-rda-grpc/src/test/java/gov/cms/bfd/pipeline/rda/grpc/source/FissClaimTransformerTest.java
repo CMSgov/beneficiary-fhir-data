@@ -119,8 +119,6 @@ public class FissClaimTransformerTest {
     claim.setMbiRecord(
         new Mbi(
             1L, "12345678901", "3cf7b310f8fd6e7b275ddbdc6c3cd5b4eec0ea10bc9a504d471b086bd5d9b888"));
-    claim.setMbi(claim.getMbiRecord().getMbi());
-    claim.setMbiHash(claim.getMbiRecord().getHash());
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");

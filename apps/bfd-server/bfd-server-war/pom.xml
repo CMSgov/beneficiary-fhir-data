@@ -404,6 +404,8 @@
 								<argument>${local.v2.enabled}</argument>
 								<argument>-p</argument>
 								<argument>${local.preadj.enabled}</argument>
+								<argument>-o</argument>
+								<argument>${local.preadj.oldMbiHash.enabled}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->

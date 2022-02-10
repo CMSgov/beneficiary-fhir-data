@@ -452,10 +452,7 @@ public class McsClaimTransformer {
       final var mbi = from.getIdrClaimMbi();
       if (transformer.validateString(
           namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi, false, 1, 11, mbi)) {
-        var mbiRecord = mbiCache.lookupMbi(mbi);
-        to.setMbiRecord(mbiRecord);
-        to.setIdrClaimMbi(mbiRecord.getMbi());
-        to.setIdrClaimMbiHash(mbiRecord.getHash());
+        to.setMbiRecord(mbiCache.lookupMbi(mbi));
       }
     }
     transformer.copyOptionalDate(
