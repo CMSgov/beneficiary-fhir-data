@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.CallOptions;
@@ -29,7 +30,7 @@ public class FissClaimStreamCallerIT {
           + "  \"totalChargeAmount\": \"3.75\","
           + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
-          + "  \"mbi\": \"c1ihk7q0g3i57\","
+          + "  \"mbi\": \"c1ihk7q0g3i\","
           + "  \"fissProcCodes\": [],"
           + "  \"medaProvId\": \"oducjgzt67joc\""
           + "}";
@@ -45,7 +46,7 @@ public class FissClaimStreamCallerIT {
           + "  \"currTranDtCymd\": \"2020-12-21\","
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
-          + "  \"mbi\": \"0vtc7u321x0se\","
+          + "  \"mbi\": \"0vtc7u321x0\","
           + "  \"fedTaxNb\": \"2845244764\","
           + "  \"fissProcCodes\": []"
           + "}";
@@ -53,7 +54,8 @@ public class FissClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
 
   @Test
   public void basicCall() throws Exception {

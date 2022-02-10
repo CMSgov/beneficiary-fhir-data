@@ -8,7 +8,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
 import gov.cms.mpsm.rda.v1.mcs.McsAudit;
@@ -35,6 +35,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsTypeOfService;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import lombok.Getter;
 
 public class McsClaimTransformer {
   private final EnumStringExtractor<McsClaim, McsClaimType> PreAdjMcsClaim_idrClaimType_Extractor;
@@ -86,11 +87,11 @@ public class McsClaimTransformer {
       PreAdjMcsLocation_idrLocActvCode_Extractor;
 
   private final Clock clock;
-  private final IdHasher idHasher;
+  @Getter private final MbiCache mbiCache;
 
-  public McsClaimTransformer(Clock clock, IdHasher idHasher) {
+  public McsClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
-    this.idHasher = idHasher;
+    this.mbiCache = mbiCache;
     PreAdjMcsClaim_idrClaimType_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrClaimTypeEnum,
@@ -244,6 +245,17 @@ public class McsClaimTransformer {
             McsLocationActivityCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
+  }
+
+  /**
+   * Hook to allow the McsClaimRdaSink to install an alternative MbiCache implementation that
+   * supports caching MBI values in a database table.
+   *
+   * @param mbiCache alternative MbiCache to use for obtaining Mbi instances
+   * @return a new transformer with the same clock but alternative MbiCache
+   */
+  public McsClaimTransformer withMbiCache(MbiCache mbiCache) {
+    return new McsClaimTransformer(clock, mbiCache);
   }
 
   public RdaChange<PreAdjMcsClaim> transformClaim(McsClaimChange change) {
@@ -436,20 +448,16 @@ public class McsClaimTransformer {
         from::hasIdrClaimReceiptDate,
         from::getIdrClaimReceiptDate,
         to::setIdrClaimReceiptDate);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi,
-        1,
-        13,
-        from::hasIdrClaimMbi,
-        from::getIdrClaimMbi,
-        to::setIdrClaimMbi);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjMcsClaim.Fields.idrClaimMbiHash,
-        1,
-        64,
-        from::hasIdrClaimMbi,
-        () -> idHasher.computeIdentifierHash(from.getIdrClaimMbi()),
-        to::setIdrClaimMbiHash);
+    if (from.hasIdrClaimMbi()) {
+      final var mbi = from.getIdrClaimMbi();
+      if (transformer.validateString(
+          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi, false, 1, 11, mbi)) {
+        var mbiRecord = mbiCache.lookupMbi(mbi);
+        to.setMbiRecord(mbiRecord);
+        to.setIdrClaimMbi(mbiRecord.getMbi());
+        to.setIdrClaimMbiHash(mbiRecord.getHash());
+      }
+    }
     transformer.copyOptionalDate(
         namePrefix + PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,
         from::hasIdrHdrFromDos,
