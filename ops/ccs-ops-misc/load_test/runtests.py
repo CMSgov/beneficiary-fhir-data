@@ -25,9 +25,7 @@ def run_with_params(argv):
 
     helpString = ('runtests.py \n--homePath="<path/to/home/directory>" (Required) '
      '\n--clientCertPath="<path/to/client/pem/file>" (Required)'
-     '\n--databaseHost="<database-aws-node>.rds.amazonaws.com" (Required)'
-     '\n--databaseUsername="keybase-db-username-for-environment" (Required)'
-     '\n--databasePassword="keybase-db-password-for-environment" (Required)'
+     '\n--databaseUri="postgres://<username:password>@<database-aws-node>.rds.amazonaws.com:port/<dbname>" (Required)'
      '\n--testHost="https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)'
      '\n--testFile="/<v1/v2>/test_to_run.py" (Required)'
      '\n--serverPublicKey="<server public key>" (Optional, Default: "")'
@@ -37,8 +35,8 @@ def run_with_params(argv):
      '\n--workerThreads="<If >1 the test is run as distributed, and expects this many worker processes to start, int>" (Optional, Default 1 - non distributed mode)')
 
     try:
-        opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseHost=", "databaseUsername=",
-        "databasePassword=", "testHost=", "serverPublicKey=", "testRunTime=", "maxClients=", "clientsPerSecond=",
+        opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseUri=",
+        "testHost=", "serverPublicKey=", "testRunTime=", "maxClients=", "clientsPerSecond=",
         "testFile=","workerThreads="])
     except getopt.GetoptError:
         print(helpString)
@@ -52,12 +50,8 @@ def run_with_params(argv):
             configData.homePath = arg
         elif opt == "--clientCertPath":
             configData.clientCertPath = arg
-        elif opt == "--databaseHost":
-            configData.dbHost = arg
-        elif opt == "--databaseUsername":
-            configData.dbUsername = arg
-        elif opt == "--databasePassword":
-            configData.dbPassword = arg
+        elif opt == "--databaseUri":
+            configData.dbUri = arg
         elif opt == "--testHost":
             configData.testHost = arg
         elif opt == "--serverPublicKey":
@@ -77,7 +71,7 @@ def run_with_params(argv):
             sys.exit()
 
     ## Check if all required params are set
-    if not all([configData.homePath, configData.clientCertPath, configData.dbHost, configData.dbUsername, configData.dbPassword, configData.testHost, testFile]):
+    if not all([configData.homePath, configData.clientCertPath, configData.dbUri, configData.testHost, testFile]):
         print("Missing required arg (See -h for help on params)")
         sys.exit(2)
 

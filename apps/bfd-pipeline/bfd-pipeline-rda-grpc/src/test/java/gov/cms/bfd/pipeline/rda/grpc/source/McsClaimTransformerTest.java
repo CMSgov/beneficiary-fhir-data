@@ -341,7 +341,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrClaimType,
             McsClaimType.CLAIM_TYPE_MEDICAL,
             "3")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrClaimTypeUnrecognized,
             PreAdjMcsClaim::getIdrClaimType,
             PreAdjMcsClaim.Fields.idrClaimType,
@@ -386,7 +386,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrBeneSex,
             McsBeneficiarySex.BENEFICIARY_SEX_MALE,
             "M")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrBeneSexUnrecognized,
             PreAdjMcsClaim::getIdrBeneSex,
             PreAdjMcsClaim.Fields.idrBeneSex,
@@ -478,7 +478,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrBillProvGroupInd,
             McsBillingProviderIndicator.BILLING_PROVIDER_INDICATOR_GROUP,
             "G")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrBillProvGroupIndUnrecognized,
             PreAdjMcsClaim::getIdrBillProvGroupInd,
             PreAdjMcsClaim.Fields.idrBillProvGroupInd,
@@ -550,7 +550,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrBillProvStatusCd,
             McsBillingProviderStatusCode.BILLING_PROVIDER_STATUS_CODE_NON_PARTICIPATING,
             "N")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrBillProvStatusCdUnrecognized,
             PreAdjMcsClaim::getIdrBillProvStatusCd,
             PreAdjMcsClaim.Fields.idrBillProvStatusCd,
@@ -613,7 +613,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrAssignment,
             McsClaimAssignmentCode.CLAIM_ASSIGNMENT_CODE,
             "A")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrAssignmentUnrecognized,
             PreAdjMcsClaim::getIdrAssignment,
             PreAdjMcsClaim.Fields.idrAssignment,
@@ -628,7 +628,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrClmLevelInd,
             McsClaimLevelIndicator.CLAIM_LEVEL_INDICATOR_ORIGINAL,
             "O")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrClmLevelIndUnrecognized,
             PreAdjMcsClaim::getIdrClmLevelInd,
             PreAdjMcsClaim.Fields.idrClmLevelInd,
@@ -650,7 +650,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrHdrAuditInd,
             McsAuditIndicator.AUDIT_INDICATOR_AUDIT_NUMBER,
             "A")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
             PreAdjMcsClaim::getIdrHdrAuditInd,
             PreAdjMcsClaim.Fields.idrHdrAuditInd,
@@ -665,7 +665,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsClaim::getIdrUSplitReason,
             McsSplitReasonCode.SPLIT_REASON_CODE_GHI_SPLIT,
             "4")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsClaim.Builder::setIdrUSplitReasonUnrecognized,
             PreAdjMcsClaim::getIdrUSplitReason,
             PreAdjMcsClaim.Fields.idrUSplitReason,
@@ -921,7 +921,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsAudit::getIdrJAuditInd,
             McsCutbackAuditIndicator.CUTBACK_AUDIT_INDICATOR_AUDIT_NUMBER,
             "A")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsAudit.Builder::setIdrJAuditIndUnrecognized,
             PreAdjMcsAudit::getIdrJAuditInd,
             PreAdjMcsAudit.Fields.idrJAuditInd,
@@ -936,7 +936,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsAudit::getIdrJAuditDisp,
             McsCutbackAuditDisposition.CUTBACK_AUDIT_DISPOSITION_ADS_LETTER,
             "S")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsAudit.Builder::setIdrJAuditDispUnrecognized,
             PreAdjMcsAudit::getIdrJAuditDisp,
             PreAdjMcsAudit.Fields.idrJAuditDisp,
@@ -965,7 +965,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
             McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9,
             "9")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDiagnosisCode.Builder::setIdrDiagIcdTypeUnrecognized,
             PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
             PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
@@ -983,7 +983,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsDetail::getIdrDtlStatus,
             McsDetailStatus.DETAIL_STATUS_FINAL,
             "F")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDetail.Builder::setIdrDtlStatusUnrecognized,
             PreAdjMcsDetail::getIdrDtlStatus,
             PreAdjMcsDetail.Fields.idrDtlStatus,
@@ -1066,7 +1066,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsDetail::getIdrDtlDiagIcdType,
             McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10,
             "0")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDetail.Builder::setIdrDtlDiagIcdTypeUnrecognized,
             PreAdjMcsDetail::getIdrDtlDiagIcdType,
             PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
@@ -1181,7 +1181,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsDetail::getIdrTos,
             McsTypeOfService.TYPE_OF_SERVICE_ANESTHESIA,
             "7")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDetail.Builder::setIdrTosUnrecognized,
             PreAdjMcsDetail::getIdrTos,
             PreAdjMcsDetail.Fields.idrTos,
@@ -1196,7 +1196,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsDetail::getIdrTwoDigitPos,
             McsTwoDigitPlanOfService.TWO_DIGIT_PLAN_OF_SERVICE_AMBULANCE_LAND,
             "41")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDetail.Builder::setIdrTwoDigitPosUnrecognized,
             PreAdjMcsDetail::getIdrTwoDigitPos,
             PreAdjMcsDetail.Fields.idrTwoDigitPos,
@@ -1404,7 +1404,7 @@ public class McsClaimTransformerTest {
             PreAdjMcsLocation::getIdrLocActvCode,
             McsLocationActivityCode.LOCATION_ACTIVITY_CODE_CAS_ACTIVITY,
             "Q")
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsLocation.Builder::setIdrLocActvCodeUnrecognized,
             PreAdjMcsLocation::getIdrLocActvCode,
             PreAdjMcsLocation.Fields.idrLocActvCode,
