@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.utils;
 
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
@@ -15,7 +16,6 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +36,13 @@ public class RDATestUtils {
           PreAdjFissClaim.class,
           PreAdjMcsDetail.class,
           PreAdjMcsDiagnosisCode.class,
-          PreAdjMcsClaim.class);
+          PreAdjMcsClaim.class,
+          Mbi.class);
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+  public static final String MBI = "123456MBI";
+  public static final String MBI_HASH = "a7f8e93f09";
+  public static final String MBI_OLD_HASH = "3816a4c752";
 
   private EntityManager entityManager;
 
@@ -59,13 +63,21 @@ public class RDATestUtils {
     }
   }
 
-  /**
-   * Seed data into the database for testing.
-   *
-   * @param entities The entities to seed into the db.
-   */
-  public void seedData(Collection<?> entities) {
-    doTransaction(em -> entities.forEach(em::persist));
+  public EntityManager getEntityManager() {
+    return entityManager;
+  }
+
+  /** Seed data into the database for testing. */
+  public void seedData(boolean includeOldHash) {
+    doTransaction(
+        em -> {
+          String oldHash = includeOldHash ? MBI_OLD_HASH : null;
+          Mbi mbi = em.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(oldHash).build());
+          em.merge(fissTestDataA(mbi));
+          em.merge(fissTestDataB(mbi));
+          em.merge(mcsTestDataA(mbi));
+          em.merge(mcsTestDataB(mbi));
+        });
   }
 
   /** Delete all the test data from the db. */
@@ -118,20 +130,11 @@ public class RDATestUtils {
   }
 
   /**
-   * Provides a set of FISS related test data.
-   *
-   * @return The FISS related test data.
-   */
-  public List<?> fissTestData() {
-    return List.of(fissTestDataA(), fissTestDataB());
-  }
-
-  /**
    * One FISS claim for testing
    *
    * @return The FISS test claim A
    */
-  private PreAdjFissClaim fissTestDataA() {
+  private PreAdjFissClaim fissTestDataA(Mbi mbi) {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
             .sequenceNumber(1L)
@@ -148,8 +151,7 @@ public class RDATestUtils {
             .admitDiagCode("admitcd")
             .principleDiag("princcd")
             .npiNumber("8876543211")
-            .mbi("123456MBI")
-            .mbiHash("a7f8e93f09")
+            .mbiRecord(mbi)
             .fedTaxNumber("abc123")
             .lobCd("r")
             .lastUpdated(Instant.ofEpochMilli(0))
@@ -231,7 +233,7 @@ public class RDATestUtils {
    *
    * @return The FISS test claim B
    */
-  private PreAdjFissClaim fissTestDataB() {
+  private PreAdjFissClaim fissTestDataB(Mbi mbi) {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
             .sequenceNumber(2L)
@@ -248,8 +250,7 @@ public class RDATestUtils {
             .admitDiagCode("admitcc")
             .principleDiag("princcc")
             .npiNumber("8876543212")
-            .mbi("123456MBI")
-            .mbiHash("a7f8e93f09")
+            .mbiRecord(mbi)
             .fedTaxNumber("abc124")
             .lobCd("k")
             .lastUpdated(Instant.ofEpochMilli(5000))
@@ -320,20 +321,11 @@ public class RDATestUtils {
   }
 
   /**
-   * Provides a set of MCS related test data.
-   *
-   * @return The MCS related test data.
-   */
-  public List<PreAdjMcsClaim> mcsTestData() {
-    return List.of(mcsTestDataA());
-  }
-
-  /**
    * One MCS claim for testing
    *
    * @return The MCS test claim A
    */
-  private PreAdjMcsClaim mcsTestDataA() {
+  private PreAdjMcsClaim mcsTestDataA(Mbi mbi) {
     PreAdjMcsClaim claim =
         PreAdjMcsClaim.builder()
             .sequenceNumber(1L)
@@ -363,8 +355,7 @@ public class RDATestUtils {
             .idrBillProvStatusCd("Z")
             .idrTotBilledAmt(new BigDecimal("23.00"))
             .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
-            .idrClaimMbi("123456MBI")
-            .idrClaimMbiHash("a7f8e93f09")
+            .mbiRecord(mbi)
             .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(210))
             .idrHdrToDateOfSvc(LocalDate.ofEpochDay(210))
             .lastUpdated(Instant.ofEpochMilli(4000))
@@ -394,6 +385,75 @@ public class RDATestUtils {
                 "654321", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new PreAdjMcsDiagnosisCode(
                 "654321", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+
+    return claim;
+  }
+
+  /**
+   * One MCS claim for testing
+   *
+   * @return The MCS test claim B
+   */
+  private PreAdjMcsClaim mcsTestDataB(Mbi mbi) {
+    PreAdjMcsClaim claim =
+        PreAdjMcsClaim.builder()
+            .sequenceNumber(1L)
+            .idrClmHdIcn("654323")
+            .idrContrId("contr")
+            .idrHic("HicValue")
+            .idrClaimType("R")
+            .idrDtlCnt(56)
+            .idrBeneLast_1_6("SMITH")
+            .idrBeneFirstInit("J")
+            .idrBeneMidInit("D")
+            .idrBeneSex("M")
+            .idrStatusCode(null)
+            .idrStatusDate(LocalDate.ofEpochDay(2))
+            .idrBillProvNpi("9876789102")
+            .idrBillProvNum("4444422222")
+            .idrBillProvEin("1231231231")
+            .idrBillProvType("AB")
+            .idrBillProvSpec("BA")
+            .idrBillProvGroupInd("A")
+            .idrBillProvPriceSpec("FF")
+            .idrBillProvCounty("GG")
+            .idrBillProvLoc("HH")
+            .idrTotAllowed(new BigDecimal("224.41"))
+            .idrCoinsurance(new BigDecimal("14.32"))
+            .idrDeductible(new BigDecimal("11.00"))
+            .idrBillProvStatusCd(null)
+            .idrTotBilledAmt(new BigDecimal("23.00"))
+            .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
+            .mbiRecord(mbi)
+            .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(200))
+            .idrHdrToDateOfSvc(LocalDate.ofEpochDay(200))
+            .lastUpdated(Instant.ofEpochMilli(4000))
+            .build();
+
+    Set<PreAdjMcsDetail> procCodes =
+        Set.of(
+            PreAdjMcsDetail.builder()
+                .priority((short) 0)
+                .idrClmHdIcn("654323")
+                .idrDtlToDate(LocalDate.ofEpochDay(208))
+                .idrProcCode("FDSAE")
+                .idrModOne("A")
+                .build(),
+            PreAdjMcsDetail.builder()
+                .priority((short) 1)
+                .idrClmHdIcn("654323")
+                .idrProcCode("FDAAA")
+                .idrModTwo("B")
+                .build());
+
+    claim.setDetails(procCodes);
+
+    claim.setDiagCodes(
+        Set.of(
+            new PreAdjMcsDiagnosisCode(
+                "654323", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+            new PreAdjMcsDiagnosisCode(
+                "654323", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }

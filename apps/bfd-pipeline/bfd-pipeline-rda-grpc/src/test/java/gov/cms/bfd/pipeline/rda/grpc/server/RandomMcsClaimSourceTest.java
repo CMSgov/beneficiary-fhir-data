@@ -23,7 +23,7 @@ public class RandomMcsClaimSourceTest {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 1);
     assertTrue(source.hasNext());
     McsClaim claim = source.next();
-    assertEquals("08642205", claim.getIdrClmHdIcn());
+    assertTrue(claim.getIdrClmHdIcn().length() > 0);
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
@@ -33,7 +33,7 @@ public class RandomMcsClaimSourceTest {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 3);
     assertTrue(source.hasNext());
     McsClaim claim = source.next();
-    assertEquals("08642205", claim.getIdrClmHdIcn());
+    assertTrue(claim.getIdrClmHdIcn().length() > 0);
 
     assertTrue(source.hasNext());
     claim = source.next();

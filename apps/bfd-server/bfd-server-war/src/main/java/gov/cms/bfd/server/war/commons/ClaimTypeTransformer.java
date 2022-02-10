@@ -20,7 +20,7 @@ public interface ClaimTypeTransformer {
    * @param rifRecord the CCW RIF record (e.g. {@link CarrierClaim}, {@link DMEClaim}, etc.) to be
    *     transformed
    * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     #HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>false</code>)
+   *     CommonHeaders#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>false</code>)
    * @return a new FHIR {@link ExplanationOfBenefit} resource
    */
   ExplanationOfBenefit transform(

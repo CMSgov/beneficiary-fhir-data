@@ -197,7 +197,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
-   *     SamhsaMatcher} to filter out all SAMHSA-related claims from the results
+   *     Stu3EobSamhsaMatcher} to filter out all SAMHSA-related claims from the results
    * @param lastUpdated an {@link OptionalParam} that specifies a date range for the lastUpdated
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
@@ -561,9 +561,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   /**
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out the HTTP header that controls this setting
-   * @return <code>true</code> if {@link CarrierClaimColumn#TAX_NUM} and {@link
-   *     DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>false</code> if
-   *     not (defaults to <code>false</code>)
+   * @return <code>true</code> if {@link gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} and
+   *     {@link gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the
+   *     results, <code>false</code> if not (defaults to <code>false</code>)
    */
   public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
     /*
