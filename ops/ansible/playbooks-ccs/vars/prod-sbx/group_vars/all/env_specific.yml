@@ -74,3 +74,7 @@ data_server_ssl_client_certificates:
   - alias: client_ab2d_imp
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_imp_certificate.pem') }}"
   
+# Populate RDA API data in our database using the in-process mock server and S3 mode.
+# Mock server configuration is defined in the vault.
+data_pipeline_rda_grpc_server_type: 'InProcess'
+data_pipeline_rda_grpc_inproc_server_mode: 'S3'
