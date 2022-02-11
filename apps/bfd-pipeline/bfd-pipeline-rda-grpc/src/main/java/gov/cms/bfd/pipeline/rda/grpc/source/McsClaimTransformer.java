@@ -314,7 +314,6 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsClaim.Fields.idrClaimType,
         false,
         1,
-        1,
         PreAdjMcsClaim_idrClaimType_Extractor.getEnumString(from),
         to::setIdrClaimType);
     transformer.copyOptionalInt(from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt);
@@ -343,13 +342,11 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsClaim.Fields.idrBeneSex,
         true,
         1,
-        1,
         PreAdjMcsClaim_idrBeneSex_Extractor.getEnumString(from),
         to::setIdrBeneSex);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsClaim.Fields.idrStatusCode,
         true,
-        1,
         1,
         PreAdjMcsClaim_idrStatusCode_Extractor.getEnumString(from),
         to::setIdrStatusCode);
@@ -397,7 +394,6 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsClaim.Fields.idrBillProvGroupInd,
         true,
         1,
-        1,
         PreAdjMcsClaim_idrBillProvGroupInd_Extractor.getEnumString(from),
         to::setIdrBillProvGroupInd);
     transformer.copyOptionalString(
@@ -440,7 +436,6 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsClaim.Fields.idrBillProvStatusCd,
         true,
         1,
-        1,
         PreAdjMcsClaim_idrBillProvStatusCd_Extractor.getEnumString(from),
         to::setIdrBillProvStatusCd);
     transformer.copyOptionalAmount(
@@ -457,10 +452,7 @@ public class McsClaimTransformer {
       final var mbi = from.getIdrClaimMbi();
       if (transformer.validateString(
           namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi, false, 1, 11, mbi)) {
-        var mbiRecord = mbiCache.lookupMbi(mbi);
-        to.setMbiRecord(mbiRecord);
-        to.setIdrClaimMbi(mbiRecord.getMbi());
-        to.setIdrClaimMbiHash(mbiRecord.getHash());
+        to.setMbiRecord(mbiCache.lookupMbi(mbi));
       }
     }
     transformer.copyOptionalDate(
@@ -477,13 +469,11 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsClaim.Fields.idrAssignment,
         true,
         1,
-        1,
         PreAdjMcsClaim_idrAssignment_Extractor.getEnumString(from),
         to::setIdrAssignment);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsClaim.Fields.idrClmLevelInd,
         true,
-        1,
         1,
         PreAdjMcsClaim_idrClmLevelInd_Extractor.getEnumString(from),
         to::setIdrClmLevelInd);
@@ -492,13 +482,11 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsClaim.Fields.idrHdrAuditInd,
         true,
         1,
-        1,
         PreAdjMcsClaim_idrHdrAuditInd_Extractor.getEnumString(from),
         to::setIdrHdrAuditInd);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsClaim.Fields.idrUSplitReason,
         true,
-        1,
         1,
         PreAdjMcsClaim_idrUSplitReason_Extractor.getEnumString(from),
         to::setIdrUSplitReason);
@@ -678,7 +666,6 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsDetail.Fields.idrDtlStatus,
         true,
         1,
-        1,
         PreAdjMcsDetail_idrDtlStatus_Extractor.getEnumString(from),
         to::setIdrDtlStatus);
     transformer.copyOptionalDate(
@@ -729,7 +716,6 @@ public class McsClaimTransformer {
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
         true,
-        1,
         1,
         PreAdjMcsDetail_idrDtlDiagIcdType_Extractor.getEnumString(from),
         to::setIdrDtlDiagIcdType);
@@ -807,13 +793,11 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsDetail.Fields.idrTos,
         true,
         1,
-        1,
         PreAdjMcsDetail_idrTos_Extractor.getEnumString(from),
         to::setIdrTos);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsDetail.Fields.idrTwoDigitPos,
         true,
-        1,
         2,
         PreAdjMcsDetail_idrTwoDigitPos_Extractor.getEnumString(from),
         to::setIdrTwoDigitPos);
@@ -940,7 +924,6 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
         true,
         1,
-        1,
         PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor.getEnumString(from),
         to::setIdrDiagIcdType);
     transformer.copyString(
@@ -1011,13 +994,11 @@ public class McsClaimTransformer {
         namePrefix + PreAdjMcsAudit.Fields.idrJAuditInd,
         true,
         1,
-        1,
         PreAdjMcsAudit_idrJAuditInd_Extractor.getEnumString(from),
         to::setIdrJAuditInd);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsAudit.Fields.idrJAuditDisp,
         true,
-        1,
         1,
         PreAdjMcsAudit_idrJAuditDisp_Extractor.getEnumString(from),
         to::setIdrJAuditDisp);
@@ -1050,7 +1031,6 @@ public class McsClaimTransformer {
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsLocation.Fields.idrLocActvCode,
         true,
-        1,
         1,
         PreAdjMcsLocation_idrLocActvCode_Extractor.getEnumString(from),
         to::setIdrLocActvCode);
