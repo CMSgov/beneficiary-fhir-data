@@ -64,9 +64,10 @@ BFD API Server Application:
 
 ### Background on Database Migrations
 
-Within this proposal we will consider database migrations to be a single deployment that consists of one or both of
-these types of changes:
-1. A database schema change which consists of one or more SQL migration scripts executed by Flyway
+Within this proposal we will consider a database migrations to be a group of one or more of the following types of
+changes that are deployed together:
+
+1. A database schema change consisting of one or more SQL migration scripts executed by Flyway
 2. An application change in the ORM layer (typically in relation to a change in the schema)
 
 When reasoning about different types of database migrations, it is necessary to consider that both the schema and the
@@ -75,14 +76,28 @@ schema and the old application, and the schema and application as they exist aft
 schema and the new applications. It is assumed that the old application is compatible with the old schema and that the
 new application is compatible with the new schema (otherwise the migration is invalid altogether). The interactions
 between old and new components though is important in understanding this proposal and leads to some classifications
-of migrations:
+of migrations based on the compatibility of the schema change with old and new versions of the application:
 
-* A backward-compatible migration is one where the new schema is compatible with the old applications
+* A backward-compatible database migration is one where the new schema is compatible with the old applications
 (otherwise it is considered to be backward-incompatible)
-* A forward-compatible migration is one where the new applications are compatible with the old schema
+* A forward-compatible database migration is one where the old schema is compatible with the new applications
 (otherwise it is considered to be forward-incompatible)
-* A fully-compatible migration is one that is both backward-compatible and forward-compatible
-* A fully-incompatible migration is one that is both backward-incompatible and forward-incompatible
+* A fully-compatible database migration is one that is both backward-compatible and forward-compatible
+* A fully-incompatible database migration is one that is both backward-incompatible and forward-incompatible
+
+Frequently, database migrations include both a schema change and an accompanying application change although there are
+some database migrations that consist only of a schema change. Strictly speaking, a database migration that does not
+contain a schema change is just an application change like any other application change. It is useful though for the
+purposes of this RFC for application changes deployed independently of a schema change to also be considered database
+migrations. Of interest in the next section is the fact that as defined above, a database migration that consists only
+of an application change is fully-compatible because it must work with both old and new schema (which are the same) to
+be valid.
+
+An example of a database migration that consists of both a schema change and an application change is adding a new
+column to a table and modifying the application to start referencing that column. This database migration can be
+decomposed into two database migrations: one consisting of the change to add a column to a table, and another to modify
+the application to reference the new column. The next section shows that decomposing migrations can affect the
+compatibility.
 
 ### Examples of common migrations in BFD and their compatibility status
 
