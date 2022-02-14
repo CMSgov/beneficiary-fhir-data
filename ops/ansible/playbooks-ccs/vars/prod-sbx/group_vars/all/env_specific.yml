@@ -78,3 +78,7 @@ data_server_ssl_client_certificates:
 # Mock server configuration is defined in the vault.
 data_pipeline_rda_grpc_server_type: 'InProcess'
 data_pipeline_rda_grpc_inproc_server_mode: 'S3'
+
+# Enable RDA API data ETL pipeline jobs.
+data_pipeline_rda_job_enabled: true
+data_pipeline_rda_job_interval_seconds: 3600
