@@ -1,4 +1,8 @@
 [
-  {{#SQLValues this 10}}"{{this}}"{{#unless @last}},{{/unless}}
-  {{/SQLValues}}
+  [
+    %%"%s",%n    %%1%%],
+  [
+    %%"%s",%n    %%2%%],
+  [
+    %%"%s",%n    %%4%%]
 ]

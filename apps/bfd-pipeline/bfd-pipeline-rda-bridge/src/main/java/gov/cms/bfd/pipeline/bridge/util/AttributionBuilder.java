@@ -1,45 +1,46 @@
 package gov.cms.bfd.pipeline.bridge.util;
 
-import com.github.jknack.handlebars.Context;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.io.FileTemplateLoader;
-import com.github.jknack.handlebars.io.TemplateLoader;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Helper class for building the attribution sql script.
  *
- * <p>The design utilizes templates to build custom sql scripts based on user configuration.
+ * <p>The design utilizes a simple template with the syntax '%%formatstring%%iterations%%.
  *
  * <h3>Example script</h3>
  *
- * <p>insert into my_table ("some_value") values {{#SQLValues
- * this}}('{{this}}'){{#if @last}};{{else}},{{/if}} {{/SQLValues}}
+ * <p>[%%"%s",%%3%%]
  *
  * <p>This would print
  *
- * <p>insert into my_table ("some_value") values ('value1'), ('value2'), ('value3'), --....
- * ('valueN');
- *
- * <p>A sublist can also be denoted
- *
- * <p>insert into my_table ("some_value") values {{#SQLValues this
- * 2}}('{{this}}'){{#if @last}};{{else}},{{/if}} {{/SQLValues}}
- *
- * <p>This would print
- *
- * <p>insert into my_table ("some_value") values ('value1'), ('value2');
+ * <p>["value1","value2","value3",]
  */
 @Slf4j
 @RequiredArgsConstructor
 public class AttributionBuilder {
+
+  private static final String TEMPLATE_GROUP = "TemplateGroup";
+  private static final String FORMAT_GROUP = "FormatString";
+  private static final String COUNT_GROUP = "Iterations";
+
+  private static final Pattern attributionMarker =
+      Pattern.compile(
+          "(?<"
+              + TEMPLATE_GROUP
+              + ">%%(?<"
+              + FORMAT_GROUP
+              + ">.+)%%(?<"
+              + COUNT_GROUP
+              + ">\\d+)%%)");
 
   private final String attributionTemplate;
   private final String attributionScript;
@@ -51,61 +52,38 @@ public class AttributionBuilder {
    * @param dataSampler The {@link DataSampler} set to pull data from.
    */
   public void run(DataSampler<String> dataSampler) {
-    // Handlebars needs to be told if this is a relative or absolute path
-    String baseDir = attributionTemplate.charAt(0) == '/' ? "/" : ".";
+    try (BufferedReader reader = new BufferedReader(new FileReader(attributionTemplate));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
+      String line;
 
-    TemplateLoader loader = new FileTemplateLoader(baseDir, "");
-    Handlebars handlebars = new Handlebars(loader);
+      while ((line = reader.readLine()) != null) {
+        Matcher matcher = attributionMarker.matcher(line);
 
-    // This will apply the helper logic to any {{#SQLValues}} block.
-    handlebars.registerHelper("SQLValues", sqlValuesHelper());
+        if (matcher.find()) {
+          String stringFormat = matcher.group(FORMAT_GROUP);
+          long count = Long.parseLong(matcher.group(COUNT_GROUP));
+          int startMatch = matcher.start(TEMPLATE_GROUP);
+          int endMatch = matcher.end(TEMPLATE_GROUP);
 
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
-      Template template = handlebars.compile(attributionTemplate);
-      // Template#apply() seems to parse the entire thing into a single string, not
-      // sure if this will cause issues with larger data sets.
-      writer.write(template.apply(dataSampler));
+          writer.write(line.substring(0, startMatch));
+
+          Iterator<String> attribution = dataSampler.iterator();
+
+          long i = -1;
+
+          while (attribution.hasNext() && ++i < count) {
+            writer.write(String.format(stringFormat, attribution.next()));
+          }
+
+          writer.write(line.substring(endMatch));
+        } else {
+          writer.write(line);
+        }
+
+        writer.newLine();
+      }
     } catch (IOException e) {
       log.error("Unable to create attribution sql script", e);
     }
-  }
-
-  /**
-   * Helper for the Handlebars templating library. This defines how to process a particular template
-   * "block", as well as defining how to treat the data for it. In this case, we're saying it's an
-   * {@link Iterable<String>}.
-   *
-   * @return The helper to be used by the templating library.
-   */
-  private Helper<Iterable<String>> sqlValuesHelper() {
-    return (objects, options) -> {
-      int subListSize = options.param(0, 0);
-
-      if (subListSize < 0) {
-        subListSize = 0;
-      }
-
-      StringBuilder sb = new StringBuilder();
-
-      Iterator<String> iterator = objects.iterator();
-
-      int i = 0;
-      while (iterator.hasNext() && i < subListSize) {
-        String value = iterator.next();
-
-        // If this is the last entry in the iterator, we need to set the @last flag to true
-        // which is used in the template.  If other flags (such as @first) are desired,
-        // additional logic would need to be added for those.
-        if (iterator.hasNext() && i < (subListSize - 1)) {
-          sb.append(options.fn(value));
-        } else {
-          sb.append(options.fn(Context.newBuilder(value).combine("last", true).build()));
-        }
-
-        ++i;
-      }
-
-      return sb.toString();
-    };
   }
 }

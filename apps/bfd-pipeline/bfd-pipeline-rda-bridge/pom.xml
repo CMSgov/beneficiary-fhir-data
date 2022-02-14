@@ -21,7 +21,6 @@
 
         <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
         <bfd-pipeline-rda-grpcs.version>1.0.0-SNAPSHOT</bfd-pipeline-rda-grpcs.version>
-        <handlebars.version>4.3.0</handlebars.version>
     </properties>
 
     <dependencies>
@@ -39,12 +38,6 @@
             <!-- Add YAML support to jackson -->
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Templating library -->
-            <groupId>com.github.jknack</groupId>
-            <artifactId>handlebars</artifactId>
-            <version>${handlebars.version}</version>
         </dependency>
         <!-- Common -->
         <dependency>

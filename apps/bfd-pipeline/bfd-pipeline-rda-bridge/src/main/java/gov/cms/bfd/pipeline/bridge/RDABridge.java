@@ -186,7 +186,7 @@ public class RDABridge {
       // Convert ratio to proportion
       float fissProportion = 1.0f - (1.0f / (1.0f + fissRatio));
 
-      float mcsProportion = 1.0f - fissRatio;
+      float mcsProportion = 1.0f - fissProportion;
 
       DataSampler<String> mbiSampler =
           DataSampler.<String>builder()
