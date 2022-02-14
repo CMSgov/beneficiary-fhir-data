@@ -16,5 +16,3 @@ CREATE TABLE "pre_adj"."RdaApiClaimMessageMetaData" (
  * We expect batch sizes to be around 25 so the increment shouldn't waste many id values.
  */
 create sequence "pre_adj"."rda_api_claim_message_meta_data_meta_data_id_seq" ${logic.sequence-start} 1 ${logic.sequence-increment} 25 cycle;
-
-/* TODO Do we want to create some indexes for faster queries yet? Or should we wait until we know we need them. */
