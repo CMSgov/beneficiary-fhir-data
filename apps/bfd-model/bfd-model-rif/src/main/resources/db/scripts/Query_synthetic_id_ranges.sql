@@ -28,7 +28,7 @@ FROM groupings
 GROUP BY grouping
 ORDER BY MIN(id);
 
--- Got this result on 2022-02-07 in prod_sbx:
+-- Got this result on 2022-02-14 in prod_sbx:
 -- grouping_start  |  grouping_end   
 -- -----------------+-----------------
 -- -88888888888888 | -88888888888888
@@ -42,7 +42,7 @@ ORDER BY MIN(id);
 --               1 |        60000000
 -- (9 rows)
 --
--- Time: 72010.398 ms
+-- Time: 188179.582 ms
 
 
 -- Find  min claim Ids for all claims except Part D Events.
@@ -77,13 +77,13 @@ select min(id) from (
 	where bene_id LIKE '-%' AND clm_id LIKE '-%'
 	) as ids;
 
--- Got this result on 2022-02-07 in prod_sbx:
+-- Got this result on 2022-02-14 in prod_sbx:
 --       min       
 -- -----------------
--- -10000004523616
+-- -10000003945763
 -- (1 row)
 --
--- Time: 40166.486 ms
+-- Time: 35988.474 ms
 
 
 -- Find  min Part D Event (PDE) Ids.
@@ -94,13 +94,13 @@ select min(id) from (
 	where bene_id LIKE '-%' AND pde_id LIKE '-%'
 	) as ids;
 
--- Got this result on 2022-02-07 in prod_sbx:
+-- Got this result on 2022-02-14 in prod_sbx:
 --     min      
 -- --------------
--- -10000487656
+-- -10000464591
 -- (1 row)
 -- 
--- Time: 236.427 ms
+-- Time: 1056.721 ms
 
 
 -- Find the claim group id range to avoid collisions with synthetic data. 
@@ -148,16 +148,16 @@ FROM groupings
 GROUP BY grouping
 ORDER BY MIN(id);
 
--- Got this result on 2022-02-07 in prod_sbx:
+-- Got this result on 2022-02-14 in prod_sbx:
 --  grouping_start | grouping_end
 -- ----------------+--------------
 --    -99998681713 | -99998681713
 --    ... (lot of sparse ranges here, skipped for brevity)
 --    -115242507   | -115242507
---    -105011273   | -105011249
+--    -104410298   | -104410277
 --    ... (lot of sparse ranges here, skipped for brevity)
 --     -4851772    |  -4851772
 --     -99999      |  -99999
--- (592230 rows)
+-- (500644 rows)
 -- 
--- Time: 43919.703 ms
+-- Time: 38603.005 ms
