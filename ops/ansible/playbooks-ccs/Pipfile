@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-ansible = "==2.9.18"
+ansible = "==5.3.0"
 boto = "*"
 boto3 = "*"
 cryptography = "*"

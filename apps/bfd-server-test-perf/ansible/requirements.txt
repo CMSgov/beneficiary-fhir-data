@@ -2,7 +2,7 @@
 # broken. Run this command first to upgrade it:
 #     $ pip install --upgrade setuptools
 # Reference: https://github.com/ansible/ansible/issues/31741#issuecomment-336889622
-ansible==4.2.0
+ansible==5.3.0
 cryptography
 pycrypto
 awscli
