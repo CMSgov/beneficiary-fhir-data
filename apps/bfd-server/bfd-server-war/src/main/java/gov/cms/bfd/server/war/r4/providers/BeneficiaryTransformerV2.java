@@ -345,7 +345,7 @@ final class BeneficiaryTransformerV2 {
    * current {@link Patient}. This is used to store Identifier slices related to the Provider
    * organization.
    *
-   * @param coverage The {@link Coverage} to Coverage details
+   * @param patient The {@link Patient} to Patient details
    * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the Coverage
    * @param optVal The {@link String} value associated with the Coverage
    */

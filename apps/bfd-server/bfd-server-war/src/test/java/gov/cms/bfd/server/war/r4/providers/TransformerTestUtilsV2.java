@@ -1406,13 +1406,10 @@ public final class TransformerTestUtilsV2 {
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
-   * @param expectedCode the expected {@link Coding#getCode()}
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionCodingDoesNotExist(
-      CcwCodebookInterface ccwVariable,
-      Optional<?> expectedCode,
-      IBaseHasExtensions actualElement) {
+      CcwCodebookInterface ccwVariable, IBaseHasExtensions actualElement) {
     String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
         actualElement.getExtension().stream()
