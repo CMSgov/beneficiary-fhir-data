@@ -83,12 +83,6 @@ public class PreAdjFissClaim {
   @JoinColumn(name = "`mbiId`")
   private Mbi mbiRecord;
 
-  @Column(name = "`mbi`", length = 13)
-  private String mbi;
-
-  @Column(name = "`mbiHash`", length = 64)
-  private String mbiHash;
-
   @Column(name = "`fedTaxNumber`", length = 10)
   private String fedTaxNumber;
 
@@ -324,10 +318,26 @@ public class PreAdjFissClaim {
   @Builder.Default
   private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
 
+  public String getMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
   public enum ServTypeCdMapping {
     Normal,
     Clinic,
     SpecialFacility,
     Unrecognized
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String mbi = "mbi";
   }
 }

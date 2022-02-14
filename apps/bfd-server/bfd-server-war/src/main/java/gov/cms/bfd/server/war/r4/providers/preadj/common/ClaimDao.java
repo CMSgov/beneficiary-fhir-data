@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import java.time.LocalDate;
@@ -32,10 +33,13 @@ public class ClaimDao {
 
   private final EntityManager entityManager;
   private final MetricRegistry metricRegistry;
+  private final boolean isOldMbiHashEnabled;
 
-  public ClaimDao(EntityManager entityManager, MetricRegistry metricRegistry) {
+  public ClaimDao(
+      EntityManager entityManager, MetricRegistry metricRegistry, boolean isOldMbiHashEnabled) {
     this.entityManager = entityManager;
     this.metricRegistry = metricRegistry;
+    this.isOldMbiHashEnabled = isOldMbiHashEnabled;
   }
 
   /**
@@ -82,21 +86,24 @@ public class ClaimDao {
   }
 
   /**
-   * Find records based on a given attribute name and value with a given last updated range.
+   * Find records by MBI (hashed or unhashed) based on a given PreAdjMbi attribute name and search
+   * value with a given last updated range.
    *
    * @param entityClass The entity type to retrieve.
-   * @param attributeName The name of the attribute to search on.
-   * @param attributeValue The desired value of the attribute be searched on.
+   * @param mbiRecordAttributeName The name of the entity's mbiRecord attribute..
+   * @param mbiSearchValue The desired value of the attribute be searched on.
+   * @param isMbiSearchValueHashed True iff the mbiSearchValue is a hashed MBI.
    * @param lastUpdated The range of lastUpdated values to search on.
    * @param serviceDate Date range of the desired service date to search on.
    * @param endDateAttributeName The name of the entity attribute denoting service end date.
    * @param <T> The entity type being retrieved.
    * @return A list of entities of type T retrieved matching the given parameters.
    */
-  public <T> List<T> findAllByAttribute(
+  public <T> List<T> findAllByMbiAttribute(
       Class<T> entityClass,
-      String attributeName,
-      String attributeValue,
+      String mbiRecordAttributeName,
+      String mbiSearchValue,
+      boolean isMbiSearchValueHashed,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
       String endDateAttributeName) {
@@ -109,7 +116,12 @@ public class ClaimDao {
     criteria.select(root);
     criteria.where(
         builder.and(
-            builder.equal(root.get(attributeName), attributeValue),
+            createMbiPredicate(
+                root.get(mbiRecordAttributeName),
+                mbiSearchValue,
+                isMbiSearchValueHashed,
+                isOldMbiHashEnabled,
+                builder),
             lastUpdated == null
                 ? builder.and()
                 : createDateRangePredicate(root, lastUpdated, builder),
@@ -129,6 +141,22 @@ public class ClaimDao {
     }
 
     return claimEntities;
+  }
+
+  @VisibleForTesting
+  Predicate createMbiPredicate(
+      Path<?> root,
+      String mbiSearchValue,
+      boolean isMbiSearchValueHashed,
+      boolean isOldMbiHashEnabled,
+      CriteriaBuilder builder) {
+    final String mbiValueAttributeName = isMbiSearchValueHashed ? Mbi.Fields.hash : Mbi.Fields.mbi;
+    var answer = builder.equal(root.get(mbiValueAttributeName), mbiSearchValue);
+    if (isMbiSearchValueHashed && isOldMbiHashEnabled) {
+      var oldHashPredicate = builder.equal(root.get(Mbi.Fields.oldHash), mbiSearchValue);
+      answer = builder.or(answer, oldHashPredicate);
+    }
+    return answer;
   }
 
   @VisibleForTesting

@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.server.war.SpringConfiguration;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
@@ -90,7 +91,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   @PostConstruct
   public void init() {
-    claimDao = new ClaimDao(entityManager, metricRegistry);
+    claimDao =
+        new ClaimDao(
+            entityManager, metricRegistry, SpringConfiguration.isPreAdjOldMbiHashEnabled());
 
     setResourceType();
   }
@@ -284,14 +287,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     for (ResourceTypeV2<T> type : resourceTypes) {
       List<?> entities;
 
-      String attributeName =
-          isHashed ? type.getEntityMbiHashAttribute() : type.getEntityMbiAttribute();
-
       entities =
-          claimDao.findAllByAttribute(
+          claimDao.findAllByMbiAttribute(
               type.getEntityClass(),
-              attributeName,
+              type.getEntityMbiRecordAttribute(),
               mbi,
+              isHashed,
               lastUpdated,
               serviceDate,
               type.getEntityEndDateAttribute());

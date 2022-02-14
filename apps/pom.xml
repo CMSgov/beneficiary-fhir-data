@@ -109,6 +109,9 @@
 
 		<!-- Whether the preadj endpoints should be enabled -->
 		<local.preadj.enabled>true</local.preadj.enabled>
+
+		<!-- Whether the old MBI hash query feature should be enabled -->
+		<local.preadj.oldMbiHash.enabled>true</local.preadj.oldMbiHash.enabled>
 	</properties>
 
 	<dependencyManagement>
