@@ -252,7 +252,7 @@ deploying the new applications.
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
-A new Java application 'bfd-db-migrator' will be introduced that performs two functions:
+A new Java application 'bfd-db-migrator' will be introduced that performs these functions:
 * Invokes Flyway (and thereby runs all pending migrations)
 * Runs Hibernate validation against the BFD ORM (after Flyway finishes)
 * Exits with a return code that indicates whether all operations were successful or not
@@ -280,6 +280,18 @@ database objects.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
+
+Bare minimum:
+
+Build new db-migrator AMI.
+Make new migrator service account available to db-migrator ami. 
+Add new stages to TEST, SBX, PROD that runs the migrator app as migrator service account on a new migrator instance.
+Ensure credentials live long enough to handle long-running migrations.
+Estimated additional deployment time 10-12 mins.
+
+Future possibilities:
+
+Don't run the migration step if we are up to date.
 
 Where should this new app run? Should we provision an instance for it or run it on the existing
 ETL node? Need to consider logging, monitoring and alerting for this application particularly if we support
