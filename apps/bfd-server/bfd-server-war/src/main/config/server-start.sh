@@ -39,7 +39,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	j:m:v:t:u:e:p: \
+	j:m:v:t:u:e:p:o: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -54,6 +54,7 @@ targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
 preadjEnabled="true"
+preadjOldMbiHashEnabled="false"
 while true; do
 	case "$1" in
 		-j )
@@ -70,6 +71,8 @@ while true; do
 			v2Enabled="$2"; shift 2 ;;
 		-p )
 			preadjEnabled="$2"; shift 2 ;;
+		-o )
+			preadjOldMbiHashEnabled="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -186,6 +189,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
 	"-DbfdServer.preadj.enabled=${preadjEnabled}" \
+	"-DbfdServer.preadj.oldMbiHash.enabled=${preadjOldMbiHashEnabled}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \

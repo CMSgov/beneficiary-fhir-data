@@ -1,4 +1,3 @@
-import os
 import yaml
 
 '''
@@ -9,9 +8,7 @@ def save(fileData):
     configFile.write("homePath: \"%s\"\n" % fileData.homePath)
     configFile.write("clientCertPath: \"%s\"\n" % fileData.clientCertPath)
     configFile.write("serverPublicKey: \"%s\"\n" % fileData.serverPublicKey)
-    configFile.write("dbHost: \"%s\"\n" % fileData.dbHost)
-    configFile.write("dbUsername: \"%s\"\n" % fileData.dbUsername)
-    configFile.write("dbPassword: \"%s\"\n" % fileData.dbPassword)
+    configFile.write("dbUri: \"%s\"\n" % fileData.dbUri)
     configFile.write("testHost: \"%s\"\n" % fileData.testHost)
     configFile.write("testRunTime: \"%s\"\n" % fileData.testRunTime)
     configFile.write("testNumTotalClients: \"%s\"\n" % fileData.testNumTotalClients)
@@ -31,9 +28,7 @@ def create():
     fileData.homePath = input("Input full path to the home directory: ")
     fileData.clientCertPath = input("Input full path to the client cert file (pem): ")
     fileData.serverPublicKey = input("Input server public key (optional, hit enter to skip): ")
-    fileData.dbHost = input("Input database host for environment under test: ")
-    fileData.dbUsername = input("Input database username for environment under test: ")
-    fileData.dbPassword = input("Input database password for environment under test: ")
+    fileData.dbUri = input("Input database uri for environment under test: ")
     fileData.testHost = input("Input desired test host (BFD server ip+port to test against, ex: https://10.235.16.152:7443 or load balancer address ex. https://test.bfd.cms.gov): ")
     fileData.testRunTime = input("Input desired test run time (eg. 30s, 1m): ")
     fileData.testNumTotalClients = input("Input total number of clients to create: ")
