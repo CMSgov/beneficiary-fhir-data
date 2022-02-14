@@ -1,95 +1,95 @@
 {
-    "resourceType": "ClaimResponse",
-    "id": "m-654321",
-    "meta": {
-      "versionId": "m-654321-3676fd6df7eb37be0210b6ee9d017d3ce5f15c0b",
-      "lastUpdated": "1970-01-01T00:00:04.000+00:00"
-    },
-    "contained": [
-      {
-        "resourceType": "Patient",
-        "id": "patient",
-        "identifier": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                  "code": "MC",
-                  "display": "Patient's Medicare Number"
-                }
-              ]
-            },
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "123456MBI"
-          }
-        ],
-        "name": [
-          {
-            "family": "S.",
-            "given": [
-              "J.",
-              "D."
-            ]
-          }
-        ],
-        "gender": "male"
-      }
-    ],
-    "extension": [
-      {
-        "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
-        "valueCoding": {
-          "system": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
-          "code": "5"
-        }
-      },
-      {
-        "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-receipt-date",
-        "valueDate": "1970-02-24"
-      },
-      {
-        "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-date",
-        "valueDate": "1970-07-11"
-      }
-    ],
-    "identifier": [
-      {
-        "type": {
-          "coding": [
-            {
-              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-              "code": "uc",
-              "display": "Unique Claim ID"
-            }
-          ]
-        },
-        "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
-        "value": "654321"
-      }
-    ],
-    "status": "active",
-    "type": {
-      "coding": [
+  "resourceType": "ClaimResponse",
+  "id": "m-654321",
+  "meta": {
+    "versionId": "m-654321-3676fd6df7eb37be0210b6ee9d017d3ce5f15c0b",
+    "lastUpdated": "1970-01-01T00:00:04.000+00:00"
+  },
+  "contained": [
+    {
+      "resourceType": "Patient",
+      "id": "patient",
+      "identifier": [
         {
-          "system": "http://terminology.hl7.org/CodeSystem/claim-type",
-          "code": "professional",
-          "display": "Professional"
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MC",
+                "display": "Patient's Medicare Number"
+              }
+            ]
+          },
+          "system": "http://hl7.org/fhir/sid/us-mbi",
+          "value": "123456MBI"
         }
-      ]
-    },
-    "use": "claim",
-    "patient": {
-      "reference": "#patient"
-    },
-    "created": "1970-01-01T00:00:01+00:00",
-    "insurer": {
-      "identifier": {
-        "value": "CMS"
+      ],
+      "name": [
+        {
+          "family": "S.",
+          "given": [
+            "J.",
+            "D."
+          ]
+        }
+      ],
+      "gender": "male"
+    }
+  ],
+  "extension": [
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
+      "valueCoding": {
+        "system": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
+        "code": "5"
       }
     },
-    "request": {
-      "reference": "Claim/m-654321"
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-receipt-date",
+      "valueDate": "1970-02-24"
     },
-    "outcome": "complete"
-  }
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-date",
+      "valueDate": "1970-07-11"
+    }
+  ],
+  "identifier": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code": "uc",
+            "display": "Unique Claim ID"
+          }
+        ]
+      },
+      "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+      "value": "654321"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "professional",
+        "display": "Professional"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "#patient"
+  },
+  "created": "1970-01-01T00:00:01+00:00",
+  "insurer": {
+    "identifier": {
+      "value": "CMS"
+    }
+  },
+  "request": {
+    "reference": "Claim/m-654321"
+  },
+  "outcome": "complete"
+}
