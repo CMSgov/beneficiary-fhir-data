@@ -12,6 +12,7 @@ boto3 = "*"
 cryptography = "*"
 pycrypto = "*"
 awscli = "*"
+wheel = "*"
 
 [requires]
 python_version = "3.7"
