@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -18,6 +19,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.Status;
@@ -45,7 +47,7 @@ public class GrpcRdaSourceIT {
           + "  \"totalChargeAmount\": \"3.75\","
           + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
-          + "  \"mbi\": \"c1ihk7q0g3i57\","
+          + "  \"mbi\": \"c1ihk7q0g3i\","
           + "  \"fissProcCodes\": ["
           + "    {"
           + "      \"procCd\": \"uec\","
@@ -79,7 +81,7 @@ public class GrpcRdaSourceIT {
           + "  \"currTranDtCymd\": \"2020-12-21\","
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
-          + "  \"mbi\": \"0vtc7u321x0se\","
+          + "  \"mbi\": \"0vtc7u321x0\","
           + "  \"fedTaxNb\": \"2845244764\","
           + "  \"fissProcCodes\": ["
           + "    {"
@@ -99,96 +101,105 @@ public class GrpcRdaSourceIT {
   private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"dcn\" : \"63843470\",\n"
-          + "  \"sequenceNumber\" : 0,\n"
-          + "  \"hicNo\" : \"916689703543\",\n"
-          + "  \"currStatus\" : \"P\",\n"
+          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
-          + "  \"medaProvId\" : \"oducjgzt67joc\",\n"
-          + "  \"totalChargeAmount\" : 3.75,\n"
+          + "  \"currStatus\" : \"P\",\n"
           + "  \"currTranDate\" : \"2021-03-20\",\n"
-          + "  \"principleDiag\" : \"uec\",\n"
-          + "  \"mbi\" : \"c1ihk7q0g3i57\",\n"
-          + "  \"mbiHash\" : \"56dd7e48bfbfcfe851d4cda2dbd863775b450aea207614a9cc118ed2765713e7\",\n"
+          + "  \"dcn\" : \"63843470\",\n"
+          + "  \"diagCodes\" : [ ],\n"
+          + "  \"hicNo\" : \"916689703543\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
-          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"mbi\" : \"c1ihk7q0g3i\",\n"
+          + "  \"mbiHash\" : \"c3b21bb6fef6e8af99a175e53b20893048dc2cd9f566a4930d8c1e6f8a30822d\",\n"
+          + "  \"mbiRecord\" : {\n"
+          + "    \"hash\" : \"c3b21bb6fef6e8af99a175e53b20893048dc2cd9f566a4930d8c1e6f8a30822d\",\n"
+          + "    \"mbi\" : \"c1ihk7q0g3i\"\n"
+          + "  },\n"
+          + "  \"medaProvId\" : \"oducjgzt67joc\",\n"
+          + "  \"payers\" : [ ],\n"
+          + "  \"principleDiag\" : \"uec\",\n"
           + "  \"procCodes\" : [ {\n"
           + "    \"dcn\" : \"63843470\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 2,\n"
           + "    \"procCode\" : \"zhaj\",\n"
-          + "    \"procDate\" : \"2021-01-07\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procDate\" : \"2021-01-07\"\n"
           + "  }, {\n"
           + "    \"dcn\" : \"63843470\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 1,\n"
           + "    \"procCode\" : \"egkkkw\",\n"
-          + "    \"procFlag\" : \"hsw\",\n"
           + "    \"procDate\" : \"2021-02-03\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procFlag\" : \"hsw\"\n"
           + "  }, {\n"
           + "    \"dcn\" : \"63843470\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 3,\n"
           + "    \"procCode\" : \"ods\",\n"
-          + "    \"procDate\" : \"2021-01-03\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procDate\" : \"2021-01-03\"\n"
           + "  }, {\n"
           + "    \"dcn\" : \"63843470\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 0,\n"
           + "    \"procCode\" : \"uec\",\n"
-          + "    \"procFlag\" : \"nli\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procFlag\" : \"nli\"\n"
           + "  } ],\n"
-          + "  \"diagCodes\" : [ ],\n"
-          + "  \"payers\" : [ ],\n"
-          + "  \"auditTrail\" : [ ]\n"
+          + "  \"sequenceNumber\" : 0,\n"
+          + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"dcn\" : \"2643602\",\n"
-          + "  \"sequenceNumber\" : 1,\n"
-          + "  \"hicNo\" : \"640930211775\",\n"
-          + "  \"currStatus\" : \"R\",\n"
+          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
-          + "  \"totalChargeAmount\" : 55.91,\n"
-          + "  \"receivedDate\" : \"2021-05-14\",\n"
+          + "  \"currStatus\" : \"R\",\n"
           + "  \"currTranDate\" : \"2020-12-21\",\n"
-          + "  \"principleDiag\" : \"egnj\",\n"
-          + "  \"npiNumber\" : \"5764657700\",\n"
-          + "  \"mbi\" : \"0vtc7u321x0se\",\n"
-          + "  \"mbiHash\" : \"9c0e61338935c978c25f73442c5593cdc20e35164ad8d8e426955b626de24e2c\",\n"
+          + "  \"dcn\" : \"2643602\",\n"
+          + "  \"diagCodes\" : [ ],\n"
           + "  \"fedTaxNumber\" : \"2845244764\",\n"
+          + "  \"hicNo\" : \"640930211775\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
-          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"mbi\" : \"0vtc7u321x0\",\n"
+          + "  \"mbiHash\" : \"b30cb27025eceae66fcedf88c3c2a8631381f1ffc26fcc9d46271038dae58721\",\n"
+          + "  \"mbiRecord\" : {\n"
+          + "    \"hash\" : \"b30cb27025eceae66fcedf88c3c2a8631381f1ffc26fcc9d46271038dae58721\",\n"
+          + "    \"mbi\" : \"0vtc7u321x0\"\n"
+          + "  },\n"
+          + "  \"npiNumber\" : \"5764657700\",\n"
+          + "  \"payers\" : [ ],\n"
+          + "  \"principleDiag\" : \"egnj\",\n"
           + "  \"procCodes\" : [ {\n"
           + "    \"dcn\" : \"2643602\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 2,\n"
           + "    \"procCode\" : \"fipyd\",\n"
-          + "    \"procFlag\" : \"g\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procFlag\" : \"g\"\n"
           + "  }, {\n"
           + "    \"dcn\" : \"2643602\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 1,\n"
           + "    \"procCode\" : \"vvqtwoz\",\n"
-          + "    \"procDate\" : \"2021-04-29\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procDate\" : \"2021-04-29\"\n"
           + "  }, {\n"
           + "    \"dcn\" : \"2643602\",\n"
+          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "    \"priority\" : 0,\n"
           + "    \"procCode\" : \"egnj\",\n"
-          + "    \"procDate\" : \"2021-05-13\",\n"
-          + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+          + "    \"procDate\" : \"2021-05-13\"\n"
           + "  } ],\n"
-          + "  \"diagCodes\" : [ ],\n"
-          + "  \"payers\" : [ ],\n"
-          + "  \"auditTrail\" : [ ]\n"
+          + "  \"receivedDate\" : \"2021-05-14\",\n"
+          + "  \"sequenceNumber\" : 1,\n"
+          + "  \"totalChargeAmount\" : 55.91\n"
           + "}";
 
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
   private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
   private MetricRegistry appMetrics;
   private JsonCaptureSink sink;
@@ -323,6 +334,7 @@ public class GrpcRdaSourceIT {
               .registerModule(new Jdk8Module())
               .registerModule(new JavaTimeModule())
               .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+              .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
               .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
@@ -356,6 +368,9 @@ public class GrpcRdaSourceIT {
     public RdaChange<PreAdjFissClaim> transformMessage(String apiVersion, FissClaimChange message) {
       var change = transformer.transformClaim(message);
       change.getClaim().setApiSource(apiVersion);
+      if (change.getClaim().getMbiRecord() != null) {
+        change.getClaim().getMbiRecord().setLastUpdated(null);
+      }
       return change;
     }
 

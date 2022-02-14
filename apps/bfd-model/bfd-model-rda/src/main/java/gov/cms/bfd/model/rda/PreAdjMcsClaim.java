@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -114,11 +116,9 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
 
-  @Column(name = "`idrClaimMbi`", length = 13)
-  private String idrClaimMbi;
-
-  @Column(name = "`idrClaimMbiHash`", length = 64)
-  private String idrClaimMbiHash;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`idrHdrFromDateOfSvc`")
   private LocalDate idrHdrFromDateOfSvc;
@@ -239,4 +239,20 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjMcsLocation> locations = new HashSet<>();
+
+  public String getIdrClaimMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getIdrClaimMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String idrClaimMbi = "idrClaimMbi";
+  }
 }
