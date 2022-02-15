@@ -1220,7 +1220,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   private boolean isFutureBigint(String headerTable, RifField rifField) {
-    final List<String> futureBigIntColumns = Arrays.asList("clm_id");
+    final List<String> futureBigIntColumns = Arrays.asList("clm_id", "pde_id");
     final List<String> futureBigIntTables =
         Arrays.asList(
             "carrier_claims",
@@ -1229,6 +1229,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "hospice_claims",
             "inpatient_claims",
             "outpatient_claims",
+            "partd_events",
             "snf_claims");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
