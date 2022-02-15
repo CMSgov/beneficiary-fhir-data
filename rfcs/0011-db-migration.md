@@ -248,9 +248,9 @@ existing objects.
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-The proposed solution is to remove the invocations of Flyway and Hibernate validation from the BFD applications
+The proposed solution is to remove the invocations of Flyway and Hibernate validation from the current BFD applications
 and instead run Flyway and Hibernate validation as a step in the deployment that must complete successfully before
-deploying the new applications.
+continuing with the deployment of the BFD Pipeline application and BFD FHIR Server.
 
 By moving the Flyway migrations to a step before all other applications are deployed, it no longer is necessary to
 deploy a schema change separately from its accompanying application change or have forward-compatible changes (since the
@@ -260,7 +260,7 @@ requirement because the old applications will still coexist with the new schema 
 Moving Hibernate validation out of the BFD Pipeline and BFD FHIR Server avoids the issue of old applications coming up
 during an auto-scaling event and failing Hibernate validation.
 
-Long-running migrations will no longer block the BFD Pipeline Application processing because the old pipeline
+Long-running migrations will no longer block the BFD Pipeline application processing because the old pipeline
 application will continue to run and process data until the schema migration completes.
 
 The new step that runs the Flyway migrations will be configured to run as a user that has the appropriate privileges to
