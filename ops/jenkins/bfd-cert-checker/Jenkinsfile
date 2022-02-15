@@ -1,0 +1,39 @@
+pipeline {
+  agent {
+    kubernetes {
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: bfd
+  restartPolicy: Never
+  containers:
+  - name: amazonlinux
+    image: amazonlinux:latest
+    command: ['/bin/bash']
+    tty: true
+"""
+    }
+  }
+  
+  stages {
+    stage('Check Certs') {
+      steps {
+        script {
+          container('awscli') {
+			withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
+				awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
+				env.AWS_DEFAULT_REGION = 'us-east-1'
+				env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+				env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+				env.AWS_SESSION_TOKEN = awsCredentials[3]
+			}
+			sh '''
+			aws $AWSCLI_COMMAND
+			'''
+          }
+        }
+      }
+    }
+  }
+}
