@@ -317,9 +317,6 @@ database objects.
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
-Add new stages to TEST, SBX, PROD that runs the migrator app as migrator service account on a new migrator instance.
-Ensure credentials live long enough to handle long-running migrations.
-
 Do we need to continue to invoke Hibernate validation at all? What benefit do we derive from this check that is not
 already derived from running the unit and integration tests? What sorts of problems would not be caught by the tests
 that would be caught by hibernate validation?
