@@ -1852,7 +1852,7 @@ public final class TransformerUtils {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,

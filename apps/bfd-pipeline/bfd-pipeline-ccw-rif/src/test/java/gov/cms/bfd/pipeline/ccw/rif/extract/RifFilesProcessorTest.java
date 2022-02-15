@@ -362,7 +362,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("9991831999", claimGroup.getClaimId());
+    assertEquals(9991831999L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('O', claimGroup.getNearLineRecordIdCode());
     assertEquals("71", claimGroup.getClaimTypeCode());
@@ -497,7 +497,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("333333222222", claimGroup.getClaimId());
+    assertEquals(333333222222L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("60", claimGroup.getClaimTypeCode());
@@ -612,7 +612,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("1234567890", claimGroup.getClaimId());
+    assertEquals(1234567890L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('W', claimGroup.getNearLineRecordIdCode());
     assertEquals("40", claimGroup.getClaimTypeCode());
@@ -814,7 +814,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("9992223422", claimGroup.getClaimId());
+    assertEquals(9992223422L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("50", claimGroup.getClaimTypeCode());
@@ -898,7 +898,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("2925555555", claimGroup.getClaimId());
+    assertEquals(2925555555L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('W', claimGroup.getNearLineRecordIdCode());
     assertEquals("10", claimGroup.getClaimTypeCode());
@@ -981,7 +981,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("2188888888", claimGroup.getClaimId());
+    assertEquals(2188888888L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('M', claimGroup.getNearLineRecordIdCode());
     assertEquals("82", claimGroup.getClaimTypeCode());

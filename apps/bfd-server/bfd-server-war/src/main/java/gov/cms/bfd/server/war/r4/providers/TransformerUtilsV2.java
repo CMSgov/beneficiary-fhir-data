@@ -3129,7 +3129,7 @@ public final class TransformerUtilsV2 {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       int sequence,
       BigDecimal serviceCount,
       String placeOfServiceCode,
