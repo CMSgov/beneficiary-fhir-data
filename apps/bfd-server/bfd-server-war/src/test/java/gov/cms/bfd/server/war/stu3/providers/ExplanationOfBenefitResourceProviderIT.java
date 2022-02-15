@@ -1494,7 +1494,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+    snfRifRecord = entityManager.find(SNFClaim.class, String.valueOf(snfRifRecord.getClaimId()));
     snfRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));

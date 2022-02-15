@@ -1446,6 +1446,29 @@ final class TransformerTestUtils {
         eob.getDiagnosisFirstRep().getPackageCode());
   }
 
+  static void assertEobCommonClaimHeaderData(
+      ExplanationOfBenefit eob,
+      String claimId,
+      String beneficiaryId,
+      ClaimType claimType,
+      String claimGroupId,
+      MedicareSegment coverageType,
+      Optional<LocalDate> dateFrom,
+      Optional<LocalDate> dateThrough,
+      Optional<BigDecimal> paymentAmount,
+      char finalAction) {
+    assertEobCommonClaimHeaderData(
+        eob,
+        Long.parseLong(claimId),
+        beneficiaryId,
+        claimType,
+        claimGroupId,
+        coverageType,
+        dateFrom,
+        dateThrough,
+        paymentAmount,
+        finalAction);
+  }
   /**
    * Test the transformation of common group level header fields between all claim types
    *
@@ -1462,7 +1485,7 @@ final class TransformerTestUtils {
    */
   static void assertEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       String beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
@@ -1477,8 +1500,8 @@ final class TransformerTestUtils {
     assertEquals(TransformerUtils.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     if (claimType.equals(ClaimType.PDE))
-      assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId, eob.getIdentifier());
-    else assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
+      assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId.toString(), eob.getIdentifier());
+    else assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId.toString(), eob.getIdentifier());
 
     assertIdentifierExists(
         TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID,

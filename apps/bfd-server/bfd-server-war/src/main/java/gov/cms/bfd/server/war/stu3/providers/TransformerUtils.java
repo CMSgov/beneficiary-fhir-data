@@ -1637,6 +1637,30 @@ public final class TransformerUtils {
     }
   }
 
+  static void mapEobCommonClaimHeaderData(
+      ExplanationOfBenefit eob,
+      String claimId,
+      String beneficiaryId,
+      ClaimType claimType,
+      String claimGroupId,
+      MedicareSegment coverageType,
+      Optional<LocalDate> dateFrom,
+      Optional<LocalDate> dateThrough,
+      Optional<BigDecimal> paymentAmount,
+      char finalAction) {
+    mapEobCommonClaimHeaderData(
+        eob,
+        Long.parseLong(claimId),
+        beneficiaryId,
+        claimType,
+        claimGroupId,
+        coverageType,
+        dateFrom,
+        dateThrough,
+        paymentAmount,
+        finalAction);
+  }
+
   /**
    * Transforms the common group level header fields between all claim types
    *

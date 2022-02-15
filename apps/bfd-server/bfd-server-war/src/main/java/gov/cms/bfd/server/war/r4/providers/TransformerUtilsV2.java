@@ -404,6 +404,26 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createClaimIdentifier(CcwCodebookInterface ccwVariable, Long identifierValue) {
+    if (identifierValue == null) {
+      throw new IllegalArgumentException();
+    }
+
+    Identifier identifier =
+        new Identifier()
+            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
+            .setValue(identifierValue.toString())
+            .setType(createC4BBClaimCodeableConcept());
+
+    return identifier;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
@@ -1768,6 +1788,30 @@ public final class TransformerUtilsV2 {
     return ClaimTypeV2.valueOf(type);
   }
 
+  static void mapEobCommonClaimHeaderData(
+      ExplanationOfBenefit eob,
+      String claimId,
+      String beneficiaryId,
+      ClaimTypeV2 claimType,
+      String claimGroupId,
+      MedicareSegment coverageType,
+      Optional<LocalDate> dateFrom,
+      Optional<LocalDate> dateThrough,
+      Optional<BigDecimal> paymentAmount,
+      char finalAction) {
+    mapEobCommonClaimHeaderData(
+        eob,
+        Long.parseLong(claimId),
+        beneficiaryId,
+        claimType,
+        claimGroupId,
+        coverageType,
+        dateFrom,
+        dateThrough,
+        paymentAmount,
+        finalAction);
+  }
+
   /**
    * Transforms the common group level header fields between all claim types
    *
@@ -1784,7 +1828,7 @@ public final class TransformerUtilsV2 {
    */
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       String beneficiaryId,
       ClaimTypeV2 claimType,
       String claimGroupId,
@@ -2119,6 +2163,17 @@ public final class TransformerUtilsV2 {
    */
   public static String buildEobId(ClaimTypeV2 claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
+   * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimTypeV2 claimType, Long claimId) {
+    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
