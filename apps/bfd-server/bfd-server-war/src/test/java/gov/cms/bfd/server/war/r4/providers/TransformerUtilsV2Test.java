@@ -1,10 +1,13 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -100,5 +103,77 @@ public class TransformerUtilsV2Test {
         () -> {
           TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, null, statusCode);
         });
+  }
+
+  /**
+   * Ensures the fi_num is correctly mapped to an eob as an extension when the input
+   * fiscalIntermediaryNumber is present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenFiNumberExistsExpectExtensionOnEob() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String fiNum = "12534";
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.of(fiNum),
+        Optional.empty());
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiNumExtension);
+    assertEquals(fiNum, ((Coding) fiNumExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fi_num is not mapped to an eob as an extension when the input
+   * fiscalIntermediaryNumber is not present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenNoFiNumberExpectNoFiNumExtension() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.empty());
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNull(fiNumExtension);
   }
 }

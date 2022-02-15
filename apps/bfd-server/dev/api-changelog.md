@@ -1,5 +1,29 @@
 # API Changelog
 
+## BFD-1517
+
+Added mapping for Fiscal Intermediary Number
+FI_NUM => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
+  }
+  ...
+}
+```
+
 ## BFD-1518
 
 Added mapping for Revenue Status Code:
