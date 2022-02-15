@@ -704,7 +704,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals("567834", claimGroup.getBeneficiaryId());
-    assertEquals("777777777", claimGroup.getClaimId());
+    assertEquals(777777777L, claimGroup.getClaimId());
     assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("20", claimGroup.getClaimTypeCode());

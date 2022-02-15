@@ -115,6 +115,23 @@ public final class RifParsingUtils {
   }
 
   /**
+   * @param longText the number string to parse
+   * @return the specified text parsed into an {@link Long}
+   */
+  public static Long parseLong(String longText) {
+    /*
+     * Might seem silly to pull this out, but it makes the code a bit easier
+     * to read, and ensures that this parsing is standardized.
+     */
+    try {
+      return Long.parseLong(longText);
+    } catch (NumberFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to parse long value: '%s'.", longText), e);
+    }
+  }
+
+  /**
    * @param intText the number string to parse
    * @return an {@link Optional} populated with an {@link Integer} if the input has data, or an
    *     empty Optional if not

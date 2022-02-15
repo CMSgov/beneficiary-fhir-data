@@ -998,30 +998,50 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .build();
       headerEntityClass.addField(headerField);
 
-      MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField))
-              .addModifiers(Modifier.PUBLIC)
-              .returns(
-                  selectJavaPropertyType(
-                      rifField.getRifColumnType(),
-                      rifField.isRifColumnOptional(),
-                      rifField.getRifColumnLength(),
-                      rifField.getRifColumnScale()));
-      addGetterStatement(rifField, headerField, headerFieldGetter);
+      MethodSpec.Builder headerFieldGetter;
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        headerFieldGetter =
+            MethodSpec.methodBuilder(calculateGetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("return Long.parseLong($N)", headerField.name)
+                .returns(TypeName.LONG);
+      } else {
+        headerFieldGetter =
+            MethodSpec.methodBuilder(calculateGetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(
+                    selectJavaPropertyType(
+                        rifField.getRifColumnType(),
+                        rifField.isRifColumnOptional(),
+                        rifField.getRifColumnLength(),
+                        rifField.getRifColumnScale()));
+        addGetterStatement(rifField, headerField, headerFieldGetter);
+      }
       headerEntityClass.addMethod(headerFieldGetter.build());
 
-      MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField))
-              .addModifiers(Modifier.PUBLIC)
-              .returns(void.class)
-              .addParameter(
-                  selectJavaPropertyType(
-                      rifField.getRifColumnType(),
-                      rifField.isRifColumnOptional(),
-                      rifField.getRifColumnLength(),
-                      rifField.getRifColumnScale()),
-                  headerField.name);
-      addSetterStatement(rifField, headerField, headerFieldSetter);
+      MethodSpec.Builder headerFieldSetter;
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        headerFieldSetter =
+            MethodSpec.methodBuilder(calculateSetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(void.class)
+                .addParameter(TypeName.LONG, headerField.name);
+        headerFieldSetter.addStatement(
+            "this.$N = String.valueOf($N)", headerField.name, headerField.name);
+      } else {
+        headerFieldSetter =
+            MethodSpec.methodBuilder(calculateSetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(void.class)
+                .addParameter(
+                    selectJavaPropertyType(
+                        rifField.getRifColumnType(),
+                        rifField.isRifColumnOptional(),
+                        rifField.getRifColumnLength(),
+                        rifField.getRifColumnScale()),
+                    headerField.name);
+        addSetterStatement(rifField, headerField, headerFieldSetter);
+      }
       headerEntityClass.addMethod(headerFieldSetter.build());
     }
 
@@ -1199,6 +1219,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return headerEntityFinal;
   }
 
+  private boolean isFutureBigint(String headerTable, RifField rifField) {
+    final List<String> futureBigIntColumns = Arrays.asList("clm_id");
+    final List<String> futureBigIntTables = Arrays.asList("snf_claims");
+
+    return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
+        && futureBigIntTables.contains(headerTable.toLowerCase());
+  }
+
   /**
    * Generates a Java class that can handle RIF-to-Entity parsing.
    *
@@ -1299,7 +1327,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
-      if (rifField.getRifColumnType() == RifColumnType.CHAR
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        parseUtilsMethodName = "parseLong";
+      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
           && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
         // Handle a String field.
         parseUtilsMethodName =

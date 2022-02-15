@@ -606,6 +606,17 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimType claimType, Long claimId) {
+    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
    * @param eob the {@link ExplanationOfBenefit} to extract the id from
    * @return the <code>claimId</code> field value (e.g. from {@link CarrierClaim#getClaimId()})
    */
@@ -1642,7 +1653,7 @@ public final class TransformerUtils {
    */
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       String beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
@@ -1655,8 +1666,8 @@ public final class TransformerUtils {
     eob.setId(buildEobId(claimType, claimId));
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId.toString()));
+    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId.toString()));
 
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
