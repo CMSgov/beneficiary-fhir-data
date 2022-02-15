@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0011-separate-flyway-from-pipeline`
 * Start Date: 2022-02-02
-* RFC PR: [beneficiary-fhir-data/rfcs#0011](https://github.com/CMSgov/beneficiary-fhir-data/pull/XXXX)
+* RFC PR: [beneficiary-fhir-data/rfcs#0011](https://github.com/CMSgov/beneficiary-fhir-data/pull/956)
 * JIRA Ticket(s):
   * [BFD-1483](https://jira.cms.gov/browse/BFD-1483)
 
