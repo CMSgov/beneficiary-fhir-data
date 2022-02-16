@@ -8,29 +8,51 @@ spec:
   serviceAccountName: bfd
   restartPolicy: Never
   containers:
-  - name: amazonlinux
+  - name: certchecker
     image: amazonlinux:latest
-    command: ['/bin/bash']
+    command: ['cat']
     tty: true
 """
     }
   }
-  
+  triggers {
+    cron('0 20 11 * 1-5')
+  }
+  environment {
+    DEFAULT_ENDPOINTS="test.bfd.cms.gov:443 prod-sbx.bfd.cms.gov:443 prod.bfd.cms.gov:443"
+    SEND_NOTIFICATIONS="false"
+    WARN_WHEN="30:45"
+    ALERT_WHEN="15:30"
+    PAGE_WHEN="1:15"
+    WARN_SLACK_WEBHOOK_URL=credentials('cert-warn-slack-webhook')
+    WARN_SLACK_CHAN="#bfd-notices"
+    ALERT_SLACK_WEBHOOK_URL=credentials('cert-alert-slack-webhook')
+    ALERT_SLACK_CHAN="#bfd-alerts"
+    PAGE_WEBHOOK_URL=credentials('cert-page-webhook-url')
+  }
   stages {
-    stage('Check Certs') {
+    stage('Prepare cert-checker'){
       steps {
         script {
-          container('awscli') {
-			withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-				awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
-				env.AWS_DEFAULT_REGION = 'us-east-1'
-				env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-				env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-				env.AWS_SESSION_TOKEN = awsCredentials[3]
-			}
-			sh '''
-			aws $AWSCLI_COMMAND
-			'''
+        container('certchecker') {
+          sh '''
+          yum update -y
+          yum install -y git openssl
+          git clone --depth 1 --branch master --single-branch https://github.com/CMSgov/beneficiary-fhir-data.git bfd
+          cp -f bfd/ops/ccs-ops-misc/cert-checker/cert-checker.sh /usr/local/bin/cert-checker.sh
+          chmod +x /usr/local/bin/cert-checker.sh
+          '''
+        }
+      }
+      }
+    }
+    stage('Run cert-checker') {
+      steps {
+        script {
+          container('certchecker') {
+            sh '''
+            cert-checker.sh
+            '''
           }
         }
       }
