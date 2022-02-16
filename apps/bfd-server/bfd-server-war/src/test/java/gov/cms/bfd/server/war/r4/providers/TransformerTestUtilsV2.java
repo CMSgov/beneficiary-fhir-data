@@ -68,7 +68,7 @@ public final class TransformerTestUtilsV2 {
   static void assertEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
       Long claimId,
-      String beneficiaryId,
+      Long beneficiaryId,
       ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,

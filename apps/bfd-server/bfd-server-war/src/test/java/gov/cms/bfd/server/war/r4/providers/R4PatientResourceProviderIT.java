@@ -275,7 +275,9 @@ public final class R4PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -319,7 +321,9 @@ public final class R4PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -365,7 +369,9 @@ public final class R4PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -410,7 +416,9 @@ public final class R4PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
@@ -622,7 +630,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "123456NULLREFYR",
+        "-123456",
         "3456789N",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -641,7 +649,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "BENE1234",
+        "1234",
         "SAMEMBI",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -820,7 +828,8 @@ public final class R4PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -859,7 +868,8 @@ public final class R4PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -949,7 +959,8 @@ public final class R4PatientResourceProviderIT {
 
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
     assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+        String.valueOf(expectedBene.getBeneficiaryId()),
+        patientFromSearchResult.getIdElement().getIdPart());
 
     /*
      * Ensure the unhashed values for MBI is present.
@@ -1106,7 +1117,8 @@ public final class R4PatientResourceProviderIT {
 
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
     assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+        String.valueOf(expectedBene.getBeneficiaryId()),
+        patientFromSearchResult.getIdElement().getIdPart());
 
     /*
      * Ensure the unhashed values for MBI is present.
@@ -1527,7 +1539,7 @@ public final class R4PatientResourceProviderIT {
    * @param expectedValue number of matches
    */
   private void testLastUpdatedUrls(
-      IGenericClient fhirClient, String id, List<String> urls, int expectedValue) {
+      IGenericClient fhirClient, Long id, List<String> urls, int expectedValue) {
     String baseResourceUrl = "Patient?_id=" + id + "&_format=application%2Fjson%2Bfhir";
 
     // Search for each lastUpdated value

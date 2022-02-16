@@ -96,10 +96,10 @@ final class BeneficiaryTransformer {
 
     Patient patient = new Patient();
 
-    patient.setId(beneficiary.getBeneficiaryId());
+    patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
     patient.addIdentifier(
         TransformerUtils.createIdentifier(
-            CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
+            CcwCodebookVariable.BENE_ID, String.valueOf(beneficiary.getBeneficiaryId())));
 
     // Add hicn-hash identifier ONLY if raw hicn is requested.
     if (requestHeader.isHICNinIncludeIdentifiers()) {

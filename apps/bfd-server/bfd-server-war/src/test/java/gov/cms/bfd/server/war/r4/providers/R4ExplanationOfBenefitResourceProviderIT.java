@@ -1486,12 +1486,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
             "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
 
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 8);
+    testLastUpdatedUrls(fhirClient, String.valueOf(beneficiary.getBeneficiaryId()), allUrls, 8);
 
     // Empty searches
     List<String> emptyUrls =
         Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
+    testLastUpdatedUrls(fhirClient, String.valueOf(beneficiary.getBeneficiaryId()), emptyUrls, 0);
   }
 
   /**
@@ -1606,7 +1606,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get()
             .getClaimId();
 
-    String beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
+    Long beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
 
     // Clear lastupdated in the database
     ServerTestUtils.get()
@@ -2086,8 +2086,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param serviceEndParam the service end param
    * @return the bundle
    */
-  private Bundle fetchWithServiceDate(
-      IGenericClient fhirClient, String id, String serviceEndParam) {
+  private Bundle fetchWithServiceDate(IGenericClient fhirClient, Long id, String serviceEndParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"
             + id

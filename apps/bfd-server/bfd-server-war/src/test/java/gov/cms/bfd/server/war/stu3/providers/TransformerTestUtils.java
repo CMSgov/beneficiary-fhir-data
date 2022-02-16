@@ -1446,29 +1446,6 @@ final class TransformerTestUtils {
         eob.getDiagnosisFirstRep().getPackageCode());
   }
 
-  static void assertEobCommonClaimHeaderData(
-      ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
-      ClaimType claimType,
-      String claimGroupId,
-      MedicareSegment coverageType,
-      Optional<LocalDate> dateFrom,
-      Optional<LocalDate> dateThrough,
-      Optional<BigDecimal> paymentAmount,
-      char finalAction) {
-    assertEobCommonClaimHeaderData(
-        eob,
-        Long.parseLong(claimId),
-        beneficiaryId,
-        claimType,
-        claimGroupId,
-        coverageType,
-        dateFrom,
-        dateThrough,
-        paymentAmount,
-        finalAction);
-  }
   /**
    * Test the transformation of common group level header fields between all claim types
    *
@@ -1486,7 +1463,7 @@ final class TransformerTestUtils {
   static void assertEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
       Long claimId,
-      String beneficiaryId,
+      Long beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -1556,7 +1533,7 @@ final class TransformerTestUtils {
    */
   static void assertEobCommonGroupCarrierDMEEquals(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
+      Long beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,

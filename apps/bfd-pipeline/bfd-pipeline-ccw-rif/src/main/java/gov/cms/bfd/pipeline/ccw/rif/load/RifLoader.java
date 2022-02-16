@@ -420,7 +420,7 @@ public final class RifLoader {
         record.setLastUpdated(Optional.of(loadedBatchBuilder.getTimestamp()));
 
         // Associate the beneficiary with this file loaded
-        loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId());
+        loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId().toString());
 
         LoadStrategy strategy = selectStrategy(recordAction);
         LoadAction loadAction;
@@ -921,7 +921,7 @@ public final class RifLoader {
     if (oldBeneficiaryRecord.isPresent()
         && !isBeneficiaryHistoryEqual(newBeneficiaryRecord, oldBeneficiaryRecord.get())) {
       BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
-      oldBeneCopy.setBeneficiaryId(oldBeneficiaryRecord.get().getBeneficiaryId());
+      oldBeneCopy.setBeneficiaryId(String.valueOf(oldBeneficiaryRecord.get().getBeneficiaryId()));
       oldBeneCopy.setBirthDate(oldBeneficiaryRecord.get().getBirthDate());
       oldBeneCopy.setHicn(oldBeneficiaryRecord.get().getHicn());
       oldBeneCopy.setHicnUnhashed(oldBeneficiaryRecord.get().getHicnUnhashed());

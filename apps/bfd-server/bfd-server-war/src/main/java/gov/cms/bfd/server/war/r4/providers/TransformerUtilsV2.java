@@ -162,7 +162,7 @@ public final class TransformerUtilsV2 {
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
    *     Beneficiary}
    */
-  public static IdDt buildPatientId(String beneficiaryId) {
+  public static IdDt buildPatientId(Long beneficiaryId) {
     return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
   }
 
@@ -1143,8 +1143,8 @@ public final class TransformerUtilsV2 {
    * @return a {@link Reference} to the {@link Patient} resource that matches the specified
    *     parameters
    */
-  static Reference referencePatient(String patientId) {
-    return new Reference(String.format("Patient/%s", patientId));
+  static Reference referencePatient(Long patientId) {
+    return new Reference(String.format("Patient/%d", patientId));
   }
 
   /**
@@ -1715,6 +1715,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * TODO: Remove
+   *
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
    * @param coverageType the {@link MedicareSegment} value to match
@@ -1722,6 +1724,17 @@ public final class TransformerUtilsV2 {
    *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
    */
   static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
+    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
+  }
+
+  /**
+   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
+   *     value for the {@link Coverage#getBeneficiary()} value to match
+   * @param coverageType the {@link MedicareSegment} value to match
+   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
+   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
+   */
+  static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
     return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
@@ -1735,6 +1748,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * TODO: Remove
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
    *     Coverage#getId()} for
@@ -1744,6 +1759,18 @@ public final class TransformerUtilsV2 {
     return new IdDt(
         Coverage.class.getSimpleName(),
         String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
+   *     Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Long beneficiaryId) {
+    return new IdDt(
+        Coverage.class.getSimpleName(),
+        String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
   }
 
   /**
@@ -1788,30 +1815,6 @@ public final class TransformerUtilsV2 {
     return ClaimTypeV2.valueOf(type);
   }
 
-  static void mapEobCommonClaimHeaderData(
-      ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
-      ClaimTypeV2 claimType,
-      String claimGroupId,
-      MedicareSegment coverageType,
-      Optional<LocalDate> dateFrom,
-      Optional<LocalDate> dateThrough,
-      Optional<BigDecimal> paymentAmount,
-      char finalAction) {
-    mapEobCommonClaimHeaderData(
-        eob,
-        Long.parseLong(claimId),
-        beneficiaryId,
-        claimType,
-        claimGroupId,
-        coverageType,
-        dateFrom,
-        dateThrough,
-        paymentAmount,
-        finalAction);
-  }
-
   /**
    * Transforms the common group level header fields between all claim types
    *
@@ -1829,7 +1832,7 @@ public final class TransformerUtilsV2 {
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
       Long claimId,
-      String beneficiaryId,
+      Long beneficiaryId,
       ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -2383,7 +2386,6 @@ public final class TransformerUtilsV2 {
    */
   static void mapEobCommonGroupCarrierDME(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,

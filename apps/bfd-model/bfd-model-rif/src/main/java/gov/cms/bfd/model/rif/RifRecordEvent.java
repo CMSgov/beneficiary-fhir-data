@@ -10,7 +10,7 @@ package gov.cms.bfd.model.rif;
 public final class RifRecordEvent<R extends RifRecordBase> {
   private final RifFileEvent fileEvent;
   private final RecordAction recordAction;
-  private final String beneficiaryId;
+  private final Long beneficiaryId;
   private final R record;
 
   /**
@@ -22,7 +22,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
    * @param record the value to use for {@link #getRecord()}
    */
   public RifRecordEvent(
-      RifFileEvent fileEvent, RecordAction recordAction, String beneficiaryId, R record) {
+      RifFileEvent fileEvent, RecordAction recordAction, Long beneficiaryId, R record) {
     if (fileEvent == null) throw new IllegalArgumentException();
     if (recordAction == null) throw new IllegalArgumentException();
     if (beneficiaryId == null) throw new IllegalArgumentException();
@@ -45,7 +45,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
   }
 
   /** @return the beneficiaryId */
-  public String getBeneficiaryId() {
+  public Long getBeneficiaryId() {
     return beneficiaryId;
   }
 

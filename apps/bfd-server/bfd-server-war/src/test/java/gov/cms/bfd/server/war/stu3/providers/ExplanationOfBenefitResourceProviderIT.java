@@ -1905,7 +1905,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Long claimId = findFirstCarrierClaim(loadedRecords).getClaimId();
-    String beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
+    Long beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
     clearCarrierClaimLastUpdated(claimId);
 
     // Find all EOBs without lastUpdated
@@ -2050,7 +2050,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @param expectedValue number of matches
    */
   private void testLastUpdatedUrls(
-      IGenericClient fhirClient, String id, List<String> urls, int expectedValue) {
+      IGenericClient fhirClient, Long id, List<String> urls, int expectedValue) {
 
     // Search for each lastUpdated value
     for (String lastUpdatedValue : urls) {
@@ -2112,8 +2112,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @param id the bene id to use
    * @param lastUpdatedParam to added to the fetch
    */
-  private Bundle fetchWithLastUpdated(
-      IGenericClient fhirClient, String id, String lastUpdatedParam) {
+  private Bundle fetchWithLastUpdated(IGenericClient fhirClient, Long id, String lastUpdatedParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"
             + id
@@ -2137,8 +2136,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             });
   }
 
-  private Bundle fetchWithServiceDate(
-      IGenericClient fhirClient, String id, String serviceEndParam) {
+  private Bundle fetchWithServiceDate(IGenericClient fhirClient, Long id, String serviceEndParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"
             + id
