@@ -141,6 +141,17 @@ There are three types of deployments that come up when considering how to deploy
 * In-place deployment that requires no additional hardware
 * Has constraints on the type of migrations that can be deployed (discussed in detail below)
 
+##### Abbreviated Deployment Diagram
+
+![2022-02 Deployment Sequence](./resources/0011-2022-02-deployment-sequence.svg)
+
+<details><summary>Diagram Notes</summary>
+
+As with most graphical representations, it can be difficult to strike the appropriate balance between information density and accuracy. The `Jenkins` participant is shorthand for our existing "BFD - Multibranch and Multistage Pipeline." Participants like `bfd-pipeline` and `bfd-server` are composites of the Jenkins deployment stage (generalized for the three existing `test`, `prod-sbx`, and `prod` environments), necessary AWS API endpoints that accommodate the deployment of these resources via terraform, **and** the resultant BFD resources running in each environment.
+
+</details>
+
+
 #### Cloned deployment
 * A cloned environment handles traffic while the primary instance undergoes the deployment and then traffic is
 redirected back to the primary
@@ -289,6 +300,12 @@ require a BFD database but do not launch a BFD server.
 be built and tested as part of the current Github actions application workflow and Jenkins App build stage.
 
 Deployment design:
+
+![Proposed Deployment Sequence](./resources/0011-proposed-deployment-sequence.svg)
+
+<details><summary>Diagram Notes</summary>
+Like the previous diagram, this illustrates the deployment sequence with some broad definitions. This adds the `bfd-db-migrator` participant that includes a blocking deployment stage for each environment that must complete **before** proceeding to apply updates to the `bfd-pipeline` and `bfd-server` resources for each environment.
+</details>
 
 * A new migrator service account and associated migrator database role that has all required privileges for running
 migrations and hibernate validation will be created.
