@@ -4,7 +4,7 @@
 // See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list
 // for help on referencing an existing prefix list.
 
-// Provision the prefix list (without entries).
+// Provision the prefix list with optinal entry blocks.
 resource "aws_ec2_managed_prefix_list" "prefix_list" {
   name           = var.name
   address_family = var.address_family
