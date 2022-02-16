@@ -5,6 +5,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.model.Mcs;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
@@ -37,7 +38,11 @@ public class McsTransformer extends AbstractTransformer {
    */
   @Override
   public Optional<MessageOrBuilder> transform(
-      WrappedCounter sequenceNumber, Parser.Data<String> data, WrappedMessage message) {
+      WrappedMessage message,
+      WrappedCounter sequenceNumber,
+      Parser.Data<String> data,
+      DataSampler<String> mbiSampler,
+      int sampleId) {
     McsClaimChange claimToReturn;
 
     int lineNumber = getLineNumber(data, Mcs.LINE_NUM);
@@ -55,7 +60,7 @@ public class McsTransformer extends AbstractTransformer {
         // If the line number is 1, it's a new claim, return the old, store the new
         claimToReturn = storedClaim;
         message.setLineNumber(1);
-        message.setMessage(transformNewClaim(sequenceNumber, data));
+        message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
       } else {
         // If it's not the next claim or a new one starting at 1, then something is wrong.
         throw new IllegalStateException(
@@ -66,7 +71,7 @@ public class McsTransformer extends AbstractTransformer {
     } else {
       // This must be the first run, store a new claim
       message.setLineNumber(1);
-      message.setMessage(transformNewClaim(sequenceNumber, data));
+      message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
       claimToReturn = null;
     }
 
@@ -96,8 +101,14 @@ public class McsTransformer extends AbstractTransformer {
    * @param data The {@link Parser.Data} to pull claim data for building the claim.
    * @return A new claim built from parsing the given {@link Parser.Data}.
    */
-  McsClaimChange transformNewClaim(WrappedCounter sequenceNumber, Parser.Data<String> data) {
+  McsClaimChange transformNewClaim(
+      WrappedCounter sequenceNumber,
+      Parser.Data<String> data,
+      DataSampler<String> mbiSampler,
+      int sampleId) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
+
+    mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
     McsClaim.Builder claimBuilder =
         McsClaim.newBuilder()

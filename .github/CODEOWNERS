@@ -2,15 +2,15 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@cbrunefearless @mackec1 @keithdadkins @christrotteradhoc
+@cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell
 
 #BFD Pipeline and Server Codeowners
-/rfcs @cbrunefearless @mackec1 @keithdadkins @christrotteradhoc
+/rfcs @cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell
 /ops @keithdadkins @njdister @christrotteradhoc
-/apps @cbrunefearless @mackec1 @christrotteradhoc
+/apps @cbrunefearless @mackec1 @christrotteradhoc @lsmitchell
 
 #BFD Insights Codeowners
-/insights @keithdadkins @njdister @mackec1 @christrotteradhoc
+/insights @keithdadkins @njdister @mackec1 @christrotteradhoc @lsmitchell
 
 #BCDA Insights Codeowners
 /insights/terraform/projects/bcda @msnook @orenfromberg @keithdadkins @njdister
