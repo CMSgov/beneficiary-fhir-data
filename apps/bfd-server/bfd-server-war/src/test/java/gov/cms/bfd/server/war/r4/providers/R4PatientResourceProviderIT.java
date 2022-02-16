@@ -615,7 +615,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "567834",
+        567834L,
         "3456789",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -630,7 +630,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "-123456",
+        -123456L,
         "3456789N",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -649,7 +649,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "1234",
+        1234L,
         "SAMEMBI",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -665,7 +665,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "55555",
+        55555L,
         "HISTMBI",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -681,7 +681,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "66666",
+        66666L,
         "DUPHISTMBI",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);
@@ -1466,7 +1466,7 @@ public final class R4PatientResourceProviderIT {
       IGenericClient fhirClient,
       List<Beneficiary> beneficiariesList,
       List<BeneficiaryHistory> beneficiariesHistoryList,
-      String beneficiaryId,
+      Long beneficiaryId,
       String unhashedValue,
       Boolean useFromBeneficiaryTable,
       Boolean expectsSingleBeneMatch) {
