@@ -2,6 +2,8 @@
 Utility project for converting data to RDA data (such as rif files into RDA ndjson files) to be used with the
 bfd-pipeline-rda-grpc-server to provide synthetic RDA data for FISS and MCS claims.
 
+Additionally, the tool offers the ability to generate attribution files for the MBI values present in the
+generated claims, providing your own template sql script using handlebars templates.
 
 ## Prerequisite
 Before the rda bridge can be executed, you need data files to read from.  For converting RIF files, they can have any
@@ -24,8 +26,10 @@ Execute the shell script
 
 ## Optional Parameters
 ```
-usage: run_bridge.sh sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
-       <arg>] [-n <arg>] [-o <arg>]
+usage: run_bridge sourceDir [-a <arg>] [-b <arg>] [-e <arg>] [-f <arg>] [-g
+       <arg>] [-m <arg>] [-n <arg>] [-o <arg>] [-q <arg>] [-s <arg>] [-t <arg>]
+       [-u <arg>] [-x <arg>] [-z <arg>]
+    -a <arg>    Indicates if the attribution sql script should be generated
     -b <arg>    Benefit History file to read from
     -e <arg>    Path to yaml file containing run configs
     -f <arg>    FISS file to read from
@@ -33,8 +37,12 @@ usage: run_bridge.sh sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
     -m <arg>    MCS file to read from
     -n <arg>    MCS RDA output file
     -o <arg>    The directory where the output files will be written to.
-    -s <arg>    The starting sequence number for FISS claims (Must be 1 or higher)
-    -z <arg>    The starting sequence number for MCS claims (Must be 1 or higher)
+    -q <arg>    The attribution script file to write to
+    -s <arg>    Starting point for FISS sequence values
+    -t <arg>    The template file to use for building the attribution script
+    -u <arg>    Ratio of fiss to mcs MBIs to use in attribution
+    -x <arg>    The number of MBIs to pull for building the attribution file
+    -z <arg>    Starting point for MCS sequence values
 ```
 
 ## Example execution commands
@@ -49,7 +57,12 @@ usage: run_bridge.sh sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
     -f inpatient.csv \
     -f outpatient.csv \
     -m carrier.csv \
-    -b beneficiary_history.csv
+    -b beneficiary_history.csv \
+    -a true \
+    -x 1000
+    -t attribution-template.sql \
+    -q attributions.sql \
+    -u 0.5
 ```
 
 ### YAML Config Based
