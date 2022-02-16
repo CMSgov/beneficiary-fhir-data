@@ -39,7 +39,7 @@
 				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>9.4.1208</version>
+				<version>42.3.3</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
