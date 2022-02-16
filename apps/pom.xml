@@ -70,7 +70,6 @@
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
-		<module>bfd-server-test-perf</module>
 		<!-- <module>bfd-server-test-functions</module> -->
 	</modules>
 
