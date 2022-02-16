@@ -1,5 +1,12 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -51,19 +58,18 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link ExplanationOfBenefitResourceProvider}. */
 public final class ExplanationOfBenefitResourceProviderIT {
 
   /**
-   * <<<<<<< HEAD Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once
-   * to make sure that any existing data is deleted from the tables before running the test suite.
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
    */
-  @BeforeClass
+  @BeforeAll
   public static void cleanupDatabaseBeforeTestSuite() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
@@ -72,7 +78,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
    * case.
    */
-  @After
+  @AfterEach
   public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
@@ -104,7 +110,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     CarrierClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
   }
 
@@ -113,16 +119,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist
    * in the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingCarrierClaim() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -152,8 +162,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
-    DMEClaimTransformerTest.assertMatches(claim, eob, Optional.of(false));
+    assertNotNull(eob);
+    DMEClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
   }
 
   /**
@@ -185,7 +195,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     DMEClaimTransformerTest.assertMatches(claim, eob, Optional.of(true));
   }
 
@@ -219,8 +229,23 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     DMEClaimTransformerTest.assertMatches(claim, eob, Optional.of(false));
+  }
+
+  public void readEobForMissingDMEClaim() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    // No data is loaded, so this should return nothing.
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.DME, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -250,7 +275,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.HHA, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     HHAClaimTransformerTest.assertMatches(claim, eob);
   }
 
@@ -259,16 +284,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in
    * the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingHHAClaim() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.HHA, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.HHA, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -298,7 +327,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     HospiceClaimTransformerTest.assertMatches(claim, eob);
   }
 
@@ -307,16 +336,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in
    * the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingHospiceClaim() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -346,7 +379,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     InpatientClaimTransformerTest.assertMatches(claim, eob);
   }
 
@@ -355,16 +388,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist
    * in the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingInpatientClaim() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -394,7 +431,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     OutpatientClaimTransformerTest.assertMatches(claim, eob);
   }
 
@@ -403,16 +440,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not
    * exist in the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingOutpatientClaim() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -442,7 +483,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.PDE, claim.getEventId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     PartDEventTransformerTest.assertMatches(claim, eob);
   }
 
@@ -451,16 +492,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
    * the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingPartDEvent() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.PDE, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -468,16 +513,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
    * the DB using a negative ID.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingNegativePartDEvent() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // No data is loaded, so this should return nothing. Tests negative ID will pass regex pattern.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1234"))
+              .execute();
+        });
   }
 
   /**
@@ -485,16 +534,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid
    * {@link ExplanationOfBenefitResourceProvider#IdParam} parameter.
    */
-  @Test(expected = InvalidRequestException.class)
+  @Test
   public void readEobForInvalidIdParamPartDEvent() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     // The IdParam is not valid, so this should return an exception.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1?234"))
-        .execute();
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1?234"))
+              .execute();
+        });
   }
 
   /**
@@ -523,7 +576,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .withId(TransformerUtils.buildEobId(ClaimType.SNF, claim.getClaimId()))
             .execute();
 
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     SNFClaimTransformerTest.assertMatches(claim, eob);
   }
 
@@ -532,16 +585,20 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in
    * the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readEobForMissingSNFClaim() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
-    // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.SNF, "1234"))
-        .execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          // No data is loaded, so this should return nothing.
+          fhirClient
+              .read()
+              .resource(ExplanationOfBenefit.class)
+              .withId(TransformerUtils.buildEobId(ClaimType.SNF, "1234"))
+              .execute();
+        });
   }
 
   /**
@@ -571,13 +628,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify the bundle contains a key for total and that the value matches the
      * number of entries in the bundle
      */
-    Assert.assertEquals(
+    assertEquals(
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
@@ -588,10 +645,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
     /*
      * Verify that no paging links exist in the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
     /*
      * Verify that each of the expected claims (one for every claim type) is present
@@ -604,7 +661,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .map(r -> (CarrierClaim) r)
             .findFirst()
             .get();
-    Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+    assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
         carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), Optional.empty());
 
@@ -705,14 +762,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(2, searchResults.getEntry().size());
+    assertNotNull(searchResults);
+    assertEquals(2, searchResults.getEntry().size());
 
     /*
      * Verify the bundle contains a key for total and that the value matches the
      * number of entries in the bundle.
      */
-    Assert.assertEquals(
+    assertEquals(
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
@@ -723,8 +780,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
     /*
      * Verify links to the first and last page exist.
      */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
 
     /*
      * Verify that accessing all next links, eventually leading to the last page,
@@ -732,15 +789,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
      */
     while (searchResults.getLink(Constants.LINK_NEXT) != null) {
       searchResults = fhirClient.loadPage().next(searchResults).execute();
-      Assert.assertNotNull(searchResults);
-      Assert.assertTrue(searchResults.hasEntry());
+      assertNotNull(searchResults);
+      assertTrue(searchResults.hasEntry());
 
       /*
        * Each page after the first should have a first, previous, and last links.
        */
-      Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-      Assert.assertNotNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-      Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+      assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+      assertNotNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+      assertNotNull(searchResults.getLink(Constants.LINK_LAST));
 
       searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
     }
@@ -749,7 +806,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
      * Verify that the combined results are the same size as
      * "all of the claim records in the sample."
      */
-    Assert.assertEquals(
+    assertEquals(
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
@@ -768,7 +825,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .map(r -> (CarrierClaim) r)
             .findFirst()
             .get();
-    Assert.assertEquals(1, filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).size());
+    assertEquals(1, filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
         carrierClaim,
         filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).get(0),
@@ -870,8 +927,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(3, searchResults.getEntry().size());
+    assertNotNull(searchResults);
+    assertEquals(3, searchResults.getEntry().size());
 
     /*
      * Verify that accessing all next links, eventually leading to the last page,
@@ -879,8 +936,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
      */
     while (searchResults.getLink(Constants.LINK_NEXT) != null) {
       searchResults = fhirClient.loadPage().next(searchResults).execute();
-      Assert.assertNotNull(searchResults);
-      Assert.assertTrue(searchResults.hasEntry());
+      assertNotNull(searchResults);
+      assertTrue(searchResults.hasEntry());
     }
   }
 
@@ -913,15 +970,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify that no paging links exist in the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
     /*
      * Access a created link of this bundle, providing the startIndex but not the
@@ -934,15 +991,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .andReturnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(pagedResults);
+    assertNotNull(pagedResults);
 
     /*
      * Verify that paging links exist in this paged bundle.
      */
-    Assert.assertNull(pagedResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNotNull(pagedResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNotNull(pagedResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNotNull(pagedResults.getLink(Constants.LINK_LAST));
+    assertNull(pagedResults.getLink(Constants.LINK_NEXT));
+    assertNotNull(pagedResults.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(pagedResults.getLink(Constants.LINK_FIRST));
+    assertNotNull(pagedResults.getLink(Constants.LINK_LAST));
 
     /*
      * Add the entries in the paged results to a list and verify that only the last
@@ -950,7 +1007,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
      */
     List<IBaseResource> pagedEntries = new ArrayList<>();
     pagedResults.getEntry().forEach(e -> pagedEntries.add(e.getResource()));
-    Assert.assertEquals(4, pagedEntries.size());
+    assertEquals(4, pagedEntries.size());
   }
 
   /**
@@ -989,13 +1046,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify the bundle contains a key for total and that the value matches the
      * number of entries in the bundle
      */
-    Assert.assertEquals(
+    assertEquals(
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
@@ -1006,10 +1063,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
     /*
      * Verify that no paging links exist in the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
     /*
      * Verify that each of the expected claims (one for every claim type) is present
@@ -1022,7 +1079,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .map(r -> (CarrierClaim) r)
             .findFirst()
             .get();
-    Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+    assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
         carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), Optional.empty());
 
@@ -1119,13 +1176,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify the bundle contains a key for total and that the value matches the
      * number of entries in the bundle
      */
-    Assert.assertEquals(
+    assertEquals(
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
@@ -1137,10 +1194,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
      * Verify that only the first and last links exist as there are no previous or
      * next pages.
      */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
 
     /*
      * Verify that each of the expected claims (one for every claim type) is present
@@ -1153,7 +1210,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .map(r -> (CarrierClaim) r)
             .findFirst()
             .get();
-    Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+    assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
         carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), Optional.empty());
 
@@ -1229,7 +1286,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    *
    * @throws FHIRException (indicates test failure)
    */
-  @Test(expected = InvalidRequestException.class)
+  @Test
   public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
@@ -1256,17 +1313,21 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Access a created link of this bundle, providing the startIndex but not the
      * pageSize (count).
      */
-    fhirClient
-        .loadPage()
-        .byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=-1")
-        .andReturnBundle(Bundle.class)
-        .execute();
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          fhirClient
+              .loadPage()
+              .byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=-1")
+              .andReturnBundle(Bundle.class)
+              .execute();
+        });
   }
 
   /**
@@ -1299,7 +1360,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
                               TransformerUtils.buildPatientId(beneficiary)))
                       .returnBundle(Bundle.class)
                       .execute();
-              Assert.assertNotNull(searchResults);
+              assertNotNull(searchResults);
 
               /*
                * Verify that the returned Bundle doesn't have any resources with duplicate
@@ -1308,11 +1369,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
               Set<String> claimIds = new HashSet<>();
               for (BundleEntryComponent searchResultEntry : searchResults.getEntry()) {
                 String resourceId = searchResultEntry.getResource().getId();
-                if (claimIds.contains(resourceId))
-                  Assert.assertFalse(claimIds.contains(resourceId));
+                if (claimIds.contains(resourceId)) assertFalse(claimIds.contains(resourceId));
                 claimIds.add(resourceId);
               }
-              if (searchResults.getTotal() > 0) Assert.assertFalse(claimIds.isEmpty());
+              if (searchResults.getTotal() > 0) assertFalse(claimIds.isEmpty());
             });
   }
 
@@ -1334,8 +1394,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -1574,16 +1634,16 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     for (ClaimType claimType : ClaimType.values()) {
       /*
        * SAMHSA fields are present on all claim types except for PDE so we should not
        * get any claims back in the results except for PDE.
        */
       if (claimType == ClaimType.PDE) {
-        Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+        assertEquals(1, filterToClaimType(searchResults, claimType).size());
       } else {
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+        assertEquals(0, filterToClaimType(searchResults, claimType).size());
       }
     }
   }
@@ -1610,10 +1670,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .and(new StringClientParam("excludeSAMHSA").matches().value("false"))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     for (ClaimType claimType : ClaimType.values()) {
       // Without filtering we expect one claim for each claim type.
-      Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+      assertEquals(1, filterToClaimType(searchResults, claimType).size());
     }
   }
 
@@ -1640,13 +1700,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     for (ClaimType claimType : ClaimType.values()) {
       // None of the claims are SAMHSA so we expect one record per claim type in the results.
-      Assert.assertEquals(
-          String.format("Verify claims of type '%s' are present", claimType),
+      assertEquals(
           1,
-          filterToClaimType(searchResults, claimType).size());
+          filterToClaimType(searchResults, claimType).size(),
+          String.format("Verify claims of type '%s' are present", claimType));
     }
   }
 
@@ -1673,13 +1733,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .and(new StringClientParam("excludeSAMHSA").matches().value("false"))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     for (ClaimType claimType : ClaimType.values()) {
       // None of the claims are SAMHSA so we expect one record per claim type in the results.
-      Assert.assertEquals(
-          String.format("Verify claims of type '%s' are present", claimType),
+      assertEquals(
           1,
-          filterToClaimType(searchResults, claimType).size());
+          filterToClaimType(searchResults, claimType).size(),
+          String.format("Verify claims of type '%s' are present", claimType));
     }
   }
 
@@ -1726,17 +1786,17 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     // Verify that tax numbers aren't present for carrier claims.
     carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
-    Assert.assertNull(
+    assertNull(
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
 
     // Verify that tax numbers aren't present for DME claims.
     dmeEob = filterToClaimType(searchResults, ClaimType.DME).get(0);
-    Assert.assertNull(
+    assertNull(
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
 
@@ -1751,18 +1811,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     // Verify that tax numbers are present for carrier claims.
     carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
 
-    Assert.assertNotNull(
+    assertNotNull(
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
 
     // Verify that tax numbers are present for DME claims.
     dmeEob = filterToClaimType(searchResults, ClaimType.DME).get(0);
-    Assert.assertNotNull(
+    assertNotNull(
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
   }
@@ -1796,13 +1856,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify the bundle contains a key for total and that the value matches the
      * number of entries in the bundle
      */
-    Assert.assertEquals(
+    assertEquals(
         loadedRecords.stream()
             .filter(r -> (r instanceof PartDEvent))
             .filter(r -> !(r instanceof BeneficiaryHistory))
@@ -1876,23 +1936,23 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .count(expectedCount)
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertEquals(
-        "Expected number resources return to be equal to count",
+    assertEquals(
         expectedCount,
-        searchResultsAfter.getEntry().size());
+        searchResultsAfter.getEntry().size(),
+        "Expected number resources return to be equal to count");
 
     // Check self url
     String selfLink = searchResultsAfter.getLink(IBaseBundle.LINK_SELF).getUrl();
-    Assert.assertTrue(selfLink.contains("lastUpdated"));
+    assertTrue(selfLink.contains("lastUpdated"));
 
     // Check next bundle
     String nextLink = searchResultsAfter.getLink(IBaseBundle.LINK_NEXT).getUrl();
-    Assert.assertTrue(nextLink.contains("lastUpdated"));
+    assertTrue(nextLink.contains("lastUpdated"));
     Bundle nextResults = fhirClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
-    Assert.assertEquals(
-        "Expected number resources return to be equal to count",
+    assertEquals(
         expectedCount,
-        nextResults.getEntry().size());
+        nextResults.getEntry().size(),
+        "Expected number resources return to be equal to count");
   }
 
   @Test
@@ -1914,10 +1974,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneId)))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertEquals(
-        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
+    assertEquals(
         Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
-        filterToClaimType(searchAll, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
+        filterToClaimType(searchAll, ClaimType.CARRIER).get(0).getMeta().getLastUpdated(),
+        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED");
 
     // Find all EOBs with < now()
     Bundle searchWithLessThan =
@@ -1928,14 +1988,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .lastUpdated(new DateRangeParam().setUpperBoundInclusive(new Date()))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertEquals(
-        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
+    assertEquals(
         Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
-        filterToClaimType(searchWithLessThan, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
-    Assert.assertEquals(
-        "Expected the search for lastUpdated <= now() to include resources with fallback lastUpdated values",
+        filterToClaimType(searchWithLessThan, ClaimType.CARRIER).get(0).getMeta().getLastUpdated(),
+        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED");
+    assertEquals(
         searchAll.getTotal(),
-        searchWithLessThan.getTotal());
+        searchWithLessThan.getTotal(),
+        "Expected the search for lastUpdated <= now() to include resources with fallback lastUpdated values");
 
     // Find all EOBs with >= now()-100 seconds
     Bundle searchWithGreaterThan =
@@ -1948,10 +2008,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
                     .setLowerBoundInclusive(Date.from(Instant.now().minusSeconds(100))))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertEquals(
-        "Expected the search for lastUpdated >= now()-100 to not include null lastUpdated resources",
+    assertEquals(
         searchAll.getTotal() - 1,
-        searchWithGreaterThan.getTotal());
+        searchWithGreaterThan.getTotal(),
+        "Expected the search for lastUpdated >= now()-100 to not include null lastUpdated resources");
   }
 
   @Test
@@ -1994,9 +2054,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
           Bundle bundle =
               fetchWithServiceDate(
                   fhirClient, beneficiary.getBeneficiaryId(), testCase.getMiddle());
-          Assert.assertNotNull(bundle);
-          Assert.assertEquals(
-              testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
+          assertNotNull(bundle);
+          assertEquals(testCase.getRight().intValue(), bundle.getTotal(), testCase.getLeft());
         });
   }
 
@@ -2053,10 +2112,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
     // Search for each lastUpdated value
     for (String lastUpdatedValue : urls) {
       Bundle searchResults = fetchWithLastUpdated(fhirClient, id, lastUpdatedValue);
-      Assert.assertEquals(
-          String.format("Expected %s to filter resources correctly", lastUpdatedValue),
+      assertEquals(
           expectedValue,
-          searchResults.getTotal());
+          searchResults.getTotal(),
+          String.format("Expected %s to filter resources correctly", lastUpdatedValue));
     }
   }
 

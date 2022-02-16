@@ -136,7 +136,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param items The {@link ItemComponent} list to check
    * @return <code>true</code> if any {@link ItemComponent} contains SAMHSA data, <code>false</code>
-   *     > otherwise.
+   *     otherwise.
    */
   protected boolean containsSamhsaLineItem(List<ItemComponent> items) {
     return items.stream().anyMatch(c -> containsSamhsaProcedureCode(c.getProductOrService()));

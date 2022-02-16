@@ -1,0 +1,8 @@
+homePath: ""
+dbHost: ""
+dbUsername: ""
+dbPassword: ""
+testHost: "http://test.bfd.cms.gov/"
+testRunTime: "1m"
+testNumTotalClients: "100"
+testCreatedClientsPerSecond: "10"

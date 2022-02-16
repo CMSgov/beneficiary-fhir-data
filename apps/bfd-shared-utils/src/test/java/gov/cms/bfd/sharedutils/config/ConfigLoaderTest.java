@@ -1,13 +1,7 @@
 package gov.cms.bfd.sharedutils.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -19,15 +13,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ConfigLoaderTest {
 
   private Map<String, String> values;
   private ConfigLoader loader;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     values = new HashMap<>();
     loader = spy(ConfigLoader.builder().addSingle(values::get).build());
@@ -39,9 +33,13 @@ public class ConfigLoaderTest {
     assertEquals("A", loader.stringValue("a"));
   }
 
-  @Test(expected = ConfigException.class)
+  @Test
   public void requiredStringValueNotFound() {
-    loader.stringValue("not-there");
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.stringValue("not-there");
+        });
   }
 
   @Test
@@ -59,15 +57,23 @@ public class ConfigLoaderTest {
     assertEquals(33, loader.intValue("a"));
   }
 
-  @Test(expected = ConfigException.class)
+  @Test
   public void requiredIntValueNotFound() {
-    loader.intValue("not-there");
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.intValue("not-there");
+        });
   }
 
-  @Test(expected = ConfigException.class)
+  @Test
   public void invalidIntValue() {
     values.put("a", "-not-a-number");
-    loader.intValue("a");
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.intValue("a");
+        });
   }
 
   @Test
@@ -92,15 +98,23 @@ public class ConfigLoaderTest {
     assertEquals(TestEnum.First, loader.enumValue("a", TestEnum::valueOf));
   }
 
-  @Test(expected = ConfigException.class)
+  @Test
   public void requiredEnumValueNotFound() {
-    loader.enumValue("not-there", TestEnum::valueOf);
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.enumValue("not-there", TestEnum::valueOf);
+        });
   }
 
-  @Test(expected = ConfigException.class)
+  @Test
   public void invalidEnumValue() {
     values.put("a", "-not-a-number");
-    loader.enumValue("a", TestEnum::valueOf);
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.enumValue("a", TestEnum::valueOf);
+        });
   }
 
   @Test
@@ -242,14 +256,18 @@ public class ConfigLoaderTest {
   @Test
   public void optionalBooleanValue() {
     values.put("a", "True");
-    assertEquals(true, loader.booleanValue("a", false));
-    assertEquals(false, loader.booleanValue("z", false));
+    assertTrue(loader.booleanValue("a", false));
+    assertFalse(loader.booleanValue("z", false));
   }
 
-  @Test(expected = ConfigException.class)
+  @Test
   public void invalidBooleanValue() {
     values.put("a", "-not-a-boolean");
-    loader.booleanValue("a", false);
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.booleanValue("a", false);
+        });
   }
 
   @Test
@@ -265,7 +283,7 @@ public class ConfigLoaderTest {
     final List<String> names = new ArrayList<>(System.getenv().keySet());
     final ConfigLoader config = ConfigLoader.builder().addEnvironmentVariables().build();
     for (String name : names) {
-      assertEquals("mismatch for " + name, System.getenv(name), config.stringValue(name, ""));
+      assertEquals(System.getenv(name), config.stringValue(name, ""), "mismatch for " + name);
     }
   }
 
@@ -275,7 +293,7 @@ public class ConfigLoaderTest {
     final ConfigLoader config = ConfigLoader.builder().addSystemProperties().build();
     for (String name : names) {
       assertEquals(
-          "mismatch for " + name, System.getProperty(name, ""), config.stringValue(name, ""));
+          System.getProperty(name, ""), config.stringValue(name, ""), "mismatch for " + name);
     }
   }
 

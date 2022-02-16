@@ -3,7 +3,7 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Adjudications <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
- * Adjudication<a>
+ * Adjudication</a>
  */
 public enum C4BBAdjudication {
   SUBMITTED,

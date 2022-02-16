@@ -47,19 +47,6 @@
 				<artifactId>javax.servlet-api</artifactId>
 				<version>4.0.1</version>
 				<scope>provided</scope>
-			</dependency>	
-			<dependency>
-				<!-- Used as a logging backed/target for SLF4J. -->
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-				<version>1.2.3</version>
-			</dependency>
-			<dependency>
-				<!-- The test framework used for unit and integration tests. -->
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<!-- Provides sample data used in tests. -->

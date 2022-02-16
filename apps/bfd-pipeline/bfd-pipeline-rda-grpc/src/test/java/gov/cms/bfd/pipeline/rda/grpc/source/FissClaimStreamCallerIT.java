@@ -1,20 +1,22 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FissClaimStreamCallerIT {
   private static final String CLAIM_1 =
@@ -68,22 +70,24 @@ public class FissClaimStreamCallerIT {
         .build()
         .runWithChannelParam(
             channel -> {
-              final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
-                  caller.callService(channel, CallOptions.DEFAULT, 0L);
-              assertEquals(true, results.hasNext());
+              final FissClaimStreamCaller caller = new FissClaimStreamCaller();
+              assertEquals(
+                  RdaService.RDA_PROTO_VERSION,
+                  caller.callVersionService(channel, CallOptions.DEFAULT));
 
-              PreAdjFissClaim claim = results.next().getClaim();
+              final GrpcResponseStream<FissClaimChange> results =
+                  caller.callService(channel, CallOptions.DEFAULT, 0L);
+              assertTrue(results.hasNext());
+
+              PreAdjFissClaim claim = transform(results.next());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
-              claim = results.next().getClaim();
+              claim = transform(results.next());
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 
@@ -97,15 +101,19 @@ public class FissClaimStreamCallerIT {
         .build()
         .runWithChannelParam(
             channel -> {
-              final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+              final FissClaimStreamCaller caller = new FissClaimStreamCaller();
+              final GrpcResponseStream<FissClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 10L);
-              assertEquals(10L, results.next().getSequenceNumber());
-              assertEquals(11L, results.next().getSequenceNumber());
-              assertEquals(12L, results.next().getSequenceNumber());
-              assertEquals(13L, results.next().getSequenceNumber());
-              assertEquals(14L, results.next().getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertEquals(Long.valueOf(10), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(11), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(13), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(14), transform(results.next()).getSequenceNumber());
+              assertFalse(results.hasNext());
             });
+  }
+
+  private PreAdjFissClaim transform(FissClaimChange change) {
+    return transformer.transformClaim(change).getClaim();
   }
 }

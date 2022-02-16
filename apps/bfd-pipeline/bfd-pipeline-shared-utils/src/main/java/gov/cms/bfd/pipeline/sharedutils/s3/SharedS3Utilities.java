@@ -131,6 +131,7 @@ public final class SharedS3Utilities {
    * @param bucketName the name of the bucket to store the object in
    * @param objectKey the key for the object
    * @param bytes a {@link ByteSource} referencing the json text
+   * @throws IOException if there is an issue opening the input byte source stream
    */
   public static void uploadJsonToBucket(
       AmazonS3 s3Client, String bucketName, String objectKey, ByteSource bytes) throws IOException {

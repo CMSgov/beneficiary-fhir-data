@@ -13,6 +13,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /** A link builder for Patient resources using bene-id cursors */
 public final class PatientLinkBuilder implements LinkBuilder {
+  /**
+   * Maximum page size is one less than the maximum integer value to allow clients to request one
+   * more than the page size as a means to see if an additional page is necessary without having an
+   * integer overflow.
+   */
+  public static final int MAX_PAGE_SIZE = Integer.MAX_VALUE - 1;
+
   private final UriComponents components;
   private final Integer count;
   private final String cursor;
@@ -25,6 +32,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
     count = extractCountParam(components);
     cursor = extractCursorParam(components);
     hasAnotherPage = false; // Don't really know, so default to false
+    validate();
   }
 
   public PatientLinkBuilder(PatientLinkBuilder prev, boolean hasAnotherPage) {
@@ -32,6 +40,15 @@ public final class PatientLinkBuilder implements LinkBuilder {
     count = prev.count;
     cursor = prev.cursor;
     this.hasAnotherPage = hasAnotherPage;
+    validate();
+  }
+
+  /** Check that the page size is valid */
+  private void validate() {
+    if (getPageSize() <= 0)
+      throw new InvalidRequestException("A zero or negative page size is unsupported");
+    if (!(getPageSize() <= MAX_PAGE_SIZE))
+      throw new InvalidRequestException("Page size must be less than " + MAX_PAGE_SIZE);
   }
 
   @Override
@@ -41,7 +58,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
   @Override
   public int getPageSize() {
-    return isPagingRequested() ? count : Integer.MAX_VALUE;
+    return isPagingRequested() ? count : MAX_PAGE_SIZE;
   }
 
   @Override
@@ -127,5 +144,17 @@ public final class PatientLinkBuilder implements LinkBuilder {
         .replaceQueryParams(params)
         .build()
         .toUriString();
+  }
+
+  /**
+   * Get the value that should be passed as the max size for a query using paging. This value should
+   * be at least as big as the page size to ensure a full page but include at least one additional
+   * record as a way to determine whether another page will be needed. In practice this means
+   * returning one more than the page size.
+   *
+   * @return the query max size
+   */
+  public int getQueryMaxSize() {
+    return getPageSize() + 1;
   }
 }

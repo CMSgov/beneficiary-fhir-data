@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -17,8 +21,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
 public final class DMEClaimTransformerTest {
@@ -91,11 +94,11 @@ public final class DMEClaimTransformerTest {
     TransformerTestUtils.assertAdjudicationTotalAmountEquals(
         CcwCodebookVariable.PRPAYAMT, claim.getPrimaryPayerPaidAmount(), eob);
 
-    Assert.assertEquals(3, eob.getDiagnosis().size());
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(3, eob.getDiagnosis().size());
+    assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     DMEClaimLine claimLine1 = claim.getLines().get(0);
-    Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
     TransformerTestUtils.assertExtensionIdentifierEquals(
         CcwCodebookVariable.SUPLRNUM, claimLine1.getProviderBillingNumber(), eobItem0);
@@ -114,6 +117,15 @@ public final class DMEClaimTransformerTest {
         CcwCodebookVariable.PRVDR_STATE_CD,
         claimLine1.getProviderStateCode(),
         eobItem0.getLocation());
+
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
+            claimLine1.getProviderTaxNumber(), eob.getCareTeam());
+    if (includedTaxNumbers.orElse(false)) {
+      assertNotNull(taxNumberCareTeamEntry);
+    } else {
+      assertNull(taxNumberCareTeamEntry);
+    }
 
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,

@@ -1,5 +1,7 @@
 package gov.cms.bfd.model.rif.samples;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.RifFileType;
@@ -14,9 +16,8 @@ import java.util.function.Function;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public final class SampleDataColumnsTest {
    */
   @Test
   // FIXME Temporary workaround until CBBD-253 and CBBD-283 are resolved.
-  @Ignore
+  @Disabled
   public void verifySampleBColumns() {
     verifyColumns(StaticRifResourceGroup.SAMPLE_B);
   }
@@ -99,14 +100,14 @@ public final class SampleDataColumnsTest {
                 .filter(c -> !metadataColumns.contains(c))
                 .toArray(String[]::new);
 
-        Assert.assertEquals(
+        assertEquals(
+            columnsInSample.length,
+            columnsInEnum.length,
             String.format(
                 "Column count mismatch for '%s'.\nSample Columns: %s\nEnum Columns:   %s\n",
                 sampleFile.name(),
                 toHeaderFormat(columnsInSample, c -> c),
-                toHeaderFormat(columnsInEnum, c -> c.name())),
-            columnsInSample.length,
-            columnsInEnum.length);
+                toHeaderFormat(columnsInEnum, c -> c.name())));
 
         /*
          * Loop through the columns in the sample data and ensure that
@@ -115,15 +116,15 @@ public final class SampleDataColumnsTest {
         for (int col = 0; col < columnsInSample.length; col++) {
           String columnNameFromEnum = columnsInEnum[col].name();
           String columnNameFromSample = columnsInSample[col];
-          Assert.assertEquals(
+          assertEquals(
+              columnNameFromSample,
+              columnNameFromEnum,
               String.format(
                   "Unable to match column '%d' from sample data for '%s'.\nSample Columns: %s\nEnum Columns:   %s\n",
                   col,
                   sampleFile.name(),
                   toHeaderFormat(columnsInSample, c -> c),
-                  toHeaderFormat(columnsInEnum, c -> c.name())),
-              columnNameFromSample,
-              columnNameFromEnum);
+                  toHeaderFormat(columnsInEnum, c -> c.name())));
         }
       }
     } catch (IOException e) {

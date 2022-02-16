@@ -34,6 +34,9 @@ public class RdaServerApp {
    *   <li>fissFile:filename creates a source that returns FissClaims contained in an NDJSON file
    *   <li>mcsFile:filename creates a source that returns McsClaims contained in an NDJSON file
    * </ul>
+   *
+   * @param args the input arguments
+   * @throws Exception any exception thrown during runtime
    */
   public static void main(String[] args) throws Exception {
     final Config config = new Config(args);

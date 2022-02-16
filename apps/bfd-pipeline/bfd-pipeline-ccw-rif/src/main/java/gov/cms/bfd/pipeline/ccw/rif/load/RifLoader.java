@@ -417,7 +417,7 @@ public final class RifLoader {
         LOGGER.trace("Loading '{}' record.", rifFileType);
 
         // Set lastUpdated to the same value for the whole batch
-        record.setLastUpdated(loadedBatchBuilder.getTimestamp());
+        record.setLastUpdated(Optional.of(loadedBatchBuilder.getTimestamp()));
 
         // Associate the beneficiary with this file loaded
         loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId());
@@ -930,7 +930,7 @@ public final class RifLoader {
       oldBeneCopy.setMbiHash(oldBeneficiaryRecord.get().getMbiHash());
       oldBeneCopy.setMbiEffectiveDate(oldBeneficiaryRecord.get().getMbiEffectiveDate());
       oldBeneCopy.setMbiObsoleteDate(oldBeneficiaryRecord.get().getMbiObsoleteDate());
-      oldBeneCopy.setLastUpdated(batchTimestamp);
+      oldBeneCopy.setLastUpdated(Optional.of(batchTimestamp));
 
       entityManager.persist(oldBeneCopy);
     }

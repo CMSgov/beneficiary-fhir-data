@@ -12,10 +12,16 @@ public interface LinkBuilder {
   /**
    * Return the size of the page (ie. _count value). Integer.MAX_VALUE if isPagingRequested is
    * false.
+   *
+   * @return the page size
    */
   int getPageSize();
 
-  /** Return is this a first page request. Always true if isPagingReuested() is false. */
+  /**
+   * Return is this a first page request. Always true if isPagingReuested() is false.
+   *
+   * @return if this is a first page request
+   */
   boolean isFirstPage();
 
   /**

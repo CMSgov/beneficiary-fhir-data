@@ -16,7 +16,8 @@ import java.util.function.Function;
  * Wrapper for a FissClaim or McsClaim source that promotes it to return a ClaimChange containing
  * the actual FiSS or MCS claim with a ChangeType of CHANGE_TYPE_UPDATE.
  *
- * @param <T> either FissClaim or McsClaim
+ * @param <TChange> the type parameter for the change
+ * @param <TClaim> the type parameter for the claim
  */
 public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChange> {
   // Cache used to select whether to return CHANGE_TYPE_UPDATE or CHANGE_TYPE_INSERT.
@@ -35,7 +36,11 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
    * intended for testing with a random claim source it is suitable for testing purposes.
    *
    * @param source the actual source of FISS/MCS claims
-   * @param setter lambda to add the claim to the appropriate field in the ClaimChange builder
+   * @param clock the clock
+   * @param sequenceNumber the sequence number
+   * @param keyCacheSize the key cache size
+   * @param keyExtractor the key extractor
+   * @param changeFactory the change factory
    */
   @VisibleForTesting
   WrappedClaimSource(

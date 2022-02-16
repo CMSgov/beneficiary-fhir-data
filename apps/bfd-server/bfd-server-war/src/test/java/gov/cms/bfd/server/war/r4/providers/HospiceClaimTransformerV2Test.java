@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
@@ -39,10 +43,9 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public final class HospiceClaimTransformerV2Test {
 
@@ -55,7 +58,7 @@ public final class HospiceClaimTransformerV2Test {
    * @return
    * @throws FHIRException
    */
-  @Before
+  @BeforeEach
   public void generateClaim() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -84,10 +87,10 @@ public final class HospiceClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  @Ignore
+  @Disabled
   @Test
   public void shouldOutputJSON() throws FHIRException {
-    Assert.assertNotNull(eob);
+    assertNotNull(eob);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
@@ -109,18 +112,18 @@ public final class HospiceClaimTransformerV2Test {
   /** Common top level ExplanationOfBenefit values */
   @Test
   public void shouldSetId() {
-    Assert.assertEquals("ExplanationOfBenefit/hospice-" + claim.getClaimId(), eob.getId());
+    assertEquals("ExplanationOfBenefit/hospice-" + claim.getClaimId(), eob.getId());
   }
 
   @Test
   public void shouldSetLastUpdated() {
-    Assert.assertNotNull(eob.getMeta().getLastUpdated());
+    assertNotNull(eob.getMeta().getLastUpdated());
   }
 
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
-    Assert.assertTrue(
+    assertTrue(
         eob.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL)));
@@ -128,38 +131,38 @@ public final class HospiceClaimTransformerV2Test {
 
   @Test
   public void shouldSetUse() {
-    Assert.assertEquals(Use.CLAIM, eob.getUse());
+    assertEquals(Use.CLAIM, eob.getUse());
   }
 
   @Test
   public void shouldSetFinalAction() {
-    Assert.assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
+    assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
   @Test
   public void shouldSetOutcomeStatus() {
-    Assert.assertEquals(ExplanationOfBenefit.RemittanceOutcome.COMPLETE, eob.getOutcome());
+    assertEquals(ExplanationOfBenefit.RemittanceOutcome.COMPLETE, eob.getOutcome());
   }
 
   /** Provider Local Reference */
   @Test
   public void shouldHaveProviderReference() {
     List<Resource> containEntries = eob.getContained();
-    Assert.assertEquals(1, containEntries.size());
-    Assert.assertNotNull(eob.getProvider());
-    Assert.assertEquals("#provider-org", eob.getProvider().getReference());
+    assertEquals(1, containEntries.size());
+    assertNotNull(eob.getProvider());
+    assertEquals("#provider-org", eob.getProvider().getReference());
   }
 
   /** Patient Reference */
   @Test
   public void shouldHavePatientReference() {
-    Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    assertNotNull(eob.getPatient());
+    assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
   @Test
   public void shouldHaveCreatedDate() {
-    Assert.assertNotNull(eob.getCreated());
+    assertNotNull(eob.getCreated());
   }
 
   /** Provider Identifier(s) */
@@ -167,10 +170,10 @@ public final class HospiceClaimTransformerV2Test {
   public void shouldHaveContainedIdentifier() {
     List<Resource> actuals = eob.getContained();
 
-    Assert.assertEquals(1, actuals.size());
+    assertEquals(1, actuals.size());
     Organization org = (Organization) actuals.get(0);
     List<Identifier> expected = org.getIdentifier();
-    Assert.assertEquals(2, expected.size());
+    assertEquals(2, expected.size());
 
     List<Identifier> compare = new ArrayList<Identifier>();
     Identifier ident = new Identifier();
@@ -195,14 +198,14 @@ public final class HospiceClaimTransformerV2Test {
     compare.add(ident);
 
     for (int i = 0; i < compare.size(); i++) {
-      Assert.assertTrue(compare.get(i).equalsDeep(expected.get(i)));
+      assertTrue(compare.get(i).equalsDeep(expected.get(i)));
     }
   }
 
   @Test
   public void shouldHaveIdentifiers() {
     List<Identifier> expected = eob.getIdentifier();
-    Assert.assertEquals(2, expected.size());
+    assertEquals(2, expected.size());
 
     List<Identifier> compare =
         Arrays.asList(
@@ -220,26 +223,26 @@ public final class HospiceClaimTransformerV2Test {
                 "Unique Claim ID"));
 
     for (int i = 0; i < expected.size(); i++) {
-      Assert.assertTrue(compare.get(i).equalsDeep(expected.get(i)));
+      assertTrue(compare.get(i).equalsDeep(expected.get(i)));
     }
   }
 
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    Assert.assertEquals(3, expected.size());
+    assertEquals(3, expected.size());
 
-    Assert.assertNotNull(
+    assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
             eob.getExtension()));
 
-    Assert.assertNotNull(
+    assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
             eob.getExtension()));
 
-    Assert.assertNotNull(
+    assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
             eob.getExtension()));
@@ -266,16 +269,16 @@ public final class HospiceClaimTransformerV2Test {
                     null)));
 
     for (int i = 0; i < expected.size(); i++) {
-      Assert.assertTrue(compare.get(i).equalsDeep(expected.get(i)));
+      assertTrue(compare.get(i).equalsDeep(expected.get(i)));
     }
   }
 
   @Test
   public void shouldHaveTypeCodings() {
     CodeableConcept cc = eob.getType();
-    Assert.assertNotNull(cc);
+    assertNotNull(cc);
     List<Coding> expected = cc.getCoding();
-    Assert.assertEquals(3, expected.size());
+    assertEquals(3, expected.size());
 
     List<Coding> compare = new ArrayList<Coding>();
     compare.add(
@@ -294,34 +297,34 @@ public final class HospiceClaimTransformerV2Test {
             .setDisplay("Institutional"));
 
     for (int i = 0; i < expected.size(); i++) {
-      Assert.assertTrue(compare.get(i).equalsDeep(expected.get(i)));
+      assertTrue(compare.get(i).equalsDeep(expected.get(i)));
     }
   }
 
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
-    Assert.assertNotNull(eob.getBillablePeriod());
-    Assert.assertEquals(
+    assertNotNull(eob.getBillablePeriod());
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-01"),
         eob.getBillablePeriod().getStart());
-    Assert.assertEquals(
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-30"), eob.getBillablePeriod().getEnd());
   }
 
   @Test
   public void shouldSetInsurer() throws Exception {
     Reference expected = eob.getInsurer();
-    Assert.assertNotNull(expected);
+    assertNotNull(expected);
     Reference compare = new Reference();
     compare.getIdentifier().setValue("CMS");
-    Assert.assertTrue(compare.equalsDeep(expected));
+    assertTrue(compare.equalsDeep(expected));
   }
 
   @Test
   public void shouldHaveFacilityTypeExtension() {
-    Assert.assertNotNull(eob.getFacility());
-    Assert.assertEquals(1, eob.getFacility().getExtension().size());
+    assertNotNull(eob.getFacility());
+    assertEquals(1, eob.getFacility().getExtension().size());
 
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -336,7 +339,7 @@ public final class HospiceClaimTransformerV2Test {
                 "8",
                 "Ambulatory Surgery Center (ASC) or other special facility (e.g. hospice)"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -351,7 +354,7 @@ public final class HospiceClaimTransformerV2Test {
             "attending",
             "Attending");
 
-    Assert.assertTrue(compare1.equalsDeep(member1));
+    assertTrue(compare1.equalsDeep(member1));
 
     // Second member
     CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
@@ -377,7 +380,7 @@ public final class HospiceClaimTransformerV2Test {
                                 "performing",
                                 "Performing provider"))));
 
-    Assert.assertTrue(compare2.equalsDeep(member2));
+    assertTrue(compare2.equalsDeep(member2));
 
     //     // Third member
     CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
@@ -403,13 +406,13 @@ public final class HospiceClaimTransformerV2Test {
                                 "performing",
                                 "Performing provider"))));
 
-    Assert.assertTrue(compare3.equalsDeep(member3));
+    assertTrue(compare3.equalsDeep(member3));
   }
 
   @Test
   public void shouldHaveAllDiagnosis() {
     List<DiagnosisComponent> expected = eob.getDiagnosis();
-    Assert.assertEquals(4, expected.size());
+    assertEquals(4, expected.size());
     DiagnosisComponent diag1 =
         TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
 
@@ -425,7 +428,7 @@ public final class HospiceClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp1.equalsDeep(diag1));
+    assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
         TransformerTestUtilsV2.findDiagnosisByCode("R6666", eob.getDiagnosis());
@@ -442,7 +445,7 @@ public final class HospiceClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp2.equalsDeep(diag2));
+    assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
         TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
@@ -459,7 +462,7 @@ public final class HospiceClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp3.equalsDeep(diag3));
+    assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
         TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
@@ -476,21 +479,21 @@ public final class HospiceClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp3.equalsDeep(diag3));
+    assertTrue(cmp3.equalsDeep(diag3));
   }
 
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
     // Only one insurance object
-    Assert.assertEquals(1, eob.getInsurance().size());
+    assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
     InsuranceComponent compare =
         new InsuranceComponent()
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
-    Assert.assertTrue(compare.equalsDeep(insurance));
+    assertTrue(compare.equalsDeep(insurance));
   }
 
   @Test
@@ -500,7 +503,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_rate_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -518,7 +521,7 @@ public final class HospiceClaimTransformerV2Test {
                                 "Revenue Center Rate Amount"))))
             .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -528,7 +531,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -549,7 +552,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("2555.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -559,7 +562,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -580,7 +583,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("300.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -590,7 +593,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_prvdr_pmt_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -611,7 +614,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("29.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -621,7 +624,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_prvdr_pmt_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -642,7 +645,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("29.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -652,7 +655,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_bene_pmt_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -673,7 +676,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("28.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -683,7 +686,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/rev_cntr_pmt_amt_amt",
             eob.getItemFirstRep().getAdjudication());
 
-    Assert.assertNotNull(adjudication);
+    assertNotNull(adjudication);
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -704,7 +707,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("26.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -731,7 +734,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("199.99"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(total));
+    assertTrue(compare.equalsDeep(total));
   }
 
   @Test
@@ -744,7 +747,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType("130.32"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(expected));
+    assertTrue(compare.equalsDeep(expected));
   }
 
   @Test
@@ -754,7 +757,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt",
             eob.getBenefitBalanceFirstRep().getFinancial());
 
-    Assert.assertNotNull(benefit);
+    assertNotNull(benefit);
 
     BenefitComponent compare =
         new BenefitComponent()
@@ -768,7 +771,7 @@ public final class HospiceClaimTransformerV2Test {
                                 "Claim Medicare Utilization Day Count"))))
             .setUsed(new UnsignedIntType(30));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -778,7 +781,7 @@ public final class HospiceClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/prpayamt",
             eob.getBenefitBalanceFirstRep().getFinancial());
 
-    Assert.assertNotNull(benefit);
+    assertNotNull(benefit);
 
     BenefitComponent compare =
         new BenefitComponent()
@@ -795,7 +798,7 @@ public final class HospiceClaimTransformerV2Test {
                     .setValueElement(new DecimalType(0))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   /**

@@ -154,11 +154,9 @@ public class DataTransformer {
    * or add an error otherwise.
    *
    * @param fieldName name of the field from which the value originates
-   * @param enumValue value of the enum
-   * @param unsetValue enum instance for unset values
-   * @param unrecognizedValue enum instance for unrecognized values
+   * @param enumResult the enum result
    * @param copier Consumer to receive the character value
-   * @return this
+   * @return this data transformer
    */
   public DataTransformer copyEnumAsCharacter(
       String fieldName, EnumStringExtractor.Result enumResult, Consumer<Character> copier) {
@@ -169,11 +167,12 @@ public class DataTransformer {
    * Same as copyString() but with a EnumStringExtractor.Result.
    *
    * @param fieldName name of the field from which the value originates
-   * @param enumValue value of the enum
-   * @param unsetValue enum instance for unset values
-   * @param unrecognizedValue enum instance for unrecognized values
+   * @param nullable if the field should be nullable
+   * @param minLength the min length
+   * @param maxLength the max length
+   * @param enumResult the enum result
    * @param copier Consumer to receive the character value as a String
-   * @return this
+   * @return this data transformer
    */
   public DataTransformer copyEnumAsString(
       String fieldName,

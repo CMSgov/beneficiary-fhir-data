@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.war.commons;
 
-/** Enumerates the value codeset indicating the race category of the {@link Patient}. */
+/**
+ * Enumerates the value codeset indicating the race category of the {@link
+ * org.hl7.fhir.r4.model.Patient}.
+ */
 public enum RaceCategory {
   WHITE,
   BLACK_OR_AFRICAN_AMERICAN,
