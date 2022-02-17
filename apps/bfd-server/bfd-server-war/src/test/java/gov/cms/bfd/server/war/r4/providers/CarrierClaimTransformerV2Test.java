@@ -549,7 +549,7 @@ public class CarrierClaimTransformerV2Test {
    */
   @Test
   public void shouldHaveCareTeamList() {
-    assertEquals(4, eob.getCareTeam().size());
+    assertEquals(5, eob.getCareTeam().size());
   }
 
   @Test

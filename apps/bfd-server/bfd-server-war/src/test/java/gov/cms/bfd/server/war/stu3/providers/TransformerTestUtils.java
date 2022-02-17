@@ -1727,7 +1727,7 @@ final class TransformerTestUtils {
     if (includeTaxNumbers.orElse(false)) {
       assertNotNull(taxNumberCareTeamEntry);
     } else {
-      assertNull(taxNumberCareTeamEntry);
+      assertEquals(null, taxNumberCareTeamEntry);
     }
   }
 

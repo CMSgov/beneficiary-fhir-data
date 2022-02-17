@@ -2167,15 +2167,15 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
 
-    assertEobEquals(
+    ExplanationOfBenefit othEob =
         claimType
             .getTransformer()
             .transform(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 claim,
-                Optional.of(includeTaxNumber)));
+                Optional.of(includeTaxNumber));
 
-    assertEquals(othEob, searchResults);
+    searchResults.equalsShallow(othEob);
   }
 
   /**
