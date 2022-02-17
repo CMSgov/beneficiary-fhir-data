@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,41 +22,62 @@ import org.junit.jupiter.api.Test;
 public class S3BucketMessageSourceFactoryTest {
   @Test
   public void listFilesTest() {
+    final String directoryPath = "/my_directory/";
     AmazonS3 s3Client =
         createS3Client(
-            "mcs-215-275.ndjson.gz",
-            "fiss.ndjson",
-            "fiss-101-250.ndjson",
-            "mcs-83-214.ndjson.gz",
-            "this-won't-match",
-            "fiss-0-100.ndjson");
+            directoryPath,
+            directoryPath + "mcs-215-275.ndjson.gz",
+            directoryPath + "fiss.ndjson",
+            directoryPath + "fiss-101-250.ndjson",
+            directoryPath + "mcs-83-214.ndjson.gz",
+            directoryPath + "this-won't-match",
+            directoryPath + "fiss-0-100.ndjson");
 
     S3BucketMessageSourceFactory<?> fissFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Client, "bucket", "fiss", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
+            s3Client,
+            "bucket",
+            directoryPath,
+            "fiss",
+            "ndjson",
+            s -> new EmptyMessageSource<>(),
+            r -> 0L);
     assertEquals(
         Arrays.asList(
-            new S3BucketMessageSourceFactory.FileEntry("fiss-0-100.ndjson", 0, 100),
-            new S3BucketMessageSourceFactory.FileEntry("fiss.ndjson", 0, Long.MAX_VALUE),
-            new S3BucketMessageSourceFactory.FileEntry("fiss-101-250.ndjson", 101, 250)),
+            new S3BucketMessageSourceFactory.FileEntry(directoryPath + "fiss-0-100.ndjson", 0, 100),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "fiss.ndjson", 0, Long.MAX_VALUE),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "fiss-101-250.ndjson", 101, 250)),
         fissFactory.listFiles(0L));
     assertEquals(
         Arrays.asList(
-            new S3BucketMessageSourceFactory.FileEntry("fiss.ndjson", 0, Long.MAX_VALUE),
-            new S3BucketMessageSourceFactory.FileEntry("fiss-101-250.ndjson", 101, 250)),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "fiss.ndjson", 0, Long.MAX_VALUE),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "fiss-101-250.ndjson", 101, 250)),
         fissFactory.listFiles(112L));
 
     S3BucketMessageSourceFactory<?> mcsFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Client, "bucket", "mcs", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
+            s3Client,
+            "bucket",
+            directoryPath,
+            "mcs",
+            "ndjson",
+            s -> new EmptyMessageSource<>(),
+            r -> 0L);
     assertEquals(
         Arrays.asList(
-            new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson.gz", 83, 214),
-            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "mcs-83-214.ndjson.gz", 83, 214),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "mcs-215-275.ndjson.gz", 215, 275)),
         mcsFactory.listFiles(44L));
     assertEquals(
         Collections.singletonList(
-            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
+            new S3BucketMessageSourceFactory.FileEntry(
+                directoryPath + "mcs-215-275.ndjson.gz", 215, 275)),
         mcsFactory.listFiles(215L));
     assertEquals(Collections.emptyList(), mcsFactory.listFiles(276L));
   }
@@ -105,7 +127,7 @@ public class S3BucketMessageSourceFactoryTest {
     assertTrue(source2.isClosed());
   }
 
-  private AmazonS3 createS3Client(String... filenames) {
+  private AmazonS3 createS3Client(String directoryPath, String... filenames) {
     List<S3ObjectSummary> summaries = new ArrayList<>();
     for (String filename : filenames) {
       S3ObjectSummary summary = mock(S3ObjectSummary.class);
@@ -115,7 +137,11 @@ public class S3BucketMessageSourceFactoryTest {
     ObjectListing listing = mock(ObjectListing.class);
     doReturn(summaries).when(listing).getObjectSummaries();
     AmazonS3 s3Client = mock(AmazonS3.class);
-    doReturn(listing).when(s3Client).listObjects(anyString());
+    if (Strings.isNullOrEmpty(directoryPath)) {
+      doReturn(listing).when(s3Client).listObjects(anyString());
+    } else {
+      doReturn(listing).when(s3Client).listObjects(anyString(), eq(directoryPath));
+    }
     return s3Client;
   }
 
@@ -126,9 +152,9 @@ public class S3BucketMessageSourceFactoryTest {
       filenames.add(source.getFilename());
       sourceMap.put(source.getFilename(), source);
     }
-    AmazonS3 s3Client = createS3Client(filenames.toArray(new String[0]));
+    AmazonS3 s3Client = createS3Client("", filenames.toArray(new String[0]));
     return new S3BucketMessageSourceFactory<>(
-        s3Client, "bucket", "fiss", "ndjson", sourceMap::get, Function.identity());
+        s3Client, "bucket", "", "fiss", "ndjson", sourceMap::get, Function.identity());
   }
 
   private static class MockMessageSource implements MessageSource<Long> {

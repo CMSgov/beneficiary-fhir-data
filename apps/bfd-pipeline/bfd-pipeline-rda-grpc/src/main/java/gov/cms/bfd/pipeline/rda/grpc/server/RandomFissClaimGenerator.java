@@ -143,7 +143,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setCurrTranDtCymd(randomDate()));
     optional(() -> claim.setAdmDiagCode(randomLetter(1, 7)));
     optional(() -> claim.setNpiNumber(randomDigit(10, 10)));
-    optional(() -> claim.setMbi(randomAlphaNumeric(13, 13)));
+    optional(() -> claim.setMbi(randomAlphaNumeric(11, 11)));
     optional(() -> claim.setFedTaxNb(randomDigit(10, 10)));
     optional(() -> claim.setPracLocAddr1(randomAlphaNumeric(1, 100)));
     optional(() -> claim.setPracLocAddr2(randomAlphaNumeric(1, 100)));

@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+        kubernetes {
+        yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: bfd
+  restartPolicy: Never
+  containers:
+  - name: certchecker
+    image: amazonlinux:latest
+    command: ['cat']
+    tty: true
+"""
+        }
+    }
+    triggers {
+        cron('0 20 11 * 1-5')
+    }
+    environment {
+        SEND_NOTIFICATIONS="false"
+        WARN_WHEN="30:45"
+        ALERT_WHEN="15:30"
+        PAGE_WHEN="1:15"
+        WARN_SLACK_WEBHOOK_URL=credentials('cert-warn-slack-webhook')
+        WARN_SLACK_CHAN="#bfd-notices"
+        ALERT_SLACK_WEBHOOK_URL=credentials('cert-alert-slack-webhook')
+        ALERT_SLACK_CHAN="#bfd-alerts"
+        PAGE_WEBHOOK_URL=credentials('cert-page-webhook-url')
+    }
+    stages {
+        stage('Prepare cert-checker'){
+            steps {
+                script {
+                    container('certchecker') {
+                        sh '''
+                        yum update -y
+                        yum install -y git openssl
+                        git clone --depth 1 --branch master --single-branch https://github.com/CMSgov/beneficiary-fhir-data.git bfd
+                        cp -f bfd/ops/ccs-ops-misc/cert-checker/cert-checker.sh /usr/local/bin/cert-checker.sh
+                        chmod +x /usr/local/bin/cert-checker.sh
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Check: test') {
+            steps {
+                script {
+                    container('certchecker') {
+                        sh '''
+                        cert-checker.sh -e "test.bfd.cms.gov:443"
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Check: prod-sbx') {
+            steps {
+                script {
+                    container('certchecker') {
+                        sh '''
+                        cert-checker.sh -e "prod-sbx.bfd.cms.gov:443"
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Check: prod') {
+            steps {
+                script {
+                    container('certchecker') {
+                        sh '''
+                        cert-checker.sh -e "prod.bfd.cms.gov:443"
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}

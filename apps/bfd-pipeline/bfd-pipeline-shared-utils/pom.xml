@@ -72,6 +72,14 @@
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 
+                <!-- Compile time only -->
+                <dependency>
+                        <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <scope>provided</scope>
+                </dependency>
+
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>

@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -67,7 +68,7 @@ public class RdaLoadJobIT {
     final ImmutableList<FissClaimChange> expectedClaims =
         JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
     final FissClaimTransformer transformer =
-        new FissClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+        new FissClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (FissClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);
@@ -158,7 +159,7 @@ public class RdaLoadJobIT {
     final ImmutableList<McsClaimChange> expectedClaims =
         JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
     final McsClaimTransformer transformer =
-        new McsClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+        new McsClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (McsClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);

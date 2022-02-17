@@ -33,6 +33,11 @@ export RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
 export RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
 export RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
 export RDA_GRPC_AUTH_TOKEN='{{ data_pipeline_rda_grpc_auth_token }}'
+export RDA_GRPC_SERVER_TYPE='{{ data_pipeline_rda_grpc_server_type }}'
+export RDA_GRPC_INPROC_SERVER_MODE='{{ data_pipeline_rda_grpc_inproc_server_mode }}'
+export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ data_pipeline_rda_grpc_inproc_server_s3_region }}'
+export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ data_pipeline_rda_grpc_inproc_server_s3_bucket }}'
+export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ data_pipeline_rda_grpc_inproc_server_s3_directory }}'
 
 # Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
 export BFD_ENV_NAME='{{ env_name_std }}'
