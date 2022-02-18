@@ -7,6 +7,8 @@ import com.codahale.metrics.servlets.ThreadDumpServlet;
 import com.newrelic.api.agent.NewRelic;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
@@ -107,6 +109,12 @@ public final class Operation {
 
     /** Handled by {@link ExplanationOfBenefitResourceProvider}. */
     V2_EOB("/v2/fhir/ExplanationOfBenefit"),
+
+    /** Handled by {@link R4ClaimResourceProvider}. */
+    V2_CLAIM("/v2/fhir/Claim"),
+
+    /** Handled by {@link R4ClaimResponseResourceProvider}. */
+    V2_CLAIM_RESPONSE("/v2/fhir/ClaimResponse"),
 
     /** Some other, unknown HTTP endpoint/operation. */
     OTHER(null);
