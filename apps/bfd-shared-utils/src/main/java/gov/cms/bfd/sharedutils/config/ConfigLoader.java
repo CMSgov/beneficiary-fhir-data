@@ -29,6 +29,7 @@ public class ConfigLoader {
   private final Function<String, Collection<String>> source;
 
   private static final String NOT_VALID_INTEGER = "not a valid integer";
+  private static final String NOT_VALID_FLOAT = "not a valid float";
 
   /**
    * Constructs a ConfigLoader that uses the provided Function as the source of key/value
@@ -84,6 +85,7 @@ public class ConfigLoader {
    * Gets an optional configuration value or a defaultValue if there is no non-empty value.
    *
    * @param name name of configuration value
+   * @param defaultValue the default value
    * @return either the non-empty string value or defaultValue
    */
   public String stringValue(String name, String defaultValue) {
@@ -111,6 +113,59 @@ public class ConfigLoader {
   }
 
   /**
+   * Gets a required float configuration value.
+   *
+   * @param name name of configuration value
+   * @return float value
+   * @throws ConfigException if there is no valid float value
+   */
+  public float floatValue(String name) {
+    final String value = stringValue(name);
+
+    try {
+      return Float.parseFloat(value);
+    } catch (Exception ex) {
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
+    }
+  }
+
+  /**
+   * Gets an optional float configuration value or a defaultValue if there is no value.
+   *
+   * @param name name of configuration value
+   * @return either the float value or defaultValue
+   * @throws ConfigException if a value existed but was not a valid float
+   */
+  public float floatValue(String name, float defaultValue) {
+    Optional<String> optional = stringOption(name);
+
+    if (optional.isEmpty()) {
+      return defaultValue;
+    }
+
+    try {
+      return Float.parseFloat(optional.get());
+    } catch (Exception ex) {
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
+    }
+  }
+
+  /**
+   * Gets an Optional for the specified float configuration value.
+   *
+   * @param name name of configuration value
+   * @return empty Option if there is no value, otherwise Option holding the value
+   * @throws ConfigException if a value existed but was not a valid float
+   */
+  public Optional<Float> floatOption(String name) {
+    try {
+      return stringOption(name).map(Float::parseFloat);
+    } catch (Exception ex) {
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
+    }
+  }
+
+  /**
    * Gets a required integer configuration value.
    *
    * @param name name of configuration value
@@ -131,6 +186,7 @@ public class ConfigLoader {
    * Gets an optional integer configuration value or a defaultValue if there is no value.
    *
    * @param name name of configuration value
+   * @param defaultValue the default value
    * @return either the integer value or defaultValue
    * @throws ConfigException if a value existed but was not a valid integer
    */
@@ -181,7 +237,9 @@ public class ConfigLoader {
   /**
    * Gets a required enum configuration value.
    *
+   * @param <T> the type parameter
    * @param name name of configuration value
+   * @param parser the function to parse the enum with
    * @return enum value
    * @throws ConfigException if there is no valid enum value
    */
@@ -193,7 +251,9 @@ public class ConfigLoader {
   /**
    * Gets an optional enum configuration value.
    *
+   * @param <T> the type parameter
    * @param name name of configuration value
+   * @param parser the function to parse the enum with
    * @return Optional enum value
    * @throws ConfigException if there is no valid enum value
    */
@@ -248,6 +308,7 @@ public class ConfigLoader {
    * Gets an optional boolean configuration value or a defaultValue if there is no value.
    *
    * @param name name of configuration value
+   * @param defaultValue the default value
    * @return either the boolean value or defaultValue
    * @throws ConfigException if a value existed but it wasn't a valid boolean
    */
@@ -361,12 +422,20 @@ public class ConfigLoader {
       return add(wrappedNewSource);
     }
 
-    /** Adds a source that pulls values from environment variables. */
+    /**
+     * Adds a source that pulls values from environment variables.
+     *
+     * @return the builder for chaining
+     */
     public Builder addEnvironmentVariables() {
       return addSingle(System::getenv);
     }
 
-    /** Adds a source that pulls values from system properties. */
+    /**
+     * Adds a source that pulls values from system properties.
+     *
+     * @return the builder for chaining
+     */
     public Builder addSystemProperties() {
       return addSingle(System::getProperty);
     }
@@ -375,6 +444,7 @@ public class ConfigLoader {
      * Adds a source that pulls values from the specified properties object.
      *
      * @param properties source of properties
+     * @return the builder for chaining
      */
     public Builder addProperties(Properties properties) {
       return addSingle(properties::getProperty);
@@ -385,6 +455,7 @@ public class ConfigLoader {
      * source. The file must exist and must be a valid Properties file.
      *
      * @param propertiesFile normal java Properties file
+     * @return the builder for chaining
      * @throws IOException if reading the file failed
      */
     public Builder addPropertiesFile(File propertiesFile) throws IOException {

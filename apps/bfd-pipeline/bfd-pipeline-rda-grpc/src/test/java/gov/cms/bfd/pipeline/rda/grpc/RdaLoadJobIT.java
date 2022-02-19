@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -33,8 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class RdaLoadJobIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
@@ -47,7 +48,7 @@ public class RdaLoadJobIT {
   private ImmutableList<String> fissClaimJson;
   private ImmutableList<String> mcsClaimJson;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     if (fissClaimJson == null) {
       fissClaimJson = fissClaimsSource.readLines();
@@ -67,7 +68,7 @@ public class RdaLoadJobIT {
     final ImmutableList<FissClaimChange> expectedClaims =
         JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
     final FissClaimTransformer transformer =
-        new FissClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+        new FissClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (FissClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);
@@ -140,7 +141,7 @@ public class RdaLoadJobIT {
                       fail("expected an exception to be thrown");
                     } catch (ProcessingException ex) {
                       assertEquals(fullBatchSize, ex.getProcessedCount());
-                      assertEquals(true, ex.getMessage().contains("invalid length"));
+                      assertTrue(ex.getMessage().contains("invalid length"));
                     }
                   });
           List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
@@ -158,7 +159,7 @@ public class RdaLoadJobIT {
     final ImmutableList<McsClaimChange> expectedClaims =
         JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
     final McsClaimTransformer transformer =
-        new McsClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+        new McsClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (McsClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);
@@ -215,7 +216,7 @@ public class RdaLoadJobIT {
           final int claimsToSendBeforeThrowing = mcsClaimJson.size() / 2;
           final int fullBatchSize =
               claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
-          assertEquals(true, fullBatchSize > 0);
+          assertTrue(fullBatchSize > 0);
           RdaServer.LocalConfig.builder()
               .mcsSourceFactory(
                   ignored ->
@@ -234,7 +235,7 @@ public class RdaLoadJobIT {
                       fail("expected an exception to be thrown");
                     } catch (ProcessingException ex) {
                       assertEquals(fullBatchSize, ex.getProcessedCount());
-                      assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
+                      assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                     }
                   });
           List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);

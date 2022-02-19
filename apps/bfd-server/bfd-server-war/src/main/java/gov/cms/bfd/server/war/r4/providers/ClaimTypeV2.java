@@ -110,9 +110,10 @@ public enum ClaimTypeV2 {
    * Enum constant constructor.
    *
    * @param entityClass the value to use for {@link #getEntityClass()}
-   * @param entityIdAtt ibute the value to u e for {@link #getEntityIdAttribute()}
-   * @param entityBeneficiaryIdA tribute the value to use for {@link
+   * @param entityIdAttribute the value to u e for {@link #getEntityIdAttribute()}
+   * @param entityBeneficiaryIdAttribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
+   * @param serviceEndAttributeFunction the service end attribute function
    * @param transformer the value to use for {@link #getTransformer()}
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
@@ -156,7 +157,6 @@ public enum ClaimTypeV2 {
   }
 
   /**
-   * @return the {@link Function} to use to transform the JPA {@link Entity} instances into FHIR
    * @return the {@link Function} to use to retrieve the {@link LocalDate} to use for service date
    *     filter
    */
@@ -165,7 +165,7 @@ public enum ClaimTypeV2 {
   }
 
   /**
-   * @return the {@link ClaimTypeTransformer} to use to transform the JPA {@link Entity} instances
+   * @return the {@link ClaimTypeTransformerV2} to use to transform the JPA {@link Entity} instances
    *     into FHIR {@link ExplanationOfBenefit} instances
    */
   public ClaimTypeTransformerV2 getTransformer() {

@@ -62,7 +62,7 @@
 			<!-- Used to serialize and deserialize objects to JSON. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.11.1</version>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>
@@ -71,17 +71,19 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
-		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
-				for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
+
+                <!-- Compile time only -->
+                <dependency>
+                        <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <scope>provided</scope>
+                </dependency>
 
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

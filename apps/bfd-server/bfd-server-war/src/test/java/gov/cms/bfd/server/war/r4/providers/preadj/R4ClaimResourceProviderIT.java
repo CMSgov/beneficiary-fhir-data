@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class R4ClaimResourceProviderIT {
 
@@ -25,15 +25,13 @@ public class R4ClaimResourceProviderIT {
   private static final Set<String> IGNORE_PATTERNS =
       Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
 
-  @BeforeClass
+  @BeforeAll
   public static void init() {
     testUtils.init();
-
-    testUtils.seedData(testUtils.fissTestData());
-    testUtils.seedData(testUtils.mcsTestData());
+    testUtils.seedData(false);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() {
     testUtils.truncateTables();
     testUtils.destroy();
@@ -73,7 +71,7 @@ public class R4ClaimResourceProviderIT {
             .forResource(Claim.class)
             .where(
                 Map.of(
-                    "mbi", List.of(new ReferenceParam("a7f8e93f09")),
+                    "mbi", List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
                     "service-date",
                         List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
             .returnBundle(Bundle.class)

@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -10,7 +12,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.NoSuchElementException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JsonMessageSourceTest {
   private static final String CLAIM_1 =
@@ -79,10 +81,10 @@ public class JsonMessageSourceTest {
   public void singleClaimString() throws Exception {
     JsonMessageSource<FissClaim> source =
         new JsonMessageSource<>(CLAIM_1, JsonMessageSource::parseFissClaim);
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     FissClaim claim = source.next();
     assertEquals("63843470", claim.getDcn());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
     assertMultipleCallsToCloseOk(source);
   }
@@ -92,13 +94,13 @@ public class JsonMessageSourceTest {
     JsonMessageSource<FissClaim> source =
         new JsonMessageSource<>(
             CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource::parseFissClaim);
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     FissClaim claim = source.next();
     assertEquals("63843470", claim.getDcn());
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     claim = source.next();
     assertEquals("2643602", claim.getDcn());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
     assertMultipleCallsToCloseOk(source);
   }
@@ -108,13 +110,13 @@ public class JsonMessageSourceTest {
     JsonMessageSource<FissClaim> source =
         new JsonMessageSource<>(
             ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource::parseFissClaim);
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     FissClaim claim = source.next();
     assertEquals("63843470", claim.getDcn());
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     claim = source.next();
     assertEquals("2643602", claim.getDcn());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
     assertMultipleCallsToCloseOk(source);
   }
@@ -130,13 +132,13 @@ public class JsonMessageSourceTest {
       }
       try (JsonMessageSource<FissClaim> source =
           new JsonMessageSource<>(jsonFile, JsonMessageSource::parseFissClaim)) {
-        assertEquals(true, source.hasNext());
+        assertTrue(source.hasNext());
         FissClaim claim = source.next();
         assertEquals("63843470", claim.getDcn());
-        assertEquals(true, source.hasNext());
+        assertTrue(source.hasNext());
         claim = source.next();
         assertEquals("2643602", claim.getDcn());
-        assertEquals(false, source.hasNext());
+        assertFalse(source.hasNext());
         assertNextPastEndOfDataThrowsException(source);
         assertMultipleCallsToCloseOk(source);
       }
@@ -151,10 +153,10 @@ public class JsonMessageSourceTest {
         new JsonMessageSource<>(
                 ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource::parseFissClaim)
             .skip(1);
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     FissClaim claim = source.next();
     assertEquals("2643602", claim.getDcn());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
   }
 
   private void assertNextPastEndOfDataThrowsException(JsonMessageSource<?> source)
@@ -166,8 +168,8 @@ public class JsonMessageSourceTest {
       // expected
     }
     // ensures calling hasNext() multiple times past the end is safe
-    assertEquals(false, source.hasNext());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
+    assertFalse(source.hasNext());
   }
 
   private void assertMultipleCallsToCloseOk(JsonMessageSource<?> source) throws Exception {

@@ -950,7 +950,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   /**
    * Check that coverageId value is valid
    *
-   * @param coverageId
+   * @param coverageId the coverage id
    * @throws InvalidRequestException if invalid coverageId
    */
   public static void checkCoverageId(TokenParam coverageId) {

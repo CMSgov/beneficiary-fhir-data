@@ -20,6 +20,7 @@ public class S3JsonMessageSources {
 
   private final AmazonS3 s3Client;
   @Getter private final String bucketName;
+  @Getter private final String directoryPath;
   private final String fissPrefix;
   private final String mcsPrefix;
 
@@ -34,8 +35,9 @@ public class S3JsonMessageSources {
   public S3JsonMessageSources(AmazonS3 s3Client, String bucketName, String directoryPath) {
     this.s3Client = s3Client;
     this.bucketName = bucketName;
-    fissPrefix = createCompoundKeyPrefix(directoryPath, FISS_OBJECT_KEY_PREFIX);
-    mcsPrefix = createCompoundKeyPrefix(directoryPath, MCS_OBJECT_KEY_PREFIX);
+    this.directoryPath = normalizeDirectoryPath(directoryPath);
+    fissPrefix = FISS_OBJECT_KEY_PREFIX;
+    mcsPrefix = MCS_OBJECT_KEY_PREFIX;
   }
 
   /**
@@ -48,6 +50,7 @@ public class S3JsonMessageSources {
     return new S3BucketMessageSourceFactory<>(
         s3Client,
         bucketName,
+        directoryPath,
         fissPrefix,
         FILE_SUFFIX,
         this::readFissClaimChanges,
@@ -64,6 +67,7 @@ public class S3JsonMessageSources {
     return new S3BucketMessageSourceFactory<>(
         s3Client,
         bucketName,
+        directoryPath,
         mcsPrefix,
         FILE_SUFFIX,
         this::readMcsClaimChanges,
@@ -98,7 +102,8 @@ public class S3JsonMessageSources {
    * @return a valid object key for FISS claims data
    */
   public String createFissObjectKey() {
-    return S3BucketMessageSourceFactory.createValidObjectKey(fissPrefix, FILE_SUFFIX);
+    return S3BucketMessageSourceFactory.createValidObjectKey(
+        directoryPath + fissPrefix, FILE_SUFFIX);
   }
 
   /**
@@ -106,6 +111,8 @@ public class S3JsonMessageSources {
    * range of sequence numbers within the file to be added to the key in a compatible way. Intended
    * for use in integration tests that need to upload files without using hard coded keys.
    *
+   * @param minSeq the min sequence number
+   * @param maxSeq the max sequence number
    * @return a valid object key for FISS claims data
    */
   public String createFissObjectKey(long minSeq, long maxSeq) {
@@ -120,7 +127,8 @@ public class S3JsonMessageSources {
    * @return a valid object key for FISS claims data
    */
   public String createMcsObjectKey() {
-    return S3BucketMessageSourceFactory.createValidObjectKey(mcsPrefix, FILE_SUFFIX);
+    return S3BucketMessageSourceFactory.createValidObjectKey(
+        directoryPath + mcsPrefix, FILE_SUFFIX);
   }
 
   /**
@@ -128,6 +136,8 @@ public class S3JsonMessageSources {
    * range of sequence numbers within the file to be added to the key in a compatible way. Intended
    * for use in integration tests that need to upload files without using hard coded keys.
    *
+   * @param minSeq the min sequence number
+   * @param maxSeq the max sequence number
    * @return a valid object key for MCS claims data
    */
   public String createMcsObjectKey(long minSeq, long maxSeq) {
@@ -142,13 +152,12 @@ public class S3JsonMessageSources {
     return new S3JsonMessageSource<>(s3Client.getObject(bucketName, ndjsonObjectKey), parser);
   }
 
-  private static String createCompoundKeyPrefix(String directoryPath, String keyPrefix) {
+  private static String normalizeDirectoryPath(String directoryPath) {
     if (Strings.isNullOrEmpty(directoryPath)) {
-      return keyPrefix;
-    } else if (directoryPath.endsWith("/")) {
-      return directoryPath + keyPrefix;
-    } else {
-      return String.format("%s/%s", directoryPath, keyPrefix);
+      directoryPath = "";
+    } else if (!directoryPath.endsWith("/")) {
+      directoryPath = directoryPath + "/";
     }
+    return directoryPath;
   }
 }
