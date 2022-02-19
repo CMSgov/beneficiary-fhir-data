@@ -6,6 +6,14 @@ Update Carrier claim mapping for mtus code instead of mtus count:
 The new coding:
 ```
 {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+},
+{
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
       "valueCoding" : {
         "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
