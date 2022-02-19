@@ -1108,7 +1108,7 @@ public final class TransformerTestUtilsV2 {
             .filter(e -> url.equals(e.getUrl()) && e.getValue().equalsDeep(cod))
             .findFirst();
 
-    Assert.assertTrue(ex.isPresent());
+    assertTrue(ex.isPresent());
 
     return ex.get();
   }

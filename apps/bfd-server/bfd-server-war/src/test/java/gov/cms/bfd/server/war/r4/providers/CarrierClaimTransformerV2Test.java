@@ -649,8 +649,8 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveLineItemExtension() {
-    Assert.assertNotNull(eob.getItemFirstRep().getExtension());
-    Assert.assertEquals(7, eob.getItemFirstRep().getExtension().size());
+    assertNotNull(eob.getItemFirstRep().getExtension());
+    assertEquals(7, eob.getItemFirstRep().getExtension().size());
 
     Extension ex1 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -662,7 +662,7 @@ public class CarrierClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
             new Quantity().setValue(1));
 
-    Assert.assertTrue(compare1.equalsDeep(ex1));
+    assertTrue(compare1.equalsDeep(ex1));
 
     Extension ex2 =
         TransformerTestUtilsV2.findExtensionByUrlAndSystem(
@@ -678,7 +678,7 @@ public class CarrierClaimTransformerV2Test {
                 .setCode("3")
                 .setDisplay("Services"));
 
-    Assert.assertTrue(compare2.equalsDeep(ex2));
+    assertTrue(compare2.equalsDeep(ex2));
 
     Extension ex3 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -693,7 +693,7 @@ public class CarrierClaimTransformerV2Test {
                 .setCode("3")
                 .setDisplay("Services"));
 
-    Assert.assertTrue(compare3.equalsDeep(ex3));
+    assertTrue(compare3.equalsDeep(ex3));
 
     Extension ex4 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -708,7 +708,7 @@ public class CarrierClaimTransformerV2Test {
                 "T2D",
                 "Other tests - other"));
 
-    Assert.assertTrue(compare4.equalsDeep(ex4));
+    assertTrue(compare4.equalsDeep(ex4));
 
     Extension ex5 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -723,7 +723,7 @@ public class CarrierClaimTransformerV2Test {
                 "E",
                 "Workers' compensation"));
 
-    Assert.assertTrue(compare5.equalsDeep(ex5));
+    assertTrue(compare5.equalsDeep(ex5));
 
     Extension ex6 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -738,7 +738,7 @@ public class CarrierClaimTransformerV2Test {
                 "A",
                 "Allowed"));
 
-    Assert.assertTrue(compare6.equalsDeep(ex6));
+    assertTrue(compare6.equalsDeep(ex6));
 
     Extension ex7 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -753,7 +753,7 @@ public class CarrierClaimTransformerV2Test {
                 "0",
                 "Service Subject to Deductible"));
 
-    Assert.assertTrue(compare7.equalsDeep(ex7));
+    assertTrue(compare7.equalsDeep(ex7));
   }
 
   @Test
