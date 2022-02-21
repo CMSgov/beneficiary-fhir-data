@@ -921,7 +921,7 @@ public final class RifLoader {
     if (oldBeneficiaryRecord.isPresent()
         && !isBeneficiaryHistoryEqual(newBeneficiaryRecord, oldBeneficiaryRecord.get())) {
       BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
-      oldBeneCopy.setBeneficiaryId(String.valueOf(oldBeneficiaryRecord.get().getBeneficiaryId()));
+      oldBeneCopy.setBeneficiaryId(oldBeneficiaryRecord.get().getBeneficiaryId());
       oldBeneCopy.setBirthDate(oldBeneficiaryRecord.get().getBirthDate());
       oldBeneCopy.setHicn(oldBeneficiaryRecord.get().getHicn());
       oldBeneCopy.setHicnUnhashed(oldBeneficiaryRecord.get().getHicnUnhashed());

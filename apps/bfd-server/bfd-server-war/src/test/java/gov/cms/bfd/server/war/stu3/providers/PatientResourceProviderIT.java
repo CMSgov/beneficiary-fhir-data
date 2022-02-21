@@ -945,7 +945,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1562,7 +1563,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 

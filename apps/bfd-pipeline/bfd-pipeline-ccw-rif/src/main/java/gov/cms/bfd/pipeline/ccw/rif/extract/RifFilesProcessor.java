@@ -199,10 +199,7 @@ public final class RifFilesProcessor {
     RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
     BeneficiaryHistory beneficiaryHistoryRow = BeneficiaryHistoryParser.parseRif(csvRecords);
     return new RifRecordEvent<BeneficiaryHistory>(
-        fileEvent,
-        recordAction,
-        Long.parseLong(beneficiaryHistoryRow.getBeneficiaryId()),
-        beneficiaryHistoryRow);
+        fileEvent, recordAction, beneficiaryHistoryRow.getBeneficiaryId(), beneficiaryHistoryRow);
   }
 
   /**

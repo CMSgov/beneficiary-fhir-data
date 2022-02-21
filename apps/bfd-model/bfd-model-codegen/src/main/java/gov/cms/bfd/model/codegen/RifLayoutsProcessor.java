@@ -1224,6 +1224,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     final List<String> futureBigIntTables =
         Arrays.asList(
             "beneficiaries",
+            "beneficiaries_history",
             "carrier_claims",
             "dme_claims",
             "hha_claims",

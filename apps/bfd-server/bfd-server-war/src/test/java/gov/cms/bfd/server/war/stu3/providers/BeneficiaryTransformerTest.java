@@ -272,8 +272,7 @@ public final class BeneficiaryTransformerTest {
         parsedRecords.stream()
             .filter(r -> r instanceof BeneficiaryHistory)
             .map(r -> (BeneficiaryHistory) r)
-            .filter(
-                r -> String.valueOf(beneficiary.getBeneficiaryId()).equals(r.getBeneficiaryId()))
+            .filter(r -> beneficiary.getBeneficiaryId() == r.getBeneficiaryId())
             .collect(Collectors.toSet());
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
     for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiaryHistories()) {

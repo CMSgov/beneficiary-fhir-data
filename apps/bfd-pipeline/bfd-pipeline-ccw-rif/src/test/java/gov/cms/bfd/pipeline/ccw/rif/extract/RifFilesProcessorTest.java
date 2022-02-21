@@ -159,10 +159,9 @@ public final class RifFilesProcessorTest {
     assertNotNull(rifRecordEvent0.getRecord());
     assertTrue(rifRecordEvent0.getRecord() instanceof BeneficiaryHistory);
     BeneficiaryHistory beneficiaryHistory0 = (BeneficiaryHistory) rifRecordEvent0.getRecord();
-    assertEquals(
-        Long.parseLong(beneficiaryHistory0.getBeneficiaryId()), rifRecordEvent0.getBeneficiaryId());
+    assertEquals(beneficiaryHistory0.getBeneficiaryId(), rifRecordEvent0.getBeneficiaryId());
     assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
-    assertEquals("567834", beneficiaryHistory0.getBeneficiaryId());
+    assertEquals(567834L, beneficiaryHistory0.getBeneficiaryId());
     assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
     assertEquals(('2'), beneficiaryHistory0.getSex());
     assertEquals("543217066Z", beneficiaryHistory0.getHicn());
@@ -184,7 +183,7 @@ public final class RifFilesProcessorTest {
       assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryHistory);
       BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
       assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
-      assertEquals("567834", beneficiaryHistory.getBeneficiaryId());
+      assertEquals(567834L, beneficiaryHistory.getBeneficiaryId());
       assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
       assertEquals(('1'), beneficiaryHistory.getSex());
       assertEquals("543217066T", beneficiaryHistory.getHicn());
