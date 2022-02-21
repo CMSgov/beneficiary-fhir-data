@@ -222,7 +222,7 @@ public final class RifFilesProcessorTest {
     MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistory =
         (MedicareBeneficiaryIdHistory) rifRecordEvent0.getRecord();
 
-    assertEquals("567834", medicareBeneficiaryIdHistory.getBeneficiaryId().get());
+    assertEquals(567834L, medicareBeneficiaryIdHistory.getBeneficiaryId().get());
     assertEquals(
         LocalDate.of(2011, Month.APRIL, 16),
         medicareBeneficiaryIdHistory.getMbiEffectiveDate().get());

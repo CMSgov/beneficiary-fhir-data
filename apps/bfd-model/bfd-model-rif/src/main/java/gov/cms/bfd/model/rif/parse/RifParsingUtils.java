@@ -145,6 +145,19 @@ public final class RifParsingUtils {
   }
 
   /**
+   * @param intText the number string to parse
+   * @return an {@link Optional} populated with an {@link Integer} if the input has data, or an
+   *     empty Optional if not
+   */
+  public static Optional<Long> parseOptionalLong(String longText) {
+    if (longText.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(parseLong(longText));
+    }
+  }
+
+  /**
    * @param decimalText the decimal string to parse
    * @return the specified text parsed into a {@link BigDecimal}
    */

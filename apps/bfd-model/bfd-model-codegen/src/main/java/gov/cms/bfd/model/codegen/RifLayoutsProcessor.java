@@ -1000,11 +1000,21 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       MethodSpec.Builder headerFieldGetter;
       if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
-        headerFieldGetter =
-            MethodSpec.methodBuilder(calculateGetterName(headerField))
-                .addModifiers(Modifier.PUBLIC)
-                .addStatement("return Long.parseLong($N)", headerField.name)
-                .returns(TypeName.LONG);
+        if (rifField.isRifColumnOptional()) {
+          headerFieldGetter =
+              MethodSpec.methodBuilder(calculateGetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .addStatement("return Optional.of(Long.parseLong($N))", headerField.name)
+                  .returns(
+                      ParameterizedTypeName.get(
+                          ClassName.get(Optional.class), ClassName.get(Long.class)));
+        } else {
+          headerFieldGetter =
+              MethodSpec.methodBuilder(calculateGetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .addStatement("return Long.parseLong($N)", headerField.name)
+                  .returns(TypeName.LONG);
+        }
       } else {
         headerFieldGetter =
             MethodSpec.methodBuilder(calculateGetterName(headerField))
@@ -1021,13 +1031,26 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       MethodSpec.Builder headerFieldSetter;
       if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
-        headerFieldSetter =
-            MethodSpec.methodBuilder(calculateSetterName(headerField))
-                .addModifiers(Modifier.PUBLIC)
-                .returns(void.class)
-                .addParameter(TypeName.LONG, headerField.name);
-        headerFieldSetter.addStatement(
-            "this.$N = String.valueOf($N)", headerField.name, headerField.name);
+        if (rifField.isRifColumnOptional()) {
+          headerFieldSetter =
+              MethodSpec.methodBuilder(calculateSetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .returns(void.class)
+                  .addParameter(
+                      ParameterizedTypeName.get(
+                          ClassName.get(Optional.class), ClassName.get(Long.class)),
+                      headerField.name);
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N.orElse(null))", headerField.name, headerField.name);
+        } else {
+          headerFieldSetter =
+              MethodSpec.methodBuilder(calculateSetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .returns(void.class)
+                  .addParameter(TypeName.LONG, headerField.name);
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N)", headerField.name, headerField.name);
+        }
       } else {
         headerFieldSetter =
             MethodSpec.methodBuilder(calculateSetterName(headerField))
@@ -1225,6 +1248,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Arrays.asList(
             "beneficiaries",
             "beneficiaries_history",
+            "medicare_beneficiaryid_history",
             "carrier_claims",
             "dme_claims",
             "hha_claims",
@@ -1339,7 +1363,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
       if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
-        parseUtilsMethodName = "parseLong";
+        parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
       } else if (rifField.getRifColumnType() == RifColumnType.CHAR
           && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
         // Handle a String field.

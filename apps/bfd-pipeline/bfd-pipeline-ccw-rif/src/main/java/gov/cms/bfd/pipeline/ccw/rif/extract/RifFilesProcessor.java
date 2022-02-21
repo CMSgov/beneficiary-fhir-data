@@ -221,7 +221,7 @@ public final class RifFilesProcessor {
     return new RifRecordEvent<MedicareBeneficiaryIdHistory>(
         fileEvent,
         recordAction,
-        Long.parseLong(medicareBeneficiaryIdHistoryRow.getBeneficiaryId().get()),
+        medicareBeneficiaryIdHistoryRow.getBeneficiaryId().get(),
         medicareBeneficiaryIdHistoryRow);
   }
 
