@@ -55,6 +55,18 @@ public class PreAdjFissClaim {
   @Column(name = "`currLoc2`", length = 5, nullable = false)
   private String currLoc2;
 
+  @Column(name = "`provStateCd`", length = 2)
+  private String provStateCd;
+
+  @Column(name = "`provTypFacilCd`", length = 1)
+  private String provTypFacilCd;
+
+  @Column(name = "`provEmerInd`", length = 1)
+  private String provEmerInd;
+
+  @Column(name = "`provDeptId`", length = 3)
+  private String provDeptId;
+
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 

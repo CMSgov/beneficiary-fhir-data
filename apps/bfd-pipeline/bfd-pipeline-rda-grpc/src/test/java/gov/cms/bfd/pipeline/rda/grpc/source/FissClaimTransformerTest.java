@@ -569,6 +569,46 @@ public class FissClaimTransformerTest {
   }
 
   @Test
+  public void testClaimProvStateCd() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvStateCd,
+            PreAdjFissClaim::getProvStateCd,
+            PreAdjFissClaim.Fields.provStateCd,
+            2);
+  }
+
+  @Test
+  public void testClaimProvTypFacilCd() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvTypFacilCd,
+            PreAdjFissClaim::getProvTypFacilCd,
+            PreAdjFissClaim.Fields.provTypFacilCd,
+            1);
+  }
+
+  @Test
+  public void testClaimProvEmerInd() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvEmerInd,
+            PreAdjFissClaim::getProvEmerInd,
+            PreAdjFissClaim.Fields.provEmerInd,
+            1);
+  }
+
+  @Test
+  public void testClaimProvDeptId() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvDeptId,
+            PreAdjFissClaim::getProvDeptId,
+            PreAdjFissClaim.Fields.provDeptId,
+            3);
+  }
+
+  @Test
   public void testClaimMedaProvId() {
     new ClaimFieldTester()
         .verifyStringFieldCopiedCorrectly(
