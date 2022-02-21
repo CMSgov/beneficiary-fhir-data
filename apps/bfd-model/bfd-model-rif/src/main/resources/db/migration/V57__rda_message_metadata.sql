@@ -9,10 +9,4 @@ CREATE TABLE "pre_adj"."RdaApiClaimMessageMetaData" (
     CONSTRAINT "RdaApiClaimMessageMetaData_mbi" FOREIGN KEY ("mbiId") REFERENCES "pre_adj"."MbiCache"("mbiId")
 );
 
-/*
- * FIXME For consistency, sequence names should be mixed-case, but can't be, due
- * to https://hibernate.atlassian.net/browse/HHH-9431.
- *
- * We expect batch sizes to be around 25 so the increment shouldn't waste many id values.
- */
-create sequence "pre_adj"."rda_api_claim_message_meta_data_meta_data_id_seq" ${logic.sequence-start} 1 ${logic.sequence-increment} 25 cycle;
+create sequence "pre_adj"."rda_api_claim_message_meta_data_meta_data_id_seq" as bigint ${logic.sequence-start} 1 ${logic.sequence-increment} 25 no cycle;
