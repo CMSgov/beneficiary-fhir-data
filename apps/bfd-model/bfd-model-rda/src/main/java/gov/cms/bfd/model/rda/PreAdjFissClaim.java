@@ -55,18 +55,34 @@ public class PreAdjFissClaim {
   @Column(name = "`currLoc2`", length = 5, nullable = false)
   private String currLoc2;
 
+  /** Provider State Code */
   @Column(name = "`provStateCd`", length = 2)
   private String provStateCd;
 
+  /** Provider Type Facility Code */
   @Column(name = "`provTypFacilCd`", length = 1)
   private String provTypFacilCd;
 
+  /** Provider Emergency Indicator */
   @Column(name = "`provEmerInd`", length = 1)
   private String provEmerInd;
 
+  /** Provider Department Identification */
   @Column(name = "`provDeptId`", length = 3)
   private String provDeptId;
 
+  /**
+   * Medicare Provider ID:
+   *
+   * <p>The Medicare Provider ID consists of the following:
+   *
+   * <ul>
+   *   <li>Provider State Code
+   *   <li>Provider Type Facility Code
+   *   <li>Provider Emergency Indicator
+   *   <li>Provider Department Identification
+   * </ul>
+   */
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 
