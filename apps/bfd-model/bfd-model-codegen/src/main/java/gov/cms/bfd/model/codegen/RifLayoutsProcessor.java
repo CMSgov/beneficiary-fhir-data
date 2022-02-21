@@ -665,8 +665,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     MethodSpec.Builder parentGetter =
         MethodSpec.methodBuilder("getParentBeneficiary")
-            .addStatement("return $N", PARENT_BENEFICIARY)
-            .returns(parentBeneficiaryIdFieldType);
+            .addStatement("return Long.parseLong($N)", PARENT_BENEFICIARY)
+            .returns(TypeName.LONG);
     beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
     MethodSpec.Builder yearMonthGetter =
         MethodSpec.methodBuilder("getYearMonth")
