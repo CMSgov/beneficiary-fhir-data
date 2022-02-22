@@ -5,6 +5,33 @@
 Added mapping for Revenue Status Code:
 REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
 
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
@@ -72,14 +99,14 @@ For more details, please see the associated [RFC].(https://github.com/CMSgov/ben
 
 ## BFD-8: Add and map coverage fields dual01..dual12 and rfrnc_yr to the coverage resource
 
-The dual_01..dual12 and rfnrc_yr are essentially coverage related fields and need to be included in the coverage resource. Previously, these fields were only available on the patient resource and when beneficiaries choose to redact their demographic data, downstream consumers lose these vital eligibility fields thus the need to add them to the coverage resource. In future versions of the API, we'll want to consider removing these from the patient resource.
+The dual_01..dual12 and rfnrc_yr are essentially coverage related fields and need to be included in the coverage resource. Previously, these fields were only available on the patient resource and when beneficiaries choose to redact their demographic data, downstream consumers lose these vital eligibility fields thus the need to add them to the coverage resource. In future versions of the API, we'll want to consider removing these from the patient resource. 
 
 ## BLUEBUTTON-1843: HAPI 4.1.0 Upgrade
 
-As part of the upgrade of the HAPI package used by the BFD, the FHIR version was changed from `3.0.1` to `3.0.2`.
-This is a minor FHIR version change.
+As part of the upgrade of the HAPI package used by the BFD, the FHIR version was changed from `3.0.1` to `3.0.2`. 
+This is a minor FHIR version change. 
 
-The `CapabilitiesStatement` resource returned by the metadata endpoint reflects this change.
+The `CapabilitiesStatement` resource returned by the metadata endpoint reflects this change. 
 In the resource the `fhirVersion` field changed and the profile path changed from:
 ```
 "reference" : "http://hl7.org/fhir/StructureDefinition/<Resource Type>"
@@ -91,9 +118,9 @@ to:
 
 ## BLUEBUTTON-1679: Hashed HICN needs to be removed from Patient Resource
 
-The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule. This is to leave no traces of the HICN-hash in any external facing data requests to BFD.
+The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
 
-For internal facing requests using the `IncludeIdentifiers` header, the Hashed HICN identifier will still be included in the response for the following values: [ "true", "hicn" ].
+For internal facing requests using the `IncludeIdentifiers` header, the Hashed HICN identifier will still be included in the response for the following values: [ "true", "hicn" ]. 
 
 The following is an example of the identifier that is NO LONGER included in external facing responses:
 
@@ -127,7 +154,7 @@ https://bluebutton.cms.gov/resources/variables/ptdcntrct12
 
 ## BLUEBUTTON-1536: Extend `IncludeIdentifiers` header options for the Patient Resource
 
-The `IncludeIdentifiers` header has been extended to handle values of [ "true", "hicn", "mbi' ].
+The `IncludeIdentifiers` header has been extended to handle values of [ "true", "hicn", "mbi' ]. 
 
 To enable this, set an "`IncludeIdentifiers: <value>`" HTTP header in the `/Patient` request.
 
@@ -168,35 +195,35 @@ At this time, only the `https://bluebutton.cms.gov/resources/codesystem/eob-type
 Some examples:
 
 * If the new parameter is not included, all EOBs will still be returned:
-
+    
     ```
     /v1/fhir/ExplanationOfBenefit?patient=123
     ```
-
+    
 * If only the code system is specified, all EOBs will also still be returned:
-
+    
     ```
     /v1/fhir/ExplanationOfBenefit?patient=123&type=https://bluebutton.cms.gov/resources/codesystem/eob-type|
     ```
-
+    
 * If just a single code is specified, only EOBs matching that claim type will be returned:
-
+    
     ```
     /v1/fhir/ExplanationOfBenefit?patient=123&type=https://bluebutton.cms.gov/resources/codesystem/eob-type|pde
     ```
-
+    
 * If just a single code is specified and no system or `|` separator is included, EOBs matching that single claim type will still be returned:
-
+    
     ```
     /v1/fhir/ExplanationOfBenefit?patient=123&type=pde
     ```
-
+    
 * If multiple codes are specified, EOBs matching all of those claim type will be returned:
-
+    
     ```
     /v1/fhir/ExplanationOfBenefit?patient=123&type=carrier,dme,hha,hospice,inpatient,outpatient,snf
     ```
-
+    
 
 ## BLUEBUTTON-865: Adding plaintext HICN/MBI to Patient resource
 
@@ -352,7 +379,7 @@ Several changes have been made to these entries:
 * The Substance Name will be displayed in the `Coding.display` for NDC fields.
 
 * The FDA NDC product file we use is downloaded from (https://www.accessdata.fda.gov/cder/ndctext.zip).
-
+   
 ## BLUEBUTTON-200: Fix duplicate `ExplanationOfBenefit`s bug
 
 A bug was fixed that had been causing duplicate `ExplanationOfBenefit` resources to be returned for most beneficiaries. (It had been generating one exact-duplicate EOB per each claim line in each claim.)
@@ -545,7 +572,7 @@ Many fields in the API now include `Coding.display` values: brief, descriptive E
 }
 ```
 
-Please note that these values have been automatically parsed out of the [Data Dictionary PDF codebooks](https://www.ccwdata.org/web/guest/data-dictionaries) and not yet fully QA'd, so some of them will have parsing problems. That QA work is ongoing at the moment, so the problems should be resolved in the future.
+Please note that these values have been automatically parsed out of the [Data Dictionary PDF codebooks](https://www.ccwdata.org/web/guest/data-dictionaries) and not yet fully QA'd, so some of them will have parsing problems. That QA work is ongoing at the moment, so the problems should be resolved in the future. 
 
 Future updates may add `Coding.display` values for additional fields.
 
@@ -593,14 +620,14 @@ Future updates may add `Coding.display` values for additional fields.
         * `https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd3.txt`
         * `https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd4.txt`
     * The benefit balance coding system is now `http://hl7.org/fhir/benefit-category`, where it had previously used `http://build.fhir.org/explanationofbenefit-definitions.html#ExplanationOfBenefit.benefitBalance.category`.
-        * The case of many of the values coded in this system has now been corrected to lowercase, as well.
-
+        * The case of many of the values coded in this system has now been corrected to lowercase, as well.	
+      
 ## CBBD-386 Map NDC code to FHIR for Part D
 
 * Following FHIR Mapping changes were made:
     * The NDC (National Drug Code) for Part D claims wasn't being mapped to FHIR.  Now it is mapped to ExplanatonOfBenefit.item.service (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.service`).
     * The `https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt` RIF Part D field was being mapped to ExplanationOfBenefit.item.service. Changed to now be mapped to ExplanationOfBenefit.information.
-
+    
 ## CBBF-111 FHIR Mapping Change (Outpatient)
 
 * Following FHIR Mapping changes were made:
@@ -621,12 +648,12 @@ Future updates may add `Coding.display` values for additional fields.
 		* Map REV_CNTR_IDE_NDC_UPC_NUM (Revenue Center IDE, NDC, UPC Number) to an extension of ExplanationOfBenefit.item.service
 		* Change code value from NCH Payment Amount to Revenue Payment Amount - description change
 		* Map REV_CNTR_STUS_IND_CD (Revenue Center Status Indicator Code) to an extension of ExplanationOfBenefit.item.revenue
-
-
+		
+	
 ## CBBF-112 FHIR Mapping Change (Inpatient)
 
 * Following FHIR Mapping changes were made:
-
+	
 		*  Changes to the diagnosis section
 			◦ Tie diagnosis.type “ADMITTING” to ADMTG_DGNS_CD
 			◦ Tie diagnosis.type “PRINCIPAL” to PRNCPAL_DGNS_CD or ICD_DGNS_CD1
@@ -635,30 +662,30 @@ Future updates may add `Coding.display` values for additional fields.
 			◦ For FST_DGNS_E_CD or ICD_DGNS_E_CD1, and ICD_DGNS_E_CD2-12, make diagnosis.type to be “FIRSTEXTERNAL”
 			◦ For ICD_DGNS_E_CD2-12, make diagnosis.type to be “EXTERNAL”
 			◦ Include FST_DGNS_E_CD or ICD_DGNS_E_CD1, but not both since both variables store the same value
-
+		
 	* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, Inpatient, SNF, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
 	* Map REV_CNTR_NDC_QTY (Revenue Center NDC Quantity) for Outpatient, Hospice, Inpatient, SNF, and HHA as an extension of the item.modifier REV_CNTR_NDC_QTY_QLFR_CD.
 	* Map CLM_DRG_CD (Claim Diagnosis Related Group Code) to ExplanationOfBenefit.diagnosis.packageCode
 	* Map PRVDR_NUM (Provider Number) to ExplanationOfBenefit.provider
-
+    
 
 ## CBBF-128 Add FILL_NUM to PDE data
 
 * Following FHIR Mapping changes were made:
-
+	
 	* The FILL_NUM (Fill Number) for Part D claims wasn't being mapped to FHIR. Now it is mapped to ExplanationOfBenefit.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
 	* The DAYS_SUPLY_NUM (Days Supply) for Part D claims was re-mapped as an extension of ExplanationOfBenefit.item.quantity instead of item.modifier.
 
 ## CBBF-110 FHIR Mapping Change (DME)
 
 * Following FHIR Mapping changes were made:
-
+	
 	* The FI_NUM (Fiscal Intermediary Number) for Inp, Out, HHA, Hospice, and SNF was not being mapped. Now it is mapped to ExplanationOfBenefit.extension (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.extension`).
 	* A second occurrence of CCLTRNUM (Clinical Trial Number) has been removed.
 	* The SUPLRNUM (DMERC Line Supplier Provider Number) for DME was not being mapped. Now it is mapped to ExplanationOfBenefit.item.extension (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.extension`).
 	* System and URL for MTUS_CNT now points to DME_UNIT link instead.
 	* System and URL for MTUS_IND now points to UNIT_IND link instead.
-
+	
 ## CBBF-109 FHIR Mapping Change (HHA)
 
 * Following FHIR Mapping changes were made:
@@ -669,13 +696,13 @@ Future updates may add `Coding.display` values for additional fields.
 	* Updated System and URL for UNIT_IND in CarrierClaim to point to MTUS_IND (undoing the change for Carrier from CBBF-110).
 	* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, Inpatient, SNF, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
 	* Map REV_CNTR_NDC_QTY (Revenue Center NDC Quantity) for Outpatient, Hospice, Inpatient, SNF, and HHA as an extension of the item.modifier REV_CNTR_NDC_QTY_QLFR_CD.
-
+	
 ## CBBF-108 FHIR Mapping Change (Hospice)
 
 * Following FHIR Mapping changes were made:
 
 	* The REV_CNTR_PMT_AMT_AMT code value was changed to read "Revenue Center Payment Amount" in the XML for Hospice/HHA/DME/Outpatient.
-
+	
 ## CBBF-106 FHIR Mapping Change (Carrier)
 
 * Following FHIR Mapping changes were made:
@@ -694,13 +721,13 @@ Future updates may add `Coding.display` values for additional fields.
 
 	* IcdCode.getFhirSystem() had a condition comparing a string "" to a character '' resulting in the incorrect Coding.system. This was changed to compare a character '' to a character ''.
 	* Test classes were created for Diagnosis and CCWProcedure, both of which extend IcdCode, to ensure that the two classes are functioning properly.
-
+	
 ## CBBF-134 Map Carrier CARR_LINE_ANSTHSA_UNIT_CNT
 
 * Following FHIR mapping changes were made:
 
 	* The field CARR_ANSTHSA_UNIT_CNT (Carrier Line Anesthesia Unit Count) has been mapped to item.service.extension (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.service.extension`) only when the value is greater than zero.
-
+	
 ## CBBF-146 Address FIXME's in Transformer like classes
 
 * Following FHIR mapping changes were made:
@@ -708,3 +735,4 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as a valueQuantity, not a valueCoding" issues were addressed by creating a new common method for adding quantities to an extension instead of codeable concepts for these fields. The new method is called addExtensionValueQuantity in TransformerUtils.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
+ 
