@@ -87,7 +87,10 @@ ${logic.perms}  GRANT CONNECT ON DATABASE fhirdb TO paca_db_admins_group;
 ${logic.perms}  GRANT paca_migrator_role TO paca_db_admins_group;
 ${logic.perms}  
 ${logic.perms}
-${logic.perms}  -- ensure current api/pipeline have the necessary permissions for zero downtime
+${logic.perms}  -- Ensure current api/pipeline roles have the necessary permissions for zero
+${logic.perms}  -- downtime deployments. This is temporary until we finish refactoring our
+${logic.perms}  -- database permissions. Once completed, a future migration will drop the various 
+${logic.perms}  -- read_only_bb, svc_bfd_* roles making the rest of this migration a noop.
 ${logic.perms}
 ${logic.perms}  -- grant reader to existing reader roles
 ${logic.perms}  IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'read_only_bb') THEN
