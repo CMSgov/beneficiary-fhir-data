@@ -23,13 +23,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<!-- Provides annotations that indicate where source code generation should 
-				be performed. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codegen-annotations</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<!-- Uses the Codebook XML files from `bluebutton-data-model-codebook-extractor` 
 				to codegen related utility code. -->
 			<groupId>gov.cms.bfd</groupId>
@@ -54,5 +47,27 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>gov.cms.bfd</groupId>
+				<artifactId>bfd-model-codegen</artifactId>
+				<version>${project.version}</version>
+				<configuration>
+					<enumName>CcwCodebookVariable</enumName>
+					<packageName>gov.cms.bfd.model.codebook.data</packageName>
+					<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>codebook-variables-enum</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

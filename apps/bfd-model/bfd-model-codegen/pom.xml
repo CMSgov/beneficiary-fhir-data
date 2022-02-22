@@ -9,22 +9,14 @@
 	</parent>
 
 	<artifactId>bfd-model-codegen</artifactId>
-	<packaging>jar</packaging>
+	<packaging>maven-plugin</packaging>
 
 	<description>
-		Provides a javac annotation processor that automagically generates RIF model 
+		Provides a javac annotation processor that automagically generates RIF model
 		classes and parsing code based on field layouts defined in Excel.
 	</description>
 
 	<dependencies>
-		<dependency>
-			<!-- The annotations are in a separate project, to avoid forcing all of 
-				this project's dependencies onto codegen users. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codegen-annotations</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
 		<dependency>
 			<!-- Provides the Codebook XML and unmarshalling code for reading it. -->
 			<groupId>gov.cms.bfd</groupId>
@@ -33,7 +25,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- Automatically generates META-INF/services files for service classes 
+			<!-- Automatically generates META-INF/services files for service classes
 				annotated with `@AutoService`. -->
 			<groupId>com.google.auto.service</groupId>
 			<artifactId>auto-service</artifactId>
@@ -53,15 +45,37 @@
 			<version>1.9.0</version>
 		</dependency>
 
-		<dependency>
-			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
+                <dependency>
+                        <!-- plugin interfaces and base classes -->
+                        <groupId>org.apache.maven</groupId>
+                        <artifactId>maven-plugin-api</artifactId>
+                        <version>3.6.0</version>
+                        <scope>provided</scope>
+                </dependency>
+                <dependency>
+                        <!-- needed when injecting the Maven Project into a plugin  -->
+                        <groupId>org.apache.maven</groupId>
+                        <artifactId>maven-core</artifactId>
+                        <version>3.6.0</version>
+                        <scope>provided</scope>
+                </dependency>
+                <dependency>
+                        <!-- annotations used to describe the plugin meta-data -->
+                        <groupId>org.apache.maven.plugin-tools</groupId>
+                        <artifactId>maven-plugin-annotations</artifactId>
+                        <version>3.5</version>
+                        <scope>provided</scope>
+                </dependency>
+
+            <dependency>
+			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
 				Hibernate is used for that in the BFD projects.) -->
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 			<groupId>org.hibernate.javax.persistence</groupId>
 		</dependency>
 		<dependency>
-			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's 
-				only brought into this project for the extra ORM mapping annotations that 
+			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's
+				only brought into this project for the extra ORM mapping annotations that
 				it provides (hence all of the exclusions). -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -105,10 +119,13 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>3.6.0</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-		</plugins>
 	</build>
 
 </project>

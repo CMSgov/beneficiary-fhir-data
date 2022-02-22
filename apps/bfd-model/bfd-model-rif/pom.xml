@@ -12,7 +12,7 @@
 	<packaging>jar</packaging>
 
 	<description>
-		Provides shared helpers and model classes related to the CCW's 'RIF' 
+		Provides shared helpers and model classes related to the CCW's 'RIF'
 		file format.
 	</description>
 
@@ -24,25 +24,7 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
-				model classes in the gov.cms.bfd.model.rif package. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codegen-annotations</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
-				model classes in the gov.cms.bfd.model.rif package. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codegen</artifactId>
-			<version>${project.version}</version>
-
-			<!-- Marked as provided to keep it (and its dependencies) out of our production 
-				systems. -->
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging 
+			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -75,7 +57,7 @@
 			<version>4.1.1</version>
 		</dependency>
 		<dependency>
-			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
+			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
 				Hibernate is used for that in the BFD projects.) -->
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 			<groupId>org.hibernate.javax.persistence</groupId>
@@ -96,8 +78,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's 
-				only brought into this project for the extra ORM mapping annotations that 
+			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's
+				only brought into this project for the extra ORM mapping annotations that
 				it provides (hence all of the exclusions). -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -138,7 +120,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager 
+			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager
 				class. -->
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
@@ -152,7 +134,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Logback is used as the logging target/backend for SLF4J during tests: 
+			<!-- Logback is used as the logging target/backend for SLF4J during tests:
 				all logging events will be sent to it. -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -175,5 +157,37 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>gov.cms.bfd</groupId>
+				<artifactId>bfd-model-codegen</artifactId>
+				<version>${project.version}</version>
+				<configuration>
+					<spreadsheetResource>rif-layout-and-fhir-mapping.xlsx</spreadsheetResource>
+					<beneficiarySheet>Beneficiary</beneficiarySheet>
+					<beneficiaryHistorySheet>Beneficiary History</beneficiaryHistorySheet>
+					<medicareBeneficiaryIdSheet>Medicare Beneficiary Id</medicareBeneficiaryIdSheet>
+					<pdeSheet>PDE</pdeSheet>
+					<carrierSheet>Carrier</carrierSheet>
+					<inpatientSheet>Inpatient</inpatientSheet>
+					<outpatientSheet>Outpatient</outpatientSheet>
+					<hhaSheet>HHA</hhaSheet>
+					<dmeSheet>DME</dmeSheet>
+					<hospiceSheet>Hospice</hospiceSheet>
+					<snfSheet>SNF</snfSheet>
+					<packageName>gov.cms.bfd.model.rif</packageName>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>rif-layouts</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

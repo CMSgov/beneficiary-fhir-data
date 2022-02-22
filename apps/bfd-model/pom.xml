@@ -18,7 +18,6 @@
 	<modules>
 		<module>bfd-model-codebook-extractor</module>
 		<module>bfd-model-codebook-data</module>
-		<module>bfd-model-codegen-annotations</module>
 		<module>bfd-model-codegen</module>
 		<module>bfd-model-rda</module>
 		<module>bfd-model-rif</module>

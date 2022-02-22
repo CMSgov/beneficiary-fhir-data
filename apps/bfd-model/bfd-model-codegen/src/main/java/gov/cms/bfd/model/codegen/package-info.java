@@ -1,2 +1,2 @@
-/** Contains the annotation processing-powered code generation for RIF layouts. */
+/** Contains a maven plugin to generate code for RIF layouts. */
 package gov.cms.bfd.model.codegen;

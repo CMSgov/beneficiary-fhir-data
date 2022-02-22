@@ -1,7 +1,7 @@
 package gov.cms.bfd.model.codegen;
 
-import com.google.auto.service.AutoService;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteSource;
+import com.google.common.io.Files;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -14,13 +14,11 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import gov.cms.bfd.model.codegen.RifLayout.RifColumnType;
 import gov.cms.bfd.model.codegen.RifLayout.RifField;
-import gov.cms.bfd.model.codegen.annotations.RifLayoutsGenerator;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.io.UncheckedIOException;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,15 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -64,112 +54,154 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.tools.Diagnostic;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-/**
- * This <code>javac</code> annotation {@link Processor} reads in an Excel file that details a RIF
- * field layout, and then generates the Java code required to work with that layout.
- */
-@AutoService(Processor.class)
-public final class RifLayoutsProcessor extends AbstractProcessor {
-  /**
-   * Both Maven and Eclipse hide compiler messages, so setting this constant to <code>true</code>
-   * will also log messages out to a new source file.
-   */
-  private static final boolean DEBUG = false;
-
+/** A Maven Mojo that generates code for RIF JPA entities. */
+@Mojo(name = "rif-layouts", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+public class RifLayoutsMojo extends AbstractMojo {
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
 
   private static final String PARENT_CLAIM = "parentClaim";
   private static final String PARENT_BENEFICIARY = "parentBeneficiary";
 
-  private final List<String> logMessages = new LinkedList<>();
-
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes() */
-  @Override
-  public Set<String> getSupportedAnnotationTypes() {
-    return ImmutableSet.of(RifLayoutsGenerator.class.getName());
-  }
-
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion() */
-  @Override
-  public SourceVersion getSupportedSourceVersion() {
-    return SourceVersion.latestSupported();
-  }
+  /** The {@link Package#getName()} of the {@link Package} in which to generate the enum. */
+  @Parameter(property = "packageName")
+  private String packageName;
 
   /**
-   * @see javax.annotation.processing.AbstractProcessor#process(java.util.Set,
-   *     javax.annotation.processing.RoundEnvironment)
+   * the file name of the spreadsheet (in this package) that details the RIF layouts to generate
+   * code for
    */
-  @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    try {
-      logNote(
-          "Processing triggered for '%s' on root elements '%s'.",
-          annotations, roundEnv.getRootElements());
+  @Parameter(property = "spreadsheetResource")
+  private String spreadsheetResource;
 
-      Set<? extends Element> annotatedElements =
-          roundEnv.getElementsAnnotatedWith(RifLayoutsGenerator.class);
-      for (Element annotatedElement : annotatedElements) {
-        if (annotatedElement.getKind() != ElementKind.PACKAGE)
-          throw new RifLayoutProcessingException(
-              annotatedElement,
-              "The %s annotation is only valid on packages (i.e. in package-info.java).",
-              RifLayoutsGenerator.class.getName());
-        process((PackageElement) annotatedElement);
-      }
-    } catch (RifLayoutProcessingException e) {
-      log(Diagnostic.Kind.ERROR, e.getMessage(), e.getElement());
+  /** the name of the sheet in the Excel file that contains the RIF layout for beneficiary data */
+  @Parameter(property = "beneficiarySheet")
+  private String beneficiarySheet;
+
+  /**
+   * the name of the sheet in the Excel file that contains the RIF layout for beneficiary history
+   * data
+   */
+  @Parameter(property = "beneficiaryHistorySheet")
+  private String beneficiaryHistorySheet;
+
+  /**
+   * the name of the sheet in the Excel file that contains the RIF layout for medicare beneficiary
+   * id data
+   */
+  @Parameter(property = "medicareBeneficiaryIdSheet")
+  private String medicareBeneficiaryIdSheet;
+
+  /** the name of the sheet in the Excel file that contains the RIF layout for PDE claims data */
+  @Parameter(property = "pdeSheet")
+  private String pdeSheet;
+
+  /**
+   * the name of the sheet in the Excel file that contains the RIF layout for carrier claims data
+   */
+  @Parameter(property = "carrierSheet")
+  private String carrierSheet;
+
+  /**
+   * the name of the sheet in the Excel file that contains the RIF layout for inpatient claims data
+   */
+  @Parameter(property = "inpatientSheet")
+  private String inpatientSheet;
+
+  /**
+   * the name of the sheet in the Excel file that contains the RIF layout for outpatient claims data
+   */
+  @Parameter(property = "outpatientSheet")
+  private String outpatientSheet;
+
+  /** the name of the sheet in the Excel file that contains the RIF layout for HHA claims data */
+  @Parameter(property = "hhaSheet")
+  private String hhaSheet;
+
+  /** the name of the sheet in the Excel file that contains the RIF layout for DME claims data */
+  @Parameter(property = "dmeSheet")
+  private String dmeSheet;
+
+  /**
+   * the name of the sheet in the Excel file that contains the RIF layout for hospice claims data
+   */
+  @Parameter(property = "hospiceSheet")
+  private String hospiceSheet;
+
+  /** the name of the sheet in the Excel file that contains the RIF layout for SNF claims data */
+  @Parameter(property = "snfSheet")
+  private String snfSheet;
+
+  @Parameter(property = "inputDirectory", defaultValue = "${project.build.sourceDirectory}")
+  private String inputDirectory;
+
+  @Parameter(
+      property = "outputDirectory",
+      defaultValue = "${project.build.directory}/generated-sources")
+  private String outputDirectory;
+
+  @Parameter(
+      property = "annotationsDirectory",
+      defaultValue = "${project.build.directory}/generated-sources/annotations")
+  private String annotationsDirectory;
+
+  @Parameter(property = "project", readonly = true)
+  private MavenProject project;
+
+  private File outputDir;
+
+  @Override
+  public void execute() throws MojoExecutionException, MojoFailureException {
+    try {
+      outputDir = new File(outputDirectory);
+      outputDir.mkdirs();
+      process();
+      project.addCompileSourceRoot(outputDirectory);
+      // Work around bug in hibernate that causes compile to fail if meta data annotation classes
+      // already exist.
+      deleteAnnotationsDirectory();
     } catch (Exception e) {
-      /*
-       * Don't allow exceptions of any type to propagate to the compiler.
-       * Log a warning and return, instead.
-       */
       StringWriter writer = new StringWriter();
       e.printStackTrace(new PrintWriter(writer));
-      log(Diagnostic.Kind.ERROR, "FATAL ERROR: " + writer.toString());
+      logError("FATAL ERROR: '%s'", writer.toString());
+      throw new MojoExecutionException("FATAL ERROR", e);
     }
-
-    if (roundEnv.processingOver()) writeDebugLogMessages();
-
-    return true;
   }
 
-  /**
-   * @param annotatedPackage the {@link PackageElement} to process that has been annotated with
-   *     {@link RifLayoutsGenerator}
-   * @throws IOException An {@link IOException} may be thrown if errors are encountered trying to
-   *     generate source files.
-   */
-  private void process(PackageElement annotatedPackage) throws IOException {
-    RifLayoutsGenerator annotation = annotatedPackage.getAnnotation(RifLayoutsGenerator.class);
-    logNote(annotatedPackage, "Processing package annotated with: '%s'.", annotation);
+  private void process() throws IOException {
+    log("Processing package '%s'.", packageName);
 
     /*
      * Find the spreadsheet referenced by the annotation. It will define the
      * RIF layouts.
      */
-    FileObject spreadsheetResource;
+    ByteSource spreadsheetSource;
     try {
-      spreadsheetResource =
-          processingEnv
-              .getFiler()
-              .getResource(
-                  StandardLocation.SOURCE_PATH,
-                  annotatedPackage.getQualifiedName().toString(),
-                  annotation.spreadsheetResource());
-    } catch (IOException | IllegalArgumentException e) {
-      throw new RifLayoutProcessingException(
-          annotatedPackage,
-          "Unable to find or open specified spreadsheet: '%s'.",
-          annotation.spreadsheetResource());
+      var file =
+          new File(
+              inputDirectory
+                  + "/"
+                  + packageName.replaceAll("\\.", "/")
+                  + "/"
+                  + spreadsheetResource);
+      spreadsheetSource = Files.asByteSource(file);
+    } catch (Exception e) {
+      throw new IOException(
+          String.format(
+              "Unable to find or open specified spreadsheet: '%s' in package '%s'.",
+              spreadsheetResource, packageName));
     }
-    logNote(annotatedPackage, "Found spreadsheet: '%s'.", annotation.spreadsheetResource());
+    log("Found spreadsheet: '%s' in package '%s'.", spreadsheetResource, packageName);
 
     /*
      * Parse the spreadsheet, extracting the layouts from it. Also: define
@@ -178,11 +210,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     List<MappingSpec> mappingSpecs = new LinkedList<>();
     Workbook spreadsheetWorkbook = null;
     try {
-      spreadsheetWorkbook = new XSSFWorkbook(spreadsheetResource.openInputStream());
+      spreadsheetWorkbook = new XSSFWorkbook(spreadsheetSource.openStream());
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiarySheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, beneficiarySheet))
               .setHeaderEntity("Beneficiary")
               .setHeaderTable("beneficiaries")
               .setHeaderEntityIdField("BENE_ID")
@@ -206,9 +238,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
        * time to fix that.
        */
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(
-                  RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistorySheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, beneficiaryHistorySheet))
               .setHeaderEntity("BeneficiaryHistory")
               .setHeaderTable("beneficiaries_history")
               .setHeaderEntityGeneratedIdField("bene_history_id")
@@ -233,9 +264,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHasBeneficiaryMonthly(false));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(
-                  RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, medicareBeneficiaryIdSheet))
               .setHeaderEntity("MedicareBeneficiaryIdHistory")
               .setHeaderTable("medicare_beneficiaryid_history")
               .setHeaderEntityIdField("bene_mbi_id")
@@ -243,8 +273,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, pdeSheet))
               .setHeaderEntity("PartDEvent")
               .setHeaderTable("partd_events")
               .setHeaderEntityIdField("PDE_ID")
@@ -252,8 +282,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, carrierSheet))
               .setHeaderEntity("CarrierClaim")
               .setHeaderTable("carrier_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -264,8 +294,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, inpatientSheet))
               .setHeaderEntity("InpatientClaim")
               .setHeaderTable("inpatient_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -276,8 +306,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, outpatientSheet))
               .setHeaderEntity("OutpatientClaim")
               .setHeaderTable("outpatient_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -288,8 +318,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, hhaSheet))
               .setHeaderEntity("HHAClaim")
               .setHeaderTable("hha_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -300,8 +330,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, dmeSheet))
               .setHeaderEntity("DMEClaim")
               .setHeaderTable("dme_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -312,8 +342,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, hospiceSheet))
               .setHeaderEntity("HospiceClaim")
               .setHeaderTable("hospice_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -324,8 +354,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
-          new MappingSpec(annotatedPackage.getQualifiedName().toString())
-              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
+          new MappingSpec(packageName)
+              .setRifLayout(RifLayout.parse(spreadsheetWorkbook, snfSheet))
               .setHeaderEntity("SNFClaim")
               .setHeaderTable("snf_claims")
               .setHeaderEntityIdField("CLM_ID")
@@ -337,7 +367,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     } finally {
       if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
     }
-    logNote(annotatedPackage, "Generated mapping specification: '%s'", mappingSpecs);
+    log("Generated mapping specification: '%s'", mappingSpecs);
 
     /* Generate the code for each layout. */
     for (MappingSpec mappingSpec : mappingSpecs) {
@@ -410,7 +440,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec columnEnumFinal = columnEnum.build();
     JavaFile columnsEnumFile =
         JavaFile.builder(mappingSpec.getPackageName(), columnEnumFinal).build();
-    columnsEnumFile.writeTo(processingEnv.getFiler());
+    writeFile(columnsEnumFile);
 
     return columnEnumFinal;
   }
@@ -425,7 +455,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private TypeSpec generateLineEntity(MappingSpec mappingSpec) throws IOException {
-    logNote(
+    log(
         "\n%s\nGenerating LineEntity code for %s\n%s\n%s",
         "===============================================",
         mappingSpec.getLineTable(),
@@ -614,7 +644,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec lineEntityFinal = lineEntity.build();
     JavaFile lineEntityClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), lineEntityFinal).build();
-    lineEntityClassFile.writeTo(processingEnv.getFiler());
+    writeFile(lineEntityClassFile);
 
     return lineEntityFinal;
   }
@@ -900,7 +930,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec beneficiaryMonthlyEntityFinal = beneficiaryMonthlyEntity.build();
     JavaFile beneficiaryMonthlyClassFile =
         JavaFile.builder("gov.cms.bfd.model.rif", beneficiaryMonthlyEntityFinal).build();
-    beneficiaryMonthlyClassFile.writeTo(processingEnv.getFiler());
+    writeFile(beneficiaryMonthlyClassFile);
 
     return beneficiaryMonthlyEntityFinal;
   }
@@ -915,7 +945,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private TypeSpec generateHeaderEntity(MappingSpec mappingSpec) throws IOException {
-    logNote(
+    log(
         "\n%s\nGenerating code for %s\n%s\n%s",
         "===============================================",
         mappingSpec.getHeaderTable(),
@@ -981,7 +1011,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // Create an Entity field with accessors for each RIF field.
     int entityLastHeaderFieldIx = mappingSpec.calculateLastHeaderFieldIndex();
-    logNote("entityLastHeaderFieldIx=%d", entityLastHeaderFieldIx);
+    log("entityLastHeaderFieldIx=%d", entityLastHeaderFieldIx);
     for (int fieldIndex = 0; fieldIndex <= entityLastHeaderFieldIx; fieldIndex++) {
       RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
 
@@ -1068,7 +1098,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   headerField.name);
       addSetterStatement(addlDatabaseField, headerField, headerFieldSetter);
       headerEntityClass.addMethod(headerFieldSetter.build());
-      logNote("addlDatabaseField added, %s", addlDatabaseField);
+      log("addlDatabaseField added, %s", addlDatabaseField);
     }
 
     // Add the parent-to-child join field and accessor, if appropriate.
@@ -1194,7 +1224,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec headerEntityFinal = headerEntityClass.build();
     JavaFile headerEntityFile =
         JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
-    headerEntityFile.writeTo(processingEnv.getFiler());
+    writeFile(headerEntityFile);
 
     return headerEntityFinal;
   }
@@ -1219,7 +1249,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     int rifFieldsSize = mappingSpec.getRifLayout().getRifFields().size();
     int firstLineFieldIx =
         mappingSpec.getHasLines() ? mappingSpec.calculateFirstLineFieldIndex() : -1;
-    logNote(
+    log(
         "generateParser, # of RifFields: %d, line field starts at: %d",
         rifFieldsSize, firstLineFieldIx);
 
@@ -1262,7 +1292,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .filter(f -> f.name.equals(rifField.getJavaFieldName()))
               .findAny()
               .get();
-      // logNote("create code for: %s", entityField.toString());
+      // log("create code for: %s", entityField.toString());
 
       // Are we starting the header parsing?
       if (fieldIndex == 0) {
@@ -1364,10 +1394,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     parsingClass.addMethod(parseMethod.build());
 
     TypeSpec parsingClassFinal = parsingClass.build();
-    logNote("parsingClass: %s", parsingClassFinal.name);
+    log("parsingClass: %s", parsingClassFinal.name);
     JavaFile parsingClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
-    parsingClassFile.writeTo(processingEnv.getFiler());
+    writeFile(parsingClassFile);
 
     return parsingClassFinal;
   }
@@ -1417,8 +1447,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     String headerColumnsList = calculateCsvColumns(headerEntity.fieldSpecs, mappingSpec);
 
-    if (DEBUG) {
-      logNote(
+    if (isDebug()) {
+      logDebug(
           "headerColumnsList\n=====================\n%s",
           headerColumnsList.replaceAll(", ", ",\n"));
     }
@@ -1463,8 +1493,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       String lineColumnsList = calculateCsvColumns(lineEntity.get().fieldSpecs, mappingSpec);
 
-      if (DEBUG) {
-        logNote(
+      if (isDebug()) {
+        logDebug(
             "lineColumnsList\n=====================\n%s", lineColumnsList.replaceAll(", ", ",\n"));
       }
 
@@ -1507,7 +1537,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec parsingClassFinal = csvWriterClass.build();
     JavaFile parsingClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
-    parsingClassFile.writeTo(processingEnv.getFiler());
+    writeFile(parsingClassFile);
     return parsingClassFinal;
   }
 
@@ -1531,7 +1561,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       FieldSpec parentField,
       FieldSpec headerIdField) {
     StringBuilder sb = new StringBuilder();
-    if (DEBUG) {
+    if (isDebug()) {
       sb.append("calculateFieldToCsvValueCode: [ ")
           .append("instanceName=")
           .append(instanceName)
@@ -1562,7 +1592,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       code.append(calculateGetterName(field)).append("()");
     }
     sb.append(", code=").append(code).append(" ]");
-    logNote("%s", sb.toString());
+    log(sb.toString());
     return code.toString();
   }
 
@@ -1891,90 +1921,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Reports the specified log message.
-   *
-   * @param logEntryKind the {@link Diagnostic.Kind} of log entry to add
-   * @param associatedElement the Java AST {@link Element} that the log entry should be associated
-   *     with, or <code>null</code>
-   * @param messageFormat the log message format {@link String}
-   * @param messageArguments the log message format arguments
-   */
-  private void log(
-      Diagnostic.Kind logEntryKind,
-      Element associatedElement,
-      String messageFormat,
-      Object... messageArguments) {
-    String logMessage = String.format(messageFormat, messageArguments);
-    processingEnv.getMessager().printMessage(logEntryKind, logMessage, associatedElement);
-
-    String logMessageFull;
-    if (associatedElement != null)
-      logMessageFull =
-          String.format("[%s] at '%s': %s", logEntryKind, associatedElement, logMessage);
-    else logMessageFull = String.format("[%s]: %s", logEntryKind, logMessage);
-    logMessages.add(logMessageFull);
-  }
-
-  /**
-   * Reports the specified log message.
-   *
-   * @param logEntryKind the {@link Diagnostic.Kind} of log entry to add
-   * @param messageFormat the log message format {@link String}
-   * @param messageArguments the log message format arguments
-   */
-  private void log(Diagnostic.Kind logEntryKind, String messageFormat, Object... messageArguments) {
-    log(logEntryKind, null, messageFormat, messageArguments);
-  }
-
-  /**
-   * Reports the specified log message.
-   *
-   * @param associatedElement the Java AST {@link Element} that the log entry should be associated
-   *     with, or <code>null</code>
-   * @param messageFormat the log message format {@link String}
-   * @param messageArguments the log message format arguments
-   */
-  private void logNote(
-      Element associatedElement, String messageFormat, Object... messageArguments) {
-    log(Diagnostic.Kind.NOTE, associatedElement, messageFormat, messageArguments);
-  }
-
-  /**
-   * Reports the specified log message.
-   *
-   * @param associatedElement the Java AST {@link Element} that the log entry should be associated
-   *     with, or <code>null</code>
-   * @param messageFormat the log message format {@link String}
-   * @param messageArguments the log message format arguments
-   */
-  private void logNote(String messageFormat, Object... messageArguments) {
-    log(Diagnostic.Kind.NOTE, null, messageFormat, messageArguments);
-  }
-
-  /**
-   * Writes out all of the messages in {@link #logMessages} to a log file in the
-   * annotation-generated source directory.
-   */
-  private void writeDebugLogMessages() {
-    if (!DEBUG) return;
-
-    try {
-      FileObject logResource =
-          processingEnv
-              .getFiler()
-              .createResource(StandardLocation.SOURCE_OUTPUT, "", "rif-layout-processor-log.txt");
-      Writer logWriter = logResource.openWriter();
-      for (String logMessage : logMessages) {
-        logWriter.write(logMessage);
-        logWriter.write('\n');
-      }
-      logWriter.flush();
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  /**
    * Creates the fields for the BeneficiaryMonthly class in the model rif
    *
    * @param lineEntity helps build the entity {@link TypeSpec.Builder}
@@ -2136,5 +2082,59 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       return ParameterizedTypeName.get(
           ClassName.get(Optional.class),
           selectJavaFieldType(type, isColumnOptional, columnLength, columnScale));
+  }
+
+  /**
+   * Reports the specified log message.
+   *
+   * @param messageFormat the log message format {@link String}
+   * @param messageArguments the log message format arguments
+   */
+  private void log(String messageFormat, Object... messageArguments) {
+    String logMessage = String.format(messageFormat, messageArguments);
+    getLog().info(logMessage);
+  }
+
+  /**
+   * Reports the specified log message at debug log level.
+   *
+   * @param messageFormat the log message format {@link String}
+   * @param messageArguments the log message format arguments
+   */
+  private void logDebug(String messageFormat, Object... messageArguments) {
+    String logMessage = String.format(messageFormat, messageArguments);
+    getLog().info(logMessage);
+  }
+
+  private void logError(String messageFormat, Object... messageArguments) {
+    String logMessage = String.format(messageFormat, messageArguments);
+    getLog().error(logMessage);
+  }
+
+  private boolean isDebug() {
+    return getLog().isDebugEnabled();
+  }
+
+  private void writeFile(JavaFile javaFile) throws IOException {
+    final var filePath = javaFile.toJavaFileObject().getName();
+    final var sourceFile = new File(outputDir, filePath);
+    log("writing source file: %s", sourceFile.getPath());
+    javaFile.writeTo(outputDir);
+  }
+
+  private void deleteAnnotationsDirectory() {
+    final var directory = new File(annotationsDirectory, packageName.replaceAll("\\.", "/"));
+    log("checking annotations directory: %s", directory.getPath());
+    if (directory.isDirectory()) {
+      File[] sourceFiles = directory.listFiles();
+      if (sourceFiles != null) {
+        for (File file : sourceFiles) {
+          if (file.getName().endsWith("_.java")) {
+            log("deleting existing annotations file: %s", file.getPath());
+            file.delete();
+          }
+        }
+      }
+    }
   }
 }
