@@ -15,9 +15,8 @@ ${logic.perms} DO $$
 ${logic.perms}  -- new paca roles on pre_adj schema: paca_reader_role, paca_writer_role, paca_migrator_role (read+write+alter)
 ${logic.perms}  
 ${logic.perms}  -- reader role
-${logic.perms}  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'paca_reader_role') THEN
-${logic.perms}      CREATE ROLE paca_reader_role;
-${logic.perms}  END IF;
+${logic.perms}  DROP ROLE IF EXISTS paca_reader_role;
+${logic.perms}  CREATE ROLE paca_reader_role;
 ${logic.perms}  GRANT USAGE ON SCHEMA pre_adj TO paca_reader_role;
 ${logic.perms}  GRANT SELECT ON ALL TABLES IN SCHEMA pre_adj TO paca_reader_role;
 ${logic.perms}  GRANT SELECT ON ALL SEQUENCES IN SCHEMA pre_adj TO paca_reader_role; --curval
@@ -25,9 +24,8 @@ ${logic.perms}  ALTER DEFAULT PRIVILEGES IN SCHEMA pre_adj GRANT SELECT ON TABLE
 ${logic.perms}  ALTER DEFAULT PRIVILEGES IN SCHEMA pre_adj GRANT SELECT ON SEQUENCES TO paca_reader_role;
 ${logic.perms}  
 ${logic.perms}  -- writer role
-${logic.perms}  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'paca_writer_role') THEN
-${logic.perms}      CREATE ROLE paca_writer_role;
-${logic.perms}  END IF;
+${logic.perms}  DROP ROLE IF EXISTS paca_writer_role;
+${logic.perms}  CREATE ROLE paca_writer_role;
 ${logic.perms}  GRANT USAGE ON SCHEMA pre_adj TO paca_writer_role;
 ${logic.perms}  GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA pre_adj TO paca_writer_role;
 ${logic.perms}  GRANT USAGE ON ALL SEQUENCES IN SCHEMA pre_adj TO paca_writer_role; -- curval, nextval
@@ -35,9 +33,8 @@ ${logic.perms}  ALTER DEFAULT PRIVILEGES IN SCHEMA pre_adj GRANT SELECT, INSERT,
 ${logic.perms}  ALTER DEFAULT PRIVILEGES IN SCHEMA pre_adj GRANT USAGE ON SEQUENCES TO paca_writer_role;
 ${logic.perms}  
 ${logic.perms}  -- migrator role
-${logic.perms}  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'paca_migrator_role') THEN
-${logic.perms}      CREATE ROLE paca_migrator_role;
-${logic.perms}  END IF;
+${logic.perms}  DROP ROLE IF EXISTS paca_migrator_role;
+${logic.perms}  CREATE ROLE paca_migrator_role;
 ${logic.perms}  GRANT ALL PRIVILEGES ON SCHEMA pre_adj TO paca_migrator_role;
 ${logic.perms}  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pre_adj TO paca_migrator_role;
 ${logic.perms}  GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pre_adj TO paca_migrator_role; -- curval, nextval, setval
