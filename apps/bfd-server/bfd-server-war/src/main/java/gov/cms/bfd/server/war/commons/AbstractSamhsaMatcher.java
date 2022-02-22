@@ -90,6 +90,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * Protected constructor for testing purposes.
    *
    * @param cptCodes the cpt codes to use for the test
+   * @param drgCodes the drg codes to use for the test
+   * @param icd9ProcedureCodes the icd 9 procedure codes to use for the test
+   * @param icd9DiagnosisCodes the icd 9 diagnosis codes to use for the test
+   * @param icd10ProcedureCodes the icd 10 procedure codes to use for the test
+   * @param icd10DiagnosisCodes the icd 10 diagnosis codes to use for the test
    */
   protected AbstractSamhsaMatcher(
       Set<String> cptCodes,
