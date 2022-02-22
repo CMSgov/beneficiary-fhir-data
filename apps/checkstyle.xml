@@ -1,0 +1,27 @@
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <module name="TreeWalker">
+        <module name="AvoidStarImport">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="private"/>
+            <property name="allowedAnnotations" value="Override"/>
+        </module>
+        <module name="MissingJavadocType">
+            <property name="scope" value="private"/>
+            <property name="excludeScope" value="nothing"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="allowMissingParamTags" value="false"/>
+            <property name="allowMissingReturnTag" value="false"/>
+            <property name="allowedAnnotations" value="Override"/>
+        </module>
+        <module name="InvalidJavadocPosition"/>
+        <module name="JavadocStyle"/>
+        <module name="NonEmptyAtclauseDescription"/>
+    </module>
+</module>

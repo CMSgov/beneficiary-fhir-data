@@ -8,21 +8,39 @@ package gov.cms.bfd.sharedutils.config;
 public class ConfigException extends RuntimeException {
   private final String name;
 
+  /**
+   * Instantiates a new Config exception.
+   *
+   * @param name the name
+   * @param message the message
+   */
   public ConfigException(String name, String message) {
     super(message);
     this.name = name;
   }
 
+  /**
+   * Instantiates a new Config exception.
+   *
+   * @param name the name
+   * @param message the message
+   * @param cause the cause
+   */
   public ConfigException(String name, String message, Throwable cause) {
     super(message, cause);
     this.name = name;
   }
 
-  /** @return The name of the configuration option that had an invalid value. */
+  /**
+   * Gets the name.
+   *
+   * @return The name
+   */
   public String getName() {
     return name;
   }
 
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("invalid option: name='%s' message='%s'", name, getMessage());

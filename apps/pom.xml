@@ -529,6 +529,21 @@ checkJavaFormat
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<configuration>
+						<configLocation>checkstyle.xml</configLocation>
+					</configuration>
+					<version>3.1.2</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>9.3</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>2.4</version>
 				</plugin>
@@ -652,8 +667,7 @@ checkJavaFormat
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<doclint>all</doclint>
-					<failOnWarnings>true</failOnWarnings>
+					<failOnWarnings>false</failOnWarnings>
 					<detectJavaApiLink>false</detectJavaApiLink>
 					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
 					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
@@ -666,6 +680,19 @@ checkJavaFormat
 						<id>attach-javadocs</id>
 						<goals>
 							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>verify</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>

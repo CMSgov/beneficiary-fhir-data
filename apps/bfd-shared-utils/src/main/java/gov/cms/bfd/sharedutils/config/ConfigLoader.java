@@ -52,6 +52,12 @@ public class ConfigLoader {
     return new Builder();
   }
 
+  /**
+   * Returns the string values for the specified configuration data.
+   *
+   * @param name the name to look up
+   * @return the values in a list
+   */
   public List<String> stringValues(String name) {
     final Collection<String> values = source.apply(name);
 
@@ -62,6 +68,13 @@ public class ConfigLoader {
     }
   }
 
+  /**
+   * Returns the string values for the specified configuration data.
+   *
+   * @param name the name to look up
+   * @param defaults the defaults for the values if no value found for name
+   * @return the values for the specified name, using the specified defaults if no value was found
+   */
   public List<String> stringValues(String name, Collection<String> defaults) {
     final Collection<String> values = source.apply(name);
 
@@ -92,6 +105,12 @@ public class ConfigLoader {
     return stringValues(name, Collections.singletonList(defaultValue)).get(0);
   }
 
+  /**
+   * Gets an optonal configuration value list.
+   *
+   * @param name the name of configuration value
+   * @return the optional list of string values for the name
+   */
   public Optional<List<String>> stringsOption(String name) {
     final Collection<String> values = source.apply(name);
 
@@ -398,10 +417,21 @@ public class ConfigLoader {
   public static class Builder {
     private Function<String, Collection<String>> source = ignored -> null;
 
+    /**
+     * Builds a new {@link ConfigLoader}.
+     *
+     * @return the config loader
+     */
     public ConfigLoader build() {
       return new ConfigLoader(source);
     }
 
+    /**
+     * Adds a configuration collection by copying the input source configuration.
+     *
+     * @param newSource the source to add
+     * @return the builder for chaining
+     */
     public Builder add(Function<String, Collection<String>> newSource) {
       Function<String, Collection<String>> oldSource = this.source;
       this.source =
@@ -412,6 +442,12 @@ public class ConfigLoader {
       return this;
     }
 
+    /**
+     * Adds a single configuration by copying the value of the input source configuration.
+     *
+     * @param newSource the source to add
+     * @return the builder for chaining
+     */
     public Builder addSingle(Function<String, String> newSource) {
       Function<String, Collection<String>> wrappedNewSource =
           name -> {
