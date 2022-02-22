@@ -71,9 +71,9 @@
   ],
   "extension": [
     {
-      "url": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+      "url": "https://bluebutton.cms.gov/resources/variables/fiss/serv-typ-cd",
       "valueCoding": {
-        "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+        "system": "https://bluebutton.cms.gov/resources/variables/fiss/serv-typ-cd",
         "code": "A"
       }
     }
@@ -89,7 +89,7 @@
           }
         ]
       },
-      "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num",
+      "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
       "value": "123456"
     }
   ],
@@ -100,10 +100,6 @@
         "system": "http://terminology.hl7.org/CodeSystem/claim-type",
         "code": "institutional",
         "display": "Institutional"
-      },
-      {
-        "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
-        "code": "A"
       }
     ]
   },
@@ -131,26 +127,13 @@
   "facility": {
     "extension": [
       {
-        "url": "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+        "url": "https://bluebutton.cms.gov/resources/variables/fiss/lob-cd",
         "valueCoding": {
-          "system": "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+          "system": "https://bluebutton.cms.gov/resources/variables/fiss/lob-cd",
           "code": "r"
         }
       }
-    ],
-    "identifier": {
-      "type": {
-        "coding": [
-          {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code": "npi",
-            "display": "National Provider Identifier"
-          }
-        ]
-      },
-      "system": "http://hl7.org/fhir/sid/us-npi",
-      "value": "8876543211"
-    }
+    ]
   },
   "supportingInfo": [
     {
@@ -167,7 +150,7 @@
       "code": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/freq-cd",
             "code": "C"
           }
         ]
@@ -199,7 +182,7 @@
       "onAdmission": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/diag-poa-ind",
             "code": "z"
           }
         ]
@@ -218,7 +201,7 @@
       "onAdmission": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/diag-poa-ind",
             "code": "u"
           }
         ]
@@ -237,7 +220,7 @@
       "onAdmission": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/diag-poa-ind",
             "code": "n"
           }
         ]

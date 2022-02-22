@@ -86,9 +86,9 @@
         ],
         "extension": [
           {
-            "url": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+            "url": "https://bluebutton.cms.gov/resources/variables/fiss/serv-typ-cd",
             "valueCoding": {
-              "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+              "system": "https://bluebutton.cms.gov/resources/variables/fiss/serv-typ-cd",
               "code": "A"
             }
           }
@@ -104,7 +104,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
             "value": "123456"
           }
         ],
@@ -115,10 +115,6 @@
               "system": "http://terminology.hl7.org/CodeSystem/claim-type",
               "code": "institutional",
               "display": "Institutional"
-            },
-            {
-              "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
-              "code": "A"
             }
           ]
         },
@@ -146,9 +142,9 @@
         "facility": {
           "extension": [
             {
-              "url": "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+              "url": "https://bluebutton.cms.gov/resources/variables/fiss/lob-cd",
               "valueCoding": {
-                "system": "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/lob-cd",
                 "code": "r"
               }
             }
@@ -182,7 +178,7 @@
             "code": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+                  "system": "https://bluebutton.cms.gov/resources/variables/fiss/freq-cd",
                   "code": "C"
                 }
               ]
@@ -214,7 +210,7 @@
             "onAdmission": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+                  "system": "https://bluebutton.cms.gov/resources/variables/fiss/diag-poa-ind",
                   "code": "z"
                 }
               ]
@@ -233,7 +229,7 @@
             "onAdmission": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+                  "system": "https://bluebutton.cms.gov/resources/variables/fiss/diag-poa-ind",
                   "code": "u"
                 }
               ]
@@ -252,7 +248,7 @@
             "onAdmission": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+                  "system": "https://bluebutton.cms.gov/resources/variables/fiss/diag-poa-ind",
                   "code": "n"
                 }
               ]
@@ -419,7 +415,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
             "value": "654323"
           }
         ],
@@ -483,7 +479,7 @@
             "productOrService": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+                  "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
                   "code": "FDSAE"
                 }
               ]
@@ -492,7 +488,7 @@
               {
                 "coding": [
                   {
-                    "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+                    "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-one",
                     "version": "1",
                     "code": "A"
                   }
@@ -508,7 +504,7 @@
             "productOrService": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+                  "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
                   "code": "FDAAA"
                 }
               ]
@@ -517,7 +513,7 @@
               {
                 "coding": [
                   {
-                    "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+                    "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-two",
                     "version": "2",
                     "code": "B"
                   }

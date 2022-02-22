@@ -76,7 +76,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
             "value": "123456"
           }
         ],
@@ -166,7 +166,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
             "value": "654323"
           }
         ],

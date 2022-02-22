@@ -104,7 +104,7 @@
           }
         ]
       },
-      "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+      "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
       "value": "654321"
     }
   ],
@@ -169,7 +169,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+            "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
             "code": "FDSAE"
           }
         ]
@@ -178,7 +178,7 @@
         {
           "coding": [
             {
-              "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+              "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-one",
               "version": "1",
               "code": "A"
             }
@@ -194,7 +194,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+            "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
             "code": "FDAAA"
           }
         ]
@@ -203,7 +203,7 @@
         {
           "coding": [
             {
-              "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+              "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-two",
               "version": "2",
               "code": "B"
             }

@@ -41,7 +41,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
@@ -128,7 +127,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                         C4BBClaimIdentifierType.UC.getSystem(),
                         C4BBClaimIdentifierType.UC.toCode(),
                         C4BBClaimIdentifierType.UC.getDisplay())))
-            .setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM)
+            .setSystem(BBCodingSystems.FISS.DCN)
             .setValue(claimGroup.getDcn()));
   }
 
@@ -136,12 +135,10 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     return claimGroup.getServTypeCd() == null
         ? null
         : List.of(
-            new Extension(BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE)
+            new Extension(BBCodingSystems.FISS.SERV_TYP_CD)
                 .setValue(
                     new Coding(
-                        BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
-                        claimGroup.getServTypeCd(),
-                        null)));
+                        BBCodingSystems.FISS.SERV_TYP_CD, claimGroup.getServTypeCd(), null)));
   }
 
   private static CodeableConcept getType(PreAdjFissClaim claimGroup) {
@@ -151,11 +148,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                 new Coding(
                     ClaimType.INSTITUTIONAL.getSystem(),
                     ClaimType.INSTITUTIONAL.toCode(),
-                    ClaimType.INSTITUTIONAL.getDisplay()),
-                new Coding(
-                    BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
-                    claimGroup.getServTypeCd(),
-                    null)));
+                    ClaimType.INSTITUTIONAL.getDisplay())));
   }
 
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
@@ -172,7 +165,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                             C4BBSupportingInfoType.TYPE_OF_BILL.getDisplay())))
                 .setCode(
                     new CodeableConcept(
-                        new Coding(BBCodingSystems.CLM_FREQ_CODE, claimGroup.getFreqCd(), null)))
+                        new Coding(BBCodingSystems.FISS.FREQ_CD, claimGroup.getFreqCd(), null)))
                 .setSequence(1));
   }
 
@@ -224,7 +217,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                   benePayer.getBeneLastName(),
                   ifNotNull(benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
                   benePayer.getBeneDob(),
-                  benePayer.getBeneSex()));
+                  benePayer.getBeneSex(),
+                  "([10 chars of first] [middle initial] [15 char of last])"));
     } else {
       patient = getContainedPatient(claimGroup.getMbi(), null);
     }
@@ -246,7 +240,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                               C4BBOrganizationIdentifierType.PRN.getSystem(),
                               C4BBOrganizationIdentifierType.PRN.toCode(),
                               C4BBOrganizationIdentifierType.PRN.getDisplay())))
-                  .setSystem(BBCodingSystems.PROVIDER_NUM)
+                  .setSystem(BBCodingSystems.FISS.MEDA_PROV_6)
                   .setValue(claimGroup.getMedaProv_6()));
     }
 
@@ -289,26 +283,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     if (claimGroup.getLobCd() != null || claimGroup.getNpiNumber() != null) {
       Reference reference = new Reference();
 
-      if (claimGroup.getNpiNumber() != null) {
-        reference.setIdentifier(
-            new Identifier()
-                .setType(
-                    new CodeableConcept(
-                        new Coding(
-                            C4BBIdentifierType.NPI.getSystem(),
-                            C4BBIdentifierType.NPI.toCode(),
-                            C4BBIdentifierType.NPI.getDisplay())))
-                .setSystem(TransformerConstants.CODING_NPI_US)
-                .setValue(claimGroup.getNpiNumber()));
-      }
-
       if (claimGroup.getLobCd() != null) {
         reference.setExtension(
             List.of(
-                new Extension(BBCodingSystems.CLM_FACILITY_TYPE_CODE)
+                new Extension(BBCodingSystems.FISS.LOB_CD)
                     .setValue(
-                        new Coding(
-                            BBCodingSystems.CLM_FACILITY_TYPE_CODE, claimGroup.getLobCd(), null))));
+                        new Coding(BBCodingSystems.FISS.LOB_CD, claimGroup.getLobCd(), null))));
       }
 
       return reference;
@@ -338,7 +318,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                 component.setOnAdmission(
                     new CodeableConcept(
                         new Coding(
-                            BBCodingSystems.CLM_POA_IND,
+                            BBCodingSystems.FISS.DIAG_POA_IND,
                             diagnosisCode.getDiagPoaInd().toLowerCase(Locale.ROOT),
                             null)));
               }
@@ -394,11 +374,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                       .setFocal(Objects.equals(payer.getPayersName(), MEDICARE));
 
               if (payer.getPayersName() != null) {
-                component.setExtension(
-                    List.of(
-                        new Extension(
-                            BBCodingSystems.FISS.PAYERS_NAME,
-                            new StringType(payer.getPayersName()))));
+                component.setCoverage(
+                    new Reference()
+                        .setIdentifier(
+                            new Identifier()
+                                .setSystem(BBCodingSystems.FISS.PAYERS_NAME)
+                                .setValue(payer.getPayersName())));
               }
 
               return component;

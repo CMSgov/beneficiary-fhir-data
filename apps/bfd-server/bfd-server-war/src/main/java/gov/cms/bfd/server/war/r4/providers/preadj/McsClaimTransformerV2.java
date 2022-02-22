@@ -9,9 +9,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
-import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
-import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Comparator;
@@ -110,10 +108,11 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     PatientInfo patientInfo =
         new PatientInfo(
             ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
-            ifNotNull(claimGroup.getIdrBeneLast_1_6(), s -> s.charAt(0) + "."),
+            claimGroup.getIdrBeneLast_1_6(),
             ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
             null, // MCS claims don't contain dob
-            claimGroup.getIdrBeneSex());
+            claimGroup.getIdrBeneSex(),
+            "([first initial] [middle initial] [6 char of last])");
 
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
@@ -145,36 +144,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                           null)));
     }
 
-    if (claimGroup.getIdrBillProvEin() != null) {
-      organization
-          .getIdentifier()
-          .add(
-              new Identifier()
-                  .setType(
-                      new CodeableConcept(
-                          new Coding(
-                              C4BBOrganizationIdentifierType.TAX.getSystem(),
-                              C4BBOrganizationIdentifierType.TAX.toCode(),
-                              C4BBOrganizationIdentifierType.TAX.getDisplay())))
-                  .setSystem(BBCodingSystems.MCS.BILL_PROV_EIN)
-                  .setValue(claimGroup.getIdrBillProvEin()));
-    }
-
-    if (claimGroup.getIdrBillProvNum() != null) {
-      organization
-          .getIdentifier()
-          .add(
-              new Identifier()
-                  .setType(
-                      new CodeableConcept(
-                          new Coding(
-                              C4BBIdentifierType.NPI.getSystem(),
-                              C4BBIdentifierType.NPI.toCode(),
-                              C4BBIdentifierType.NPI.getDisplay())))
-                  .setSystem(TransformerConstants.CODING_NPI_US)
-                  .setValue(claimGroup.getIdrBillProvNpi()));
-    }
-
     organization.setId("provider-org");
 
     return organization;
@@ -200,7 +169,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                             C4BBIdentifierType.UC.getSystem(),
                             C4BBIdentifierType.UC.toCode(),
                             C4BBIdentifierType.UC.getDisplay())))
-                .setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM)
+                .setSystem(BBCodingSystems.MCS.ICN)
                 .setValue(claimGroup.getIdrClmHdIcn()));
   }
 
@@ -274,7 +243,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                       .setSequence(detail.getPriority() + 1)
                       .setProductOrService(
                           new CodeableConcept(
-                              new Coding(BBCodingSystems.HCPCS, detail.getIdrProcCode(), null)))
+                              new Coding(
+                                  BBCodingSystems.MCS.PROC_CODE, detail.getIdrProcCode(), null)))
                       .setServiced(
                           new Period()
                               .setStart(localDateToDate(detail.getIdrDtlFromDate()))
@@ -314,6 +284,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             Optional.ofNullable(detail.getIdrModThree()),
             Optional.ofNullable(detail.getIdrModFour()));
 
+    List<String> systemSuffix = List.of("one", "two", "three", "four");
+
     // OptionalGetWithoutIsPresent - IsPresent used in filter
     //noinspection OptionalGetWithoutIsPresent
     return IntStream.range(0, mods.size())
@@ -321,7 +293,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .mapToObj(
             index ->
                 new CodeableConcept(
-                    new Coding(BBCodingSystems.HCPCS, mods.get(index).get(), null)
+                    new Coding(
+                            BBCodingSystems.MCS.MOD_PREFIX + systemSuffix.get(index + 1),
+                            mods.get(index).get(),
+                            null)
                         .setVersion(String.valueOf(index + 1))))
         .collect(Collectors.toList());
   }

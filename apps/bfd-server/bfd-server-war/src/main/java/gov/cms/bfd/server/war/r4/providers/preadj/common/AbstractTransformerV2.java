@@ -5,6 +5,8 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -68,13 +71,26 @@ public class AbstractTransformerV2 {
     patient.setId("patient");
 
     if (patientInfo != null) {
+      Narrative textNode = new Narrative();
+
+      List<String> textNodeValues =
+          new ArrayList<>(
+              Arrays.asList(
+                  patientInfo.getFirstName(),
+                  patientInfo.getMiddleName(),
+                  patientInfo.getLastName(),
+                  patientInfo.getText()));
+      textNodeValues.removeAll(Collections.singletonList(null));
+      textNode.setDivAsString(String.join(" ", textNodeValues));
+
       patient
           .setName(createHumanNameFrom(patientInfo))
           .setBirthDate(localDateToDate(patientInfo.getDob()))
           .setGender(
               patientInfo.getGender() == null
                   ? null
-                  : genderMap().get(patientInfo.getGender().toLowerCase()));
+                  : genderMap().get(patientInfo.getGender().toLowerCase()))
+          .setText(textNode);
     }
 
     return patient;
@@ -129,14 +145,21 @@ public class AbstractTransformerV2 {
     private final String middleName;
     private final LocalDate dob;
     private final String gender;
+    private final String text;
 
     public PatientInfo(
-        String firstName, String lastName, String middleName, LocalDate dob, String gender) {
+        String firstName,
+        String lastName,
+        String middleName,
+        LocalDate dob,
+        String gender,
+        String text) {
       this.firstName = firstName;
       this.lastName = lastName;
       this.middleName = middleName;
       this.dob = dob;
       this.gender = gender;
+      this.text = text;
     }
 
     public String getFirstName() {
@@ -157,6 +180,10 @@ public class AbstractTransformerV2 {
 
     public String getGender() {
       return gender;
+    }
+
+    public String getText() {
+      return text;
     }
   }
 }

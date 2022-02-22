@@ -120,7 +120,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
                   benePayer.getBeneLastName(),
                   ifNotNull(benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
                   benePayer.getBeneDob(),
-                  benePayer.getBeneSex()));
+                  benePayer.getBeneSex(),
+                  "([10 chars of first] [middle initial] [15 char of last])"));
     } else {
       patient = getContainedPatient(claimGroup.getMbi(), null);
     }
@@ -158,7 +159,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
                         C4BBIdentifierType.UC.getSystem(),
                         C4BBIdentifierType.UC.toCode(),
                         C4BBIdentifierType.UC.getDisplay())))
-            .setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM)
+            .setSystem(BBCodingSystems.FISS.DCN)
             .setValue(claimGroup.getDcn()));
   }
 

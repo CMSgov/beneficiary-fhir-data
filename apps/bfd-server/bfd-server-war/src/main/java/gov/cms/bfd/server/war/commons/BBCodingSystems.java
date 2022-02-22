@@ -4,24 +4,6 @@ public class BBCodingSystems {
 
   public static final String BB_BASE_URL = "https://bluebutton.cms.gov/resources";
 
-  public static final String CARR_CLM_CONTROL_NUM = BB_BASE_URL + "/variables/carr_clm_cntrl_num";
-
-  public static final String CLM_FACILITY_TYPE_CODE = BB_BASE_URL + "/variables/clm_fac_type_cd";
-
-  public static final String CLM_FREQ_CODE = BB_BASE_URL + "/variables/clm_freq_cd";
-
-  public static final String CLM_SERVICE_CLSFCTN_TYPE_CODE =
-      BB_BASE_URL + "/variables/clm_srvc_clsfctn_type_cd";
-
-  public static final String CLM_POA_IND = BB_BASE_URL + "/variables/clm_poa_ind_sw1";
-
-  public static final String FI_DOC_CLM_CONTROL_NUM =
-      BB_BASE_URL + "/variables/fi_doc_clm_cntrl_num";
-
-  public static final String HCPCS = BB_BASE_URL + "/codesystem/hcpcs";
-
-  public static final String PROVIDER_NUM = BB_BASE_URL + "/variables/prvdr_num";
-
   private BBCodingSystems() {}
 
   public static class FISS {
@@ -37,6 +19,18 @@ public class BBCodingSystems {
     public static final String RECD_DT_CYMD = FISS_BASE + "/recd-dt-cymd";
 
     public static final String TAX_NUM = FISS_BASE + "/fed-tax-nb";
+
+    public static final String DCN = FISS_BASE + "/dcn";
+
+    public static final String SERV_TYP_CD = FISS_BASE + "/serv-typ-cd";
+
+    public static final String FREQ_CD = FISS_BASE + "/freq-cd";
+
+    public static final String MEDA_PROV_6 = FISS_BASE + "/meda-prov-6";
+
+    public static final String LOB_CD = FISS_BASE + "/lob-cd";
+
+    public static final String DIAG_POA_IND = FISS_BASE + "/diag-poa-ind";
 
     private FISS() {}
   }
@@ -58,6 +52,12 @@ public class BBCodingSystems {
     public static final String STATUS_CODE = MCS_BASE + "/status-code";
 
     public static final String STATUS_DATE = MCS_BASE + "/status-date";
+
+    public static final String ICN = MCS_BASE + "/icn";
+
+    public static final String PROC_CODE = MCS_BASE + "/proc-code";
+
+    public static final String MOD_PREFIX = MCS_BASE + "/mod-";
 
     private MCS() {}
   }

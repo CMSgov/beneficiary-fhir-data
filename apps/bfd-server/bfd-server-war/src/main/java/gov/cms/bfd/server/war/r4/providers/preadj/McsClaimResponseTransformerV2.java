@@ -166,7 +166,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
             ifNotNull(claimGroup.getIdrBeneLast_1_6(), s -> s.charAt(0) + "."),
             ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
             null, // MCS claims don't contain dob
-            claimGroup.getIdrBeneSex());
+            claimGroup.getIdrBeneSex(),
+            "([first initial] [middle initial] [6 char of last])");
 
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
@@ -206,7 +207,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
                         C4BBIdentifierType.UC.getSystem(),
                         C4BBIdentifierType.UC.toCode(),
                         C4BBIdentifierType.UC.getDisplay())))
-            .setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM)
+            .setSystem(BBCodingSystems.MCS.ICN)
             .setValue(claimGroup.getIdrClmHdIcn()));
   }
 
