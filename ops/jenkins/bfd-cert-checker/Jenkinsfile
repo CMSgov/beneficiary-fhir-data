@@ -16,10 +16,10 @@ spec:
         }
     }
     triggers {
-        cron('0 20 11 * 1-5')
+        cron('0 20 * * 1-5')
     }
     environment {
-        SEND_NOTIFICATIONS="false"
+        SEND_NOTIFICATIONS="true"
         WARN_WHEN="30:45"
         ALERT_WHEN="15:30"
         PAGE_WHEN="1:15"
