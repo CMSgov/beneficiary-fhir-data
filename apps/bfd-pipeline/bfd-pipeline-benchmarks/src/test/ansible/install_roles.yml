@@ -1,5 +1,0 @@
----
-# Run the following command against this file to install all of the Ansible roles required by this project:
-# 
-#     $ ansible-galaxy install -r install_roles.yml 
-# 
