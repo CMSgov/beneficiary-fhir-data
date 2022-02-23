@@ -667,14 +667,14 @@ public class CarrierClaimTransformerV2Test {
     Extension ex2 =
         TransformerTestUtilsV2.findExtensionByUrlAndSystem(
             "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
             eob.getItemFirstRep().getExtension());
 
     Extension compare2 =
         new Extension(
             "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
             new Coding()
-                .setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd")
+                .setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt")
                 .setCode("3")
                 .setDisplay("Services"));
 

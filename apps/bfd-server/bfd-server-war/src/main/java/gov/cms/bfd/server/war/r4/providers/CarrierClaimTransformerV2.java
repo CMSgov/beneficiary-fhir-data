@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -273,10 +272,7 @@ public class CarrierClaimTransformerV2 {
               code ->
                   item.addExtension(
                       TransformerUtilsV2.createExtensionCoding(
-                              eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, code)
-                          .setUrl(
-                              CCWUtils.calculateVariableReferenceUrl(
-                                  CcwCodebookVariable.CARR_LINE_MTUS_CNT))));
+                          eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
 
       // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
       line.getMtusCode()
