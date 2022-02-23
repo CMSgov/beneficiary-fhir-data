@@ -266,7 +266,7 @@ public class CarrierClaimTransformerV2 {
                 CcwCodebookVariable.CARR_LINE_MTUS_CNT, line.getMtusCount()));
       }
 
-      // CARR_LINE_MTUS_CNT => ExplanationOfBenefit.item.extension
+      // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
       line.getMtusCode()
           .ifPresent(
               code ->

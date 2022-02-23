@@ -675,8 +675,7 @@ public class CarrierClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
             new Coding()
                 .setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt")
-                .setCode("3")
-                .setDisplay("Services"));
+                .setCode("3"));
 
     assertTrue(compare2.equalsDeep(ex2));
 
