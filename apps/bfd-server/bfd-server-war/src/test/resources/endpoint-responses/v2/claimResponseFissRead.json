@@ -2,7 +2,7 @@
   "resourceType": "ClaimResponse",
   "id": "f-123456",
   "meta": {
-    "versionId": "f-123456-224d1b5be6023302c5c5c103d0d6d532e9e1f84c",
+    "versionId": "f-123456-2a83b67a2d8acfa8eadcbc1af1b1c0cb3c7c61fd",
     "lastUpdated": "1970-01-01T00:00:00.000+00:00"
   },
   "contained": [
@@ -26,6 +26,7 @@
       ],
       "name": [
         {
+          "text": "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
           "family": "baker",
           "given": [
             "jim",

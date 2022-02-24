@@ -5,8 +5,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +14,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -71,26 +68,13 @@ public class AbstractTransformerV2 {
     patient.setId("patient");
 
     if (patientInfo != null) {
-      Narrative textNode = new Narrative();
-
-      List<String> textNodeValues =
-          new ArrayList<>(
-              Arrays.asList(
-                  patientInfo.getFirstName(),
-                  patientInfo.getMiddleName(),
-                  patientInfo.getLastName(),
-                  patientInfo.getText()));
-      textNodeValues.removeAll(Collections.singletonList(null));
-      textNode.setDivAsString(String.join(" ", textNodeValues));
-
       patient
           .setName(createHumanNameFrom(patientInfo))
           .setBirthDate(localDateToDate(patientInfo.getDob()))
           .setGender(
               patientInfo.getGender() == null
                   ? null
-                  : genderMap().get(patientInfo.getGender().toLowerCase()))
-          .setText(textNode);
+                  : genderMap().get(patientInfo.getGender().toLowerCase()));
     }
 
     return patient;
@@ -122,12 +106,43 @@ public class AbstractTransformerV2 {
         givens = null;
       }
 
-      names.add(new HumanName().setFamily(patientInfo.getLastName()).setGiven(givens));
+      HumanName name =
+          new HumanName()
+              .setFamily(patientInfo.getLastName())
+              .setGiven(givens)
+              .setText(createNameText(patientInfo));
+
+      names.add(name);
     } else {
       names = null;
     }
 
     return names;
+  }
+
+  private static String createNameText(PatientInfo patientInfo) {
+    List<String> nodeNames = new ArrayList<>();
+    List<String> nodeFormats = new ArrayList<>();
+
+    if (patientInfo.getFirstName() != null) {
+      nodeNames.add(patientInfo.getFirstName());
+      nodeFormats.add("[" + patientInfo.getFirstNameFormat() + "]");
+    }
+
+    if (patientInfo.getMiddleName() != null) {
+      nodeNames.add(patientInfo.getMiddleName());
+      nodeFormats.add("[" + patientInfo.getMiddleNameFormat() + "]");
+    }
+
+    if (patientInfo.getLastName() != null) {
+      nodeNames.add(patientInfo.getLastName());
+      nodeFormats.add("[" + patientInfo.getLastNameFormat() + "]");
+    }
+
+    String nodeName = String.join(" ", nodeNames);
+    String nodeFormat = "(" + String.join(", ", nodeFormats) + ")";
+
+    return nodeName + " " + nodeFormat;
   }
 
   protected static <T> T ifNotNull(T object, UnaryOperator<T> processor) {
@@ -145,7 +160,9 @@ public class AbstractTransformerV2 {
     private final String middleName;
     private final LocalDate dob;
     private final String gender;
-    private final String text;
+    private final String firstNameFormat;
+    private final String middleNameFormat;
+    private final String lastNameFormat;
 
     public PatientInfo(
         String firstName,
@@ -153,13 +170,17 @@ public class AbstractTransformerV2 {
         String middleName,
         LocalDate dob,
         String gender,
-        String text) {
+        String firstNameFormat,
+        String middleNameFormat,
+        String lastNameFormat) {
       this.firstName = firstName;
       this.lastName = lastName;
       this.middleName = middleName;
       this.dob = dob;
       this.gender = gender;
-      this.text = text;
+      this.firstNameFormat = firstNameFormat;
+      this.middleNameFormat = middleNameFormat;
+      this.lastNameFormat = lastNameFormat;
     }
 
     public String getFirstName() {
@@ -182,8 +203,16 @@ public class AbstractTransformerV2 {
       return gender;
     }
 
-    public String getText() {
-      return text;
+    public String getFirstNameFormat() {
+      return firstNameFormat;
+    }
+
+    public String getMiddleNameFormat() {
+      return middleNameFormat;
+    }
+
+    public String getLastNameFormat() {
+      return lastNameFormat;
     }
   }
 }

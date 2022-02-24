@@ -218,7 +218,9 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                   ifNotNull(benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
                   benePayer.getBeneDob(),
                   benePayer.getBeneSex(),
-                  "([10 chars of first] [middle initial] [15 char of last])"));
+                  "max 10 chars of first",
+                  "middle initial",
+                  "max 15 chars of last"));
     } else {
       patient = getContainedPatient(claimGroup.getMbi(), null);
     }

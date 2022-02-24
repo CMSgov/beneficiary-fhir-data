@@ -17,7 +17,7 @@
         "resourceType": "ClaimResponse",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-224d1b5be6023302c5c5c103d0d6d532e9e1f84c",
+          "versionId": "f-123456-2a83b67a2d8acfa8eadcbc1af1b1c0cb3c7c61fd",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -41,6 +41,7 @@
             ],
             "name": [
               {
+                "text": "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
                 "family": "baker",
                 "given": [
                   "jim",
@@ -111,7 +112,7 @@
         "resourceType": "ClaimResponse",
         "id": "m-654323",
         "meta": {
-          "versionId": "m-654323-2aae5a3c48bca88332e1d7191b2c53886bf5e173",
+          "versionId": "m-654323-a462be7187b00e898e035154c6e384dc647c1420",
           "lastUpdated": "1970-01-01T00:00:04.000+00:00"
         },
         "contained": [
@@ -135,7 +136,8 @@
             ],
             "name": [
               {
-                "family": "S.",
+                "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+                "family": "SMITH",
                 "given": [
                   "J.",
                   "D."

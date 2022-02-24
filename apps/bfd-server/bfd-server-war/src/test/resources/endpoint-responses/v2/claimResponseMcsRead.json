@@ -2,7 +2,7 @@
   "resourceType": "ClaimResponse",
   "id": "m-654321",
   "meta": {
-    "versionId": "m-654321-3676fd6df7eb37be0210b6ee9d017d3ce5f15c0b",
+    "versionId": "m-654321-0b6b964b7176ac54c53878a425fc13e5afb4683d",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
@@ -26,7 +26,8 @@
       ],
       "name": [
         {
-          "family": "S.",
+          "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+          "family": "SMITH",
           "given": [
             "J.",
             "D."

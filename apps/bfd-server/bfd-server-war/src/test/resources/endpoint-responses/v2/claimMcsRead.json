@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "versionId": "m-654321-c068f60762c66f83851b6fa8d38eae206cb3ef56",
+    "versionId": "m-654321-f4dda597ebb2a08da4e86ae6e2dc4d8fc77b328a",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
@@ -26,7 +26,8 @@
       ],
       "name": [
         {
-          "family": "S.",
+          "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+          "family": "SMITH",
           "given": [
             "J.",
             "D."
@@ -169,7 +170,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/proc-code",
             "code": "FDSAE"
           }
         ]
@@ -178,7 +179,7 @@
         {
           "coding": [
             {
-              "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-one",
+              "system": "https://bluebutton.cms.gov/resources/variables/mcs/mod-one",
               "version": "1",
               "code": "A"
             }
@@ -194,7 +195,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/proc-code",
             "code": "FDAAA"
           }
         ]
@@ -203,7 +204,7 @@
         {
           "coding": [
             {
-              "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-two",
+              "system": "https://bluebutton.cms.gov/resources/variables/mcs/mod-two",
               "version": "2",
               "code": "B"
             }

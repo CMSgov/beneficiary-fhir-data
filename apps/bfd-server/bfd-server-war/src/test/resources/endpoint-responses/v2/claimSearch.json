@@ -17,7 +17,7 @@
         "resourceType": "Claim",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-8e50a587ef3ec5f80a2cbabc534c0205f0ab6f54",
+          "versionId": "f-123456-291b81c21c06d9efda0b3c4fa029ee5663bc3fe1",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -41,6 +41,7 @@
             ],
             "name": [
               {
+                "text": "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
                 "family": "baker",
                 "given": [
                   "jim",
@@ -148,20 +149,7 @@
                 "code": "r"
               }
             }
-          ],
-          "identifier": {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                  "code": "npi",
-                  "display": "National Provider Identifier"
-                }
-              ]
-            },
-            "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "8876543211"
-          }
+          ]
         },
         "supportingInfo": [
           {
@@ -282,24 +270,24 @@
         ],
         "insurance": [
           {
-            "extension": [
-              {
-                "url": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name",
-                "valueString": "MEDICARE"
-              }
-            ],
             "sequence": 1,
-            "focal": true
+            "focal": true,
+            "coverage": {
+              "identifier": {
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name",
+                "value": "MEDICARE"
+              }
+            }
           },
           {
-            "extension": [
-              {
-                "url": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name",
-                "valueString": "BCBS KC"
-              }
-            ],
             "sequence": 2,
-            "focal": false
+            "focal": false,
+            "coverage": {
+              "identifier": {
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name",
+                "value": "BCBS KC"
+              }
+            }
           }
         ],
         "total": {
@@ -313,7 +301,7 @@
         "resourceType": "Claim",
         "id": "m-654323",
         "meta": {
-          "versionId": "m-654323-f12ea170155b8dd1ef0595c7a1f35393e36bbc43",
+          "versionId": "m-654323-e9cbfe61dafd33d11ea0291ac87be77747f80159",
           "lastUpdated": "1970-01-01T00:00:04.000+00:00"
         },
         "contained": [
@@ -337,7 +325,8 @@
             ],
             "name": [
               {
-                "family": "S.",
+                "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+                "family": "SMITH",
                 "given": [
                   "J.",
                   "D."
@@ -479,7 +468,7 @@
             "productOrService": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
+                  "system": "https://bluebutton.cms.gov/resources/variables/mcs/proc-code",
                   "code": "FDSAE"
                 }
               ]
@@ -488,7 +477,7 @@
               {
                 "coding": [
                   {
-                    "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-one",
+                    "system": "https://bluebutton.cms.gov/resources/variables/mcs/mod-one",
                     "version": "1",
                     "code": "A"
                   }
@@ -504,7 +493,7 @@
             "productOrService": {
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/proc-code",
+                  "system": "https://bluebutton.cms.gov/resources/variables/mcs/proc-code",
                   "code": "FDAAA"
                 }
               ]
@@ -513,7 +502,7 @@
               {
                 "coding": [
                   {
-                    "system": "https://bluebutton.cms.gov/resources/codesystem/mcs/mod-two",
+                    "system": "https://bluebutton.cms.gov/resources/variables/mcs/mod-two",
                     "version": "2",
                     "code": "B"
                   }

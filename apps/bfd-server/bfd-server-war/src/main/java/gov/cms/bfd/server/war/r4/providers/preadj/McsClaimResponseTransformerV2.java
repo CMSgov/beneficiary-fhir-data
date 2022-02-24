@@ -163,11 +163,13 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     PatientInfo patientInfo =
         new PatientInfo(
             ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
-            ifNotNull(claimGroup.getIdrBeneLast_1_6(), s -> s.charAt(0) + "."),
+            claimGroup.getIdrBeneLast_1_6(),
             ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
             null, // MCS claims don't contain dob
             claimGroup.getIdrBeneSex(),
-            "([first initial] [middle initial] [6 char of last])");
+            "first initial",
+            "middle initial",
+            "max 6 chars of last");
 
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }

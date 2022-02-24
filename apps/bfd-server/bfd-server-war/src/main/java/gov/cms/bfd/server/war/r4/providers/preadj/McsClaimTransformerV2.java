@@ -9,7 +9,9 @@ import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Comparator;
@@ -112,7 +114,9 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
             null, // MCS claims don't contain dob
             claimGroup.getIdrBeneSex(),
-            "([first initial] [middle initial] [6 char of last])");
+            "first initial",
+            "middle initial",
+            "max 6 chars of last");
 
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
@@ -142,6 +146,36 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                           BBCodingSystems.MCS.BILL_PROV_SPEC,
                           claimGroup.getIdrBillProvSpec(),
                           null)));
+    }
+
+    if (claimGroup.getIdrBillProvEin() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBOrganizationIdentifierType.TAX.getSystem(),
+                              C4BBOrganizationIdentifierType.TAX.toCode(),
+                              C4BBOrganizationIdentifierType.TAX.getDisplay())))
+                  .setSystem(BBCodingSystems.MCS.BILL_PROV_EIN)
+                  .setValue(claimGroup.getIdrBillProvEin()));
+    }
+
+    if (claimGroup.getIdrBillProvNum() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBIdentifierType.NPI.getSystem(),
+                              C4BBIdentifierType.NPI.toCode(),
+                              C4BBIdentifierType.NPI.getDisplay())))
+                  .setSystem(TransformerConstants.CODING_NPI_US)
+                  .setValue(claimGroup.getIdrBillProvNpi()));
     }
 
     organization.setId("provider-org");
@@ -294,7 +328,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             index ->
                 new CodeableConcept(
                     new Coding(
-                            BBCodingSystems.MCS.MOD_PREFIX + systemSuffix.get(index + 1),
+                            BBCodingSystems.MCS.MOD_PREFIX + systemSuffix.get(index),
                             mods.get(index).get(),
                             null)
                         .setVersion(String.valueOf(index + 1))))
