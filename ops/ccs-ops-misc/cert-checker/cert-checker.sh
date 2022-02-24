@@ -9,9 +9,9 @@ SEND_NOTIFICATIONS=${SEND_NOTIFICATIONS:-"false"}
 CRON_SCHEDULE="${SCHEDULE:-"0 12 * * *"}" # run at noon everyday
 
 # notifications
-WARN_WHEN="${WARN_WHEN:-"3000:4500"}"     # WARN when expiration is >= 30 but less than 45 days
-ALERT_WHEN="${ALERT_WHEN:-"1500:3000"}"   # expiration is >= 15 but less than 30 days
-PAGE_WHEN="${PAGE_WHEN:-"1:1500"}"        # expiration is >= 0 but less than 15 days
+WARN_WHEN="${WARN_WHEN:-"30:45"}"     # WARN when expiration is >= 30 but less than 45 days
+ALERT_WHEN="${ALERT_WHEN:-"15:30"}"   # expiration is >= 15 but less than 30 days
+PAGE_WHEN="${PAGE_WHEN:-"1:15"}"      # expiration is >= 0 but less than 15 days
 
 # notifications must be set via env vars or command line flags
 WARN_SLACK_WEBHOOK_URL="${WARN_SLACK_WEBHOOK_URL:-}"
@@ -110,7 +110,7 @@ send_warning_slack() {
 }
 
 # Send alert slack
-send_alert_slack_CHAN() {
+send_alert_slack_chan() {
   local msg payload
   msg="$*"
   payload="payload={\"channel\": \"$ALERT_SLACK_CHAN\", \"text\": \"$msg\"}"
@@ -120,10 +120,13 @@ send_alert_slack_CHAN() {
 }
 
 # Trigger a page
+# https://help.victorops.com/knowledge-base/rest-endpoint-integration-guide/#recommended-rest-endpoint-integration-fields
 trigger_page() {
   local msg payload
-  msg="$*"
-  payload="{\"message_type\":\"critical\",\"state_message\":\"${msg}\"}"
+  id="$1"; shift # entity_id (think of it as a primary key)
+  name="$*" # entity_display_name
+  msg="${name}" # state_message (I cannot seem to find this in actual pages, so just displaying name)
+  payload="{\"message_type\":\"critical\",\"entity_id\":\"${id}\",\"entity_display_name\":\"${name}\",\"state_message\":\"${msg}\"}"
   if [[ "$SEND_NOTIFICATIONS" == "true" ]]; then
     curl -X POST -d "$payload" "$PAGE_WEBHOOK_URL"
   fi
@@ -168,12 +171,12 @@ check_endpoint(){
 
   # send alerts
   if (( expires_in_days >= ALERT_START && expires_in_days < ALERT_END)); then
-    send_alert_slack_CHAN "WARNING!! ${endpoint} TLS cert expires in less than ${expires_in_days} days"
+    send_alert_slack_chan "WARNING!! ${endpoint} TLS cert expires in less than ${expires_in_days} days"
   fi
 
   # trigger a page (our pager service will automatically send a slack alert)
   if (( expires_in_days <= PAGE_END)); then
-    trigger_page "${endpoint} TLS cert expires in less than ${expires_in_days} days"
+    trigger_page "bfd/tls/expiring_cert/${endpoint}" "${endpoint} cert expires in less than ${expires_in_days} days"
   fi
 }
 
