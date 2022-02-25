@@ -23,7 +23,6 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformer {
-
   static IDrugCodeProvider DrugCodeProvider;
 
   public DMEClaimTransformer() {
@@ -33,7 +32,6 @@ final class DMEClaimTransformer {
   public DMEClaimTransformer(IDrugCodeProvider iDrugCodeProvider) {
     DrugCodeProvider = iDrugCodeProvider;
   }
-
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
@@ -257,7 +255,6 @@ final class DMEClaimTransformer {
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
           eob,
-          includeTaxNumbers,
           claimGroup.getClaimId(),
           claimLine.getServiceCount(),
           claimLine.getPlaceOfServiceCode(),
