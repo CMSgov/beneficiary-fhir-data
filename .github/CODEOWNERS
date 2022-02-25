@@ -2,24 +2,24 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@cbrunefearless @mackec1 @keithdadkins @christrotteradhoc
+@cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell
 
 #BFD Pipeline and Server Codeowners
-/rfcs @cbrunefearless @mackec1 @keithdadkins @christrotteradhoc
-/ops @keithdadkins @njdister @christrotteradhoc
-/apps @cbrunefearless @mackec1 @christrotteradhoc
+/rfcs @cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell
+/ops @keithdadkins @christrotteradhoc
+/apps @cbrunefearless @mackec1 @christrotteradhoc @lsmitchell
 
 #BFD Insights Codeowners
-/insights @keithdadkins @njdister @mackec1 @christrotteradhoc
+/insights @keithdadkins @mackec1 @christrotteradhoc @lsmitchell
 
 #BCDA Insights Codeowners
-/insights/terraform/projects/bcda @msnook @orenfromberg @keithdadkins @njdister
+/insights/terraform/projects/bcda @msnook @orenfromberg @keithdadkins
 
 #AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger @keithdadkins @njdister
+/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger @keithdadkins
 
 #BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @njdister
+/insights/terraform/projects/bb2 @dtisza1 @keithdadkins
 
 #DCGEO Pipeline Codeowners
 /apps/bfd-pipeline/bfd-pipeline-rda-grpc @ericbuckley @brianburton @christrotteradhoc

@@ -4,6 +4,11 @@ fissOutputFile: rda-fiss.ndjson
 mcsOutputFile: rda-mcs.ndjson
 fissSeqStart: 1 # Sequence numbers must be 1 or higher
 mcsSeqStart: 1  # Sequence numbers must be 1 or higher
+buildAttributionSet: true
+attributionSetSize: 100
+attributionTemplateFile: attribution-template.sql # Input template file
+attributionScriptFile: attribution-data.sql # Output script file
+attributionFissRatio: 1.0 # Ratio of fiss claims to MCS (0.5 means 33% fiss, 1.0 means 50% fiss, 1.5 means 60% fiss)
 fissSources:
   - inpatient.csv
   - outpatient.csv
