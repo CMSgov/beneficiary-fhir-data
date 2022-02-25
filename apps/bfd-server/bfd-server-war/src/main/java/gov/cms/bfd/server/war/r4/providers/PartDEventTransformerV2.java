@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -32,6 +33,12 @@ final class PartDEventTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
+  static IDrugCodeProvider DrugCodeProvider;
+
+  public PartDEventTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
+    DrugCodeProvider = iDrugCodeProvider;
+  }
+
   @Trace
   static ExplanationOfBenefit transform(
       MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
@@ -282,7 +289,7 @@ final class PartDEventTransformerV2 {
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            TransformerUtilsV2.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            DrugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
             claimGroup.getNationalDrugCode()));
 
     // QTY_DSPNSD_NUM => ExplanationOfBenefit.item.quantity

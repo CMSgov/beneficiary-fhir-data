@@ -145,7 +145,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        TransformerUtils.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
+        DrugCodeProvider.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 

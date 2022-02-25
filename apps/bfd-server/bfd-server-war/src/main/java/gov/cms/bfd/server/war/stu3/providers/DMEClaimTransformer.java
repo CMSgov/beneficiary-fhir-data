@@ -6,6 +6,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.server.war.FDADrugUtils;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -21,6 +23,17 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformer {
+
+  static IDrugCodeProvider DrugCodeProvider;
+
+  public DMEClaimTransformer() {
+    DrugCodeProvider = new FDADrugUtils();
+  }
+
+  public DMEClaimTransformer(IDrugCodeProvider iDrugCodeProvider) {
+    DrugCodeProvider = iDrugCodeProvider;
+  }
+
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
@@ -244,6 +257,7 @@ final class DMEClaimTransformer {
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
           eob,
+          includeTaxNumbers,
           claimGroup.getClaimId(),
           claimLine.getServiceCount(),
           claimLine.getPlaceOfServiceCode(),

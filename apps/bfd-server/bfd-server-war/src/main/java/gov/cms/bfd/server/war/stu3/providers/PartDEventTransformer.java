@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -23,6 +24,13 @@ import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformer {
+
+  static IDrugCodeProvider DrugCodeProvider;
+
+  public PartDEventTransformer(IDrugCodeProvider iDrugCodeProvider) {
+    DrugCodeProvider = iDrugCodeProvider;
+  }
+
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link PartDEvent} to transform
@@ -233,7 +241,7 @@ final class PartDEventTransformer {
         TransformerUtils.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            TransformerUtils.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            DrugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
             claimGroup.getNationalDrugCode()));
 
     SimpleQuantity quantityDispensed = new SimpleQuantity();
