@@ -47,8 +47,8 @@ of migrations.
 It is assumed that readers of this proposal are generally familiar with two open source tools that BFD depends on for
 database operations:
 
-* Flyway -- for executing database schema migration scripts
-* Hibernate -- for object-relational mapping between the applications and the database
+* [Flyway](https://flywaydb.org/) -- for executing database schema migration scripts
+* [Hibernate](https://hibernate.org/orm/) -- for object-relational mapping between the applications and the database
 
 The two applications that make up BFD will be considered in terms of their roles in database migration and database
 operations:
@@ -71,13 +71,15 @@ changes that are deployed together:
 2. An application change in the ORM layer (typically in relation to a change in the schema)
 
 When reasoning about different types of database migrations, it is necessary to consider that both the schema and the
-application may change. We will refer to the schema and application as they existed prior to the deployment as the old
-schema and the old application, and the schema and application as they exist after applying the migration as the new
-schema and the new applications. It is assumed that the old application is compatible with the old schema (since that is
-what is current running on the system) and that the new application is compatible with the new schema (ensuring this is
-a basic testing requirement of any change to the system). The interactions between old and new components though is
-important in understanding this proposal and leads to some classifications of migrations based on the compatibility of
-the schema change with old and new versions of the application:
+application may change. We will refer to the schema and application as they exist immediately prior to the deployment of
+the database migration as the old schema and the old application, and the schema and application that result from
+running the database migration to completion as the new schema and the new applications. Old and new components are only
+discussed in the context of a particular deployment (and not in a cumulative manner across multiple deployments). It is
+assumed that the old application is compatible with the old schema (since that is what is current running on the system)
+and that the new application is compatible with the new schema (ensuring this is a basic testing requirement of any
+change to the system). The interactions between old and new components though is important in understanding this
+proposal and leads to some classifications of migrations based on the compatibility of the schema change with old and
+new versions of the application:
 
 * A backward-compatible database migration is one where the new schema is compatible with the old applications
 (otherwise it is considered to be backward-incompatible)
@@ -318,7 +320,8 @@ PROD-SBX, PROD.
 
 * The Jenkins pipeline will not proceed to the next stage (deploying the other applications) until the migrator
 application has exited with a status indicating success. In the event that this application status indicates that not
-all operations were successful, the Jenkins deployment will halt and be marked as a failure.
+all operations were successful, the Jenkins deployment will halt and be marked as a failure. Flyway migrations are
+typically run within a transaction so a failure will cause a rollback and not lead to downtime. 
 
 * The new application will produce log files that contain the Flyway and Hibernate logging that is currently captured in
 the BFD Pipeline application logs. These new application logs will be sent to Splunk and Cloudwatch.
@@ -333,6 +336,10 @@ database objects.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
+
+What postgres privileges are required to run all possible migrations? Database owner? Or does something else suffice?
+
+Is EC2 the right fit for this or would Lambda or other options be a better fit? 
 
 Do we need to continue to invoke Hibernate validation at all? What benefit do we derive from this check that is not
 already derived from running the unit and integration tests? What sorts of problems would not be caught by the tests
