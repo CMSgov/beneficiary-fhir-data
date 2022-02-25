@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.BatchSize;
 
 /** JPA class for the FissClaims table */
 @Entity
@@ -291,6 +292,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 
@@ -299,6 +301,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
 
@@ -307,6 +310,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissPayer> payers = new HashSet<>();
 
@@ -315,6 +319,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
 
