@@ -278,7 +278,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                       .setProductOrService(
                           new CodeableConcept(
                               new Coding(
-                                  BBCodingSystems.MCS.PROC_CODE, detail.getIdrProcCode(), null)))
+                                  BBCodingSystems.HCPCS_RELEASE, detail.getIdrProcCode(), null)))
                       .setServiced(
                           new Period()
                               .setStart(localDateToDate(detail.getIdrDtlFromDate()))
@@ -318,8 +318,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             Optional.ofNullable(detail.getIdrModThree()),
             Optional.ofNullable(detail.getIdrModFour()));
 
-    List<String> systemSuffix = List.of("one", "two", "three", "four");
-
     // OptionalGetWithoutIsPresent - IsPresent used in filter
     //noinspection OptionalGetWithoutIsPresent
     return IntStream.range(0, mods.size())
@@ -327,10 +325,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .mapToObj(
             index ->
                 new CodeableConcept(
-                    new Coding(
-                            BBCodingSystems.MCS.MOD_PREFIX + systemSuffix.get(index),
-                            mods.get(index).get(),
-                            null)
+                    new Coding(BBCodingSystems.HCPCS_RELEASE, mods.get(index).get(), null)
                         .setVersion(String.valueOf(index + 1))))
         .collect(Collectors.toList());
   }

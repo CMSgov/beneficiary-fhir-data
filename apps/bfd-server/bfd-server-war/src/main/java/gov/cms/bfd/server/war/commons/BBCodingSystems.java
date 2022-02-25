@@ -4,6 +4,9 @@ public class BBCodingSystems {
 
   public static final String BB_BASE_URL = "https://bluebutton.cms.gov/resources";
 
+  public static final String HCPCS_RELEASE =
+      "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+
   private BBCodingSystems() {}
 
   public static class FISS {
