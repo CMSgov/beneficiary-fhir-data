@@ -220,8 +220,17 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   @VisibleForTesting
   boolean hasHcpcsSystemAndSamhsaCptCode(CodeableConcept procedureConcept) {
     return procedureConcept.getCoding().stream()
-            .anyMatch(code -> TransformerConstants.CODING_SYSTEM_HCPCS.equals(code.getSystem()))
+            .anyMatch(code -> getHcpcsSystem().equals(code.getSystem()))
         && procedureConcept.getCoding().stream().anyMatch(this::isSamhsaCptCode);
+  }
+
+  /**
+   * Defines the HCPCS system to use. Child classes can override to define different systems.
+   *
+   * @return The HCPCS system to use in logic.
+   */
+  protected String getHcpcsSystem() {
+    return TransformerConstants.CODING_SYSTEM_HCPCS;
   }
 
   /**

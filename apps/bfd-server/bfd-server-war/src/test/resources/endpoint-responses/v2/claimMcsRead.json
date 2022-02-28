@@ -2,7 +2,6 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "versionId": "m-654321-f4dda597ebb2a08da4e86ae6e2dc4d8fc77b328a",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
@@ -170,7 +169,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/mcs/proc-code",
+            "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
             "code": "FDSAE"
           }
         ]
@@ -179,7 +178,7 @@
         {
           "coding": [
             {
-              "system": "https://bluebutton.cms.gov/resources/variables/mcs/mod-one",
+              "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
               "version": "1",
               "code": "A"
             }
@@ -195,7 +194,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/mcs/proc-code",
+            "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
             "code": "FDAAA"
           }
         ]
@@ -204,7 +203,7 @@
         {
           "coding": [
             {
-              "system": "https://bluebutton.cms.gov/resources/variables/mcs/mod-two",
+              "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
               "version": "2",
               "code": "B"
             }

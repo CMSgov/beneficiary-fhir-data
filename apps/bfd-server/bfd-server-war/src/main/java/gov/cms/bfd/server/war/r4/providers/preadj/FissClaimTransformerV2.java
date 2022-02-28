@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -27,7 +25,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -89,7 +86,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setIdentifier(getIdentifier(claimGroup));
     claim.setExtension(getExtension(claimGroup));
     claim.setStatus(Claim.ClaimStatus.ACTIVE);
-    claim.setType(getType(claimGroup));
+    claim.setType(getType());
     claim.setSupportingInfo(getSupportingInfo(claimGroup));
     claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
@@ -102,17 +99,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setProcedure(getProcedure(claimGroup, isIcd9));
     claim.setInsurance(getInsurance(claimGroup));
 
-    FhirContext ctx = FhirContext.forR4();
-    IParser parser = ctx.newJsonParser();
-
-    String claimContent = parser.encodeResourceToString(claim);
-
-    String resourceHash = DigestUtils.sha1Hex(claimContent);
-
-    claim.setMeta(
-        new Meta()
-            .setLastUpdated(Date.from(claimGroup.getLastUpdated()))
-            .setVersionId("f-" + claimGroup.getDcn() + "-" + resourceHash));
+    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
 
     return claim;
@@ -141,7 +128,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                         BBCodingSystems.FISS.SERV_TYP_CD, claimGroup.getServTypeCd(), null)));
   }
 
-  private static CodeableConcept getType(PreAdjFissClaim claimGroup) {
+  private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(
             List.of(

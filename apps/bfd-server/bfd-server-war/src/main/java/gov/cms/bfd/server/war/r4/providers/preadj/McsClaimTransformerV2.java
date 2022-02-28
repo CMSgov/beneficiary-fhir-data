@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -20,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -90,18 +87,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setDiagnosis(getDiagnosis(claimGroup));
     claim.setItem(getItems(claimGroup));
 
-    FhirContext ctx = FhirContext.forR4();
-    IParser parser = ctx.newJsonParser();
-
-    String claimContent = parser.encodeResourceToString(claim);
-
-    String resourceHash = DigestUtils.sha1Hex(claimContent);
-
     claim.setCreated(new Date());
-    claim.setMeta(
-        new Meta()
-            .setLastUpdated(Date.from(claimGroup.getLastUpdated()))
-            .setVersionId("m-" + claimGroup.getIdrClmHdIcn() + "-" + resourceHash));
+    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
 
     return claim;
   }
@@ -278,7 +265,9 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                       .setProductOrService(
                           new CodeableConcept(
                               new Coding(
-                                  BBCodingSystems.HCPCS_RELEASE, detail.getIdrProcCode(), null)))
+                                  TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
+                                  detail.getIdrProcCode(),
+                                  null)))
                       .setServiced(
                           new Period()
                               .setStart(localDateToDate(detail.getIdrDtlFromDate()))
@@ -325,7 +314,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .mapToObj(
             index ->
                 new CodeableConcept(
-                    new Coding(BBCodingSystems.HCPCS_RELEASE, mods.get(index).get(), null)
+                    new Coding(
+                            TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
+                            mods.get(index).get(),
+                            null)
                         .setVersion(String.valueOf(index + 1))))
         .collect(Collectors.toList());
   }
