@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
@@ -14,14 +15,24 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
+import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
+import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -30,15 +41,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.sql.DataSource;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -66,9 +81,8 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
   public void loadSampleA() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   @Test
@@ -77,7 +91,7 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Verify that LoadedFile entity
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               assertTrue(loadedFiles.size() > 1, "Expected to have many loaded files in SAMPLE A");
@@ -103,7 +117,7 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Verify that a loaded files exsits
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> beforeLoadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               assertTrue(beforeLoadedFiles.size() > 0, "Expected to have at least one file");
@@ -111,7 +125,7 @@ public final class RifLoaderIT {
               LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
 
               PipelineTestUtils.get().pauseMillis(10);
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
               // Verify that the loaded list was updated properly
               final List<LoadedFile> afterLoadedFiles =
@@ -137,7 +151,7 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Setup a loaded file with an old date
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               final EntityTransaction txn = entityManager.getTransaction();
@@ -155,7 +169,7 @@ public final class RifLoaderIT {
                   "Expect to have old files");
 
               // Load another set that will cause the old file to be trimmed
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
               // Verify that old file was trimmed
               final List<LoadedFile> afterFiles =
@@ -172,8 +186,7 @@ public final class RifLoaderIT {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
-              loadSample(
-                  dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
               // Verify that a loaded files exsits
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
@@ -188,10 +201,9 @@ public final class RifLoaderIT {
   @Test
   @Disabled
   public void loadSampleU() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -275,19 +287,18 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
   public void loadSampleUUnchanged() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // this should insert a new beneficiary history record
     /*
      * FIXME Why is this called "_UNCHANGED" if it will result in a new bene history record? Is the
      * name off, or are we still creating some unnecessary history records?
      */
-    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+    loadSample(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     long start = System.currentTimeMillis();
     // this should bypass inserting a new beneficiary history record because it already exists
-    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+    loadSample(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -337,10 +348,8 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount12() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads sample A Data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {
@@ -370,12 +379,10 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount24() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads first year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
@@ -397,15 +404,12 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads first year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     // Loads  second year of data with only 8 months
     loadSample(
-        dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
     EntityManagerFactory entityManagerFactory =
@@ -428,13 +432,10 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Load first year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Load 8 months of data in year two
     loadSample(
-        dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
     EntityManagerFactory entityManagerFactory =
@@ -467,7 +468,6 @@ public final class RifLoaderIT {
     }
     // Load 9 months of data in year two with some data updated in july
     loadSample(
-        dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS.getResources()));
 
     entityManager = null;
@@ -513,15 +513,6 @@ public final class RifLoaderIT {
     }
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_B} data. */
-  @Disabled
-  @Test
-  public void loadSampleB() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
-  }
-
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHETIC_DATA} data.
    *
@@ -535,46 +526,193 @@ public final class RifLoaderIT {
         "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
         Runtime.getRuntime().maxMemory()),
     Runtime.getRuntime().maxMemory() >= 4500000000L); */
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-  }
-
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_MCT} data. */
-  @Test
-  public void loadSampleMctData() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
+    List<StaticRifResource> samples =
+        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources());
+    loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
+    verifyRecordPrimaryKeysPresent(samples);
   }
 
   @Disabled
   @Test
   public void loadSyntheaData() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources()));
+    List<StaticRifResource> samples =
+        Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources());
+    loadSample(samples);
+    verifyRecordPrimaryKeysPresent(samples);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data and the XXX
+   * filtering turned on, to verify that 2022 bene records do load normally.
+   */
+  @Test
+  public void referenceYearFilteringFor2022Beneficiary() {
+    // TODO These are the test cases/coverage that we need:
+    // 1: Edit bene to 2022, but load bene + claims: verify counts with filtering turned on
+    // 2: Turn off filtering, load SAMPLE_A, turn on filtering, re-run edited SAMPLE_A as 2022
+    // UPDATE, verify counts
+    // 3: Don't edit bene, load bene: verify it blows up due to disallowed non-2022 INSERT
+
+    /*
+     * Grab the SAMPLE_A BENE record and set its enrollment reference year to 2022, prior to loading
+     * it.
+     */
+    Stream<RifFile> samplesStream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.BENEFICIARY,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
+        rifRecordEvent -> {
+          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          List<String> beneCsvValues =
+              StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
+          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal(), "2022");
+          return Arrays.asList(beneCsvValues);
+        };
+    Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
+    samplesStream = editSamples(samplesStream, fileEditor);
+
+    /* Turn on the filtering and then load it. */
+    // TODO turn on the filtering
+    loadSample("SAMPLE_A, edited to have 2022 ref year", samples);
+
+    /* Verify that the bene record does load as expected. */
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+      // Count and verify the number of bene records in the DB.
+      CriteriaQuery<Long> beneCountQuery = criteriaBuilder.createQuery(Long.class);
+      beneCountQuery.select(criteriaBuilder.count(beneCountQuery.from(Beneficiary.class)));
+      Long beneCount = entityManager.createQuery(beneCountQuery).getSingleResult();
+      assertEquals(1, beneCount, "Beneficiary record not created as expected.");
+
+      // Count and verify the number of bene records in the DB.
+      CriteriaQuery<Long> skippedCountQuery = criteriaBuilder.createQuery(Long.class);
+      skippedCountQuery.select(
+          criteriaBuilder.count(skippedCountQuery.from(SkippedRifRecords.class)));
+      Long skippedCount = entityManager.createQuery(skippedCountQuery).getSingleResult();
+      assertEquals(0, skippedCount, "Unexpected records found in skipped queue.");
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
+   * TODO
+   *
+   * @param filter
+   * @param samples
+   * @return
+   */
+  private Stream<RifFile> filterSamples(Predicate<RifFile> filter, StaticRifResource... samples) {
+    return Arrays.stream(samples).map(sample -> sample.toRifFile()).filter(filter);
+  }
+
+  /**
+   * TODO
+   *
+   * @param samples
+   * @param editor
+   * @return
+   */
+  private Stream<RifFile> editSamples(Stream<RifFile> samples, Function<RifFile, RifFile> editor) {
+    Stream<RifFile> editedRifFiles = samples.map(sampleFile -> editor.apply(sampleFile));
+    return editedRifFiles;
+  }
+
+  /**
+   * TODO
+   *
+   * @param inputFile
+   * @param editor
+   * @return
+   */
+  private RifFile editSampleRecords(
+      RifFile inputFile, Function<RifRecordEvent<?>, List<List<String>>> editor) {
+    try {
+      Path editedTempFile = Files.createTempFile("edited-sample-rif", ".rif");
+      RifFilesProcessor rifProcessor = new RifFilesProcessor();
+      RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), inputFile);
+      RifFileRecords records = rifProcessor.produceRecords(rifFilesEvent.getFileEvents().get(0));
+
+      /*
+       * Each List<String> represents a single CSV row's cell values. Each List<List<String>>
+       * represents a single RIF "record group", because claims are often composed of multiple CSV
+       * rows. Thus, each List<List<List<String>>> is a collection of multiple RIF record groups,
+       * e.g. multiple claims or beneficiaries.
+       */
+      List<List<List<String>>> editedRifRecords =
+          records.getRecords().map(editor).collect(Collectors.toList());
+
+      /*
+       * Write the RIF records back out to a new RIF temp file. Worth noting that, because we aren't
+       * RAII'ing this, we have no way to reliably clean up the temp files that this creates. They
+       * _shouldn't_ be large enough for that to be a major problem, but it's still not great.
+       */
+      try (FileWriter fileWriter = new FileWriter(editedTempFile.toFile());
+          CSVPrinter csvPrinter = new CSVPrinter(fileWriter, RifParsingUtils.CSV_FORMAT); ) {
+        for (List<List<String>> rifRecordGroup : editedRifRecords) {
+          for (List<String> csvRow : rifRecordGroup) {
+            csvPrinter.printRecord(csvRow);
+          }
+        }
+      }
+
+      LocalRifFile editedRifFile = new LocalRifFile(editedTempFile, inputFile.getFileType());
+      return editedRifFile;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  /**
+   * Runs {@link RifLoader} against the specified {@link RifFile}s.
+   *
+   * @param sampleName a human-friendly name that will be logged to identify the data load being
+   *     kicked off here
+   * @param filesToLoad the {@link RifFile}s to load
+   */
+  private void loadSample(String sampleName, Stream<RifFile> filesToLoad) {
+    RifFilesEvent rifFilesEvent =
+        new RifFilesEvent(Instant.now(), filesToLoad.collect(Collectors.toList()));
+    loadSample(sampleName, rifFilesEvent);
   }
 
   /**
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
-   * @param dataSource a {@link DataSource} for the test DB to use
    * @param sampleResources the {@link StaticRifResourceGroup} to load
    */
-  private void loadSample(DataSource dataSource, List<StaticRifResource> sampleResources) {
-    LOGGER.info("Loading RIF file from {}...", sampleResources.get(0).getResourceUrl().toString());
-
+  private void loadSample(List<StaticRifResource> sampleResources) {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
+    int loadCount = loadSample(sampleResources.get(0).getResourceUrl().toString(), rifFilesEvent);
+
+    // Verify that the expected number of records were run successfully.
+    assertEquals(
+        sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
+        loadCount,
+        "Unexpected number of loaded records.");
+  }
+
+  /**
+   * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
+   *
+   * @param sampleName a human-friendly name that will be logged to identify the data load being
+   *     kicked off here
+   * @param rifFilesEvent the {@link RifFilesEvent} to load
+   * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
+   */
+  private int loadSample(String sampleName, RifFilesEvent rifFilesEvent) {
+    LOGGER.info("Loading RIF files: '{}'...", sampleName);
 
     // Create the processors that will handle each stage of the pipeline.
     RifFilesProcessor processor = new RifFilesProcessor();
@@ -599,7 +737,7 @@ public final class RifLoaderIT {
           });
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }
-    LOGGER.info("Loaded RIF records: '{}'.", loadCount.get());
+    LOGGER.info("Loaded RIF files: '{}', record count: '{}'.", sampleName, loadCount.get());
     Slf4jReporter.forRegistry(PipelineTestUtils.get().getPipelineApplicationState().getMetrics())
         .outputTo(LOGGER)
         .build()
@@ -607,17 +745,29 @@ public final class RifLoaderIT {
 
     // Verify that the expected number of records were run successfully.
     assertEquals(0, failureCount.get());
-    assertEquals(
-        sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
-        loadCount.get(),
-        "Unexpected number of loaded records.");
+
+    return loadCount.get();
+  }
+
+  /**
+   * Runs the {@link RifFilesProcessor} to extract RIF records from the specified {@link
+   * StaticRifResource}s, and then calls {@link #assertAreInDatabase(LoadAppOptions,
+   * EntityManagerFactory, Stream)} on each record to verify that it's present in the database.
+   * Basically: this is a decent smoke test to verify that {@link RifLoader} did what it should have
+   * -- not thorough, but something.
+   *
+   * @param sampleResources the {@link StaticRifResource}s to go check for in the DB
+   */
+  private void verifyRecordPrimaryKeysPresent(List<StaticRifResource> sampleResources) {
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    RifFilesProcessor processor = new RifFilesProcessor();
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
 
     /*
      * Run the extraction an extra time and verify that each record can now
      * be found in the database.
      */
-    EntityManagerFactory entityManagerFactory =
-        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     for (StaticRifResource rifResource : sampleResources) {
       /*
        * This is too slow to run against larger data sets: for instance,

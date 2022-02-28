@@ -454,6 +454,10 @@ public final class RifLoader {
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+            /*
+             * TODO should we be explicitly blowing up here if we try to UPDATE a not-pre-existing
+             * bene?
+             */
             entityManager.merge(record);
 
           } else {
