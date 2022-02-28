@@ -126,9 +126,11 @@ trigger_page() {
   id="$1"; shift # entity_id (think of it as a primary key)
   name="$*" # entity_display_name
   msg="${name}" # state_message (I cannot seem to find this in actual pages, so just displaying name)
-  payload="{\"message_type\":\"critical\",\"entity_id\":\"${id}\",\"entity_display_name\":\"${name}\",\"state_message\":\"${msg}\"}"
+  cmd="curl -X POST -d '{\"message_type\":\"critical\",\"entity_id\":\"${id}\",\"entity_display_name\":\"${name}\",\"state_message\":\"${msg}\"}' $PAGE_WEBHOOK_URL"
   if [[ "$SEND_NOTIFICATIONS" == "true" ]]; then
-    curl -X POST -d "$payload" "$PAGE_WEBHOOK_URL"
+    # For some reason single quotes breaks json when called via a variable
+    # building and eval'ing the command to avoid the issue
+    eval "$cmd"
   fi
 }
 
