@@ -542,21 +542,141 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data and the XXX
-   * filtering turned on, to verify that 2022 bene records do load normally.
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
+   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
    */
   @Test
-  public void referenceYearFilteringFor2022Beneficiary() {
-    // TODO These are the test cases/coverage that we need:
-    // 1: Edit bene to 2022, but load bene + claims: verify counts with filtering turned on
+  public void loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+
+    // TODO: Set data to insert? Is any action an insert if it doesnt exist?
+
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
+   * 2021 enrollment date and filter on expect an exception is thrown.
+   *
+   * <p>There should be no 2021 records being inserted, but if so blow up since this has
+   * implications that need to be handled before we load them.
+   */
+  @Test
+  public void loadBeneficiaryWhenInsertAnd2021EnrollmentDateAndFilterOnExpectException() {
+    // 3: Don't edit bene, load bene: verify it blows up due to disallowed non-2022 INSERT
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
+   * LoadStrategy.INSERT_IDEMPOTENT is used and 2022 enrollment date and filter on expect the data
+   * is loaded to the regular database tables.
+   */
+  @Test
+  public void
+      loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnAndInsertStrategyExpectRecordLoaded() {}
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
+   * LoadStrategy.INSERT_IDEMPOTENT is used and 2022 enrollment date and filter on expect an
+   * exception.
+   *
+   * <p>There should be no 2021 records being inserted, but if so blow up since this has
+   * implications that need to be handled before we load them.
+   */
+  @Test
+  public void
+      loadBeneficiaryWhenInsertAnd2021EnrollmentDateAndFilterOnAndInsertStrategyExpectException() {}
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when doing an
+   * UPDATE on an existing record, 2022 enrollment date, and filter on expect the data is loaded to
+   * the regular database tables.
+   */
+  @Test
+  public void
+      loadBeneficiaryWhenUpdateExistingAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
     // 2: Turn off filtering, load SAMPLE_A, turn on filtering, re-run edited SAMPLE_A as 2022
     // UPDATE, verify counts
-    // 3: Don't edit bene, load bene: verify it blows up due to disallowed non-2022 INSERT
+
+    // TODO: Turn off filter
+
+    // Load SAMPLE_A as-is to add an existing record to update
+    Stream<RifFile> sampleAStream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.BENEFICIARY,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample("SAMPLE_A, 2021 ref year", sampleAStream);
+
+    // TODO: Turn on filter
+
+    // Load the new item as an INSERT with 2022 ref year
+    Stream<RifFile> updatedSampleAStream = getRifFileStreamForEnrollmentRefYear("2022");
+    loadSample("SAMPLE_A, updates to 2022 ref year", updatedSampleAStream);
+
+    // TODO: Verify
+
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
+   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+
+    // 1: Edit bene to 2022, but load bene + claims: verify counts with filtering turned on
 
     /*
      * Grab the SAMPLE_A BENE record and set its enrollment reference year to 2022, prior to loading
      * it.
      */
+    Stream<RifFile> updatedSampleAStream = getRifFileStreamForEnrollmentRefYear("2022");
+
+    /* Turn on the filtering and then load it. */
+    // TODO turn on the filtering, pass filter value to loadSample
+    loadSample("SAMPLE_A, edited to have 2022 ref year", updatedSampleAStream);
+
+    /* Verify that the bene record does load as expected. */
+    validateDatabaseLoadedAsExpected(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data UPDATE and 2021
+   * enrollment date and filter on expect the data is not loaded to the regular database tables, and
+   * is instead added to the skipped table for future investigation/processing.
+   *
+   * <p>This is because records not from 2022 should be skipped while CCW investigates if these
+   * records are correct, and we decide how to process them.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAnd2021EnrollmentDateAndFilterOnExpectRecordSkipped() {}
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
+   * 2022 enrollment date and filter setting is off expect the data is loaded to the regular
+   * database tables.
+   *
+   * <p>If the filter is off, we take no special action to filter records.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOffExpectRecordLoaded() {}
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
+   * 2021 enrollment date and filter setting is off expect the data is loaded to the regular
+   * database tables.
+   *
+   * <p>If the filter is off, we take no special action to filter records.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAnd2021EnrollmentDateAndFilterOffExpectRecordSkipped() {}
+
+  /**
+   * Gathers the SAMPLE_A data, modifies the enrollment reference year to the input date, and
+   * returns the stream of data for further use.
+   *
+   * @return the rif file stream with the modified data
+   */
+  private Stream<RifFile> getRifFileStreamForEnrollmentRefYear(String refYear) {
+
     Stream<RifFile> samplesStream =
         filterSamples(
             r -> r.getFileType() == RifFileType.BENEFICIARY,
@@ -566,17 +686,21 @@ public final class RifLoaderIT {
           CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
-          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal(), "2022");
-          return Arrays.asList(beneCsvValues);
+          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal(), refYear);
+          return List.of(beneCsvValues);
         };
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
-    samplesStream = editSamples(samplesStream, fileEditor);
+    return editSamples(samplesStream, fileEditor);
+  }
 
-    /* Turn on the filtering and then load it. */
-    // TODO turn on the filtering
-    loadSample("SAMPLE_A, edited to have 2022 ref year", samples);
-
-    /* Verify that the bene record does load as expected. */
+  /**
+   * Validates the database load went as expected for the normal data table and the skipped table.
+   *
+   * @param expectedRecordsInNormalTable the expected records in normal table
+   * @param expectedRecordsInSkippedTable the expected records in skipped table
+   */
+  private void validateDatabaseLoadedAsExpected(
+      int expectedRecordsInNormalTable, int expectedRecordsInSkippedTable) {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
@@ -588,14 +712,18 @@ public final class RifLoaderIT {
       CriteriaQuery<Long> beneCountQuery = criteriaBuilder.createQuery(Long.class);
       beneCountQuery.select(criteriaBuilder.count(beneCountQuery.from(Beneficiary.class)));
       Long beneCount = entityManager.createQuery(beneCountQuery).getSingleResult();
-      assertEquals(1, beneCount, "Beneficiary record not created as expected.");
+      assertEquals(
+          expectedRecordsInNormalTable, beneCount, "Beneficiary record not created as expected.");
 
       // Count and verify the number of bene records in the DB.
       CriteriaQuery<Long> skippedCountQuery = criteriaBuilder.createQuery(Long.class);
       skippedCountQuery.select(
           criteriaBuilder.count(skippedCountQuery.from(SkippedRifRecords.class)));
       Long skippedCount = entityManager.createQuery(skippedCountQuery).getSingleResult();
-      assertEquals(0, skippedCount, "Unexpected records found in skipped queue.");
+      assertEquals(
+          expectedRecordsInSkippedTable,
+          skippedCount,
+          "Unexpected records found in skipped queue.");
     } finally {
       if (entityManager != null) {
         entityManager.close();

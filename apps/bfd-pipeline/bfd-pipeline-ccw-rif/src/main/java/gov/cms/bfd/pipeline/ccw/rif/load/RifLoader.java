@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -437,6 +438,16 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
+          // Blow up the data load if we try to insert a record that has a non 2022 year; this would
+          // have implications to fix before we load any more
+          // Do this regardless of if the item exists in the DB, if the setting is on so we know to
+          // investigate it
+          // TODO: Add logic for doing this based on the app option
+          if (isBeneficiaryWithNon2022Year(rifRecordEvent)) {
+            throw new IllegalArgumentException(
+                "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
+          }
+
           if (recordInDb == null) {
             loadAction = LoadAction.INSERTED;
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
@@ -448,18 +459,31 @@ public final class RifLoader {
         } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
+
+            // Blow up the data load if we try to insert a record that has a non 2022 year; this
+            // would have implications to fix before we load any more
+            if (isBeneficiaryWithNon2022Year(rifRecordEvent)) {
+              throw new IllegalArgumentException(
+                  "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
+            }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
 
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-            /*
-             * TODO should we be explicitly blowing up here if we try to UPDATE a not-pre-existing
-             * bene?
-             */
-            entityManager.merge(record);
-
+            // Skip this record if the year is not 2022 and its an update; should be a temporary
+            // measure
+            // TODO: Add logic for doing this based on the app option
+            if (isBeneficiaryWithNon2022Year(rifRecordEvent)) {
+              tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+              /*
+               * TODO should we be explicitly blowing up here if we try to UPDATE a not-pre-existing
+               * bene?
+               */
+              entityManager.merge(record);
+            } else {
+              // TODO: Add the skipped record to the new db table
+            }
           } else {
             throw new BadCodeMonkeyException(
                 String.format(
@@ -513,6 +537,26 @@ public final class RifLoader {
 
       if (entityManager != null) entityManager.close();
     }
+  }
+
+  /**
+   * Checks if the record is a beneficiary, has a enrollment reference year that is non-null, and is
+   * not from 2022. This is to handle special filtering while CCW fixes an issue and should be
+   * temporary.
+   *
+   * @param rifRecordEvent the rif record event to check
+   * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-null
+   *     and not 2022
+   */
+  private boolean isBeneficiaryWithNon2022Year(RifRecordEvent<?> rifRecordEvent) {
+
+    // TODO: Are we also skipping null enrollment years?
+    return rifRecordEvent.getRecord() instanceof Beneficiary
+        && ((Beneficiary) rifRecordEvent.getRecord()).getBeneEnrollmentReferenceYear().isPresent()
+        && ((Beneficiary) rifRecordEvent.getRecord())
+            .getBeneEnrollmentReferenceYear()
+            .get()
+            .equals(BigDecimal.valueOf(2022));
   }
 
   /**
