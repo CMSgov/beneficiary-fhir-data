@@ -119,10 +119,10 @@ ${logic.perms}  IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'svc_
 ${logic.perms}      GRANT paca_migrator_role TO svc_bfd_pipeline_role;
 ${logic.perms}  END IF;
 ${logic.perms}  IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'svc_bfd_pipeline_0') THEN
-${logic.perms}      GRANT paca_writer_role TO svc_bfd_pipeline_0;
+${logic.perms}      GRANT paca_migrator_role TO svc_bfd_pipeline_0;
 ${logic.perms}  END IF;
 ${logic.perms}  IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'svc_bfd_pipeline_1') THEN
-${logic.perms}      GRANT paca_writer_role TO svc_bfd_pipeline_1;
+${logic.perms}      GRANT paca_migrator_role TO svc_bfd_pipeline_1;
 ${logic.perms}  END IF;
 ${logic.perms}
 ${logic.perms} END $$;
