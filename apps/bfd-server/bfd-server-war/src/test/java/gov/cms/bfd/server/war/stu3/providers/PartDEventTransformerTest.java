@@ -7,6 +7,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -142,6 +144,7 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
+    IDrugCodeProvider DrugCodeProvider = new FDADrugTestUtils();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,

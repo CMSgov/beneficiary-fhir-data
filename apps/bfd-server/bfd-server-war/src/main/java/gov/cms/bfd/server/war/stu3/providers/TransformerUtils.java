@@ -34,6 +34,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -127,6 +128,10 @@ public final class TransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
   static IDrugCodeProvider DrugCodeProvider;
+
+  public TransformerUtils() {
+    DrugCodeProvider = new FDADrugUtils();
+  }
 
   public TransformerUtils(IDrugCodeProvider iDrugCodeProvider) {
     DrugCodeProvider = iDrugCodeProvider;
@@ -1920,7 +1925,6 @@ public final class TransformerUtils {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      Optional<Boolean> includeTaxNumbers,
       String claimId,
       BigDecimal serviceCount,
       String placeOfServiceCode,
@@ -1944,8 +1948,7 @@ public final class TransformerUtils {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode,
-      String taxNumber) {
+      Optional<String> nationalDrugCode) {
 
     SimpleQuantity serviceCnt = new SimpleQuantity();
     serviceCnt.setValue(serviceCount);
@@ -1967,25 +1970,6 @@ public final class TransformerUtils {
           new Period()
               .setStart((convertToDate(firstExpenseDate.get())), TemporalPrecisionEnum.DAY)
               .setEnd((convertToDate(lastExpenseDate.get())), TemporalPrecisionEnum.DAY));
-    }
-
-    if (includeTaxNumbers.orElse(false)) {
-
-      ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-          TransformerUtils.addCareTeamPractitioner(
-              eob, item, IdentifierType.TAX.getSystem(), taxNumber, ClaimCareteamrole.OTHER);
-      providerTaxNumber.setResponsible(true);
-
-      ExplanationOfBenefit.CareTeamComponent providerTaxNumberWithIdentifier =
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              item,
-              IdentifierType.TAX,
-              taxNumber,
-              ClaimCareteamrole.OTHER.getSystem(),
-              ClaimCareteamrole.OTHER.name(),
-              ClaimCareteamrole.OTHER.getDisplay());
-      providerTaxNumber.setResponsible(true);
     }
 
     AdjudicationComponent adjudicationForPayment = item.addAdjudication();

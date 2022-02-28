@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -26,6 +27,10 @@ import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 final class PartDEventTransformer {
 
   static IDrugCodeProvider DrugCodeProvider;
+
+  public PartDEventTransformer() {
+    DrugCodeProvider = new FDADrugUtils();
+  }
 
   public PartDEventTransformer(IDrugCodeProvider iDrugCodeProvider) {
     DrugCodeProvider = iDrugCodeProvider;

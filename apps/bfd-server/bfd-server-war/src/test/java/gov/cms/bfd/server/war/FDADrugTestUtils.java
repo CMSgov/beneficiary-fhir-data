@@ -85,22 +85,18 @@ public class FDADrugTestUtils implements IDrugCodeProvider {
     String line =
         "0000-0000_00z00000-00zz-000z-zzzz-0z000zz00z00\t0000-0000\tHUMAN DRUG\tSterile Water, SOLUTION\t00000000\tNDA\tNDA000000\tCMS \tWATER\t1 tmL/mL\tN\t20201231";
     String ndcProductColumns[] = line.split("\t");
-    try {
-      String nationalDrugCodeManufacturer =
-          StringUtils.leftPad(
-              ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-      String nationalDrugCodeIngredient =
-          StringUtils.leftPad(
-              ndcProductColumns[1].substring(
-                  ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-              4,
-              '0');
-      ndcProductHashMap.put(
-          String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-          ndcProductColumns[3] + " - " + ndcProductColumns[13]);
-    } catch (StringIndexOutOfBoundsException e) {
-      continue;
-    }
+    String nationalDrugCodeManufacturer =
+        StringUtils.leftPad(
+            ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+    String nationalDrugCodeIngredient =
+        StringUtils.leftPad(
+            ndcProductColumns[1].substring(
+                ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
+            4,
+            '0');
+    ndcProductHashMap.put(
+        String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+        ndcProductColumns[3] + " - " + ndcProductColumns[13]);
 
     return ndcProductHashMap;
   }
