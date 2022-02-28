@@ -2,7 +2,6 @@
   "resourceType": "ClaimResponse",
   "id": "m-654321",
   "meta": {
-    "versionId": "m-654321-3676fd6df7eb37be0210b6ee9d017d3ce5f15c0b",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
