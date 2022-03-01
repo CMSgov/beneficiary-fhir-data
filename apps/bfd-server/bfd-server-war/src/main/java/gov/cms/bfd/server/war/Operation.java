@@ -6,6 +6,7 @@ import com.codahale.metrics.servlets.PingServlet;
 import com.codahale.metrics.servlets.ThreadDumpServlet;
 import com.newrelic.api.agent.NewRelic;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResponseResourceProvider;
