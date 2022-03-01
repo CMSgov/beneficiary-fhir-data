@@ -9,9 +9,9 @@ SEND_NOTIFICATIONS=${SEND_NOTIFICATIONS:-"false"}
 CRON_SCHEDULE="${SCHEDULE:-"0 12 * * *"}" # run at noon everyday
 
 # notifications
-WARN_WHEN="${WARN_WHEN:-"30:45"}"     # WARN when expiration is >= 30 but less than 45 days
-ALERT_WHEN="${ALERT_WHEN:-"15:30"}"   # expiration is >= 15 but less than 30 days
-PAGE_WHEN="${PAGE_WHEN:-"1:15"}"      # expiration is >= 0 but less than 15 days
+WARN_WHEN="${WARN_WHEN:-"30:45"}"     # WARN  when >= 30 and < 45 days
+ALERT_WHEN="${ALERT_WHEN:-"15:30"}"   # ALERT when >= 15 and < 30 days
+PAGE_WHEN="${PAGE_WHEN:-"15"}"        # PAGE  when <= 15 days
 
 # notifications must be set via env vars or command line flags
 WARN_SLACK_WEBHOOK_URL="${WARN_SLACK_WEBHOOK_URL:-}"
@@ -32,7 +32,6 @@ WARN_START=
 WARN_END=
 ALERT_START=
 ALERT_END=
-PAGE_START=
 PAGE_END=
 
 # print error message and exit
@@ -88,8 +87,7 @@ parse_day_ranges() {
   export ALERT_START
   export ALERT_END
 
-  IFS=: read -r PAGE_START PAGE_END <<< "$PAGE_WHEN"
-  export PAGE_START
+  read -r PAGE_END <<< "$PAGE_WHEN"
   export PAGE_END
 }
 
@@ -167,17 +165,17 @@ check_endpoint(){
   echo "expires on $expires_on (${expires_in_days} days)"
 
   # send warnings
-  if (( expires_in_days >= WARN_START && expires_in_days < WARN_END)); then
+  if (( expires_in_days >= WARN_START && expires_in_days < WARN_END )); then
     send_warning_slack "Heads up! ${endpoint} TLS cert expires in ${expires_in_days} days"
   fi
 
   # send alerts
-  if (( expires_in_days >= ALERT_START && expires_in_days < ALERT_END)); then
+  if (( expires_in_days >= ALERT_START && expires_in_days < ALERT_END )); then
     send_alert_slack_chan "WARNING!! ${endpoint} TLS cert expires in less than ${expires_in_days} days"
   fi
 
   # trigger a page (our pager service will automatically send a slack alert)
-  if (( expires_in_days <= PAGE_END)); then
+  if (( expires_in_days <= PAGE_END )); then
     trigger_page "bfd/tls/expiring_cert/${endpoint}" "${endpoint} cert expires in less than ${expires_in_days} days"
   fi
 }
