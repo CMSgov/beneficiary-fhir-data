@@ -32,8 +32,7 @@ public final class LoadAppOptions implements Serializable {
    * @param idHasherConfig the value to use for {@link #getIdHasherConfig()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
-   * @param filteringNonNullAndNon2022Benes the value to use for {@link
-   *     #isFilteringNonNullAndNon2022Benes()}
+   * @param filterNon2022Benes the filter non 2022 benes
    */
   public LoadAppOptions(
       IdHasher.Config idHasherConfig,
