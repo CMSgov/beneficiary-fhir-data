@@ -1,0 +1,27 @@
+@startuml
+title 2022-02 Deployment Sequence (Abbreviated)
+participant Jenkins
+participant "bfd-pipeline"
+participant "bfd-server"
+database FHIR
+note over Jenkins,"bfd-server": Deployment stage is largely parallel
+Jenkins -> "bfd-pipeline": Deploy
+Jenkins -> "bfd-server":
+group Deployment
+       note right of "bfd-server": Update launch template,\nre-create autoscaling group
+       "bfd-server" -> "bfd-server": Bootstrap,\nValidate
+       "bfd-server" -> FHIR: Hibernate Validations
+       FHIR --> "bfd-server": Valid
+       "bfd-server" -> "bfd-server": Serve HTTP Requests
+       "bfd-server" <-> FHIR: Continued Read Requests
+       note over "bfd-server",FHIR: !!! DB requests\ncan begin before\nbfd-pipeline's migrations\ncomplete
+       note right of "bfd-pipeline": Recreate ec2\ninstance with\nnew AMI
+       "bfd-pipeline" -> "bfd-pipeline": Bootstrap,\nMigrate,\nValidate
+       "bfd-pipeline" -> FHIR: Execute Migrations
+       FHIR --> "bfd-pipeline": Changes committed
+       "bfd-pipeline" -> FHIR: Hibernate Validations
+       FHIR --> "bfd-pipeline": Valid
+       "bfd-pipeline" -> "bfd-pipeline": Run "bfd-pipelines"
+       "bfd-pipeline" <-> FHIR: Continued Database Interactions
+end
+@enduml
