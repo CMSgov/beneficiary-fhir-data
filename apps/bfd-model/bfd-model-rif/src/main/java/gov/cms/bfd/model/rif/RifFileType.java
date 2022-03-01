@@ -90,7 +90,11 @@ public enum RifFileType {
     return columnEnum;
   }
 
-  /** @return all of the columns/entries from this {@link RifFileType}'s columns enum */
+  /**
+   * Get the enums that represent the columns of the rif file.
+   *
+   * @return all of the columns/entries from this {@link RifFileType}'s columns enum
+   */
   public Enum<?>[] getColumns() {
     return columns;
   }

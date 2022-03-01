@@ -73,21 +73,22 @@ public final class LoadAppOptions implements Serializable {
   }
 
   /**
-   * @return
-   *     <p>As part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>, we want a
-   *     filtering mechanism in our loads such some {@link Beneficiary}s are temporarily skipped:
-   *     only those with a {@link Beneficiary#getBeneEnrollmentReferenceYear()} of "2022" or where
-   *     the reference year is <code>null</code> will be processed (which, during the calendar year
-   *     of 2022, is most of them). As part of this filtering, we are implementing an assumption
-   *     that no non-2022 <code>INSERT</code> {@link Beneficiary} records will be received, as
-   *     skipping those would also require skipping their associated claims, which is additional
-   *     complexity that we want to avoid. If any such records are encountered, the load will go
-   *     boom. This filtering is an inelegant hack to workaround upstream data issues, and will
-   *     hopefully only be in place very temporarily. See the code that uses this field in {@link
-   *     RifLoader} for details.
-   *     <p>The above filtering is enabled when this field is <code>true</code>, and disabled when
-   *     it's <code>false</code>. It is being made configurable so as to not invalidate all of our
-   *     existing test coverage.
+   * Gets if the filtering for non-null and 2022 benes is active or not.
+   *
+   * <p>As part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>, we want a filtering
+   * mechanism in our loads such some {@link Beneficiary}s are temporarily skipped: only those with
+   * a {@link Beneficiary#getBeneEnrollmentReferenceYear()} of "2022" or where the reference year is
+   * <code>null</code> will be processed (which, during the calendar year of 2022, is most of them).
+   * As part of this filtering, we are implementing an assumption that no non-2022 <code>INSERT
+   * </code> {@link Beneficiary} records will be received, as skipping those would also require
+   * skipping their associated claims, which is additional complexity that we want to avoid. If any
+   * such records are encountered, the load will go boom. This filtering is an inelegant hack to
+   * workaround upstream data issues, and will hopefully only be in place very temporarily. See the
+   * code that uses this field in {@link RifLoader} for details. This filtering is being made
+   * configurable so as to not invalidate all of our existing test coverage.
+   *
+   * @return filtering is enabled when this field is <code>true</code>, and disabled when it's
+   *     <code>false</code>
    */
   public boolean isFilteringNonNullAndNon2022Benes() {
     return filteringNonNullAndNon2022Benes;

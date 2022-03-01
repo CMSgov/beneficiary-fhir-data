@@ -32,7 +32,7 @@ public final class CcwRifLoadTestUtils {
   }
 
   /**
-   * Gets the load options with filteringof non 2022 benes enabled.
+   * Gets the load options with filtering of non 2022 benes enabled.
    *
    * @param idempotencyRequired if idempotency is required; affects the LoadStrategy that gets used
    *     when loading
