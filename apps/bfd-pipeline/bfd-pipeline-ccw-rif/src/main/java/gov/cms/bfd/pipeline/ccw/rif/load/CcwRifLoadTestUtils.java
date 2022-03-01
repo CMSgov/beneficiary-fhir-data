@@ -27,6 +27,20 @@ public final class CcwRifLoadTestUtils {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        IDEMPOTENCY_REQUIRED);
+        IDEMPOTENCY_REQUIRED,
+        false);
+  }
+
+  /**
+   * @return Same as {@link #getLoadOptions()}, but with {@link
+   *     LoadAppOptions#isFilteringNonNullAndNon2022Benes()} set to <code>true</code>. Should only
+   *     be used in those test cases looking to test that filtering capability.
+   */
+  public static LoadAppOptions getLoadOptionsWithFilteringofNon2022BenesEnabled() {
+    return new LoadAppOptions(
+        new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
+        LoadAppOptions.DEFAULT_LOADER_THREADS,
+        IDEMPOTENCY_REQUIRED,
+        true);
   }
 }

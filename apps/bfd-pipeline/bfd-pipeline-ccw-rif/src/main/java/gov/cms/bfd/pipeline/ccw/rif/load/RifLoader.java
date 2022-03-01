@@ -22,6 +22,8 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.RifRecordsSkipped;
+import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -63,6 +65,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.postgresql.copy.CopyManager;
@@ -442,8 +445,8 @@ public final class RifLoader {
           // have implications to fix before we load any more
           // Do this regardless of if the item exists in the DB, if the setting is on so we know to
           // investigate it
-          // TODO: Add logic for doing this based on the app option
-          if (isBeneficiaryWithNon2022Year(rifRecordEvent)) {
+          if (options.isFilteringNonNullAndNon2022Benes()
+              && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
             throw new IllegalArgumentException(
                 "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
           }
@@ -462,7 +465,8 @@ public final class RifLoader {
 
             // Blow up the data load if we try to insert a record that has a non 2022 year; this
             // would have implications to fix before we load any more
-            if (isBeneficiaryWithNon2022Year(rifRecordEvent)) {
+            if (options.isFilteringNonNullAndNon2022Benes()
+                && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
               throw new IllegalArgumentException(
                   "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
             }
@@ -471,18 +475,35 @@ public final class RifLoader {
 
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
-            // Skip this record if the year is not 2022 and its an update; should be a temporary
-            // measure
-            // TODO: Add logic for doing this based on the app option
-            if (isBeneficiaryWithNon2022Year(rifRecordEvent)) {
+            // Skip this record if the year is not 2022 and its an update.
+            if (options.isFilteringNonNullAndNon2022Benes()
+                && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+              /*
+               * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
+               * it in the DB.
+               */
+              StringBuffer rifData = new StringBuffer();
+              try (CSVPrinter csvPrinter = new CSVPrinter(rifData, RifParsingUtils.CSV_FORMAT)) {
+                for (CSVRecord csvRow : rifRecordEvent.getRawCsvRecords()) {
+                  csvPrinter.printRecord(csvRow);
+                }
+              }
+
+              // Save the skipped record to the DB.
+              RifRecordsSkipped skippedRifRecord =
+                  new RifRecordsSkipped(
+                      rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
+                      rifRecordEvent.getFileEvent().getFile().getFileType().name(),
+                      ((Beneficiary) record).getBeneficiaryId(),
+                      rifData.toString());
+              entityManager.persist(skippedRifRecord);
+            } else {
               tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
               /*
                * TODO should we be explicitly blowing up here if we try to UPDATE a not-pre-existing
                * bene?
                */
               entityManager.merge(record);
-            } else {
-              // TODO: Add the skipped record to the new db table
             }
           } else {
             throw new BadCodeMonkeyException(
@@ -540,23 +561,25 @@ public final class RifLoader {
   }
 
   /**
-   * Checks if the record is a beneficiary, has a enrollment reference year that is non-null, and is
-   * not from 2022. This is to handle special filtering while CCW fixes an issue and should be
-   * temporary.
+   * Checks if the record is a beneficiary and has a enrollment reference year that is either <code>
+   * null</code> or is from 2022. This is to handle special filtering while CCW fixes an issue and
+   * should be temporary.
    *
-   * @param rifRecordEvent the rif record event to check
-   * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-null
-   *     and not 2022
+   * @param rifRecordEvent the {@link RifRecordEvent} to check
+   * @return {@code true} if the record is a beneficiary and has an enrollment year that is either
+   *     <code>null</code> or 2022
    */
-  private boolean isBeneficiaryWithNon2022Year(RifRecordEvent<?> rifRecordEvent) {
+  private boolean isBeneficiaryWithNullOr2022Year(RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getRecord() instanceof Beneficiary) {
+      Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
+      if (bene.getBeneEnrollmentReferenceYear().isPresent()) {
+        return BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get());
+      } else {
+        return true;
+      }
+    }
 
-    // TODO: Are we also skipping null enrollment years?
-    return rifRecordEvent.getRecord() instanceof Beneficiary
-        && ((Beneficiary) rifRecordEvent.getRecord()).getBeneEnrollmentReferenceYear().isPresent()
-        && ((Beneficiary) rifRecordEvent.getRecord())
-            .getBeneEnrollmentReferenceYear()
-            .get()
-            .equals(BigDecimal.valueOf(2022));
+    return false;
   }
 
   /**

@@ -295,6 +295,13 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
+  /**
+   * Hardcoded to enabled for now, as this filtering should always be enabled in AWS (for now). When
+   * it's not needed there anymore, we should rip out the entire option and the code associated with
+   * it.
+   */
+  private static final boolean FILTERING_NON_NULL_AND_NON_2022_BENES = true;
+
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
@@ -425,7 +432,8 @@ public final class AppConfiguration implements Serializable {
                 .cacheSize(hicnHashCacheSize)
                 .build(),
             loaderThreads,
-            idempotencyRequired);
+            idempotencyRequired,
+            FILTERING_NON_NULL_AND_NON_2022_BENES);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
