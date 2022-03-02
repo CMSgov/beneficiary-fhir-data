@@ -39,7 +39,9 @@ Synthetic data is generated with the external Synthea codebase. More information
 ## Loading Data
 
 1. Test CCWRIFLoader functionality locally (i.e. verify BFD Pipeline can ingest records). Copy the files that were generated from the steps above and place them in the rif-synthea folder located at: `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea`
-2. Go to `/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java`. Go to and navigate to the SAMPLE_SYNTHEA entries and add or delete the entries that are currently there to correspond to the files you have copied from step 1.  You will also need to know how many records are in each file and place that in the entry as well. Sample Below: 
+2. Go to `/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java`. Go to and navigate to the SAMPLE_SYNTHEA entries and add or delete the entries that are currently there to correspond to the files you have copied from step 1.  You will also need to know how many records are in each file and place that in the entry as well. To find the counts run `wc -l apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea/*.csv`. Each value will need to be subtracted by 1 to remove the count for headers.
+
+Sample Below: 
 
     Synthea-Rif-Static:
 
@@ -104,6 +106,8 @@ docker run \
 
 6. Run the following in a terminal window:
 `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSyntheaData clean install`
+
+7. A sanity check to see if any collisions are possible with previously generated data locally requires loading both the new and old datasets into the local DB. Download the most recent synthea RIF files located in S3, and move them into `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea`. Then run steps 2, 3, and 6 with counts and entries for both data sets Synthea-Rif-Static and StaticResourceGroup in mind. If the RIF Loader IT does not fail, the data likely does not create collisions, but the queries in the `Checking for collisions in TEST, SBX or PROD` section below should also be run. 
 
 ## Data Compliance
 Test FHIR API payload (data) for FHIR and CARIN compliance. 
@@ -203,14 +207,17 @@ Delete Script:
 
 ## Load Synthetic Data in Hosted Environments
 
-1. We need to make sure in TEST, SBX or PROD there are no collisions for the main properties in synthetic data i.e. bene_id, mbi_num, claim_id, etc. Before loading data, agregate RIF data to generate the following queries: 
+1. Before loading data, we need to make sure in TEST, SBX or PROD there are no collisions for the main properties in synthetic data i.e. bene_id, mbi_num, claim_id, etc. Each of the queries should return zero records. Aggregate RIF file data from all claim types, beneficiaries, and Part D Events located in `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea/` to generate the following queries for the various synthea end-state properties: 
 
+        -- For Beneficiary
         Select count(*) from public.beneficiaries where mbi_num in (‘XXX’,’YYY’,…);
 
         Select count(*) from public.beneficiaries where bene_id in (‘XXX’,’YYY’,…);
 
         Select count(*) from public.beneficiaries where hicn_unhashed in (‘XXX’,’YYY’,…);
 
+        
+        -- For PDE
         Select count(*) from public.partd_events where pde_id in (‘XXX’,’YYY’,…);
 
 
@@ -219,6 +226,16 @@ Delete Script:
         Select count(*) from public.carrier_claims where claim_id in (‘XXX’,’YYY’,…);
 
         Select count(*) from public.carrier_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’;
+
+
+        -- For DME and Carrier
+        Select count(*) from public.carrier_claims where carr_clm_cntl_num in (‘XXX’,’YYY’,…);
+
+
+        -- For HHA, Hospice, Inpatient, Outpatient, SNF
+        Select count(*) from public.hha_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…);
+
+
 
 2. Load data. Begin with TEST (Approval required for SBX and PROD)
 3. Create dated Pipeline folder (same format as CCW) in the 'Incoming' folder of the environments ETL bucket. 
