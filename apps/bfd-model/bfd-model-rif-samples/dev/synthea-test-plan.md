@@ -1,12 +1,40 @@
 # Synthea Test Plan
 
-This document details various tests/procedures to ensure that each batch of synthetic data generated will not collide with previously generated data.
+This document details various tests/procedures to ensure that each batch of synthetic data generated will not collide with previously generated data. 
+Synthetic data is generated with the external Synthea codebase. More information on this process can be found at: `apps/bfd-model/bfd-model-rif-samples/dev/design-sample-data-sets.md`.
 
 ## Before Generating Data
 
-1. Check the output of the end-state properties from the latest synthea release i.e. `apps/bfd-model/bfd-model-rif-samples/dev/synthea_releases/XX-XX-20XX/end_state.properties`. 
-2. Query ranges of the end-state properties in PROD SBX to ensure there will not be any overlaps based on the synthetic data set size. e.g.: `psql -h {prod sbx db url} -d fhirdb -U bfduser -f apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql | tee Query_synthetic_id_rangesTest.out`.
-3. Increment the end-state properties values by 1 or more based on the query output in step 2 and set the values in the synthea.properties file, and generate new data.
+1. Each time you generate synthea data, you are also generating ranges of values for several beneficiary and claim data properties. Furthermore, this creates database constraints for subsequent generated synthea datasets, which will cause collisions if not set properly. The input is the set of start values that the data can have, i.e the lower bound of these constraints. Once the data is generated, there is an output file representing the end values of the data, or the upper bound. Before generating data, go to `apps/bfd-model/bfd-model-rif-samples/dev/synthea_releases/XX-XX-20XX/end_state.properties` for the latest end-state properties. See example below: 
+
+        exporter.bfd.clm_grp_id_start=-104410371
+        exporter.bfd.pde_id_start=-10000464592
+        exporter.bfd.carr_clm_cntl_num_start=-100518629
+        exporter.bfd.fi_doc_cntl_num_start=-100251672
+        exporter.bfd.hicn_start=T01030000A
+        exporter.bfd.bene_id_start=-10000000020000
+        exporter.bfd.clm_id_start=-10000003945779
+        exporter.bfd.mbi_start=1S00E00NA00
+
+2. With the end-state properties in mind, you need to check for two things before setting the next synthea property start values. First, if you increment each end-state property by 1, will the amount of data you are trying to generate e.g. 10,000, allow for a new range of values that has no overlap with previously generated synthea datasets? To answer this you need to run queries in PROD SBX. Run `psql -h {prod sbx db url} -d fhirdb -U bfduser -f apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql | tee Query_synthetic_id_rangesTest.out` to generate a series of outputs for various end state properties. An example for beneficiary ID is shown below:
+
+        grouping_start  |  grouping_end
+        -----------------+-----------------
+        -88888888888888 | -88888888888888
+        -20140000010000 | -20140000000001
+        -20000000010000 | -20000000000001
+        -19990000010000 | -19990000000001
+                   -400 |            -400
+                   -223 |            -207
+                   -204 |            -201
+                      1 |        60000000
+        (8 rows)
+
+
+3. Second, is the value you are incrementing creating a range of values that are FHIR compliant. For example the previous MBI ID end is `1S00-E00-FY99`, and you set the next start value to `1S00-E00-FZ01`, you are generating data that does not create database collisions, but is not FHIR compliant. For each property make sure to check resources like [https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf](https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf) for MBI ID. 
+
+4. If all checks out, set the synthea property start values and generate new data.
+
 
 ## Loading Data
 
@@ -200,7 +228,7 @@ Delete Script:
 
 ## Checking for collisions in TEST, SBX or PROD
 
-1. Run queries to find any possible duplicate parametere
+1. Run queries to find any possible duplicate parameters
 
         SELECT mbi_hash, count(*) 
         FROM public.beneficiaries 
