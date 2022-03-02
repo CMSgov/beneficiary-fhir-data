@@ -494,6 +494,7 @@ public final class RifLoader {
                   new SkippedRifRecord(
                       rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
                       rifRecordEvent.getFileEvent().getFile().getFileType().name(),
+                      rifRecordEvent.getRecordAction(),
                       ((Beneficiary) record).getBeneficiaryId(),
                       rifData.toString());
               entityManager.persist(skippedRifRecord);

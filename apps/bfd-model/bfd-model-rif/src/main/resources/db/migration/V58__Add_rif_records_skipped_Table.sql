@@ -19,8 +19,9 @@ CREATE TABLE skipped_rif_records (
   -- The `RifFileType` (e.g. `BENEFICIARY`, `CARRIER`, etc.) of the RIF file that this record is from.
   rif_file_type        varchar(48)                NOT NULL,
 
-  -- TODO: add DML_IND
-  
+  -- The `DML_IND` of the RIF record(s).
+  dml_ind              varchar(6)                 NOT NULL,
+
   -- The `bene_id` of the beneficiary that this record is of / associated with.
   bene_id              bigint                     NOT NULL,
 

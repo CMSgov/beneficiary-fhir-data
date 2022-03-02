@@ -39,6 +39,9 @@ public class SkippedRifRecord {
   @Column(name = "rif_file_type", nullable = false)
   private String rifFileType;
 
+  @Column(name = "dml_ind", nullable = false)
+  private String dmlInd;
+
   @Column(name = "bene_id", nullable = false)
   private long beneId;
 
@@ -53,13 +56,19 @@ public class SkippedRifRecord {
    *
    * @param rifFileTimestamp the value to use for {@link #getRifFileTimestamp()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
+   * @param dmlInd the value to use for {@link #getDmlInd()}
    * @param beneId the value to use for {@link #getBeneId()}
    * @param rifData the value to use for {@link #getRifData()}
    */
   public SkippedRifRecord(
-      Instant rifFileTimestamp, String rifFileType, long beneId, String rifData) {
+      Instant rifFileTimestamp,
+      String rifFileType,
+      RecordAction dmlInd,
+      long beneId,
+      String rifData) {
     this.rifFileTimestamp = rifFileTimestamp;
     this.rifFileType = rifFileType;
+    this.dmlInd = dmlInd.name();
     this.beneId = beneId;
     this.rifData = rifData;
   }
@@ -69,12 +78,17 @@ public class SkippedRifRecord {
    *
    * @param rifFileTimestamp the value to use for {@link #getRifFileTimestamp()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
+   * @param dmlInd the value to use for {@link #getDmlInd()}
    * @param beneId the value to use for {@link #getBeneId()}
    * @param rifData the value to use for {@link #getRifData()}
    */
   public SkippedRifRecord(
-      Instant rifFileTimestamp, String rifFileType, String beneId, String rifData) {
-    this(rifFileTimestamp, rifFileType, Long.parseLong(beneId), rifData);
+      Instant rifFileTimestamp,
+      String rifFileType,
+      RecordAction dmlInd,
+      String beneId,
+      String rifData) {
+    this(rifFileTimestamp, rifFileType, dmlInd, Long.parseLong(beneId), rifData);
   }
 
   /** @return the unique (sequence-generated) ID for this {@link SkippedRifRecord} instance */
@@ -90,6 +104,11 @@ public class SkippedRifRecord {
   /** @return the {@link RifFileType} of the RIF file that this record is from */
   public String getRifFileType() {
     return rifFileType;
+  }
+
+  /** @return the {@link RecordAction} of the RIF record(s) */
+  public RecordAction getDmlInd() {
+    return RecordAction.match(dmlInd);
   }
 
   /**
