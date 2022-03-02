@@ -9,15 +9,16 @@ import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -200,10 +201,19 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   private List<RdaChange<TClaim>> transformMessages(
-      String apiVersion, Collection<TMessage> messages) {
-    return messages.stream()
-        .map(message -> transformMessage(apiVersion, message))
-        .collect(Collectors.toList());
+      String apiVersion, Collection<TMessage> messages) throws ProcessingException {
+    var claims = new ArrayList<RdaChange<TClaim>>();
+    for (TMessage message : messages) {
+      try {
+        var change = transformMessage(apiVersion, message);
+        metrics.transformSuccesses.mark();
+        claims.add(change);
+      } catch (DataTransformer.TransformationException error) {
+        metrics.transformFailures.mark();
+        throw new ProcessingException(error, 0);
+      }
+    }
+    return claims;
   }
 
   private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
@@ -291,6 +301,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter objectsPersisted;
     /** Number of objects stored using <code>merge()</code> */
     private final Meter objectsMerged;
+    /** Number of objects successfully transformed. */
+    private final Meter transformSuccesses;
+    /** Number of objects which failed to be transformed. */
+    private final Meter transformFailures;
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
     /** Latest sequnce number from writing a batch. * */
@@ -306,6 +320,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       objectsWritten = appMetrics.meter(MetricRegistry.name(base, "writes", "total"));
       objectsPersisted = appMetrics.meter(MetricRegistry.name(base, "writes", "persisted"));
       objectsMerged = appMetrics.meter(MetricRegistry.name(base, "writes", "merged"));
+      transformSuccesses = appMetrics.meter(MetricRegistry.name(base, "transform", "successes"));
+      transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
       latestSequenceNumber =
