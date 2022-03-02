@@ -16,7 +16,9 @@ Synthetic data is generated with the external Synthea codebase. More information
         exporter.bfd.clm_id_start=-10000003945779
         exporter.bfd.mbi_start=1S00E00NA00
 
-2. With the end-state properties in mind, you need to check for two things before setting the next synthea property start values. First, if you increment each end-state property by 1, will the amount of data you are trying to generate e.g. 10,000, allow for a new range of values that has no overlap with previously generated synthea datasets? To answer this you need to run queries in PROD SBX. Run `psql -h {prod sbx db url} -d fhirdb -U bfduser -f apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql | tee Query_synthetic_id_rangesTest.out` to generate a series of outputs for various end state properties. An example for beneficiary ID is shown below:
+2. With the end-state properties in mind, you need to check for two things before setting the next synthea property start values. 
+
+- First, if you increment each end-state property by 1, will the amount of data you are trying to generate e.g. 10,000, allow for a new range of values that has no overlap with previously generated synthea datasets? To answer this you need to run queries in PROD SBX. Run `psql -h {prod sbx db url} -d fhirdb -U bfduser -f apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql | tee Query_synthetic_id_rangesTest.out` to generate a series of outputs for various end state properties. An example for beneficiary ID is shown below:
 
         grouping_start  |  grouping_end
         -----------------+-----------------
@@ -30,10 +32,9 @@ Synthetic data is generated with the external Synthea codebase. More information
                       1 |        60000000
         (8 rows)
 
+- Second, is the value you are incrementing creating a range of values that are valid with how our data is structured? For example the previous MBI ID end is `1S00-E00-FY99`, and you set the next start value to `1S00-E00-FZ01`, you are generating data that does not create database collisions, but has a range of invalid MBI IDs. For each property make sure to check resources like [https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf](https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf) for MBI ID. 
 
-3. Second, is the value you are incrementing creating a range of values that are FHIR compliant. For example the previous MBI ID end is `1S00-E00-FY99`, and you set the next start value to `1S00-E00-FZ01`, you are generating data that does not create database collisions, but is not FHIR compliant. For each property make sure to check resources like [https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf](https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf) for MBI ID. 
-
-4. If all checks out, set the synthea property start values and generate new data.
+- If all checks out, set the synthea property start values and generate new data.
 
 
 ## Loading Data
@@ -104,12 +105,109 @@ docker run \
      -v 'bfd_pgdata:/var/lib/postgresql/data' \
      postgres:12`
 
-6. Run the following in a terminal window:
+6. Go to `/apps/bfd-pipeline/bfd-pipeline-ccw-rif` in a new terminal window and run: 
 `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSyntheaData clean install`
 
-7. A sanity check to see if any collisions are possible with previously generated data locally requires loading both the new and old datasets into the local DB. Download the most recent synthea RIF files located in S3, and move them into `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea`. Then run steps 2, 3, and 6 with counts and entries for both data sets Synthea-Rif-Static and StaticResourceGroup in mind. If the RIF Loader IT does not fail, the data likely does not create collisions, but the queries in the `Checking for collisions in TEST, SBX or PROD` section below should also be run. 
+7. If the data loads without error, you must sanity check to see if any collisions are possible with previously generated data locally, which requires loading both the new and old datasets into the local DB. Download the most recent synthea RIF files located in S3, and move them into `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea`. Make sure to remove the database docker container, so there is no hold over data by running:
 
-## Data Compliance
+    docker stop bfd-db
+    docker rm bfd-db
+    docker volume rm bfd_pgdata
+
+Then run steps 2, 3, 5, and 6 with counts and entries for both data sets Synthea-Rif-Static and StaticResourceGroup in mind. If the RIF Loader IT does not fail, the data likely does not create collisions, but the queries in the `Checking for collisions in TEST, SBX or PROD` section below should also be run. 
+
+## Load Synthetic Data in Hosted Environments
+
+1. For partners to access the data, we host the RIF files in S3, and load it into the TEST, SBX, and PROD databases using the BFD pipeline application. Having recent backups of Prod SBX, TEST, and PROD prior to loading is important in case we do need to rollback due to any issues. Additionally before loading data, we need to make sure in TEST, SBX or PROD there are no collisions for the main properties in synthetic data i.e. bene_id, mbi_num, claim_id, etc. Each of the queries should return zero records. Aggregate RIF file data from all claim types, beneficiaries, and Part D Events located in `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea/` to generate the following queries for the various synthea end-state properties: 
+
+        -- For Beneficiary
+        Select count(*) from public.beneficiaries where mbi_num in (‘XXX’,’YYY’,…);
+        Select count(*) from public.beneficiaries where bene_id in (‘XXX’,’YYY’,…);
+        Select count(*) from public.beneficiaries where hicn_unhashed in (‘XXX’,’YYY’,…);
+
+        
+        -- For PDE
+        Select count(*) from public.partd_events where pde_id in (‘XXX’,’YYY’,…);
+
+
+        -- claim_id
+        Select count(*) from public.carrier_claims where claim_id in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.dme_claims where claim_id in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.snf_claims where claim_id in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.hha_claims where claim_id in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.hospice_claims where claim_id in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.inpatient_claims where claim_id in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.outpatient_claims where claim_id in (‘XXX’,’YYY’,…);
+
+
+        -- clm_grp_id
+        Select count(*) from public.carrier_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’ UNION
+        Select count(*) from public.dme_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’ UNION
+        Select count(*) from public.snf_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’ UNION
+        Select count(*) from public.hha_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’ UNION
+        Select count(*) from public.hospice_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’ UNION
+        Select count(*) from public.inpatient_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’ UNION
+        Select count(*) from public.outpatient_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’;
+
+
+        -- carr_clm_cntl_num
+        Select count(*) from public.carrier_claims where carr_clm_cntl_num in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.dme_claims where carr_clm_cntl_num in (‘XXX’,’YYY’,…);
+
+
+        -- fi_doc_clm_cntl_num
+        Select count(*) from public.hha_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.hospice_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.inpatient_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.outpatient_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…) UNION
+        Select count(*) from public.snf_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…);
+
+
+
+2. Load data. Begin with TEST (Approval required for SBX and PROD)
+3. Create dated Pipeline folder (same format as CCW) in the 'Incoming' folder of the environments ETL bucket. 
+4. Upload generated synthetic data to dated folder.  Watch for Data Discovered and Data Loaded slack messages. Note: Also watch logs (at first)
+5. Repeat for each approved environment. 
+6. Upload synthetic data to shared space (TBD) example: test-synthetic-data S3 bucket (public)
+
+## Checking for collisions in TEST, SBX or PROD
+
+1. As a sanity check before loading the data in any environment, we need to run a set of queries to find any possible duplicate parameters, which should return zero rows. 
+
+
+        SELECT mbi_hash, count(*) 
+        FROM public.beneficiaries 
+        GROUP BY mbi_hash
+        HAVING count(*)>1
+
+        SELECT mbi_num, count(*) 
+        FROM public.beneficiaries 
+        GROUP BY mbi_num
+        HAVING count(*)>1;
+
+        SELECT hicn_unhashed, count(*) 
+        FROM public.beneficiaries 
+        GROUP BY hicn_unhashed
+        HAVING count(*)>1;
+
+        SELECT bene_crnt_hic_num, count(*) 
+        FROM public.beneficiaries 
+        GROUP BY bene_crnt_hic_num
+        HAVING count(*)>1;
+
+        SELECT DISTINCT
+            dups.mbi_hash as hash, b.mbi_num as num, b.bene_id as bene
+        FROM
+            (	SELECT mbi_hash
+                FROM beneficiaries
+                GROUP BY mbi_hash
+                HAVING COUNT(*) > 1
+            ) dups
+        LEFT JOIN beneficiaries b ON dups.mbi_hash = b.mbi_hash
+        GROUP BY hash, num, bene
+        HAVING count(*) < 2
+
+## Optional Data Compliance Check
 Test FHIR API payload (data) for FHIR and CARIN compliance. 
 Test removal of data. 
 
@@ -203,78 +301,3 @@ Delete Script:
     DELETE FROM public.beneficiaries
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999';`
-
-
-## Load Synthetic Data in Hosted Environments
-
-1. Before loading data, we need to make sure in TEST, SBX or PROD there are no collisions for the main properties in synthetic data i.e. bene_id, mbi_num, claim_id, etc. Each of the queries should return zero records. Aggregate RIF file data from all claim types, beneficiaries, and Part D Events located in `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea/` to generate the following queries for the various synthea end-state properties: 
-
-        -- For Beneficiary
-        Select count(*) from public.beneficiaries where mbi_num in (‘XXX’,’YYY’,…);
-
-        Select count(*) from public.beneficiaries where bene_id in (‘XXX’,’YYY’,…);
-
-        Select count(*) from public.beneficiaries where hicn_unhashed in (‘XXX’,’YYY’,…);
-
-        
-        -- For PDE
-        Select count(*) from public.partd_events where pde_id in (‘XXX’,’YYY’,…);
-
-
-        -- For all claim types
-
-        Select count(*) from public.carrier_claims where claim_id in (‘XXX’,’YYY’,…);
-
-        Select count(*) from public.carrier_claims where clm_grp_id BETWEEN ‘XXX’ AND ’YYY’;
-
-
-        -- For DME and Carrier
-        Select count(*) from public.carrier_claims where carr_clm_cntl_num in (‘XXX’,’YYY’,…);
-
-
-        -- For HHA, Hospice, Inpatient, Outpatient, SNF
-        Select count(*) from public.hha_claims where fi_doc_clm_cntl_num in (‘XXX’,’YYY’,…);
-
-
-
-2. Load data. Begin with TEST (Approval required for SBX and PROD)
-3. Create dated Pipeline folder (same format as CCW) in the 'Incoming' folder of the environments ETL bucket. 
-4. Upload generated synthetic data to dated folder.  Watch for Data Discovered and Data Loaded slack messages. Note: Also watch logs (at first)
-5. Repeat for each approved environment. 
-6. Upload synthetic data to shared space (TBD) example: test-synthetic-data S3 bucket (public)
-
-## Checking for collisions in TEST, SBX or PROD
-
-1. Run queries to find any possible duplicate parameters
-
-        SELECT mbi_hash, count(*) 
-        FROM public.beneficiaries 
-        GROUP BY mbi_hash
-        HAVING count(*)>1
-
-        SELECT mbi_num, count(*) 
-        FROM public.beneficiaries 
-        GROUP BY mbi_num
-        HAVING count(*)>1;
-
-        SELECT hicn_unhashed, count(*) 
-        FROM public.beneficiaries 
-        GROUP BY hicn_unhashed
-        HAVING count(*)>1;
-
-        SELECT bene_crnt_hic_num, count(*) 
-        FROM public.beneficiaries 
-        GROUP BY bene_crnt_hic_num
-        HAVING count(*)>1;
-
-        SELECT DISTINCT
-            dups.mbi_hash as hash, b.mbi_num as num, b.bene_id as bene
-        FROM
-            (	SELECT mbi_hash
-                FROM beneficiaries
-                GROUP BY mbi_hash
-                HAVING COUNT(*) > 1
-            ) dups
-        LEFT JOIN beneficiaries b ON dups.mbi_hash = b.mbi_hash
-        GROUP BY hash, num, bene
-        HAVING count(*) < 2
