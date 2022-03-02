@@ -119,6 +119,24 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} value, which is a bit complex; please see
+   * its description for details.
+   */
+  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES =
+      "FILTERING_NON_NULL_AND_NON_2022_BENES";
+
+  /**
+   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES}
+   * configuration environment variable when it is not set.
+   *
+   * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
+   * removed as soon as is reasonable. Until then, though, we want it to be turned on in all
+   * environments, so we default it to enabled.
+   */
+  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES = false;
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricKey()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
@@ -295,13 +313,6 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
-  /**
-   * Hardcoded to enabled for now, as this filtering should always be enabled in AWS (for now). When
-   * it's not needed there anymore, we should rip out the entire option and the code associated with
-   * it.
-   */
-  private static final boolean FILTERING_NON_NULL_AND_NON_2022_BENES = true;
-
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
@@ -388,6 +399,9 @@ public final class AppConfiguration implements Serializable {
     String databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
     int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
     boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+    boolean filteringNonNullAndNon2022Benes =
+        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES)
+            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES);
     Optional<String> newRelicMetricKey = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_KEY);
     Optional<String> newRelicAppName = readEnvStringOptional(ENV_VAR_NEW_RELIC_APP_NAME);
     Optional<String> newRelicMetricHost = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_HOST);
@@ -433,7 +447,7 @@ public final class AppConfiguration implements Serializable {
                 .build(),
             loaderThreads,
             idempotencyRequired,
-            FILTERING_NON_NULL_AND_NON_2022_BENES);
+            filteringNonNullAndNon2022Benes);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
