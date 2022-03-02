@@ -606,14 +606,17 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnExpectException() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          loadSampleABeneWithEnrollmentRefYear(
-              "2021",
-              CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-                  USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
-        });
+    AssertionFailedError thrown =
+        assertThrows(
+            AssertionFailedError.class,
+            () -> {
+              loadSampleABeneWithEnrollmentRefYear(
+                  "2021",
+                  CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+                      USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+            });
+
+    assertTrue(thrown.getMessage().contains("Load errors encountered"));
   }
 
   /**
@@ -653,14 +656,17 @@ public final class RifLoaderIT {
   @Test
   public void
       loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndInsertStrategyExpectException() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          loadSampleABeneWithEnrollmentRefYear(
-              "2022",
-              CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-                  USE_INSERT_IDEMPOTENT_STRATEGY));
-        });
+    AssertionFailedError thrown =
+        assertThrows(
+            AssertionFailedError.class,
+            () -> {
+              loadSampleABeneWithEnrollmentRefYear(
+                  "2021",
+                  CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+                      USE_INSERT_IDEMPOTENT_STRATEGY));
+            });
+
+    assertTrue(thrown.getMessage().contains("Load errors encountered"));
   }
 
   /**
@@ -690,15 +696,17 @@ public final class RifLoaderIT {
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
     Stream<RifFile> updatedSampleAStream = editSamples(samplesStream, fileEditor);
 
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          loadSample(
-              "SAMPLE_A, updates to null ref year",
-              CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-                  USE_INSERT_IDEMPOTENT_STRATEGY),
-              updatedSampleAStream);
-        });
+    AssertionFailedError thrown =
+        assertThrows(
+            AssertionFailedError.class,
+            () -> {
+              loadSample(
+                  "SAMPLE_A, updates to null ref year",
+                  CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+                      USE_INSERT_IDEMPOTENT_STRATEGY),
+                  updatedSampleAStream);
+            });
+    assertTrue(thrown.getMessage().contains("Load errors encountered"));
   }
 
   /**
@@ -869,7 +877,7 @@ public final class RifLoaderIT {
           CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
-          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal() - 1, refYear);
+          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal() + 1, refYear);
           if (isUpdate) {
             beneCsvValues.set(0, "UPDATE");
           }

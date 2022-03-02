@@ -441,10 +441,9 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          // Blow up the data load if we try to insert a record that has a non 2022 year; this would
-          // have implications to fix before we load any more
-          // Do this regardless of if the item exists in the DB, if the setting is on so we know to
-          // investigate it
+          /* Blow up the data load if we try to insert a record that has a non 2022 year.
+           * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
+           */
           if (options.isFilteringNonNullAndNon2022Benes()
               && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
             throw new IllegalArgumentException(
@@ -463,8 +462,9 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            // Blow up the data load if we try to insert a record that has a non 2022 year; this
-            // would have implications to fix before we load any more
+            /* Blow up the data load if we try to insert a record that has a non 2022 year.
+             * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
+             */
             if (options.isFilteringNonNullAndNon2022Benes()
                 && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
               throw new IllegalArgumentException(
@@ -499,10 +499,6 @@ public final class RifLoader {
               entityManager.persist(skippedRifRecord);
             } else {
               tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-              /*
-               * TODO should we be explicitly blowing up here if we try to UPDATE a not-pre-existing
-               * bene?
-               */
               entityManager.merge(record);
             }
           } else {
