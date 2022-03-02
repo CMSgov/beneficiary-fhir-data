@@ -32,3 +32,8 @@ CREATE TABLE skipped_rif_records (
 CREATE SEQUENCE skipped_rif_records_record_id_seq
   AS bigint ${logic.sequence-start} 1 ${logic.sequence-increment} 1
   NO CYCLE;
+
+-- This index will allow for fast queries to determine whether or not a given `beneficiaries` record has been
+-- impacted by the new load filtering. This will allow the BFD Server to report that status in its `Patient`
+-- responses.
+CREATE INDEX skipped_rif_records_bene_id_idx on skipped_rif_records(bene_id);
