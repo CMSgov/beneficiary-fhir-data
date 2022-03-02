@@ -9,7 +9,7 @@
  * Added as part of <https://jira.cms.gov/browse/BFD-1566>.
  */
 
-CREATE TABLE rif_records_skipped (
+CREATE TABLE skipped_rif_records (
   -- Sequence-generated PK for these records, as no natural PK is feasible.
   record_id            bigint                     NOT NULL PRIMARY KEY,
 
@@ -28,7 +28,7 @@ CREATE TABLE rif_records_skipped (
   rif_data             ${type.text}               NOT NULL
 );
 
--- The sequence used for the `rif_records_skipped.record_id` column.
-CREATE SEQUENCE rif_records_skipped_record_id_seq 
+-- The sequence used for the `skipped_rif_records.record_id` column.
+CREATE SEQUENCE skipped_rif_records_record_id_seq
   AS bigint ${logic.sequence-start} 1 ${logic.sequence-increment} 1
   NO CYCLE;

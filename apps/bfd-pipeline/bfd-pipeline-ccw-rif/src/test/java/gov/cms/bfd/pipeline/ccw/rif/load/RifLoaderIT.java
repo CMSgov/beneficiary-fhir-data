@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.RifRecordsSkipped;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -936,7 +936,7 @@ public final class RifLoaderIT {
       // Count and verify the number of bene records in the DB.
       CriteriaQuery<Long> skippedCountQuery = criteriaBuilder.createQuery(Long.class);
       skippedCountQuery.select(
-          criteriaBuilder.count(skippedCountQuery.from(RifRecordsSkipped.class)));
+          criteriaBuilder.count(skippedCountQuery.from(SkippedRifRecord.class)));
       Long skippedCount = entityManager.createQuery(skippedCountQuery).getSingleResult();
       assertEquals(expectedSkippedCount, skippedCount, "Unexpected number of skipped records.");
     } finally {

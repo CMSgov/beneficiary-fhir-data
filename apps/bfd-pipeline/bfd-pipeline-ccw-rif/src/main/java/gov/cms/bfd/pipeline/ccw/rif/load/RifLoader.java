@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.RifRecordsSkipped;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -490,8 +490,8 @@ public final class RifLoader {
               }
 
               // Save the skipped record to the DB.
-              RifRecordsSkipped skippedRifRecord =
-                  new RifRecordsSkipped(
+              SkippedRifRecord skippedRifRecord =
+                  new SkippedRifRecord(
                       rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
                       rifRecordEvent.getFileEvent().getFile().getFileType().name(),
                       ((Beneficiary) record).getBeneficiaryId(),

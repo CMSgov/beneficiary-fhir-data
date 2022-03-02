@@ -20,16 +20,16 @@ import javax.persistence.Table;
  * <p>Added as part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>.
  */
 @Entity
-@Table(name = "rif_records_skipped")
-public class RifRecordsSkipped {
+@Table(name = "skipped_rif_records")
+public class SkippedRifRecord {
   @Id
   @Column(name = "record_id", nullable = false)
   @GeneratedValue(
       strategy = GenerationType.SEQUENCE,
-      generator = "rif_records_skipped_record_id_seq")
+      generator = "skipped_rif_records_record_id_seq")
   @SequenceGenerator(
-      name = "rif_records_skipped_record_id_seq",
-      sequenceName = "rif_records_skipped_record_id_seq",
+      name = "skipped_rif_records_record_id_seq",
+      sequenceName = "skipped_rif_records_record_id_seq",
       allocationSize = 1)
   private long recordId;
 
@@ -46,17 +46,17 @@ public class RifRecordsSkipped {
   private String rifData;
 
   /** This default constructor is required, per the JPA spec. */
-  public RifRecordsSkipped() {}
+  public SkippedRifRecord() {}
 
   /**
-   * Constructs a new {@link RifRecordsSkipped} instance.
+   * Constructs a new {@link SkippedRifRecord} instance.
    *
    * @param rifFileTimestamp the value to use for {@link #getRifFileTimestamp()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
    * @param beneId the value to use for {@link #getBeneId()}
    * @param rifData the value to use for {@link #getRifData()}
    */
-  public RifRecordsSkipped(
+  public SkippedRifRecord(
       Instant rifFileTimestamp, String rifFileType, long beneId, String rifData) {
     this.rifFileTimestamp = rifFileTimestamp;
     this.rifFileType = rifFileType;
@@ -65,19 +65,19 @@ public class RifRecordsSkipped {
   }
 
   /**
-   * Constructs a new {@link RifRecordsSkipped} instance.
+   * Constructs a new {@link SkippedRifRecord} instance.
    *
    * @param rifFileTimestamp the value to use for {@link #getRifFileTimestamp()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
    * @param beneId the value to use for {@link #getBeneId()}
    * @param rifData the value to use for {@link #getRifData()}
    */
-  public RifRecordsSkipped(
+  public SkippedRifRecord(
       Instant rifFileTimestamp, String rifFileType, String beneId, String rifData) {
     this(rifFileTimestamp, rifFileType, Long.parseLong(beneId), rifData);
   }
 
-  /** @return the unique (sequence-generated) ID for this {@link RifRecordsSkipped} instance */
+  /** @return the unique (sequence-generated) ID for this {@link SkippedRifRecord} instance */
   public long getRecordId() {
     return recordId;
   }

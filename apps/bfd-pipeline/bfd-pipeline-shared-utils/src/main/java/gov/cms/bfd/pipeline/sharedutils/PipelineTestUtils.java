@@ -26,9 +26,9 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
-import gov.cms.bfd.model.rif.RifRecordsSkipped;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -145,7 +145,7 @@ public final class PipelineTestUtils {
             LoadedFile.class,
             PreAdjFissClaim.class,
             PreAdjFissProcCode.class,
-            RifRecordsSkipped.class);
+            SkippedRifRecord.class);
 
     try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection(); ) {
       // Disable auto-commit and remember the default schema name.
