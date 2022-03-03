@@ -1157,7 +1157,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       childField.addAnnotation(
           AnnotationSpec.builder(OneToMany.class)
-              .addMember("mappedBy", "$S", "bene_id")
+              .addMember("mappedBy", "$S", "beneId")
               .addMember("orphanRemoval", "$L", false)
               .addMember("fetch", "$T.EAGER", FetchType.class)
               .addMember("cascade", "$T.ALL", CascadeType.class)
@@ -1173,6 +1173,16 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .returns(childFieldType)
               .build();
       headerEntityClass.addMethod(childGetter);
+
+      MethodSpec childSetter =
+          MethodSpec.methodBuilder("setSkippedRifRecords")
+              .addModifiers(Modifier.PUBLIC)
+              .returns(void.class)
+              .addParameter(childFieldType, "skippedRifRecords")
+              .addStatement(
+                  "this.$N = ($T)$N", "skippedRifRecords", childFieldType, "skippedRifRecords")
+              .build();
+      headerEntityClass.addMethod(childSetter);
     }
 
     // Add the parent-to-child join field and accessor for an inner join
