@@ -6,6 +6,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.server.war.FDADrugUtils;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -25,6 +27,17 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 public class CarrierClaimTransformerV2 {
+
+  static IDrugCodeProvider DrugCodeProvider;
+
+  public CarrierClaimTransformerV2() {
+    DrugCodeProvider = new FDADrugUtils();
+  }
+
+  public CarrierClaimTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
+    DrugCodeProvider = iDrugCodeProvider;
+  }
+
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link CarrierClaim} to transform
