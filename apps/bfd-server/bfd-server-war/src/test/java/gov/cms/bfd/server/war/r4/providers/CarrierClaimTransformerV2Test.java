@@ -72,7 +72,7 @@ public class CarrierClaimTransformerV2Test {
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2(new FDADrugTestUtils())
+        new CarrierClaimTransformerV2(new FDADrugTestUtils())
             .transform(new MetricRegistry(), claim, Optional.empty());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
