@@ -26,7 +26,7 @@ CREATE TABLE skipped_rif_records (
   dml_ind              varchar(6)                 NOT NULL,
 
   -- The `bene_id` of the beneficiary that this record(s) is of / associated with.
-  bene_id              varchar(15)                NOT NULL,
+  bene_id              varchar(15)               NOT NULL,
 
   -- The RIF/CSV row or rows representing the record(s) (i.e. beneficiary or claim) that was skipped.
   rif_data             ${type.text}               NOT NULL
