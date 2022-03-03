@@ -8,7 +8,7 @@ Our system has delayed the processing of demographic and enrollment data
 This delay is due to errors in
   how that data has been sent to our system for processing
   that only impact such persons.
-Only around 0.003% of persons we have records for are impacted by this issue.
+Only around 0.3% of persons we have records for are impacted by this issue.
 
 Nevertheless, for such impacted persons,
   their `Patient` resources are being tagged,
