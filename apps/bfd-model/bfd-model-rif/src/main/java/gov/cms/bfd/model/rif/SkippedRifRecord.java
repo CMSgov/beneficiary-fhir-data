@@ -43,7 +43,7 @@ public class SkippedRifRecord {
   private String dmlInd;
 
   @Column(name = "bene_id", nullable = false)
-  private long beneId;
+  private String beneId;
 
   @Column(name = "rif_data", nullable = false)
   private String rifData;
@@ -64,31 +64,13 @@ public class SkippedRifRecord {
       Instant rifFileTimestamp,
       String rifFileType,
       RecordAction dmlInd,
-      long beneId,
+      String beneId,
       String rifData) {
     this.rifFileTimestamp = rifFileTimestamp;
     this.rifFileType = rifFileType;
     this.dmlInd = dmlInd.name();
     this.beneId = beneId;
     this.rifData = rifData;
-  }
-
-  /**
-   * Constructs a new {@link SkippedRifRecord} instance.
-   *
-   * @param rifFileTimestamp the value to use for {@link #getRifFileTimestamp()}
-   * @param rifFileType the value to use for {@link #getRifFileType()}
-   * @param dmlInd the value to use for {@link #getDmlInd()}
-   * @param beneId the value to use for {@link #getBeneId()}
-   * @param rifData the value to use for {@link #getRifData()}
-   */
-  public SkippedRifRecord(
-      Instant rifFileTimestamp,
-      String rifFileType,
-      RecordAction dmlInd,
-      String beneId,
-      String rifData) {
-    this(rifFileTimestamp, rifFileType, dmlInd, Long.parseLong(beneId), rifData);
   }
 
   /** @return the unique (sequence-generated) ID for this {@link SkippedRifRecord} instance */
@@ -115,7 +97,7 @@ public class SkippedRifRecord {
    * @return the {@link Beneficiary}{@link #getBeneId()} of the {@link Beneficiary} that this record
    *     is of / associated with
    */
-  public long getBeneId() {
+  public String getBeneId() {
     return beneId;
   }
 
