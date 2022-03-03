@@ -146,7 +146,7 @@ public final class RifParsingUtils {
 
   /**
    * @param longText the number string to parse
-   * @return an {@link Optional} populated with an {@link Integer} if the input has data, or an
+   * @return an {@link Optional} populated with an {@link Long} if the input has data, or an
    *     empty Optional if not
    */
   public static Optional<Long> parseOptionalLong(String longText) {
