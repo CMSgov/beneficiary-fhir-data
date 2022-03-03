@@ -525,7 +525,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -651,6 +651,14 @@ checkJavaFormat
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<doclint>all</doclint>
+					<failOnWarnings>true</failOnWarnings>
+					<detectJavaApiLink>false</detectJavaApiLink>
+					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
+					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
+					<quiet>true</quiet>
+				</configuration>
 				<executions>
 					<execution>
 						<!-- Always generate a Javadoc JAR. This is a best practice, but is 
@@ -659,12 +667,6 @@ checkJavaFormat
 						<goals>
 							<goal>jar</goal>
 						</goals>
-						<configuration>
-							<failOnError>false</failOnError>
-							<detectJavaApiLink>false</detectJavaApiLink>
-							<!-- Exclude javadocs on generated files, reduces build warnings -->
-							<excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
-            			</configuration>
 					</execution>
 				</executions>
 			</plugin>
