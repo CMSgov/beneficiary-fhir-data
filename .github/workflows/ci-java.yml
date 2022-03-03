@@ -3,6 +3,8 @@ on: pull_request
 
 env:
   # workflow file matchers - workflow jobs will only run if matching files are found
+  # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
+  # are using this workflow logic
   workflow_files_re: ^apps/bfd-
 
 jobs:
