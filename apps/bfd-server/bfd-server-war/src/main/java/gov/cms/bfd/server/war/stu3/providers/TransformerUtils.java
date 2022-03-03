@@ -595,6 +595,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * TODO: Remove this method and the calling unit test when fully converted to BigInt claim IDs.
+   *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
@@ -1275,7 +1277,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: Remove
+   * TODO: Remove this method when the calling method has been removed as per BFD-XXXX
    *
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
@@ -1694,8 +1696,8 @@ public final class TransformerUtils {
     eob.setId(buildEobId(claimType, claimId));
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId.toString()));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId.toString()));
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
+    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
 
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)

@@ -139,7 +139,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, 1234L))
               .execute();
         });
   }
@@ -195,7 +195,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, 1234L))
               .execute();
         });
   }
@@ -252,7 +252,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, 1234L))
               .execute();
         });
   }
@@ -308,7 +308,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, 1234L))
               .execute();
         });
   }
@@ -364,7 +364,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, 1234L))
               .execute();
         });
   }
@@ -425,7 +425,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, 1234L))
               .execute();
         });
   }
@@ -481,7 +481,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, 1234L))
               .execute();
         });
   }
@@ -504,7 +504,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, "-1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, -1234L))
               .execute();
         });
   }
@@ -583,7 +583,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, 1234L))
               .execute();
         });
   }

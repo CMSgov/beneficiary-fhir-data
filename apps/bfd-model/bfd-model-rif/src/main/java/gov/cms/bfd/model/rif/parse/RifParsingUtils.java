@@ -145,7 +145,7 @@ public final class RifParsingUtils {
   }
 
   /**
-   * @param intText the number string to parse
+   * @param longText the number string to parse
    * @return an {@link Optional} populated with an {@link Integer} if the input has data, or an
    *     empty Optional if not
    */

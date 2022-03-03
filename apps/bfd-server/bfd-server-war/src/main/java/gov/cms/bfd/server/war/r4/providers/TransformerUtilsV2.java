@@ -404,26 +404,6 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
-   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
-   *     {@link Identifier}
-   * @return the output {@link Identifier}
-   */
-  static Identifier createClaimIdentifier(CcwCodebookInterface ccwVariable, Long identifierValue) {
-    if (identifierValue == null) {
-      throw new IllegalArgumentException();
-    }
-
-    Identifier identifier =
-        new Identifier()
-            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
-            .setValue(identifierValue.toString())
-            .setType(createC4BBClaimCodeableConcept());
-
-    return identifier;
-  }
-
-  /**
-   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
@@ -1715,7 +1695,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO: Remove
+   * TODO: Remove this method when the calling method has been removed as per BFD-XXXX
    *
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
@@ -1748,7 +1728,9 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO: Remove
+   * TODO: Remove this method when the calling method has been removed as per BFD-XXXX and the
+   * conversion to bigint for beneficiaryId is complete which will allow removal of the other caller
+   * which is a unit test that passes an ID that contains alpha characters.
    *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
@@ -1852,10 +1834,10 @@ public final class TransformerUtilsV2 {
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
     }
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
@@ -2158,6 +2140,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * TODO: Remove this method and the calling unit test when fully converted to BigInt claim IDs.
+   *
    * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for

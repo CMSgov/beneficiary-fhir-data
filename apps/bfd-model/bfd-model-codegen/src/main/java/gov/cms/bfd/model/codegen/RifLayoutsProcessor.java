@@ -1243,18 +1243,23 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return headerEntityFinal;
   }
   /**
-   * Support method for the varchar to bigint transition that identifies the columns that are planned to be converted.
+   * Support method for the varchar to bigint transition that identifies the columns that are
+   * planned to be converted.
    *
-   * TODO: This is a temporary method that should be removed along with all code blocks that are conditional on this
-   * method once all beneficiary and claim tables IDs have completed the transition from varchar to bigint.
+   * <p>TODO: This is a temporary method that should be removed along with all code blocks that are
+   * conditional on this method once all beneficiary and claim tables IDs have completed the
+   * transition from varchar to bigint.
    *
    * @param tableName the table name
    * @param rifField the field model
-   * @return true if the field specified is one that will be converted to a bigint in the near future
+   * @return true if the field specified is one that will be converted to a bigint in the near
+   *     future
    */
   private boolean isFutureBigint(String tableName, RifField rifField) {
-    // Remove elements from these arrays as they are converted. When everything is removed, remove the method and all
-    // blocks that are conditional on this method.
+    /*
+     * Remove elements from these arrays as they are converted. When everything is removed, remove
+     * the method and all blocks that are conditional on this method.
+     */
     final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
     final List<String> futureBigIntTables =
         Arrays.asList(
