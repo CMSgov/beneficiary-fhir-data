@@ -80,7 +80,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * Both Maven and Eclipse hide compiler messages, so setting this constant to <code>true</code>
    * will also log messages out to a new source file.
    */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
