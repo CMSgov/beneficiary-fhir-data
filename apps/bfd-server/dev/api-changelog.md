@@ -1,6 +1,37 @@
 # API Changelog
 
-## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
+## BFD-1566: Add Patient.meta.tag entry for Some Patients
+
+Our system has delayed the processing of demographic and enrollment data
+  for some persons who had previously been enrolled in Medicare
+  but are not enrolled in Medicare for the current year.
+This delay is due to errors in
+  how that data has been sent to our system for processing
+  that only impact such persons.
+Only around 0.003% of persons we have records for are impacted by this issue.
+
+Nevertheless, for such impacted persons,
+  their `Patient` resources are being tagged,
+  as follows:
+
+```
+{
+  "resourceType": "Patient",
+  ...
+  "meta": {
+    ...
+    "tag": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/codesystem/tags",
+        "code": "delayed-backdated-enrollment",
+        "display": "Impacted by delayed backdated enrollment data."
+      }
+    ]
+  },
+  ...
+```
+
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
 ```

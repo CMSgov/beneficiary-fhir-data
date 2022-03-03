@@ -36,6 +36,9 @@ public class SkippedRifRecord {
   @Column(name = "rif_file_timestamp", nullable = false)
   private Instant rifFileTimestamp;
 
+  @Column(name = "skip_reason", nullable = false)
+  private String skipReason;
+
   @Column(name = "rif_file_type", nullable = false)
   private String rifFileType;
 
@@ -55,6 +58,7 @@ public class SkippedRifRecord {
    * Constructs a new {@link SkippedRifRecord} instance.
    *
    * @param rifFileTimestamp the value to use for {@link #getRifFileTimestamp()}
+   * @param skipReason the value to use for {@link #getSkipReason()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
    * @param dmlInd the value to use for {@link #getDmlInd()}
    * @param beneId the value to use for {@link #getBeneId()}
@@ -62,11 +66,13 @@ public class SkippedRifRecord {
    */
   public SkippedRifRecord(
       Instant rifFileTimestamp,
+      SkipReasonCode skipReason,
       String rifFileType,
       RecordAction dmlInd,
       String beneId,
       String rifData) {
     this.rifFileTimestamp = rifFileTimestamp;
+    this.skipReason = skipReason.name();
     this.rifFileType = rifFileType;
     this.dmlInd = dmlInd.name();
     this.beneId = beneId;
@@ -76,6 +82,14 @@ public class SkippedRifRecord {
   /** @return the unique (sequence-generated) ID for this {@link SkippedRifRecord} instance */
   public long getRecordId() {
     return recordId;
+  }
+
+  /**
+   * @return the {@link SkipReasonCode} that identifies why this {@link SkippedRifRecord} was
+   *     skipped in the first place
+   */
+  public SkipReasonCode getSkipReason() {
+    return SkipReasonCode.valueOf(skipReason);
   }
 
   /** @return the timestamp associated with the CCW data set manifest that this record is from */
@@ -107,5 +121,14 @@ public class SkippedRifRecord {
    */
   public String getRifData() {
     return rifData;
+  }
+
+  /** Represents the allowed/known values for {@link SkippedRifRecord#getSkipReason()}. */
+  public static enum SkipReasonCode {
+    /**
+     * The code that represents the filtering for non-null and 2022 benes, implemented as part of <a
+     * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>.
+     */
+    DELAYED_BACKDATED_ENROLLMENT_BFD_1566;
   }
 }

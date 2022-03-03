@@ -23,6 +23,7 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
+import gov.cms.bfd.model.rif.SkippedRifRecord.SkipReasonCode;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -493,6 +494,7 @@ public final class RifLoader {
               SkippedRifRecord skippedRifRecord =
                   new SkippedRifRecord(
                       rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
+                      SkipReasonCode.DELAYED_BACKDATED_ENROLLMENT_BFD_1566,
                       rifRecordEvent.getFileEvent().getFile().getFileType().name(),
                       rifRecordEvent.getRecordAction(),
                       ((Beneficiary) record).getBeneficiaryId(),

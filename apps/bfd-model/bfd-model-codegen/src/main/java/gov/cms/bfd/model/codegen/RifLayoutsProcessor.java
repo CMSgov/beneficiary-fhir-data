@@ -1148,23 +1148,20 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     if (mappingSpec.isBeneficiaryEntity()) {
       ParameterizedTypeName childFieldType =
           ParameterizedTypeName.get(
-              ClassName.get(List.class),
+              ClassName.get(Set.class),
               ClassName.get(mappingSpec.getPackageName(), "SkippedRifRecord"));
 
       FieldSpec.Builder childField =
           FieldSpec.builder(childFieldType, "skippedRifRecords", Modifier.PRIVATE)
-              .initializer("new $T<>()", LinkedList.class);
+              .initializer("new $T<>()", HashSet.class);
 
       childField.addAnnotation(
           AnnotationSpec.builder(OneToMany.class)
+              .addMember("mappedBy", "$S", "beneId")
               .addMember("orphanRemoval", "$L", false)
-              .addMember("fetch", "$T.EAGER", FetchType.class)
+              .addMember("fetch", "$T.LAZY", FetchType.class)
               .addMember("cascade", "$T.ALL", CascadeType.class)
               .build());
-      childField.addAnnotation(
-          AnnotationSpec.builder(JoinColumn.class).addMember("name", "$S", "bene_id").build());
-      childField.addAnnotation(
-          AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", "record_id ASC").build());
       headerEntityClass.addField(childField.build());
 
       MethodSpec childGetter =

@@ -13,19 +13,22 @@ CREATE TABLE skipped_rif_records (
   -- Sequence-generated PK for these records, as no natural PK is feasible.
   record_id            bigint                     NOT NULL PRIMARY KEY,
 
-  -- The timestamp associated with the CCW data set manifest that this record is from.
+  -- A code indicating why this particular RIF record(s) were skipped.
+  skip_reason          varchar(50)                NOT NULL,
+
+  -- The timestamp associated with the CCW data set manifest that this record(s) is from.
   rif_file_timestamp   timestamp with time zone   NOT NULL,
 
-  -- The `RifFileType` (e.g. `BENEFICIARY`, `CARRIER`, etc.) of the RIF file that this record is from.
+  -- The `RifFileType` (e.g. `BENEFICIARY`, `CARRIER`, etc.) of the RIF file that this record(s) is from.
   rif_file_type        varchar(48)                NOT NULL,
 
   -- The `DML_IND` of the RIF record(s).
   dml_ind              varchar(6)                 NOT NULL,
 
-  -- The `bene_id` of the beneficiary that this record is of / associated with.
+  -- The `bene_id` of the beneficiary that this record(s) is of / associated with.
   bene_id              varchar(15)                NOT NULL,
 
-  -- The RIF/CSV row or rows representing the record (i.e. beneficiary or claim) that was skipped.
+  -- The RIF/CSV row or rows representing the record(s) (i.e. beneficiary or claim) that was skipped.
   rif_data             ${type.text}               NOT NULL
 );
 
