@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 2
       - id: workflow_files
         run: |
-          echo "::set-output name=files::$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')"
+          echo "::set-output name=files::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')"
 
   mvn-fmt-maven-plugin:
     runs-on: macos-latest
