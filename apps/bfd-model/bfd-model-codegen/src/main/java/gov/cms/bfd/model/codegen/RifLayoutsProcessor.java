@@ -999,6 +999,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(headerField);
 
       MethodSpec.Builder headerFieldGetter;
+
       if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
         if (rifField.isRifColumnOptional()) {
           headerFieldGetter =
@@ -1241,8 +1242,19 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     return headerEntityFinal;
   }
-
-  private boolean isFutureBigint(String headerTable, RifField rifField) {
+  /**
+   * Support method for the varchar to bigint transition that identifies the columns that are planned to be converted.
+   *
+   * TODO: This is a temporary method that should be removed along with all code blocks that are conditional on this
+   * method once all beneficiary and claim tables IDs have completed the transition from varchar to bigint.
+   *
+   * @param tableName the table name
+   * @param rifField the field model
+   * @return true if the field specified is one that will be converted to a bigint in the near future
+   */
+  private boolean isFutureBigint(String tableName, RifField rifField) {
+    // Remove elements from these arrays as they are converted. When everything is removed, remove the method and all
+    // blocks that are conditional on this method.
     final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
     final List<String> futureBigIntTables =
         Arrays.asList(
@@ -1259,7 +1271,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "snf_claims");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
-        && futureBigIntTables.contains(headerTable.toLowerCase());
+        && futureBigIntTables.contains(tableName.toLowerCase());
   }
 
   /**
