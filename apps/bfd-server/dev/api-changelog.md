@@ -2,7 +2,7 @@
 
 ## BFD-1424 Fix mtus code
 
-Added a new extension with the correct url/system for MTUS Count and keeping the old extension with the MTUS Count value that had the incorrect url/system of MTUS Code:
+Added a new extension with the correct url/system for MTUS Code and kept the old extension with the MTUS Code value that had the incorrect url/system of MTUS Count:
 The old coding:
 ```
 {
