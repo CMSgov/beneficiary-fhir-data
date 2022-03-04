@@ -130,8 +130,7 @@ public final class AppConfiguration implements Serializable {
    * configuration environment variable when it is not set.
    *
    * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
-   * removed as soon as is reasonable. Until then, though, we want it to be turned on in all
-   * environments, so we default it to enabled.
+   * removed as soon as is reasonable.
    */
   public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES = false;
 
