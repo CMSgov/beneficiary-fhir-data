@@ -2,9 +2,31 @@
 
 ## BFD-1424 Fix mtus code
 
-Update Carrier claim mapping for mtus code instead of mtus count:
-The new coding:
+Update Carrier claim extension mapping for mtus code instead of mtus count:
+The old coding:
 ```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+}, 
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+}
+```
+`The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+},
 {
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
       "valueCoding" : {
