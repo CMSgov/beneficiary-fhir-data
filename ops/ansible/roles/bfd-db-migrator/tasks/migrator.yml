@@ -1,0 +1,89 @@
+---
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - java-11-openjdk
+  become: true
+  tags:
+    - pre-ami
+
+- name: Create DB Migrator Service User
+  user:
+    name: "{{ db_migrator_user }}"
+    shell: /bin/false
+  become: true
+  tags: 
+    - pre-ami
+
+- name: Create DB Migrator Service Directory
+  file:
+    path: "{{ db_migrator_dir }}"
+    state: directory
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  tags: 
+    - pre-ami
+
+# Create the temp directory iff it's missing. (Don't want to accidentally
+# change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ db_migrator_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: db_migrator_tmp_dir is defined
+  tags: 
+    - pre-ami
+
+- name: Create Custom Temp Directory
+  file:
+    path: "{{ db_migrator_tmp_dir }}"
+    state: directory
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  when: db_migrator_tmp_dir is defined and stat_tmp.stat.exists == false
+  tags: 
+    - pre-ami
+
+- name: Copy and Unzip DB Migrator Application
+  unarchive:
+    src: "{{ db_migrator_zip }}"
+    dest: "{{ db_migrator_dir }}"
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
+  become: true
+  tags:
+    - pre-ami
+
+- name: Create DB Migrator Service Wrapper Script
+  template:
+    src: bfd-db-migrator-service.sh.j2
+    dest: "{{ db_migrator_dir }}/bfd-db-migrator-service.sh"
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  notify:
+    - 'Restart DB Migrator Service'
+  tags: 
+    - post-ami
+
+- name: Create DB Migrator Service Definition
+  template:
+    src: bfd-db-migrator.service.j2
+    dest: /etc/systemd/system/bfd-db-migrator.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - 'Enable DB Migrator Service'
+    - 'Restart DB Migrator Service'
+  tags: 
+    - post-ami

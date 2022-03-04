@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+export DATABASE_URL='{{ db_migrator_db_url }}'
+export DATABASE_USERNAME='{{ db_migrator_db_username }}'
+export DATABASE_PASSWORD='{{ db_migrator_db_password }}'
+
+LOGS_DIR='{{ db_migrator_dir }}/'
+
+# Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
+# export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
+
+exec "{{ db_migrator_dir }}/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh" \
+	"-DbfdDbMigrator.logs.dir=${LOGS_DIR}" \
+	-Djava.io.tmpdir={{ db_migrator_tmp_dir }} \
+	&>> "{{ db_migrator_dir }}/migrator-log.json"

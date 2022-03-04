@@ -1,0 +1,10 @@
+---
+- name: Enable DB Migrator Service
+  command: /usr/bin/systemctl --system enable bfd-db-migrator
+  become: true
+
+- name: Restart DB Migrator Service
+  service:
+    name: bfd-db-migrator
+    state: restarted
+  become: true
