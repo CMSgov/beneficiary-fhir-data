@@ -595,7 +595,8 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: Remove this method and the calling unit test when fully converted to BigInt claim IDs.
+   * TODO: BFD-1583 Remove this method and the calling unit test when fully converted to BigInt
+   * claim IDs.
    *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
@@ -687,8 +688,8 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: Remove this method and anything that references it once beneficiaryId datatype conversion
-   * to Long is complete.
+   * TODO: BFD-1583 Remove this method and anything that references it once beneficiaryId datatype
+   * conversion to Long is complete.
    *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
@@ -1277,7 +1278,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: Remove this method when the calling method has been removed as per BFD-XXXX
+   * TODO: Remove this method when the calling method has been removed as per BFD-1582
    *
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match

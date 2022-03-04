@@ -1246,9 +1246,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * Support method for the varchar to bigint transition that identifies the columns that are
    * planned to be converted.
    *
-   * <p>TODO: This is a temporary method that should be removed along with all code blocks that are
-   * conditional on this method once all beneficiary and claim tables IDs have completed the
-   * transition from varchar to bigint.
+   * <p>TODO: BFD-1583 This is a temporary method that should be removed along with all code blocks
+   * that are conditional on this method once all beneficiary and claim tables IDs have completed
+   * the transition from varchar to bigint.
    *
    * @param tableName the table name
    * @param rifField the field model
