@@ -2,7 +2,7 @@
 
 ## BFD-1424 Fix mtus code
 
-Update Carrier claim extension mapping for mtus code instead of mtus count:
+Added a new extension with the correct url/system for MTUS Count and keeping the old extension with the MTUS Count value that had the incorrect url/system of MTUS Code:
 The old coding:
 ```
 {
