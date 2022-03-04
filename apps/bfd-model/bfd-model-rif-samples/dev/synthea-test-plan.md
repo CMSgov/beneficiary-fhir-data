@@ -214,43 +214,43 @@ Test removal of data.
 Delete Script: 
 
     DELETE FROM public.carrier_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.carrier_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.carrier_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
     
     DELETE FROM public.dme_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.dme_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.dme_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
     
     DELETE FROM public.hha_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.hha_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.hha_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
     
     DELETE FROM public.hospice_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.hospice_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.hospice_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
     
     DELETE FROM public.inpatient_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.inpatient_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.inpatient_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
     
     DELETE FROM public.outpatient_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.outpatient_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.outpatient_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
     
     DELETE FROM public.snf_claim_lines
-        WHERE "clm_id" in (SELECT "clm_id" FROM public.snf_claims
+        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.snf_claims
     WHERE "bene_id" >='-10000000000000'
         AND "bene_id" <='-10000000009999'
     );
