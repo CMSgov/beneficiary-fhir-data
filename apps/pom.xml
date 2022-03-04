@@ -70,6 +70,7 @@
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
+		<module>bfd-db-migrator</module>
 	</modules>
 
 	<properties>
