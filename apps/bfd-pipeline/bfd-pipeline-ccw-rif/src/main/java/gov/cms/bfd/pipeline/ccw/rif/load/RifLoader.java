@@ -500,6 +500,7 @@ public final class RifLoader {
                       ((Beneficiary) record).getBeneficiaryId(),
                       rifData.toString());
               entityManager.persist(skippedRifRecord);
+              LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
             } else {
               tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
               entityManager.merge(record);
