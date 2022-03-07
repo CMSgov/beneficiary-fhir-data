@@ -446,6 +446,7 @@ public final class RifLoader {
            * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
            */
           if (options.isFilteringNonNullAndNon2022Benes()
+              && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
               && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
             throw new IllegalArgumentException(
                 "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
@@ -467,17 +468,18 @@ public final class RifLoader {
              * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
              */
             if (options.isFilteringNonNullAndNon2022Benes()
+                && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
                 && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
               throw new IllegalArgumentException(
                   "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
-
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
             // Skip this record if the year is not 2022 and its an update.
             if (options.isFilteringNonNullAndNon2022Benes()
+                && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
                 && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
               /*
                * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
