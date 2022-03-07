@@ -819,6 +819,132 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is on, and the LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type,
+   * expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenInsertAndFilterOnAndInsertStrategyExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(true),
+        stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is on, and a non-Beneficiary type, expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenInsertAndFilterOnExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(false),
+        stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is off, and the LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type,
+   * expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenInsertAndFilterOffAndInsertStrategyExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample("non-Bene sample", CcwRifLoadTestUtils.getLoadOptions(), stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is off, and a non-Beneficiary type, expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenInsertAndFilterOffExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample("non-Bene sample", CcwRifLoadTestUtils.getLoadOptions(), stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE,
+   * filter setting is off, and a non-Beneficiary type expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenUpdateAndFilterOffExpectRecordLoaded() {
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptions(),
+        getStreamForFileType(RifFileType.INPATIENT));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    // Load again to test UPDATE
+    Stream<RifFile> updateStream =
+        editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
+    loadSample("non-Bene sample update", CcwRifLoadTestUtils.getLoadOptions(), updateStream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE,
+   * filter setting is on, and a non-Beneficiary type expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenUpdateAndFilterOnExpectRecordLoaded() {
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptions(),
+        getStreamForFileType(RifFileType.INPATIENT));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    // Load again to test UPDATE
+    Stream<RifFile> updateStream =
+        editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
+    loadSample(
+        "non-Bene sample update",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(false),
+        updateStream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Gets the stream for the specified file type from the SAMPLE_A data.
+   *
+   * @param fileType the file type to get from the SAMPLE_A data
+   * @return the stream for file type
+   */
+  private Stream<RifFile> getStreamForFileType(RifFileType fileType) {
+    return filterSamples(
+        r -> r.getFileType() == fileType, StaticRifResourceGroup.SAMPLE_A.getResources());
+  }
+
+  /**
    * Loads the default SAMPLE_A bene data, useful for testing updates. Assumes this load is an
    * INSERT.
    *
@@ -900,6 +1026,16 @@ public final class RifLoaderIT {
         filterSamples(
             r -> r.getFileType() == RifFileType.BENEFICIARY,
             StaticRifResourceGroup.SAMPLE_A.getResources());
+    return editStreamToBeUpdate(samplesStream);
+  }
+
+  /**
+   * Edit the given stream to be an UPDATE by editing the csv data.
+   *
+   * @param samplesStream the samples stream
+   * @return the edited stream
+   */
+  private Stream<RifFile> editStreamToBeUpdate(Stream<RifFile> samplesStream) {
     Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
         rifRecordEvent -> {
           CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
