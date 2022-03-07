@@ -104,6 +104,18 @@ public final class DataServerLauncherAppIT {
               .resolve("access.log");
       assertTrue(Files.isReadable(accessLog));
       assertTrue(Files.size(accessLog) > 0);
+
+      /*// Check that the access log lines follow the desired regex pattern
+      List<String> lines = Files.readAllLines(accessLog);
+
+      String regex = "^(\\S+) \\S+ \\\"([^\\\"]*)\\\" \\[([^\\]]+)\\] \\\"([A-Z]+) ([^ \\\"]+) HTTP\\/[0-9.]+\\\" \\\"([^ \\\"]+)\\\" ([0-9]{3}) ([0-9]+|-) ([0-9]+|-) (\\S+) ([0-9]+|-) \\[([^\\]]+)\\] ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" (\\S+)";
+      Pattern p = Pattern.compile(regex);
+
+      lines.forEach((line) -> {
+        Matcher m = p.matcher(line);
+        assertTrue(m.matches());
+      });*/
+
       Path accessLogJson =
           ServerTestUtils.getLauncherProjectDirectory()
               .resolve("target")
