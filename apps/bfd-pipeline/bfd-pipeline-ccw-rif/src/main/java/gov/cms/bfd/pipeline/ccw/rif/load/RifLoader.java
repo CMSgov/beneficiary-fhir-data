@@ -22,6 +22,9 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
+import gov.cms.bfd.model.rif.SkippedRifRecord.SkipReasonCode;
+import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -31,6 +34,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -62,6 +66,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.postgresql.copy.CopyManager;
@@ -437,6 +442,16 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
+          /* Blow up the data load if we try to insert a record that has a non 2022 year.
+           * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
+           */
+          if (options.isFilteringNonNullAndNon2022Benes()
+              && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
+              && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+            throw new IllegalArgumentException(
+                "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
+          }
+
           if (recordInDb == null) {
             loadAction = LoadAction.INSERTED;
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
@@ -448,14 +463,50 @@ public final class RifLoader {
         } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
+
+            /* Blow up the data load if we try to insert a record that has a non 2022 year.
+             * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
+             */
+            if (options.isFilteringNonNullAndNon2022Benes()
+                && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
+                && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+              throw new IllegalArgumentException(
+                  "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
+            }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
-
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-            entityManager.merge(record);
+            // Skip this record if the year is not 2022 and its an update.
+            if (options.isFilteringNonNullAndNon2022Benes()
+                && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
+                && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+              /*
+               * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
+               * it in the DB.
+               */
+              StringBuffer rifData = new StringBuffer();
+              try (CSVPrinter csvPrinter = new CSVPrinter(rifData, RifParsingUtils.CSV_FORMAT)) {
+                for (CSVRecord csvRow : rifRecordEvent.getRawCsvRecords()) {
+                  csvPrinter.printRecord(csvRow);
+                }
+              }
 
+              // Save the skipped record to the DB.
+              SkippedRifRecord skippedRifRecord =
+                  new SkippedRifRecord(
+                      rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
+                      SkipReasonCode.DELAYED_BACKDATED_ENROLLMENT_BFD_1566,
+                      rifRecordEvent.getFileEvent().getFile().getFileType().name(),
+                      rifRecordEvent.getRecordAction(),
+                      ((Beneficiary) record).getBeneficiaryId(),
+                      rifData.toString());
+              entityManager.persist(skippedRifRecord);
+              LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
+            } else {
+              tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+              entityManager.merge(record);
+            }
           } else {
             throw new BadCodeMonkeyException(
                 String.format(
@@ -509,6 +560,28 @@ public final class RifLoader {
 
       if (entityManager != null) entityManager.close();
     }
+  }
+
+  /**
+   * Checks if the record is a beneficiary and has a enrollment reference year that is either <code>
+   * null</code> or is from 2022. This is to handle special filtering while CCW fixes an issue and
+   * should be temporary.
+   *
+   * @param rifRecordEvent the {@link RifRecordEvent} to check
+   * @return {@code true} if the record is a beneficiary and has an enrollment year that is either
+   *     <code>null</code> or 2022
+   */
+  private boolean isBeneficiaryWithNullOr2022Year(RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getRecord() instanceof Beneficiary) {
+      Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
+      if (bene.getBeneEnrollmentReferenceYear().isPresent()) {
+        return BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get());
+      } else {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

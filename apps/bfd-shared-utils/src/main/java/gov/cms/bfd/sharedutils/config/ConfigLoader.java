@@ -133,6 +133,7 @@ public class ConfigLoader {
    * Gets an optional float configuration value or a defaultValue if there is no value.
    *
    * @param name name of configuration value
+   * @param defaultValue the default value
    * @return either the float value or defaultValue
    * @throws ConfigException if a value existed but was not a valid float
    */

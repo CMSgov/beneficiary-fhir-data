@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.Coding;
@@ -21,8 +20,8 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
-import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -885,21 +884,21 @@ public class AbstractSamhsaMatcherTest {
   /** Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCptCode(Coding)} */
   @ParameterizedTest(name = "{index}: List(\"{0}\"), System(\"{1}\")")
   @MethodSource
-  public void cptCodingTest(String code, boolean expectedResult, String errorMessage)
-      throws NoSuchFieldException, IllegalAccessException {
-    // unchecked - This is ok for making a mock.
-    //noinspection unchecked
-    AbstractSamhsaMatcher<FhirResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+  public void cptCodingTest(String code, boolean expectedResult, String errorMessage) {
+    MockSamhsaMatcher mockSamhsaMatcher =
+        new MockSamhsaMatcher(
+            Set.of("ABC"),
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>());
 
     Coding mockCoding = mock(Coding.class);
 
     doReturn(code).when(mockCoding).getCode();
 
-    Set<String> mockCptCodes = Set.of("ABC");
-
-    ReflectionTestUtils.setField(matcherSpy, "cptCodes", mockCptCodes);
-
-    assertEquals(expectedResult, matcherSpy.isSamhsaCptCode(mockCoding), errorMessage);
+    assertEquals(expectedResult, mockSamhsaMatcher.isSamhsaCptCode(mockCoding), errorMessage);
   }
 
   /**
@@ -923,11 +922,12 @@ public class AbstractSamhsaMatcherTest {
   @ParameterizedTest(name = "{index}: Code(\"{0}\"), System(\"{1}\")")
   @MethodSource
   public void isSamhsaCodingForSystemTest(
-      String code, String system, boolean shouldThrow, boolean expectedResult, String errorMessage)
-      throws NoSuchFieldException, IllegalAccessException {
-    // unchecked - This is ok for making a mock.
-    //noinspection unchecked
-    AbstractSamhsaMatcher<FhirResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      String code,
+      String system,
+      boolean shouldThrow,
+      boolean expectedResult,
+      String errorMessage) {
+    MockSamhsaMatcher mockSamhsaMatcher = new MockSamhsaMatcher();
 
     Coding mockCoding = mock(Coding.class);
 
@@ -938,7 +938,8 @@ public class AbstractSamhsaMatcherTest {
     Set<String> samhsaCodes = Set.of("ABC");
 
     try {
-      boolean result = matcherSpy.isSamhsaCodingForSystem(mockCoding, samhsaCodes, "valid system");
+      boolean result =
+          mockSamhsaMatcher.isSamhsaCodingForSystem(mockCoding, samhsaCodes, "valid system");
 
       if (shouldThrow) {
         fail("Expected exception, none thrown");
@@ -993,24 +994,34 @@ public class AbstractSamhsaMatcherTest {
       String codePropertyName,
       String system,
       SamhsaFilterMethod<Coding> method,
-      String errorMessage)
-      throws NoSuchFieldException, IllegalAccessException {
+      String errorMessage) {
     Coding mockCoding = mock(Coding.class);
+    String testCode = "TEST_CODE";
+    Set<String> testCodes = new HashSet<>();
+    testCodes.add(testCode);
+    when(mockCoding.getSystem()).thenReturn(system);
+    when(mockCoding.getCode()).thenReturn(testCode);
 
-    // unchecked - This is ok for making a mock.
-    //noinspection unchecked
-    AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+    Set<String> drgCodes = "drgCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
+    Set<String> cptCodes = new HashSet<>();
+    Set<String> icd9ProcedureCodes =
+        "icd9ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
+    Set<String> icd9DiagnosisCodes =
+        "icd9DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
+    Set<String> icd10ProcedureCodes =
+        "icd10DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
+    Set<String> icd10DiagnosisCodes =
+        "icd10ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
 
-    doReturn(false)
-        .when(matcherSpy)
-        .isSamhsaCodingForSystem(any(Coding.class), anySet(), anyString());
+    MockSamhsaMatcher mockSamhsaMatcher =
+        new MockSamhsaMatcher(
+            cptCodes,
+            drgCodes,
+            icd9ProcedureCodes,
+            icd9DiagnosisCodes,
+            icd10DiagnosisCodes,
+            icd10ProcedureCodes);
 
-    // unchecked - This is fine for testing.
-    //noinspection unchecked
-    Set<String> codeList = (Set<String>) ReflectionTestUtils.getField(matcherSpy, codePropertyName);
-
-    doReturn(true).when(matcherSpy).isSamhsaCodingForSystem(mockCoding, codeList, system);
-
-    assertTrue(method.apply(matcherSpy, mockCoding), errorMessage);
+    assertTrue(method.apply(mockSamhsaMatcher, mockCoding), errorMessage);
   }
 }
