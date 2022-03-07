@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.launcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
@@ -11,9 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.concurrent.TimeUnit;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -32,6 +33,32 @@ import org.junit.jupiter.api.Test;
 public final class DataServerLauncherAppIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
+  /** Regex for access log entries */
+  private static final String regex =
+      "^(\\S+) \\S+ \\\"([^\\\"]*)\\\" \\[([^\\]]+)\\] \\\"([A-Z]+) ([^ \\\"]+) HTTP\\/[0-9.]+\\\" \\\"([^ \\\"]+)\\\" ([0-9]{3}) ([0-9]+|-) ([0-9]+|-) (\\S+) ([0-9]+|-) \\[([^\\]]+)\\] ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" (\\S+)";
+
+  /**
+   * Verifies the regex for valdiating our access log entries adequately avoids edge cases that
+   * could break our alerts, which depend on logs
+   */
+  @Test
+  public void checkAccessLogFormat() {
+    String goodLine1 =
+        "127.0.0.1 - \"CN=client-local-dev\" [07/Mar/2022:18:43:15 +0000] \"GET / HTTP/1.1\" \"?null\" 200 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
+    String goodline2 =
+        "10.252.14.216 - \"EMAILADDRESS=gomer.pyle@adhocteam.us, CN=BlueButton Root CA, OU=BlueButton on FHIR API Root CA, O=Centers for Medicare and Medicaid Services, L=Baltimore, ST=Maryland, C=US\" [01/Oct/2021:23:10:01 -0400] \"GET /v1/fhir/Coverage/?startIndex=0&_count=10&_format=application%2Fjson%2Bfhir&beneficiary=Patient%2F587940319 HTTP/1.1\" \"?startIndex=0&_count=10&_format=application%2Fjson%2Bfhir&beneficiary=Patient%2F587940319\" 200 2103 23 3b3e2b30-232f-11ec-9b9f-0a006c0cb407 1 [2021-10-02 03:10:01.104125] 11770 \"-\" 32 \"Evidation on behalf of Heartline\" 79696 \"-\" patientId:587940319";
+    String badLine =
+        "127.0.0.1 - \"CN=client-local-dev\" [[07/Mar/2022:18:43:15 +0000]] \"GET / HTTP/1.1\" \"?null\" 200 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
+    String badLine2 =
+        "127.0.0.1 - \"CN=client-local-dev\" [07/Mar/2022:18:43:15 +0000] \"GET / HTTP/1.1\" \"?null\" 2004 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
+
+    Pattern p = Pattern.compile(regex);
+
+    assertTrue(p.matcher(goodLine1).matches());
+    assertTrue(p.matcher(goodline2).matches());
+    assertFalse(p.matcher(badLine).matches());
+    assertFalse(p.matcher(badLine2).matches());
+  }
 
   /**
    * Verifies that {@link DataServerLauncherApp} exits as expected when launched with no
@@ -111,13 +138,13 @@ public final class DataServerLauncherAppIT {
       // Check that the access log lines follow the desired regex pattern
       List<String> lines = Files.readAllLines(accessLog);
 
-      String regex = "^(\\S+) \\S+ \\\"([^\\\"]*)\\\" \\[([^\\]]+)\\] \\\"([A-Z]+) ([^ \\\"]+) HTTP\\/[0-9.]+\\\" \\\"([^ \\\"]+)\\\" ([0-9]{3}) ([0-9]+|-) ([0-9]+|-) (\\S+) ([0-9]+|-) \\[([^\\]]+)\\] ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" (\\S+)";
       Pattern p = Pattern.compile(regex);
 
-      lines.forEach((line) -> {
-        Matcher m = p.matcher(line);
-        assertTrue(m.matches());
-      });
+      lines.forEach(
+          (line) -> {
+            Matcher m = p.matcher(line);
+            assertTrue(m.matches());
+          });
 
       Path accessLogJson =
           ServerTestUtils.getLauncherProjectDirectory()
