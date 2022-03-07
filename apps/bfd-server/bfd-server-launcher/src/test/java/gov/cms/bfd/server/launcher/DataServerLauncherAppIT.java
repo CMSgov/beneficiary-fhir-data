@@ -9,7 +9,10 @@ import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -105,7 +108,7 @@ public final class DataServerLauncherAppIT {
       assertTrue(Files.isReadable(accessLog));
       assertTrue(Files.size(accessLog) > 0);
 
-      /*// Check that the access log lines follow the desired regex pattern
+      // Check that the access log lines follow the desired regex pattern
       List<String> lines = Files.readAllLines(accessLog);
 
       String regex = "^(\\S+) \\S+ \\\"([^\\\"]*)\\\" \\[([^\\]]+)\\] \\\"([A-Z]+) ([^ \\\"]+) HTTP\\/[0-9.]+\\\" \\\"([^ \\\"]+)\\\" ([0-9]{3}) ([0-9]+|-) ([0-9]+|-) (\\S+) ([0-9]+|-) \\[([^\\]]+)\\] ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" (\\S+)";
@@ -114,7 +117,7 @@ public final class DataServerLauncherAppIT {
       lines.forEach((line) -> {
         Matcher m = p.matcher(line);
         assertTrue(m.matches());
-      });*/
+      });
 
       Path accessLogJson =
           ServerTestUtils.getLauncherProjectDirectory()
