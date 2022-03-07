@@ -34,7 +34,7 @@ public final class DataServerLauncherAppIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
   /** Regex for access log entries */
-  private static final String regex =
+  private static final String accessLogPattern =
       "^(\\S+) \\S+ \\\"([^\\\"]*)\\\" \\[([^\\]]+)\\] \\\"([A-Z]+) ([^ \\\"]+) HTTP\\/[0-9.]+\\\" \\\"([^ \\\"]+)\\\" ([0-9]{3}) ([0-9]+|-) ([0-9]+|-) (\\S+) ([0-9]+|-) \\[([^\\]]+)\\] ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" (\\S+)";
 
   /**
@@ -52,7 +52,7 @@ public final class DataServerLauncherAppIT {
     String badLine2 =
         "127.0.0.1 - \"CN=client-local-dev\" [07/Mar/2022:18:43:15 +0000] \"GET / HTTP/1.1\" \"?null\" 2004 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
 
-    Pattern p = Pattern.compile(regex);
+    Pattern p = Pattern.compile(accessLogPattern);
 
     assertTrue(p.matcher(goodLine1).matches());
     assertTrue(p.matcher(goodline2).matches());
@@ -138,7 +138,7 @@ public final class DataServerLauncherAppIT {
       // Check that the access log lines follow the desired regex pattern
       List<String> lines = Files.readAllLines(accessLog);
 
-      Pattern p = Pattern.compile(regex);
+      Pattern p = Pattern.compile(accessLogPattern);
 
       lines.forEach(
           (line) -> {
