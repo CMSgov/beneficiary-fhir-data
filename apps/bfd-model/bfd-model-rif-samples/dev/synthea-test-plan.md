@@ -213,91 +213,73 @@ Test removal of data.
 
 Delete Script: 
 
+    SET max_parallel_workers = 24;
+    SET max_parallel_workers_per_gather = 20;
+    SET parallel_leader_participation = off;
+    SET parallel_tuple_cost = 0;
+    SET parallel_setup_cost = 0;
+    SET min_parallel_table_scan_size = 0;
+    ​
+    ​
     DELETE FROM public.carrier_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.carrier_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-    
+        WHERE clm_id in (SELECT clm_id FROM public.carrier_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
     DELETE FROM public.dme_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.dme_claims
-     WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-    
+        WHERE clm_id in (SELECT clm_id FROM public.dme_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
     DELETE FROM public.hha_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.hha_claims
-     WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-    
+        WHERE clm_id in (SELECT clm_id FROM public.hha_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
     DELETE FROM public.hospice_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.hospice_claims
-     WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-    
+        WHERE clm_id in (SELECT clm_id FROM public.hospice_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
     DELETE FROM public.inpatient_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.inpatient_claims
-     WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-    
+        WHERE clm_id in (SELECT clm_id FROM public.inpatient_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
     DELETE FROM public.outpatient_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.outpatient_claims
-     WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-    
+        WHERE clm_id in (SELECT clm_id FROM public.outpatient_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
     DELETE FROM public.snf_claim_lines
-        WHERE CAST(clm_id AS bigint) AS id in (SELECT CAST(clm_id AS bigint) AS id FROM public.snf_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-    );
-        
+        WHERE clm_id in (SELECT clm_id FROM public.snf_claims
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000);
+    ​
         
     DELETE FROM public.carrier_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.dme_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.hha_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
     
     DELETE FROM public.hospice_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.inpatient_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.outpatient_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.snf_claims
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     
     DELETE FROM public.partd_events
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.beneficiary_monthly
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
         
     DELETE FROM public.beneficiaries_history
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
-        
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
+    ​
     DELETE FROM public.beneficiaries
-    WHERE CAST(bene_id AS bigint) AS id >=-10000000000000
-        AND id <=-10000000009999
+    where bene_id not like 'DEH%' and CAST(bene_id as numeric) <= -10000000010000 and CAST(bene_id as numeric) >= -10000000020000;
