@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,17 +41,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -1268,52 +1264,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
               .andReturnBundle(Bundle.class)
               .execute();
         });
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
-   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} doesn't
-   * return duplicate results.
-   *
-   * <p>This is a regression test case for TODO.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  // @Test
-  public void searchForEobsHasNoDupes() throws FHIRException {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
-
-    loadedRecords.stream()
-        .filter(r -> r instanceof Beneficiary)
-        .map(r -> (Beneficiary) r)
-        .forEach(
-            beneficiary -> {
-              Bundle searchResults =
-                  fhirClient
-                      .search()
-                      .forResource(ExplanationOfBenefit.class)
-                      .where(
-                          ExplanationOfBenefit.PATIENT.hasId(
-                              TransformerUtils.buildPatientId(beneficiary)))
-                      .returnBundle(Bundle.class)
-                      .execute();
-              assertNotNull(searchResults);
-
-              /*
-               * Verify that the returned Bundle doesn't have any resources with duplicate
-               * IDs.
-               */
-              Set<String> claimIds = new HashSet<>();
-              for (BundleEntryComponent searchResultEntry : searchResults.getEntry()) {
-                String resourceId = searchResultEntry.getResource().getId();
-                if (claimIds.contains(resourceId)) assertFalse(claimIds.contains(resourceId));
-                claimIds.add(resourceId);
-              }
-              if (searchResults.getTotal() > 0) assertFalse(claimIds.isEmpty());
-            });
   }
 
   /**
