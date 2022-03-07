@@ -5,7 +5,13 @@ env:
   # workflow file matchers - workflow jobs will only run if matching files are found
   # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
   # are using this workflow logic
-  workflow_files_re: ^apps/bfd-
+  workflow_files_re: >
+    (
+    ^apps/bfd- |
+    ^apps/pom.xml |
+    ^apps/Dockerfile |
+    ^.github/workflows/ci-java.yml
+    )
 
 jobs:
   workflow:
@@ -23,7 +29,7 @@ jobs:
           echo "::set-output name=files::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')"
 
   mvn-fmt-maven-plugin:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
@@ -53,7 +59,7 @@ jobs:
         working-directory: ./apps
   
   mvn-verify:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
@@ -86,15 +92,26 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run Maven Build'
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            mvn --batch-mode deploy
-          else
-            mvn --batch-mode verify
-          fi
+        run: mvn --batch-mode --threads 1C verify
         working-directory: ./apps
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+          | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Deliver Apps Container Image
+        run: |
+          SANITIZED_REF="${GITHUB_REF_NAME////-}"
+          IMAGE_NAME="ghcr.io/cmsgov/bfd-apps"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
+          FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag
+          docker build . --tag "$FULL_BRANCH_TAG"
+          docker tag "$FULL_BRANCH_TAG" "$FULL_COMMIT_TAG"
+          docker push "$FULL_BRANCH_TAG"
+          docker push "$FULL_COMMIT_TAG"
+        working-directory: apps
       - name: 'Upload test artifacts'
         uses: actions/upload-artifact@v2
         if: always()
