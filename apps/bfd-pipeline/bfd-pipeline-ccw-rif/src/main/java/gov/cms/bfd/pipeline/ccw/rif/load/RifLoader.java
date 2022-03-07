@@ -445,9 +445,7 @@ public final class RifLoader {
           /* Blow up the data load if we try to insert a record that has a non 2022 year.
            * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
            */
-          if (options.isFilteringNonNullAndNon2022Benes()
-              && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
-              && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+          if (shouldBeFiltered(rifRecordEvent)) {
             throw new IllegalArgumentException(
                 "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
           }
@@ -467,9 +465,7 @@ public final class RifLoader {
             /* Blow up the data load if we try to insert a record that has a non 2022 year.
              * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
              */
-            if (options.isFilteringNonNullAndNon2022Benes()
-                && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
-                && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+            if (shouldBeFiltered(rifRecordEvent)) {
               throw new IllegalArgumentException(
                   "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
             }
@@ -478,9 +474,7 @@ public final class RifLoader {
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
             // Skip this record if the year is not 2022 and its an update.
-            if (options.isFilteringNonNullAndNon2022Benes()
-                && rifRecordEvent.getFileEvent().getFile().getFileType() == RifFileType.BENEFICIARY
-                && !isBeneficiaryWithNullOr2022Year(rifRecordEvent)) {
+            if (shouldBeFiltered(rifRecordEvent)) {
               /*
                * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
                * it in the DB.
@@ -563,21 +557,23 @@ public final class RifLoader {
   }
 
   /**
-   * Checks if the record is a beneficiary and has a enrollment reference year that is either <code>
-   * null</code> or is from 2022. This is to handle special filtering while CCW fixes an issue and
-   * should be temporary.
+   * Checks if the record should be filtered by checking if it is a beneficiary, the flag to filter
+   * items is on, the bene has a non-{@code null} enrollment reference year and is not equal to
+   * 2022. This is to handle special filtering while CCW fixes an issue and should be temporary.
    *
    * @param rifRecordEvent the {@link RifRecordEvent} to check
-   * @return {@code true} if the record is a beneficiary and has an enrollment year that is either
-   *     <code>null</code> or 2022
+   * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-
+   *     <code>null</code> and not 2022, and the flag to filter such beneficiaries is set to {@code
+   *     true}
    */
-  private boolean isBeneficiaryWithNullOr2022Year(RifRecordEvent<?> rifRecordEvent) {
-    if (rifRecordEvent.getRecord() instanceof Beneficiary) {
+  private boolean shouldBeFiltered(RifRecordEvent<?> rifRecordEvent) {
+    if (options.isFilteringNonNullAndNon2022Benes()
+        && rifRecordEvent.getRecord() instanceof Beneficiary) {
       Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
       if (bene.getBeneEnrollmentReferenceYear().isPresent()) {
-        return BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get());
+        return !BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get());
       } else {
-        return true;
+        return false;
       }
     }
 
