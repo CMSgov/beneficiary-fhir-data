@@ -92,7 +92,7 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run Maven Build'
-        run: mvn --batch-mode --threads 1C install
+        run: mvn --batch-mode --threads 1C verify
         working-directory: ./apps
 
       - name: Login to GitHub Container Registry
