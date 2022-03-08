@@ -603,24 +603,17 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * non-2022 enrollment date and filter on expect an exception is thrown.
-   *
-   * <p>There should be no non-2022 records being inserted, but if so blow up since this has
-   * implications that need to be handled before we load them.
+   * non-2022 enrollment date and filter on expect the record is successfully loaded. A log message
+   * will be printed in this case.
    */
   @Test
-  public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnExpectException() {
-    AssertionFailedError thrown =
-        assertThrows(
-            AssertionFailedError.class,
-            () -> {
-              loadSampleABeneWithEnrollmentRefYear(
-                  "2021",
-                  CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-                      USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
-            });
+  public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
 
-    assertTrue(thrown.getMessage().contains("Load errors encountered"));
+    loadSampleABeneWithEnrollmentRefYear(
+        "2021",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
@@ -640,39 +633,29 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2022 enrollment date and filter on expect an
-   * exception.
-   *
-   * <p>There should be no non-2022 records being inserted, but if so blow up since this has
-   * implications that need to be handled before we load them.
+   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2022 enrollment date and filter on expect the
+   * data is loaded to the regular database tables. A log message will be printed.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectException() {
-    AssertionFailedError thrown =
-        assertThrows(
-            AssertionFailedError.class,
-            () -> {
-              loadSampleABeneWithEnrollmentRefYear(
-                  "2021",
-                  CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-                      USE_INSERT_IDEMPOTENT_STRATEGY));
-            });
+      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
-    assertTrue(thrown.getMessage().contains("Load errors encountered"));
+    loadSampleABeneWithEnrollmentRefYear(
+        "2021",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY));
+
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
    * LoadStrategy.INSERT_IDEMPOTENT is used with a {@code null} enrollment date and filter on expect
-   * an exception.
-   *
-   * <p>There should be no null enrollment records being inserted, but if so blow up since this has
-   * implications that need to be handled before we load them.
+   * the data is loaded to the regular database tables. A log message will be printed.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectException() {
+      loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
     Stream<RifFile> samplesStream =
         filterSamples(
@@ -689,17 +672,13 @@ public final class RifLoaderIT {
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
     Stream<RifFile> updatedSampleAStream = editSamples(samplesStream, fileEditor);
 
-    AssertionFailedError thrown =
-        assertThrows(
-            AssertionFailedError.class,
-            () -> {
-              loadSample(
-                  "SAMPLE_A, updates to null ref year",
-                  CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-                      USE_INSERT_IDEMPOTENT_STRATEGY),
-                  updatedSampleAStream);
-            });
-    assertTrue(thrown.getMessage().contains("Load errors encountered"));
+    loadSample(
+        "SAMPLE_A, updates to null ref year",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY),
+        updatedSampleAStream);
+
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**

@@ -442,12 +442,12 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          /* Blow up the data load if we try to insert a record that has a non 2022 year.
-           * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
-           */
+          // Log if we have a non-2022 enrollment year INSERT
           if (shouldBeFiltered(rifRecordEvent)) {
-            throw new IllegalArgumentException(
-                "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
+            Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
+            LOGGER.info(
+                "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                bene.getBeneficiaryId());
           }
 
           if (recordInDb == null) {
@@ -462,12 +462,12 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            /* Blow up the data load if we try to insert a record that has a non 2022 year.
-             * See {@link LoadAppOptions.isFilteringNonNullAndNon2022Benes}
-             */
+            // Log if we have a non-2022 enrollment year INSERT
             if (shouldBeFiltered(rifRecordEvent)) {
-              throw new IllegalArgumentException(
-                  "Cannot INSERT beneficiary with non-2022 enrollment year; investigate this data load.");
+              Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
+              LOGGER.info(
+                  "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                  bene.getBeneficiaryId());
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
