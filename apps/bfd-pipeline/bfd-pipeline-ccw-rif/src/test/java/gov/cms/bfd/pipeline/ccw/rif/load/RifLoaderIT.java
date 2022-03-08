@@ -711,11 +711,11 @@ public final class RifLoaderIT {
   @Test
   public void loadBeneficiaryWhenUpdateAndNullEnrollmentDateAndFilterOnExpectRecordLoaded() {
 
-    /* First, load a bene that SHOULD be filtered out (when filtering is turned on) normally. */
+    /* First, load a bene normally. */
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
-    /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was skipped. */
+    /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
     loadSampleABeneWithEnrollmentRefYear(
         null,
         CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
