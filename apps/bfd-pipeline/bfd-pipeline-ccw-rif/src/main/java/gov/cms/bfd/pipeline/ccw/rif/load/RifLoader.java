@@ -567,17 +567,40 @@ public final class RifLoader {
    *     true}
    */
   private boolean shouldBeFiltered(RifRecordEvent<?> rifRecordEvent) {
-    if (options.isFilteringNonNullAndNon2022Benes()
-        && rifRecordEvent.getRecord() instanceof Beneficiary) {
+    // If this is a beneficiary record, apply the beneficiary filtering rules
+    if (rifRecordEvent.getRecord() instanceof Beneficiary) {
       Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
-      if (bene.getBeneEnrollmentReferenceYear().isPresent()) {
-        return !BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get());
-      } else {
-        return false;
-      }
+      return shouldBeneficiaryBeFiltered(bene);
     }
 
+    // Not currently filtering other types of records
     return false;
+  }
+
+  /**
+   * Checks if the beneficiary should be skipped on the load (filtered).
+   *
+   * @param bene the bene to check
+   * @return {@code true} if the bene should be filtered/skipped
+   */
+  private boolean shouldBeneficiaryBeFiltered(Beneficiary bene) {
+    // No filtering should take place unless filtering is turned on in the configuration
+    if (!options.isFilteringNonNullAndNon2022Benes()) {
+      return false;
+    }
+
+    // If the reference year is not present we do not want to filter it
+    if (bene.getBeneEnrollmentReferenceYear().isEmpty()) {
+      return false;
+    }
+
+    // If the reference year is 2022 we do not want to filter it
+    if (BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get())) {
+      return false;
+    }
+
+    // Otherwise we do want to filter it
+    return true;
   }
 
   /**
