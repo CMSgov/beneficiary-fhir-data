@@ -89,6 +89,8 @@ public final class RifLoaderIT {
   public void loadSampleA() {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
@@ -247,6 +249,8 @@ public final class RifLoaderIT {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -620,24 +624,13 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * non-2022 enrollment date and filter off expect the record is loaded normally; without the
-   * filter on we should not do anything to pre-2022 data and load it normally.
-   */
-  @Test
-  public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOffExpectRecordLoaded() {
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
    * LoadStrategy.INSERT_IDEMPOTENT is used and 2022 enrollment date and filter on expect the data
    * is loaded to the regular database tables.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnAndInsertStrategyExpectRecordLoaded() {
+      loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
         "2022",
         CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
@@ -655,7 +648,7 @@ public final class RifLoaderIT {
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndInsertStrategyExpectException() {
+      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectException() {
     AssertionFailedError thrown =
         assertThrows(
             AssertionFailedError.class,
@@ -679,7 +672,7 @@ public final class RifLoaderIT {
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndInsertStrategyExpectException() {
+      loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectException() {
 
     Stream<RifFile> samplesStream =
         filterSamples(
@@ -802,29 +795,13 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
-   * 2021 enrollment date and filter setting is off expect the data is loaded to the regular
-   * database tables.
-   *
-   * <p>If the filter is off, we take no special action to filter records.
-   */
-  @Test
-  public void loadBeneficiaryWhenUpdateAndNon2022EnrollmentDateAndFilterOffExpectRecordLoaded() {
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-
-    // Load again to test UPDATE with filter off and non-2022 year
-    loadSampleABeneWithEnrollmentRefYear("2021", CcwRifLoadTestUtils.getLoadOptions(), true);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
    * filter is on, and the LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type,
    * expect the data is loaded normally.
    */
   @Test
-  public void loadNonBeneficiaryWhenInsertAndFilterOnAndInsertStrategyExpectRecordLoaded() {
+  public void
+      loadNonBeneficiaryWhenInsertAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     Stream<RifFile> stream =
@@ -833,7 +810,8 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(true),
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -852,7 +830,8 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(false),
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -863,50 +842,19 @@ public final class RifLoaderIT {
    * expect the data is loaded normally.
    */
   @Test
-  public void loadNonBeneficiaryWhenInsertAndFilterOffAndInsertStrategyExpectRecordLoaded() {
+  public void
+      loadNonBeneficiaryWhenInsertAndFilterOffAndIdempotentInsertStrategyExpectRecordLoaded() {
 
+    boolean FILTER_MODE_DISABLED = false;
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     Stream<RifFile> stream =
         filterSamples(
             r -> r.getFileType() == RifFileType.INPATIENT,
             StaticRifResourceGroup.SAMPLE_A.getResources());
-    loadSample("non-Bene sample", CcwRifLoadTestUtils.getLoadOptions(), stream);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
-   * filter is off, and a non-Beneficiary type, expect the data is loaded normally.
-   */
-  @Test
-  public void loadNonBeneficiaryWhenInsertAndFilterOffExpectRecordLoaded() {
-
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    Stream<RifFile> stream =
-        filterSamples(
-            r -> r.getFileType() == RifFileType.INPATIENT,
-            StaticRifResourceGroup.SAMPLE_A.getResources());
-    loadSample("non-Bene sample", CcwRifLoadTestUtils.getLoadOptions(), stream);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE,
-   * filter setting is off, and a non-Beneficiary type expect the data is loaded normally.
-   */
-  @Test
-  public void loadNonBeneficiaryWhenUpdateAndFilterOffExpectRecordLoaded() {
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptions(),
-        getStreamForFileType(RifFileType.INPATIENT));
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-
-    // Load again to test UPDATE
-    Stream<RifFile> updateStream =
-        editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
-    loadSample("non-Bene sample update", CcwRifLoadTestUtils.getLoadOptions(), updateStream);
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY, FILTER_MODE_DISABLED),
+        stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -928,7 +876,8 @@ public final class RifLoaderIT {
         editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
     loadSample(
         "non-Bene sample update",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(false),
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
