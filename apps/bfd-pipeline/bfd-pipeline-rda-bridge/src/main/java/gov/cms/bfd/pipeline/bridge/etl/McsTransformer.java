@@ -149,7 +149,8 @@ public class McsTransformer extends AbstractTransformer {
                                   .map(
                                       dxVersionCode -> {
                                         try {
-                                          return Integer.parseInt(dxVersionCode);
+                                          // Convert ("9", "0") literals to (0, 1) enum values
+                                          return (Integer.parseInt(dxVersionCode) + 1) % 10;
                                         } catch (NumberFormatException e) {
                                           return -1;
                                         }
