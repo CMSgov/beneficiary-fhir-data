@@ -24,6 +24,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
+  private static final Map<String, Integer> icdMap = Map.of("0", 1, "9", 0);
+
   private static final int MAX_DIAGNOSIS_CODES = 12;
 
   private final Map<String, BeneficiaryData> mbiMap;
@@ -146,15 +148,7 @@ public class McsTransformer extends AbstractTransformer {
                           .setIdrDiagCode(diagnosisCode)
                           .setIdrDiagIcdTypeEnumValue(
                               data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
-                                  .map(
-                                      dxVersionCode -> {
-                                        try {
-                                          // Convert ("9", "0") literals to (0, 1) enum values
-                                          return (Integer.parseInt(dxVersionCode) + 1) % 10;
-                                        } catch (NumberFormatException e) {
-                                          return -1;
-                                        }
-                                      })
+                                  .map(dxVersionCode -> icdMap.getOrDefault(dxVersionCode, -1))
                                   .orElse(-1))
                           .build()));
     }
