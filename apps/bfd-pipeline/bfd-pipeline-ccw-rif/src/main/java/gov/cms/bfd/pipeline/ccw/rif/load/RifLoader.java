@@ -570,7 +570,7 @@ public final class RifLoader {
     // If this is a beneficiary record, apply the beneficiary filtering rules
     if (rifRecordEvent.getRecord() instanceof Beneficiary) {
       Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
-      return shouldBeneficiaryBeFiltered(bene);
+      return isBackdatedBene(bene);
     }
 
     // Not currently worried about other types of records
@@ -583,7 +583,7 @@ public final class RifLoader {
    * @param bene the bene to check
    * @return {@code true} if the bene should be filtered/skipped
    */
-  private boolean shouldBeneficiaryBeFiltered(Beneficiary bene) {
+  private boolean isBackdatedBene(Beneficiary bene) {
     // No filtering should take place unless filtering is turned on in the configuration
     if (!options.isFilteringNonNullAndNon2022Benes()) {
       return false;
