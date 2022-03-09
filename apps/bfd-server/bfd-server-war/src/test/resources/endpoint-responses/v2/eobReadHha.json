@@ -383,6 +383,14 @@
     "sequence" : 1,
     "careTeamSequence" : [ 2 ],
     "revenue" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+          "code" : "A",
+          "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+        }
+      } ],
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
         "code" : "0023",
