@@ -122,3 +122,18 @@ jobs:
             **/target/failsafe-reports/*
             bfd-server/bfd-server-war/target/server-work/access.*
             bfd-server/bfd-server-war/target/server-work/server-console.log
+  fhir-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+      - name: 'Set up JDK'
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+      - name: 'Download fhir validator'
+        uses: wei/wget@v1
+        with:
+          args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+      - name: 'Verify FHIR resource'
+        run: ./validations.sh
