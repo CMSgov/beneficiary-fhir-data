@@ -123,8 +123,8 @@
     "reference": "#patient"
   },
   "billablePeriod": {
-    "start": "1970-07-30T00:00:00+00:00",
-    "end": "1970-07-30T00:00:00+00:00"
+    "start": "1970-07-30",
+    "end": "1970-07-30"
   },
   "created": "2021-12-09T00:19:24+00:00",
   "provider": {
@@ -186,7 +186,7 @@
         }
       ],
       "servicedPeriod": {
-        "end": "1970-07-28T00:00:00+00:00"
+        "end": "1970-07-28"
       }
     },
     {
@@ -194,8 +194,7 @@
       "productOrService": {
         "coding": [
           {
-            "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-            "code": "FDAAA"
+            "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           }
         ]
       },

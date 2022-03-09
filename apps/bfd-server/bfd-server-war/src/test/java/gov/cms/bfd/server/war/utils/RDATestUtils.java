@@ -373,7 +373,6 @@ public class RDATestUtils {
             PreAdjMcsDetail.builder()
                 .priority((short) 1)
                 .idrClmHdIcn("654321")
-                .idrProcCode("FDAAA")
                 .idrModTwo("B")
                 .build());
 

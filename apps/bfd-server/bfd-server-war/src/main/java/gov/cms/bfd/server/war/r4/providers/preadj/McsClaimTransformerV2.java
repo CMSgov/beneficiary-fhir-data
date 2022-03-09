@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -206,8 +207,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
   private static Period getBillablePeriod(PreAdjMcsClaim claimGroup) {
     return new Period()
-        .setStart(localDateToDate(claimGroup.getIdrHdrFromDateOfSvc()))
-        .setEnd(localDateToDate(claimGroup.getIdrHdrToDateOfSvc()));
+        .setStart(localDateToDate(claimGroup.getIdrHdrFromDateOfSvc()), TemporalPrecisionEnum.DAY)
+        .setEnd(localDateToDate(claimGroup.getIdrHdrToDateOfSvc()), TemporalPrecisionEnum.DAY);
   }
 
   private static CodeableConcept getPriority() {
@@ -264,14 +265,21 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                       .setSequence(detail.getPriority() + 1)
                       .setProductOrService(
                           new CodeableConcept(
+                              // The FHIR spec requires productOrService to exist even if there is
+                              // no product code, so printing out the system regardless because
+                              // HAPI won't serialize it unless there is some sort of value inside.
                               new Coding(
                                   TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
                                   detail.getIdrProcCode(),
                                   null)))
                       .setServiced(
                           new Period()
-                              .setStart(localDateToDate(detail.getIdrDtlFromDate()))
-                              .setEnd(localDateToDate(detail.getIdrDtlToDate())))
+                              .setStart(
+                                  localDateToDate(detail.getIdrDtlFromDate()),
+                                  TemporalPrecisionEnum.DAY)
+                              .setEnd(
+                                  localDateToDate(detail.getIdrDtlToDate()),
+                                  TemporalPrecisionEnum.DAY))
                       .setModifier(getModifiers(detail));
 
               // Set the DiagnosisSequence only if the detail Dx Code is not null and present in the

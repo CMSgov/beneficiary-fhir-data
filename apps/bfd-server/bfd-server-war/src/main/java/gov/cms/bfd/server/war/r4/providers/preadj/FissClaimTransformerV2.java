@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -158,8 +159,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
   private static Period getBillablePeriod(PreAdjFissClaim claimGroup) {
     return new Period()
-        .setStart(localDateToDate(claimGroup.getStmtCovToDate()))
-        .setEnd(localDateToDate(claimGroup.getStmtCovFromDate()));
+        .setStart(localDateToDate(claimGroup.getStmtCovToDate()), TemporalPrecisionEnum.DAY)
+        .setEnd(localDateToDate(claimGroup.getStmtCovFromDate()), TemporalPrecisionEnum.DAY);
   }
 
   private static CodeableConcept getPriority() {
