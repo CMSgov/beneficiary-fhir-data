@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,7 +36,27 @@ public final class DataServerLauncherAppIT {
   private static final int SIGTERM = 15;
   /** Regex for access log entries */
   private static final String accessLogPattern =
-      "^(\\S+) \\S+ \\\"([^\\\"]*)\\\" \\[([^\\]]+)\\] \\\"([A-Z]+) ([^ \\\"]+) HTTP\\/[0-9.]+\\\" \\\"([^ \\\"]+)\\\" ([0-9]{3}) ([0-9]+|-) ([0-9]+|-) (\\S+) ([0-9]+|-) \\[([^\\]]+)\\] ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" ([0-9]+|-) \\\"([^\\\"]*)\\\" (\\S+)";
+      new StringJoiner(" ")
+          .add("^(\\S+)") // Address or Hostname
+          .add("\\S+") // Dash symbol (-) separator
+          .add("\"([^\"]*)\"") // Remote user info
+          .add("\\[([^\\]]+)\\]") // Request timestamp
+          .add("\"([A-Z]+) ([^ \"]+) HTTP\\/[0-9.]+\"") // First line of request
+          .add("\"([^ \"]+)\"") // Request query string
+          .add("([0-9]{3})") // Response status
+          .add("([0-9]+|-)") // Bytes transferred
+          .add("([0-9]+|-)") // Time taken to serve request
+          .add("(\\S+)") // BlueButton-OriginalQueryId
+          .add("([0-9]+|-)") // BlueButton-OriginalQueryCounter
+          .add("\\[([^\\]]+)\\]") // BlueButton-OriginalQueryTimestamp
+          .add("([0-9]+|-)") // BlueButton-DeveloperId
+          .add("\"([^\"]*)\"") // BlueButton-Developer
+          .add("([0-9]+|-)") // BlueButton-ApplicationId
+          .add("\"([^\"]*)\"") // BlueButton-Application
+          .add("([0-9]+|-)") // BlueButton-UserId
+          .add("\"([^\"]*)\"") // BlueButton-User
+          .add("(\\S+)") // BlueButton-BeneficiaryId
+          .toString();
 
   /**
    * Verifies the regex for valdiating our access log entries adequately avoids edge cases that
@@ -43,14 +64,64 @@ public final class DataServerLauncherAppIT {
    */
   @Test
   public void checkAccessLogFormat() {
+    // Access log entry for local environment
     String goodLine1 =
-        "127.0.0.1 - \"CN=client-local-dev\" [07/Mar/2022:18:43:15 +0000] \"GET / HTTP/1.1\" \"?null\" 200 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
+        new StringJoiner(" ")
+            .add("127.0.0.1")
+            .add("-")
+            .add("\"CN=client-local-dev\"")
+            .add("[07/Mar/2022:18:43:15 +0000]")
+            .add("\"GET / HTTP/1.1\"")
+            .add("\"?null\"")
+            .add("200 26 22000")
+            .add("- - [-] -")
+            .add("\"-\" - \"-\" - \"-\" -\"")
+            .toString();
+
+    // Access log entry for test/prod sbx environments
     String goodline2 =
-        "10.252.14.216 - \"EMAILADDRESS=gomer.pyle@adhocteam.us, CN=BlueButton Root CA, OU=BlueButton on FHIR API Root CA, O=Centers for Medicare and Medicaid Services, L=Baltimore, ST=Maryland, C=US\" [01/Oct/2021:23:10:01 -0400] \"GET /v1/fhir/Coverage/?startIndex=0&_count=10&_format=application%2Fjson%2Bfhir&beneficiary=Patient%2F587940319 HTTP/1.1\" \"?startIndex=0&_count=10&_format=application%2Fjson%2Bfhir&beneficiary=Patient%2F587940319\" 200 2103 23 3b3e2b30-232f-11ec-9b9f-0a006c0cb407 1 [2021-10-02 03:10:01.104125] 11770 \"-\" 32 \"Evidation on behalf of Heartline\" 79696 \"-\" patientId:587940319";
+        new StringJoiner(" ")
+            .add("10.252.14.216")
+            .add("-")
+            .add(
+                "\"EMAILADDRESS=gomer.pyle@adhocteam.us, CN=BlueButton Root CA, OU=BlueButton on FHIR API Root CA, O=Centers for Medicare and Medicaid Services, L=Baltimore, ST=Maryland, C=US\"")
+            .add("[01/Oct/2021:23:10:01 -0400]")
+            .add(
+                "\"GET /v1/fhir/Coverage/?startIndex=0&_count=10&_format=application%2Fjson%2Bfhir&beneficiary=Patient%2F587940319 HTTP/1.1\"")
+            .add(
+                "\"?startIndex=0&_count=10&_format=application%2Fjson%2Bfhir&beneficiary=Patient%2F587940319\"")
+            .add("200 2103 23")
+            .add("3b3e2b30-232f-11ec-9b9f-0a006c0cb407 1 [2021-10-02 03:10:01.104125] 11770")
+            .add("\"-\" 32 \"Evidation on behalf of Heartline\" 79696 \"-\" patientId:587940319")
+            .toString();
+
+    // Invalid log entry with request timestamp enclosed by double brackets
     String badLine =
-        "127.0.0.1 - \"CN=client-local-dev\" [[07/Mar/2022:18:43:15 +0000]] \"GET / HTTP/1.1\" \"?null\" 200 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
+        new StringJoiner(" ")
+            .add("127.0.0.1")
+            .add("-")
+            .add("\"CN=client-local-dev\"")
+            .add("[[07/Mar/2022:18:43:15 +0000]]")
+            .add("\"GET / HTTP/1.1\"")
+            .add("\"?null\"")
+            .add("200 26 22000")
+            .add("- - [-] -")
+            .add("\"-\" - \"-\" - \"-\" -\"")
+            .toString();
+
+    // Invalid log entry with HTTP status code having more than 3 digits
     String badLine2 =
-        "127.0.0.1 - \"CN=client-local-dev\" [07/Mar/2022:18:43:15 +0000] \"GET / HTTP/1.1\" \"?null\" 2004 26 22000 - - [-] - \"-\" - \"-\" - \"-\" -";
+        new StringJoiner(" ")
+            .add("127.0.0.1")
+            .add("-")
+            .add("\"CN=client-local-dev\"")
+            .add("[07/Mar/2022:18:43:15 +0000]")
+            .add("\"GET / HTTP/1.1\"")
+            .add("\"?null\"")
+            .add("2004 26 22000")
+            .add("- - [-] -")
+            .add("\"-\" - \"-\" - \"-\" -\"")
+            .toString();
 
     Pattern p = Pattern.compile(accessLogPattern);
 
