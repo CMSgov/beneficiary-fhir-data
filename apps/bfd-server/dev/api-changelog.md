@@ -44,8 +44,6 @@ The new coding:
 }
 ```
 
-## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
-
 ## BFD-1566: Add Patient.meta.tag entry for Some Patients
 
 Our system has delayed the processing of demographic and enrollment data
