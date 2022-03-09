@@ -42,10 +42,24 @@ public final class CcwRifLoadTestUtils {
    */
   public static LoadAppOptions getLoadOptionsWithFilteringofNon2022BenesEnabled(
       boolean idempotencyRequired) {
+    return getLoadOptions(idempotencyRequired, true);
+  }
+
+  /**
+   * Gets the load options with filtering of non 2022 benes and idempotency strategy as input.
+   *
+   * @param idempotencyRequired if idempotency is required; affects the LoadStrategy that gets used
+   *     when loading
+   * @param filterNon2022benes the filter non 2022 benes turned on if {@code true}
+   * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
+   *     to the database server that tests should be run against
+   */
+  public static LoadAppOptions getLoadOptions(
+      boolean idempotencyRequired, boolean filterNon2022benes) {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         idempotencyRequired,
-        true);
+        filterNon2022benes);
   }
 }
