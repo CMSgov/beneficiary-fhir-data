@@ -106,6 +106,8 @@ public final class LoadAppOptions implements Serializable {
     builder.append(loaderThreads);
     builder.append(", idempotencyRequired=");
     builder.append(idempotencyRequired);
+    builder.append(", filteringNonNullAndNon2022Benes=");
+    builder.append(filteringNonNullAndNon2022Benes);
     builder.append("]");
     return builder.toString();
   }

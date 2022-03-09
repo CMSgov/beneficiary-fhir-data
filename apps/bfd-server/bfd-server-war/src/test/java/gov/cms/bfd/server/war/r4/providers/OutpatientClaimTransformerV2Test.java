@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -507,14 +508,19 @@ public final class OutpatientClaimTransformerV2Test {
   public void shouldHaveLineItemRevenue() {
     CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
 
-    CodeableConcept compare =
-        new CodeableConcept()
-            .setCoding(
-                Arrays.asList(
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/rev_cntr", "1", null)));
+    Coding code1 =
+        revenue.getCoding().stream()
+            .filter(
+                coding ->
+                    coding
+                        .getSystem()
+                        .equals("https://bluebutton.cms.gov/resources/variables/rev_cntr"))
+            .findFirst()
+            .orElse(null);
 
-    assertTrue(compare.equalsDeep(revenue));
+    assertNotNull(code1, "Missing expected rev_cntr coding");
+    assertEquals("1", code1.getCode());
+    assertNull(code1.getDisplay());
   }
 
   @Test
@@ -1238,6 +1244,33 @@ public final class OutpatientClaimTransformerV2Test {
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /**
+   * Ensure that when the revenue status code exists in the claim, it should be mapped to an
+   * extension.
+   *
+   * <p>The specific code value of the extension is tested in {@link
+   * TransformerUtilsV2Test#mapEobCommonItemRevenueStatusCodeWhenStatusCodeExistsExpectExtensionOnItem()}
+   */
+  @Test
+  public void shouldHaveRevenueStatusCode() {
+
+    String expectedExtensionUrl =
+        "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd";
+
+    assertNotNull(eob.getItem());
+    assertTrue(eob.getItem().size() > 0);
+    ExplanationOfBenefit.ItemComponent item = eob.getItem().get(0);
+    assertNotNull(item);
+    assertNotNull(item.getRevenue());
+    assertNotNull(item.getRevenue().getExtension());
+    assertEquals(1, item.getRevenue().getExtension().size());
+    Extension ext = item.getRevenue().getExtensionByUrl(expectedExtensionUrl);
+    assertNotNull(ext);
+    assertEquals(expectedExtensionUrl, ext.getUrl());
+    assertTrue(ext.getValue() instanceof Coding);
+    assertNotNull(((Coding) ext.getValue()).getCode());
   }
 
   /**
