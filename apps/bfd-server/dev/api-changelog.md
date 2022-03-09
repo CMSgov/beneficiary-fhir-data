@@ -1,6 +1,6 @@
 # API Changelog
 
-## BFD-1517
+## BFD-1517: Map FI Number in V2
 
 Added mapping for Fiscal Intermediary Number
 FI_NUM => ExplanationOfBenefit.extension
@@ -24,7 +24,7 @@ The newly added information will look like:
 }
 ```
 
-## BFD-1518
+## BFD-1518: Map Revenue Center Status Indicator Code in V2
 
 Added mapping for Revenue Status Code:
 REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
