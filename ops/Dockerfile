@@ -1,4 +1,4 @@
-ARG UPSTREAM_IMAGE="centos:7"
+ARG UPSTREAM_IMAGE="amazonlinux"
 FROM $UPSTREAM_IMAGE
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
@@ -11,7 +11,10 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 # * <https://hub.docker.com/_/centos/>: Good start, but badly broken.
 # * <https://github.com/solita/docker-systemd>: For Ubuntu, but works!
 # * <https://github.com/moby/moby/issues/28614>: Also some useful info.
-RUN find /etc/systemd/system \
+RUN amazon-linux-extras enable java-openjdk11 && \
+    yum clean metadata && \
+    yum install -y sudo unzip selinux-policy systemd && \
+    find /etc/systemd/system \
          /lib/systemd/system \
          -path '*.wants/*' \
          -not -name '*journald*' \
@@ -21,20 +24,5 @@ RUN find /etc/systemd/system \
 RUN systemctl set-default multi-user.target
 STOPSIGNAL SIGRTMIN+3
 
-# Install and start SSH.
-#
-# References:
-#
-# * <https://stackoverflow.com/questions/18173889/cannot-access-centos-sshd-on-docker>
-RUN yum update -y && yum install -y openssh-server sudo unzip selinux-policy && \
-    /usr/bin/systemctl enable sshd && \
-    /usr/bin/systemctl enable systemd-user-sessions.service
-
-# Create the SSH user.
-RUN useradd ansible_test -G wheel && \
-    echo 'ansible_test:secret' | chpasswd && \
-    echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
 VOLUME [ "/sys/fs/cgroup" ]
-EXPOSE 22
 CMD ["/usr/sbin/init"]
