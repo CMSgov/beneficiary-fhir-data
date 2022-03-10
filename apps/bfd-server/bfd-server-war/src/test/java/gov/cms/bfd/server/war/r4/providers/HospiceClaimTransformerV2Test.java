@@ -230,7 +230,7 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    assertEquals(3, expected.size());
+    assertEquals(4, expected.size());
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -266,7 +266,10 @@ public final class HospiceClaimTransformerV2Test {
                 new Coding(
                     "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
                     "1",
-                    null)));
+                    null)),
+            new Extension(
+                "https://bluebutton.cms.gov/resources/variables/fi_num",
+                new Coding("https://bluebutton.cms.gov/resources/variables/fi_num", "6666", null)));
 
     for (int i = 0; i < expected.size(); i++) {
       assertTrue(compare.get(i).equalsDeep(expected.get(i)));
