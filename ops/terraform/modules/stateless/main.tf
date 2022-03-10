@@ -87,11 +87,27 @@ data "aws_security_group" "aurora_cluster" {
   }
 }
 
-# vpc security group
+# vpn security group
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
     values = ["bfd-${var.env_config.env}-vpn-private"]
+  }
+}
+
+# get vpn cidr blocks from shared CMS prefix list
+data "aws_ec2_managed_prefix_list" "vpn" {
+  filter {
+    name   = "prefix-list-name"
+    values = ["cmscloud-vpn"]
+  }
+}
+
+# get cbc jenkins cidr block
+data "aws_ec2_managed_prefix_list" "jenkins" {
+  filter {
+    name   = "prefix-list-name"
+    values = ["bfd-cbc-jenkins"]
   }
 }
 
@@ -147,13 +163,15 @@ module "fhir_lb" {
   is_public  = var.is_public
 
   ingress = var.is_public ? {
-    description = "Public Internet access"
-    port        = 443
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "Public Internet access"
+    port            = 443
+    cidr_blocks     = ["0.0.0.0/0"]
+    prefix_list_ids = []
     } : {
-    description = "From VPC peerings, the MGMT VPC, and self"
-    port        = 443
-    cidr_blocks = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    description     = "From VPN, VPC peerings, the MGMT VPC, and self"
+    port            = 443
+    cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
 
   egress = {
@@ -334,7 +352,7 @@ module "bfd_server_alarm_all_eob_6s-p95" {
     datapoints       = "15"
     statistic        = null
     ext_statistic    = "p95"
-    threshold        = "6000.0"
+    threshold        = "6000000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }

@@ -1,13 +1,17 @@
 package gov.cms.bfd.model.rda;
 
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -15,30 +19,46 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.hibernate.tool.schema.Action;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SchemaMigrationIT {
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
+  private Connection dbLifetimeConnection;
   private EntityManager entityManager;
 
-  @Before
-  public void setUp() {
-    final JDBCDataSource dataSource = createInMemoryDataSource();
+  @BeforeEach
+  public void setUp() throws SQLException {
+    final String dbUrl = "jdbc:hsqldb:mem:" + getClass().getSimpleName();
+
+    // the HSQLDB database will be destroyed when this connection is closed
+    dbLifetimeConnection = DriverManager.getConnection(dbUrl + ";shutdown=true", "", "");
+
+    final JDBCDataSource dataSource = new JDBCDataSource();
+    dataSource.setUrl(dbUrl);
+    dataSource.setUser("");
+    dataSource.setPassword("");
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
     entityManager = createEntityManager(dataSource);
   }
 
-  @After
-  public void tearDown() {
+  @AfterEach
+  public void tearDown() throws SQLException {
     if (entityManager != null && entityManager.isOpen()) {
       entityManager.close();
+      entityManager = null;
     }
-    entityManager = null;
+    if (dbLifetimeConnection != null) {
+      dbLifetimeConnection.close();
+      dbLifetimeConnection = null;
+    }
   }
 
   /**
@@ -222,6 +242,126 @@ public class SchemaMigrationIT {
     assertEquals("0:W:0,1:U:1", summarizeMcsDiagCodes(resultClaim));
   }
 
+  @Test
+  public void verifyFissMbiQueries() {
+    // populate a schema with a bunch of claims
+    final List<String> mbis = new ArrayList<>();
+    final String hashSuffix = "-hash";
+    long seqNo = 1;
+    for (int mbiNumber = 1; mbiNumber <= 10; mbiNumber += 1) {
+      final String mbi = format("%05d", mbiNumber);
+      mbis.add(mbi);
+      entityManager.getTransaction().begin();
+      Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
+      for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
+        final PreAdjFissClaim claim =
+            PreAdjFissClaim.builder()
+                .dcn(mbi + "d" + claimNumber)
+                .hicNo(mbi + "h" + claimNumber)
+                .currStatus('1')
+                .currLoc1('A')
+                .currLoc2("1A")
+                .sequenceNumber(seqNo++)
+                .mbiRecord(mbiRecord)
+                .build();
+        entityManager.merge(claim);
+      }
+      entityManager.getTransaction().commit();
+      entityManager.clear();
+    }
+
+    // verify the mbis were written to the MbiCache table
+    entityManager.getTransaction().begin();
+    for (String mbi : mbis) {
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+      Root<Mbi> root = criteria.from(Mbi.class);
+      criteria.select(root);
+      criteria.where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+      var record = entityManager.createQuery(criteria).getSingleResult();
+      assertNotNull(record);
+    }
+    entityManager.getTransaction().commit();
+
+    // verify we can find the claims using their MBI hash through the mbiRecord
+    entityManager.getTransaction().begin();
+    for (String mbi : mbis) {
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<PreAdjFissClaim> criteria = builder.createQuery(PreAdjFissClaim.class);
+      Root<PreAdjFissClaim> root = criteria.from(PreAdjFissClaim.class);
+      criteria.select(root);
+      criteria.where(
+          builder.equal(
+              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
+      var claims = entityManager.createQuery(criteria).getResultList();
+      assertEquals(3, claims.size());
+      for (PreAdjFissClaim claim : claims) {
+        assertEquals(mbi, claim.getDcn().substring(0, mbi.length()));
+      }
+    }
+    entityManager.getTransaction().commit();
+  }
+
+  @Test
+  public void verifyMcsMbiQueries() {
+    // populate a schema with a bunch of claims
+    final List<String> mbis = new ArrayList<>();
+    final String hashSuffix = "-hash";
+    long seqNo = 1;
+    for (int mbiNumber = 1; mbiNumber <= 10; mbiNumber += 1) {
+      final String mbi = format("%05d", mbiNumber);
+      mbis.add(mbi);
+      entityManager.getTransaction().begin();
+      Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
+      for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
+        final PreAdjMcsClaim claim =
+            PreAdjMcsClaim.builder()
+                .sequenceNumber(7L)
+                .idrClmHdIcn(mbi + "i" + claimNumber)
+                .idrContrId("c1")
+                .idrHic("hc")
+                .idrClaimType("c")
+                .sequenceNumber(seqNo++)
+                .mbiRecord(mbiRecord)
+                .build();
+        entityManager.merge(claim);
+      }
+      entityManager.getTransaction().commit();
+      entityManager.clear();
+    }
+
+    // verify the mbis were written to the MbiCache table
+    entityManager.getTransaction().begin();
+    for (String mbi : mbis) {
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+      Root<Mbi> root = criteria.from(Mbi.class);
+      criteria.select(root);
+      criteria.where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+      var record = entityManager.createQuery(criteria).getSingleResult();
+      assertNotNull(record);
+    }
+    entityManager.getTransaction().commit();
+
+    // verify we can find the claims using their MBI hash through the mbiRecord
+    entityManager.getTransaction().begin();
+    for (String mbi : mbis) {
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<PreAdjMcsClaim> criteria = builder.createQuery(PreAdjMcsClaim.class);
+      Root<PreAdjMcsClaim> root = criteria.from(PreAdjMcsClaim.class);
+      criteria.select(root);
+      criteria.where(
+          builder.equal(
+              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
+      var claims = entityManager.createQuery(criteria).getResultList();
+      assertEquals(3, claims.size());
+      for (PreAdjMcsClaim claim : claims) {
+        assertEquals(mbi, claim.getIdrClmHdIcn().substring(0, mbi.length()));
+      }
+    }
+    entityManager.getTransaction().commit();
+  }
+
   private PreAdjMcsDetail quickMcsDetail(PreAdjMcsClaim claim, int priority, String dtlStatus) {
     return PreAdjMcsDetail.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
@@ -286,11 +426,5 @@ public class SchemaMigrationIT {
 
     return Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
         .createEntityManager();
-  }
-
-  private JDBCDataSource createInMemoryDataSource() {
-    JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl("jdbc:hsqldb:mem:" + getClass().getSimpleName());
-    return dataSource;
   }
 }

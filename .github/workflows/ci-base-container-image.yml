@@ -1,0 +1,34 @@
+name: 'CI - Base Container Image'
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ops/Dockerfile
+      - .github/workflows/ci-base-container-image.yml
+
+jobs:
+  build-container:
+    name: Build and Deliver Container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+          | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      # Build the base image from ops/Dockerfile; define the image tags by short commit hash and
+      # branch for flexibility; and upload the tags to github container registry for internal use.
+      - name: Build and Deliver Container Image
+        run: |
+          SANITIZED_REF="${GITHUB_REF_NAME////-}"
+          IMAGE_NAME="ghcr.io/cmsgov/bfd-ansible"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
+          FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag
+          docker build . --tag "$FULL_BRANCH_TAG"
+          docker tag "$FULL_BRANCH_TAG" "$FULL_COMMIT_TAG"
+          docker push "$FULL_BRANCH_TAG"
+          docker push "$FULL_COMMIT_TAG"
+        working-directory: ops

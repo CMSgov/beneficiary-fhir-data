@@ -143,6 +143,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
+    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     if (requestHeader.isHICNinIncludeIdentifiers())
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -552,6 +553,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
     beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
     // Run the query and return the results.
@@ -780,6 +782,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
+    beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     if (requestHeader.isHICNinIncludeIdentifiers())
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -950,7 +953,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   /**
    * Check that coverageId value is valid
    *
-   * @param coverageId
+   * @param coverageId the coverage id
    * @throws InvalidRequestException if invalid coverageId
    */
   public static void checkCoverageId(TokenParam coverageId) {

@@ -104,6 +104,7 @@ public class LoadRdaJsonApp {
     private final String dbUrl;
     private final String dbUser;
     private final String dbPassword;
+    private final int writeThreads;
     private final int batchSize;
     private final boolean runSchemaMigration;
     private final Optional<File> fissFile;
@@ -116,7 +117,8 @@ public class LoadRdaJsonApp {
       dbUser = options.stringValue("database.user", "");
       dbPassword = options.stringValue("database.password", "");
 
-      batchSize = options.intValue("job.batchSize", 10);
+      writeThreads = options.intValue("job.writeThreads", 1);
+      batchSize = options.intValue("job.batchSize", 100);
       runSchemaMigration = options.booleanValue("job.migration", false);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
@@ -131,6 +133,7 @@ public class LoadRdaJsonApp {
       final AbstractRdaLoadJob.Config jobConfig =
           AbstractRdaLoadJob.Config.builder()
               .runInterval(Duration.ofDays(1))
+              .writeThreads(writeThreads)
               .batchSize(batchSize)
               .build();
       final GrpcRdaSource.Config grpcConfig =

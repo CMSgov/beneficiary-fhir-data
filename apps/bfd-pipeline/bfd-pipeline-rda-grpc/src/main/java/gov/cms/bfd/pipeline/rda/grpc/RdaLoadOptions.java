@@ -1,14 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.sink.McsClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.McsClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.Serializable;
@@ -61,7 +62,6 @@ public class RdaLoadOptions implements Serializable {
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
-   * @param databaseOptions the shared application {@link DatabaseOptions}
    * @param appState the shared {@link PipelineApplicationState}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
@@ -71,20 +71,27 @@ public class RdaLoadOptions implements Serializable {
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
-                new FissClaimStreamCaller(
-                    new FissClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
+                new FissClaimStreamCaller(),
                 appState.getMetrics(),
                 "fiss",
                 jobConfig.getStartingFissSeqNum()),
-        () -> new FissClaimRdaSink(appState),
+        () ->
+            ConcurrentRdaSink.createSink(
+                jobConfig.getWriteThreads(),
+                jobConfig.getBatchSize(),
+                autoUpdateSequenceNumbers ->
+                    new FissClaimRdaSink(
+                        appState,
+                        new FissClaimTransformer(
+                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
+                        autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
 
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
-   * @param databaseOptions connection options for SQL database
-   * @param appMetrics MetricRegistry used to track operational metrics
+   * @param appState the app state
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
@@ -93,12 +100,20 @@ public class RdaLoadOptions implements Serializable {
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
-                new McsClaimStreamCaller(
-                    new McsClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
+                new McsClaimStreamCaller(),
                 appState.getMetrics(),
                 "mcs",
                 jobConfig.getStartingMcsSeqNum()),
-        () -> new McsClaimRdaSink(appState),
+        () ->
+            ConcurrentRdaSink.createSink(
+                jobConfig.getWriteThreads(),
+                jobConfig.getBatchSize(),
+                autoUpdateSequenceNumbers ->
+                    new McsClaimRdaSink(
+                        appState,
+                        new McsClaimTransformer(
+                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
+                        autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
 

@@ -34,6 +34,9 @@ public class RdaServerApp {
    *   <li>fissFile:filename creates a source that returns FissClaims contained in an NDJSON file
    *   <li>mcsFile:filename creates a source that returns McsClaims contained in an NDJSON file
    * </ul>
+   *
+   * @param args the input arguments
+   * @throws Exception any exception thrown during runtime
    */
   public static void main(String[] args) throws Exception {
     final Config config = new Config(args);
@@ -74,8 +77,17 @@ public class RdaServerApp {
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
         final String s3Directory = config.stringOption("s3Directory").orElse("");
         s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory);
+        checkS3Connectivity("FISS", s3Sources.fissClaimChangeFactory());
+        checkS3Connectivity("MCS", s3Sources.mcsClaimChangeFactory());
       } else {
         s3Sources = null;
+      }
+    }
+
+    private void checkS3Connectivity(String claimType, MessageSource.Factory<?> factory)
+        throws Exception {
+      try (MessageSource<?> source = factory.apply(0)) {
+        LOGGER.info("checking for {} claims: {}", claimType, source.hasNext());
       }
     }
 

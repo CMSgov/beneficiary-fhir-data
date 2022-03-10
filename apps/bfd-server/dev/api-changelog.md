@@ -2,7 +2,7 @@
 
 ## BFD-1403 Update patient discharge status code mapping
 
-Update mapping for patient discharge status coding for HHA, Inpatient and Hospice:
+Update mapping for patient discharge status coding for HHA, Inpatient and Hospice. Previously, the patient discharge status code in the EOB FHIR response was incorrectly being populated by the claim frequency code data field. The value for the patient discharge status code is now correctly being populated by the patient discharge status code data field.
 For Inpatient:
 
 ```
@@ -39,7 +39,70 @@ For HHA:
     }
 ```
 
-## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
+## BFD-1518
+
+Added mapping for Revenue Status Code:
+REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
+## BFD-1566: Add Patient.meta.tag entry for Some Patients
+
+Our system has delayed the processing of demographic and enrollment data
+  for some persons who had previously been enrolled in Medicare
+  but are not enrolled in Medicare for the current year.
+This delay is due to errors in
+  how that data has been sent to our system for processing
+  that only impact such persons.
+Only around 0.3% of persons we have records for are impacted by this issue.
+
+Nevertheless, for such impacted persons,
+  their `Patient` resources are being tagged,
+  as follows:
+
+```
+{
+  "resourceType": "Patient",
+  ...
+  "meta": {
+    ...
+    "tag": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/codesystem/tags",
+        "code": "delayed-backdated-enrollment",
+        "display": "Impacted by delayed backdated enrollment data."
+      }
+    ]
+  },
+  ...
+```
+
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
 ```

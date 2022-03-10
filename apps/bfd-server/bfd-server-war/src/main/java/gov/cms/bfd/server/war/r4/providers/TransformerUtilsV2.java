@@ -11,6 +11,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
@@ -58,6 +59,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -100,6 +102,7 @@ import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.util.Assert;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -1215,6 +1218,7 @@ public final class TransformerUtilsV2 {
    * Retrieves the NPI display value from an NPI code look up file
    *
    * @param npiCode - NPI code
+   * @return the npi code display string
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
 
@@ -1300,6 +1304,7 @@ public final class TransformerUtilsV2 {
    * Retrieves the Procedure code and display value from a Procedure code look up file
    *
    * @param procedureCode - Procedure code
+   * @return the procedure code display string
    */
   public static String retrieveProcedureCodeDisplay(String procedureCode) {
 
@@ -1368,6 +1373,7 @@ public final class TransformerUtilsV2 {
    * during the build process
    *
    * @param claimDrugCode - NDC value in claim records
+   * @return the fda drug code display string
    */
   public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
@@ -1416,6 +1422,8 @@ public final class TransformerUtilsV2 {
    * Products file which was downloaded during the build process.
    *
    * <p>See {@link FDADrugDataUtilityApp} for details.
+   *
+   * @return a map with drug codes and fields
    */
   public static Map<String, String> readFDADrugCodeFile() {
     Map<String, String> ndcProductHashMap = new HashMap<String, String>();
@@ -2107,7 +2115,7 @@ public final class TransformerUtilsV2 {
   /**
    * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
-   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
    * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
    *     </code> value
    */
@@ -2118,7 +2126,7 @@ public final class TransformerUtilsV2 {
   /**
    * maps a blue button claim type to a FHIR claim type
    *
-   * @param eobType the {@link CodeableConcept} that will get remapped
+   * @param eob the {@link CodeableConcept} that will get remapped
    * @param blueButtonClaimType the blue button {@link ClaimTypeV2} we are mapping from
    * @param ccwNearLineRecordIdCode if present, the blue button near line id code {@link
    *     Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
@@ -3545,6 +3553,33 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Maps the Revenue Status Indicator Code to the eob's item revenue as an extension, if the status
+   * code is present.
+   *
+   * <p>REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+   *
+   * @param item the item to add the extension to, if the required data is present
+   * @param eob the root eob (only used for logging purposes)
+   * @param statusCode the status code to check for and add data from if exists
+   * @return the {@link ItemComponent}
+   */
+  static ItemComponent mapEobCommonItemRevenueStatusCode(
+      @Nonnull ItemComponent item, @Nonnull ExplanationOfBenefit eob, Optional<String> statusCode) {
+
+    Assert.notNull(item, "Item must be non-null");
+    Assert.notNull(eob, "Eob must be non-null");
+
+    if (statusCode.isPresent()) {
+      item.getRevenue()
+          .addExtension(
+              TransformerUtilsV2.createExtensionCoding(
+                  eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, statusCode));
+    }
+
+    return item;
+  }
+
+  /**
    * Transforms the common item level data elements between the {@link OutpatientClaimLine} {@link
    * HospiceClaimLine} and {@link HHAClaimLine} claim types to FHIR. The method parameter fields
    * from {@link OutpatientClaimLine} {@link HospiceClaimLine} and {@link HHAClaimLine} are listed
@@ -3646,6 +3681,12 @@ public final class TransformerUtilsV2 {
         return RaceCategory.AMERICAN_INDIAN_OR_ALASKA_NATIVE;
       default:
         return RaceCategory.UNKNOWN;
+    }
+  }
+
+  public static void logMbiHashToMdc(String mbiHash) {
+    if (!Strings.isNullOrEmpty(mbiHash)) {
+      MDC.put("mbi_hash", mbiHash);
     }
   }
 }

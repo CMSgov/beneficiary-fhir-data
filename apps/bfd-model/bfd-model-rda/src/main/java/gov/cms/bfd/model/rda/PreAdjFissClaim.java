@@ -12,6 +12,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.BatchSize;
 
 /** JPA class for the FissClaims table */
 @Entity
@@ -77,11 +80,9 @@ public class PreAdjFissClaim {
   @Column(name = "`npiNumber`", length = 10)
   private String npiNumber;
 
-  @Column(name = "`mbi`", length = 13)
-  private String mbi;
-
-  @Column(name = "`mbiHash`", length = 64)
-  private String mbiHash;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`fedTaxNumber`", length = 10)
   private String fedTaxNumber;
@@ -291,6 +292,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 
@@ -299,6 +301,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
 
@@ -307,6 +310,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissPayer> payers = new HashSet<>();
 
@@ -315,16 +319,30 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
 
+  public String getMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
   public enum ServTypeCdMapping {
     Normal,
-
     Clinic,
-
     SpecialFacility,
-
     Unrecognized
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String mbi = "mbi";
   }
 }
