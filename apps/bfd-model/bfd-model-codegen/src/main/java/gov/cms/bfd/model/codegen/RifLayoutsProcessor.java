@@ -9,7 +9,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -81,10 +80,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * Both Maven and Eclipse hide compiler messages, so setting this constant to <code>true</code>
    * will also log messages out to a new source file.
    */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
+
+  private static final String PARENT_CLAIM = "parentClaim";
+  private static final String PARENT_BENEFICIARY = "parentBeneficiary";
 
   private final List<String> logMessages = new LinkedList<>();
 
@@ -182,11 +184,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiarySheet()))
               .setHeaderEntity("Beneficiary")
-              .setHeaderTable("Beneficiaries")
-              .setHeaderEntityIdField("beneficiaryId")
+              .setHeaderTable("beneficiaries")
+              .setHeaderEntityIdField("BENE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("hicnUnhashed", "mbiHash")))
+                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -196,8 +198,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                           null,
                           "MedicareBeneficiaryIdHistory",
                           "medicareBeneficiaryIdHistories")))
-              .setHasLines(false)
-              .setHasBeneficiaryMonthly(true));
+              .setIsBeneficiaryEntity(true));
       /*
        * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
        * DB), as they won't ever have changed data. We should change the RIF layout to
@@ -209,116 +210,139 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setRifLayout(
                   RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistorySheet()))
               .setHeaderEntity("BeneficiaryHistory")
-              .setHeaderTable("BeneficiariesHistory")
-              .setHeaderEntityGeneratedIdField("beneficiaryHistoryId")
+              .setHeaderTable("beneficiaries_history")
+              .setHeaderEntityGeneratedIdField("bene_history_id")
+              .setSequenceNumberGeneratorName("beneficiaryhistory_beneficiaryhistoryid_seq")
               .setHeaderEntityTransientFields(
-                  "stateCode",
-                  "countyCode",
-                  "postalCode",
-                  "race",
-                  "entitlementCodeOriginal",
-                  "entitlementCodeCurrent",
-                  "endStageRenalDiseaseCode",
-                  "medicareEnrollmentStatusCode",
-                  "partATerminationCode",
-                  "partBTerminationCode",
-                  "nameSurname",
-                  "nameGiven",
-                  "nameMiddleInitial")
+                  "STATE_CODE",
+                  "BENE_COUNTY_CD",
+                  "BENE_ZIP_CD",
+                  "BENE_RACE_CD",
+                  "BENE_ENTLMT_RSN_ORIG",
+                  "BENE_ENTLMT_RSN_CURR",
+                  "BENE_ESRD_IND",
+                  "BENE_MDCR_STATUS_CD",
+                  "BENE_PTA_TRMNTN_CD",
+                  "BENE_PTB_TRMNTN_CD",
+                  "BENE_SRNM_NAME",
+                  "BENE_GVN_NAME",
+                  "BENE_MDL_NAME")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("hicnUnhashed", "mbiHash")))
-              .setHasLines(false)
-              .setHasBeneficiaryMonthly(false));
+                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
+              .setIsBeneficiaryEntity(false));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(
                   RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
               .setHeaderEntity("MedicareBeneficiaryIdHistory")
-              .setHeaderTable("MedicareBeneficiaryIdHistory")
-              .setHeaderEntityIdField("medicareBeneficiaryIdKey")
-              .setHasLines(false)
-              .setHasBeneficiaryMonthly(false));
+              .setHeaderTable("medicare_beneficiaryid_history")
+              .setHeaderEntityIdField("bene_mbi_id")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
               .setHeaderEntity("PartDEvent")
-              .setHeaderTable("PartDEvents")
-              .setHeaderEntityIdField("eventId")
-              .setHasLines(false)
-              .setHasBeneficiaryMonthly(false));
+              .setHeaderTable("partd_events")
+              .setHeaderEntityIdField("PDE_ID")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
               .setHeaderEntity("CarrierClaim")
-              .setHeaderTable("CarrierClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("carrier_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("CarrierClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("carrier_claim_lines")
+              .setLineEntityLineNumberField("LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
               .setHeaderEntity("InpatientClaim")
-              .setHeaderTable("InpatientClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("inpatient_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("InpatientClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("inpatient_claim_lines")
+              .setLineEntityLineNumberField("CLM_LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
               .setHeaderEntity("OutpatientClaim")
-              .setHeaderTable("OutpatientClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("outpatient_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("OutpatientClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("outpatient_claim_lines")
+              .setLineEntityLineNumberField("CLM_LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
               .setHeaderEntity("HHAClaim")
-              .setHeaderTable("HHAClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("hha_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("HHAClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("hha_claim_lines")
+              .setLineEntityLineNumberField("CLM_LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
               .setHeaderEntity("DMEClaim")
-              .setHeaderTable("DMEClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("dme_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("DMEClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("dme_claim_lines")
+              .setLineEntityLineNumberField("LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
               .setHeaderEntity("HospiceClaim")
-              .setHeaderTable("HospiceClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("hospice_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("HospiceClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("hospice_claim_lines")
+              .setLineEntityLineNumberField("CLM_LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("SNFClaims")
-              .setHeaderEntityIdField("claimId")
+              .setHeaderTable("snf_claims")
+              .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("SNFClaimLines")
-              .setHasBeneficiaryMonthly(false));
+              .setLineTable("snf_claim_lines")
+              .setLineEntityLineNumberField("CLM_LINE_NUM")
+              .setHeaderEntityAdditionalDatabaseFields(
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
     } finally {
       if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
     }
-    logNote(annotatedPackage, "Generated mapping specification: '%s'.", mappingSpecs);
+    logNote(annotatedPackage, "Generated mapping specification: '%s'", mappingSpecs);
 
     /* Generate the code for each layout. */
-    for (MappingSpec mappingSpec : mappingSpecs) generateCode(mappingSpec);
+    for (MappingSpec mappingSpec : mappingSpecs) {
+      generateCode(mappingSpec);
+    }
   }
 
   /**
@@ -329,8 +353,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private void generateCode(MappingSpec mappingSpec) throws IOException {
-    logNote("Generated code for %s", mappingSpec.getRifLayout().getName());
-
     /*
      * First, create the Java enum for the RIF columns.
      */
@@ -340,10 +362,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      * Then, create the JPA Entity for the "line" fields, containing: fields
      * and accessors.
      */
-    Optional<TypeSpec> lineEntity = Optional.empty();
-    if (mappingSpec.getHasLines()) {
-      lineEntity = Optional.of(generateLineEntity(mappingSpec));
-    }
+    Optional<TypeSpec> lineEntity =
+        mappingSpec.getHasLines() ? Optional.of(generateLineEntity(mappingSpec)) : Optional.empty();
 
     /*
      * Then, create the JPA Entity for the "grouped" fields, containing:
@@ -351,7 +371,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     TypeSpec headerEntity = generateHeaderEntity(mappingSpec);
 
-    if (mappingSpec.getHasBeneficiaryMonthly()) {
+    if (mappingSpec.isBeneficiaryEntity()) {
       generateBeneficiaryMonthlyEntity(mappingSpec);
     }
 
@@ -405,13 +425,19 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private TypeSpec generateLineEntity(MappingSpec mappingSpec) throws IOException {
+    logNote(
+        "\n%s\nGenerating LineEntity code for %s\n%s\n%s",
+        "===============================================",
+        mappingSpec.getLineTable(),
+        mappingSpec.toString(),
+        "===============================================");
     RifLayout rifLayout = mappingSpec.getRifLayout();
 
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
         AnnotationSpec.builder(Table.class)
-            .addMember("name", "$S", "`" + mappingSpec.getLineTable() + "`")
+            .addMember("name", "$S", mappingSpec.getLineTable().toLowerCase())
             .build();
     TypeSpec.Builder lineEntity =
         TypeSpec.classBuilder(mappingSpec.getLineEntity())
@@ -434,51 +460,62 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .initializer("$L", 1L)
             .build());
 
-    // Add a field to that @IdClass for the parent claim's ID.
+    // find associated RifField(s) to imbue into @IdClass
     RifField parentClaimRifField =
         rifLayout.getRifFields().stream()
-            .filter(f -> mappingSpec.getHeaderEntityIdField().equals(f.getJavaFieldName()))
+            .filter(
+                f ->
+                    f.getRifColumnName()
+                        .equalsIgnoreCase(mappingSpec.getHeaderEntityIdField().toLowerCase()))
             .findAny()
             .get();
+    RifField lineNumberRifField =
+        rifLayout.getRifFields().stream()
+            .filter(
+                f ->
+                    f.getRifColumnName()
+                        .equalsIgnoreCase(mappingSpec.getLineEntityLineNumberField().toLowerCase()))
+            .findFirst()
+            .get();
+
+    // setup field types for associated RifField(s)
     TypeName parentClaimIdFieldType =
         selectJavaFieldType(
             parentClaimRifField.getRifColumnType(),
             parentClaimRifField.isRifColumnOptional(),
             parentClaimRifField.getRifColumnLength(),
             parentClaimRifField.getRifColumnScale());
-    FieldSpec.Builder parentIdField =
-        FieldSpec.builder(
-            parentClaimIdFieldType, mappingSpec.getLineEntityParentField(), Modifier.PRIVATE);
-    lineIdClass.addField(parentIdField.build());
-    MethodSpec.Builder parentGetter =
-        MethodSpec.methodBuilder("getParentClaim")
-            .addStatement("return $N", mappingSpec.getLineEntityParentField())
-            .returns(parentClaimIdFieldType);
-    lineIdClass.addMethod(parentGetter.build());
-
-    // Add a field to that @IdClass class for the line number.
-    RifField rifLineNumberField =
-        rifLayout.getRifFields().stream()
-            .filter(f -> f.getJavaFieldName().equals(mappingSpec.getLineEntityLineNumberField()))
-            .findFirst()
-            .get();
     TypeName lineNumberFieldType =
         selectJavaFieldType(
-            rifLineNumberField.getRifColumnType(),
-            rifLineNumberField.isRifColumnOptional(),
-            rifLineNumberField.getRifColumnLength(),
-            rifLineNumberField.getRifColumnScale());
+            lineNumberRifField.getRifColumnType(),
+            lineNumberRifField.isRifColumnOptional(),
+            lineNumberRifField.getRifColumnLength(),
+            lineNumberRifField.getRifColumnScale());
+
+    // create fields to be added to the @IdClass object
+    FieldSpec.Builder parentIdField =
+        FieldSpec.builder(parentClaimIdFieldType, PARENT_CLAIM, Modifier.PRIVATE);
     FieldSpec.Builder lineNumberIdField =
         FieldSpec.builder(
-            lineNumberFieldType, mappingSpec.getLineEntityLineNumberField(), Modifier.PRIVATE);
-    lineIdClass.addField(lineNumberIdField.build());
-    MethodSpec.Builder lineNumberGetter =
-        MethodSpec.methodBuilder("get" + capitalize(mappingSpec.getLineEntityLineNumberField()))
-            .addStatement("return $N", mappingSpec.getLineEntityLineNumberField())
-            .returns(lineNumberFieldType);
-    lineIdClass.addMethod(lineNumberGetter.build());
+            lineNumberFieldType, lineNumberRifField.getJavaFieldName(), Modifier.PRIVATE);
 
-    // Add hashCode() and equals(...) to that @IdClass.
+    // Add fields to that @IdClass class
+    lineIdClass.addField(parentIdField.build());
+    lineIdClass.addField(lineNumberIdField.build());
+
+    // add getter methods to access the ID fields
+    MethodSpec.Builder parentGetter =
+        MethodSpec.methodBuilder("getParentClaim")
+            .addStatement("return $N", PARENT_CLAIM)
+            .returns(parentClaimIdFieldType);
+    MethodSpec.Builder lineNumberGetter =
+        MethodSpec.methodBuilder("getLineNumber")
+            .addStatement("return $N", lineNumberRifField.getJavaFieldName())
+            .returns(lineNumberFieldType);
+
+    // Add getter, hashCode() and equals(...) to @IdClass.
+    lineIdClass.addMethod(parentGetter.build());
+    lineIdClass.addMethod(lineNumberGetter.build());
     lineIdClass.addMethod(generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
     lineIdClass.addMethod(
         generateEqualsMethod(
@@ -489,39 +526,42 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // Add a field and accessor to the "line" Entity for the parent.
     FieldSpec parentClaimField =
-        FieldSpec.builder(
-                mappingSpec.getHeaderEntity(),
-                mappingSpec.getLineEntityParentField(),
-                Modifier.PRIVATE)
+        FieldSpec.builder(mappingSpec.getHeaderEntity(), PARENT_CLAIM, Modifier.PRIVATE)
             .addAnnotation(Id.class)
             .addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
             .addAnnotation(
                 AnnotationSpec.builder(JoinColumn.class)
-                    .addMember("name", "$S", "`" + mappingSpec.getLineEntityParentField() + "`")
+                    .addMember("name", "$S", mappingSpec.getHeaderEntityIdField().toLowerCase())
                     .addMember(
                         "foreignKey",
                         "@$T(name = $S)",
                         ForeignKey.class,
                         String.format(
-                            "%s_%s_to_%s",
-                            mappingSpec.getLineTable(),
-                            mappingSpec.getLineEntityParentField(),
-                            mappingSpec.getHeaderTable()))
+                                "%s_%s_to_%s",
+                                mappingSpec.getLineTable(),
+                                mappingSpec.getHeaderEntityIdField().toLowerCase(),
+                                mappingSpec.getHeaderTable())
+                            .toLowerCase())
                     .build())
             .build();
+
     lineEntity.addField(parentClaimField);
+
+    // setup parentClaim setter/getter
     MethodSpec parentClaimGetter =
         MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
             .addModifiers(Modifier.PUBLIC)
-            .addStatement("return $N", mappingSpec.getLineEntityParentField())
+            .addStatement("return $N", PARENT_CLAIM)
             .returns(mappingSpec.getHeaderEntity())
             .build();
     lineEntity.addMethod(parentClaimGetter);
+
     MethodSpec.Builder parentClaimSetter =
         MethodSpec.methodBuilder(calculateSetterName(parentClaimField))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(mappingSpec.getHeaderEntity(), parentClaimField.name);
+
     addSetterStatement(false, parentClaimField, parentClaimSetter);
     lineEntity.addMethod(parentClaimSetter.build());
 
@@ -584,7 +624,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
-        AnnotationSpec.builder(Table.class).addMember("name", "$S", "`BeneficiaryMonthly`").build();
+        AnnotationSpec.builder(Table.class).addMember("name", "$S", "beneficiary_monthly").build();
+
     TypeSpec.Builder beneficiaryMonthlyEntity =
         TypeSpec.classBuilder("BeneficiaryMonthly")
             .addAnnotation(entityAnnotation)
@@ -612,21 +653,23 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     TypeName parentBeneficiaryIdFieldType = ClassName.get(String.class);
     FieldSpec.Builder parentIdField =
-        FieldSpec.builder(parentBeneficiaryIdFieldType, "parentBeneficiary", Modifier.PRIVATE);
-    beneficiaryMonthlyIdClass.addField(parentIdField.build());
-    MethodSpec.Builder parentGetter =
-        MethodSpec.methodBuilder("getParentBeneficiary")
-            .addStatement("return $N", "parentBeneficiary")
-            .returns(parentBeneficiaryIdFieldType);
-    beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
+        FieldSpec.builder(parentBeneficiaryIdFieldType, PARENT_BENEFICIARY, Modifier.PRIVATE);
 
     // Add a field to that @IdClass class for the month.
     TypeName yearMonthFieldType = ClassName.get(LocalDate.class);
     FieldSpec.Builder yearMonthIdField =
         FieldSpec.builder(yearMonthFieldType, "yearMonth", Modifier.PRIVATE);
+
+    beneficiaryMonthlyIdClass.addField(parentIdField.build());
     beneficiaryMonthlyIdClass.addField(yearMonthIdField.build());
+
+    MethodSpec.Builder parentGetter =
+        MethodSpec.methodBuilder("getParentBeneficiary")
+            .addStatement("return $N", PARENT_BENEFICIARY)
+            .returns(parentBeneficiaryIdFieldType);
+    beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
     MethodSpec.Builder yearMonthGetter =
-        MethodSpec.methodBuilder("get" + capitalize("yearMonth"))
+        MethodSpec.methodBuilder("getYearMonth")
             .addStatement("return $N", "yearMonth")
             .returns(yearMonthFieldType);
     beneficiaryMonthlyIdClass.addMethod(yearMonthGetter.build());
@@ -647,30 +690,33 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     FieldSpec parentBeneficiaryField =
         FieldSpec.builder(
                 ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"),
-                "parentBeneficiary",
+                PARENT_BENEFICIARY,
                 Modifier.PRIVATE)
             .addAnnotation(Id.class)
             .addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
             .addAnnotation(
                 AnnotationSpec.builder(JoinColumn.class)
-                    .addMember("name", "$S", "`parentBeneficiary`")
+                    .addMember("name", "$S", "bene_id")
                     .addMember(
                         "foreignKey",
                         "@$T(name = $S)",
                         ForeignKey.class,
                         String.format(
-                            "%s_%s_to_%s",
-                            "BeneficiaryMonthly", "parentBeneficiary", "Beneficiary"))
+                                "%s_%s_to_%s", "beneficiary_monthly", "bene_id", "beneficiary")
+                            .toLowerCase())
                     .build())
             .build();
+
     beneficiaryMonthlyEntity.addField(parentBeneficiaryField);
+
     MethodSpec parentBeneficiaryGetter =
         MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
-            .addStatement("return $N", "parentBeneficiary")
+            .addStatement("return $N", PARENT_BENEFICIARY)
             .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
             .build();
     beneficiaryMonthlyEntity.addMethod(parentBeneficiaryGetter);
+
     MethodSpec.Builder parentBeneficiarySetter =
         MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
@@ -680,145 +726,176 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     addSetterStatement(false, parentBeneficiaryField, parentBeneficiarySetter);
     beneficiaryMonthlyEntity.addMethod(parentBeneficiarySetter.build());
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        true,
-        false,
-        false,
-        "yearMonth",
-        RifColumnType.DATE,
-        Optional.of(8),
-        Optional.empty());
+    // These aren't "real" RifFields, as they're not in the spreadsheet; representing them here as
+    // such, to make
+    // it easier to add them into the spreadsheet in the future.
+    RifField rifField =
+        new RifField(
+            "YEAR_MONTH",
+            RifColumnType.DATE,
+            Optional.of(8),
+            Optional.empty(),
+            false,
+            null,
+            null,
+            "yearMonth");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, true, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "fipsStateCntyCode",
-        RifColumnType.CHAR,
-        Optional.of(5),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "FIPS_STATE_CNTY_CODE",
+            RifColumnType.CHAR,
+            Optional.of(5),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "fipsStateCntyCode");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "medicareStatusCode",
-        RifColumnType.CHAR,
-        Optional.of(2),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "MEDICARE_STATUS_CODE",
+            RifColumnType.CHAR,
+            Optional.of(2),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "medicareStatusCode");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "entitlementBuyInInd",
-        RifColumnType.CHAR,
-        Optional.of(1),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "ENTITLEMENT_BUY_IN_IND",
+            RifColumnType.CHAR,
+            Optional.of(1),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "entitlementBuyInInd");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "hmoIndicatorInd",
-        RifColumnType.CHAR,
-        Optional.of(1),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "HMO_INDICATOR_IND",
+            RifColumnType.CHAR,
+            Optional.of(1),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "hmoIndicatorInd");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partCContractNumberId",
-        RifColumnType.CHAR,
-        Optional.of(5),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTC_CONTRACT_NUMBER_ID",
+            RifColumnType.CHAR,
+            Optional.of(5),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partCContractNumberId");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partCPbpNumberId",
-        RifColumnType.CHAR,
-        Optional.of(3),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTC_PBP_NUMBER_ID",
+            RifColumnType.CHAR,
+            Optional.of(3),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partCPbpNumberId");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partCPlanTypeCode",
-        RifColumnType.CHAR,
-        Optional.of(3),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTC_PLAN_TYPE_CODE",
+            RifColumnType.CHAR,
+            Optional.of(3),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partCPlanTypeCode");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partDContractNumberId",
-        RifColumnType.CHAR,
-        Optional.of(5),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTD_CONTRACT_NUMBER_ID",
+            RifColumnType.CHAR,
+            Optional.of(5),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partDContractNumberId");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partDPbpNumberId",
-        RifColumnType.CHAR,
-        Optional.of(3),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTD_PBP_NUMBER_ID",
+            RifColumnType.CHAR,
+            Optional.of(3),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partDPbpNumberId");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partDSegmentNumberId",
-        RifColumnType.CHAR,
-        Optional.of(3),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTD_SEGMENT_NUMBER_ID",
+            RifColumnType.CHAR,
+            Optional.of(3),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partDSegmentNumberId");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partDRetireeDrugSubsidyInd",
-        RifColumnType.CHAR,
-        Optional.of(1),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTD_RETIREE_DRUG_SUBSIDY_IND",
+            RifColumnType.CHAR,
+            Optional.of(1),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partDRetireeDrugSubsidyInd");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "medicaidDualEligibilityCode",
-        RifColumnType.CHAR,
-        Optional.of(2),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "MEDICAID_DUAL_ELIGIBILITY_CODE",
+            RifColumnType.CHAR,
+            Optional.of(2),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "medicaidDualEligibilityCode");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
-    createBeneficiaryMonthlyFields(
-        beneficiaryMonthlyEntity,
-        false,
-        false,
-        true,
-        "partDLowIncomeCostShareGroupCode",
-        RifColumnType.CHAR,
-        Optional.of(2),
-        Optional.empty());
+    rifField =
+        new RifField(
+            "PARTD_LOW_INCOME_COST_SHARE_GROUP_CODE",
+            RifColumnType.CHAR,
+            Optional.of(2),
+            Optional.empty(),
+            true,
+            null,
+            null,
+            "partDLowIncomeCostShareGroupCode");
+    createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     TypeSpec beneficiaryMonthlyEntityFinal = beneficiaryMonthlyEntity.build();
     JavaFile beneficiaryMonthlyClassFile =
@@ -838,11 +915,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private TypeSpec generateHeaderEntity(MappingSpec mappingSpec) throws IOException {
+    logNote(
+        "\n%s\nGenerating code for %s\n%s\n%s",
+        "===============================================",
+        mappingSpec.getHeaderTable(),
+        mappingSpec.toString(),
+        "===============================================");
+
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
         AnnotationSpec.builder(Table.class)
-            .addMember("name", "$S", "`" + mappingSpec.getHeaderTable() + "`")
+            .addMember("name", "$S", mappingSpec.getHeaderTable().toLowerCase())
             .build();
     TypeSpec.Builder headerEntityClass =
         TypeSpec.classBuilder(mappingSpec.getHeaderEntity())
@@ -859,23 +943,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       idFieldBuilder.addAnnotation(Id.class);
       idFieldBuilder.addAnnotation(
           AnnotationSpec.builder(Column.class)
-              .addMember(
-                  "name",
-                  "$S",
-                  String.format("`%s`", mappingSpec.getHeaderEntityGeneratedIdField()))
+              .addMember("name", "$S", mappingSpec.getHeaderEntityGeneratedIdField().toLowerCase())
               .addMember("nullable", "$L", false)
               .addMember("updatable", "$L", false)
               .build());
-      String sequenceName =
-          String.format(
-              "%s_%s_seq",
-              mappingSpec.getHeaderEntity().simpleName(),
-              mappingSpec.getHeaderEntityGeneratedIdField());
-      /*
-       * FIXME For consistency, sequence names should be mixed-case, but can't be, due
-       * to https://hibernate.atlassian.net/browse/HHH-9431.
-       */
-      sequenceName = sequenceName.toLowerCase();
+
+      String sequenceName = mappingSpec.getSequenceNumberGeneratorName().toLowerCase();
       idFieldBuilder.addAnnotation(
           AnnotationSpec.builder(GeneratedValue.class)
               .addMember("strategy", "$T.SEQUENCE", GenerationType.class)
@@ -907,9 +980,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
 
     // Create an Entity field with accessors for each RIF field.
-    for (int fieldIndex = 0;
-        fieldIndex <= mappingSpec.calculateLastHeaderFieldIndex();
-        fieldIndex++) {
+    int entityLastHeaderFieldIx = mappingSpec.calculateLastHeaderFieldIndex();
+    logNote("entityLastHeaderFieldIx=%d", entityLastHeaderFieldIx);
+    for (int fieldIndex = 0; fieldIndex <= entityLastHeaderFieldIx; fieldIndex++) {
       RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
 
       FieldSpec headerField =
@@ -995,6 +1068,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   headerField.name);
       addSetterStatement(addlDatabaseField, headerField, headerFieldSetter);
       headerEntityClass.addMethod(headerFieldSetter.build());
+      logNote("addlDatabaseField added, %s", addlDatabaseField);
     }
 
     // Add the parent-to-child join field and accessor, if appropriate.
@@ -1028,7 +1102,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
 
     // Add the parent-to-child join field and accessor, if appropriate.
-    if (mappingSpec.getHasBeneficiaryMonthly()) {
+    if (mappingSpec.isBeneficiaryEntity()) {
 
       ParameterizedTypeName childFieldType =
           ParameterizedTypeName.get(
@@ -1068,6 +1142,35 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   "this.$N = ($T)$N", "beneficiaryMonthlys", childFieldType, "beneficiaryMonthlys")
               .build();
       headerEntityClass.addMethod(childSetter);
+    }
+
+    // Add a hardcoded "Beneficiary.skippedRifRecords" field, if appropriate.
+    if (mappingSpec.isBeneficiaryEntity()) {
+      ParameterizedTypeName childFieldType =
+          ParameterizedTypeName.get(
+              ClassName.get(Set.class),
+              ClassName.get(mappingSpec.getPackageName(), "SkippedRifRecord"));
+
+      FieldSpec.Builder childField =
+          FieldSpec.builder(childFieldType, "skippedRifRecords", Modifier.PRIVATE)
+              .initializer("new $T<>()", HashSet.class);
+
+      childField.addAnnotation(
+          AnnotationSpec.builder(OneToMany.class)
+              .addMember("mappedBy", "$S", "beneId")
+              .addMember("orphanRemoval", "$L", false)
+              .addMember("fetch", "$T.LAZY", FetchType.class)
+              .addMember("cascade", "$T.ALL", CascadeType.class)
+              .build());
+      headerEntityClass.addField(childField.build());
+
+      MethodSpec childGetter =
+          MethodSpec.methodBuilder("getSkippedRifRecords")
+              .addModifiers(Modifier.PUBLIC)
+              .addStatement("return $N", "skippedRifRecords")
+              .returns(childFieldType)
+              .build();
+      headerEntityClass.addMethod(childGetter);
     }
 
     // Add the parent-to-child join field and accessor for an inner join
@@ -1117,31 +1220,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         headerEntityClass.addMethod(childGetter);
       }
     }
-
-    // Add a lastUpdated field.
-    final FieldSpec lastUpdatedField =
-        FieldSpec.builder(Instant.class, "lastUpdated", Modifier.PRIVATE).build();
-    headerEntityClass.addField(lastUpdatedField);
-
-    // Getter method
-    final MethodSpec lastUpdatedGetter =
-        MethodSpec.methodBuilder("getLastUpdated")
-            .addModifiers(Modifier.PUBLIC)
-            .addStatement("return Optional.ofNullable(lastUpdated)")
-            .returns(ParameterizedTypeName.get(Optional.class, Instant.class))
-            .build();
-    headerEntityClass.addMethod(lastUpdatedGetter);
-
-    // Setter method which is useful for testing, but not needed in the main modules
-    final MethodSpec lastUpdatedSetter =
-        MethodSpec.methodBuilder("setLastUpdated")
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Instant.class, "lastUpdated").build())
-            .addStatement("this.lastUpdated = lastUpdated")
-            .returns(TypeName.VOID)
-            .build();
-    headerEntityClass.addMethod(lastUpdatedSetter);
-
     TypeSpec headerEntityFinal = headerEntityClass.build();
     JavaFile headerEntityFile =
         JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
@@ -1167,6 +1245,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       TypeSpec headerEntity,
       Optional<TypeSpec> lineEntity)
       throws IOException {
+    int rifFieldsSize = mappingSpec.getRifLayout().getRifFields().size();
+    int firstLineFieldIx =
+        mappingSpec.getHasLines() ? mappingSpec.calculateFirstLineFieldIndex() : -1;
+    logNote(
+        "generateParser, # of RifFields: %d, line field starts at: %d",
+        rifFieldsSize, firstLineFieldIx);
+
     TypeSpec.Builder parsingClass =
         TypeSpec.classBuilder(mappingSpec.getParserClass())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -1192,9 +1277,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     parseMethod.addCode("\n$1T header = new $1T();\n", mappingSpec.getHeaderEntity());
 
     // Loop over each field and generate the code needed to parse it.
-    for (int fieldIndex = 0;
-        fieldIndex < mappingSpec.getRifLayout().getRifFields().size();
-        fieldIndex++) {
+    for (int fieldIndex = 0; fieldIndex < rifFieldsSize; fieldIndex++) {
       RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
 
       // Find the Entity field for the RifField.
@@ -1208,6 +1291,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .filter(f -> f.name.equals(rifField.getJavaFieldName()))
               .findAny()
               .get();
+      // logNote("create code for: %s", entityField.toString());
 
       // Are we starting the header parsing?
       if (fieldIndex == 0) {
@@ -1216,7 +1300,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       }
 
       // Are we starting the line parsing?
-      if (mappingSpec.getHasLines() && fieldIndex == mappingSpec.calculateFirstLineFieldIndex()) {
+      if (fieldIndex == firstLineFieldIx) {
         parseMethod.addCode("\n// Parse the line fields.\n");
         parseMethod.beginControlFlow(
             "for (int lineIndex = 0; lineIndex < csvRecords.size(); lineIndex++)");
@@ -1225,7 +1309,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
         FieldSpec lineEntityParentField =
             lineEntity.get().fieldSpecs.stream()
-                .filter(f -> f.name.equals(mappingSpec.getLineEntityParentField()))
+                .filter(f -> f.name.equalsIgnoreCase(mappingSpec.getLineEntityParentField()))
                 .findAny()
                 .get();
         parseMethod.addCode("line.$L(header);\n\n", calculateSetterName(lineEntityParentField));
@@ -1234,7 +1318,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       // Determine which variables to use in assignment statement.
       String entityName;
       String recordName;
-      if (mappingSpec.getHasLines() && fieldIndex >= mappingSpec.calculateFirstLineFieldIndex()) {
+      if (mappingSpec.getHasLines() && fieldIndex >= firstLineFieldIx) {
         entityName = "line";
         recordName = "lineRecord";
       } else {
@@ -1309,6 +1393,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     parsingClass.addMethod(parseMethod.build());
 
     TypeSpec parsingClassFinal = parsingClass.build();
+    logNote("parsingClass: %s", parsingClassFinal.name);
     JavaFile parsingClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
     parsingClassFile.writeTo(processingEnv.getFiler());
@@ -1330,6 +1415,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   private TypeSpec generateCsvWriter(
       MappingSpec mappingSpec, TypeSpec headerEntity, Optional<TypeSpec> lineEntity)
       throws IOException {
+
     TypeSpec.Builder csvWriterClass =
         TypeSpec.classBuilder(mappingSpec.getCsvWriterClass())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -1357,18 +1443,17 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     csvWriterMethod.addCode("\n");
     csvWriterMethod.addComment("Convert the header fields.");
     csvWriterMethod.addStatement("$T headerRecords = new $T[2][]", recordsListType, Object.class);
-    String headerColumnsList =
-        headerEntity.fieldSpecs.stream()
-            .filter(
-                f -> {
-                  if (mappingSpec.getHasLines()
-                      && f.name.equals(mappingSpec.getHeaderEntityLinesField())) return false;
-                  return true;
-                })
-            .map(f -> "\"" + f.name + "\"")
-            .collect(Collectors.joining(", "));
+
+    String headerColumnsList = calculateCsvColumns(headerEntity.fieldSpecs, mappingSpec);
+
+    if (DEBUG) {
+      logNote(
+          "headerColumnsList\n=====================\n%s",
+          headerColumnsList.replaceAll(", ", ",\n"));
+    }
     csvWriterMethod.addStatement(
         "headerRecords[0] = new $1T{ $2L }", recordType, headerColumnsList);
+
     String headerGettersList =
         headerEntity.fieldSpecs.stream()
             .filter(
@@ -1379,6 +1464,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 })
             .map(f -> calculateFieldToCsvValueCode("entity", f, mappingSpec, null, null))
             .collect(Collectors.joining(", "));
+
     csvWriterMethod.addStatement(
         "$1T headerRecord = new $1T{ $2L }", recordType, headerGettersList);
     csvWriterMethod.addStatement("headerRecords[1] = headerRecord");
@@ -1389,7 +1475,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     if (mappingSpec.getHasLines()) {
       FieldSpec linesField =
           headerEntity.fieldSpecs.stream()
-              .filter(f -> f.name.equals(mappingSpec.getHeaderEntityLinesField()))
+              .filter(f -> f.name.equalsIgnoreCase(mappingSpec.getHeaderEntityLinesField()))
               .findAny()
               .get();
       String linesFieldGetter = calculateGetterName(linesField);
@@ -1400,12 +1486,17 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           recordsListType,
           Object.class,
           linesFieldGetter);
+
       csvWriterMethod.addStatement(
           "csvRecordsByTable.put($S, lineRecords)", mappingSpec.getLineTable());
-      String lineColumnsList =
-          lineEntity.get().fieldSpecs.stream()
-              .map(f -> "\"" + f.name + "\"")
-              .collect(Collectors.joining(", "));
+
+      String lineColumnsList = calculateCsvColumns(lineEntity.get().fieldSpecs, mappingSpec);
+
+      if (DEBUG) {
+        logNote(
+            "lineColumnsList\n=====================\n%s", lineColumnsList.replaceAll(", ", ",\n"));
+      }
+
       csvWriterMethod.addStatement("lineRecords[0] = new $1T{ $2L }", recordType, lineColumnsList);
       csvWriterMethod.beginControlFlow(
           "for (int lineIndex = 0; lineIndex < entity.$L().size();lineIndex++)", linesFieldGetter);
@@ -1413,16 +1504,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           "$T lineEntity = entity.$L().get(lineIndex)",
           mappingSpec.getLineEntity(),
           linesFieldGetter);
+
       FieldSpec parentField =
           lineEntity.get().fieldSpecs.stream()
-              .filter(f -> f.name.equals(mappingSpec.getLineEntityParentField()))
+              .filter(f -> f.name.equalsIgnoreCase(PARENT_CLAIM))
               .findAny()
               .get();
       FieldSpec headerIdField =
           headerEntity.fieldSpecs.stream()
-              .filter(f -> f.name.equals(mappingSpec.getHeaderEntityIdField()))
+              .filter(f -> f.name.equalsIgnoreCase("claimId"))
               .findAny()
               .get();
+
       String lineGettersList =
           lineEntity.get().fieldSpecs.stream()
               .map(
@@ -1431,6 +1524,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                         "lineEntity", f, mappingSpec, parentField, headerIdField);
                   })
               .collect(Collectors.joining(", "));
+
       csvWriterMethod.addStatement("$1T lineRecord = new $1T{ $2L }", recordType, lineGettersList);
       csvWriterMethod.addStatement("lineRecords[lineIndex + 1] = lineRecord");
       csvWriterMethod.endControlFlow();
@@ -1443,7 +1537,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     JavaFile parsingClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
     parsingClassFile.writeTo(processingEnv.getFiler());
-
     return parsingClassFinal;
   }
 
@@ -1466,29 +1559,71 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       MappingSpec mappingSpec,
       FieldSpec parentField,
       FieldSpec headerIdField) {
-    StringBuilder code = new StringBuilder();
-    code.append(instanceName);
+    StringBuilder sb = new StringBuilder();
+    if (DEBUG) {
+      sb.append("calculateFieldToCsvValueCode: [ ")
+          .append("instanceName=")
+          .append(instanceName)
+          .append(", field=")
+          .append(field.name);
+      if (parentField != null) {
+        sb.append(", parentField=").append(parentField.name);
+      }
+      if (headerIdField != null) {
+        sb.append(", headerIdField=").append(headerIdField.name);
+      }
+    }
+    StringBuilder code = new StringBuilder(instanceName);
     code.append(".");
 
     Optional<RifField> rifField =
         mappingSpec.getRifLayout().getRifFields().stream()
             .filter(f -> field.name.equals(f.getJavaFieldName()))
             .findAny();
+
     if (field == parentField) {
       // This is the line-level "parent" field.
-      code.append(calculateGetterName(parentField));
-      code.append("().");
-      code.append(calculateGetterName(headerIdField));
-      code.append("()");
+      code.append(calculateGetterName(parentField)).append("().");
+      code.append(calculateGetterName(headerIdField)).append("()");
     } else if (rifField.isPresent() && rifField.get().isRifColumnOptional()) {
-      code.append(calculateGetterName(field));
-      code.append("().orElse(null)");
+      code.append(calculateGetterName(field)).append("().orElse(null)");
     } else {
-      code.append(calculateGetterName(field));
-      code.append("()");
+      code.append(calculateGetterName(field)).append("()");
     }
-
+    sb.append(", code=").append(code).append(" ]");
+    logNote("%s", sb.toString());
     return code.toString();
+  }
+
+  /**
+   * Used in {@link #calculateCsvColumns(List<FieldSpec>, MappingSpec)} and generates the
+   * field-to-CSV-value header.
+   *
+   * @param fields {@link List<FieldSpec>} to process
+   * @param mappingSpec the {@link MappingSpec} of the field to generate conversion code for
+   * @return the string header of column names
+   */
+  private String calculateCsvColumns(List<FieldSpec> fields, MappingSpec mappingSpec) {
+    StringBuilder sb = new StringBuilder();
+    int cnt = 0;
+    for (FieldSpec field : fields) {
+      Optional<RifField> rifField =
+          mappingSpec.getRifLayout().getRifFields().stream()
+              .filter(f -> field.name.equalsIgnoreCase(f.getJavaFieldName()))
+              .findAny();
+
+      if (!rifField.isPresent()) {
+        rifField =
+            mappingSpec.getHeaderEntityAdditionalDatabaseFields().stream()
+                .filter(f -> field.name.equalsIgnoreCase(f.getJavaFieldName()))
+                .findAny();
+      }
+      if (rifField.isPresent()) {
+        sb.append(cnt > 0 ? ", \"" : "\"").append(rifField.get().getRifColumnName()).append("\"");
+        cnt++;
+      }
+    }
+    return sb.toString();
   }
 
   /**
@@ -1556,20 +1691,22 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     LinkedList<AnnotationSpec> annotations = new LinkedList<>();
 
     // Add an @Id annotation, if appropriate.
-    if (rifField.getJavaFieldName().equals(mappingSpec.getHeaderEntityIdField())
+    if (rifField.getRifColumnName().equalsIgnoreCase(mappingSpec.getHeaderEntityIdField())
         || (mappingSpec.getHasLines()
-            && rifField.getJavaFieldName().equals(mappingSpec.getLineEntityLineNumberField()))) {
+            && rifField
+                .getRifColumnName()
+                .equalsIgnoreCase(mappingSpec.getLineEntityLineNumberField()))) {
       AnnotationSpec.Builder idAnnotation = AnnotationSpec.builder(Id.class);
       annotations.add(idAnnotation.build());
     }
 
     // Add an @Column annotation to every non-transient column.
     boolean isTransient =
-        mappingSpec.getHeaderEntityTransientFields().contains(rifField.getJavaFieldName());
+        mappingSpec.getHeaderEntityTransientFields().contains(rifField.getRifColumnName());
     if (!isTransient) {
       AnnotationSpec.Builder columnAnnotation =
           AnnotationSpec.builder(Column.class)
-              .addMember("name", "$S", "`" + rifField.getJavaFieldName() + "`")
+              .addMember("name", "$S", rifField.getRifColumnName().toLowerCase())
               .addMember("nullable", "$L", rifField.isRifColumnOptional());
       if (rifField.getRifColumnType() == RifColumnType.CHAR
           && rifField.getRifColumnLength().isPresent()) {
@@ -1631,36 +1768,73 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     List<RifField> addlDatabaseFields = new ArrayList<RifField>();
 
     for (String additionalDatabaseField : additionalDatabaseFields) {
-      if (additionalDatabaseField.contentEquals("hicnUnhashed")) {
+      if (additionalDatabaseField.contentEquals("HICN_UNHASHED")) {
         RifField hicnUnhashed =
             new RifField(
-                "BENE_CRNT_HIC_NUM",
+                "HICN_UNHASHED",
                 RifColumnType.CHAR,
                 Optional.of(64),
                 Optional.of(0),
                 Boolean.TRUE,
-                new URL(DATA_DICTIONARY_LINK + "benecrnthicnum"),
-                "BENE_CRNT_HIC_NUM",
+                new URL(DATA_DICTIONARY_LINK + "hicnUnhashed"),
+                "HICN_UNHASHED",
                 "hicnUnhashed");
         addlDatabaseFields.add(hicnUnhashed);
         continue;
       }
-      if (additionalDatabaseField.contentEquals("mbiHash")) {
+      if (additionalDatabaseField.contentEquals("MBI_HASH")) {
         RifField mbiHash =
             new RifField(
-                "MBI_NUM",
+                "MBI_HASH",
                 RifColumnType.CHAR,
                 Optional.of(64),
                 Optional.of(0),
                 Boolean.TRUE,
                 new URL(DATA_DICTIONARY_LINK + "mbiHash"),
-                "MBI_NUM",
+                "MBI_HASH",
                 "mbiHash");
         addlDatabaseFields.add(mbiHash);
         continue;
       }
+      if (additionalDatabaseField.contentEquals("LAST_UPDATED")) {
+        RifField lastUpdated =
+            new RifField(
+                "LAST_UPDATED",
+                RifColumnType.TIMESTAMP,
+                Optional.of(20),
+                Optional.of(0),
+                Boolean.TRUE,
+                new URL(DATA_DICTIONARY_LINK + "lastUpdated"),
+                "LAST_UPDATED",
+                "lastUpdated");
+        addlDatabaseFields.add(lastUpdated);
+        continue;
+      }
     }
     return addlDatabaseFields;
+  }
+
+  /**
+   * @param fieldName the JPA entity field name to convert from snake case to camel case
+   * @return the input string converted to camel case
+   */
+  public static String convertToCamelCase(String fieldName) {
+    if (!fieldName.contains("_")) {
+      return fieldName;
+    }
+    // Capitalize first letter of string
+    String camelCaseResult = fieldName.toLowerCase();
+    camelCaseResult = camelCaseResult.substring(0, 1).toUpperCase() + camelCaseResult.substring(1);
+
+    // iterate over string looking for '_' (underscore)
+    while (camelCaseResult.contains("_")) {
+      camelCaseResult =
+          camelCaseResult.replaceFirst(
+              "_[a-z]",
+              String.valueOf(
+                  Character.toUpperCase(camelCaseResult.charAt(camelCaseResult.indexOf("_") + 1))));
+    }
+    return camelCaseResult;
   }
 
   /**
@@ -1669,10 +1843,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @return the name of the Java "getter" for the specified {@link FieldSpec}
    */
   private static String calculateGetterName(FieldSpec entityField) {
-    if (entityField.type.equals(TypeName.BOOLEAN)
-        || entityField.type.equals(ClassName.get(Boolean.class)))
-      return "is" + capitalize(entityField.name);
-    else return "get" + capitalize(entityField.name);
+    String name = capitalize(convertToCamelCase(entityField.name));
+
+    return entityField.type.equals(TypeName.BOOLEAN)
+            || entityField.type.equals(ClassName.get(Boolean.class))
+        ? "is" + name
+        : "get" + name;
   }
 
   /**
@@ -1693,17 +1869,21 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    */
   private static void addGetterStatement(
       boolean optional, FieldSpec entityField, MethodSpec.Builder entityGetter) {
-    if (!optional) entityGetter.addStatement("return $N", entityField);
-    else entityGetter.addStatement("return $T.ofNullable($N)", Optional.class, entityField);
+    if (!optional) {
+      entityGetter.addStatement("return $N", entityField);
+    } else {
+      entityGetter.addStatement("return $T.ofNullable($N)", Optional.class, entityField);
+    }
   }
 
   /**
    * @param entityField the JPA entity {@link FieldSpec} for the field that the desired setter will
-   *     wrap
+   *     wrap @Param overrideName allow flexibility in not using JPA entity name as the basis for
+   *     setter
    * @return the name of the Java "setter" for the specified {@link FieldSpec}
    */
   private static String calculateSetterName(FieldSpec entityField) {
-    return "set" + capitalize(entityField.name);
+    return "set" + capitalize(convertToCamelCase(entityField.name));
   }
 
   /**
@@ -1724,8 +1904,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    */
   private static void addSetterStatement(
       boolean optional, FieldSpec entityField, MethodSpec.Builder entitySetter) {
-    if (!optional) entitySetter.addStatement("this.$N = $N", entityField, entityField);
-    else entitySetter.addStatement("this.$N = $N.orElse(null)", entityField, entityField);
+    if (!optional) {
+      entitySetter.addStatement("this.$N = $N", entityField, entityField);
+    } else {
+      entitySetter.addStatement("this.$N = $N.orElse(null)", entityField, entityField);
+    }
   }
 
   /**
@@ -1733,8 +1916,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @return a capitalized {@link String}
    */
   private static String capitalize(String name) {
-    char first = name.charAt(0);
-    return String.format("%s%s", Character.toUpperCase(first), name.substring(1));
+    return String.format("%s%s", Character.toUpperCase(name.charAt(0)), name.substring(1));
   }
 
   /**
@@ -1826,57 +2008,39 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *
    * @param lineEntity helps build the entity {@link TypeSpec.Builder}
    * @param isId determines if the field is an id field
-   * @param isTransient determines if the field is transient {@link boolean}
-   * @param isColumnOptional determines if the field is optional {@link boolean}
-   * @param fieldName specifies the fieldname {@link String}
-   * @param type specifies the field type {@link RifColumnType}
-   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types
-   *     this represents the total number of digits that can be stored
-   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
-   *     represents how many of the total digits (see `columnLength`) are to the right of the
-   *     decimal point
+   * @param rifField {@link RifField} to create
    */
   private static void createBeneficiaryMonthlyFields(
-      TypeSpec.Builder lineEntity,
-      boolean isId,
-      boolean isTransient,
-      boolean isColumnOptional,
-      String fieldName,
-      RifColumnType type,
-      Optional<Integer> columnLength,
-      Optional<Integer> columnScale) {
+      TypeSpec.Builder lineEntity, boolean isId, RifField rifField) {
+
+    List<AnnotationSpec> annotSpecs = createBeneficiaryMonthlyAnnotations(isId, rifField);
+    TypeName javaFieldType =
+        selectJavaFieldType(
+            rifField.getRifColumnType(), rifField.isRifColumnOptional(),
+            rifField.getRifColumnLength(), rifField.getRifColumnScale());
+    TypeName javaPropType =
+        selectJavaPropertyType(
+            rifField.getRifColumnType(), rifField.isRifColumnOptional(),
+            rifField.getRifColumnLength(), rifField.getRifColumnScale());
     FieldSpec lineField =
-        FieldSpec.builder(
-                selectJavaFieldType(type, isColumnOptional, columnLength, columnScale),
-                fieldName,
-                Modifier.PRIVATE)
-            .addAnnotations(
-                createBeneficiaryMonthlyAnnotations(
-                    isId,
-                    isTransient,
-                    isColumnOptional,
-                    fieldName,
-                    type,
-                    columnLength,
-                    columnScale))
+        FieldSpec.builder(javaFieldType, rifField.getJavaFieldName(), Modifier.PRIVATE)
+            .addAnnotations(annotSpecs)
             .build();
     lineEntity.addField(lineField);
 
     MethodSpec.Builder lineFieldGetter =
         MethodSpec.methodBuilder(calculateGetterName(lineField))
             .addModifiers(Modifier.PUBLIC)
-            .returns(selectJavaPropertyType(type, isColumnOptional, columnLength, columnScale));
-    addGetterStatement(isColumnOptional, lineField, lineFieldGetter);
+            .returns(javaPropType);
+    addGetterStatement(rifField.isRifColumnOptional(), lineField, lineFieldGetter);
     lineEntity.addMethod(lineFieldGetter.build());
 
     MethodSpec.Builder lineFieldSetter =
         MethodSpec.methodBuilder(calculateSetterName(lineField))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
-            .addParameter(
-                selectJavaPropertyType(type, isColumnOptional, columnLength, columnScale),
-                lineField.name);
-    addSetterStatement(isColumnOptional, lineField, lineFieldSetter);
+            .addParameter(javaPropType, lineField.name);
+    addSetterStatement(rifField.isRifColumnOptional(), lineField, lineFieldSetter);
     lineEntity.addMethod(lineFieldSetter.build());
   }
 
@@ -1884,81 +2048,60 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * Creates the fields for the BeneficiaryMonthly annotations in the model rif
    *
    * @param isId determines if the field is an id field
-   * @param isTransient determines if the field is transient {@link boolean}
-   * @param isColumnOptional determines if the field is optional {@link boolean}
-   * @param fieldName specifies the fieldname {@link String}
-   * @param type specifies the field type {@link RifColumnType}
-   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types
-   *     this represents the total number of digits that can be stored
-   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
-   *     represents how many of the total digits (see `columnLength`) are to the right of the
-   *     decimal point
+   * @param rifField {@link RifField} to create
    */
   private static List<AnnotationSpec> createBeneficiaryMonthlyAnnotations(
-      boolean isId,
-      boolean isTransient,
-      boolean isColumnOptional,
-      String fieldName,
-      RifColumnType type,
-      Optional<Integer> columnLength,
-      Optional<Integer> columnScale) {
-    LinkedList<AnnotationSpec> annotations = new LinkedList<>();
+      boolean isId, RifField rifField) {
 
+    LinkedList<AnnotationSpec> annotations = new LinkedList<>();
     // Add an @Id annotation, if appropriate.
     if (isId) {
       AnnotationSpec.Builder idAnnotation = AnnotationSpec.builder(Id.class);
       annotations.add(idAnnotation.build());
     }
-    // Add an @Column annotation to every non-transient column.
-    if (!isTransient) {
-      AnnotationSpec.Builder columnAnnotation =
-          AnnotationSpec.builder(Column.class)
-              .addMember("name", "$S", "`" + fieldName + "`")
-              .addMember("nullable", "$L", isColumnOptional);
-      if (type == RifColumnType.CHAR && columnLength.isPresent()) {
-        columnAnnotation.addMember("length", "$L", columnLength.get());
-      } else if (type == RifColumnType.NUM) {
+    // Add an @Column annotation to every column.
+    AnnotationSpec.Builder columnAnnotation =
+        AnnotationSpec.builder(Column.class)
+            .addMember("name", "$S", rifField.getRifColumnName().toLowerCase())
+            .addMember("nullable", "$L", rifField.isRifColumnOptional());
+
+    if (rifField.getRifColumnType() == RifColumnType.CHAR
+        && rifField.getRifColumnLength().isPresent()) {
+      columnAnnotation.addMember("length", "$L", rifField.getRifColumnLength().get());
+    } else if (rifField.getRifColumnType() == RifColumnType.NUM) {
+      /*
+       * In SQL, the precision is the number of digits in the unscaled value, e.g.
+       * "123.45" has a precision of 5. The scale is the number of digits to the right
+       * of the decimal point, e.g. "123.45" has a scale of 2.
+       */
+
+      if (rifField.getRifColumnLength().isPresent()) {
+        columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength().get());
+        columnAnnotation.addMember("scale", "$L", rifField.getRifColumnScale().get());
+      } else {
         /*
-         * In SQL, the precision is the number of digits in the unscaled value, e.g.
-         * "123.45" has a precision of 5. The scale is the number of digits to the right
-         * of the decimal point, e.g. "123.45" has a scale of 2.
+         * Unfortunately, Hibernate's SQL schema generation (HBM2DDL) doesn't correctly
+         * handle SQL numeric datatypes that don't have a defined precision and scale.
+         * What it _should_ do is represent those types in PostgreSQL as a "NUMERIC",
+         * but what it does instead is insert a default precision and scale as
+         * "NUMBER(19, 2)". The only way to force the correct behavior is to specify a
+         * columnDefinition, so we do that. This leads to incorrect behavior with HSQL
+         * (for different reasons), but fortunately that doesn't happen to cause
+         * problems with our tests.
          */
+        StringBuilder columnDefinition = new StringBuilder("numeric");
+        if (rifField.getRifColumnLength().isPresent()) {
+          columnDefinition.append("(").append(rifField.getRifColumnLength().get());
 
-        if (columnLength.isPresent() && columnScale.isPresent()) {
-          columnAnnotation.addMember("precision", "$L", columnLength.get());
-          columnAnnotation.addMember("scale", "$L", columnScale.get());
-        } else {
-          /*
-           * Unfortunately, Hibernate's SQL schema generation (HBM2DDL) doesn't correctly
-           * handle SQL numeric datatypes that don't have a defined precision and scale.
-           * What it _should_ do is represent those types in PostgreSQL as a "NUMERIC",
-           * but what it does instead is insert a default precision and scale as
-           * "NUMBER(19, 2)". The only way to force the correct behavior is to specify a
-           * columnDefinition, so we do that. This leads to incorrect behavior with HSQL
-           * (for different reasons), but fortunately that doesn't happen to cause
-           * problems with our tests.
-           */
-          StringBuilder columnDefinition = new StringBuilder();
-          columnDefinition.append("numeric");
-          if (columnLength.isPresent() || columnScale.isPresent()) {
-            columnDefinition.append('(');
-            if (columnLength.isPresent()) {
-              columnDefinition.append(columnLength.get());
-            }
-            if (columnScale.isPresent()) {
-              columnDefinition.append(", ");
-              columnDefinition.append(columnScale.get());
-            }
-            columnDefinition.append(')');
+          if (rifField.getRifColumnScale().isPresent()) {
+            columnDefinition.append(", ").append(rifField.getRifColumnScale().get());
           }
-          columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
+          columnDefinition.append(")");
         }
+        columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
       }
-      annotations.add(columnAnnotation.build());
-    } else {
-      annotations.add(AnnotationSpec.builder(Transient.class).build());
     }
-
+    annotations.add(columnAnnotation.build());
     return annotations;
   }
 

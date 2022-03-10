@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -14,74 +15,61 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class AbstractR4SamhsaMatcherTest {
 
-  private final String name;
-  private final List<String> systems;
-  private final boolean expectedResult;
-  private final String errorMessage;
-
-  @Parameterized.Parameters(name = "{index}: {0}")
-  public static Iterable<Object[]> parameters() {
+  /**
+   * Data method for the abstractR4SamhsaMatcherTest. Used automatically via the MethodSource
+   * annotation.
+   *
+   * @return the data for the test
+   */
+  public static Stream<Arguments> abstractR4SamhsaMatcherTest() {
     final String HCPCS = TransformerConstants.CODING_SYSTEM_HCPCS;
     final String OLDER_HCPCS = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
     final String OTHER = "other system";
-    return List.of(
-        new Object[][] {
-          {
+
+    return Stream.of(
+        arguments(
             "Empty list",
             Collections.emptyList(),
             false,
-            "should NOT return true (all known systems), but DID."
-          },
-          {
+            "should NOT return true (all known systems), but DID."),
+        arguments(
             "HCPCS only systems",
             List.of(HCPCS, HCPCS, HCPCS),
             true,
-            "SHOULD return true (all known systems), but did NOT."
-          },
-          {
+            "SHOULD return true (all known systems), but did NOT."),
+        arguments(
             "HCPCS and older HCPCS system",
             List.of(HCPCS, HCPCS, OLDER_HCPCS, OLDER_HCPCS),
             true,
-            "SHOULD return true (all known systems), but did NOT."
-          },
-          {
+            "SHOULD return true (all known systems), but did NOT."),
+        arguments(
             "Other system only",
             List.of(OTHER, OTHER),
             false,
-            "should NOT return true (all known systems), but DID."
-          },
-          {
+            "should NOT return true (all known systems), but DID."),
+        arguments(
             "HCPCS and other system",
             List.of(HCPCS, HCPCS, OTHER),
             false,
-            "should NOT return true (all known systems), but DID."
-          },
-          {
+            "should NOT return true (all known systems), but DID."),
+        arguments(
             "HCPCS, older HCPCS, and other system",
             List.of(HCPCS, HCPCS, OLDER_HCPCS, OLDER_HCPCS, OTHER),
             false,
-            "should NOT return true (all known systems), but DID."
-          },
-        });
+            "should NOT return true (all known systems), but DID."));
   }
 
-  public AbstractR4SamhsaMatcherTest(
+  @ParameterizedTest(name = "{index}: {0}")
+  @MethodSource
+  public void abstractR4SamhsaMatcherTest(
       String name, List<String> systems, boolean expectedResult, String errorMessage) {
-    this.name = name;
-    this.systems = systems;
-    this.expectedResult = expectedResult;
-    this.errorMessage = errorMessage;
-  }
-
-  @Test
-  public void test() {
     // unchecked - This is ok for making a mock.
     //noinspection unchecked
     AbstractR4SamhsaMatcher<FhirResource> matcherSpy = spy(AbstractR4SamhsaMatcher.class);
@@ -101,8 +89,8 @@ public class AbstractR4SamhsaMatcherTest {
     doReturn(codings).when(mockConcept).getCoding();
 
     assertEquals(
-        name + " " + errorMessage,
         expectedResult,
-        matcherSpy.containsOnlyKnownSystems(mockConcept));
+        matcherSpy.containsOnlyKnownSystems(mockConcept),
+        name + " " + errorMessage);
   }
 }

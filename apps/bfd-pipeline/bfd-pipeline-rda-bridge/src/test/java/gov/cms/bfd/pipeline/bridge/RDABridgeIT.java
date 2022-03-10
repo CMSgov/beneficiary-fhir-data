@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.bridge;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +10,9 @@ import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -25,18 +30,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RDABridgeIT {
+class RDABridgeIT {
 
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
+
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
-  private static final String ACTUAL_FISS = "rda-fiss-test.ndjson";
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
-  private static final String ACTUAL_MCS = "rda-mcs-test.ndjson";
+  private static final String EXPECTED_ATTRIBUTION = "expected-attribution.json";
+
+  private static final String ACTUAL_FISS = "rda-fiss-test-5-18.ndjson";
+  private static final String ACTUAL_MCS = "rda-mcs-test-1-4.ndjson";
+  private static final String ACTUAL_ATTRIBUTION = "attribution.json";
 
   @Test
-  public void shouldGenerateCorrectOutput() throws IOException {
+  void shouldGenerateCorrectOutput() throws IOException {
     Path resourcesDir = getResourcePath();
     String rifDir = resourcesDir.toString();
     Path outputDir = resourcesDir.resolve("output-test");
@@ -49,9 +58,9 @@ public class RDABridgeIT {
           "-b",
           "beneficiary_history.csv",
           "-g",
-          ACTUAL_FISS,
+          "rda-fiss-test.ndjson",
           "-n",
-          ACTUAL_MCS,
+          "rda-mcs-test.ndjson",
           "-f",
           "inpatient.csv",
           "-f",
@@ -64,10 +73,22 @@ public class RDABridgeIT {
           "snf.csv",
           "-m",
           "carrier.csv",
+          "-s",
+          "5",
+          "-z",
+          "1",
+          "-a",
+          "true",
+          "-x",
+          "4",
+          "-q",
+          outputDir.resolve("attribution.json").toString(),
+          "-t",
+          resourcesDir.resolve("attribution-template.json").toString(),
           rifDir
         });
 
-    Set<String> ignorePaths = Collections.emptySet();
+    Set<String> ignorePaths = Collections.singleton("/timestamp");
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
     List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));
@@ -76,12 +97,24 @@ public class RDABridgeIT {
     List<String> expectedMcsJson = Files.readAllLines(expectedDir.resolve(EXPECTED_MCS));
     List<String> actualMcsJson = Files.readAllLines(outputDir.resolve(ACTUAL_MCS));
     assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
+
+    String expectedAttribution =
+        String.join("\n", Files.readAllLines(expectedDir.resolve(EXPECTED_ATTRIBUTION)));
+    String actualAttribution =
+        String.join("\n", Files.readAllLines(outputDir.resolve(ACTUAL_ATTRIBUTION)));
+    assertEquals(
+        expectedAttribution,
+        actualAttribution,
+        "Generated attribution file does not match expected.");
   }
 
-  // DefaultAnnotationParam - Might as well be explicit
-  @SuppressWarnings("DefaultAnnotationParam")
-  @Test(expected = Test.None.class)
-  public void shouldProduceValidClaimStructures() throws IOException {
+  /**
+   * Ensures that no exceptions are thrown while transforming Fiss and MCS claims.
+   *
+   * @throws IOException if there is a setup issue loading the test data
+   */
+  @Test
+  void shouldProduceValidClaimStructures() throws IOException {
     RDABridge bridge = new RDABridge();
 
     Path resourcesDir = getResourcePath();
@@ -94,7 +127,7 @@ public class RDABridgeIT {
     List<MessageOrBuilder> results = new ArrayList<>();
 
     Sink<MessageOrBuilder> testSink =
-        new Sink<MessageOrBuilder>() {
+        new Sink<>() {
           @Override
           public void write(MessageOrBuilder value) {
             results.add(value);
@@ -104,23 +137,52 @@ public class RDABridgeIT {
           public void close() throws IOException {}
         };
 
-    bridge.executeTransformation(
-        RDABridge.SourceType.FISS, resourcesDir, inpatientData, mbiMap, testSink);
-    bridge.executeTransformation(
-        RDABridge.SourceType.MCS, resourcesDir, carrierData, mbiMap, testSink);
+    final int FISS_ID = 0;
+    final int MCS_ID = 1;
 
-    Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-    IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-    FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
-    McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
+    DataSampler<String> dataSampler =
+        DataSampler.<String>builder()
+            .maxValues(10_000)
+            .registerSampleSet(FISS_ID, 0.5f)
+            .registerSampleSet(MCS_ID, 0.5f)
+            .build();
 
-    for (MessageOrBuilder message : results) {
-      if (message instanceof FissClaimChange) {
-        fissTransformer.transformClaim((FissClaimChange) message);
-      } else {
-        mcsTransformer.transformClaim((McsClaimChange) message);
-      }
-    }
+    assertDoesNotThrow(
+        () -> {
+          bridge.executeTransformation(
+              RDABridge.SourceType.FISS,
+              resourcesDir,
+              inpatientData,
+              new WrappedCounter(0),
+              mbiMap,
+              testSink,
+              dataSampler,
+              FISS_ID);
+          bridge.executeTransformation(
+              RDABridge.SourceType.MCS,
+              resourcesDir,
+              carrierData,
+              new WrappedCounter(0),
+              mbiMap,
+              testSink,
+              dataSampler,
+              MCS_ID);
+
+          Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+          IdHasher.Config hasherConfig = new IdHasher.Config(10, "justsomestring");
+          FissClaimTransformer fissTransformer =
+              new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+          McsClaimTransformer mcsTransformer =
+              new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+
+          for (MessageOrBuilder message : results) {
+            if (message instanceof FissClaimChange) {
+              fissTransformer.transformClaim((FissClaimChange) message);
+            } else {
+              mcsTransformer.transformClaim((McsClaimChange) message);
+            }
+          }
+        });
   }
 
   private void assertJsonEquals(
@@ -155,7 +217,7 @@ public class RDABridgeIT {
       }
     }
 
-    assertTrue(String.join("\n", diffList), diffList.isEmpty());
+    assertTrue(diffList.isEmpty(), String.join("\n", diffList));
   }
 
   private String createDiff(String expectedJson, String actualJson, Set<String> ignorePaths) {

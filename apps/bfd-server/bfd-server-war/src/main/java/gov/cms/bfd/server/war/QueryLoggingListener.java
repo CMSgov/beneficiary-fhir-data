@@ -118,66 +118,70 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_OMIT_IDENTIFIERS(
         "bene_by_id.omit_hicns_and_mbis",
         (s ->
-            s.contains("from \"Beneficiaries\"")
-                && s.contains("\"beneficiaryId\"=")
+            s.contains(" from beneficiaries ")
+                && s.contains("bene_id=")
                 && !s.contains(" join ")
-                && !s.contains("\"hicn\"="))),
+                && !s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_ID_INCLUDE_IDENTIFIERS(
         "bene_by_id.include_hicns_and_mbis",
         (s ->
-            s.contains("from \"Beneficiaries\"")
-                && s.contains("\"beneficiaryId\"=")
+            s.contains(" from beneficiaries ")
+                && s.contains("bene_id=")
                 && s.contains(" join ")
-                && !s.contains("\"hicn\"="))),
+                && !s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn.hicns_from_beneficiarieshistory",
-        (s -> s.contains(" from \"BeneficiariesHistory\" "))),
+        (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_OMIT_IDENTIFIERS(
         "bene_by_hicn.bene_by_hicn_or_id.omit_hicns_and_mbis",
         (s ->
-            s.contains("from \"Beneficiaries\"")
+            s.contains(" from beneficiaries ")
                 && !s.contains(" join ")
-                && s.contains("\"hicn\"="))),
+                && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_INCLUDE_IDENTIFIERS(
         "bene_by_hicn.bene_by_hicn_or_id.include_hicns_and_mbis",
         (s ->
-            s.contains("from \"Beneficiaries\"")
+            s.contains(" from beneficiaries ")
                 && s.contains(" join ")
-                && s.contains("\"hicn\"="))),
+                && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_COVERAGE(
         "bene_by_coverage",
         (s ->
-            s.contains("from \"Beneficiaries\"")
+            s.contains(" from beneficiaries ")
                 && s.contains("where beneficiar0_.\"partDContractNumber"))),
 
-    EOBS_BY_BENE_ID_CARRIER(
-        "eobs_by_bene_id.carrier", (s -> s.contains(" from \"CarrierClaims\" "))),
+    EOBS_BY_BENE_ID_CARRIER("eobs_by_bene_id.carrier", (s -> s.contains(" from carrier_claims "))),
 
-    EOBS_BY_BENE_ID_DME("eobs_by_bene_id.dme", (s -> s.contains(" from \"DMEClaims\" "))),
+    EOBS_BY_BENE_ID_DME("eobs_by_bene_id.dme", (s -> s.contains(" from dme_claims "))),
 
-    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id.hha", (s -> s.contains(" from \"HHAClaims\" "))),
+    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id.hha", (s -> s.contains(" from hha_claims "))),
 
-    EOBS_BY_BENE_ID_HOSPICE(
-        "eobs_by_bene_id.hospice", (s -> s.contains(" from \"HospiceClaims\" "))),
+    EOBS_BY_BENE_ID_HOSPICE("eobs_by_bene_id.hospice", (s -> s.contains(" from hospice_claims "))),
 
     EOBS_BY_BENE_ID_INPATIENT(
-        "eobs_by_bene_id.inpatient", (s -> s.contains(" from \"InpatientClaims\" "))),
+        "eobs_by_bene_id.inpatient", (s -> s.contains(" from inpatient_claims "))),
 
     EOBS_BY_BENE_ID_OUTPATIENT(
-        "eobs_by_bene_id.outpatient", (s -> s.contains(" from \"OutpatientClaims\" "))),
+        "eobs_by_bene_id.outpatient", (s -> s.contains(" from outpatient_claims "))),
 
-    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id.pde", (s -> s.contains(" from \"PartDEvents\" "))),
+    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id.pde", (s -> s.contains(" from partd_events "))),
 
-    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id.snf", (s -> s.contains(" from \"SNFClaims\" "))),
+    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id.snf", (s -> s.contains(" from snf_claims "))),
 
-    LOADED_BATCH("loaded_batch", (s -> s.contains(" from \"LoadedBatches\" "))),
+    FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from \"pre_adj\".\"Fiss")),
 
-    LOADED_FILE("loaded_file", (s -> s.contains(" from \"LoadedFiles\" "))),
+    MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from \"pre_adj\".\"Mcs")),
+
+    MBI_CACHE("mbi_cache_lookup", s -> s.contains("from \"pre_adj\".\"MbiCache\"")),
+
+    LOADED_BATCH("loaded_batch", (s -> s.contains(" from loaded_batches "))),
+
+    LOADED_FILE("loaded_file", (s -> s.contains(" from loaded_files "))),
 
     UNKNOWN("unknown", null);
 

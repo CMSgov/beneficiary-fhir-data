@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
@@ -34,10 +38,9 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class CarrierClaimTransformerV2Test {
   CarrierClaim claim;
@@ -64,7 +67,7 @@ public class CarrierClaimTransformerV2Test {
     return claim;
   }
 
-  @Before
+  @BeforeEach
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
@@ -98,7 +101,7 @@ public class CarrierClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  @Ignore
+  @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
@@ -110,17 +113,17 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
-    Assert.assertNotNull(eob.getBillablePeriod());
-    Assert.assertEquals(
+    assertNotNull(eob.getBillablePeriod());
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"),
         eob.getBillablePeriod().getStart());
-    Assert.assertEquals(
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"), eob.getBillablePeriod().getEnd());
   }
 
   @Test
   public void shouldHaveIdentifiers() {
-    Assert.assertEquals(2, eob.getIdentifier().size());
+    assertEquals(2, eob.getIdentifier().size());
 
     Identifier clmGrp1 =
         TransformerTestUtilsV2.findIdentifierBySystem(
@@ -134,7 +137,7 @@ public class CarrierClaimTransformerV2Test {
             "uc",
             "Unique Claim ID");
 
-    Assert.assertTrue(compare1.equalsDeep(clmGrp1));
+    assertTrue(compare1.equalsDeep(clmGrp1));
 
     Identifier clmGrp2 =
         TransformerTestUtilsV2.findIdentifierBySystem(
@@ -148,12 +151,12 @@ public class CarrierClaimTransformerV2Test {
             "uc",
             "Unique Claim ID");
 
-    Assert.assertTrue(compare2.equalsDeep(clmGrp2));
+    assertTrue(compare2.equalsDeep(clmGrp2));
   }
 
   @Test
   public void shouldHaveEstensions() {
-    Assert.assertEquals(7, eob.getExtension().size());
+    assertEquals(7, eob.getExtension().size());
   }
 
   @Test
@@ -171,7 +174,7 @@ public class CarrierClaimTransformerV2Test {
                 "O",
                 "Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -188,7 +191,7 @@ public class CarrierClaimTransformerV2Test {
     Extension compare =
         new Extension("https://bluebutton.cms.gov/resources/variables/carr_num", identifier);
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -207,7 +210,7 @@ public class CarrierClaimTransformerV2Test {
         new Extension(
             "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num", identifier);
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -227,7 +230,7 @@ public class CarrierClaimTransformerV2Test {
     Extension compare =
         new Extension("https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd", coding);
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -246,7 +249,7 @@ public class CarrierClaimTransformerV2Test {
     Extension compare =
         new Extension("https://bluebutton.cms.gov/resources/variables/asgmntcd", coding);
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -266,7 +269,7 @@ public class CarrierClaimTransformerV2Test {
         new Extension(
             "https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num", identifier);
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -286,13 +289,13 @@ public class CarrierClaimTransformerV2Test {
     Extension compare =
         new Extension("https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd", coding);
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    Assert.assertEquals(2, eob.getSupportingInfo().size());
+    assertEquals(2, eob.getSupportingInfo().size());
   }
 
   @Test
@@ -318,7 +321,7 @@ public class CarrierClaimTransformerV2Test {
 
     compare.setTiming(new DateType("1999-11-06"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -344,45 +347,44 @@ public class CarrierClaimTransformerV2Test {
 
     compare.setValue(new Reference("#line-observation-6"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
   public void shouldHaveCreatedDate() {
-    Assert.assertNotNull(eob.getCreated());
+    assertNotNull(eob.getCreated());
   }
 
   @Test
   public void shouldReferencePatient() {
-    Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    assertNotNull(eob.getPatient());
+    assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
   @Test
   public void shouldInsuranceCoverage() {
-    Assert.assertNotNull(eob.getInsurance());
-    Assert.assertEquals(
-        "Coverage/part-b-567834", eob.getInsurance().get(0).getCoverage().getReference());
+    assertNotNull(eob.getInsurance());
+    assertEquals("Coverage/part-b-567834", eob.getInsurance().get(0).getCoverage().getReference());
   }
 
   @Test
   public void shouldSetFinalAction() {
-    Assert.assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
+    assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
   @Test
   public void shouldSetUse() {
-    Assert.assertEquals(Use.CLAIM, eob.getUse());
+    assertEquals(Use.CLAIM, eob.getUse());
   }
 
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("ExplanationOfBenefit/carrier-" + claim.getClaimId(), eob.getId());
+    assertEquals("ExplanationOfBenefit/carrier-" + claim.getClaimId(), eob.getId());
   }
 
   @Test
   public void shouldSetLastUpdated() {
-    Assert.assertNotNull(eob.getMeta().getLastUpdated());
+    assertNotNull(eob.getMeta().getLastUpdated());
   }
 
   @Test
@@ -402,7 +404,7 @@ public class CarrierClaimTransformerV2Test {
                 "http://hl7.org/fhir/sid/ndc",
                 new Coding("http://hl7.org/fhir/sid/ndc", "49035044700", null))));
 
-    Assert.assertTrue(compare.equalsDeep(pos));
+    assertTrue(compare.equalsDeep(pos));
   }
 
   @Test
@@ -427,13 +429,13 @@ public class CarrierClaimTransformerV2Test {
             // timingDate
             .setTiming(new DateType("1999-11-06"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   /** Diagnosis elements */
   @Test
   public void shouldHaveDiagnosesList() {
-    Assert.assertEquals(5, eob.getDiagnosis().size());
+    assertEquals(5, eob.getDiagnosis().size());
   }
 
   @Test
@@ -452,7 +454,7 @@ public class CarrierClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp1.equalsDeep(diag1));
+    assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
         TransformerTestUtilsV2.findDiagnosisByCode("H8888", eob.getDiagnosis());
@@ -469,7 +471,7 @@ public class CarrierClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp2.equalsDeep(diag2));
+    assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
         TransformerTestUtilsV2.findDiagnosisByCode("H66666", eob.getDiagnosis());
@@ -486,7 +488,7 @@ public class CarrierClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp3.equalsDeep(diag3));
+    assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
         TransformerTestUtilsV2.findDiagnosisByCode("H77777", eob.getDiagnosis());
@@ -503,7 +505,7 @@ public class CarrierClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp4.equalsDeep(diag4));
+    assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
         TransformerTestUtilsV2.findDiagnosisByCode("H12345", eob.getDiagnosis());
@@ -520,13 +522,13 @@ public class CarrierClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp5.equalsDeep(diag5));
+    assertTrue(cmp5.equalsDeep(diag5));
   }
 
   /** Top level Type */
   @Test
   public void shouldHaveExpectedTypeCoding() {
-    Assert.assertEquals(3, eob.getType().getCoding().size());
+    assertEquals(3, eob.getType().getCoding().size());
   }
 
   @Test
@@ -548,7 +550,7 @@ public class CarrierClaimTransformerV2Test {
                         "professional",
                         "Professional")));
 
-    Assert.assertTrue(compare.equalsDeep(eob.getType()));
+    assertTrue(compare.equalsDeep(eob.getType()));
   }
 
   /**
@@ -559,7 +561,7 @@ public class CarrierClaimTransformerV2Test {
    */
   @Test
   public void shouldHaveCareTeamList() {
-    Assert.assertEquals(4, eob.getCareTeam().size());
+    assertEquals(4, eob.getCareTeam().size());
   }
 
   @Test
@@ -574,7 +576,7 @@ public class CarrierClaimTransformerV2Test {
             "referring",
             "Referring");
 
-    Assert.assertTrue(compare1.equalsDeep(member1));
+    assertTrue(compare1.equalsDeep(member1));
 
     // Second member
     CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
@@ -586,7 +588,7 @@ public class CarrierClaimTransformerV2Test {
             "referring",
             "Referring");
 
-    Assert.assertTrue(compare2.equalsDeep(member2));
+    assertTrue(compare2.equalsDeep(member2));
 
     //     // Third member
     CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
@@ -620,7 +622,7 @@ public class CarrierClaimTransformerV2Test {
             .setCode("1")
             .setDisplay("Participating"));
 
-    Assert.assertTrue(compare3.equalsDeep(member3));
+    assertTrue(compare3.equalsDeep(member3));
 
     // Fourth member
     CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, eob.getCareTeam());
@@ -633,7 +635,7 @@ public class CarrierClaimTransformerV2Test {
             "Primary provider");
     compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
 
-    Assert.assertTrue(compare4.equalsDeep(member4));
+    assertTrue(compare4.equalsDeep(member4));
   }
 
   @Test
@@ -642,12 +644,12 @@ public class CarrierClaimTransformerV2Test {
 
     Quantity compare = new Quantity(1);
 
-    Assert.assertTrue(compare.equalsDeep(quantity));
+    assertTrue(compare.equalsDeep(quantity));
   }
 
   @Test
   public void shouldHaveLineItemAdjudications() {
-    Assert.assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
+    assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
   }
 
   @Test
@@ -675,7 +677,7 @@ public class CarrierClaimTransformerV2Test {
                                 "0",
                                 "N/A"))));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -700,7 +702,7 @@ public class CarrierClaimTransformerV2Test {
                                 "Line Payment Amount to Beneficiary"))))
             .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -733,7 +735,7 @@ public class CarrierClaimTransformerV2Test {
                         "https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd",
                         "0",
                         "80%"))));
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -759,7 +761,7 @@ public class CarrierClaimTransformerV2Test {
             .setAmount(
                 new Money().setValue(37.5).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -784,7 +786,7 @@ public class CarrierClaimTransformerV2Test {
                                 "Line Beneficiary Part B Deductible Amount"))))
             .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -809,7 +811,7 @@ public class CarrierClaimTransformerV2Test {
                                 "Line Primary Payer (if not Medicare) Paid Amount"))))
             .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -835,7 +837,7 @@ public class CarrierClaimTransformerV2Test {
             .setAmount(
                 new Money().setValue(9.57).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -860,7 +862,7 @@ public class CarrierClaimTransformerV2Test {
                                 "Line Submitted Charge Amount"))))
             .setAmount(new Money().setValue(75).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -886,12 +888,12 @@ public class CarrierClaimTransformerV2Test {
             .setAmount(
                 new Money().setValue(47.84).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
   public void shouldHaveBenefitBalanceFinancial() {
-    Assert.assertEquals(5, eob.getBenefitBalanceFirstRep().getFinancial().size());
+    assertEquals(5, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
   @Test
@@ -916,7 +918,7 @@ public class CarrierClaimTransformerV2Test {
                     .setValueElement(new DecimalType("777.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -941,7 +943,7 @@ public class CarrierClaimTransformerV2Test {
                     .setValueElement(new DecimalType("123.45"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -966,7 +968,7 @@ public class CarrierClaimTransformerV2Test {
                     .setValueElement(new DecimalType("888.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -991,7 +993,7 @@ public class CarrierClaimTransformerV2Test {
                     .setValueElement(new DecimalType("245.04"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1016,7 +1018,7 @@ public class CarrierClaimTransformerV2Test {
                     .setValueElement(new DecimalType("166.23"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1040,13 +1042,13 @@ public class CarrierClaimTransformerV2Test {
                                 "Claim Total Charge Amount"))))
             .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(total));
+    assertTrue(compare.equalsDeep(total));
   }
 
   /** Procedures */
   @Test
   public void shouldHaveProcedureList() {
-    Assert.assertEquals(0, eob.getProcedure().size());
+    assertEquals(0, eob.getProcedure().size());
   }
 
   /**

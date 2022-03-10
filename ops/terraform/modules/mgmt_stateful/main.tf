@@ -113,30 +113,6 @@ module "logs" {
   kms_key_id = null                 # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
-
-## Jenkins EFS Resources, Mounts, and Security Groups
-#
-module "efs" {
-  source     = "../resources/efs"
-  env_config = local.env_config
-  role       = "jenkins"
-  layer      = "app"
-}
-
-resource "aws_ebs_volume" "jenkins_data" {
-  availability_zone = local.env_config.azs
-  size              = 1000
-  type              = "gp2"
-  encrypted         = true
-  kms_key_id        = data.aws_kms_key.master_key.arn
-
-  tags = {
-    Name       = "bfd-${var.env_config.env}-jenkins-data"
-    cpm_backup = "4HR Daily Weekly Monthly"
-  }
-}
-
-
 ## IAM Roles, Profiles and Policies for Packer
 #
 resource "aws_iam_role" "packer" {

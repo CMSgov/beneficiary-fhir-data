@@ -16,6 +16,9 @@ https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests
 The tests use a few python libraries that will need to be installed on the run box prior to starting the tests. Below are the required
 libraries, what they do, and the command to install them.
 
+To install everything below at the same time you can use the provided requirements file
+`pip3 install -r requirements.txt`
+
 **Pyyaml**
 
 What: Library for reading/writing yaml files
@@ -47,12 +50,12 @@ See: http://docs.locust.io/en/stable/installation.html
 
 
 In addition to these libraries, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
-Run the following two commands on the box:
+Run the following two commands on the box from your local directory:
 
 ```
 sudo cp /usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem ~/
 
-sudo chown <SSH-username>:<SSH-username> bluebutton-backend-test-data-server-client-test-keypair.pem
+sudo chown <SSH-username>:<SSH-username> ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 ```
 
 Once this is done you'll have a modified PEM to use for the tests in your user directory.
@@ -65,13 +68,13 @@ The tests run headless, i.e. without the web GUI, because we'll be executing the
 
 The tests are run with parameters that specify all the test params and test file to use, so the test can be run in a single line. This is primarily meant to allow support for running tests in Jenkins, but can also be used to automate test suites.
 
-A single-line test will look like this:
+A single-line test will look like this (placeholders to replace in brackets):
 
-_python3 runtests.py --homePath="~/" --clientCertPath="~/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="**<AWS_DB_host>**" --databaseUsername="**<db_username_from_keybase>**" --databasePassword="**<db_password_from_keybase>**" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"_
+    python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="<AWS_DB_host>" --databaseUsername="<db_username_from_keybase>" --databasePassword="<db_password_from_keybase>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
 
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
 
-**--homePath** : (Required) : The path to your home directory on the local box, such as /home/logan.mitchell/ or ~/
+**--homePath** : (Required) : The path to your home directory on the local box, such as /home/logan.mitchell/
 
 **--clientCertPath** : (Required) : The path to the PEM file we copied/modified earlier. Should be located in your home directory like this: ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 
@@ -81,7 +84,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--databasePassword** : (Required) : The password for connecting to the database, can be found in Keybase. Make sure to use the correct one for the environment you're connecting to.
 
-**--testHost** : (Required) : The load balancer or single node to run the tests against. The environment used here should match the same environment (test, prod-sbx, prod) as the database, so we pull the appropriate data for the environment tested against.
+**--testHost** : (Required) : The load balancer or single node to run the tests against. The environment used here should match the same environment (test, prod-sbx, prod) as the database, so we pull the appropriate data for the environment tested against. Note that when using a single node, you should specity the Ip AND the port for the application.
 
 **--testFile** : (Required) : The path to the test file we want to run.
 
@@ -93,11 +96,15 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--clientsPerSecond** : (Optional) : The number of clients to spawn per second, until maxClients is reached. If not provided, defaults to 5.
 
+**--workerThreads** : (Optional) : Controls running in distributed mode; If this is set to >1, will spawn that many worker threads to run the tests across multiple cores. If not provided, defaults to 1. See section on running in distributed mode for more info.
+
 ### Data setup for contract tests
 
 There is one special type of test that requires a data setup script to be run beforehand; this is the coverage contract test. This test runs through every list of pages for a set of contracts, but the urls for hitting all the pages of whatever contracts need to be set up before the test runs. This can be done by calling the data setup script common/write_contract_cursors.py similar to this:
 
-_python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"_
+    python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"
+
+The script will write out the results to homePath specified in the config (and expect them there during runtime.)
 
 The following are the arguments passed to this data setup script:
 
@@ -123,6 +130,26 @@ locust -f <path/to/test/file.py>
 
 This will run the test with the parameters of the last test that was run. If you want to set up a configuration file manually, a sample file is included in this directory to copy and modify; simply copy the file and remove -sample from the name so its named config.yml.
 
+## Distributed Mode
+
+Python natively only runs code on a single thread; this limits the ability of the test to properly scale up because too many requests will quickly overload the box's cpu and bottleneck the cadence of requests.
+In order to avoid this limitation, the tests support distribution over multiple cpu cores by spinning up multiple threads that each handle a portion of the data at once.
+By doing this, we get the following benefits:
+- Python handles each new thread on a separate core, allowing us to run a larger number of requests without bottlenecking the cpu
+- Locust runs each request task subsequently, so splitting the request tasks across threads increases the parallelism of each call and allows for more requests to hit simultaneously
+  - This only matters slightly; locust only waits to _start_ the request to make the next, so it still goes through the requests quickly with few threads
+
+Distributed mode is controlled by using the --workerThreads parameter on the runtests.py test script. By setting this parameter, that many worker threads will be spawned and automatically split up the test data amongst themselves.
+Note that each worker will still ramp up to the same number of maxClients and clientsPerSecond, so keep this in mind when setting the test up. If you have 4 workers and want to have 100 users total hitting the server,
+you should set --maxClients to 25. (25 clients across 4 threads = 100 target)
+
+Since the test script controls making the child threads, automated distributed mode is not runnable using "quick run" by calling locust directly.
+Locust does support distributing the tests natively using a master and worker threads using its own parameters that could be used to manually make a distributed test run outside
+the runtests.py script.
+
+See https://docs.locust.io/en/stable/running-locust-distributed.html#options for how to use distributed mode calling locust directly. This can allow us to distribute the load
+across multiple boxes instead of threads by using a host bind port, master/worker parameters, and other options noted there if we wanted to run a much larger scale test.
+
 ## Reading the results
 
 After running the tests, you'll get a results printout that looks like this:
@@ -146,6 +173,8 @@ Response time percentiles (approximated)
 You can use this to check against the expected SLAs and see if there were any failures as a result of the load placed against the endpoint. If the endpoint encountered any failures, 
 determined by an HTTP response code >200, they will be reported here.
 
+The results will look the same whether running in distributed or non-distributed modes.
+
 ## Troubleshooting
 - The run box may not have permissions to hit another single node instance, in which case the test will repeat 0 requests with no error message.
     - If this occurs, you may need to adjust the ACLs in AWS to allow the box to connect to other single instances. This silent error may occur with other types of connection issues as well.
@@ -154,9 +183,9 @@ determined by an HTTP response code >200, they will be reported here.
     
 ## Improvements
 This is a list of some improvements that could be made to the tests moving forward:
+- (Consider) Move all tests into one script with each test being a @Task
+- Set up tests to all run at once to simulate actual load across the whole system (i.e. during big spike loads)
+- Since each test shares boilerplate setup, commonize what is inside the tasks to take the url and name of the test with any required setup params.
 - Currently, when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
-- Commonize the boilerplate code that each test shares, possibly using Python classes
 - Add the ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
-- Add/Correct any use cases that are missing from the existing tests. The idea was to capture realistic endpoint calls, so these tests should reflect real user calls to most accurately test the system.
-- Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common pull_hashed_mbis and pull_bene_ids files)
-- Look into better utilizing the machine cpu by running distributed: https://docs.locust.io/en/stable/running-without-web-ui.html#running-locust-distributed-without-web-ui
+- Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common db file)

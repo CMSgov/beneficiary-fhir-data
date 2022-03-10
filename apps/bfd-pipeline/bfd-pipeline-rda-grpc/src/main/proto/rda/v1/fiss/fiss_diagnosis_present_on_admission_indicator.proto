@@ -7,36 +7,21 @@ option java_multiple_files = true;
 import "rda/v1/enum_options.proto";
 
 enum FissDiagnosisPresentOnAdmissionIndicator {
-  // ASCII N:
-  //
   // No, not present at the time of inpatient admission.
   DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO = 0                      [(string_value) = "N"];
 
-  // ASCII U:
-  //
   // Unknown, the documentation is insufficient to determine if the condition was present at the time of inpatient
   // admission.
   DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_UNKNOWN = 1                 [(string_value) = "U"];
 
-  // ASCII W:
-  //
   // Clinically undetermined, the provider is unable to clinically determine whether the condition was present at the
   // time of inpatient admission or not.
   DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED = 2 [(string_value) = "W"];
 
-  // ASCII Y:
-  //
   // Yes, Present at the time of inpatient admission.
   DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_YES = 3                     [(string_value) = "Y"];
 
-  // ASCII 1:
-  //
   // Unreported/not used, exempt from POA reporting - This code is the equivalent code of a blank on the UB04,
   // however, it is determined that blanks are undesirable when submitting the data via the 4010A1.
   DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_UNREPORTED = 4              [(string_value) = "1"];
-
-  // ASCII <SPACE>:
-  //
-  // Not acute care, POA does not apply.
-  DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NOT_ACUTE_CARE = 5          [(string_value) = " "];
 }

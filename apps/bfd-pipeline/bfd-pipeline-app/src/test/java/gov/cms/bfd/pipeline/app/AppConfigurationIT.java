@@ -1,5 +1,11 @@
 package gov.cms.bfd.pipeline.app;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
@@ -16,8 +22,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit(ish) tests for {@link gov.cms.bfd.pipeline.app.AppConfiguration}.
@@ -79,16 +84,15 @@ public final class AppConfigurationIT {
      */
     String output = "";
     if (testAppExitCode != 0) output = collectOutput(testApp);
-    Assert.assertEquals(
-        String.format("Wrong exit code. Output[\n%s]\n", output), 0, testAppExitCode);
+    assertEquals(0, testAppExitCode, String.format("Wrong exit code. Output[\n%s]\n", output));
 
     ObjectInputStream testAppOutput = new ObjectInputStream(testApp.getErrorStream());
     AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
-    Assert.assertNotNull(testAppConfig);
-    Assert.assertEquals(
+    assertNotNull(testAppConfig);
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_BUCKET),
         testAppConfig.getCcwRifLoadOptions().get().getExtractionOptions().getS3BucketName());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE),
         testAppConfig
             .getCcwRifLoadOptions()
@@ -97,7 +101,7 @@ public final class AppConfigurationIT {
             .getAllowedRifFileType()
             .get()
             .name());
-    Assert.assertEquals(
+    assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
         testAppConfig
@@ -106,7 +110,7 @@ public final class AppConfigurationIT {
             .getLoadOptions()
             .getIdHasherConfig()
             .getHashIterations());
-    Assert.assertArrayEquals(
+    assertArrayEquals(
         Hex.decodeHex(
             testAppBuilder
                 .environment()
@@ -118,20 +122,20 @@ public final class AppConfigurationIT {
             .getLoadOptions()
             .getIdHasherConfig()
             .getHashPepper());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
         testAppConfig.getDatabaseOptions().getDatabaseUrl());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
         testAppConfig.getDatabaseOptions().getDatabaseUsername());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD),
         testAppConfig.getDatabaseOptions().getDatabasePassword());
-    Assert.assertEquals(
+    assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
         testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().getLoaderThreads());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED),
         "" + testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().isIdempotencyRequired());
   }
@@ -150,12 +154,12 @@ public final class AppConfigurationIT {
     ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
     Process testApp = testAppBuilder.start();
 
-    Assert.assertNotEquals(0, testApp.waitFor());
+    assertNotEquals(0, testApp.waitFor());
     String testAppError =
         new BufferedReader(new InputStreamReader(testApp.getErrorStream()))
             .lines()
             .collect(Collectors.joining("\n"));
-    Assert.assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
+    assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
   }
 
   /**

@@ -96,6 +96,9 @@ public final class PipelineJobRecordStore {
   }
 
   /**
+   * Find most recent optional.
+   *
+   * @param <A> the type parameter
    * @param type the {@link PipelineJobRecord#getJobType()} to match against
    * @return the {@link PipelineJobRecord} that matches the criteria with the most recent {@link
    *     PipelineJobRecord#getCreatedTime()} value
@@ -127,6 +130,7 @@ public final class PipelineJobRecordStore {
    * Submits the specified {@link PipelineJob} / {@link PipelineJobType} for execution, with the
    * specified {@link PipelineJobArguments}.
    *
+   * @param <A> the type parameter
    * @param jobType the {@link PipelineJob#getType()} of the {@link PipelineJob} to run
    * @param jobArguments the {@link PipelineJobArguments} to run the specified {@link PipelineJob}
    *     with

@@ -8,6 +8,7 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
+export FILTERING_NON_NULL_AND_NON_2022_BENES='{{ data_pipeline_filtering_non_null_and_non_2022_benes }}'
 export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
 export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
 {% if data_pipeline_new_relic_app_name is defined %}
@@ -33,6 +34,14 @@ export RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
 export RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
 export RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
 export RDA_GRPC_AUTH_TOKEN='{{ data_pipeline_rda_grpc_auth_token }}'
+export RDA_GRPC_SERVER_TYPE='{{ data_pipeline_rda_grpc_server_type }}'
+export RDA_GRPC_INPROC_SERVER_MODE='{{ data_pipeline_rda_grpc_inproc_server_mode }}'
+export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ data_pipeline_rda_grpc_inproc_server_s3_region }}'
+export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ data_pipeline_rda_grpc_inproc_server_s3_bucket }}'
+export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ data_pipeline_rda_grpc_inproc_server_s3_directory }}'
+
+# Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
+export BFD_ENV_NAME='{{ env_name_std }}'
 
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"

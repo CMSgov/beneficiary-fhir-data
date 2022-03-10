@@ -1,13 +1,10 @@
-import os
-import sys
-import yaml
 from common import config
 
 '''
 Returns a list of cursor urls by looking for an expected file (named by endpoint version) and returning the
 patient by contract search urls with all relevant pages (via cursor links).
 '''
-def loaddata(version):
+def load_data(version):
     ## Load configuration data, like db creds
     config_file = config.load()
 

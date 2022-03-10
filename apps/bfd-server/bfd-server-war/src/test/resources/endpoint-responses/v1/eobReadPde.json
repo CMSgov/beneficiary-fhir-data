@@ -28,9 +28,9 @@
   "patient" : {
     "reference" : "Patient/567834"
   },
-  "billablePeriod": {
-    "start": "2015-05-12",
-    "end": "2015-05-12"
+  "billablePeriod" : {
+    "start" : "2015-05-12",
+    "end" : "2015-05-12"
   },
   "organization" : {
     "identifier" : {
@@ -302,8 +302,8 @@
     "service" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "495800192",
-        "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
+        "code" : "500904610",
+        "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
       } ]
     },
     "servicedDate" : "2015-05-12",

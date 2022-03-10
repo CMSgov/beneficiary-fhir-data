@@ -27,7 +27,11 @@ public final class RifLayoutProcessingException extends RuntimeException {
     this.element = element;
   }
 
-  /** @return */
+  /**
+   * Gets the element.
+   *
+   * @return the element
+   */
   public Element getElement() {
     return element;
   }

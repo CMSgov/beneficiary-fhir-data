@@ -44,14 +44,6 @@
 		<tag>HEAD</tag>
 	</scm>
 
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>GitHub CMSgov Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data</url>
-		</repository>
-	</distributionManagement>
-
 	<repositories>
 		<repository>
 			<id>ossrh-snapshots</id>
@@ -70,8 +62,7 @@
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
-		<module>bfd-server-test-perf</module>
-		<!-- <module>bfd-server-test-functions</module> -->
+		<module>bfd-db-migrator</module>
 	</modules>
 
 	<properties>
@@ -91,9 +82,12 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.1.2</metrics.version>
-		<hibernate.version>5.2.10.Final</hibernate.version>
-		
+		<metrics.version>4.1.29</metrics.version>
+		<hibernate.version>5.6.1.Final</hibernate.version>
+		<junit.version>5.8.2</junit.version>
+		<jackson.version>2.13.1</jackson.version>
+		<mockito.version>4.2.0</mockito.version>
+
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
@@ -106,6 +100,9 @@
 
 		<!-- Whether the preadj endpoints should be enabled -->
 		<local.preadj.enabled>true</local.preadj.enabled>
+
+		<!-- Whether the old MBI hash query feature should be enabled -->
+		<local.preadj.oldMbiHash.enabled>true</local.preadj.oldMbiHash.enabled>
 	</properties>
 
 	<dependencyManagement>
@@ -143,7 +140,7 @@
 				<!-- Used as a logging backed/target for SLF4J. -->
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.2.3</version>
+				<version>1.2.8</version>
 			</dependency>
 
 			<dependency>
@@ -297,12 +294,18 @@
 
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
-
+			<dependency>
+				<!-- Needed for parameterized unit tests. -->
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -464,7 +467,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>2.22.2</version>
 					<configuration>
 						<!-- The intent here is to provide a property that can be set in `settings.xml`,
 							to specify environment-specific JVM arguments for tests. For example, one
@@ -515,7 +518,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.3</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -641,6 +644,14 @@ checkJavaFormat
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<doclint>all</doclint>
+					<failOnWarnings>true</failOnWarnings>
+					<detectJavaApiLink>false</detectJavaApiLink>
+					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
+					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
+					<quiet>true</quiet>
+				</configuration>
 				<executions>
 					<execution>
 						<!-- Always generate a Javadoc JAR. This is a best practice, but is 
@@ -649,9 +660,6 @@ checkJavaFormat
 						<goals>
 							<goal>jar</goal>
 						</goals>
-						<configuration>
-							<failOnError>false</failOnError>
-            			</configuration>
 					</execution>
 				</executions>
 			</plugin>

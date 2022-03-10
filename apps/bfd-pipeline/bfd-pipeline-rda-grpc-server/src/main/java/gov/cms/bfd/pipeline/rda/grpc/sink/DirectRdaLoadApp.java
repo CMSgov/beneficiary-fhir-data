@@ -54,9 +54,12 @@ public class DirectRdaLoadApp {
     reporter.start(5, TimeUnit.SECONDS);
 
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(options);
-    final DatabaseOptions databaseConfig = readDatabaseOptions(options);
+    final DatabaseOptions databaseConfig =
+        readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
     HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+    System.out.printf("thread count is %d%n", jobConfig.getJobConfig().getWriteThreads());
+    System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
     DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
     try (PipelineApplicationState appState =
         new PipelineApplicationState(
@@ -89,12 +92,12 @@ public class DirectRdaLoadApp {
     }
   }
 
-  private static DatabaseOptions readDatabaseOptions(ConfigLoader options) {
+  private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
     return new DatabaseOptions(
         options.stringValue("database.url", null),
         options.stringValue("database.user", null),
         options.stringValue("database.password", null),
-        10);
+        options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)));
   }
 
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(ConfigLoader options) {
@@ -105,7 +108,8 @@ public class DirectRdaLoadApp {
     final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofDays(1))
-            .batchSize(options.intValue("job.batchSize", 1));
+            .batchSize(options.intValue("job.batchSize", 1))
+            .writeThreads(options.intValue("job.writeThreads", 1));
     options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
     options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
     final GrpcRdaSource.Config grpcConfig =

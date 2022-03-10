@@ -3,7 +3,7 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Pharmacy Care Team Roles <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBClaimPharmacyTeamRole.html">ValueSet:
- * C4BB Claim Pharmacy CareTeam Roles<a>
+ * C4BB Claim Pharmacy CareTeam Roles</a>
  */
 public enum C4BBClaimPharmacyTeamRole {
   PRIMARY,

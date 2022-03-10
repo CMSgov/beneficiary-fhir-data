@@ -1,23 +1,25 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class McsClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-  private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-  private final McsClaimTransformer transformer = new McsClaimTransformer(clock, hasher);
+  private final McsClaimTransformer transformer =
+      new McsClaimTransformer(
+          clock, MbiCache.computedCache(new IdHasher.Config(10, "justsomestring")));
 
   @Test
   public void basicCall() throws Exception {
@@ -29,22 +31,20 @@ public class McsClaimStreamCallerIT {
         .build()
         .runWithChannelParam(
             channel -> {
-              final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
+              final McsClaimStreamCaller caller = new McsClaimStreamCaller();
+              final GrpcResponseStream<McsClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
-              PreAdjMcsClaim claim = results.next().getClaim();
-              assertEquals("75302", claim.getIdrClmHdIcn());
+              PreAdjMcsClaim claim = transform(results.next());
+              assertTrue(claim.getIdrClmHdIcn().length() > 0);
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
-              claim = results.next().getClaim();
-              assertEquals("43644459", claim.getIdrClmHdIcn());
+              claim = transform(results.next());
+              assertTrue(claim.getIdrClmHdIcn().length() > 0);
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 
@@ -58,15 +58,19 @@ public class McsClaimStreamCallerIT {
         .build()
         .runWithChannelParam(
             channel -> {
-              final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
+              final McsClaimStreamCaller caller = new McsClaimStreamCaller();
+              final GrpcResponseStream<McsClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 10L);
-              assertEquals(10L, results.next().getSequenceNumber());
-              assertEquals(11L, results.next().getSequenceNumber());
-              assertEquals(12L, results.next().getSequenceNumber());
-              assertEquals(13L, results.next().getSequenceNumber());
-              assertEquals(14L, results.next().getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertEquals(Long.valueOf(10), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(11), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(13), transform(results.next()).getSequenceNumber());
+              assertEquals(Long.valueOf(14), transform(results.next()).getSequenceNumber());
+              assertFalse(results.hasNext());
             });
+  }
+
+  private PreAdjMcsClaim transform(McsClaimChange change) {
+    return transformer.transformClaim(change).getClaim();
   }
 }

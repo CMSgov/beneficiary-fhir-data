@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -10,8 +12,7 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link CsvRecordGroupingIterator}. */
 public class CsvRecordGroupingIteratorTest {
@@ -34,10 +35,10 @@ public class CsvRecordGroupingIteratorTest {
     List<List<CSVRecord>> groupedRecordsList = groupedRecordsStream.collect(Collectors.toList());
 
     // Verify the results.
-    Assert.assertEquals(3, groupedRecordsList.size());
-    Assert.assertEquals(1, groupedRecordsList.get(0).size());
-    Assert.assertEquals(1, groupedRecordsList.get(1).size());
-    Assert.assertEquals(1, groupedRecordsList.get(2).size());
+    assertEquals(3, groupedRecordsList.size());
+    assertEquals(1, groupedRecordsList.get(0).size());
+    assertEquals(1, groupedRecordsList.get(1).size());
+    assertEquals(1, groupedRecordsList.get(2).size());
   }
 
   /**
@@ -59,8 +60,8 @@ public class CsvRecordGroupingIteratorTest {
     List<List<CSVRecord>> groupedRecordsList = groupedRecordsStream.collect(Collectors.toList());
 
     // Verify the results.
-    Assert.assertEquals(2, groupedRecordsList.size());
-    Assert.assertEquals(2, groupedRecordsList.get(0).size());
-    Assert.assertEquals(2, groupedRecordsList.get(1).size());
+    assertEquals(2, groupedRecordsList.size());
+    assertEquals(2, groupedRecordsList.get(0).size());
+    assertEquals(2, groupedRecordsList.get(1).size());
   }
 }
