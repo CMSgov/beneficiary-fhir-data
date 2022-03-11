@@ -20,7 +20,8 @@ jobs:
           fetch-depth: 2
       - id: mvn-verify
         run: |
-          echo "::set-output name=bfd_pipeline::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.bfd-pipeline-re }}')"
+          git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD
+          echo "::set-output name=bfd-pipeline::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.bfd-pipeline-re }}')"
 
   mvn-fmt-maven-plugin:
     runs-on: ubuntu-latest
