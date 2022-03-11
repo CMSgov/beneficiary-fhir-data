@@ -36,6 +36,7 @@ jobs:
         run: |
           mvn verify --threads 1C \
           --also-make-dependents \
+          --also-make \
           --batch-mode \
           --projects ${{ inputs.project }}
         working-directory: ./apps
