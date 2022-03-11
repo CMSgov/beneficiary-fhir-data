@@ -1,0 +1,64 @@
+name: 'Build Java'
+on:
+  workflow_call:
+    inputs:
+      project:
+        required: true
+        type: string
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+      - name: 'Generate Maven Config'
+        run: |
+          cat << EOF > ~/.m2/toolchains.xml
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides>
+                <version>11</version>
+                <vendor>OpenJDK</vendor>
+              </provides>
+              <configuration>
+                <jdkHome>$JAVA_HOME</jdkHome>
+              </configuration>
+            </toolchain>
+          </toolchains>
+          EOF
+      - name: '${{ inputs.project }} Maven Build'
+        run: |
+          mvn verify --threads 1C \
+          --also-make-dependents \
+          --batch-mode \
+          --projects ${{ inputs.project }}
+        working-directory: ./apps
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+          | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Deliver Apps Container Image
+        run: |
+          IMAGE_NAME="ghcr.io/cmsgov/${{ inputs.project }}"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"
+          docker build  . --tag "$FULL_COMMIT_TAG"
+          docker push "$FULL_COMMIT_TAG"
+        working-directory: apps/${{ inputs.project }}
+      - name: 'Upload test artifacts'
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: mvn-verify-build-logs
+          path: |
+            **/target/surefire-reports/*
+            **/target/failsafe-reports/*
+            bfd-server/bfd-server-war/target/server-work/access.*
+            bfd-server/bfd-server-war/target/server-work/server-console.log
