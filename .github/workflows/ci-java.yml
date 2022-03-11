@@ -54,7 +54,7 @@ jobs:
 
   bfd-pipeline:
     needs: verify
-    if: needs.mvn-verify.outputs.pipeline
+    if: needs.verify.outputs.pipeline
     uses: ./.github/workflows/java.yml
     with:
       project: bfd-pipeline
