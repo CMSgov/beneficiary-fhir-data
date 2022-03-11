@@ -189,6 +189,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     return metrics;
   }
 
+  /**
+   * Apply implementation specific logic to produce a populated {@link RdaApiClaimMessageMetaData}
+   * object suitable for insertion into the database to track this update.
+   *
+   * @param change an incoming RdaChange object from which to extract meta data
+   * @return an object ready for insertion into the database
+   */
   abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {

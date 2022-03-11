@@ -363,6 +363,10 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().commit();
   }
 
+  /**
+   * Verifies that claim meta data records can be written to the database and that their {@code
+   * metaDataId} fields are properly updated from the sequence when {@code persist()} is called.
+   */
   @Test
   public void verifyClaimMetaData() {
     var metaDataList =

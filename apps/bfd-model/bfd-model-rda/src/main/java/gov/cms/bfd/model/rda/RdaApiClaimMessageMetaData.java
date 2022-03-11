@@ -19,6 +19,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/**
+ * JPA entity for the table that tracks important meta data for each claim update received from the
+ * RDA API. The RDA API can send us multiple updates to each claim. Since our database only stores
+ * the most recent version of each claim we cannot simply query the claims tables to obtain a full
+ * history of changes to a claim. This table stores sufficient meta-data about each update to track
+ * when updates were received and what the status of the claim was on each update.
+ */
 @Entity
 @Getter
 @Setter
