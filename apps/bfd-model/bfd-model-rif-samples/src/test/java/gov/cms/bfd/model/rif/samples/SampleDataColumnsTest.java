@@ -16,7 +16,6 @@ import java.util.function.Function;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,29 +46,6 @@ public final class SampleDataColumnsTest {
   @Test
   public void verifySampleAColumns() {
     verifyColumns(StaticRifResourceGroup.SAMPLE_A);
-  }
-
-  /**
-   * Checks our code's columns against the {@link
-   * gov.cms.bfd.model.rif.samples.StaticRifResourceGroup#SAMPLE_B} data file headers.
-   */
-  @Test
-  // FIXME Temporary workaround until CBBD-253 and CBBD-283 are resolved.
-  @Disabled
-  public void verifySampleBColumns() {
-    verifyColumns(StaticRifResourceGroup.SAMPLE_B);
-  }
-
-  /**
-   * Checks our code's columns against the {@link
-   * gov.cms.bfd.model.rif.samples.StaticRifResourceGroup#SAMPLE_MCT} data file headers.
-   */
-  @Test
-  public void verifySampleMCTColumns() {
-    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT);
-    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
-    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
-    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
   }
 
   /**
