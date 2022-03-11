@@ -2114,7 +2114,7 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * Reports the specified log message.
+   * Reports the specified log message at info log level.
    *
    * @param messageFormat the log message format {@link String}
    * @param messageArguments the log message format arguments
@@ -2135,6 +2135,12 @@ public class RifLayoutsMojo extends AbstractMojo {
     getLog().info(logMessage);
   }
 
+  /**
+   * Reports the specified log message at error log level.
+   *
+   * @param messageFormat the log message format {@link String}
+   * @param messageArguments the log message format arguments
+   */
   private void logError(String messageFormat, Object... messageArguments) {
     String logMessage = String.format(messageFormat, messageArguments);
     getLog().error(logMessage);
@@ -2151,6 +2157,13 @@ public class RifLayoutsMojo extends AbstractMojo {
     javaFile.writeTo(outputDir);
   }
 
+  /**
+   * There is a bug in hibernate that causes compile to fail if meta data annotation classes already
+   * exist and there is no setting to disable this behavior. As a result if a build is done without
+   * an intervening {@code mvn clean} the build will fail. This method checks for the existence of
+   * the annotations directory and deletes all existing java files within the directory to clear the
+   * decks for the hibernate plugin's code generation.
+   */
   private void deleteAnnotationsDirectory() {
     final var directory = new File(annotationsDirectory, packageName.replaceAll("\\.", "/"));
     log("checking annotations directory: %s", directory.getPath());
