@@ -54,7 +54,7 @@ jobs:
 
   bfd-pipeline:
     needs: verify
-    if: needs.verify.outputs.pipeline
+    # if: needs.verify.outputs.pipeline
     uses: ./.github/workflows/java.yml
     with:
       project: bfd-pipeline
@@ -62,7 +62,7 @@ jobs:
     needs:
       - verify
       - bfd-pipeline
-    if: needs.verify.outputs.pipeline
+    # if: needs.verify.outputs.pipeline
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline
