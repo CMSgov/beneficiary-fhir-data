@@ -36,6 +36,11 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the BFD Server service, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdServerAmiId
+
+	/**
+	 * The ID of the AMI that will run the BFD DB Migrator service, or <code>null</code> if such an AMI does not yet exist.
+	 */
+    String bfdDbMigratorAmiId
 }
 
 
@@ -66,6 +71,13 @@ def findAmis() {
       returnStdout: true,
       script: "aws ec2 describe-images --owners self --filters \
 			'Name=name,Values=bfd-amzn2-jdk11-fhir-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+    ).trim(),
+    bfdDbMigratorAmiId: sh(
+      returnStdout: true,
+      script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-amzn2-jdk11-db-migrator-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
@@ -106,6 +118,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
 			bfdServerAmiId: amiIds.bfdServerAmiId,
+            bfdDbMigratorAmiId: amiIds.bfdDbMigratorAmiId,
 		)
  	}
 }
@@ -125,7 +138,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 			writeFile file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", text: """{
     "data_server_launcher": "${workspace}/${appBuildResults.dataServerLauncher}",
     "data_server_war": "${workspace}/${appBuildResults.dataServerWar}",
-    "data_pipeline_zip": "${workspace}/${appBuildResults.dataPipelineZip}"
+    "data_pipeline_zip": "${workspace}/${appBuildResults.dataPipelineZip}",
+    "db_migrator_zip": "${workspace}/${appBuildResults.dbMigratorZip}",
 }"""
 
 			// build AMIs in parallel
@@ -143,6 +157,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
+				bfdDbMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
+					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
 			)
 		}
 	}
@@ -169,6 +185,7 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		
 		// Gathering terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+        // TODO: BFD-1600 ensure the amiIds.bfdDbMigrator is leveraged for the the forthcoming terraform definition
 		sh "terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \

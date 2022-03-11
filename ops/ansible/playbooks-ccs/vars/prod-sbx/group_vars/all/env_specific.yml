@@ -82,3 +82,7 @@ data_pipeline_rda_grpc_inproc_server_mode: 'S3'
 # Enable RDA API data ETL pipeline jobs.
 data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 3600
+
+# This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
+db_migrator_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+db_migrator_ec2_instance_type_vcpu: 4

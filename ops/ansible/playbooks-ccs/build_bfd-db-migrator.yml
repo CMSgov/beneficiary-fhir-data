@@ -1,0 +1,54 @@
+---
+##
+# Configures the BFD DB Migrator Service for CCS env
+##
+- name: Configure DB Migrator Server
+  hosts: all
+  become: true
+  remote_user: ec2-user
+  gather_facts: yes
+  vars:
+    bfd_db_migrator_dir: '/usr/local/bfd-migrator'
+    ansible_ssh_pipelining: no
+    env: "test"
+
+  tasks:
+    - name: Include global variables
+      include_vars:
+        file: vars/000_cross_env_vars.yml
+      tags: [pre-ami, post-ami]
+    
+    - name: Include env specific variables
+      include_vars:
+        dir: vars/{{ env }}
+      tags: [pre-ami, post-ami]
+
+    - name: Apply base Cloudwatch Agent Role
+      import_role:
+        name: cloudwatch-agent-instrumented
+    
+    - name: Apply latest host security patches
+      import_role:
+        name: base_patch
+
+    - name: Apply DB Migrator Role
+      import_role:
+        name: bfd-db-migrator
+      vars:
+        db_migrator_dir: "{{ bfd_db_migrator_dir }}"
+        # Note: The `db_migrator_zip` variable should have been provided by `--extra-vars` on the command line.
+        db_migrator_jvm_args: "-Xmx{{ (ansible_memtotal_mb * 0.80) | int }}m -XX:+PreserveFramePointer"
+        db_migrator_tmp_dir: "{{ db_migrator_dir }}/tmp"
+        # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`:
+        db_migrator_db_url: "{{ vault_data_db_primary_url }}"
+        db_migrator_db_username: "{{ vault_data_pipeline_db_username }}" # TODO: BFD-1552 get migrator-specific credentials
+        db_migrator_db_password: "{{ vault_data_pipeline_db_password }}" # TODO: BFD-1552 get migrator-specific credentials
+
+    - name: Add SSH users
+      import_role:
+        name: ssh_users
+      tags:
+        - pre-ami
+
+  handlers:
+    - import_tasks: handlers/main.yml

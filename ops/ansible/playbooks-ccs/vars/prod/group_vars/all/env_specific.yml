@@ -51,3 +51,7 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_certificate.pem') }}"
   - alias: client_ab2d_prod_validation
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_validation_certificate.pem') }}"
+
+# This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
+db_migrator_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+db_migrator_ec2_instance_type_vcpu: 4
