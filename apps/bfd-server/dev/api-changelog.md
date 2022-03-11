@@ -1,5 +1,61 @@
 # API Changelog
 
+## BFD-1517: Map FI Number in V2
+
+Added mapping for Fiscal Intermediary Number
+FI_NUM => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
+  }
+  ...
+}
+```
+
+## BFD-1518: Map Revenue Center Status Indicator Code in V2
+
+Added mapping for Revenue Status Code:
+REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
 ## BFD-1566: Add Patient.meta.tag entry for Some Patients
 
 Our system has delayed the processing of demographic and enrollment data
