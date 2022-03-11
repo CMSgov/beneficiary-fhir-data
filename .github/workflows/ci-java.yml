@@ -12,7 +12,7 @@ jobs:
     name: mvn-verify
     runs-on: ubuntu-latest
     outputs:
-      bfd-pipeline: ${{ steps.workflow_files.outputs.bfd-pipeline }}
+      pipeline: ${{ steps.workflow_files.outputs.pipeline }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -21,7 +21,7 @@ jobs:
       - id: mvn-verify
         run: |
           git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD
-          echo "::set-output name=bfd-pipeline::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.bfd-pipeline-re }}')"
+          echo "::set-output name=pipeline::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.bfd-pipeline-re }}')"
 
   mvn-fmt-maven-plugin:
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
 
   bfd-pipeline:
     needs: mvn-verify
-    if: needs.mvn-verify.outputs.bfd-pipeline
+    if: needs.mvn-verify.outputs.pipeline
     uses: ./.github/workflows/java.yml
     with:
       project: bfd-pipeline
@@ -62,7 +62,7 @@ jobs:
     needs:
       - mvn-verify
       - bfd-pipeline
-    if: needs.mvn-verify.outputs.bfd_pipeline
+    if: needs.mvn-verify.outputs.pipeline
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline
