@@ -10,6 +10,12 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
+      - name: 'Configure AWS credentials'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GA_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GA_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
       - name: 'Checkout repo'
         uses: actions/checkout@v2
       - name: 'Setup JDK'
