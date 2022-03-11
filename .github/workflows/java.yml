@@ -35,10 +35,10 @@ jobs:
       - name: '${{ inputs.project }} Maven Build'
         run: |
           mvn verify --threads 1C \
-          --also-make-dependents \
           --also-make \
+          --also-make-dependents \
           --batch-mode \
-          --projects ${{ inputs.project }}
+          --projects ${{ inputs.project }},bfd-model
         working-directory: ./apps
       - name: Login to GitHub Container Registry
         run: |
