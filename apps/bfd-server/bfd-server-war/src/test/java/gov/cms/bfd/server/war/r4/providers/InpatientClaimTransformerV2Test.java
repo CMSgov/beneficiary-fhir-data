@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -539,7 +540,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(5, eob.getExtension().size());
+    assertEquals(6, eob.getExtension().size());
   }
 
   @Test
@@ -1651,6 +1652,26 @@ public final class InpatientClaimTransformerV2Test {
             .setUsed(new UnsignedIntType(0));
 
     assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /**
+   * Ensures the fi_num is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryNumber is present.
+   */
+  @Test
+  public void shouldHaveFiNumberExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiNumExtension);
+    assertEquals("8299", ((Coding) fiNumExtension.getValue()).getCode());
   }
 
   /**
