@@ -62,6 +62,7 @@ public class HospiceClaimTransformerV2 {
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier
+    // FI_DOC_CLM_CNTRL_NUM     => ExplanationOfBenefit.identifier
     // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage
     // BENE_ID                  => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION             => ExplanationOfBenefit.status
@@ -78,6 +79,7 @@ public class HospiceClaimTransformerV2 {
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
+        claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate

@@ -205,10 +205,13 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveIdentifiers() {
     List<Identifier> expected = eob.getIdentifier();
-    assertEquals(2, expected.size());
+    assertEquals(3, expected.size());
 
     List<Identifier> compare =
         Arrays.asList(
+            new Identifier()
+                .setSystem("https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num")
+                .setValue("2718813985998"),
             TransformerTestUtilsV2.createIdentifier(
                 "https://bluebutton.cms.gov/resources/variables/clm_id",
                 "9992223422",

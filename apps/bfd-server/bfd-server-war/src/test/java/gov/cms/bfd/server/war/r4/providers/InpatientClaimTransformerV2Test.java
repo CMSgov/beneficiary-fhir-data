@@ -631,7 +631,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Identifiers */
   @Test
   public void shouldHaveKnownIdentifiers() {
-    assertEquals(2, eob.getIdentifier().size());
+    assertEquals(3, eob.getIdentifier().size());
   }
 
   @Test

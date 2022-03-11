@@ -81,6 +81,7 @@ public class OutpatientClaimTransformerV2 {
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
+        claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate

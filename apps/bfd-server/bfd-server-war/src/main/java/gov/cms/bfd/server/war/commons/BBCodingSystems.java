@@ -4,7 +4,7 @@ public class BBCodingSystems {
 
   public static final String BB_BASE_URL = "https://bluebutton.cms.gov/resources";
 
-  public static final String CARR_CLM_CONTROL_NUM = BB_BASE_URL + "/variables/carr_clm_cntrl_num";
+  public static final String CARR_CLM_CONTROL_NUM = BB_BASE_URL + "/variables/carr_clm_cntl_num";
 
   public static final String CLM_FACILITY_TYPE_CODE = BB_BASE_URL + "/variables/clm_fac_type_cd";
 
@@ -16,7 +16,7 @@ public class BBCodingSystems {
   public static final String CLM_POA_IND = BB_BASE_URL + "/variables/clm_poa_ind_sw1";
 
   public static final String FI_DOC_CLM_CONTROL_NUM =
-      BB_BASE_URL + "/variables/fi_doc_clm_cntrl_num";
+      BB_BASE_URL + "/variables/fi_doc_clm_cntl_num";
 
   public static final String HCPCS = BB_BASE_URL + "/codesystem/hcpcs";
 

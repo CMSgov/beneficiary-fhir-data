@@ -69,6 +69,7 @@ public class CarrierClaimTransformerV2 {
     // Claim Type + Claim ID => ExplanationOfBenefit.id
     // CLM_ID => ExplanationOfBenefit.identifier
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
+    // CARR_CLM_CNTRL_NUM       => ExplanationOfBenefit.identifier
     // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage
     // (reference)
     // BENE_ID => ExplanationOfBenefit.patient (reference)
@@ -86,6 +87,7 @@ public class CarrierClaimTransformerV2 {
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
+        claimGroup.getClaimCarrierControlNumber(),
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate

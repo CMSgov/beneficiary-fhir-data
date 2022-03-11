@@ -71,6 +71,9 @@
     }
   } ],
   "identifier" : [ {
+    "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "value": "28486613848"
+  }, {
     "type" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",

@@ -82,6 +82,7 @@ final class PartDEventTransformerV2 {
         Optional.of(claimGroup.getPrescriptionFillDate()),
         Optional.of(claimGroup.getPrescriptionFillDate()),
         Optional.empty(),
+        Optional.empty(),
         claimGroup.getFinalAction());
 
     // RX_SRVC_RFRNC_NUM => ExplanationOfBenefit.identifier

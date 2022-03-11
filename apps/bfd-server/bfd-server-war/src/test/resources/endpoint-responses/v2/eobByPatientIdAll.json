@@ -72,6 +72,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "value": "32490593716374487"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -880,6 +883,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+        "value": "74655592568216"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -1581,6 +1587,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "value": "08683096577486"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -2156,6 +2165,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "value": "28486613848"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -3166,6 +3178,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "value": "23443453453"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -4593,6 +4608,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+        "value": "74655592568216"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -5297,6 +5315,9 @@
         }
       } ],
       "identifier" : [ {
+        "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "value": "2718813985998"
+      }, {
         "type" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
