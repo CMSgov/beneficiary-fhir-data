@@ -9,7 +9,7 @@ env:
 
 jobs:
   mvn-verify:
-    name: Checking workflow
+    name: mvn-verify
     runs-on: ubuntu-latest
     outputs:
       bfd-pipeline: ${{ steps.workflow_files.outputs.bfd-pipeline }}
