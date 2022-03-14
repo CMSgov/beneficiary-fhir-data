@@ -23,6 +23,22 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
+      - name: 'Generate maven toolchain config'
+        run: |
+          cat << EOF > ~/.m2/toolchains.xml
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides>
+                <version>11</version>
+                <vendor>OpenJDK</vendor>
+              </provides>
+              <configuration>
+                <jdkHome>$JAVA_HOME</jdkHome>
+              </configuration>
+            </toolchain>
+          </toolchains>
+          EOF
       - name: '${{ inputs.project }} Maven Build'
         run: |
           mvn verify --threads 1C \
