@@ -57,7 +57,7 @@ jobs:
     # if: needs.verify.outputs.pipeline
     uses: ./.github/workflows/java.yml
     with:
-      project: bfd-pipeline
+      project: bfd-pipeline/bfd-pipeline-app
   ansible-role-bfd-pipeline:
     needs:
       - verify
