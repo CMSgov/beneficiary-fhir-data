@@ -9,48 +9,32 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    services:
+      minio:
+        image: bitnami/minio:latest
+        env:
+          MINIO_FORCE_NEW_KEYS: 'yes'
+          MINIO_ROOT_USER: bfdLocalS3Dev
+          MINIO_ROOT_PASSWORD: bfdLocalS3Dev
     steps:
-      - name: 'Configure AWS credentials'
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.GA_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.GA_AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
       - name: 'Checkout repo'
         uses: actions/checkout@v2
       - name: 'Setup JDK'
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-      - name: 'Generate Maven Config'
-        run: |
-          cat << EOF > ~/.m2/toolchains.xml
-          <toolchains>
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>11</version>
-                <vendor>OpenJDK</vendor>
-              </provides>
-              <configuration>
-                <jdkHome>$JAVA_HOME</jdkHome>
-              </configuration>
-            </toolchain>
-          </toolchains>
-          EOF
       - name: '${{ inputs.project }} Maven Build'
         run: |
           mvn verify --threads 1C \
           --also-make \
-          --also-make-dependents \
           --batch-mode \
-          --projects ${{ inputs.project }},bfd-model
+          -Ds3.local=true \
+          --projects ${{ inputs.project }}
         working-directory: ./apps
       - name: Login to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" \
           | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
       - name: Build and Deliver Apps Container Image
         run: |
           IMAGE_NAME="ghcr.io/cmsgov/${{ inputs.project }}"
