@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -358,6 +359,33 @@ public class SchemaMigrationIT {
       for (PreAdjMcsClaim claim : claims) {
         assertEquals(mbi, claim.getIdrClmHdIcn().substring(0, mbi.length()));
       }
+    }
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Verifies that claim meta data records can be written to the database and that their {@code
+   * metaDataId} fields are properly updated from the sequence when {@code persist()} is called.
+   */
+  @Test
+  public void verifyClaimMetaData() {
+    var metaDataList =
+        IntStream.of(1, 2, 3)
+            .mapToObj(
+                i ->
+                    RdaApiClaimMessageMetaData.builder()
+                        .sequenceNumber(i)
+                        .claimState("A")
+                        .claimId(String.valueOf(i))
+                        .receivedDate(Instant.now())
+                        .claimType(RdaApiProgress.ClaimType.FISS)
+                        .build())
+            .collect(Collectors.toList());
+    entityManager.getTransaction().begin();
+    for (RdaApiClaimMessageMetaData metaData : metaDataList) {
+      assertEquals(0L, metaData.getMetaDataId());
+      entityManager.persist(metaData);
+      assertEquals(metaData.getSequenceNumber(), metaData.getMetaDataId());
     }
     entityManager.getTransaction().commit();
   }
