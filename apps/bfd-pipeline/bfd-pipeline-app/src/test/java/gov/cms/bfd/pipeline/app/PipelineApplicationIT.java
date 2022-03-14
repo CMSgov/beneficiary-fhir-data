@@ -586,6 +586,11 @@ public final class PipelineApplicationIT {
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
 
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
+    appRunBuilder
+        .environment()
+        .put(
+            AppConfiguration.ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES,
+            Boolean.FALSE.toString());
 
     return appRunBuilder;
   }

@@ -16,11 +16,13 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -68,6 +70,7 @@ public final class BeneficiaryTransformerV2Test {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
+    beneficiary.getSkippedRifRecords().add(new SkippedRifRecord());
 
     beneficiary.setLastUpdated(Instant.now());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
@@ -121,6 +124,19 @@ public final class BeneficiaryTransformerV2Test {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
     assertNotNull(patient);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+  }
+
+  /**
+   * Verify that {@link TransformerConstants#CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT} is
+   * populated, as expected (it's hardcoded into the test data used by this class).
+   */
+  @Test
+  public void shouldHaveDelayedBackdatedEnrollmentTag() {
+    assertEquals(1, patient.getMeta().getTag().size());
+    TransformerTestUtilsV2.assertCodingEquals(
+        TransformerConstants.CODING_SYSTEM_BFD_TAGS,
+        TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
+        patient.getMeta().getTag().get(0));
   }
 
   /** Common top level Patient values */

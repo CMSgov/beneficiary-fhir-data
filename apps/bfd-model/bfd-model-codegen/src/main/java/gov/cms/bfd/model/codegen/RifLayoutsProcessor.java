@@ -198,7 +198,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                           null,
                           "MedicareBeneficiaryIdHistory",
                           "medicareBeneficiaryIdHistories")))
-              .setHasBeneficiaryMonthly(true));
+              .setIsBeneficiaryEntity(true));
       /*
        * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
        * DB), as they won't ever have changed data. We should change the RIF layout to
@@ -230,7 +230,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
                       Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
-              .setHasBeneficiaryMonthly(false));
+              .setIsBeneficiaryEntity(false));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -371,7 +371,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     TypeSpec headerEntity = generateHeaderEntity(mappingSpec);
 
-    if (mappingSpec.getHasBeneficiaryMonthly()) {
+    if (mappingSpec.isBeneficiaryEntity()) {
       generateBeneficiaryMonthlyEntity(mappingSpec);
     }
 
@@ -1146,7 +1146,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
 
     // Add the parent-to-child join field and accessor, if appropriate.
-    if (mappingSpec.getHasBeneficiaryMonthly()) {
+    if (mappingSpec.isBeneficiaryEntity()) {
 
       ParameterizedTypeName childFieldType =
           ParameterizedTypeName.get(
@@ -1186,6 +1186,35 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   "this.$N = ($T)$N", "beneficiaryMonthlys", childFieldType, "beneficiaryMonthlys")
               .build();
       headerEntityClass.addMethod(childSetter);
+    }
+
+    // Add a hardcoded "Beneficiary.skippedRifRecords" field, if appropriate.
+    if (mappingSpec.isBeneficiaryEntity()) {
+      ParameterizedTypeName childFieldType =
+          ParameterizedTypeName.get(
+              ClassName.get(Set.class),
+              ClassName.get(mappingSpec.getPackageName(), "SkippedRifRecord"));
+
+      FieldSpec.Builder childField =
+          FieldSpec.builder(childFieldType, "skippedRifRecords", Modifier.PRIVATE)
+              .initializer("new $T<>()", HashSet.class);
+
+      childField.addAnnotation(
+          AnnotationSpec.builder(OneToMany.class)
+              .addMember("mappedBy", "$S", "beneId")
+              .addMember("orphanRemoval", "$L", false)
+              .addMember("fetch", "$T.LAZY", FetchType.class)
+              .addMember("cascade", "$T.ALL", CascadeType.class)
+              .build());
+      headerEntityClass.addField(childField.build());
+
+      MethodSpec childGetter =
+          MethodSpec.methodBuilder("getSkippedRifRecords")
+              .addModifiers(Modifier.PUBLIC)
+              .addStatement("return $N", "skippedRifRecords")
+              .returns(childFieldType)
+              .build();
+      headerEntityClass.addMethod(childGetter);
     }
 
     // Add the parent-to-child join field and accessor for an inner join

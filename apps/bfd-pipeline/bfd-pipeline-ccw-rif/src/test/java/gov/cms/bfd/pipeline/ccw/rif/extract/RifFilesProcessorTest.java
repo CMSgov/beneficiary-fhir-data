@@ -35,7 +35,6 @@ import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link RifFilesProcessor}. */
@@ -231,26 +230,6 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_BENES}.
-   */
-  @Test
-  @Disabled
-  public void processBeneRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_BENES.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_BENES.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_PDE}.
    */
   @Test
@@ -313,26 +292,6 @@ public final class RifFilesProcessorTest {
     assertEquals("01", pdeRow.getPharmacyTypeCode());
     assertEquals("02", pdeRow.getPatientResidenceCode());
     assertEquals("08", pdeRow.getSubmissionClarificationCode().get());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_PDE}.
-   */
-  @Test
-  @Disabled
-  public void processPDERecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_PDE.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_PDE.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_PDE.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
   }
 
   /**
@@ -452,26 +411,6 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_CARRIER}.
-   */
-  @Test
-  @Disabled
-  public void processCarrierClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_CARRIER.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_CARRIER.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_CARRIER.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_INPATIENT}.
    */
   @Test
@@ -567,26 +506,6 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_INPATIENT}.
-   */
-  @Test
-  @Disabled
-  public void processInpatientClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_INPATIENT.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_INPATIENT.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_INPATIENT.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_OUTPATIENT}.
    */
   @Test
@@ -655,26 +574,6 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal(5000.00), claimGroup.getLines().get(0).getPaymentAmount());
     assertEquals(new BigDecimal(134.00), claimGroup.getLines().get(0).getNonCoveredChargeAmount());
     assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_OUTPATIENT}.
-   */
-  @Test
-  @Disabled
-  public void processOutpatientClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_OUTPATIENT.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_OUTPATIENT.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_OUTPATIENT.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
   }
 
   /**
@@ -769,26 +668,6 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_SNF}.
-   */
-  @Test
-  @Disabled
-  public void processSNFClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_SNF.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_SNF.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_SNF.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_HOSPICE}.
    */
   @Test
@@ -853,26 +732,6 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_HOSPICE}.
-   */
-  @Test
-  @Disabled
-  public void processHospiceClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HOSPICE.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_HOSPICE.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_HOSPICE.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_HHA}.
    */
   @Test
@@ -932,26 +791,6 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("24.00"), claimGroup.getLines().get(0).getNonCoveredChargeAmount());
     assertEquals(new BigDecimal("25.00"), claimGroup.getLines().get(0).getTotalChargeAmount());
     assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_HHA}.
-   */
-  @Test
-  @Disabled
-  public void processHHAClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HHA.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_HHA.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_HHA.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
   }
 
   /**
@@ -1049,25 +888,5 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
     assertEquals("R2", claimLine.getHctHgbTestTypeCode().get());
     assertEquals("500904610", claimLine.getNationalDrugCode().get());
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_B_DME}.
-   */
-  @Test
-  @Disabled
-  public void processDMEClaimRecords() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_DME.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(StaticRifResource.SAMPLE_B_DME.getRecordCount(), rifEventsList.size());
-    assertEquals(
-        StaticRifResource.SAMPLE_B_DME.getRifFileType(),
-        rifEventsList.get(0).getFileEvent().getFile().getFileType());
   }
 }
