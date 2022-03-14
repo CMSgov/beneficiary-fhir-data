@@ -69,9 +69,7 @@
     group: "{{ db_migrator_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
-  notify:
-    - 'Restart DB Migrator Service'
-  tags: 
+  tags:
     - post-ami
 
 - name: Create DB Migrator Service Definition
@@ -82,8 +80,5 @@
     group: root
     mode: u=rw,g=r,o=r
   become: true
-  notify:
-    - 'Enable DB Migrator Service'
-    - 'Restart DB Migrator Service'
-  tags: 
+  tags:
     - post-ami
