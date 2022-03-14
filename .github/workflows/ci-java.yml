@@ -13,6 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       pipeline: ${{ steps.workflow_files.outputs.pipeline }}
+    services:
+      minio:
+        image: bitnami/minio:latest
+        env:
+          MINIO_FORCE_NEW_KEYS: 'yes'
+          MINIO_ROOT_USER: bfdLocalS3Dev
+          MINIO_ROOT_PASSWORD: bfdLocalS3Dev
+        ports:
+          - 9000:9000
+          - 9001:9001
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2

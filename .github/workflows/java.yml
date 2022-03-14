@@ -9,13 +9,6 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    services:
-      minio:
-        image: bitnami/minio:latest
-        env:
-          MINIO_FORCE_NEW_KEYS: 'yes'
-          MINIO_ROOT_USER: bfdLocalS3Dev
-          MINIO_ROOT_PASSWORD: bfdLocalS3Dev
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
