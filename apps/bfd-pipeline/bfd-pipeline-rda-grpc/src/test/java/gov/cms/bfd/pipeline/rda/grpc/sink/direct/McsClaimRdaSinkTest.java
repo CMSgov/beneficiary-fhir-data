@@ -1,10 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertGaugeReading;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
@@ -87,6 +92,9 @@ public class McsClaimRdaSinkTest {
     for (RdaChange<PreAdjMcsClaim> change : batch) {
       PreAdjMcsClaim claim = change.getClaim();
       verify(entityManager).merge(claim);
+    }
+    for (RdaChange<PreAdjMcsClaim> change : batch) {
+      verify(entityManager).persist(sink.createMetaData(change));
     }
     // the merge transaction will be committed
     verify(transaction).commit();
