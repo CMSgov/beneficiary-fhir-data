@@ -57,6 +57,11 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "code" : "6666"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
+    }
   } ],
   "identifier" : [ {
     "type" : {

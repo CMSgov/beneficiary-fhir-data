@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
@@ -230,7 +231,7 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    assertEquals(4, expected.size());
+    assertEquals(5, expected.size());
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -246,6 +247,18 @@ public final class HospiceClaimTransformerV2Test {
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
             eob.getExtension()));
+
+    assertNotNull(
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+            eob.getExtension()));
+
+    Extension hospiceCountExtension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt", null, null));
+    hospiceCountExtension.setValue(new Quantity(2));
 
     List<Extension> compare =
         Arrays.asList(
@@ -269,7 +282,8 @@ public final class HospiceClaimTransformerV2Test {
                     null)),
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/fi_num",
-                new Coding("https://bluebutton.cms.gov/resources/variables/fi_num", "6666", null)));
+                new Coding("https://bluebutton.cms.gov/resources/variables/fi_num", "6666", null)),
+            hospiceCountExtension);
 
     for (int i = 0; i < expected.size(); i++) {
       assertTrue(compare.get(i).equalsDeep(expected.get(i)));
