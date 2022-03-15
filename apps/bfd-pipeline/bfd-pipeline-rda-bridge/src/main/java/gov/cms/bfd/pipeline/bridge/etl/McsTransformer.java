@@ -24,6 +24,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
+  // Maps RIF ICD type codes to their equivalent RDA model values
   private static final Map<String, Integer> icdMap = Map.of("0", 1, "9", 0);
 
   private static final int MAX_DIAGNOSIS_CODES = 12;
