@@ -28,8 +28,8 @@
   tags: 
     - pre-ami
 
-# Create the temp directory iff it's missing. (Don't want to accidentally
-# change the permissions on /tmp.)
+# Create the temp directory if and only if it's missing. (Don't want to
+# accidentally change the permissions on /tmp.)
 - name: Check for Custom Temp Directory
   stat:
     path: "{{ db_migrator_tmp_dir }}"
