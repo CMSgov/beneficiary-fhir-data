@@ -363,33 +363,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Used for creating Identifier references for Practitioners
-   *
-   * @param type the {@link C4BBPractitionerIdentifierType} to use in {@link
-   *     Reference#getIdentifier()}
-   * @param value the {@link Identifier#getValue()} to use in {@link Reference#getIdentifier()}
-   * @return a {@link Reference} with the specified {@link Identifier}
-   */
-  static Reference createPractitionerIdentifierReference(IdentifierType type, String value) {
-    Reference response =
-        new Reference()
-            .setIdentifier(
-                new Identifier()
-                    .setType(
-                        new CodeableConcept()
-                            .addCoding(
-                                new Coding(type.getSystem(), type.getCode(), type.getDisplay())))
-                    .setValue(value));
-
-    // If this is an NPI perform the extra lookup
-    if (IdentifierType.NPI.equals(type)) {
-      response.setDisplay(retrieveNpiCodeDisplay(value));
-    }
-
-    return response;
-  }
-
-  /**
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
    * @param diagnosis the {@link Diagnosis} to add, if it's not already present
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
