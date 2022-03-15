@@ -51,6 +51,12 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "3"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "15444"
+    }
   } ],
   "identifier" : [ {
     "type" : {
