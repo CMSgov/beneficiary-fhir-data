@@ -150,7 +150,7 @@ public final class PipelineApplicationState implements AutoCloseable {
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
     /*
      * Hibernate validation is being disabled in the applications so that
-     * non-fatal validation failures do not prevent the server from starting.
+     * validation failures do not prevent the pipeline from starting.
      * With the implementation of RFC-0011 this validation will be moved
      * to a more appropriate stage of the deployment.
      */
