@@ -4,13 +4,13 @@ package gov.cms.bfd.pipeline.bridge.model;
 public class Mcs {
 
   public static final String BENE_ID = "BENE_ID";
-  public static final String CARR_CLM_CNTRL_NUM = "CARR_CLM_CNTRL_NUM";
-  public static final String CLM_FRM_DT = "CLM_FRM_DT";
+  public static final String CARR_CLM_CNTL_NUM = "CARR_CLM_CNTL_NUM";
+  public static final String CLM_FROM_DT = "CLM_FROM_DT";
   public static final String CLM_ID = "CLM_ID";
   public static final String CLM_THRU_DT = "CLM_THRU_DT";
   public static final String HCPCS_CD = "HCPCS_CD";
-  public static final String HCPCS_1_MDFR_CD = "HCPCS_1_MDFR_CD";
-  public static final String HCPCS_2_MDFR_CD = "HCPCS_2_MDFR_CD";
+  public static final String HCPCS_1ST_MDFR_CD = "HCPCS_1ST_MDFR_CD";
+  public static final String HCPCS_2ND_MDFR_CD = "HCPCS_2ND_MDFR_CD";
   public static final String ICD_DGNS_CD = "ICD_DGNS_CD";
   public static final String ICD_DGNS_VRSN_CD = "ICD_DGNS_VRSN_CD";
   public static final String LINE_1ST_EXPNS_DT = "LINE_1ST_EXPNS_DT";

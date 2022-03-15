@@ -69,8 +69,13 @@ public class McsTransformer extends AbstractTransformer {
                 message.getLineNumber(), lineNumber));
       }
     } else {
-      // This must be the first run, store a new claim
-      message.setLineNumber(1);
+      if (lineNumber != 1) {
+        throw new IllegalStateException(
+            String.format(
+                "Invalid row sequence, expected: 1, current line number: %d", lineNumber));
+      }
+
+      message.setLineNumber(lineNumber);
       message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
       claimToReturn = null;
     }
@@ -107,13 +112,13 @@ public class McsTransformer extends AbstractTransformer {
       DataSampler<String> mbiSampler,
       int sampleId) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
+    String icn = ifNull(data.get(Mcs.CARR_CLM_CNTL_NUM).orElse(null), () -> convertIcn(data));
 
     mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
     McsClaim.Builder claimBuilder =
         McsClaim.newBuilder()
-            .setIdrClmHdIcn(
-                ifNull(data.get(Mcs.CARR_CLM_CNTRL_NUM).orElse(null), () -> convertIcn(data)))
+            .setIdrClmHdIcn(icn)
             .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
             // Not generated
             .setIdrBillProvEin("XX-XXXXXXX")
@@ -146,7 +151,7 @@ public class McsTransformer extends AbstractTransformer {
             claimBuilder.setIdrBeneSexEnumValue(enumValue);
           }
         });
-    data.getFromType(Mcs.CLM_FRM_DT, Parser.Data.Type.DATE)
+    data.getFromType(Mcs.CLM_FROM_DT, Parser.Data.Type.DATE)
         .ifPresent(claimBuilder::setIdrHdrFromDos);
     data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE)
         .ifPresent(claimBuilder::setIdrHdrToDos);
@@ -161,6 +166,7 @@ public class McsTransformer extends AbstractTransformer {
         .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
         .setSeq(sequenceNumber.inc())
         .setClaim(claimBuilder)
+        .setIcn(icn)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .build();
   }
@@ -197,17 +203,10 @@ public class McsTransformer extends AbstractTransformer {
                       McsDiagnosisCode.newBuilder()
                           .setIdrClmHdIcn(icn)
                           .setIdrDiagCode(diagnosisCode)
-                          .setIdrDiagIcdTypeEnumValue(
+                          .setIdrDiagIcdTypeEnum(
                               data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
-                                  .map(
-                                      dxVersionCode -> {
-                                        try {
-                                          return Integer.parseInt(dxVersionCode);
-                                        } catch (NumberFormatException e) {
-                                          return -1;
-                                        }
-                                      })
-                                  .orElse(-1))
+                                  .map(this::mapVersionCode)
+                                  .orElse(McsDiagnosisIcdType.UNRECOGNIZED))
                           .build()));
     }
   }
@@ -249,8 +248,8 @@ public class McsTransformer extends AbstractTransformer {
         .map(this::mapVersionCode)
         .ifPresent(detailBuilder::setIdrDtlDiagIcdTypeEnum);
     data.get(Mcs.HCPCS_CD).ifPresent(detailBuilder::setIdrProcCode);
-    data.get(Mcs.HCPCS_1_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
-    data.get(Mcs.HCPCS_2_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
+    data.get(Mcs.HCPCS_1ST_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
+    data.get(Mcs.HCPCS_2ND_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
     data.getFromType(Mcs.LINE_1ST_EXPNS_DT, Parser.Data.Type.DATE)
         .ifPresent(detailBuilder::setIdrDtlFromDate);
     data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)

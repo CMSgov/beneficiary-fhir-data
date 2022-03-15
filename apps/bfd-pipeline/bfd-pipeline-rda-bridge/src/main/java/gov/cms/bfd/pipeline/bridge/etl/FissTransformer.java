@@ -71,8 +71,13 @@ public class FissTransformer extends AbstractTransformer {
                 message.getLineNumber(), lineNumber));
       }
     } else {
-      // This must be the first run, store a new claim
-      message.setLineNumber(1);
+      if (lineNumber != 1) {
+        throw new IllegalStateException(
+            String.format(
+                "Invalid row sequence, expected: 1, current line number: %d", lineNumber));
+      }
+
+      message.setLineNumber(lineNumber);
       message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
       claimToReturn = null;
     }
@@ -115,10 +120,12 @@ public class FissTransformer extends AbstractTransformer {
 
     mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
+    final String dcn =
+        ifNull(data.get(Fiss.FI_DOC_CLM_CNTL_NUM).orElse(null), () -> convertDcn(data));
+
     FissClaim.Builder claimBuilder =
         FissClaim.newBuilder()
-            .setDcn(
-                ifNull(data.get(Fiss.FI_DOC_CLM_CNTRL_NUM).orElse(null), () -> convertDcn(data)))
+            .setDcn(dcn)
             .setMbi(mbiMap.get(beneId).getMbi())
             .setHicNo(mbiMap.get(beneId).getHicNo())
             // Not generated
@@ -140,7 +147,7 @@ public class FissTransformer extends AbstractTransformer {
     consumeIfNotNull(
         mbiMap.get(beneId).getMidName(), s -> payerBuilder.setBeneMidInit(s.substring(0, 1)));
     consumeIf(
-        data.get(mbiMap.get(beneId).getGender()).orElse(null),
+        mbiMap.get(beneId).getGender(),
         NumberUtils::isDigits,
         value -> {
           // RIF mappings are  0 - unknown, 1 - male, 2 - female
@@ -158,7 +165,7 @@ public class FissTransformer extends AbstractTransformer {
         data.get(Fiss.CLM_FREQ_CD).orElse(null),
         NumberUtils::isDigits,
         value -> claimBuilder.setFreqCdEnumValue(Integer.parseInt(value)));
-    data.getFromType(Fiss.CLM_FRM_DT, Parser.Data.Type.DATE)
+    data.getFromType(Fiss.CLM_FROM_DT, Parser.Data.Type.DATE)
         .ifPresent(claimBuilder::setStmtCovFromCymd);
     consumeIf(
         data.get(Fiss.CLM_SRVC_CLSFCTN_TYPE_CD).orElse(null),
@@ -184,6 +191,7 @@ public class FissTransformer extends AbstractTransformer {
         .setSeq(sequenceNumber.inc())
         .setClaim(claimBuilder.build())
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setDcn(dcn)
         .build();
   }
 
@@ -246,7 +254,7 @@ public class FissTransformer extends AbstractTransformer {
               value ->
                   claimBuilder.addFissProcCodes(
                       FissProcedureCode.newBuilder()
-                          .setProcCd(data.get(Fiss.ICD_PRCDR_CD + INDEX).orElse(""))
+                          .setProcCd(value)
                           .setProcDt(
                               data.getFromType(Fiss.PRCDR_DT + INDEX, Parser.Data.Type.DATE)
                                   .orElse(""))
