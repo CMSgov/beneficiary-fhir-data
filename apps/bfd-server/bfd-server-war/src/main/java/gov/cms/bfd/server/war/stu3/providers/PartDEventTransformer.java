@@ -26,14 +26,14 @@ import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformer {
 
-  static IDrugCodeProvider DrugCodeProvider;
+  IDrugCodeProvider drugCodeProvider;
 
   public PartDEventTransformer() {
-    DrugCodeProvider = new FDADrugUtils();
+    drugCodeProvider = new FDADrugUtils();
   }
 
   public PartDEventTransformer(IDrugCodeProvider iDrugCodeProvider) {
-    DrugCodeProvider = iDrugCodeProvider;
+    drugCodeProvider = iDrugCodeProvider;
   }
 
   /**
@@ -246,7 +246,7 @@ final class PartDEventTransformer {
         TransformerUtils.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            DrugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            drugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
             claimGroup.getNationalDrugCode()));
 
     SimpleQuantity quantityDispensed = new SimpleQuantity();

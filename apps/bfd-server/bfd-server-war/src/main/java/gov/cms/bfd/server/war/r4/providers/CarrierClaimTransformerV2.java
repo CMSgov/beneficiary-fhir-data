@@ -28,14 +28,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  */
 public class CarrierClaimTransformerV2 {
 
-  static IDrugCodeProvider DrugCodeProvider;
+  private IDrugCodeProvider drugCodeProvider;
 
   public CarrierClaimTransformerV2() {
-    DrugCodeProvider = new FDADrugUtils();
+    drugCodeProvider = new FDADrugUtils();
   }
 
   public CarrierClaimTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
-    DrugCodeProvider = iDrugCodeProvider;
+    drugCodeProvider = iDrugCodeProvider;
   }
 
   /**
@@ -287,6 +287,11 @@ public class CarrierClaimTransformerV2 {
                       TransformerUtilsV2.createExtensionCoding(
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
 
+      String drugCode = null;
+
+      if (line.getNationalDrugCode().isPresent()) {
+        drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode().get());
+      }
       // Common item level fields between Carrier and DME
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
       // LINE_CMS_TYPE_SRVC_CD    => ExplanationOfBenefit.item.category
@@ -334,7 +339,8 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode());
+          line.getNationalDrugCode(),
+          drugCode);
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

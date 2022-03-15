@@ -6,6 +6,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.server.war.FDADrugUtils;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -24,7 +26,17 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Quantity;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
-final class DMEClaimTransformerV2 {
+public final class DMEClaimTransformerV2 {
+
+  private IDrugCodeProvider drugCodeProvider;
+
+  public DMEClaimTransformerV2() {
+    drugCodeProvider = new FDADrugUtils();
+  }
+
+  public DMEClaimTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
+    drugCodeProvider = iDrugCodeProvider;
+  }
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
@@ -307,6 +319,12 @@ final class DMEClaimTransformerV2 {
                           CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD,
                           line.getSupplierTypeCode())));
 
+      String drugCode = null;
+
+      if (line.getNationalDrugCode().isPresent()) {
+        drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode().get());
+      }
+
       // Common item level fields between Carrier and DME
       // LINE_NUM                 => ExplanationOfBenefit.item.sequence
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
@@ -358,7 +376,8 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode());
+          line.getNationalDrugCode(),
+          drugCode);
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

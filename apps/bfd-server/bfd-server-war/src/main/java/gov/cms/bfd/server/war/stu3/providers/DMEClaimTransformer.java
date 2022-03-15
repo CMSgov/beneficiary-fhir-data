@@ -23,14 +23,14 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformer {
-  static IDrugCodeProvider DrugCodeProvider;
+  private IDrugCodeProvider drugCodeProvider;
 
   public DMEClaimTransformer() {
-    DrugCodeProvider = new FDADrugUtils();
+    drugCodeProvider = new FDADrugUtils();
   }
 
   public DMEClaimTransformer(IDrugCodeProvider iDrugCodeProvider) {
-    DrugCodeProvider = iDrugCodeProvider;
+    drugCodeProvider = iDrugCodeProvider;
   }
   /**
    * @param metricRegistry the {@link MetricRegistry} to use

@@ -13,8 +13,6 @@ import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugUtils;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
@@ -109,15 +107,6 @@ import org.slf4j.MDC;
 public final class TransformerUtilsV2 {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtilsV2.class);
 
-  static IDrugCodeProvider DrugCodeProvider;
-
-  public TransformerUtilsV2() {
-    DrugCodeProvider = new FDADrugUtils();
-  }
-
-  public TransformerUtilsV2(IDrugCodeProvider iDrugCodeProvider) {
-    DrugCodeProvider = iDrugCodeProvider;
-  }
   /**
    * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
    * missing {@link Value} matches. Why track this? To ensure that we don't spam log events for
@@ -831,17 +820,14 @@ public final class TransformerUtilsV2 {
    * @param item The {@link ItemComponent} to add the NDC to
    * @param nationalDrugCode The NDC value to add
    */
-  static void addNationalDrugCode(ItemComponent item, Optional<String> nationalDrugCode) {
+  static void addNationalDrugCode(
+      ItemComponent item, Optional<String> nationalDrugCode, String drugCode) {
     nationalDrugCode.ifPresent(
         code ->
             item.getProductOrService()
                 .addExtension()
                 .setUrl(TransformerConstants.CODING_NDC)
-                .setValue(
-                    new Coding(
-                        TransformerConstants.CODING_NDC,
-                        code,
-                        DrugCodeProvider.retrieveFDADrugCodeDisplay(code))));
+                .setValue(new Coding(TransformerConstants.CODING_NDC, code, drugCode)));
   }
 
   /**
@@ -3001,7 +2987,8 @@ public final class TransformerUtilsV2 {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode) {
+      Optional<String> nationalDrugCode,
+      String drugCode) {
 
     // LINE_SRVC_CNT => ExplanationOfBenefit.item.quantity
     item.setQuantity(new SimpleQuantity().setValue(serviceCount));
@@ -3145,7 +3132,7 @@ public final class TransformerUtilsV2 {
     }
 
     // LINE_NDC_CD => ExplanationOfBenefit.item.productOrService.extension
-    addNationalDrugCode(item, nationalDrugCode);
+    addNationalDrugCode(item, nationalDrugCode, drugCode);
 
     return item;
   }

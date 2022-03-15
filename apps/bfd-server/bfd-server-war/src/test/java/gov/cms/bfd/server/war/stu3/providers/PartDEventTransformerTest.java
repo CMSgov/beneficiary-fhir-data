@@ -144,11 +144,11 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-    IDrugCodeProvider DrugCodeProvider = new FDADrugTestUtils();
+    IDrugCodeProvider drugCodeProvider = new FDADrugTestUtils();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        DrugCodeProvider.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
+        drugCodeProvider.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 

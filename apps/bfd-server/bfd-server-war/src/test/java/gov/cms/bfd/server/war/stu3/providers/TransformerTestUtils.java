@@ -2024,7 +2024,7 @@ final class TransformerTestUtils {
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
     IDrugCodeProvider DrugCodeProvider = new FDADrugTestUtils();
     String nationalDrugCodeDisplayValueActual =
-        DrugCodeProvider.retrieveFDADrugCodeDisplay(nationalDrugCode);
+        drugCodeProvider.retrieveFDADrugCodeDisplay(nationalDrugCode);
     assertEquals(
         nationalDrugCodeDisplayValue,
         nationalDrugCodeDisplayValueActual,

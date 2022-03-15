@@ -34,14 +34,14 @@ final class PartDEventTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
-  static IDrugCodeProvider DrugCodeProvider;
+  private IDrugCodeProvider drugCodeProvider;
 
   public PartDEventTransformerV2() {
-    DrugCodeProvider = new FDADrugUtils();
+    drugCodeProvider = new FDADrugUtils();
   }
 
   public PartDEventTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
-    DrugCodeProvider = iDrugCodeProvider;
+    drugCodeProvider = iDrugCodeProvider;
   }
 
   @Trace
@@ -294,7 +294,7 @@ final class PartDEventTransformerV2 {
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            DrugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            drugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
             claimGroup.getNationalDrugCode()));
 
     // QTY_DSPNSD_NUM => ExplanationOfBenefit.item.quantity

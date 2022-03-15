@@ -127,14 +127,14 @@ import org.slf4j.MDC;
 public final class TransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
-  static IDrugCodeProvider DrugCodeProvider;
+  private IDrugCodeProvider drugCodeProvider;
 
   public TransformerUtils() {
-    DrugCodeProvider = new FDADrugUtils();
+    drugCodeProvider = new FDADrugUtils();
   }
 
   public TransformerUtils(IDrugCodeProvider iDrugCodeProvider) {
-    DrugCodeProvider = iDrugCodeProvider;
+    drugCodeProvider = iDrugCodeProvider;
   }
 
   /**
@@ -2048,7 +2048,7 @@ public final class TransformerUtils {
           item,
           TransformerConstants.CODING_NDC,
           TransformerConstants.CODING_NDC,
-          DrugCodeProvider.retrieveFDADrugCodeDisplay(nationalDrugCode.get()),
+          drugCodeProvider.retrieveFDADrugCodeDisplay(nationalDrugCode.get()),
           nationalDrugCode.get());
     }
 
@@ -3169,8 +3169,8 @@ public final class TransformerUtils {
     }
 
     // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!DrugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
-      DrugCodeProvider.drugCodeLookupMissingFailures.add(icdCode);
+    if (!drugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
+      drugCodeProvider.drugCodeLookupMissingFailures.add(icdCode);
       LOGGER.info(
           "No ICD code display value match found for ICD code {} in resource {}.",
           icdCode,
