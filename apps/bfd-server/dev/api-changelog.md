@@ -1,6 +1,116 @@
 # API Changelog
 
-## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
+## BFD-1516: Map Hospice Period Count in V2
+
+Added mapping for Hospice Period count
+BENE_HOSPC_PRD_CNT => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
+    }
+  }
+  ...
+}
+```
+
+## BFD-1517: Map FI Number in V2
+
+Added mapping for Fiscal Intermediary Number
+FI_NUM => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
+  }
+  ...
+}
+```
+
+## BFD-1518: Map Revenue Center Status Indicator Code in V2
+
+Added mapping for Revenue Status Code:
+REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
+## BFD-1566: Add Patient.meta.tag entry for Some Patients
+
+Our system has delayed the processing of demographic and enrollment data
+  for some persons who had previously been enrolled in Medicare
+  but are not enrolled in Medicare for the current year.
+This delay is due to errors in
+  how that data has been sent to our system for processing
+  that only impact such persons.
+Only around 0.3% of persons we have records for are impacted by this issue.
+
+Nevertheless, for such impacted persons,
+  their `Patient` resources are being tagged,
+  as follows:
+
+```
+{
+  "resourceType": "Patient",
+  ...
+  "meta": {
+    ...
+    "tag": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/codesystem/tags",
+        "code": "delayed-backdated-enrollment",
+        "display": "Impacted by delayed backdated enrollment data."
+      }
+    ]
+  },
+  ...
+```
+
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
 ```

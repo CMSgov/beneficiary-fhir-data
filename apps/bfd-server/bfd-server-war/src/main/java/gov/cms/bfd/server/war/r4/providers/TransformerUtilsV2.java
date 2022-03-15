@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -101,6 +102,7 @@ import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.util.Assert;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -162,7 +164,7 @@ public final class TransformerUtilsV2 {
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
    *     Beneficiary}
    */
-  public static IdDt buildPatientId(String beneficiaryId) {
+  public static IdDt buildPatientId(Long beneficiaryId) {
     return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
   }
 
@@ -1123,8 +1125,8 @@ public final class TransformerUtilsV2 {
    * @return a {@link Reference} to the {@link Patient} resource that matches the specified
    *     parameters
    */
-  static Reference referencePatient(String patientId) {
-    return new Reference(String.format("Patient/%s", patientId));
+  static Reference referencePatient(Long patientId) {
+    return new Reference(String.format("Patient/%d", patientId));
   }
 
   /**
@@ -1695,6 +1697,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * TODO: Remove this method when the calling method has been removed as per BFD-1582
+   *
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
    * @param coverageType the {@link MedicareSegment} value to match
@@ -1702,6 +1706,17 @@ public final class TransformerUtilsV2 {
    *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
    */
   static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
+    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
+  }
+
+  /**
+   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
+   *     value for the {@link Coverage#getBeneficiary()} value to match
+   * @param coverageType the {@link MedicareSegment} value to match
+   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
+   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
+   */
+  static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
     return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
@@ -1715,6 +1730,10 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * TODO: Remove this method when the calling method has been removed as per BFD-1582 and the
+   * conversion to bigint for beneficiaryId is complete which will allow removal of the other caller
+   * which is a unit test that passes an ID that contains alpha characters (BFD-1583).
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
    *     Coverage#getId()} for
@@ -1724,6 +1743,18 @@ public final class TransformerUtilsV2 {
     return new IdDt(
         Coverage.class.getSimpleName(),
         String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
+   *     Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Long beneficiaryId) {
+    return new IdDt(
+        Coverage.class.getSimpleName(),
+        String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
   }
 
   /**
@@ -1784,8 +1815,8 @@ public final class TransformerUtilsV2 {
    */
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
+      Long claimId,
+      Long beneficiaryId,
       ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -1805,10 +1836,10 @@ public final class TransformerUtilsV2 {
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
     }
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
@@ -2111,6 +2142,9 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * TODO: BFD-1583 Remove this method and the calling unit test when fully converted to BigInt
+   * claim IDs.
+   *
    * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
@@ -2119,6 +2153,17 @@ public final class TransformerUtilsV2 {
    */
   public static String buildEobId(ClaimTypeV2 claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
+   * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimTypeV2 claimType, Long claimId) {
+    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
@@ -2328,7 +2373,6 @@ public final class TransformerUtilsV2 {
    */
   static void mapEobCommonGroupCarrierDME(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,
@@ -2958,10 +3002,10 @@ public final class TransformerUtilsV2 {
    * @param patientDischargeStatusCode PTNT_DSCHRG_STUS_CD,
    * @param claimServiceClassificationTypeCode CLM_SRVC_CLSFCTN_TYPE_CD,
    * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
-   * @param attendingPhysicianNpi AT_PHYSN_NPI,
    * @param totalChargeAmount CLM_TOT_CHRG_AMT,
    * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
    * @param fiscalIntermediaryNumber FI_NUM
+   * @param lastUpdated the last updated
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3024,6 +3068,12 @@ public final class TransformerUtilsV2 {
           claimPrimaryPayerCode.get());
     }
 
+    // FI_NUM => ExplanationOfBenefit.extension
+    if (fiscalIntermediaryNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionCoding(eob, CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
+    }
+
     // CLM_TOT_CHRG_AMT => ExplainationOfBenefit.total
     addTotal(
         eob,
@@ -3074,7 +3124,7 @@ public final class TransformerUtilsV2 {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       int sequence,
       BigDecimal serviceCount,
       String placeOfServiceCode,
@@ -3545,6 +3595,33 @@ public final class TransformerUtilsV2 {
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
       item.setQuantity(drugQuantity);
+    }
+
+    return item;
+  }
+
+  /**
+   * Maps the Revenue Status Indicator Code to the eob's item revenue as an extension, if the status
+   * code is present.
+   *
+   * <p>REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+   *
+   * @param item the item to add the extension to, if the required data is present
+   * @param eob the root eob (only used for logging purposes)
+   * @param statusCode the status code to check for and add data from if exists
+   * @return the {@link ItemComponent}
+   */
+  static ItemComponent mapEobCommonItemRevenueStatusCode(
+      @Nonnull ItemComponent item, @Nonnull ExplanationOfBenefit eob, Optional<String> statusCode) {
+
+    Assert.notNull(item, "Item must be non-null");
+    Assert.notNull(eob, "Eob must be non-null");
+
+    if (statusCode.isPresent()) {
+      item.getRevenue()
+          .addExtension(
+              TransformerUtilsV2.createExtensionCoding(
+                  eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, statusCode));
     }
 
     return item;
