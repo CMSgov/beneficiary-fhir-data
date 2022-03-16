@@ -196,7 +196,7 @@
 				<artifactId>bfd-model-rda-codegen-plugin</artifactId>
 				<version>${project.version}</version>
 				<configuration>
-					<mappingFile>${project.basedir}/mapping.yaml</mappingFile>
+					<mappingFile>${project.basedir}/mappings</mappingFile>
 					<outputDirectory>${project.build.directory}/generated-sources/dsl</outputDirectory>
 				</configuration>
 				<executions>

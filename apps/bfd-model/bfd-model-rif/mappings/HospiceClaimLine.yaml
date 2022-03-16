@@ -1,0 +1,167 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.HospiceClaimLine
+  id: HospiceClaimLine
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: Claim Line Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_ln.txt)
+      dbName: clm_line_num
+      name: lineNumber
+      nullable: false
+      sqlType: numeric
+    - comment: Revenue Center Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt)
+      dbName: rev_cntr
+      name: revenueCenterCode
+      nullable: false
+      sqlType: varchar(4)
+    - comment: Revenue Center Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_dt.txt)
+      dbName: rev_cntr_dt
+      name: revenueCenterDate
+      sqlType: date
+    - comment: Revenue Center Healthcare Common Procedure Coding System (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt)
+      dbName: hcpcs_cd
+      name: hcpcsCode
+      sqlType: varchar(5)
+    - comment: Revenue Center HCPCS Initial Modifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt)
+      dbName: hcpcs_1st_mdfr_cd
+      name: hcpcsInitialModifierCode
+      sqlType: varchar(5)
+    - comment: Revenue Center HCPCS Second Modifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt)
+      dbName: hcpcs_2nd_mdfr_cd
+      name: hcpcsSecondModifierCode
+      sqlType: varchar(5)
+    - comment: Revenue Center Unit Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_unit.txt)
+      dbName: rev_cntr_unit_cnt
+      name: unitCount
+      nullable: false
+      sqlType: numeric
+    - comment: Revenue Center Rate Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_rate.txt)
+      dbName: rev_cntr_rate_amt
+      name: rateAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Revenue Center Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rprvdpmt.txt)
+      dbName: rev_cntr_prvdr_pmt_amt
+      name: providerPaymentAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Revenue Center Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rbenepmt.txt)
+      dbName: rev_cntr_bene_pmt_amt
+      name: benficiaryPaymentAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Revenue Center Payment Amount Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revpmt.txt)
+      dbName: rev_cntr_pmt_amt_amt
+      name: paymentAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Revenue Center Total Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_chrg.txt)
+      dbName: rev_cntr_tot_chrg_amt
+      name: totalChargeAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Revenue Center Non-Covered Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_ncvr.txt)
+      dbName: rev_cntr_ncvrd_chrg_amt
+      name: nonCoveredChargeAmount
+      sqlType: decimal(12,2)
+    - comment: Revenue Center Deductible Coinsurance Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt)
+      dbName: rev_cntr_ddctbl_coinsrnc_cd
+      javaType: Character
+      name: deductibleCoinsuranceCd
+      sqlType: varchar(1)
+    - comment: Revenue Center NDC Quantity (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt)
+      dbName: rev_cntr_ndc_qty
+      name: nationalDrugCodeQuantity
+      sqlType: numeric
+    - comment: Revenue Center NDC Quantity Qualifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt)
+      dbName: rev_cntr_ndc_qty_qlfr_cd
+      name: nationalDrugCodeQualifierCode
+      sqlType: varchar(2)
+    - comment: Revenue Center Rendering Physician UPIN (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_upin.txt)
+      dbName: rndrng_physn_upin
+      name: revenueCenterRenderingPhysicianUPIN
+      sqlType: varchar(12)
+    - comment: Revenue Center Rendering Physician NPI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt)
+      dbName: rndrng_physn_npi
+      name: revenueCenterRenderingPhysicianNPI
+      sqlType: varchar(12)
+    equalsNeeded: false
+    joins:
+    - entityClass: gov.cms.bfd.model.rif.HospiceClaim
+      fetchType: EAGER
+      fieldName: parentClaim
+      foreignKey: hospice_claim_lines_clm_id_to_hospice_claims
+      joinColumnName: clm_id
+      joinType: ManyToOne
+    name: hospice_claim_lines
+    primaryKeyColumns:
+    - parentClaim
+    - lineNumber
+    quoteNames: false
+  transformations:
+  - defaultValue: '0'
+    from: CLM_LINE_NUM
+    optional: false
+    to: lineNumber
+  - from: REV_CNTR
+    optional: false
+    to: revenueCenterCode
+  - from: REV_CNTR_DT
+    optional: true
+    to: revenueCenterDate
+  - from: HCPCS_CD
+    optional: true
+    to: hcpcsCode
+  - from: HCPCS_1ST_MDFR_CD
+    optional: true
+    to: hcpcsInitialModifierCode
+  - from: HCPCS_2ND_MDFR_CD
+    optional: true
+    to: hcpcsSecondModifierCode
+  - defaultValue: '0'
+    from: REV_CNTR_UNIT_CNT
+    optional: false
+    to: unitCount
+  - defaultValue: '0'
+    from: REV_CNTR_RATE_AMT
+    optional: false
+    to: rateAmount
+  - defaultValue: '0'
+    from: REV_CNTR_PRVDR_PMT_AMT
+    optional: false
+    to: providerPaymentAmount
+  - defaultValue: '0'
+    from: REV_CNTR_BENE_PMT_AMT
+    optional: false
+    to: benficiaryPaymentAmount
+  - defaultValue: '0'
+    from: REV_CNTR_PMT_AMT_AMT
+    optional: false
+    to: paymentAmount
+  - defaultValue: '0'
+    from: REV_CNTR_TOT_CHRG_AMT
+    optional: false
+    to: totalChargeAmount
+  - defaultValue: '0'
+    from: REV_CNTR_NCVRD_CHRG_AMT
+    optional: true
+    to: nonCoveredChargeAmount
+  - from: REV_CNTR_DDCTBL_COINSRNC_CD
+    optional: true
+    to: deductibleCoinsuranceCd
+  - defaultValue: '0'
+    from: REV_CNTR_NDC_QTY
+    optional: true
+    to: nationalDrugCodeQuantity
+  - from: REV_CNTR_NDC_QTY_QLFR_CD
+    optional: true
+    to: nationalDrugCodeQualifierCode
+  - from: RNDRNG_PHYSN_UPIN
+    optional: true
+    to: revenueCenterRenderingPhysicianUPIN
+  - from: RNDRNG_PHYSN_NPI
+    optional: true
+    to: revenueCenterRenderingPhysicianNPI

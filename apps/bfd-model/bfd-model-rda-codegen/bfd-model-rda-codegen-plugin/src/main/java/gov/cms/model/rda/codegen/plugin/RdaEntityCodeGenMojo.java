@@ -1,5 +1,7 @@
 package gov.cms.model.rda.codegen.plugin;
 
+import static gov.cms.model.rda.codegen.plugin.model.ModelUtil.isValidMappingSource;
+
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -77,7 +79,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
 
   @SneakyThrows(IOException.class)
   public void execute() throws MojoExecutionException {
-    if (mappingFile == null || !new File(mappingFile).isFile()) {
+    if (!isValidMappingSource(mappingFile)) {
       throw failure("mappingFile not defined or does not exist");
     }
 

@@ -8,7 +8,7 @@ import yaml
 classNameSuffix = ""
 noTransformerMappings = {"BeneficiaryMonthly"}
 stringToLongFieldNames = {"beneficiaryId", "claimId", "eventId"}
-# stringToLongFieldNames = set()
+
 
 def create_mapping(summary):
     columns = list()
@@ -364,6 +364,18 @@ def add_join_to_beneficiary(all_mappings):
     joins.insert(0, join)
 
 
+def swap_clm_id_and_bene_id(columns):
+    index = 0
+    for column in columns:
+        if column["dbName"] == "bene_id":
+            next_column = columns[index + 1]
+            if next["dbName"] == "clm_id":
+                columns[index] = next_column
+                columns[index + 1] = column
+                break
+        index += 1
+
+
 summaryFilePath = Path("target/rif-mapping-summary.yaml")
 summaries = yaml.safe_load(summaryFilePath.read_text())
 
@@ -377,11 +389,13 @@ for summary in summaries:
 add_join_to_beneficiary(output_mappings)
 add_join_to_monthlies(output_mappings)
 
-result = {"mappings": output_mappings}
-result_yaml = yaml.dump(result, default_flow_style=False)
-
 if len(sys.argv) > 1:
-    with open(sys.argv[1], "w") as text_file:
-        text_file.write(result_yaml)
+    for mapping in output_mappings:
+        with open(f'{sys.argv[1]}/{mapping["id"]}.yaml', "w") as text_file:
+            result = {"mappings": [mapping]}
+            result_yaml = yaml.dump(result, default_flow_style=False)
+            text_file.write(result_yaml)
 else:
+    result = {"mappings": output_mappings}
+    result_yaml = yaml.dump(result, default_flow_style=False)
     print(result_yaml)

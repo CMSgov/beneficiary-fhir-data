@@ -1,0 +1,157 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
+  entityInterfaces:
+  - gov.cms.bfd.model.rif.RifRecordBase
+  id: MedicareBeneficiaryIdHistory
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: System generated unique sequence number
+      dbName: bene_mbi_id
+      name: medicareBeneficiaryIdKey
+      nullable: false
+      sqlType: numeric(10)
+    - comment: Beneficiary ID - A unique CCW beneficiary identifier field (BENE_ID)  that
+        is specific to the Chronic Condition Warehouse. This field is encrypted prior
+        to delivery to researchers. The BENE_ID field is used to cross-reference data
+        for each beneficiary across all claim and assessment data files.
+      dbName: bene_id
+      javaAccessorType: long
+      javaType: String
+      name: beneficiaryId
+      sqlType: varchar(15)
+    - comment: 'Beneficiary Claim Account Number - The number identifying the primary
+        beneficiary under the SSA or RRB programs submitted. LIMITATIONS: RRB-issued
+        numbers contain an over punch in the first position that may appear as a plus
+        zero or A-G.RRB-formatted numbers may cause matching problems on non-IBM machines.'
+      dbName: bene_clm_acnt_num
+      name: claimAccountNumber
+      sqlType: varchar(9)
+    - comment: Beneficiary Identification Code - The BIC Code establishes the Beneficiary"s
+        to a primary Social Security Administration (SSA) beneficiary or a primary
+        Railroad Board (RRB) beneficiary. It is used to justify entitlement to Medicare
+        benefits.
+      dbName: bene_ident_cd
+      name: beneficiaryIdCode
+      sqlType: varchar(2)
+    - comment: A system generated number that indicates an MBI as active or history.  The
+        active MBI will always be zero.
+      dbName: mbi_sqnc_num
+      name: mbiSequenceNumber
+      sqlType: numeric(1)
+    - comment: Medicare Beneficiary identifier
+      dbName: mbi_num
+      name: medicareBeneficiaryId
+      sqlType: varchar(11)
+    - comment: The effective date when an MBI is assigned to a beneficiary.
+      dbName: mbi_efctv_bgn_dt
+      name: mbiEffectiveDate
+      sqlType: date
+    - comment: The end date when an MBI period is closed due to being compromised
+        or involved in a merge cross reference action.
+      dbName: mbi_efctv_end_dt
+      name: mbiEndDate
+      sqlType: date
+    - comment: The effective reason code which identifies why an MBI was assigned
+        to an individual.
+      dbName: mbi_bgn_rsn_cd
+      name: mbiEffectiveReasonCode
+      sqlType: varchar(5)
+    - comment: The end reason code which identifies why an MBI was inactivated.
+      dbName: mbi_end_rsn_cd
+      name: mbiEndReasonCode
+      sqlType: varchar(5)
+    - comment: The date the EDB created and sent the Medicare Card request with the
+        MBI to the Print Mail Contractor.
+      dbName: mbi_card_rqst_dt
+      name: mbiCardRequestDate
+      sqlType: date
+    - comment: USER that added the record
+      dbName: creat_user_id
+      name: mbiAddUser
+      sqlType: varchar(30)
+    - comment: Timestamp when the row was added to the table.
+      dbName: creat_ts
+      name: mbiAddDate
+      sqlType: timestamp with time zone
+    - comment: User who updated the record
+      dbName: updt_user_id
+      name: mbiUpdateUser
+      sqlType: varchar(30)
+    - comment: Timestamp when the row was updated.
+      dbName: updt_ts
+      name: mbiUpdateDate
+      sqlType: timestamp with time zone
+    - comment: A system generated number used internally to spread data across all
+        partitions within the Entitlement Database.
+      dbName: bene_crnt_rec_ind_id
+      name: mbiCrntRecIndId
+      sqlType: numeric(1)
+    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+      dbName: last_updated
+      name: lastUpdated
+      sqlType: timestamp with time zone
+    equalsNeeded: false
+    name: medicare_beneficiaryid_history
+    primaryKeyColumns:
+    - medicareBeneficiaryIdKey
+    quoteNames: false
+  transformations:
+  - defaultValue: '0'
+    from: BENE_MBI_ID
+    optional: false
+    to: medicareBeneficiaryIdKey
+  - from: BENE_ID
+    optional: true
+    to: beneficiaryId
+    transformer: LongString
+  - from: BENE_CLM_ACNT_NUM
+    optional: true
+    to: claimAccountNumber
+  - from: BENE_IDENT_CD
+    optional: true
+    to: beneficiaryIdCode
+  - defaultValue: '0'
+    from: MBI_SQNC_NUM
+    optional: true
+    to: mbiSequenceNumber
+  - from: MBI_NUM
+    optional: true
+    to: medicareBeneficiaryId
+  - from: MBI_EFCTV_BGN_DT
+    optional: true
+    to: mbiEffectiveDate
+  - from: MBI_EFCTV_END_DT
+    optional: true
+    to: mbiEndDate
+  - from: MBI_BGN_RSN_CD
+    optional: true
+    to: mbiEffectiveReasonCode
+  - from: MBI_END_RSN_CD
+    optional: true
+    to: mbiEndReasonCode
+  - from: MBI_CARD_RQST_DT
+    optional: true
+    to: mbiCardRequestDate
+  - from: CREAT_USER_ID
+    optional: true
+    to: mbiAddUser
+  - from: CREAT_TS
+    optional: true
+    to: mbiAddDate
+    transformer: RifTimestamp
+  - from: UPDT_USER_ID
+    optional: true
+    to: mbiUpdateUser
+  - from: UPDT_TS
+    optional: true
+    to: mbiUpdateDate
+    transformer: RifTimestamp
+  - defaultValue: '0'
+    from: BENE_CRNT_REC_IND_ID
+    optional: true
+    to: mbiCrntRecIndId
+  transformerClassName: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistoryParser

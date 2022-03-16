@@ -1,5 +1,6 @@
 package gov.cms.model.rda.codegen.plugin;
 
+import static gov.cms.model.rda.codegen.plugin.model.ModelUtil.isValidMappingSource;
 import static gov.cms.model.rda.codegen.plugin.transformer.TransformerUtil.capitalize;
 
 import com.google.common.collect.ImmutableList;
@@ -70,7 +71,7 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
 
   @SneakyThrows(IOException.class)
   public void execute() throws MojoExecutionException {
-    if (mappingFile == null || !new File(mappingFile).isFile()) {
+    if (!isValidMappingSource(mappingFile)) {
       fail("mappingFile not defined or does not exist");
     }
 

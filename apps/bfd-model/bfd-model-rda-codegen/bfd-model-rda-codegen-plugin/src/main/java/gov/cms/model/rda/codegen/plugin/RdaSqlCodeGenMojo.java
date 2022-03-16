@@ -1,5 +1,7 @@
 package gov.cms.model.rda.codegen.plugin;
 
+import static gov.cms.model.rda.codegen.plugin.model.ModelUtil.isValidMappingSource;
+
 import gov.cms.model.rda.codegen.plugin.model.MappingBean;
 import gov.cms.model.rda.codegen.plugin.model.ModelUtil;
 import gov.cms.model.rda.codegen.plugin.model.RootBean;
@@ -34,7 +36,7 @@ public class RdaSqlCodeGenMojo extends AbstractMojo {
 
   @SneakyThrows(IOException.class)
   public void execute() throws MojoExecutionException {
-    if (mappingFile == null || !new File(mappingFile).isFile()) {
+    if (!isValidMappingSource(mappingFile)) {
       fail("mappingFile not defined or does not exist");
     }
 

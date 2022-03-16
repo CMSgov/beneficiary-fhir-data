@@ -1,0 +1,1558 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.Beneficiary
+  entityInterfaces:
+  - gov.cms.bfd.model.rif.RifRecordBase
+  id: Beneficiary
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
+      dbName: bene_id
+      javaAccessorType: long
+      javaType: String
+      name: beneficiaryId
+      nullable: false
+      sqlType: varchar(15)
+    - comment: State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/state_cd.txt)
+      dbName: state_code
+      name: stateCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: County Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cnty_cd.txt)
+      dbName: bene_county_cd
+      name: countyCode
+      nullable: false
+      sqlType: varchar(10)
+    - comment: Zip Code of Residence (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_zip.txt)
+      dbName: bene_zip_cd
+      name: postalCode
+      nullable: false
+      sqlType: varchar(9)
+    - comment: Date of Birth (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_dob.txt)
+      dbName: bene_birth_dt
+      name: birthDate
+      nullable: false
+      sqlType: date
+    - comment: Sex (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sex.txt)
+      dbName: bene_sex_ident_cd
+      javaType: char
+      name: sex
+      nullable: false
+      sqlType: varchar(1)
+    - comment: Beneficiary Race Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt)
+      dbName: bene_race_cd
+      javaType: Character
+      name: race
+      sqlType: varchar(1)
+    - comment: Original Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt)
+      dbName: bene_entlmt_rsn_orig
+      javaType: Character
+      name: entitlementCodeOriginal
+      sqlType: varchar(1)
+    - comment: Current Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt)
+      dbName: bene_entlmt_rsn_curr
+      javaType: Character
+      name: entitlementCodeCurrent
+      sqlType: varchar(1)
+    - comment: ESRD Indicator (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt)
+      dbName: bene_esrd_ind
+      javaType: Character
+      name: endStageRenalDiseaseCode
+      sqlType: varchar(1)
+    - comment: Medicare Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt)
+      dbName: bene_mdcr_status_cd
+      name: medicareEnrollmentStatusCode
+      sqlType: varchar(2)
+    - comment: Part A Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt)
+      dbName: bene_pta_trmntn_cd
+      javaType: Character
+      name: partATerminationCode
+      sqlType: varchar(1)
+    - comment: Part B Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt)
+      dbName: bene_ptb_trmntn_cd
+      javaType: Character
+      name: partBTerminationCode
+      sqlType: varchar(1)
+    - comment: Beneficiary Current HIC Number
+      dbName: bene_crnt_hic_num
+      name: hicn
+      nullable: false
+      sqlType: varchar(64)
+    - comment: Beneficiary Surname Name
+      dbName: bene_srnm_name
+      name: nameSurname
+      nullable: false
+      sqlType: varchar(24)
+    - comment: Beneficiary Given Name
+      dbName: bene_gvn_name
+      name: nameGiven
+      nullable: false
+      sqlType: varchar(15)
+    - comment: Beneficiary Middle Name
+      dbName: bene_mdl_name
+      javaType: Character
+      name: nameMiddleInitial
+      sqlType: varchar(1)
+    - comment: Medicare Beneficiary ID
+      dbName: mbi_num
+      name: medicareBeneficiaryId
+      sqlType: varchar(11)
+    - comment: Date of Death
+      dbName: death_dt
+      name: beneficiaryDateOfDeath
+      sqlType: date
+    - comment: Reference Year
+      dbName: rfrnc_yr
+      name: beneEnrollmentReferenceYear
+      sqlType: numeric(4)
+    - comment: Part A Months Count
+      dbName: a_mo_cnt
+      name: partAMonthsCount
+      sqlType: numeric(3)
+    - comment: Part B Months Count
+      dbName: b_mo_cnt
+      name: partBMonthsCount
+      sqlType: numeric(3)
+    - comment: State Buy-In Coverage Count
+      dbName: buyin_mo_cnt
+      name: stateBuyInCoverageCount
+      sqlType: numeric(3)
+    - comment: HMO Coverage Count
+      dbName: hmo_mo_cnt
+      name: hmoCoverageCount
+      sqlType: numeric(3)
+    - comment: Months of Retiree Drug Subsidy Coverage
+      dbName: rds_mo_cnt
+      name: monthsRetireeDrugSubsidyCoverage
+      sqlType: numeric(3)
+    - comment: Source of enrollment data
+      dbName: enrl_src
+      name: sourceOfEnrollmentData
+      sqlType: varchar(3)
+    - comment: Medicare 1, 5, or 20% strict sample group indicator
+      dbName: sample_group
+      name: sampleMedicareGroupIndicator
+      sqlType: varchar(2)
+    - comment: Enhanced Medicare 5% Sample Indicator
+      dbName: efivepct
+      javaType: Character
+      name: enhancedMedicareSampleIndicator
+      sqlType: varchar(1)
+    - comment: Current Beneficiary Identification Code
+      dbName: crnt_bic
+      name: currentBeneficiaryIdCode
+      sqlType: varchar(2)
+    - comment: Age of beneficiary at end of year
+      dbName: age
+      name: ageOfBeneficiary
+      sqlType: numeric(3)
+    - comment: Medicare Coverage Start Date
+      dbName: covstart
+      name: medicareCoverageStartDate
+      sqlType: date
+    - comment: Months of Dual Eligibility
+      dbName: dual_mo_cnt
+      name: monthsOfDualEligibility
+      sqlType: numeric(3)
+    - comment: State and county FIPS code - January
+      dbName: fips_state_cnty_jan_cd
+      name: fipsStateCntyJanCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - February
+      dbName: fips_state_cnty_feb_cd
+      name: fipsStateCntyFebCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - March
+      dbName: fips_state_cnty_mar_cd
+      name: fipsStateCntyMarCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - April
+      dbName: fips_state_cnty_apr_cd
+      name: fipsStateCntyAprCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - May
+      dbName: fips_state_cnty_may_cd
+      name: fipsStateCntyMayCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - June
+      dbName: fips_state_cnty_jun_cd
+      name: fipsStateCntyJunCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - July
+      dbName: fips_state_cnty_jul_cd
+      name: fipsStateCntyJulCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - August
+      dbName: fips_state_cnty_aug_cd
+      name: fipsStateCntyAugCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - September
+      dbName: fips_state_cnty_sept_cd
+      name: fipsStateCntySeptCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - October
+      dbName: fips_state_cnty_oct_cd
+      name: fipsStateCntyOctCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - November
+      dbName: fips_state_cnty_nov_cd
+      name: fipsStateCntyNovCode
+      sqlType: varchar(5)
+    - comment: State and county FIPS code - December
+      dbName: fips_state_cnty_dec_cd
+      name: fipsStateCntyDecCode
+      sqlType: varchar(5)
+    - comment: Valid Date of Death Switch
+      dbName: v_dod_sw
+      javaType: Character
+      name: validDateOfDeathSw
+      sqlType: varchar(1)
+    - comment: Research Triangle Institute (RTI) Race Code
+      dbName: rti_race_cd
+      javaType: Character
+      name: rtiRaceCode
+      sqlType: varchar(1)
+    - comment: Medicare Status Code - January
+      dbName: mdcr_stus_jan_cd
+      name: medicareStatusJanCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - February
+      dbName: mdcr_stus_feb_cd
+      name: medicareStatusFebCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - March
+      dbName: mdcr_stus_mar_cd
+      name: medicareStatusMarCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - April
+      dbName: mdcr_stus_apr_cd
+      name: medicareStatusAprCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - May
+      dbName: mdcr_stus_may_cd
+      name: medicareStatusMayCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - June
+      dbName: mdcr_stus_jun_cd
+      name: medicareStatusJunCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - July
+      dbName: mdcr_stus_jul_cd
+      name: medicareStatusJulCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - August
+      dbName: mdcr_stus_aug_cd
+      name: medicareStatusAugCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - September
+      dbName: mdcr_stus_sept_cd
+      name: medicareStatusSeptCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - October
+      dbName: mdcr_stus_oct_cd
+      name: medicareStatusOctCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - November
+      dbName: mdcr_stus_nov_cd
+      name: medicareStatusNovCode
+      sqlType: varchar(2)
+    - comment: Medicare Status Code - December
+      dbName: mdcr_stus_dec_cd
+      name: medicareStatusDecCode
+      sqlType: varchar(2)
+    - comment: Months of Part D Coverage
+      dbName: plan_cvrg_mo_cnt
+      name: partDMonthsCount
+      sqlType: numeric(3)
+    - comment: Medicare Entitlement/Buy-In Indicator - January
+      dbName: mdcr_entlmt_buyin_1_ind
+      javaType: Character
+      name: entitlementBuyInJanInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - February
+      dbName: mdcr_entlmt_buyin_2_ind
+      javaType: Character
+      name: entitlementBuyInFebInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - March
+      dbName: mdcr_entlmt_buyin_3_ind
+      javaType: Character
+      name: entitlementBuyInMarInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - April
+      dbName: mdcr_entlmt_buyin_4_ind
+      javaType: Character
+      name: entitlementBuyInAprInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - May
+      dbName: mdcr_entlmt_buyin_5_ind
+      javaType: Character
+      name: entitlementBuyInMayInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - June
+      dbName: mdcr_entlmt_buyin_6_ind
+      javaType: Character
+      name: entitlementBuyInJunInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - July
+      dbName: mdcr_entlmt_buyin_7_ind
+      javaType: Character
+      name: entitlementBuyInJulInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - August
+      dbName: mdcr_entlmt_buyin_8_ind
+      javaType: Character
+      name: entitlementBuyInAugInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - September
+      dbName: mdcr_entlmt_buyin_9_ind
+      javaType: Character
+      name: entitlementBuyInSeptInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - October
+      dbName: mdcr_entlmt_buyin_10_ind
+      javaType: Character
+      name: entitlementBuyInOctInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - November
+      dbName: mdcr_entlmt_buyin_11_ind
+      javaType: Character
+      name: entitlementBuyInNovInd
+      sqlType: varchar(1)
+    - comment: Medicare  Entitlement/Buy-In Indicator - December
+      dbName: mdcr_entlmt_buyin_12_ind
+      javaType: Character
+      name: entitlementBuyInDecInd
+      sqlType: varchar(1)
+    - comment: 'HMO Indicator - January '
+      dbName: hmo_1_ind
+      javaType: Character
+      name: hmoIndicatorJanInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - February
+      dbName: hmo_2_ind
+      javaType: Character
+      name: hmoIndicatorFebInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - March
+      dbName: hmo_3_ind
+      javaType: Character
+      name: hmoIndicatorMarInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - April
+      dbName: hmo_4_ind
+      javaType: Character
+      name: hmoIndicatorAprInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - May
+      dbName: hmo_5_ind
+      javaType: Character
+      name: hmoIndicatorMayInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - June
+      dbName: hmo_6_ind
+      javaType: Character
+      name: hmoIndicatorJunInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - July
+      dbName: hmo_7_ind
+      javaType: Character
+      name: hmoIndicatorJulInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - August
+      dbName: hmo_8_ind
+      javaType: Character
+      name: hmoIndicatorAugInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - September
+      dbName: hmo_9_ind
+      javaType: Character
+      name: hmoIndicatorSeptInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - October
+      dbName: hmo_10_ind
+      javaType: Character
+      name: hmoIndicatorOctInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - November
+      dbName: hmo_11_ind
+      javaType: Character
+      name: hmoIndicatorNovInd
+      sqlType: varchar(1)
+    - comment: HMO Indicator - December
+      dbName: hmo_12_ind
+      javaType: Character
+      name: hmoIndicatorDecInd
+      sqlType: varchar(1)
+    - comment: Part C Contract Number - January
+      dbName: ptc_cntrct_jan_id
+      name: partCContractNumberJanId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - February
+      dbName: ptc_cntrct_feb_id
+      name: partCContractNumberFebId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - March
+      dbName: ptc_cntrct_mar_id
+      name: partCContractNumberMarId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - April
+      dbName: ptc_cntrct_apr_id
+      name: partCContractNumberAprId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - May
+      dbName: ptc_cntrct_may_id
+      name: partCContractNumberMayId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - June
+      dbName: ptc_cntrct_jun_id
+      name: partCContractNumberJunId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - July
+      dbName: ptc_cntrct_jul_id
+      name: partCContractNumberJulId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - August
+      dbName: ptc_cntrct_aug_id
+      name: partCContractNumberAugId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - September
+      dbName: ptc_cntrct_sept_id
+      name: partCContractNumberSeptId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - October
+      dbName: ptc_cntrct_oct_id
+      name: partCContractNumberOctId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - November
+      dbName: ptc_cntrct_nov_id
+      name: partCContractNumberNovId
+      sqlType: varchar(5)
+    - comment: Part C Contract Number - December
+      dbName: ptc_cntrct_dec_id
+      name: partCContractNumberDecId
+      sqlType: varchar(5)
+    - comment: Part C PBP Number - January
+      dbName: ptc_pbp_jan_id
+      name: partCPbpNumberJanId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - February
+      dbName: ptc_pbp_feb_id
+      name: partCPbpNumberFebId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - March
+      dbName: ptc_pbp_mar_id
+      name: partCPbpNumberMarId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - April
+      dbName: ptc_pbp_apr_id
+      name: partCPbpNumberAprId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - May
+      dbName: ptc_pbp_may_id
+      name: partCPbpNumberMayId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - June
+      dbName: ptc_pbp_jun_id
+      name: partCPbpNumberJunId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - July
+      dbName: ptc_pbp_jul_id
+      name: partCPbpNumberJulId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - August
+      dbName: ptc_pbp_aug_id
+      name: partCPbpNumberAugId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - September
+      dbName: ptc_pbp_sept_id
+      name: partCPbpNumberSeptId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - October
+      dbName: ptc_pbp_oct_id
+      name: partCPbpNumberOctId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - November
+      dbName: ptc_pbp_nov_id
+      name: partCPbpNumberNovId
+      sqlType: varchar(3)
+    - comment: Part C PBP Number - December
+      dbName: ptc_pbp_dec_id
+      name: partCPbpNumberDecId
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - January
+      dbName: ptc_plan_type_jan_cd
+      name: partCPlanTypeJanCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - February
+      dbName: ptc_plan_type_feb_cd
+      name: partCPlanTypeFebCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - March
+      dbName: ptc_plan_type_mar_cd
+      name: partCPlanTypeMarCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - April
+      dbName: ptc_plan_type_apr_cd
+      name: partCPlanTypeAprCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - May
+      dbName: ptc_plan_type_may_cd
+      name: partCPlanTypeMayCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - June
+      dbName: ptc_plan_type_jun_cd
+      name: partCPlanTypeJunCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - July
+      dbName: ptc_plan_type_jul_cd
+      name: partCPlanTypeJulCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - August
+      dbName: ptc_plan_type_aug_cd
+      name: partCPlanTypeAugCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - September
+      dbName: ptc_plan_type_sept_cd
+      name: partCPlanTypeSeptCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - October
+      dbName: ptc_plan_type_oct_cd
+      name: partCPlanTypeOctCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - November
+      dbName: ptc_plan_type_nov_cd
+      name: partCPlanTypeNovCode
+      sqlType: varchar(3)
+    - comment: Part C Plan Type Code - December
+      dbName: ptc_plan_type_dec_cd
+      name: partCPlanTypeDecCode
+      sqlType: varchar(3)
+    - comment: Part D Contract Number - January
+      dbName: ptd_cntrct_jan_id
+      name: partDContractNumberJanId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - February
+      dbName: ptd_cntrct_feb_id
+      name: partDContractNumberFebId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - March
+      dbName: ptd_cntrct_mar_id
+      name: partDContractNumberMarId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - April
+      dbName: ptd_cntrct_apr_id
+      name: partDContractNumberAprId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - May
+      dbName: ptd_cntrct_may_id
+      name: partDContractNumberMayId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - June
+      dbName: ptd_cntrct_jun_id
+      name: partDContractNumberJunId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - July
+      dbName: ptd_cntrct_jul_id
+      name: partDContractNumberJulId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - August
+      dbName: ptd_cntrct_aug_id
+      name: partDContractNumberAugId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - September
+      dbName: ptd_cntrct_sept_id
+      name: partDContractNumberSeptId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - October
+      dbName: ptd_cntrct_oct_id
+      name: partDContractNumberOctId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - November
+      dbName: ptd_cntrct_nov_id
+      name: partDContractNumberNovId
+      sqlType: varchar(5)
+    - comment: Part D Contract Number - December
+      dbName: ptd_cntrct_dec_id
+      name: partDContractNumberDecId
+      sqlType: varchar(5)
+    - comment: Part D PBP Number - January
+      dbName: ptd_pbp_jan_id
+      name: partDPbpNumberJanId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - February
+      dbName: ptd_pbp_feb_id
+      name: partDPbpNumberFebId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - March
+      dbName: ptd_pbp_mar_id
+      name: partDPbpNumberMarId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - April
+      dbName: ptd_pbp_apr_id
+      name: partDPbpNumberAprId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - May
+      dbName: ptd_pbp_may_id
+      name: partDPbpNumberMayId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - June
+      dbName: ptd_pbp_jun_id
+      name: partDPbpNumberJunId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - July
+      dbName: ptd_pbp_jul_id
+      name: partDPbpNumberJulId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - August
+      dbName: ptd_pbp_aug_id
+      name: partDPbpNumberAugId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - September
+      dbName: ptd_pbp_sept_id
+      name: partDPbpNumberSeptId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - October
+      dbName: ptd_pbp_oct_id
+      name: partDPbpNumberOctId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - November
+      dbName: ptd_pbp_nov_id
+      name: partDPbpNumberNovId
+      sqlType: varchar(3)
+    - comment: Part D PBP Number - December
+      dbName: ptd_pbp_dec_id
+      name: partDPbpNumberDecId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - January
+      dbName: ptd_sgmt_jan_id
+      name: partDSegmentNumberJanId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - February
+      dbName: ptd_sgmt_feb_id
+      name: partDSegmentNumberFebId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - March
+      dbName: ptd_sgmt_mar_id
+      name: partDSegmentNumberMarId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - April
+      dbName: ptd_sgmt_apr_id
+      name: partDSegmentNumberAprId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - May
+      dbName: ptd_sgmt_may_id
+      name: partDSegmentNumberMayId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - June
+      dbName: ptd_sgmt_jun_id
+      name: partDSegmentNumberJunId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - July
+      dbName: ptd_sgmt_jul_id
+      name: partDSegmentNumberJulId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - August
+      dbName: ptd_sgmt_aug_id
+      name: partDSegmentNumberAugId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - September
+      dbName: ptd_sgmt_sept_id
+      name: partDSegmentNumberSeptId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - October
+      dbName: ptd_sgmt_oct_id
+      name: partDSegmentNumberOctId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - November
+      dbName: ptd_sgmt_nov_id
+      name: partDSegmentNumberNovId
+      sqlType: varchar(3)
+    - comment: Part D Segment Number - December
+      dbName: ptd_sgmt_dec_id
+      name: partDSegmentNumberDecId
+      sqlType: varchar(3)
+    - comment: Part D Retiree Drug Subsidy Indicator - January
+      dbName: rds_jan_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyJanInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - February
+      dbName: rds_feb_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyFebInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - March
+      dbName: rds_mar_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyMarInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - April
+      dbName: rds_apr_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyAprInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - May
+      dbName: rds_may_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyMayInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - June
+      dbName: rds_jun_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyJunInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - July
+      dbName: rds_jul_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyJulInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - August
+      dbName: rds_aug_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyAugInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - September
+      dbName: rds_sept_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidySeptInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - October
+      dbName: rds_oct_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyOctInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - November
+      dbName: rds_nov_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyNovInd
+      sqlType: varchar(1)
+    - comment: Part D Retiree Drug Subsidy Indicator - December
+      dbName: rds_dec_ind
+      javaType: Character
+      name: partDRetireeDrugSubsidyDecInd
+      sqlType: varchar(1)
+    - comment: Medicare-Medicaid dual eligibility code - January
+      dbName: meta_dual_elgbl_stus_jan_cd
+      name: medicaidDualEligibilityJanCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - February
+      dbName: meta_dual_elgbl_stus_feb_cd
+      name: medicaidDualEligibilityFebCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - March
+      dbName: meta_dual_elgbl_stus_mar_cd
+      name: medicaidDualEligibilityMarCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - April
+      dbName: meta_dual_elgbl_stus_apr_cd
+      name: medicaidDualEligibilityAprCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - May
+      dbName: meta_dual_elgbl_stus_may_cd
+      name: medicaidDualEligibilityMayCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - June
+      dbName: meta_dual_elgbl_stus_jun_cd
+      name: medicaidDualEligibilityJunCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - July
+      dbName: meta_dual_elgbl_stus_jul_cd
+      name: medicaidDualEligibilityJulCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - August
+      dbName: meta_dual_elgbl_stus_aug_cd
+      name: medicaidDualEligibilityAugCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - September
+      dbName: meta_dual_elgbl_stus_sept_cd
+      name: medicaidDualEligibilitySeptCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - October
+      dbName: meta_dual_elgbl_stus_oct_cd
+      name: medicaidDualEligibilityOctCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - November
+      dbName: meta_dual_elgbl_stus_nov_cd
+      name: medicaidDualEligibilityNovCode
+      sqlType: varchar(2)
+    - comment: Medicare-Medicaid dual eligibility code - December
+      dbName: meta_dual_elgbl_stus_dec_cd
+      name: medicaidDualEligibilityDecCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group code - January
+      dbName: cst_shr_grp_jan_cd
+      name: partDLowIncomeCostShareGroupJanCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - February
+      dbName: cst_shr_grp_feb_cd
+      name: partDLowIncomeCostShareGroupFebCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - March
+      dbName: cst_shr_grp_mar_cd
+      name: partDLowIncomeCostShareGroupMarCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - April
+      dbName: cst_shr_grp_apr_cd
+      name: partDLowIncomeCostShareGroupAprCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - May
+      dbName: cst_shr_grp_may_cd
+      name: partDLowIncomeCostShareGroupMayCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - June
+      dbName: cst_shr_grp_jun_cd
+      name: partDLowIncomeCostShareGroupJunCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - July
+      dbName: cst_shr_grp_jul_cd
+      name: partDLowIncomeCostShareGroupJulCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - August
+      dbName: cst_shr_grp_aug_cd
+      name: partDLowIncomeCostShareGroupAugCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - September
+      dbName: cst_shr_grp_sept_cd
+      name: partDLowIncomeCostShareGroupSeptCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - October
+      dbName: cst_shr_grp_oct_cd
+      name: partDLowIncomeCostShareGroupOctCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - November
+      dbName: cst_shr_grp_nov_cd
+      name: partDLowIncomeCostShareGroupNovCode
+      sqlType: varchar(2)
+    - comment: Part D low-income cost share group  code - December
+      dbName: cst_shr_grp_dec_cd
+      name: partDLowIncomeCostShareGroupDecCode
+      sqlType: varchar(2)
+    - comment: Beneficiary Derived Mailing Address 1
+      dbName: drvd_line_1_adr
+      name: derivedMailingAddress1
+      sqlType: varchar(40)
+    - comment: Beneficiary Derived Mailing Address 2
+      dbName: drvd_line_2_adr
+      name: derivedMailingAddress2
+      sqlType: varchar(40)
+    - comment: Beneficiary Derived Mailing Address 3
+      dbName: drvd_line_3_adr
+      name: derivedMailingAddress3
+      sqlType: varchar(40)
+    - comment: Beneficiary Derived Mailing Address 4
+      dbName: drvd_line_4_adr
+      name: derivedMailingAddress4
+      sqlType: varchar(40)
+    - comment: Beneficiary Derived Mailing Address 5
+      dbName: drvd_line_5_adr
+      name: derivedMailingAddress5
+      sqlType: varchar(40)
+    - comment: Beneficiary Derived Mailing Address 6
+      dbName: drvd_line_6_adr
+      name: derivedMailingAddress6
+      sqlType: varchar(40)
+    - comment: Beneficiary Derived Mailing Address - City
+      dbName: city_name
+      name: derivedCityName
+      sqlType: varchar(100)
+    - comment: Beneficiary Derived Mailing Address - State
+      dbName: state_cd
+      name: derivedStateCode
+      sqlType: varchar(2)
+    - comment: Beneficiary Derived Mailing Address - Zip Code
+      dbName: state_cnty_zip_cd
+      name: derivedZipCode
+      sqlType: varchar(9)
+    - comment: MBI Effective Date
+      dbName: efctv_bgn_dt
+      name: mbiEffectiveDate
+      sqlType: date
+    - comment: MBI Obsolete Date
+      dbName: efctv_end_dt
+      name: mbiObsoleteDate
+      sqlType: date
+    - comment: Beneficiary Link Key
+      dbName: bene_link_key
+      name: beneLinkKey
+      sqlType: numeric(38)
+    - comment: HICN_UNHASHED (https://bluebutton.cms.gov/resources/variables/hicnUnhashed)
+      dbName: hicn_unhashed
+      name: hicnUnhashed
+      sqlType: varchar(64)
+    - comment: MBI_HASH (https://bluebutton.cms.gov/resources/variables/mbiHash)
+      dbName: mbi_hash
+      name: mbiHash
+      sqlType: varchar(64)
+    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+      dbName: last_updated
+      name: lastUpdated
+      sqlType: timestamp with time zone
+    equalsNeeded: false
+    joins:
+    - cascadeTypes:
+      - ALL
+      collectionType: List
+      entityClass: gov.cms.bfd.model.rif.BeneficiaryMonthly
+      fetchType: LAZY
+      fieldName: beneficiaryMonthlys
+      joinType: OneToMany
+      mappedBy: parentBeneficiary
+      orderBy: YEAR_MONTH ASC
+      orphanRemoval: 'true'
+    - cascadeTypes:
+      - ALL
+      collectionType: Set
+      entityClass: gov.cms.bfd.model.rif.SkippedRifRecord
+      fetchType: LAZY
+      fieldName: skippedRifRecords
+      joinType: OneToMany
+      mappedBy: beneId
+      orphanRemoval: 'false'
+    - cascadeTypes:
+      - ALL
+      collectionType: Set
+      entityClass: gov.cms.bfd.model.rif.BeneficiaryHistory
+      fetchType: LAZY
+      fieldName: beneficiaryHistories
+      joinType: OneToMany
+      mappedBy: beneficiaryId
+      orphanRemoval: false
+    - cascadeTypes:
+      - ALL
+      collectionType: Set
+      entityClass: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
+      fetchType: LAZY
+      fieldName: medicareBeneficiaryIdHistories
+      joinType: OneToMany
+      mappedBy: beneficiaryId
+      orphanRemoval: false
+    name: beneficiaries
+    primaryKeyColumns:
+    - beneficiaryId
+    quoteNames: false
+  transformations:
+  - from: BENE_ID
+    optional: false
+    to: beneficiaryId
+    transformer: LongString
+  - from: STATE_CODE
+    optional: false
+    to: stateCode
+  - from: BENE_COUNTY_CD
+    optional: false
+    to: countyCode
+  - from: BENE_ZIP_CD
+    optional: false
+    to: postalCode
+  - from: BENE_BIRTH_DT
+    optional: false
+    to: birthDate
+  - from: BENE_SEX_IDENT_CD
+    optional: false
+    to: sex
+  - from: BENE_RACE_CD
+    optional: true
+    to: race
+  - from: BENE_ENTLMT_RSN_ORIG
+    optional: true
+    to: entitlementCodeOriginal
+  - from: BENE_ENTLMT_RSN_CURR
+    optional: true
+    to: entitlementCodeCurrent
+  - from: BENE_ESRD_IND
+    optional: true
+    to: endStageRenalDiseaseCode
+  - from: BENE_MDCR_STATUS_CD
+    optional: true
+    to: medicareEnrollmentStatusCode
+  - from: BENE_PTA_TRMNTN_CD
+    optional: true
+    to: partATerminationCode
+  - from: BENE_PTB_TRMNTN_CD
+    optional: true
+    to: partBTerminationCode
+  - from: BENE_CRNT_HIC_NUM
+    optional: false
+    to: hicn
+  - from: BENE_SRNM_NAME
+    optional: false
+    to: nameSurname
+  - from: BENE_GVN_NAME
+    optional: false
+    to: nameGiven
+  - from: BENE_MDL_NAME
+    optional: true
+    to: nameMiddleInitial
+  - from: MBI_NUM
+    optional: true
+    to: medicareBeneficiaryId
+  - from: DEATH_DT
+    optional: true
+    to: beneficiaryDateOfDeath
+  - defaultValue: '0'
+    from: RFRNC_YR
+    optional: true
+    to: beneEnrollmentReferenceYear
+  - defaultValue: '0'
+    from: A_MO_CNT
+    optional: true
+    to: partAMonthsCount
+  - defaultValue: '0'
+    from: B_MO_CNT
+    optional: true
+    to: partBMonthsCount
+  - defaultValue: '0'
+    from: BUYIN_MO_CNT
+    optional: true
+    to: stateBuyInCoverageCount
+  - defaultValue: '0'
+    from: HMO_MO_CNT
+    optional: true
+    to: hmoCoverageCount
+  - defaultValue: '0'
+    from: RDS_MO_CNT
+    optional: true
+    to: monthsRetireeDrugSubsidyCoverage
+  - from: ENRL_SRC
+    optional: true
+    to: sourceOfEnrollmentData
+  - from: SAMPLE_GROUP
+    optional: true
+    to: sampleMedicareGroupIndicator
+  - from: EFIVEPCT
+    optional: true
+    to: enhancedMedicareSampleIndicator
+  - from: CRNT_BIC
+    optional: true
+    to: currentBeneficiaryIdCode
+  - defaultValue: '0'
+    from: AGE
+    optional: true
+    to: ageOfBeneficiary
+  - from: COVSTART
+    optional: true
+    to: medicareCoverageStartDate
+  - defaultValue: '0'
+    from: DUAL_MO_CNT
+    optional: true
+    to: monthsOfDualEligibility
+  - from: FIPS_STATE_CNTY_JAN_CD
+    optional: true
+    to: fipsStateCntyJanCode
+  - from: FIPS_STATE_CNTY_FEB_CD
+    optional: true
+    to: fipsStateCntyFebCode
+  - from: FIPS_STATE_CNTY_MAR_CD
+    optional: true
+    to: fipsStateCntyMarCode
+  - from: FIPS_STATE_CNTY_APR_CD
+    optional: true
+    to: fipsStateCntyAprCode
+  - from: FIPS_STATE_CNTY_MAY_CD
+    optional: true
+    to: fipsStateCntyMayCode
+  - from: FIPS_STATE_CNTY_JUN_CD
+    optional: true
+    to: fipsStateCntyJunCode
+  - from: FIPS_STATE_CNTY_JUL_CD
+    optional: true
+    to: fipsStateCntyJulCode
+  - from: FIPS_STATE_CNTY_AUG_CD
+    optional: true
+    to: fipsStateCntyAugCode
+  - from: FIPS_STATE_CNTY_SEPT_CD
+    optional: true
+    to: fipsStateCntySeptCode
+  - from: FIPS_STATE_CNTY_OCT_CD
+    optional: true
+    to: fipsStateCntyOctCode
+  - from: FIPS_STATE_CNTY_NOV_CD
+    optional: true
+    to: fipsStateCntyNovCode
+  - from: FIPS_STATE_CNTY_DEC_CD
+    optional: true
+    to: fipsStateCntyDecCode
+  - from: V_DOD_SW
+    optional: true
+    to: validDateOfDeathSw
+  - from: RTI_RACE_CD
+    optional: true
+    to: rtiRaceCode
+  - from: MDCR_STUS_JAN_CD
+    optional: true
+    to: medicareStatusJanCode
+  - from: MDCR_STUS_FEB_CD
+    optional: true
+    to: medicareStatusFebCode
+  - from: MDCR_STUS_MAR_CD
+    optional: true
+    to: medicareStatusMarCode
+  - from: MDCR_STUS_APR_CD
+    optional: true
+    to: medicareStatusAprCode
+  - from: MDCR_STUS_MAY_CD
+    optional: true
+    to: medicareStatusMayCode
+  - from: MDCR_STUS_JUN_CD
+    optional: true
+    to: medicareStatusJunCode
+  - from: MDCR_STUS_JUL_CD
+    optional: true
+    to: medicareStatusJulCode
+  - from: MDCR_STUS_AUG_CD
+    optional: true
+    to: medicareStatusAugCode
+  - from: MDCR_STUS_SEPT_CD
+    optional: true
+    to: medicareStatusSeptCode
+  - from: MDCR_STUS_OCT_CD
+    optional: true
+    to: medicareStatusOctCode
+  - from: MDCR_STUS_NOV_CD
+    optional: true
+    to: medicareStatusNovCode
+  - from: MDCR_STUS_DEC_CD
+    optional: true
+    to: medicareStatusDecCode
+  - defaultValue: '0'
+    from: PLAN_CVRG_MO_CNT
+    optional: true
+    to: partDMonthsCount
+  - from: MDCR_ENTLMT_BUYIN_1_IND
+    optional: true
+    to: entitlementBuyInJanInd
+  - from: MDCR_ENTLMT_BUYIN_2_IND
+    optional: true
+    to: entitlementBuyInFebInd
+  - from: MDCR_ENTLMT_BUYIN_3_IND
+    optional: true
+    to: entitlementBuyInMarInd
+  - from: MDCR_ENTLMT_BUYIN_4_IND
+    optional: true
+    to: entitlementBuyInAprInd
+  - from: MDCR_ENTLMT_BUYIN_5_IND
+    optional: true
+    to: entitlementBuyInMayInd
+  - from: MDCR_ENTLMT_BUYIN_6_IND
+    optional: true
+    to: entitlementBuyInJunInd
+  - from: MDCR_ENTLMT_BUYIN_7_IND
+    optional: true
+    to: entitlementBuyInJulInd
+  - from: MDCR_ENTLMT_BUYIN_8_IND
+    optional: true
+    to: entitlementBuyInAugInd
+  - from: MDCR_ENTLMT_BUYIN_9_IND
+    optional: true
+    to: entitlementBuyInSeptInd
+  - from: MDCR_ENTLMT_BUYIN_10_IND
+    optional: true
+    to: entitlementBuyInOctInd
+  - from: MDCR_ENTLMT_BUYIN_11_IND
+    optional: true
+    to: entitlementBuyInNovInd
+  - from: MDCR_ENTLMT_BUYIN_12_IND
+    optional: true
+    to: entitlementBuyInDecInd
+  - from: HMO_1_IND
+    optional: true
+    to: hmoIndicatorJanInd
+  - from: HMO_2_IND
+    optional: true
+    to: hmoIndicatorFebInd
+  - from: HMO_3_IND
+    optional: true
+    to: hmoIndicatorMarInd
+  - from: HMO_4_IND
+    optional: true
+    to: hmoIndicatorAprInd
+  - from: HMO_5_IND
+    optional: true
+    to: hmoIndicatorMayInd
+  - from: HMO_6_IND
+    optional: true
+    to: hmoIndicatorJunInd
+  - from: HMO_7_IND
+    optional: true
+    to: hmoIndicatorJulInd
+  - from: HMO_8_IND
+    optional: true
+    to: hmoIndicatorAugInd
+  - from: HMO_9_IND
+    optional: true
+    to: hmoIndicatorSeptInd
+  - from: HMO_10_IND
+    optional: true
+    to: hmoIndicatorOctInd
+  - from: HMO_11_IND
+    optional: true
+    to: hmoIndicatorNovInd
+  - from: HMO_12_IND
+    optional: true
+    to: hmoIndicatorDecInd
+  - from: PTC_CNTRCT_JAN_ID
+    optional: true
+    to: partCContractNumberJanId
+  - from: PTC_CNTRCT_FEB_ID
+    optional: true
+    to: partCContractNumberFebId
+  - from: PTC_CNTRCT_MAR_ID
+    optional: true
+    to: partCContractNumberMarId
+  - from: PTC_CNTRCT_APR_ID
+    optional: true
+    to: partCContractNumberAprId
+  - from: PTC_CNTRCT_MAY_ID
+    optional: true
+    to: partCContractNumberMayId
+  - from: PTC_CNTRCT_JUN_ID
+    optional: true
+    to: partCContractNumberJunId
+  - from: PTC_CNTRCT_JUL_ID
+    optional: true
+    to: partCContractNumberJulId
+  - from: PTC_CNTRCT_AUG_ID
+    optional: true
+    to: partCContractNumberAugId
+  - from: PTC_CNTRCT_SEPT_ID
+    optional: true
+    to: partCContractNumberSeptId
+  - from: PTC_CNTRCT_OCT_ID
+    optional: true
+    to: partCContractNumberOctId
+  - from: PTC_CNTRCT_NOV_ID
+    optional: true
+    to: partCContractNumberNovId
+  - from: PTC_CNTRCT_DEC_ID
+    optional: true
+    to: partCContractNumberDecId
+  - from: PTC_PBP_JAN_ID
+    optional: true
+    to: partCPbpNumberJanId
+  - from: PTC_PBP_FEB_ID
+    optional: true
+    to: partCPbpNumberFebId
+  - from: PTC_PBP_MAR_ID
+    optional: true
+    to: partCPbpNumberMarId
+  - from: PTC_PBP_APR_ID
+    optional: true
+    to: partCPbpNumberAprId
+  - from: PTC_PBP_MAY_ID
+    optional: true
+    to: partCPbpNumberMayId
+  - from: PTC_PBP_JUN_ID
+    optional: true
+    to: partCPbpNumberJunId
+  - from: PTC_PBP_JUL_ID
+    optional: true
+    to: partCPbpNumberJulId
+  - from: PTC_PBP_AUG_ID
+    optional: true
+    to: partCPbpNumberAugId
+  - from: PTC_PBP_SEPT_ID
+    optional: true
+    to: partCPbpNumberSeptId
+  - from: PTC_PBP_OCT_ID
+    optional: true
+    to: partCPbpNumberOctId
+  - from: PTC_PBP_NOV_ID
+    optional: true
+    to: partCPbpNumberNovId
+  - from: PTC_PBP_DEC_ID
+    optional: true
+    to: partCPbpNumberDecId
+  - from: PTC_PLAN_TYPE_JAN_CD
+    optional: true
+    to: partCPlanTypeJanCode
+  - from: PTC_PLAN_TYPE_FEB_CD
+    optional: true
+    to: partCPlanTypeFebCode
+  - from: PTC_PLAN_TYPE_MAR_CD
+    optional: true
+    to: partCPlanTypeMarCode
+  - from: PTC_PLAN_TYPE_APR_CD
+    optional: true
+    to: partCPlanTypeAprCode
+  - from: PTC_PLAN_TYPE_MAY_CD
+    optional: true
+    to: partCPlanTypeMayCode
+  - from: PTC_PLAN_TYPE_JUN_CD
+    optional: true
+    to: partCPlanTypeJunCode
+  - from: PTC_PLAN_TYPE_JUL_CD
+    optional: true
+    to: partCPlanTypeJulCode
+  - from: PTC_PLAN_TYPE_AUG_CD
+    optional: true
+    to: partCPlanTypeAugCode
+  - from: PTC_PLAN_TYPE_SEPT_CD
+    optional: true
+    to: partCPlanTypeSeptCode
+  - from: PTC_PLAN_TYPE_OCT_CD
+    optional: true
+    to: partCPlanTypeOctCode
+  - from: PTC_PLAN_TYPE_NOV_CD
+    optional: true
+    to: partCPlanTypeNovCode
+  - from: PTC_PLAN_TYPE_DEC_CD
+    optional: true
+    to: partCPlanTypeDecCode
+  - from: PTD_CNTRCT_JAN_ID
+    optional: true
+    to: partDContractNumberJanId
+  - from: PTD_CNTRCT_FEB_ID
+    optional: true
+    to: partDContractNumberFebId
+  - from: PTD_CNTRCT_MAR_ID
+    optional: true
+    to: partDContractNumberMarId
+  - from: PTD_CNTRCT_APR_ID
+    optional: true
+    to: partDContractNumberAprId
+  - from: PTD_CNTRCT_MAY_ID
+    optional: true
+    to: partDContractNumberMayId
+  - from: PTD_CNTRCT_JUN_ID
+    optional: true
+    to: partDContractNumberJunId
+  - from: PTD_CNTRCT_JUL_ID
+    optional: true
+    to: partDContractNumberJulId
+  - from: PTD_CNTRCT_AUG_ID
+    optional: true
+    to: partDContractNumberAugId
+  - from: PTD_CNTRCT_SEPT_ID
+    optional: true
+    to: partDContractNumberSeptId
+  - from: PTD_CNTRCT_OCT_ID
+    optional: true
+    to: partDContractNumberOctId
+  - from: PTD_CNTRCT_NOV_ID
+    optional: true
+    to: partDContractNumberNovId
+  - from: PTD_CNTRCT_DEC_ID
+    optional: true
+    to: partDContractNumberDecId
+  - from: PTD_PBP_JAN_ID
+    optional: true
+    to: partDPbpNumberJanId
+  - from: PTD_PBP_FEB_ID
+    optional: true
+    to: partDPbpNumberFebId
+  - from: PTD_PBP_MAR_ID
+    optional: true
+    to: partDPbpNumberMarId
+  - from: PTD_PBP_APR_ID
+    optional: true
+    to: partDPbpNumberAprId
+  - from: PTD_PBP_MAY_ID
+    optional: true
+    to: partDPbpNumberMayId
+  - from: PTD_PBP_JUN_ID
+    optional: true
+    to: partDPbpNumberJunId
+  - from: PTD_PBP_JUL_ID
+    optional: true
+    to: partDPbpNumberJulId
+  - from: PTD_PBP_AUG_ID
+    optional: true
+    to: partDPbpNumberAugId
+  - from: PTD_PBP_SEPT_ID
+    optional: true
+    to: partDPbpNumberSeptId
+  - from: PTD_PBP_OCT_ID
+    optional: true
+    to: partDPbpNumberOctId
+  - from: PTD_PBP_NOV_ID
+    optional: true
+    to: partDPbpNumberNovId
+  - from: PTD_PBP_DEC_ID
+    optional: true
+    to: partDPbpNumberDecId
+  - from: PTD_SGMT_JAN_ID
+    optional: true
+    to: partDSegmentNumberJanId
+  - from: PTD_SGMT_FEB_ID
+    optional: true
+    to: partDSegmentNumberFebId
+  - from: PTD_SGMT_MAR_ID
+    optional: true
+    to: partDSegmentNumberMarId
+  - from: PTD_SGMT_APR_ID
+    optional: true
+    to: partDSegmentNumberAprId
+  - from: PTD_SGMT_MAY_ID
+    optional: true
+    to: partDSegmentNumberMayId
+  - from: PTD_SGMT_JUN_ID
+    optional: true
+    to: partDSegmentNumberJunId
+  - from: PTD_SGMT_JUL_ID
+    optional: true
+    to: partDSegmentNumberJulId
+  - from: PTD_SGMT_AUG_ID
+    optional: true
+    to: partDSegmentNumberAugId
+  - from: PTD_SGMT_SEPT_ID
+    optional: true
+    to: partDSegmentNumberSeptId
+  - from: PTD_SGMT_OCT_ID
+    optional: true
+    to: partDSegmentNumberOctId
+  - from: PTD_SGMT_NOV_ID
+    optional: true
+    to: partDSegmentNumberNovId
+  - from: PTD_SGMT_DEC_ID
+    optional: true
+    to: partDSegmentNumberDecId
+  - from: RDS_JAN_IND
+    optional: true
+    to: partDRetireeDrugSubsidyJanInd
+  - from: RDS_FEB_IND
+    optional: true
+    to: partDRetireeDrugSubsidyFebInd
+  - from: RDS_MAR_IND
+    optional: true
+    to: partDRetireeDrugSubsidyMarInd
+  - from: RDS_APR_IND
+    optional: true
+    to: partDRetireeDrugSubsidyAprInd
+  - from: RDS_MAY_IND
+    optional: true
+    to: partDRetireeDrugSubsidyMayInd
+  - from: RDS_JUN_IND
+    optional: true
+    to: partDRetireeDrugSubsidyJunInd
+  - from: RDS_JUL_IND
+    optional: true
+    to: partDRetireeDrugSubsidyJulInd
+  - from: RDS_AUG_IND
+    optional: true
+    to: partDRetireeDrugSubsidyAugInd
+  - from: RDS_SEPT_IND
+    optional: true
+    to: partDRetireeDrugSubsidySeptInd
+  - from: RDS_OCT_IND
+    optional: true
+    to: partDRetireeDrugSubsidyOctInd
+  - from: RDS_NOV_IND
+    optional: true
+    to: partDRetireeDrugSubsidyNovInd
+  - from: RDS_DEC_IND
+    optional: true
+    to: partDRetireeDrugSubsidyDecInd
+  - from: META_DUAL_ELGBL_STUS_JAN_CD
+    optional: true
+    to: medicaidDualEligibilityJanCode
+  - from: META_DUAL_ELGBL_STUS_FEB_CD
+    optional: true
+    to: medicaidDualEligibilityFebCode
+  - from: META_DUAL_ELGBL_STUS_MAR_CD
+    optional: true
+    to: medicaidDualEligibilityMarCode
+  - from: META_DUAL_ELGBL_STUS_APR_CD
+    optional: true
+    to: medicaidDualEligibilityAprCode
+  - from: META_DUAL_ELGBL_STUS_MAY_CD
+    optional: true
+    to: medicaidDualEligibilityMayCode
+  - from: META_DUAL_ELGBL_STUS_JUN_CD
+    optional: true
+    to: medicaidDualEligibilityJunCode
+  - from: META_DUAL_ELGBL_STUS_JUL_CD
+    optional: true
+    to: medicaidDualEligibilityJulCode
+  - from: META_DUAL_ELGBL_STUS_AUG_CD
+    optional: true
+    to: medicaidDualEligibilityAugCode
+  - from: META_DUAL_ELGBL_STUS_SEPT_CD
+    optional: true
+    to: medicaidDualEligibilitySeptCode
+  - from: META_DUAL_ELGBL_STUS_OCT_CD
+    optional: true
+    to: medicaidDualEligibilityOctCode
+  - from: META_DUAL_ELGBL_STUS_NOV_CD
+    optional: true
+    to: medicaidDualEligibilityNovCode
+  - from: META_DUAL_ELGBL_STUS_DEC_CD
+    optional: true
+    to: medicaidDualEligibilityDecCode
+  - from: CST_SHR_GRP_JAN_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupJanCode
+  - from: CST_SHR_GRP_FEB_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupFebCode
+  - from: CST_SHR_GRP_MAR_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupMarCode
+  - from: CST_SHR_GRP_APR_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupAprCode
+  - from: CST_SHR_GRP_MAY_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupMayCode
+  - from: CST_SHR_GRP_JUN_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupJunCode
+  - from: CST_SHR_GRP_JUL_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupJulCode
+  - from: CST_SHR_GRP_AUG_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupAugCode
+  - from: CST_SHR_GRP_SEPT_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupSeptCode
+  - from: CST_SHR_GRP_OCT_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupOctCode
+  - from: CST_SHR_GRP_NOV_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupNovCode
+  - from: CST_SHR_GRP_DEC_CD
+    optional: true
+    to: partDLowIncomeCostShareGroupDecCode
+  - from: DRVD_LINE_1_ADR
+    optional: true
+    to: derivedMailingAddress1
+  - from: DRVD_LINE_2_ADR
+    optional: true
+    to: derivedMailingAddress2
+  - from: DRVD_LINE_3_ADR
+    optional: true
+    to: derivedMailingAddress3
+  - from: DRVD_LINE_4_ADR
+    optional: true
+    to: derivedMailingAddress4
+  - from: DRVD_LINE_5_ADR
+    optional: true
+    to: derivedMailingAddress5
+  - from: DRVD_LINE_6_ADR
+    optional: true
+    to: derivedMailingAddress6
+  - from: CITY_NAME
+    optional: true
+    to: derivedCityName
+  - from: STATE_CD
+    optional: true
+    to: derivedStateCode
+  - from: STATE_CNTY_ZIP_CD
+    optional: true
+    to: derivedZipCode
+  - from: EFCTV_BGN_DT
+    optional: true
+    to: mbiEffectiveDate
+  - from: EFCTV_END_DT
+    optional: true
+    to: mbiObsoleteDate
+  - defaultValue: '0'
+    from: BENE_LINK_KEY
+    optional: true
+    to: beneLinkKey
+  transformerClassName: gov.cms.bfd.model.rif.BeneficiaryParser

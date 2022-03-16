@@ -1,0 +1,358 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.DMEClaimLine
+  id: DMEClaimLine
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: Claim Line Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_num.txt)
+      dbName: line_num
+      name: lineNumber
+      nullable: false
+      sqlType: numeric
+    - comment: Line Provider Tax Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tax_num.txt)
+      dbName: tax_num
+      name: providerTaxNumber
+      nullable: false
+      sqlType: varchar(10)
+    - comment: Line HCFA Provider Specialty Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt)
+      dbName: prvdr_spclty
+      name: providerSpecialityCode
+      sqlType: varchar(3)
+    - comment: Line Provider Participating Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt)
+      dbName: prtcptng_ind_cd
+      javaType: Character
+      name: providerParticipatingIndCode
+      sqlType: varchar(1)
+    - comment: Line Service Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_cnt.txt)
+      dbName: line_srvc_cnt
+      name: serviceCount
+      nullable: false
+      sqlType: numeric
+    - comment: Line HCFA Type Service Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typsrvcb.txt)
+      dbName: line_cms_type_srvc_cd
+      javaType: char
+      name: cmsServiceTypeCode
+      nullable: false
+      sqlType: varchar(1)
+    - comment: Line Place Of Service Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt)
+      dbName: line_place_of_srvc_cd
+      name: placeOfServiceCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: Line First Expense Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/expnsdt1.txt)
+      dbName: line_1st_expns_dt
+      name: firstExpenseDate
+      sqlType: date
+    - comment: Line Last Expense Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/expnsdt2.txt)
+      dbName: line_last_expns_dt
+      name: lastExpenseDate
+      sqlType: date
+    - comment: Line Healthcare Common Procedure Coding System (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt)
+      dbName: hcpcs_cd
+      name: hcpcsCode
+      sqlType: varchar(5)
+    - comment: Line HCPCS Initial Modifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt)
+      dbName: hcpcs_1st_mdfr_cd
+      name: hcpcsInitialModifierCode
+      sqlType: varchar(5)
+    - comment: Line HCPCS Second Modifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt)
+      dbName: hcpcs_2nd_mdfr_cd
+      name: hcpcsSecondModifierCode
+      sqlType: varchar(5)
+    - comment: Line NCH BETOS Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt)
+      dbName: betos_cd
+      name: betosCode
+      sqlType: varchar(3)
+    - comment: Line NCH Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/linepmt.txt)
+      dbName: line_nch_pmt_amt
+      name: paymentAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lbenpmt.txt)
+      dbName: line_bene_pmt_amt
+      name: beneficiaryPaymentAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprvpmt.txt)
+      dbName: line_prvdr_pmt_amt
+      name: providerPaymentAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Beneficiary Part B Deductible Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ldedamt.txt)
+      dbName: line_bene_ptb_ddctbl_amt
+      name: beneficiaryPartBDeductAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Beneficiary Primary Payer Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt)
+      dbName: line_bene_prmry_pyr_cd
+      javaType: Character
+      name: primaryPayerCode
+      sqlType: varchar(1)
+    - comment: Line Beneficiary Primary Payer Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpdamt.txt)
+      dbName: line_bene_prmry_pyr_pd_amt
+      name: primaryPayerPaidAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Coinsurance Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coinamt.txt)
+      dbName: line_coinsrnc_amt
+      name: coinsuranceAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Primary Payer Allowed Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpyalow.txt)
+      dbName: line_prmry_alowd_chrg_amt
+      name: primaryPayerAllowedChargeAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Submitted Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lsbmtchg.txt)
+      dbName: line_sbmtd_chrg_amt
+      name: submittedChargeAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Allowed Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lalowchg.txt)
+      dbName: line_alowd_chrg_amt
+      name: allowedChargeAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: Line Processing Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt)
+      dbName: line_prcsg_ind_cd
+      name: processingIndicatorCode
+      sqlType: varchar(2)
+    - comment: Line Payment 80%/100% Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt)
+      dbName: line_pmt_80_100_cd
+      javaType: Character
+      name: paymentCode
+      sqlType: varchar(1)
+    - comment: Line Service Deductible Indicator Switch (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt)
+      dbName: line_service_deductible
+      javaType: Character
+      name: serviceDeductibleCode
+      sqlType: varchar(1)
+    - comment: Line Diagnosis Code Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_icd_dgns_cd.txt)
+      dbName: line_icd_dgns_cd
+      name: diagnosisCode
+      sqlType: varchar(7)
+    - comment: Line Diagnosis Code Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_icd_dgns_vrsn_cd.txt)
+      dbName: line_icd_dgns_vrsn_cd
+      javaType: Character
+      name: diagnosisCodeVersion
+      sqlType: varchar(1)
+    - comment: Line DME Purchase Price Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dme_purc.txt)
+      dbName: line_dme_prchs_price_amt
+      name: purchasePriceAmount
+      nullable: false
+      sqlType: decimal(12,2)
+    - comment: DMERC Line Supplier Provider Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/suplrnum.txt)
+      dbName: prvdr_num
+      name: providerBillingNumber
+      sqlType: varchar(10)
+    - comment: DMERC Line Item Supplier NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_npi.txt)
+      dbName: prvdr_npi
+      name: providerNPI
+      sqlType: varchar(12)
+    - comment: DMERC Line Pricing State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_st.txt)
+      dbName: dmerc_line_prcng_state_cd
+      name: pricingStateCode
+      sqlType: varchar(2)
+    - comment: DMERC Line Provider State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvstate.txt)
+      dbName: prvdr_state_cd
+      name: providerStateCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: DMERC Line Supplier Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt)
+      dbName: dmerc_line_supplr_type_cd
+      javaType: Character
+      name: supplierTypeCode
+      sqlType: varchar(1)
+    - comment: DMERC Line HCPCS Third Modifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd3.txt)
+      dbName: hcpcs_3rd_mdfr_cd
+      name: hcpcsThirdModifierCode
+      sqlType: varchar(5)
+    - comment: DMERC Line HCPCS Fourth Modifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd4.txt)
+      dbName: hcpcs_4th_mdfr_cd
+      name: hcpcsFourthModifierCode
+      sqlType: varchar(5)
+    - comment: DMERC Line Screen Savings Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/scrnsvgs.txt)
+      dbName: dmerc_line_scrn_svgs_amt
+      name: screenSavingsAmount
+      sqlType: decimal(12,2)
+    - comment: DMERC Line Miles/Time/Units/Services Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dme_unit.txt)
+      dbName: dmerc_line_mtus_cnt
+      name: mtusCount
+      nullable: false
+      sqlType: numeric
+    - comment: DMERC Line Miles/Time/ Units/Services Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt)
+      dbName: dmerc_line_mtus_cd
+      javaType: Character
+      name: mtusCode
+      sqlType: varchar(1)
+    - comment: Hematocrit/Hemoglobin Test Results (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt)
+      dbName: line_hct_hgb_rslt_num
+      name: hctHgbTestResult
+      nullable: false
+      sqlType: decimal(3,1)
+    - comment: Hematocrit/Hemoglobin Test Type code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt)
+      dbName: line_hct_hgb_type_cd
+      name: hctHgbTestTypeCode
+      sqlType: varchar(2)
+    - comment: Line National Drug Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lnndccd.txt)
+      dbName: line_ndc_cd
+      name: nationalDrugCode
+      sqlType: varchar(11)
+    equalsNeeded: false
+    joins:
+    - entityClass: gov.cms.bfd.model.rif.DMEClaim
+      fetchType: EAGER
+      fieldName: parentClaim
+      foreignKey: dme_claim_lines_clm_id_to_dme_claims
+      joinColumnName: clm_id
+      joinType: ManyToOne
+    name: dme_claim_lines
+    primaryKeyColumns:
+    - parentClaim
+    - lineNumber
+    quoteNames: false
+  transformations:
+  - defaultValue: '0'
+    from: LINE_NUM
+    optional: false
+    to: lineNumber
+  - from: TAX_NUM
+    optional: false
+    to: providerTaxNumber
+  - from: PRVDR_SPCLTY
+    optional: true
+    to: providerSpecialityCode
+  - from: PRTCPTNG_IND_CD
+    optional: true
+    to: providerParticipatingIndCode
+  - defaultValue: '0'
+    from: LINE_SRVC_CNT
+    optional: false
+    to: serviceCount
+  - from: LINE_CMS_TYPE_SRVC_CD
+    optional: false
+    to: cmsServiceTypeCode
+  - from: LINE_PLACE_OF_SRVC_CD
+    optional: false
+    to: placeOfServiceCode
+  - from: LINE_1ST_EXPNS_DT
+    optional: true
+    to: firstExpenseDate
+  - from: LINE_LAST_EXPNS_DT
+    optional: true
+    to: lastExpenseDate
+  - from: HCPCS_CD
+    optional: true
+    to: hcpcsCode
+  - from: HCPCS_1ST_MDFR_CD
+    optional: true
+    to: hcpcsInitialModifierCode
+  - from: HCPCS_2ND_MDFR_CD
+    optional: true
+    to: hcpcsSecondModifierCode
+  - from: BETOS_CD
+    optional: true
+    to: betosCode
+  - defaultValue: '0'
+    from: LINE_NCH_PMT_AMT
+    optional: false
+    to: paymentAmount
+  - defaultValue: '0'
+    from: LINE_BENE_PMT_AMT
+    optional: false
+    to: beneficiaryPaymentAmount
+  - defaultValue: '0'
+    from: LINE_PRVDR_PMT_AMT
+    optional: false
+    to: providerPaymentAmount
+  - defaultValue: '0'
+    from: LINE_BENE_PTB_DDCTBL_AMT
+    optional: false
+    to: beneficiaryPartBDeductAmount
+  - from: LINE_BENE_PRMRY_PYR_CD
+    optional: true
+    to: primaryPayerCode
+  - defaultValue: '0'
+    from: LINE_BENE_PRMRY_PYR_PD_AMT
+    optional: false
+    to: primaryPayerPaidAmount
+  - defaultValue: '0'
+    from: LINE_COINSRNC_AMT
+    optional: false
+    to: coinsuranceAmount
+  - defaultValue: '0'
+    from: LINE_PRMRY_ALOWD_CHRG_AMT
+    optional: false
+    to: primaryPayerAllowedChargeAmount
+  - defaultValue: '0'
+    from: LINE_SBMTD_CHRG_AMT
+    optional: false
+    to: submittedChargeAmount
+  - defaultValue: '0'
+    from: LINE_ALOWD_CHRG_AMT
+    optional: false
+    to: allowedChargeAmount
+  - from: LINE_PRCSG_IND_CD
+    optional: true
+    to: processingIndicatorCode
+  - from: LINE_PMT_80_100_CD
+    optional: true
+    to: paymentCode
+  - from: LINE_SERVICE_DEDUCTIBLE
+    optional: true
+    to: serviceDeductibleCode
+  - from: LINE_ICD_DGNS_CD
+    optional: true
+    to: diagnosisCode
+  - from: LINE_ICD_DGNS_VRSN_CD
+    optional: true
+    to: diagnosisCodeVersion
+  - defaultValue: '0'
+    from: LINE_DME_PRCHS_PRICE_AMT
+    optional: false
+    to: purchasePriceAmount
+  - from: PRVDR_NUM
+    optional: true
+    to: providerBillingNumber
+  - from: PRVDR_NPI
+    optional: true
+    to: providerNPI
+  - from: DMERC_LINE_PRCNG_STATE_CD
+    optional: true
+    to: pricingStateCode
+  - from: PRVDR_STATE_CD
+    optional: false
+    to: providerStateCode
+  - from: DMERC_LINE_SUPPLR_TYPE_CD
+    optional: true
+    to: supplierTypeCode
+  - from: HCPCS_3RD_MDFR_CD
+    optional: true
+    to: hcpcsThirdModifierCode
+  - from: HCPCS_4TH_MDFR_CD
+    optional: true
+    to: hcpcsFourthModifierCode
+  - defaultValue: '0'
+    from: DMERC_LINE_SCRN_SVGS_AMT
+    optional: true
+    to: screenSavingsAmount
+  - defaultValue: '0'
+    from: DMERC_LINE_MTUS_CNT
+    optional: false
+    to: mtusCount
+  - from: DMERC_LINE_MTUS_CD
+    optional: true
+    to: mtusCode
+  - defaultValue: '0'
+    from: LINE_HCT_HGB_RSLT_NUM
+    optional: false
+    to: hctHgbTestResult
+  - from: LINE_HCT_HGB_TYPE_CD
+    optional: true
+    to: hctHgbTestTypeCode
+  - from: LINE_NDC_CD
+    optional: true
+    to: nationalDrugCode
