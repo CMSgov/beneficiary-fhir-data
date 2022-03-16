@@ -1247,7 +1247,7 @@ public final class RifLoaderIT {
               .where(
                   criteriaBuilder.equal(
                       from.get(BeneficiaryHistory_.beneficiaryId),
-                      beneficiaryHistoryToFind.getBeneficiaryId()),
+                      String.valueOf(beneficiaryHistoryToFind.getBeneficiaryId())),
                   criteriaBuilder.equal(
                       from.get(BeneficiaryHistory_.birthDate),
                       beneficiaryHistoryToFind.getBirthDate()),
