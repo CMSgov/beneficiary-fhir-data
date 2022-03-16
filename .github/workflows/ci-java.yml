@@ -136,6 +136,12 @@ jobs:
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+      - name: 'Git Branch'
+        run: git branch
+      - name: 'Git Pull'
+        run: git pull
+      - name: 'Git Branch Again'
+        run: git branch
       - name: 'Verify FHIR resource'
         run: ./validations.sh -r
         
