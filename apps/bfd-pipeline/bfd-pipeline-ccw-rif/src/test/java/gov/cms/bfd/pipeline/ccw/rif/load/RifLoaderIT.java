@@ -365,7 +365,7 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        assertEquals(567834L, beneHistory.getBeneficiaryId());
+        assertEquals("567834", beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
         assertTrue(beneHistory.getLastUpdated().isPresent(), "Expected a lastUpdated field");
         long end = System.currentTimeMillis();

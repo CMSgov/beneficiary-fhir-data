@@ -67,8 +67,8 @@ public final class TransformerTestUtilsV2 {
    */
   static void assertEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      Long claimId,
-      Long beneficiaryId,
+      String claimId,
+      String beneficiaryId,
       ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -82,9 +82,9 @@ public final class TransformerTestUtilsV2 {
     assertEquals(TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
-      assertHasIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId), eob.getIdentifier());
+      assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId, eob.getIdentifier());
     } else {
-      assertHasIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId), eob.getIdentifier());
+      assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
     }
 
     assertIdentifierExists(
