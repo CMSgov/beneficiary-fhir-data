@@ -5,7 +5,7 @@
 -- on all environments as a precondition to that migration.
 --
 
--- Find non-numeric bene_id's in claim and claim_lines tables
+-- Find non-numeric bene_id's and clm_id's in claim and claim_lines tables
 SELECT clm_id FROM carrier_claim_lines
 WHERE clm_id IN (SELECT clm_id FROM carrier_claims WHERE bene_id !~ E'^([-+])?[0-9\.]+$' OR clm_id !~ E'^([-+])?[0-9\.]+$');
 
@@ -43,7 +43,7 @@ SELECT bene_id, clm_id FROM outpatient_claims
 WHERE bene_id !~ E'^([-+])?[0-9\.]+$' OR clm_id !~ E'^([-+])?[0-9\.]+$';
 
 SELECT pde_id FROM partd_events
-WHERE bene_id !~ E'^([-+])?[0-9\.]+$' OR clm_id !~ E'^([-+])?[0-9\.]+$';
+WHERE bene_id !~ E'^([-+])?[0-9\.]+$' OR pde_id !~ E'^([-+])?[0-9\.]+$';
 
 SELECT clm_id FROM snf_claim_lines
 WHERE clm_id IN (SELECT clm_id FROM snf_claims WHERE bene_id !~ E'^([-+])?[0-9\.]+$' OR clm_id !~ E'^([-+])?[0-9\.]+$');
