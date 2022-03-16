@@ -1,7 +1,8 @@
 --
 -- Script to locate all records that have non-numeric bene_id's
 -- or clm_id's in preparation for the conversion of bene_id from
--- varchar to bigint.
+-- varchar to bigint. All of these queries should return zero
+-- on all environments as a precondition to that migration.
 --
 
 -- Find non-numeric bene_id's in claim and claim_lines tables
