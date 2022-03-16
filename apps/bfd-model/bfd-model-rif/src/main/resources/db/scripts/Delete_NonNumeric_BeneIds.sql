@@ -1,6 +1,8 @@
 --
 -- One-off script to remove the records in TEST that reference the
--- non-numeric bene_id's that all start with 'DEH'.
+-- non-numeric bene_id's that all start with 'DEH'. This encompasses
+-- all non-numeric data that was found by running queries in
+-- Select_NonNumeric_BeneAndClaimIds.sql.
 --
 
 DELETE FROM carrier_claim_lines
