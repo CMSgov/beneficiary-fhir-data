@@ -139,7 +139,7 @@ jobs:
       - name: 'Git Branch'
         run: git branch
       - name: 'Git Pull'
-        run: git pull
+        run: git checkout $GITHUB_HEAD_REF
       - name: 'Git Branch Again'
         run: git branch
       - name: 'Verify FHIR resource'
