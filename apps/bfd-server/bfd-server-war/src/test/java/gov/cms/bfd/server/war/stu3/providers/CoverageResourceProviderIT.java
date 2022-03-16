@@ -115,7 +115,7 @@ public final class CoverageResourceProviderIT {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, 1234L))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, "1234"))
           .execute();
     } catch (ResourceNotFoundException e) {
       exception = e;
@@ -127,7 +127,7 @@ public final class CoverageResourceProviderIT {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, 1234L))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, "1234"))
           .execute();
     } catch (ResourceNotFoundException e) {
       exception = e;
@@ -140,7 +140,7 @@ public final class CoverageResourceProviderIT {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, -1234L))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, "-1234"))
           .execute();
     } catch (ResourceNotFoundException e) {
       exception = e;
@@ -340,7 +340,7 @@ public final class CoverageResourceProviderIT {
         fhirClient
             .search()
             .forResource(Coverage.class)
-            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(1234L)))
+            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId("1234")))
             .returnBundle(Bundle.class)
             .execute();
 

@@ -14,7 +14,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
   private final RifFileEvent fileEvent;
   private final List<CSVRecord> rawCsvRecords;
   private final RecordAction recordAction;
-  private final Long beneficiaryId;
+  private final String beneficiaryId;
   private final R record;
 
   /**
@@ -30,7 +30,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
       RifFileEvent fileEvent,
       List<CSVRecord> rawCsvRecords,
       RecordAction recordAction,
-      Long beneficiaryId,
+      String beneficiaryId,
       R record) {
     if (fileEvent == null) throw new IllegalArgumentException();
     if (rawCsvRecords == null) throw new IllegalArgumentException();
@@ -61,7 +61,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
   }
 
   /** @return the beneficiaryId */
-  public Long getBeneficiaryId() {
+  public String getBeneficiaryId() {
     return beneficiaryId;
   }
 
