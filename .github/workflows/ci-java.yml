@@ -136,8 +136,8 @@ jobs:
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
-      - name: 'Git Branch'
-        run: git branch
+      - name: 'Git Add Remote'
+        run: git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git
       - name: 'Git Pull'
         run: git checkout $GITHUB_HEAD_REF
       - name: 'Git Branch Again'
