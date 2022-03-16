@@ -177,6 +177,13 @@ public class HospiceClaimTransformerV2 {
         Optional.empty(),
         Optional.empty());
 
+    // BENE_HOSPC_PRD_CNT => ExplanationOfBenefit.extension
+    if (claimGroup.getHospicePeriodCount().isPresent()) {
+      eob.addExtension(
+          TransformerUtilsV2.createExtensionQuantity(
+              CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
+    }
+
     for (HospiceClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 

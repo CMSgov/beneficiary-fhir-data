@@ -1,10 +1,16 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -99,6 +105,120 @@ public class TransformerUtilsV2Test {
         IllegalArgumentException.class,
         () -> {
           TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, null, statusCode);
+        });
+  }
+
+  /**
+   * Ensures the fi_num is correctly mapped to an eob as an extension when the input
+   * fiscalIntermediaryNumber is present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenFiNumberExistsExpectExtensionOnEob() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String fiNum = "12534";
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.of(fiNum),
+        Optional.empty());
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiNumExtension);
+    assertEquals(fiNum, ((Coding) fiNumExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fi_num is not mapped to an eob as an extension when the input
+   * fiscalIntermediaryNumber is not present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenNoFiNumberExpectNoFiNumExtension() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.empty());
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNull(fiNumExtension);
+  }
+
+  /** Verifies that createCoding can take a Character type value and create a Coding from it. */
+  @Test
+  public void createCodingWhenValueIsCharacterExpectCodingWithValue() {
+
+    Character codingValue = 'a';
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    Coding coding =
+        TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
+
+    assertEquals(codingValue.toString(), coding.getCode());
+  }
+
+  /** Verifies that createCoding can take a String type value and create a Coding from it. */
+  @Test
+  public void createCodingWhenValueIsStringExpectCodingWithValue() {
+
+    String codingValue = "abc";
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    Coding coding =
+        TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
+
+    assertEquals(codingValue, coding.getCode());
+  }
+
+  /**
+   * Verifies that createCoding throws an exception when an unexpected typed coding is passed to it.
+   */
+  @Test
+  public void createCodingWhenValueIsUnexpectedTypeExpectException() {
+
+    BigInteger codingValue = BigInteger.ONE;
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    assertThrows(
+        BadCodeMonkeyException.class,
+        () -> {
+          TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
         });
   }
 }

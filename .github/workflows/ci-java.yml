@@ -6,12 +6,12 @@ env:
   # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
   # are using this workflow logic
   workflow_files_re: >
-    (
-    ^apps/bfd- |
-    ^apps/pom.xml |
+    (^apps/bfd- |
     ^apps/Dockerfile |
-    ^.github/workflows/ci-java.yml
-    )
+    ^apps/pom.xml |
+    ^ops/ansible |
+    ^.github/workflows/ci-ansible.yml |
+    ^.github/workflows/ci-java.yml)
 
 jobs:
   workflow:
@@ -122,6 +122,7 @@ jobs:
             **/target/failsafe-reports/*
             bfd-server/bfd-server-war/target/server-work/access.*
             bfd-server/bfd-server-war/target/server-work/server-console.log
+            
   fhir-validate:
     runs-on: ubuntu-latest
     steps:
@@ -136,4 +137,23 @@ jobs:
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Verify FHIR resource'
-        run: git log --name-only --pretty=oneline --full-index $GITHUB_REF..$GITHUB_BASE_REF | grep -vE '^[0-9a-f]{40} ' | sort | uniq
+        run: ./validations.sh
+        
+  # ansible system testing
+  ansible-role-bfd-pipeline:
+    needs: mvn-verify
+    uses: ./.github/workflows/ci-ansible.yml
+    with:
+      role: bfd-pipeline
+
+  ansible-role-bfd-server:
+    needs: mvn-verify
+    uses: ./.github/workflows/ci-ansible.yml
+    with:
+      role: bfd-server
+
+  ansible-role-bfd-db-migrator:
+    needs: mvn-verify
+    uses: ./.github/workflows/ci-ansible.yml
+    with:
+      role: bfd-db-migrator
