@@ -879,7 +879,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       // bene reference year is > than prior reference year
       if (duplicateBene.getBeneEnrollmentReferenceYear().get().compareTo(maxReferenceYear) > 0) {
         maxReferenceYear = duplicateBene.getBeneEnrollmentReferenceYear().get();
-        maxReferenceYearMatchingBeneficiaryId = String.valueOf(duplicateBene.getBeneficiaryId());
+        maxReferenceYearMatchingBeneficiaryId = duplicateBene.getBeneficiaryId();
       }
     }
 
