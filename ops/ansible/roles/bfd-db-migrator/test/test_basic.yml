@@ -1,0 +1,36 @@
+---
+##
+# Applies and verifies the role on the container being used for the test case.
+##
+
+# Apply the role.
+- hosts: bfd-db-migrator
+  tasks:
+    - name: Apply Role
+      import_role:
+        name: bfd-db-migrator
+      vars:
+        db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAPSHOT/bfd-db-migrator-1.0.0-SNAPSHOT.zip"
+        db_migrator_db_url: 'jdbc:hsqldb:mem:test'
+        db_migrator_db_username: ""
+        db_migrator_db_password: ""
+
+# Verify that things worked as expected.
+- hosts: bfd-db-migrator
+  tasks:
+    - name: Ensure Service Is Running
+      service:
+        name: bfd-db-migrator
+        state: started
+        enabled: yes
+      changed_when: false
+      become: true
+
+    - name: Check Log Content
+      find:
+        paths: /usr/local/bfd-migrator/
+        patterns: migrator-log.json
+        contains: Successfully started
+      register: modified
+      retries: 20
+      delay: 5
