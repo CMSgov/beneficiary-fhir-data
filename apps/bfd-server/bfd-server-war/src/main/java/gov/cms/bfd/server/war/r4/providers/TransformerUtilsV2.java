@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -101,6 +102,7 @@ import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.util.Assert;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -2958,10 +2960,10 @@ public final class TransformerUtilsV2 {
    * @param patientDischargeStatusCode PTNT_DSCHRG_STUS_CD,
    * @param claimServiceClassificationTypeCode CLM_SRVC_CLSFCTN_TYPE_CD,
    * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
-   * @param attendingPhysicianNpi AT_PHYSN_NPI,
    * @param totalChargeAmount CLM_TOT_CHRG_AMT,
    * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
    * @param fiscalIntermediaryNumber FI_NUM
+   * @param lastUpdated the last updated
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3022,6 +3024,12 @@ public final class TransformerUtilsV2 {
           CcwCodebookVariable.NCH_PRMRY_PYR_CD,
           CcwCodebookVariable.NCH_PRMRY_PYR_CD,
           claimPrimaryPayerCode.get());
+    }
+
+    // FI_NUM => ExplanationOfBenefit.extension
+    if (fiscalIntermediaryNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionCoding(eob, CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
     }
 
     // CLM_TOT_CHRG_AMT => ExplainationOfBenefit.total
@@ -3545,6 +3553,33 @@ public final class TransformerUtilsV2 {
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
       item.setQuantity(drugQuantity);
+    }
+
+    return item;
+  }
+
+  /**
+   * Maps the Revenue Status Indicator Code to the eob's item revenue as an extension, if the status
+   * code is present.
+   *
+   * <p>REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+   *
+   * @param item the item to add the extension to, if the required data is present
+   * @param eob the root eob (only used for logging purposes)
+   * @param statusCode the status code to check for and add data from if exists
+   * @return the {@link ItemComponent}
+   */
+  static ItemComponent mapEobCommonItemRevenueStatusCode(
+      @Nonnull ItemComponent item, @Nonnull ExplanationOfBenefit eob, Optional<String> statusCode) {
+
+    Assert.notNull(item, "Item must be non-null");
+    Assert.notNull(eob, "Eob must be non-null");
+
+    if (statusCode.isPresent()) {
+      item.getRevenue()
+          .addExtension(
+              TransformerUtilsV2.createExtensionCoding(
+                  eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, statusCode));
     }
 
     return item;

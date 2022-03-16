@@ -14,6 +14,7 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
+import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,6 +39,7 @@ public class McsClaimRdaSinkIT {
           claim.setIdrContrId("c1");
           claim.setIdrHic("hc");
           claim.setIdrClaimType("c");
+          claim.setIdrStatusCode("A");
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
           final PreAdjMcsDetail detail = new PreAdjMcsDetail();
@@ -69,6 +71,7 @@ public class McsClaimRdaSinkIT {
                   .setIdrClaimMbi(claim.getIdrClaimMbi())
                   .setIdrHic(claim.getIdrHic())
                   .setIdrClaimTypeUnrecognized(claim.getIdrClaimType())
+                  .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
                   .addMcsDetails(detailMessage)
                   .addMcsDiagnosisCodes(diagCodeMessage)
                   .build();
