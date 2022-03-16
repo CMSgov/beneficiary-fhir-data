@@ -137,7 +137,7 @@ jobs:
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Git Add Remote'
-        run: git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git
+        run: git remote set-url origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git
       - name: 'Git Pull'
         run: git checkout $GITHUB_HEAD_REF
       - name: 'Git Branch Again'
