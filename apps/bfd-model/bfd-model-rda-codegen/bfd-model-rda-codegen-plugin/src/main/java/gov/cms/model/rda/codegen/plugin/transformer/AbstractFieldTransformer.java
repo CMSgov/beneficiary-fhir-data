@@ -43,10 +43,15 @@ public abstract class AbstractFieldTransformer {
    *
    * @param mapping The mapping that contains the field.
    * @param transformation The specific field to be copied.
+   * @param toCodeGenerator
    * @return CodeBlock for the generated block of code
    */
   public abstract CodeBlock generateCodeBlock(
-      MappingBean mapping, ColumnBean column, TransformationBean transformation);
+      MappingBean mapping,
+      ColumnBean column,
+      TransformationBean transformation,
+      FromCodeGenerator fromCodeGenerator,
+      ToCodeGenerator toCodeGenerator);
 
   public List<FieldSpec> generateFieldSpecs(
       MappingBean mapping, ColumnBean column, TransformationBean transformation) {
@@ -79,7 +84,7 @@ public abstract class AbstractFieldTransformer {
    * @param nestedProperty accepts a field and property name and returns a CodeBlock
    * @return CodeBlock created by appropriate method
    */
-  protected CodeBlock transformationPropertyCodeBlock(
+  public static CodeBlock transformationPropertyCodeBlock(
       TransformationBean transformation,
       Function<String, CodeBlock> simpleProperty,
       BiFunction<String, String, CodeBlock> nestedProperty) {
@@ -92,84 +97,5 @@ public abstract class AbstractFieldTransformer {
       final String propertyName = capitalize(from.substring(dotIndex + 1));
       return nestedProperty.apply(fieldName, propertyName);
     }
-  }
-
-  /**
-   * Generates a {@code Supplier<Boolean>} compatible CodeBlock that that returns true if the field
-   * is present in the message.
-   *
-   * @param transformation defines the {@code from} field
-   * @return CodeBlock for a lambda function
-   */
-  protected CodeBlock sourceHasRef(TransformationBean transformation) {
-    return transformationPropertyCodeBlock(
-        transformation,
-        fieldName -> CodeBlock.of("$L::has$L", SOURCE_VAR, fieldName),
-        (fieldName, propertyName) ->
-            CodeBlock.of(
-                "() -> $L.has$L() && $L.get$L().has$L()",
-                SOURCE_VAR,
-                fieldName,
-                SOURCE_VAR,
-                fieldName,
-                propertyName));
-  }
-
-  /**
-   * Generates an expression CodeBlock that returns true if the field is present in the message.
-   *
-   * @param transformation defines the {@code from} field
-   * @return CodeBlock for an expression
-   */
-  protected CodeBlock sourceHasValue(TransformationBean transformation) {
-    return transformationPropertyCodeBlock(
-        transformation,
-        fieldName -> CodeBlock.of("$L.has$L()", SOURCE_VAR, fieldName),
-        (fieldName, propertyName) ->
-            CodeBlock.of(
-                "($L.has$L() && $L.get$L().has$L())",
-                SOURCE_VAR,
-                fieldName,
-                SOURCE_VAR,
-                fieldName,
-                propertyName));
-  }
-
-  /**
-   * Generates a {@code Supplier<T>} compatible CodeBlock that that returns the value of the field.
-   *
-   * @param transformation defines the {@code from} field
-   * @return CodeBlock for a lambda function
-   */
-  protected CodeBlock sourceGetRef(TransformationBean transformation) {
-    return transformationPropertyCodeBlock(
-        transformation,
-        fieldName -> CodeBlock.of("$L::get$L", SOURCE_VAR, fieldName),
-        (fieldName, propertyName) ->
-            CodeBlock.of("() -> $L.get$L().get$L()", SOURCE_VAR, fieldName, propertyName));
-  }
-
-  /**
-   * Generates an expression CodeBlock that that returns the value of the field.
-   *
-   * @param transformation defines the {@code from} field
-   * @return CodeBlock for an expression
-   */
-  protected CodeBlock sourceValue(TransformationBean transformation) {
-    return transformationPropertyCodeBlock(
-        transformation,
-        fieldName -> CodeBlock.of("$L.get$L()", SOURCE_VAR, fieldName),
-        (fieldName, propertyName) ->
-            CodeBlock.of("$L.get$L().get$L()", SOURCE_VAR, fieldName, propertyName));
-  }
-
-  protected CodeBlock destSetter(ColumnBean column, CodeBlock value) {
-    return CodeBlock.builder()
-        .addStatement("$L.set$L($L)", DEST_VAR, capitalize(column.getName()), value)
-        .build();
-  }
-
-  protected CodeBlock destSetRef(ColumnBean column) {
-    return CodeBlock.of("$L::set$L", DEST_VAR, capitalize(column.getName()));
   }
 }

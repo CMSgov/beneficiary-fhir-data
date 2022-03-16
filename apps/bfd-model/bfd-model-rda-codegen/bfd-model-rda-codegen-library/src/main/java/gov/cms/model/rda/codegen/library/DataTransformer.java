@@ -5,6 +5,10 @@ import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +29,21 @@ import lombok.Getter;
  * return this instance so that calls can be chained.
  */
 public class DataTransformer {
+  private static final DateTimeFormatter RifEightCharacterDate =
+      new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("yyyyMMdd").toFormatter();
+
+  private static final DateTimeFormatter RifElevenCharacterDate =
+      new DateTimeFormatterBuilder()
+          .parseCaseInsensitive()
+          .appendPattern("dd-MMM-yyyy")
+          .toFormatter();
+
+  private static final DateTimeFormatter RifTimestamp =
+      new DateTimeFormatterBuilder()
+          .parseCaseInsensitive()
+          .appendPattern("dd-MMM-yyyy HH:mm:ss")
+          .toFormatter();
+
   private final List<ErrorMessage> errors = new ArrayList<>();
 
   /**
@@ -156,6 +175,11 @@ public class DataTransformer {
     return this;
   }
 
+  public DataTransformer copyInt(IntSupplier value, IntConsumer copier) {
+    copier.accept(value.getAsInt());
+    return this;
+  }
+
   public DataTransformer copyOptionalInt(
       BooleanSupplier exists, IntSupplier value, IntConsumer copier) {
     if (exists.getAsBoolean()) {
@@ -247,6 +271,32 @@ public class DataTransformer {
   }
 
   /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called. Optional character fields must be
+   * of java type {@code Character}.
+   *
+   * <p>If the value exists extracts the first character of the string and delivers it to the
+   * Consumer. The string MUST not be null and MUST have length one to be valid.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the string value of length 1 to copy
+   * @param copier Consumer to receive the hashed value
+   * @return this
+   */
+  public DataTransformer copyOptionalCharacter(
+      String fieldName,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<Character> copier) {
+    if (exists.getAsBoolean()) {
+      copyCharacter(fieldName, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
    * Parses the string into a LocalDate and delivers it to the Consumer. The string value must be in
    * ISO-8601 format (YYYY-MM-DD). Valid null values are silently accepted without calling the
    * Consumer.
@@ -261,7 +311,18 @@ public class DataTransformer {
       String fieldName, boolean nullable, String value, Consumer<LocalDate> copier) {
     if (nonNull(fieldName, value, nullable)) {
       try {
-        LocalDate date = LocalDate.parse(value);
+        LocalDate date;
+        switch (value.length()) {
+          case 8:
+            date = LocalDate.parse(value, RifEightCharacterDate);
+            break;
+          case 11:
+            date = LocalDate.parse(value, RifElevenCharacterDate);
+            break;
+          default:
+            date = LocalDate.parse(value);
+            break;
+        }
         copier.accept(date);
       } catch (DateTimeParseException ex) {
         addError(fieldName, "invalid date");
@@ -292,6 +353,143 @@ public class DataTransformer {
       Consumer<LocalDate> copier) {
     if (exists.getAsBoolean()) {
       return copyDate(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Parses the string into an Integer and delivers it to the Consumer. The string value must be a
+   * valid integer. Valid null values are silently accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value integer string
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyIntString(
+      String fieldName, boolean nullable, String value, Consumer<Integer> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      try {
+        int intValue = Integer.parseInt(value);
+        copier.accept(intValue);
+      } catch (NumberFormatException ex) {
+        addError(fieldName, "invalid integer");
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into a Integer. Valid null values are silently accepted without calling
+   * the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyOptionalIntString(
+      String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Integer> copier) {
+    if (exists.getAsBoolean()) {
+      return copyIntString(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Parses the string into an Long and delivers it to the Consumer. The string value must be a
+   * valid long. Valid null values are silently accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value long string
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyLongString(
+      String fieldName, boolean nullable, String value, Consumer<Long> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      try {
+        long longValue = Long.parseLong(value);
+        copier.accept(longValue);
+      } catch (NumberFormatException ex) {
+        addError(fieldName, "invalid long");
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into a Long. Valid null values are silently accepted without calling the
+   * Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyOptionalLongString(
+      String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Long> copier) {
+    if (exists.getAsBoolean()) {
+      return copyLongString(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Parses the string into a LocalTimestamp and delivers it to the Consumer. The string value must
+   * be in ISO-8601 format (YYYY-MM-DD). Valid null values are silently accepted without calling the
+   * Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value timestamp string in ISO-8601 format
+   * @param copier Consumer to receive the timestamp
+   * @return this
+   */
+  public DataTransformer copyRifTimestamp(
+      String fieldName, boolean nullable, String value, Consumer<Instant> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      try {
+        Instant timestamp = LocalDateTime.parse(value, RifTimestamp).toInstant(ZoneOffset.UTC);
+        copier.accept(timestamp);
+      } catch (DateTimeParseException ex) {
+        addError(fieldName, "invalid timestamp");
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into an Instant and delivers it to the Consumer. The string value must be
+   * in {@code dd-MMM-yyyy HH:mm:ss} format. Valid null values are silently accepted without calling
+   * the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the timestamp
+   * @return this
+   */
+  public DataTransformer copyOptionalRifTimestamp(
+      String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Instant> copier) {
+    if (exists.getAsBoolean()) {
+      return copyRifTimestamp(fieldName, false, value.get(), copier);
     }
     return this;
   }
@@ -453,6 +651,11 @@ public class DataTransformer {
     public TransformationException(String message, List<ErrorMessage> errors) {
       super(message);
       this.errors = errors;
+    }
+
+    @Override
+    public String toString() {
+      return getMessage() + getErrors();
     }
   }
 }

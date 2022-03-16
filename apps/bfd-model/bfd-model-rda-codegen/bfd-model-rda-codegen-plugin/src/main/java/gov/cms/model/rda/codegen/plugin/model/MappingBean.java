@@ -19,11 +19,15 @@ public class MappingBean {
   private String messageClassName;
   private String entityClassName;
   private String transformerClassName;
+  private SourceType sourceType = SourceType.Grpc;
+  private NullableFieldAccessorType nullableFieldAccessorType = NullableFieldAccessorType.Standard;
   private TableBean table;
+  @Builder.Default private int minStringLength = 1;
   @Singular private List<EnumTypeBean> enumTypes = new ArrayList<>();
   @Singular private List<TransformationBean> transformations = new ArrayList<>();
   @Singular private List<ArrayElement> arrays = new ArrayList<>();
   @Singular private List<ExternalTransformationBean> externalTransformations = new ArrayList<>();
+  @Singular private List<String> entityInterfaces = new ArrayList<>();
 
   public EnumTypeBean findEnum(String enumName) {
     return enumTypes.stream()
@@ -64,7 +68,29 @@ public class MappingBean {
     return ModelUtil.className(transformerClassName);
   }
 
+  public boolean hasEntityInterfaces() {
+    return entityInterfaces.size() > 0;
+  }
+
   public Optional<TransformationBean> firstPrimaryKeyField() {
     return transformations.stream().findFirst();
+  }
+
+  public Optional<ColumnBean> findColumnByFieldName(String name) {
+    return table.getColumns().stream().filter(c -> name.equals(c.getName())).findAny();
+  }
+
+  public Optional<JoinBean> findJoinByFieldName(String name) {
+    return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findAny();
+  }
+
+  public enum SourceType {
+    Grpc,
+    RifCsv
+  }
+
+  public enum NullableFieldAccessorType {
+    Standard,
+    Optional
   }
 }

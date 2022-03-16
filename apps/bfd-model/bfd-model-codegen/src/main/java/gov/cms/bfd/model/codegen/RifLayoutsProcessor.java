@@ -15,6 +15,7 @@ import com.squareup.javapoet.TypeSpec;
 import gov.cms.bfd.model.codegen.RifLayout.RifColumnType;
 import gov.cms.bfd.model.codegen.RifLayout.RifField;
 import gov.cms.bfd.model.codegen.annotations.RifLayoutsGenerator;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -89,6 +90,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   private static final String PARENT_BENEFICIARY = "parentBeneficiary";
 
   private final List<String> logMessages = new LinkedList<>();
+  private final MappingSummarizer mappingSummarizer = new MappingSummarizer();
 
   /** @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes() */
   @Override
@@ -123,6 +125,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               RifLayoutsGenerator.class.getName());
         process((PackageElement) annotatedElement);
       }
+      mappingSummarizer.writeToFile(new File("target/rif-mapping-summary.yaml"));
     } catch (RifLayoutProcessingException e) {
       log(Diagnostic.Kind.ERROR, e.getMessage(), e.getElement());
     } catch (Exception e) {
@@ -132,7 +135,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
        */
       StringWriter writer = new StringWriter();
       e.printStackTrace(new PrintWriter(writer));
-      log(Diagnostic.Kind.ERROR, "FATAL ERROR: " + writer.toString());
+      log(Diagnostic.Kind.ERROR, "BTB FATAL ERROR: " + writer.toString().replaceAll("\n", "|"));
     }
 
     if (roundEnv.processingOver()) writeDebugLogMessages();
@@ -353,6 +356,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private void generateCode(MappingSpec mappingSpec) throws IOException {
+    mappingSummarizer.addObject(mappingSpec.createMetaData(mappingSummarizer));
+
     /*
      * First, create the Java enum for the RIF columns.
      */
@@ -614,12 +619,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec lineEntityFinal = lineEntity.build();
     JavaFile lineEntityClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), lineEntityFinal).build();
-    lineEntityClassFile.writeTo(processingEnv.getFiler());
+    //    lineEntityClassFile.writeTo(processingEnv.getFiler());
 
     return lineEntityFinal;
   }
 
   private TypeSpec generateBeneficiaryMonthlyEntity(MappingSpec mappingSpec) throws IOException {
+    var monthlyRifFields = new ArrayList<RifField>();
 
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
@@ -739,6 +745,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "yearMonth");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, true, rifField);
 
     rifField =
@@ -751,6 +758,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "fipsStateCntyCode");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -763,6 +771,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "medicareStatusCode");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -775,6 +784,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "entitlementBuyInInd");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -787,6 +797,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "hmoIndicatorInd");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -799,6 +810,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partCContractNumberId");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -811,6 +823,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partCPbpNumberId");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -823,6 +836,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partCPlanTypeCode");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -835,6 +849,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partDContractNumberId");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -847,6 +862,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partDPbpNumberId");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -859,6 +875,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partDSegmentNumberId");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -871,6 +888,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partDRetireeDrugSubsidyInd");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -883,6 +901,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "medicaidDualEligibilityCode");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     rifField =
@@ -895,12 +914,23 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             null,
             null,
             "partDLowIncomeCostShareGroupCode");
+    monthlyRifFields.add(rifField);
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
+
+    var monthlyMappingSpec =
+        new MappingSpec(mappingSpec.getPackageName())
+            .setRifLayout(new RifLayout("BeneficiaryMonthly", monthlyRifFields))
+            .setHeaderEntity("BeneficiaryMonthly")
+            .setHeaderTable("beneficiary_monthly")
+            .setHeaderEntityIdField("YEAR_MONTH")
+            .setHasLines(false)
+            .setHeaderEntityAdditionalDatabaseFields(List.of());
+    mappingSummarizer.addObject(monthlyMappingSpec.createMetaData(mappingSummarizer));
 
     TypeSpec beneficiaryMonthlyEntityFinal = beneficiaryMonthlyEntity.build();
     JavaFile beneficiaryMonthlyClassFile =
         JavaFile.builder("gov.cms.bfd.model.rif", beneficiaryMonthlyEntityFinal).build();
-    beneficiaryMonthlyClassFile.writeTo(processingEnv.getFiler());
+    //    beneficiaryMonthlyClassFile.writeTo(processingEnv.getFiler());
 
     return beneficiaryMonthlyEntityFinal;
   }
@@ -1267,7 +1297,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeSpec headerEntityFinal = headerEntityClass.build();
     JavaFile headerEntityFile =
         JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
-    headerEntityFile.writeTo(processingEnv.getFiler());
+    //    headerEntityFile.writeTo(processingEnv.getFiler());
 
     return headerEntityFinal;
   }
@@ -1478,7 +1508,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     logNote("parsingClass: %s", parsingClassFinal.name);
     JavaFile parsingClassFile =
         JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
-    parsingClassFile.writeTo(processingEnv.getFiler());
+    //    parsingClassFile.writeTo(processingEnv.getFiler());
 
     return parsingClassFinal;
   }

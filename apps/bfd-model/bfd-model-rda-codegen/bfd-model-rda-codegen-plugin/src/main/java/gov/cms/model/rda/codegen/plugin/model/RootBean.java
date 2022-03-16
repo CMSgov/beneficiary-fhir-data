@@ -19,4 +19,8 @@ public class RootBean {
   public Optional<MappingBean> findMappingWithId(String id) {
     return mappings.stream().filter(m -> m.getId().equals(id)).findAny();
   }
+
+  public Optional<MappingBean> findMappingWithEntityClassName(String entityClassName) {
+    return mappings.stream().filter(m -> m.getEntityClassName().equals(entityClassName)).findAny();
+  }
 }

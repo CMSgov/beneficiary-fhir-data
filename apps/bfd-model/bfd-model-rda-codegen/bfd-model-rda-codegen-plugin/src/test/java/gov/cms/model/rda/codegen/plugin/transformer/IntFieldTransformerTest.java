@@ -24,7 +24,12 @@ public class IntFieldTransformerTest {
     RootBean model = RootBean.builder().mapping(mapping).build();
 
     IntFieldTransformer generator = new IntFieldTransformer();
-    generator.generateCodeBlock(mapping, column, transformation);
+    generator.generateCodeBlock(
+        mapping,
+        column,
+        transformation,
+        GrpcFromCodeGenerator.Instance,
+        StandardToCodeGenerator.Instance);
   }
 
   @Test
@@ -40,7 +45,13 @@ public class IntFieldTransformerTest {
     RootBean model = RootBean.builder().mapping(mapping).build();
 
     IntFieldTransformer generator = new IntFieldTransformer();
-    CodeBlock block = generator.generateCodeBlock(mapping, column, transformation);
+    CodeBlock block =
+        generator.generateCodeBlock(
+            mapping,
+            column,
+            transformation,
+            GrpcFromCodeGenerator.Instance,
+            StandardToCodeGenerator.Instance);
     assertEquals(
         "transformer.copyOptionalInt(from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt);\n",
         block.toString());

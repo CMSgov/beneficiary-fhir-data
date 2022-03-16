@@ -1,5 +1,7 @@
 package gov.cms.model.rda.codegen.plugin;
 
+import static gov.cms.model.rda.codegen.plugin.transformer.TransformerUtil.capitalize;
+
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -20,6 +22,10 @@ import gov.cms.model.rda.codegen.plugin.model.ModelUtil;
 import gov.cms.model.rda.codegen.plugin.model.RootBean;
 import gov.cms.model.rda.codegen.plugin.model.TransformationBean;
 import gov.cms.model.rda.codegen.plugin.transformer.AbstractFieldTransformer;
+import gov.cms.model.rda.codegen.plugin.transformer.GrpcFromCodeGenerator;
+import gov.cms.model.rda.codegen.plugin.transformer.OptionalToCodeGenerator;
+import gov.cms.model.rda.codegen.plugin.transformer.RifFromCodeGenerator;
+import gov.cms.model.rda.codegen.plugin.transformer.StandardToCodeGenerator;
 import gov.cms.model.rda.codegen.plugin.transformer.TransformerUtil;
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +53,7 @@ import org.apache.maven.project.MavenProject;
 @Mojo(name = "transformers", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class RdaTransformerCodeGenMojo extends AbstractMojo {
   private static final String PUBLIC_TRANSFORM_METHOD_NAME = "transformMessage";
-  private static final String PRIVATE_TRANSFORM_METHOD_NAME = "transformMessageImpl";
+  private static final String PRIVATE_TRANSFORM_METHOD_NAME_BASE = "transformMessageTo";
   private static final String PRIVATE_TRANSFORM_ARRAYS_METHOD_NAME = "transformMessageArrays";
 
   @Parameter(property = "mappingFile")
@@ -109,16 +115,17 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
                 EnumStringExtractor.Factory.class, AbstractFieldTransformer.ENUM_FACTORY_VAR);
     constructor.addStatement(
         "this.$L = $L", AbstractFieldTransformer.HASHER_VAR, AbstractFieldTransformer.HASHER_VAR);
-    if (mapping.hasExternalTransformations()) {
-      addExternalTransformationFieldsForMapping(mapping, classBuilder);
-      addExternalTransformationConstructorParametersForMapping(mapping, constructor);
-    }
     for (MappingBean aMapping : allMappings) {
       for (CodeBlock initializer : createFieldInitializersForMapping(aMapping)) {
         constructor.addCode(initializer);
       }
+      if (aMapping.hasExternalTransformations()) {
+        addExternalTransformationFieldsForMapping(aMapping, classBuilder);
+        addExternalTransformationConstructorParametersForMapping(aMapping, constructor);
+      }
     }
     classBuilder.addMethod(constructor.build());
+    classBuilder.addMethod(createPublicSimplifiedTransformMessageMethod(mapping));
     classBuilder.addMethod(createPublicTransformMessageMethod(mapping));
     for (MappingBean aMapping : allMappings) {
       classBuilder.addMethod(createTransformMessageMethodForMapping(aMapping));
@@ -164,7 +171,7 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
     return mapping.getTransformations().stream()
         .flatMap(
             transformation -> {
-              final ColumnBean column = mapping.getTable().findColumn(transformation.getTo());
+              final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
               return TransformerUtil.selectTransformerForField(column, transformation)
                   .map(
                       transformer ->
@@ -207,7 +214,7 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
     return mapping.getTransformations().stream()
         .flatMap(
             transformation -> {
-              final ColumnBean column = mapping.getTable().findColumn(transformation.getTo());
+              final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
               return TransformerUtil.selectTransformerForField(column, transformation)
                   .map(
                       transformer ->
@@ -215,6 +222,41 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
                   .orElse(Collections.emptyList()).stream();
             })
         .collect(ImmutableList.toImmutableList());
+  }
+
+  private MethodSpec createPublicSimplifiedTransformMessageMethod(MappingBean mapping) {
+    final TypeName messageClassType = ModelUtil.classType(mapping.getMessageClassName());
+    final TypeName entityClassType = ModelUtil.classType(mapping.getEntityClassName());
+    final MethodSpec.Builder builder =
+        MethodSpec.methodBuilder(PUBLIC_TRANSFORM_METHOD_NAME)
+            .returns(entityClassType)
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(messageClassType, AbstractFieldTransformer.SOURCE_VAR);
+    builder.addStatement(
+        "final $T $L = new $T();",
+        DataTransformer.class,
+        AbstractFieldTransformer.TRANSFORMER_VAR,
+        DataTransformer.class);
+    builder.addStatement(
+        "final $T $L = $L($L, $L, Instant.now())",
+        entityClassType,
+        AbstractFieldTransformer.DEST_VAR,
+        PUBLIC_TRANSFORM_METHOD_NAME,
+        AbstractFieldTransformer.SOURCE_VAR,
+        AbstractFieldTransformer.TRANSFORMER_VAR);
+    CodeBlock.Builder errorCheck =
+        CodeBlock.builder()
+            .beginControlFlow(
+                "if ($L.getErrors().size() > 0)", AbstractFieldTransformer.TRANSFORMER_VAR)
+            .addStatement(
+                "throw new $T($S, $L.getErrors())",
+                DataTransformer.TransformationException.class,
+                "data transformation failed",
+                AbstractFieldTransformer.TRANSFORMER_VAR)
+            .endControlFlow();
+    builder.addCode(errorCheck.build());
+    builder.addStatement("return $L", AbstractFieldTransformer.DEST_VAR);
+    return builder.build();
   }
 
   private MethodSpec createPublicTransformMessageMethod(MappingBean mapping) {
@@ -231,7 +273,7 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
         "final $T $L = $L($L,$L,$L,$S)",
         entityClassType,
         AbstractFieldTransformer.DEST_VAR,
-        PRIVATE_TRANSFORM_METHOD_NAME,
+        createPrivateTransformMethodNameForMapping(mapping),
         AbstractFieldTransformer.SOURCE_VAR,
         AbstractFieldTransformer.TRANSFORMER_VAR,
         AbstractFieldTransformer.NOW_VAR,
@@ -255,7 +297,7 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
     final TypeName messageClassType = ModelUtil.classType(mapping.getMessageClassName());
     final TypeName entityClassType = ModelUtil.classType(mapping.getEntityClassName());
     final MethodSpec.Builder builder =
-        MethodSpec.methodBuilder(PRIVATE_TRANSFORM_METHOD_NAME)
+        MethodSpec.methodBuilder(createPrivateTransformMethodNameForMapping(mapping))
             .returns(entityClassType)
             .addModifiers(Modifier.PRIVATE)
             .addParameter(messageClassType, AbstractFieldTransformer.SOURCE_VAR)
@@ -267,19 +309,31 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
                 entityClassType,
                 AbstractFieldTransformer.DEST_VAR,
                 entityClassType);
+    final var fromCodeGenerator =
+        mapping.getSourceType() == MappingBean.SourceType.RifCsv
+            ? RifFromCodeGenerator.Instance
+            : GrpcFromCodeGenerator.Instance;
+    final var toCodeGenerator =
+        mapping.getNullableFieldAccessorType() == MappingBean.NullableFieldAccessorType.Standard
+            ? StandardToCodeGenerator.Instance
+            : OptionalToCodeGenerator.Instance;
     for (TransformationBean transformation : mapping.getTransformations()) {
-      final ColumnBean column = mapping.getTable().findColumn(transformation.getTo());
+      final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
       TransformerUtil.selectTransformerForField(column, transformation)
-          .map(generator -> generator.generateCodeBlock(mapping, column, transformation))
+          .map(
+              generator ->
+                  generator.generateCodeBlock(
+                      mapping, column, transformation, fromCodeGenerator, toCodeGenerator))
           .ifPresent(builder::addCode);
     }
     if (mapping.hasExternalTransformations()) {
       for (ExternalTransformationBean externalTransformation :
           mapping.getExternalTransformations()) {
         builder.addStatement(
-            "$L.transformField($L, $L, $L)",
+            "$L.transformField($L, $L, $L, $L)",
             externalTransformation.getName(),
             AbstractFieldTransformer.TRANSFORMER_VAR,
+            AbstractFieldTransformer.NAME_PREFIX_VAR,
             AbstractFieldTransformer.SOURCE_VAR,
             AbstractFieldTransformer.DEST_VAR);
       }
@@ -315,7 +369,7 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
               .beginControlFlow(
                   "for (short index = 0; index < $L.get$LCount(); ++index)",
                   AbstractFieldTransformer.SOURCE_VAR,
-                  TransformerUtil.capitalize(arrayElement.getFrom()));
+                  capitalize(arrayElement.getFrom()));
       loop.addStatement(
               "final String itemNamePrefix = $L + $S + \"-\" + index + \"-\"",
               AbstractFieldTransformer.NAME_PREFIX_VAR,
@@ -324,27 +378,29 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
               "final $T itemFrom = $L.get$L(index)",
               PoetUtil.toClassName(elementMapping.getMessageClassName()),
               AbstractFieldTransformer.SOURCE_VAR,
-              TransformerUtil.capitalize(arrayElement.getFrom()))
+              capitalize(arrayElement.getFrom()))
           .addStatement(
               "final $T itemTo = $L(itemFrom,$L,$L,itemNamePrefix)",
               PoetUtil.toClassName(elementMapping.getEntityClassName()),
-              PRIVATE_TRANSFORM_METHOD_NAME,
+              createPrivateTransformMethodNameForMapping(elementMapping),
               AbstractFieldTransformer.TRANSFORMER_VAR,
               AbstractFieldTransformer.NOW_VAR);
       for (TransformationBean elementField : elementMapping.getTransformations()) {
         final String elementFrom = elementField.getFrom();
         if (elementFrom.equals(TransformerUtil.IndexFromName)) {
           // set the column to the current array element's index within the array
-          loop.addStatement(
-              "itemTo.set$L(index)", TransformerUtil.capitalize(elementField.getTo()));
+          loop.addStatement("itemTo.set$L(index)", capitalize(elementField.getTo()));
         } else if (elementFrom.equals(TransformerUtil.ParentFromName)) {
           // copy the same column from parent into the array element field
           loop.addStatement(
               "itemTo.set$L($L.get$L())",
-              TransformerUtil.capitalize(elementField.getTo()),
+              capitalize(elementField.getTo()),
               AbstractFieldTransformer.SOURCE_VAR,
-              TransformerUtil.capitalize(elementField.getTo()));
+              capitalize(elementField.getTo()));
         }
+      }
+      if (arrayElement.hasParentField()) {
+        loop.addStatement("itemTo.set$L(to)", capitalize(arrayElement.getParentField()));
       }
       if (elementMapping.hasArrayElements()) {
         loop.addStatement(
@@ -356,11 +412,15 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
       loop.addStatement(
               "$L.get$L().add(itemTo)",
               AbstractFieldTransformer.DEST_VAR,
-              TransformerUtil.capitalize(arrayElement.getTo()))
+              capitalize(arrayElement.getTo()))
           .endControlFlow();
       builder.addCode(loop.build());
     }
     return builder.build();
+  }
+
+  private String createPrivateTransformMethodNameForMapping(MappingBean mapping) {
+    return PRIVATE_TRANSFORM_METHOD_NAME_BASE + mapping.getId();
   }
 
   private MojoExecutionException failure(String formatString, Object... args) {

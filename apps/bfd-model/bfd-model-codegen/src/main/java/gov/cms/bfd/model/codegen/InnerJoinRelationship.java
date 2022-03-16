@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.codegen;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import javax.persistence.Entity;
 
 /**
@@ -19,6 +20,16 @@ public final class InnerJoinRelationship {
     this.orderBy = orderBy;
     this.childEntity = childEntity;
     this.childField = childField;
+  }
+
+  public JsonNode createMetaData(MappingSummarizer logger) {
+    var node = logger.createObject();
+    node.put("type", "InnerJoinRelationship");
+    node.put("mappedBy", mappedBy);
+    node.put("orderBy", orderBy);
+    node.put("childEntity", childEntity);
+    node.put("childField", childField);
+    return node;
   }
 
   /** @return the name of the field being mapped */

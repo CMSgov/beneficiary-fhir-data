@@ -5,7 +5,7 @@ import gov.cms.model.rda.codegen.plugin.model.ColumnBean;
 import gov.cms.model.rda.codegen.plugin.model.MappingBean;
 import gov.cms.model.rda.codegen.plugin.model.TransformationBean;
 
-public class StringFieldTransformer extends AbstractFieldTransformer {
+public class LongStringFieldTransformer extends AbstractFieldTransformer {
   @Override
   public CodeBlock generateCodeBlock(
       MappingBean mapping,
@@ -28,12 +28,10 @@ public class StringFieldTransformer extends AbstractFieldTransformer {
       ToCodeGenerator toCodeGenerator) {
     return CodeBlock.builder()
         .addStatement(
-            "$L.copyString($L, $L, $L, $L, $L, $L)",
+            "$L.copyLongString($L, $L, $L, $L)",
             TRANSFORMER_VAR,
             fieldNameReference(mapping, column),
             column.isNullable(),
-            mapping.getMinStringLength(),
-            column.computeLength(),
             fromCodeGenerator.createGetCall(transformation),
             toCodeGenerator.createSetRef(column))
         .build();
@@ -47,11 +45,9 @@ public class StringFieldTransformer extends AbstractFieldTransformer {
       ToCodeGenerator toCodeGenerator) {
     return CodeBlock.builder()
         .addStatement(
-            "$L.copyOptionalString($L, $L, $L, $L, $L, $L)",
+            "$L.copyOptionalLongString($L, $L, $L, $L)",
             TRANSFORMER_VAR,
             fieldNameReference(mapping, column),
-            mapping.getMinStringLength(),
-            column.computeLength(),
             fromCodeGenerator.createHasRef(transformation),
             fromCodeGenerator.createGetRef(transformation),
             toCodeGenerator.createSetRef(column))

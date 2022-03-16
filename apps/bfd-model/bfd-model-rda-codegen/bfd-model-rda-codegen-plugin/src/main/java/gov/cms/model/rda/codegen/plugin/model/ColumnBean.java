@@ -19,16 +19,31 @@ import lombok.SneakyThrows;
 @AllArgsConstructor
 @Builder
 public class ColumnBean {
+  private static final Pattern NumericTypeRegex =
+      Pattern.compile("(numeric|decimal)\\((\\d+)(,(\\d+))?\\)");
+  private static final int NumericPrecisionGroup = 2;
+  private static final int NumericScaleGroup = 4;
+
   private String name;
+  private String dbName;
   private String sqlType;
   private String javaType;
+  private String javaAccessorType;
   private String enumType;
   private String comment;
   private boolean nullable = true;
   private boolean identity = false;
+  private boolean updatable = true;
+  private FieldType fieldType = FieldType.Column;
+  private SequenceBean sequence;
 
-  public String getColumnName(String fieldName) {
-    return Strings.isNullOrEmpty(name) ? fieldName : name;
+  public enum FieldType {
+    Column,
+    Transient
+  }
+
+  public String getColumnName() {
+    return Strings.isNullOrEmpty(dbName) ? name : dbName;
   }
 
   public int computeLength() {
@@ -48,8 +63,20 @@ public class ColumnBean {
     } else if (isEnum()) {
       return ClassName.get(String.class);
     } else {
-      return mapJavaTypeToTypeName();
+      return mapJavaTypeToTypeName(javaType);
     }
+  }
+
+  public TypeName computeJavaAccessorType() {
+    if (Strings.isNullOrEmpty(javaAccessorType)) {
+      return computeJavaType();
+    } else {
+      return mapJavaTypeToTypeName(javaAccessorType);
+    }
+  }
+
+  public boolean hasDifferentAccessorType() {
+    return !Strings.isNullOrEmpty(javaAccessorType);
   }
 
   public boolean hasComment() {
@@ -57,7 +84,26 @@ public class ColumnBean {
   }
 
   public boolean isColumnDefRequired() {
-    return sqlType.contains("decimal");
+    return sqlType.contains("decimal") || sqlType.contains("numeric");
+  }
+
+  public int getPrecision() {
+    var matcher = NumericTypeRegex.matcher(sqlType);
+    if (matcher.find()) {
+      return Integer.parseInt(matcher.group(NumericPrecisionGroup));
+    }
+    return 0;
+  }
+
+  public int getScale() {
+    var matcher = NumericTypeRegex.matcher(sqlType);
+    if (matcher.find()) {
+      var value = matcher.group(NumericScaleGroup);
+      if (!Strings.isNullOrEmpty(value)) {
+        return Integer.parseInt(value);
+      }
+    }
+    return 0;
   }
 
   public boolean isEnum() {
@@ -72,16 +118,24 @@ public class ColumnBean {
     return "char".equals(javaType);
   }
 
+  public boolean isCharacter() {
+    return "Character".equals(javaType);
+  }
+
   public boolean isInt() {
     return "int".equals(javaType) || isIntType(mapSqlTypeToTypeName());
   }
 
   public boolean isDecimal() {
-    return sqlType.contains("decimal");
+    return sqlType.contains("decimal") || sqlType.contains("numeric");
   }
 
   public boolean isDate() {
     return sqlType.contains("date");
+  }
+
+  public boolean hasSequence() {
+    return sequence != null;
   }
 
   private boolean isStringType(TypeName type) {
@@ -93,6 +147,9 @@ public class ColumnBean {
   }
 
   private TypeName mapSqlTypeToTypeName() {
+    if (Strings.isNullOrEmpty(sqlType)) {
+      throw new RuntimeException("no sqlType for column " + name);
+    }
     if (sqlType.contains("char")) {
       return ClassName.get(String.class);
     }
@@ -105,7 +162,7 @@ public class ColumnBean {
     if (sqlType.equals("int")) {
       return ClassName.get(Integer.class);
     }
-    if (sqlType.contains("decimal")) {
+    if (sqlType.contains("decimal") || sqlType.contains("numeric")) {
       return ClassName.get(BigDecimal.class);
     }
     if (sqlType.contains("date")) {
@@ -118,16 +175,26 @@ public class ColumnBean {
   }
 
   @SneakyThrows(ClassNotFoundException.class)
-  private TypeName mapJavaTypeToTypeName() {
+  private static TypeName mapJavaTypeToTypeName(String javaType) {
     switch (javaType) {
       case "char":
         return TypeName.CHAR;
+      case "Character":
+        return ClassName.get(Character.class);
       case "int":
         return TypeName.INT;
+      case "Integer":
+        return ClassName.get(Integer.class);
       case "short":
         return TypeName.SHORT;
+      case "Short":
+        return ClassName.get(Short.class);
       case "long":
         return TypeName.LONG;
+      case "Long":
+        return ClassName.get(Long.class);
+      case "String":
+        return ClassName.get(String.class);
       default:
         return ClassName.get(Class.forName(javaType));
     }

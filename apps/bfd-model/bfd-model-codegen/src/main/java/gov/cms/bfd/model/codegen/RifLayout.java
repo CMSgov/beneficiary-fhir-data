@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.codegen;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,6 +30,18 @@ public final class RifLayout {
   public RifLayout(String name, List<RifField> rifFields) {
     this.name = name;
     this.rifFields = rifFields;
+  }
+
+  public JsonNode createMetaData(MappingSummarizer logger) {
+    var node = logger.createObject();
+    node.put("type", "RifLayout");
+    node.put("name", name);
+    var fields = logger.createArray();
+    for (RifField rifField : rifFields) {
+      fields.add(rifField.createMetaData(logger));
+    }
+    node.set("fields", fields);
+    return node;
   }
 
   /**
@@ -175,6 +188,21 @@ public final class RifLayout {
     private final URL dataDictionaryEntry;
     private final String rifColumnLabel;
     private final String javaFieldName;
+
+    public JsonNode createMetaData(MappingSummarizer logger) {
+      var node = logger.createObject();
+      node.put("type", "RifField");
+      node.put("rifColumnName", rifColumnName);
+      node.put("rifColumnType", rifColumnType.name());
+      node.put("rifColumnLength", rifColumnLength);
+      node.put("rifColumnScale", rifColumnScale);
+      node.put("rifColumnOptional", rifColumnOptional);
+      node.put(
+          "dataDictionaryEntry", dataDictionaryEntry != null ? dataDictionaryEntry.toString() : "");
+      node.put("rifColumnLabel", rifColumnLabel);
+      node.put("javaFieldName", javaFieldName);
+      return node;
+    }
 
     /**
      * Constructs a new {@link RifField}.

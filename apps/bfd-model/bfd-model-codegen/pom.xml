@@ -12,13 +12,13 @@
 	<packaging>jar</packaging>
 
 	<description>
-		Provides a javac annotation processor that automagically generates RIF model 
+		Provides a javac annotation processor that automagically generates RIF model
 		classes and parsing code based on field layouts defined in Excel.
 	</description>
 
 	<dependencies>
 		<dependency>
-			<!-- The annotations are in a separate project, to avoid forcing all of 
+			<!-- The annotations are in a separate project, to avoid forcing all of
 				this project's dependencies onto codegen users. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-codegen-annotations</artifactId>
@@ -33,7 +33,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- Automatically generates META-INF/services files for service classes 
+			<!-- Automatically generates META-INF/services files for service classes
 				annotated with `@AutoService`. -->
 			<groupId>com.google.auto.service</groupId>
 			<artifactId>auto-service</artifactId>
@@ -54,14 +54,14 @@
 		</dependency>
 
 		<dependency>
-			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
+			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
 				Hibernate is used for that in the BFD projects.) -->
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 			<groupId>org.hibernate.javax.persistence</groupId>
 		</dependency>
 		<dependency>
-			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's 
-				only brought into this project for the extra ORM mapping annotations that 
+			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's
+				only brought into this project for the extra ORM mapping annotations that
 				it provides (hence all of the exclusions). -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -99,6 +99,22 @@
 					<artifactId>antlr</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<!-- Add YAML support to jackson -->
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 	</dependencies>
 

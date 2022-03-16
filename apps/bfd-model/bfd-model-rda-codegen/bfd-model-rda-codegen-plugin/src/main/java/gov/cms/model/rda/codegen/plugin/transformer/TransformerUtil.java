@@ -19,16 +19,32 @@ public class TransformerUtil {
   private static final AmountFieldTransformer AmountInstance = new AmountFieldTransformer();
   private static final StringFieldTransformer StringInstance = new StringFieldTransformer();
   private static final IdHashFieldTransformer IdHashInstance = new IdHashFieldTransformer();
+  private static final RifTimestampFieldTransformer RifTimestampInstance =
+      new RifTimestampFieldTransformer();
+  private static final IntStringFieldTransformer IntStringInstance =
+      new IntStringFieldTransformer();
+  private static final LongStringFieldTransformer LongStringInstance =
+      new LongStringFieldTransformer();
   private static final MessageEnumFieldTransformer MessageEnumInstance =
       new MessageEnumFieldTransformer();
   private static final TimestampFieldTransformer TimestampInstance =
       new TimestampFieldTransformer();
   private static final Map<String, AbstractFieldTransformer> transformersByName =
       ImmutableMap.of(
-          "IdHash", IdHashInstance,
-          "Now", TimestampInstance,
-          "MessageEnum", MessageEnumInstance,
-          "EnumValueIfPresent", new EnumValueIfPresentTransformer());
+          "IdHash",
+          IdHashInstance,
+          "Now",
+          TimestampInstance,
+          "MessageEnum",
+          MessageEnumInstance,
+          "EnumValueIfPresent",
+          new EnumValueIfPresentTransformer(),
+          "RifTimestamp",
+          RifTimestampInstance,
+          "IntString",
+          IntStringInstance,
+          "LongString",
+          LongStringInstance);
   private static final Map<String, AbstractFieldTransformer> transformersByFrom =
       ImmutableMap.of(TimestampFromName, TimestampInstance);
 
@@ -50,6 +66,8 @@ public class TransformerUtil {
         // TODO add support for message enums
         answer = Optional.empty();
       } else if (column.isChar()) {
+        answer = Optional.of(CharInstance);
+      } else if (column.isCharacter()) {
         answer = Optional.of(CharInstance);
       } else if (column.isString()) {
         answer = Optional.of(StringInstance);

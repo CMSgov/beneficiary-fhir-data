@@ -66,9 +66,9 @@ public class FissClaimTransformer {
   }
 
   private void lookupMbiInCache(
-      DataTransformer transformer, FissClaim message, PreAdjFissClaim entity) {
+      DataTransformer transformer, String namePrefix, FissClaim message, PreAdjFissClaim entity) {
     if (message.hasMbi()) {
-      transformer.validateString(Mbi.Fields.mbi, false, 1, 11, message.getMbi());
+      transformer.validateString(namePrefix + Mbi.Fields.mbi, false, 1, 11, message.getMbi());
       entity.setMbiRecord(mbiCache.lookupMbi(message.getMbi()));
     }
   }

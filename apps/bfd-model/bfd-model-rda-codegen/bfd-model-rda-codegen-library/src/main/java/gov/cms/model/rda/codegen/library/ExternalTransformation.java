@@ -6,5 +6,6 @@ package gov.cms.model.rda.codegen.library;
  */
 @FunctionalInterface
 public interface ExternalTransformation<TRecord, TEntity> {
-  void transformField(DataTransformer transformer, TRecord record, TEntity entity);
+  void transformField(
+      DataTransformer transformer, String namePrefix, TRecord record, TEntity entity);
 }

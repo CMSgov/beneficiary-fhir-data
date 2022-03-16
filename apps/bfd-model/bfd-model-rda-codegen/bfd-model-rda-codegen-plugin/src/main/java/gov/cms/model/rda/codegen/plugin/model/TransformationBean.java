@@ -21,6 +21,7 @@ public class TransformationBean {
   private String to;
   @Builder.Default private boolean optional = true;
   private String transformer;
+  private String defaultValue;
   @Singular Map<String, String> transformerOptions = new HashMap<>();
 
   public String getTo() {

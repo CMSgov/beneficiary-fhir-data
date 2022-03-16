@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.codegen;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.squareup.javapoet.ClassName;
 import gov.cms.bfd.model.codegen.RifLayout.RifField;
 import java.util.ArrayList;
@@ -52,6 +53,34 @@ public final class MappingSpec {
     this.headerEntityTransientFields = new ArrayList<>();
     this.headerEntityAdditionalDatabaseFields = new ArrayList<RifField>();
     this.innerJoinRelationship = new ArrayList<InnerJoinRelationship>();
+  }
+
+  public JsonNode createMetaData(MappingSummarizer logger) {
+    var node = logger.createObject();
+    node.put("type", "MappingSpec");
+    node.put("packageName", packageName);
+    node.set("rifLayout", rifLayout.createMetaData(logger));
+    node.put("headerEntity", headerEntity);
+    node.put("headerTable", headerTable);
+    node.put("headerEntityIdField", headerEntityIdField);
+    node.put("headerEntityGeneratedIdField", headerEntityGeneratedIdField);
+    node.put("hasLines", hasLines);
+    node.put("isBeneficiaryEntity", isBeneficiaryEntity);
+    node.put("lineTable", lineTable);
+    node.put("lineEntityLineNumberField", lineEntityLineNumberField);
+    node.put("sequenceNumberGeneratorName", sequenceNumberGeneratorName);
+    var array = logger.createArray();
+    headerEntityTransientFields.forEach(array::add);
+    node.set("headerEntityTransientFields", array);
+    array = logger.createArray();
+    headerEntityAdditionalDatabaseFields.stream()
+        .map(rf -> rf.createMetaData(logger))
+        .forEach(array::add);
+    node.set("headerEntityAdditionalDatabaseFields", array);
+    array = logger.createArray();
+    innerJoinRelationship.stream().map(ijr -> ijr.createMetaData(logger)).forEach(array::add);
+    node.set("innerJoinRelationship", array);
+    return node;
   }
 
   /** @return the name of the Java package that the mapping is occurring for and in */

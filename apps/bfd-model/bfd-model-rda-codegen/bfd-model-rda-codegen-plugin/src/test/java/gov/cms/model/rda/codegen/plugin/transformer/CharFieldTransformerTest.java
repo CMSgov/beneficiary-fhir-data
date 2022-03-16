@@ -24,13 +24,19 @@ public class CharFieldTransformerTest {
     RootBean model = RootBean.builder().mapping(mapping).build();
 
     CharFieldTransformer generator = new CharFieldTransformer();
-    CodeBlock block = generator.generateCodeBlock(mapping, column, transformation);
+    CodeBlock block =
+        generator.generateCodeBlock(
+            mapping,
+            column,
+            transformation,
+            GrpcFromCodeGenerator.Instance,
+            StandardToCodeGenerator.Instance);
     assertEquals(
         "transformer.copyCharacter(namePrefix + gov.cms.bfd.model.rda.PreAdjFissClaim.Fields.curr1Status, from.getCurr1Status(), to::setCurr1Status);\n",
         block.toString());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void optionalField() {
     ColumnBean column =
         ColumnBean.builder().name("idrDtlCnt").nullable(true).sqlType("char(1)").build();
@@ -43,6 +49,15 @@ public class CharFieldTransformerTest {
     RootBean model = RootBean.builder().mapping(mapping).build();
 
     CharFieldTransformer generator = new CharFieldTransformer();
-    generator.generateCodeBlock(mapping, column, transformation);
+    CodeBlock block =
+        generator.generateCodeBlock(
+            mapping,
+            column,
+            transformation,
+            GrpcFromCodeGenerator.Instance,
+            StandardToCodeGenerator.Instance);
+    assertEquals(
+        "transformer.copyOptionalCharacter(namePrefix + gov.cms.bfd.model.rda.PreAdjFissClaim.Fields.idrDtlCnt, from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt);\n",
+        block.toString());
   }
 }

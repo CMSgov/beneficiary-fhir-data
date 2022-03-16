@@ -19,7 +19,6 @@
     </description>
 
     <properties>
-        <jackson.version>2.12.3</jackson.version>
         <javapoet.version>1.9.0</javapoet.version>
     </properties>
 

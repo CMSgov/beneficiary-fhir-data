@@ -58,9 +58,10 @@ public class McsClaimTransformer {
   }
 
   private void lookupMbiInCache(
-      DataTransformer transformer, McsClaim message, PreAdjMcsClaim entity) {
+      DataTransformer transformer, String namePrefix, McsClaim message, PreAdjMcsClaim entity) {
     if (message.hasIdrClaimMbi()) {
-      transformer.validateString(MbiUtil.McsFields.mbi, false, 1, 11, message.getIdrClaimMbi());
+      transformer.validateString(
+          namePrefix + MbiUtil.McsFields.mbi, false, 1, 11, message.getIdrClaimMbi());
       entity.setMbiRecord(mbiCache.lookupMbi(message.getIdrClaimMbi()));
     }
   }
