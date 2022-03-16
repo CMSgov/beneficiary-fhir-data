@@ -136,6 +136,8 @@ jobs:
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+      - name: 'Github Envs'
+        run: env | grep GITHUB
       - name: 'Verify FHIR resource'
         run: ./validations.sh -r
         
