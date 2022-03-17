@@ -175,7 +175,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
     Beneficiary beneficiaryRow =
-        new BeneficiaryParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new BeneficiaryParser().transformMessage(new RifObjectWrapper(csvRecords));
 
     // Swap the unhashed HICN into the correct field.
     beneficiaryRow.setHicnUnhashed(Optional.ofNullable(beneficiaryRow.getHicn()));
@@ -200,7 +200,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
     BeneficiaryHistory beneficiaryHistoryRow =
-        new BeneficiaryHistoryParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new BeneficiaryHistoryParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<BeneficiaryHistory>(
         fileEvent,
         csvRecords,
@@ -224,8 +224,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.INSERT;
     MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistoryRow =
-        new MedicareBeneficiaryIdHistoryParser(null, null)
-            .transformMessage(new RifObjectWrapper(csvRecords));
+        new MedicareBeneficiaryIdHistoryParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<MedicareBeneficiaryIdHistory>(
         fileEvent,
         csvRecords,
@@ -249,7 +248,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
     PartDEvent partDEvent =
-        new PartDEventParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new PartDEventParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<PartDEvent>(
         fileEvent, csvRecords, recordAction, partDEvent.getBeneficiaryId(), partDEvent);
   }
@@ -268,7 +267,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
     InpatientClaim claim =
-        new InpatientClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new InpatientClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<InpatientClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }
@@ -287,7 +286,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
     OutpatientClaim claim =
-        new OutpatientClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new OutpatientClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<OutpatientClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }
@@ -306,7 +305,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
     CarrierClaim claim =
-        new CarrierClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new CarrierClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<CarrierClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }
@@ -324,8 +323,7 @@ public final class RifFilesProcessor {
     CSVRecord firstCsvRecord = csvRecords.get(0);
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    SNFClaim claim =
-        new SNFClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+    SNFClaim claim = new SNFClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<SNFClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }
@@ -344,7 +342,7 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
     HospiceClaim claim =
-        new HospiceClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+        new HospiceClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<HospiceClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }
@@ -362,8 +360,7 @@ public final class RifFilesProcessor {
     CSVRecord firstCsvRecord = csvRecords.get(0);
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    HHAClaim claim =
-        new HHAClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+    HHAClaim claim = new HHAClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<HHAClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }
@@ -381,8 +378,7 @@ public final class RifFilesProcessor {
     CSVRecord firstCsvRecord = csvRecords.get(0);
 
     RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    DMEClaim claim =
-        new DMEClaimParser(null, null).transformMessage(new RifObjectWrapper(csvRecords));
+    DMEClaim claim = new DMEClaimParser().transformMessage(new RifObjectWrapper(csvRecords));
     return new RifRecordEvent<DMEClaim>(
         fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
   }

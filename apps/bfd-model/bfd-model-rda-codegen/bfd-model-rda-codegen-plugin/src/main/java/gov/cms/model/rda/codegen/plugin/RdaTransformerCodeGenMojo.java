@@ -94,28 +94,32 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
       throws MojoExecutionException {
     final List<MappingBean> allMappings = findAllMappingsForRootMapping(mapping, mappingFinder);
     TypeSpec.Builder classBuilder =
-        TypeSpec.classBuilder(mapping.transformerSimpleName())
-            .addModifiers(Modifier.PUBLIC)
-            .addField(
-                ParameterizedTypeName.get(Function.class, String.class, String.class),
-                AbstractFieldTransformer.HASHER_VAR,
-                Modifier.PRIVATE,
-                Modifier.FINAL);
+        TypeSpec.classBuilder(mapping.transformerSimpleName()).addModifiers(Modifier.PUBLIC);
     for (MappingBean aMapping : allMappings) {
       for (FieldSpec field : createFieldsForMapping(aMapping)) {
         classBuilder.addField(field);
       }
     }
-    MethodSpec.Builder constructor =
-        MethodSpec.constructorBuilder()
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(
-                ParameterizedTypeName.get(Function.class, String.class, String.class),
-                AbstractFieldTransformer.HASHER_VAR)
-            .addParameter(
-                EnumStringExtractor.Factory.class, AbstractFieldTransformer.ENUM_FACTORY_VAR);
-    constructor.addStatement(
-        "this.$L = $L", AbstractFieldTransformer.HASHER_VAR, AbstractFieldTransformer.HASHER_VAR);
+    MethodSpec.Builder constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
+    if (TransformerUtil.mappingRequiresIdHasher(mapping)) {
+      classBuilder.addField(
+          ParameterizedTypeName.get(Function.class, String.class, String.class),
+          AbstractFieldTransformer.HASHER_VAR,
+          Modifier.PRIVATE,
+          Modifier.FINAL);
+      constructor
+          .addParameter(
+              ParameterizedTypeName.get(Function.class, String.class, String.class),
+              AbstractFieldTransformer.HASHER_VAR)
+          .addStatement(
+              "this.$L = $L",
+              AbstractFieldTransformer.HASHER_VAR,
+              AbstractFieldTransformer.HASHER_VAR);
+    }
+    if (TransformerUtil.mappingRequiresEnumExtractor(mapping)) {
+      constructor.addParameter(
+          EnumStringExtractor.Factory.class, AbstractFieldTransformer.ENUM_FACTORY_VAR);
+    }
     for (MappingBean aMapping : allMappings) {
       for (CodeBlock initializer : createFieldInitializersForMapping(aMapping)) {
         constructor.addCode(initializer);

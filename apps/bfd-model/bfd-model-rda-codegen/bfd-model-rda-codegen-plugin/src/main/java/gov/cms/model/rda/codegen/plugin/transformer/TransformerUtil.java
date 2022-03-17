@@ -2,6 +2,7 @@ package gov.cms.model.rda.codegen.plugin.transformer;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.model.rda.codegen.plugin.model.ColumnBean;
+import gov.cms.model.rda.codegen.plugin.model.MappingBean;
 import gov.cms.model.rda.codegen.plugin.model.TransformationBean;
 import java.util.Map;
 import java.util.Optional;
@@ -29,15 +30,18 @@ public class TransformerUtil {
       new MessageEnumFieldTransformer();
   private static final TimestampFieldTransformer TimestampInstance =
       new TimestampFieldTransformer();
+  public static final String ID_HASH_TRANSFORM_NAME = "IdHash";
+  public static final String ENUM_VALUE_TRANSFORM_NAME = "EnumValueIfPresent";
+  public static final String MESSAGE_ENUM_TRANSFORM_NAME = "MessageEnum";
   private static final Map<String, AbstractFieldTransformer> transformersByName =
       ImmutableMap.of(
-          "IdHash",
+          ID_HASH_TRANSFORM_NAME,
           IdHashInstance,
           "Now",
           TimestampInstance,
-          "MessageEnum",
+          MESSAGE_ENUM_TRANSFORM_NAME,
           MessageEnumInstance,
-          "EnumValueIfPresent",
+          ENUM_VALUE_TRANSFORM_NAME,
           new EnumValueIfPresentTransformer(),
           "RifTimestamp",
           RifTimestampInstance,
@@ -47,6 +51,16 @@ public class TransformerUtil {
           LongStringInstance);
   private static final Map<String, AbstractFieldTransformer> transformersByFrom =
       ImmutableMap.of(TimestampFromName, TimestampInstance);
+
+  public static boolean mappingRequiresIdHasher(MappingBean mapping) {
+    return mapping.getTransformations().stream()
+        .anyMatch(transform -> ID_HASH_TRANSFORM_NAME.equals(transform.getTransformer()));
+  }
+
+  public static boolean mappingRequiresEnumExtractor(MappingBean mapping) {
+    return mapping.getTransformations().stream()
+        .anyMatch(transform -> MESSAGE_ENUM_TRANSFORM_NAME.equals(transform.getTransformer()));
+  }
 
   public static String capitalize(String name) {
     return name.substring(0, 1).toUpperCase() + name.substring(1);

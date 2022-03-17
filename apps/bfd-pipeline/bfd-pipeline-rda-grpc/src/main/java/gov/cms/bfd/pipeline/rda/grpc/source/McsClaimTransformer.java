@@ -19,9 +19,7 @@ public class McsClaimTransformer {
   public McsClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
-    claimTransformer =
-        new McsClaimTransformer2(
-            this::computeMbiHash, EnumStringExtractor::new, this::lookupMbiInCache);
+    claimTransformer = new McsClaimTransformer2(EnumStringExtractor::new, this::lookupMbiInCache);
   }
 
   /**
@@ -64,9 +62,5 @@ public class McsClaimTransformer {
           namePrefix + MbiUtil.McsFields.mbi, false, 1, 11, message.getIdrClaimMbi());
       entity.setMbiRecord(mbiCache.lookupMbi(message.getIdrClaimMbi()));
     }
-  }
-
-  private String computeMbiHash(String mbi) {
-    return mbiCache.lookupMbi(mbi).getHash();
   }
 }

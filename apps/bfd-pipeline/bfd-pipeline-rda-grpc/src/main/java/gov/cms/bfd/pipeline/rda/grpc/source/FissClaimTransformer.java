@@ -27,9 +27,7 @@ public class FissClaimTransformer {
   public FissClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
-    claimTransformer =
-        new FissClaimTransformer2(
-            this::computeMbiHash, EnumStringExtractor::new, this::lookupMbiInCache);
+    claimTransformer = new FissClaimTransformer2(EnumStringExtractor::new, this::lookupMbiInCache);
   }
 
   /**
@@ -71,9 +69,5 @@ public class FissClaimTransformer {
       transformer.validateString(namePrefix + Mbi.Fields.mbi, false, 1, 11, message.getMbi());
       entity.setMbiRecord(mbiCache.lookupMbi(message.getMbi()));
     }
-  }
-
-  private String computeMbiHash(String mbi) {
-    return mbiCache.lookupMbi(mbi).getHash();
   }
 }
