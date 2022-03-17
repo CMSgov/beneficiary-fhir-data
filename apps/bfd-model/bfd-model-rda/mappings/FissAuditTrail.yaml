@@ -1,0 +1,46 @@
+mappings:
+  - id: FissAuditTrail
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissAuditTrail
+    entityClassName: gov.cms.bfd.model.rda.PreAdjFissAuditTrail
+    table:
+      name: FissAuditTrails
+      schema: pre_adj
+      primaryKeyColumns:
+        - dcn
+        - priority
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: badtStatus
+          sqlType: char(1)
+        - name: badtLoc
+          sqlType: varchar(5)
+        - name: badtOperId
+          sqlType: varchar(9)
+        - name: badtReas
+          sqlType: varchar(5)
+        - name: badtCurrDate
+          sqlType: date
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      - from: NOW
+        to: lastUpdated
+      - from: badtStatus
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissClaimStatus
+      - from: badtLoc
+      - from: badtOperId
+      - from: badtReas
+      - from: badtCurrDateCymd
+        to: badtCurrDate

@@ -72,7 +72,7 @@
                 <artifactId>bfd-model-rda-codegen-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <mappingFile>${project.basedir}/mapping.yaml</mappingFile>
+                    <mappingFile>${project.basedir}/mappings</mappingFile>
                     <outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
                 </configuration>
                 <executions>

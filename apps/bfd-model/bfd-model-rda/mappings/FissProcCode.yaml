@@ -1,0 +1,40 @@
+mappings:
+  - id: FissProcCode
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissProcedureCode
+    entityClassName: gov.cms.bfd.model.rda.PreAdjFissProcCode
+    table:
+      name: FissProcCodes
+      schema: pre_adj
+      primaryKeyColumns:
+        - dcn
+        - priority
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: procCode
+          sqlType: varchar(10)
+          nullable: false
+        - name: procFlag
+          sqlType: varchar(4)
+        - name: procDate
+          sqlType: date
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      - from: procCd
+        to: procCode
+        optional: false
+      - from: procFlag
+      - from: procDt
+        to: procDate
+      - from: NOW
+        to: lastUpdated

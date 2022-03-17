@@ -1,0 +1,152 @@
+mappings:
+  - id: McsDetail
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDetail
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsDetail
+    table:
+      name: McsDetails
+      schema: pre_adj
+      primaryKeyColumns:
+        - idrClmHdIcn
+        - priority
+      columns:
+        - name: idrClmHdIcn
+          sqlType: varchar(15)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: idrDtlStatus
+          sqlType: varchar(1)
+        - name: idrDtlFromDate
+          sqlType: date
+        - name: idrDtlToDate
+          sqlType: date
+        - name: idrProcCode
+          sqlType: varchar(5)
+        - name: idrModOne
+          sqlType: varchar(2)
+        - name: idrModTwo
+          sqlType: varchar(2)
+        - name: idrModThree
+          sqlType: varchar(2)
+        - name: idrModFour
+          sqlType: varchar(2)
+        - name: idrDtlDiagIcdType
+          sqlType: varchar(1)
+        - name: idrDtlPrimaryDiagCode
+          sqlType: varchar(7)
+        - name: idrKPosLnameOrg
+          sqlType: varchar(60)
+        - name: idrKPosFname
+          sqlType: varchar(35)
+        - name: idrKPosMname
+          sqlType: varchar(25)
+        - name: idrKPosAddr1
+          sqlType: varchar(55)
+        - name: idrKPosAddr2_1st
+          sqlType: varchar(30)
+        - name: idrKPosAddr2_2nd
+          sqlType: varchar(25)
+        - name: idrKPosCity
+          sqlType: varchar(30)
+        - name: idrKPosState
+          sqlType: varchar(2)
+        - name: idrKPosZip
+          sqlType: varchar(15)
+        - name: idrTos
+          sqlType: char(1)
+        - name: idrTwoDigitPos
+          sqlType: varchar(2)
+        - name: idrDtlRendType
+          sqlType: varchar(2)
+        - name: idrDtlRendSpec
+          sqlType: varchar(2)
+        - name: idrDtlRendNpi
+          sqlType: varchar(10)
+        - name: idrDtlRendProv
+          sqlType: varchar(10)
+        - name: idrKDtlFacProvNpi
+          sqlType: varchar(10)
+        - name: idrDtlAmbPickupAddres1
+          sqlType: varchar(25)
+        - name: idrDtlAmbPickupAddres2
+          sqlType: varchar(20)
+        - name: idrDtlAmbPickupCity
+          sqlType: varchar(20)
+        - name: idrDtlAmbPickupState
+          sqlType: varchar(2)
+        - name: idrDtlAmbPickupZipcode
+          sqlType: varchar(9)
+        - name: idrDtlAmbDropoffName
+          sqlType: varchar(24)
+        - name: idrDtlAmbDropoffAddrL1
+          sqlType: varchar(25)
+        - name: idrDtlAmbDropoffAddrL2
+          sqlType: varchar(20)
+        - name: idrDtlAmbDropoffCity
+          sqlType: varchar(20)
+        - name: idrDtlAmbDropoffState
+          sqlType: varchar(2)
+        - name: idrDtlAmbDropoffZipcode
+          sqlType: varchar(9)
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    transformations:
+      - from: PARENT
+        to: idrClmHdIcn
+      - from: INDEX
+        to: priority
+      - from: idrDtlStatus
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsDetailStatus
+      - from: idrDtlFromDate
+      - from: idrDtlToDate
+      - from: idrProcCode
+      - from: idrModOne
+      - from: idrModTwo
+      - from: idrModThree
+      - from: idrModFour
+      - from: idrDtlDiagIcdType
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType
+      - from: idrDtlPrimaryDiagCode
+      - from: idrKPosLnameOrg
+      - from: idrKPosFname
+      - from: idrKPosMname
+      - from: idrKPosAddr1
+      - from: idrKPosAddr21St
+        to: idrKPosAddr2_1st
+      - from: idrKPosAddr22Nd
+        to: idrKPosAddr2_2nd
+      - from: idrKPosCity
+      - from: idrKPosState
+      - from: idrKPosZip
+      - from: idrTos
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsTypeOfService
+      - from: idrTwoDigitPos
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService
+      - from: idrDtlRendType
+      - from: idrDtlRendSpec
+      - from: idrDtlRendNpi
+      - from: idrDtlRendProv
+      - from: idrKDtlFacProvNpi
+      - from: idrDtlAmbPickupAddres1
+      - from: idrDtlAmbPickupAddres2
+      - from: idrDtlAmbPickupCity
+      - from: idrDtlAmbPickupState
+      - from: idrDtlAmbPickupZipcode
+      - from: idrDtlAmbDropoffName
+      - from: idrDtlAmbDropoffAddrL1
+      - from: idrDtlAmbDropoffAddrL2
+      - from: idrDtlAmbDropoffCity
+      - from: idrDtlAmbDropoffState
+      - from: idrDtlAmbDropoffZipcode
+      - from: NOW
+        to: lastUpdated

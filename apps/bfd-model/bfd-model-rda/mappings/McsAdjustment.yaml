@@ -1,0 +1,48 @@
+mappings:
+  - id: McsAdjustment
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsAdjustment
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsAdjustment
+    table:
+      name: McsAdjustments
+      schema: pre_adj
+      primaryKeyColumns:
+        - idrClmHdIcn
+        - priority
+      columns:
+        - name: idrClmHdIcn
+          sqlType: varchar(15)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+        - name: idrAdjDate
+          sqlType: date
+        - name: idrXrefIcn
+          sqlType: varchar(15)
+        - name: idrAdjClerk
+          sqlType: varchar(4)
+        - name: idrInitCcn
+          sqlType: varchar(15)
+        - name: idrAdjChkWrtDt
+          sqlType: date
+        - name: idrAdjBEombAmt
+          sqlType: decimal(7,2)
+        - name: idrAdjPEombAmt
+          sqlType: decimal(7,2)
+    transformations:
+      - from: PARENT
+        to: idrClmHdIcn
+      - from: INDEX
+        to: priority
+      - from: NOW
+        to: lastUpdated
+      - from: idrAdjDate
+      - from: idrXrefIcn
+      - from: idrAdjClerk
+      - from: idrInitCcn
+      - from: idrAdjChkWrtDt
+      - from: idrAdjBEombAmt
+      - from: idrAdjPEombAmt

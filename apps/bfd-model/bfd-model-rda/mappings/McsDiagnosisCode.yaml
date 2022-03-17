@@ -1,0 +1,38 @@
+mappings:
+  - id: McsDiagnosisCode
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode
+    table:
+      name: McsDiagnosisCodes
+      schema: pre_adj
+      primaryKeyColumns:
+        - idrClmHdIcn
+        - priority
+      columns:
+        - name: idrClmHdIcn
+          sqlType: varchar(15)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: idrDiagIcdType
+          sqlType: varchar(1)
+        - name: idrDiagCode
+          sqlType: varchar(7)
+          nullable: false
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    transformations:
+      - from: PARENT
+        to: idrClmHdIcn
+      - from: INDEX
+        to: priority
+      - from: idrDiagIcdType
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType
+      - from: idrDiagCode
+        optional: false
+      - from: NOW
+        to: lastUpdated

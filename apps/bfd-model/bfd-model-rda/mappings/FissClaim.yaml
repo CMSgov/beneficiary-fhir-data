@@ -1,0 +1,426 @@
+mappings:
+  - id: FissClaim
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissClaim
+    entityClassName: gov.cms.bfd.model.rda.PreAdjFissClaim
+    transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer2
+    table:
+      name: FissClaims
+      schema: pre_adj
+      primaryKeyColumns:
+        - dcn
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: sequenceNumber
+          sqlType: bigint
+          nullable: false
+        - name: hicNo
+          sqlType: varchar(12)
+          nullable: false
+        - name: currStatus
+          sqlType: varchar(1)
+          javaType: char
+          nullable: false
+        - name: currLoc1
+          sqlType: varchar(1)
+          javaType: char
+          nullable: false
+        - name: currLoc2
+          sqlType: varchar(5)
+          nullable: false
+        - name: provStateCd
+          sqlType: varchar(2)
+        - name: provTypFacilCd
+          sqlType: varchar(1)
+        - name: provEmerInd
+          sqlType: varchar(1)
+        - name: provDeptId
+          sqlType: varchar(3)
+        - name: medaProvId
+          sqlType: varchar(13)
+          comment: |
+            Medicare Provider ID:
+            
+            <p>The Medicare Provider ID consists of the following:
+            
+            <ul>
+              <li>Provider State Code
+              <li>Provider Type Facility Code
+              <li>Provider Emergency Indicator
+              <li>Provider Department Identification
+            </ul>
+        - name: medaProv_6
+          sqlType: varchar(6)
+        - name: totalChargeAmount
+          sqlType: decimal(11,2)
+        - name: receivedDate
+          sqlType: date
+        - name: currTranDate
+          sqlType: date
+        - name: admitDiagCode
+          sqlType: varchar(7)
+        - name: principleDiag
+          sqlType: varchar(7)
+        - name: npiNumber
+          sqlType: varchar(10)
+        - name: fedTaxNumber
+          sqlType: varchar(10)
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+        - name: pracLocAddr1
+          sqlType: varchar(max)
+        - name: pracLocAddr2
+          sqlType: varchar(max)
+        - name: pracLocCity
+          sqlType: varchar(max)
+        - name: pracLocState
+          sqlType: varchar(2)
+        - name: pracLocZip
+          sqlType: varchar(15)
+        - name: stmtCovFromDate
+          sqlType: date
+        - name: stmtCovToDate
+          sqlType: date
+        - name: lobCd
+          sqlType: varchar(1)
+        - name: servTypeCdMapping
+          enumType: ServTypeCdMapping
+          sqlType: varchar(20)
+        - name: servTypeCd
+          sqlType: varchar(1)
+        - name: freqCd
+          sqlType: varchar(1)
+        - name: billTypCd
+          sqlType: varchar(3)
+        - name: apiSource
+          sqlType: varchar(24)
+          comment: String specifying the source of the data contained in this record. Generally this will be the version string returned by the RDA API server but when populating data from mock server it will also include information about the mode the server was running in.
+        - name: rejectCd
+          sqlType: varchar(5)
+          comment: "Reject Code"
+        - name: fullPartDenInd
+          sqlType: varchar(1)
+          comment: "Fully or Partially Denied Indicator"
+        - name: nonPayInd
+          sqlType: varchar(2)
+          comment: "Non-Pay Code Indicator"
+        - name: xrefDcnNbr
+          sqlType: varchar(23)
+          comment: "Cross-reference Document Control Number"
+        - name: adjReqCd
+          sqlType: char(1)
+          comment: "Adjustment Requestor Identification"
+        - name: adjReasCd
+          sqlType: varchar(2)
+          comment: "Adjustment Reason Code"
+        - name: cancelXrefDcn
+          sqlType: varchar(23)
+          comment: "Cancel Cross-reference Document Control Number"
+        - name: cancelDate
+          sqlType: date
+          comment: "Cancel Date"
+        - name: cancAdjCd
+          sqlType: char(1)
+          comment: "Cancel Adjustment Code"
+        - name: originalXrefDcn
+          sqlType: varchar(23)
+          comment: "Original Cross-Reference Document Control Number"
+        - name: paidDt
+          sqlType: date
+          comment: "Paid Date"
+        - name: admDate
+          sqlType: date
+          comment: "Admission Date"
+        - name: admSource
+          sqlType: char(1)
+          comment: "Source of Admission"
+        - name: primaryPayerCode
+          sqlType: char(1)
+          comment: "Primary Payer Code"
+        - name: attendPhysId
+          sqlType: varchar(16)
+          comment: "Attending Physician NPI"
+        - name: attendPhysLname
+          sqlType: varchar(17)
+          comment: "Attending Physician Last Name"
+        - name: attendPhysFname
+          sqlType: varchar(18)
+          comment: "Attending Physician First Name"
+        - name: attendPhysMint
+          sqlType: varchar(1)
+          comment: "Attending Physician Middle Initial"
+        - name: attendPhysFlag
+          sqlType: char(1)
+          comment: "Attending Physician Flag"
+        - name: operatingPhysId
+          sqlType: varchar(16)
+          comment: "Operating Physician NPI"
+        - name: operPhysLname
+          sqlType: varchar(17)
+          comment: "Operating Physician Last Name"
+        - name: operPhysFname
+          sqlType: varchar(18)
+          comment: "Operating Physician First Name"
+        - name: operPhysMint
+          sqlType: varchar(1)
+          comment: "Operating Physician Middle Initial"
+        - name: operPhysFlag
+          sqlType: char(1)
+          comment: "Operating Physician Flag"
+        - name: othPhysId
+          sqlType: varchar(16)
+          comment: "Other Physician NPI"
+        - name: othPhysLname
+          sqlType: varchar(17)
+          comment: "Other Physician Last Name"
+        - name: othPhysFname
+          sqlType: varchar(18)
+          comment: "Other Physician First Name"
+        - name: othPhysMint
+          sqlType: varchar(1)
+          comment: "Other Physician Middle Initial"
+        - name: othPhysFlag
+          sqlType: char(1)
+          comment: "Other Physician Flag"
+        - name: xrefHicNbr
+          sqlType: varchar(12)
+          comment: "Cross-Reference Health Insurance Claim Number"
+        - name: procNewHicInd
+          sqlType: char(1)
+          comment: "Process new Health Insurance Claim Number"
+        - name: newHic
+          sqlType: varchar(12)
+          comment: "New Health Insurance Claim Number"
+        - name: reposInd
+          sqlType: char(1)
+          comment: "Repository Indicator"
+        - name: reposHic
+          sqlType: varchar(12)
+          comment: "Repository HIC"
+        - name: mbiSubmBeneInd
+          sqlType: char(1)
+          comment: "Health Insurance Claim (HIC) Number or Medicare Beneficiary Identify (MBI)"
+        - name: adjMbiInd
+          sqlType: char(1)
+          comment: "Adjustment Medicare Beneficiary Identifier (MBI) Indicator"
+        - name: adjMbi
+          sqlType: varchar(11)
+          comment: "Adjustment Medicare Beneficiary Identifier"
+        - name: medicalRecordNo
+          sqlType: varchar(17)
+          comment: "Medical Record Number"
+      joins:
+        - fieldName: mbiRecord
+          entityClass: gov.cms.bfd.model.rda.Mbi
+          joinColumnName: mbiId
+          joinType: ManyToOne
+          fetchType: EAGER
+    enumTypes:
+      - name: ServTypeCdMapping
+        values:
+          - Normal
+          - Clinic
+          - SpecialFacility
+          - Unrecognized
+    transformations:
+      - from: dcn
+        optional: false
+      - from: seq
+        to: sequenceNumber
+        optional: false
+      - from: hicNo
+        optional: false
+      - from: currStatus
+        optional: false
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissClaimStatus
+          extractorOptions: RejectUnrecognized
+      - from: currLoc1
+        optional: false
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissProcessingType
+      - from: currLoc2
+        optional: false
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2
+      - from: provStateCd
+      - from: provTypFacilCd
+      - from: provEmerInd
+      - from: provDeptId
+      - from: medaProvId
+      - from: medaProv6
+        to: medaProv_6
+      - from: totalChargeAmount
+      - from: recdDtCymd
+        to: receivedDate
+      - from: currTranDtCymd
+        to: currTranDate
+      - from: admDiagCode
+        to: admitDiagCode
+      - from: principleDiag
+      - from: npiNumber
+      - from: fedTaxNb
+        to: fedTaxNumber
+      - from: pracLocAddr1
+      - from: pracLocAddr2
+      - from: pracLocCity
+      - from: pracLocState
+      - from: pracLocZip
+      - from: stmtCovFromCymd
+        to: stmtCovFromDate
+      - from: stmtCovToCymd
+        to: stmtCovToDate
+      - from: lobCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType
+      # The servTypeCdMapping is set to one of 4 enum values depending on which of the 4
+      # oneof fields has a value in the FissClaim message.
+      - from: servTypeCdEnum
+        to: servTypeCdMapping
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: ServTypeCdMapping
+          enumValue: Normal
+      - from: servTypeCdForClinicsEnum
+        to: servTypeCdMapping
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: ServTypeCdMapping
+          enumValue: Clinic
+      - from: servTypeCdForSpecialFacilitiesEnum
+        to: servTypeCdMapping
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: ServTypeCdMapping
+          enumValue: SpecialFacility
+      - from: servTypCdUnrecognized
+        to: servTypeCdMapping
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: ServTypeCdMapping
+          enumValue: Unrecognized
+      # The servTypeCd value is set from one of 4 possible values in a oneof within the FissClaim.
+      - from: servTypeCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassification
+          hasUnrecognized: false
+      - from: servTypeCdForClinics
+        to: servTypeCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics
+          hasUnrecognized: false
+      - from: servTypeCdForSpecialFacilities
+        to: servTypeCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForSpecialFacilities
+          hasUnrecognized: false
+      - from: servTypCdUnrecognized
+        to: servTypeCd
+      - from: freqCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillFrequency
+      - from: billTypCd
+      - from: rejectCd
+      - from: fullPartDenInd
+      - from: nonPayInd
+      - from: xrefDcnNbr
+      - from: adjReqCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode
+      - from: adjReasCd
+      - from: cancelXrefDcn
+      - from: cancelDateCymd
+        to: cancelDate
+      - from: cancAdjCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissCancelAdjustmentCode
+      - from: originalXrefDcn
+      - from: paidDtCymd
+        to: paidDt
+      - from: admDateCymd
+        to: admDate
+      - from: admSource
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission
+      - from: primaryPayerCode
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+      - from: attendPhysId
+      - from: attendPhysLname
+      - from: attendPhysFname
+      - from: attendPhysMint
+      - from: attendPhysFlag
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag
+      - from: operatingPhysId
+      - from: operPhysLname
+      - from: operPhysFname
+      - from: operPhysMint
+      - from: operPhysFlag
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag
+      - from: othPhysId
+      - from: othPhysLname
+      - from: othPhysFname
+      - from: othPhysMint
+      - from: othPhysFlag
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag
+      - from: xrefHicNbr
+      - from: procNewHicInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissProcessNewHealthInsuranceClaimNumberIndicator
+      - from: newHic
+      - from: reposInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator
+      - from: reposHic
+      - from: mbiSubmBeneInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier
+      - from: adjMbiInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator
+      - from: adjMbi
+      - from: medicalRecordNo
+      - from: NOW
+        to: lastUpdated
+    arrays:
+      - from: fissProcCodes
+        to: procCodes
+        mapping: FissProcCode
+        namePrefix: "procCode"
+      - from: fissDiagCodes
+        to: diagCodes
+        mapping: FissDiagnosisCode
+        namePrefix: "diagCode"
+      - from: fissPayers
+        to: payers
+        mapping: FissPayer
+        namePrefix: "payer"
+      - from: fissAuditTrail
+        to: auditTrail
+        mapping: FissAuditTrail
+        namePrefix: "auditTrail"
+    externalTransformations:
+      - applyMbiCache

@@ -213,7 +213,7 @@
                 <artifactId>bfd-model-rda-codegen-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <mappingFile>${mapping.directory}/mapping.yaml</mappingFile>
+                    <mappingFile>${mapping.directory}/mappings</mappingFile>
                     <outputDirectory>${project.build.directory}/generated-sources/transformers</outputDirectory>
                 </configuration>
                 <executions>

@@ -1,0 +1,42 @@
+mappings:
+  - id: McsLocation
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsLocation
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsLocation
+    table:
+      name: McsLocations
+      schema: pre_adj
+      primaryKeyColumns:
+        - idrClmHdIcn
+        - priority
+      columns:
+        - name: idrClmHdIcn
+          sqlType: varchar(15)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+        - name: idrLocClerk
+          sqlType: varchar(4)
+        - name: idrLocCode
+          sqlType: varchar(3)
+        - name: idrLocDate
+          sqlType: date
+        - name: idrLocActvCode
+          sqlType: char(1)
+    transformations:
+      - from: PARENT
+        to: idrClmHdIcn
+      - from: INDEX
+        to: priority
+      - from: NOW
+        to: lastUpdated
+      - from: idrLocClerk
+      - from: idrLocCode
+      - from: idrLocDate
+      - from: idrLocActvCode
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsLocationActivityCode

@@ -1,0 +1,236 @@
+mappings:
+  - id: McsClaim
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsClaim
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsClaim
+    transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer2
+    table:
+      name: McsClaims
+      schema: pre_adj
+      primaryKeyColumns:
+        - idrClmHdIcn
+      columns:
+        - name: idrClmHdIcn
+          sqlType: varchar(15)
+          nullable: false
+        - name: sequenceNumber
+          sqlType: bigint
+          nullable: false
+        - name: idrContrId
+          sqlType: varchar(5)
+          nullable: false
+        - name: idrHic
+          sqlType: varchar(12)
+        - name: idrClaimType
+          sqlType: varchar(1)
+          nullable: false
+        - name: idrDtlCnt
+          sqlType: int
+        - name: idrBeneLast_1_6
+          sqlType: varchar(6)
+        - name: idrBeneFirstInit
+          sqlType: varchar(1)
+        - name: idrBeneMidInit
+          sqlType: varchar(1)
+        - name: idrBeneSex
+          sqlType: varchar(1)
+        - name: idrStatusCode
+          sqlType: varchar(1)
+        - name: idrStatusDate
+          sqlType: date
+        - name: idrBillProvNpi
+          sqlType: varchar(10)
+        - name: idrBillProvNum
+          sqlType: varchar(10)
+        - name: idrBillProvEin
+          sqlType: varchar(10)
+        - name: idrBillProvType
+          sqlType: varchar(2)
+        - name: idrBillProvSpec
+          sqlType: varchar(2)
+        - name: idrBillProvGroupInd
+          sqlType: varchar(1)
+        - name: idrBillProvPriceSpec
+          sqlType: varchar(2)
+        - name: idrBillProvCounty
+          sqlType: varchar(2)
+        - name: idrBillProvLoc
+          sqlType: varchar(2)
+        - name: idrTotAllowed
+          sqlType: decimal(7,2)
+        - name: idrCoinsurance
+          sqlType: decimal(7,2)
+        - name: idrDeductible
+          sqlType: decimal(7,2)
+        - name: idrBillProvStatusCd
+          sqlType: varchar(1)
+        - name: idrTotBilledAmt
+          sqlType: decimal(7,2)
+        - name: idrClaimReceiptDate
+          sqlType: date
+        - name: idrHdrFromDateOfSvc
+          sqlType: date
+        - name: idrHdrToDateOfSvc
+          sqlType: date
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+        - name: apiSource
+          sqlType: varchar(24)
+          comment: String specifying the source of the data contained in this record. Generally this will be the version string returned by the RDA API server but when populating data from mock server it will also include information about the mode the server was running in.
+        - name: idrAssignment
+          sqlType: char(1)
+        - name: idrClmLevelInd
+          sqlType: char(1)
+        - name: idrHdrAudit
+          sqlType: int
+        - name: idrHdrAuditInd
+          sqlType: char(1)
+        - name: idrUSplitReason
+          sqlType: char(1)
+        - name: idrJReferringProvNpi
+          sqlType: varchar(10)
+        - name: idrJFacProvNpi
+          sqlType: varchar(10)
+        - name: idrUDemoProvNpi
+          sqlType: varchar(10)
+        - name: idrUSuperNpi
+          sqlType: varchar(10)
+        - name: idrUFcadjBilNpi
+          sqlType: varchar(10)
+        - name: idrAmbPickupAddresLine1
+          sqlType: varchar(25)
+        - name: idrAmbPickupAddresLine2
+          sqlType: varchar(20)
+        - name: idrAmbPickupCity
+          sqlType: varchar(20)
+        - name: idrAmbPickupState
+          sqlType: varchar(2)
+        - name: idrAmbPickupZipcode
+          sqlType: varchar(9)
+        - name: idrAmbDropoffName
+          sqlType: varchar(24)
+        - name: idrAmbDropoffAddrLine1
+          sqlType: varchar(25)
+        - name: idrAmbDropoffAddrLine2
+          sqlType: varchar(20)
+        - name: idrAmbDropoffCity
+          sqlType: varchar(20)
+        - name: idrAmbDropoffState
+          sqlType: varchar(2)
+        - name: idrAmbDropoffZipcode
+          sqlType: varchar(9)
+      joins:
+        - fieldName: mbiRecord
+          entityClass: gov.cms.bfd.model.rda.Mbi
+          joinColumnName: mbiId
+          joinType: ManyToOne
+          fetchType: EAGER
+    transformations:
+      - from: idrClmHdIcn
+        optional: false
+      - from: sequenceNumber
+      - from: idrContrId
+        optional: false
+      - from: idrHic
+      - from: idrClaimType
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsClaimType
+      - from: idrDtlCnt
+      - from: idrBeneLast16
+        to: idrBeneLast_1_6
+      - from: idrBeneFirstInit
+      - from: idrBeneMidInit
+      - from: idrBeneSex
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsBeneficiarySex
+      - from: idrStatusCode
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsStatusCode
+          extractorOptions: RejectUnrecognized
+          unsupportedEnumValues: STATUS_CODE_NOT_USED
+      - from: idrStatusDate
+      - from: idrBillProvNpi
+      - from: idrBillProvNum
+      - from: idrBillProvEin
+      - from: idrBillProvType
+      - from: idrBillProvSpec
+      - from: idrBillProvGroupInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsBillingProviderIndicator
+      - from: idrBillProvPriceSpec
+      - from: idrBillProvCounty
+      - from: idrBillProvLoc
+      - from: idrTotAllowed
+      - from: idrCoinsurance
+      - from: idrDeductible
+      - from: idrBillProvStatusCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsBillingProviderStatusCode
+      - from: idrTotBilledAmt
+      - from: idrClaimReceiptDate
+      - from: idrHdrFromDos
+        to: idrHdrFromDateOfSvc
+      - from: idrHdrToDos
+        to: idrHdrToDateOfSvc
+      - from: idrAssignment
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsClaimAssignmentCode
+      - from: idrClmLevelInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsClaimLevelIndicator
+      - from: idrHdrAudit
+      - from: idrHdrAuditInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsAuditIndicator
+      - from: idrUSplitReason
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode
+      - from: idrJReferringProvNpi
+      - from: idrJFacProvNpi
+      - from: idrUDemoProvNpi
+      - from: idrUSuperNpi
+      - from: idrUFcadjBilNpi
+      - from: idrAmbPickupAddresLine1
+      - from: idrAmbPickupAddresLine2
+      - from: idrAmbPickupCity
+      - from: idrAmbPickupState
+      - from: idrAmbPickupZipcode
+      - from: idrAmbDropoffName
+      - from: idrAmbDropoffAddrLine1
+      - from: idrAmbDropoffAddrLine2
+      - from: idrAmbDropoffCity
+      - from: idrAmbDropoffState
+      - from: idrAmbDropoffZipcode
+      - from: NOW
+        to: lastUpdated
+    arrays:
+      - from: mcsDetails
+        to: details
+        mapping: McsDetail
+        namePrefix: detail
+      - from: mcsDiagnosisCodes
+        to: diagCodes
+        mapping: McsDiagnosisCode
+        namePrefix: diagCode
+      - from: mcsAdjustments
+        to: adjustments
+        mapping: McsAdjustment
+        namePrefix: adjustment
+      - from: mcsAudits
+        to: audits
+        mapping: McsAudit
+        namePrefix: audit
+      - from: mcsLocations
+        to: locations
+        mapping: McsLocation
+        namePrefix: location
+    externalTransformations:
+      - applyMbiCache

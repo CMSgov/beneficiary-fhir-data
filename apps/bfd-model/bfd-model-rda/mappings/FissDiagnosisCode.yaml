@@ -1,0 +1,42 @@
+mappings:
+  - id: FissDiagnosisCode
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode
+    entityClassName: gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode
+    table:
+      name: FissDiagnosisCodes
+      schema: pre_adj
+      primaryKeyColumns:
+        - dcn
+        - priority
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: diagCd2
+          sqlType: varchar(7)
+          nullable: false
+        - name: diagPoaInd
+          sqlType: varchar(1)
+        - name: bitFlags
+          sqlType: varchar(4)
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      - from: diagCd2
+        optional: false
+      - from: diagPoaInd
+        optional: false
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator
+      - from: bitFlags
+      - from: NOW
+        to: lastUpdated

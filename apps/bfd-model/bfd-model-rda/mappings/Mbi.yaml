@@ -1,0 +1,26 @@
+mappings:
+  - id: Mbi
+    entityClassName: gov.cms.bfd.model.rda.Mbi
+    table:
+      name: MbiCache
+      schema: pre_adj
+      primaryKeyColumns:
+        - mbiId
+      equalsColumns:
+        - mbi
+      columns:
+        - name: mbiId
+          sqlType: bigint
+          nullable: false
+          identity: true
+        - name: mbi
+          sqlType: varchar(11)
+          nullable: false
+        - name: hash
+          sqlType: varchar(64)
+          nullable: false
+        - name: oldHash
+          sqlType: varchar(64)
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+          nullable: false

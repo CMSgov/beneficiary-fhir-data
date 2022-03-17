@@ -1,0 +1,42 @@
+mappings:
+  - id: McsAudit
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsAudit
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsAudit
+    table:
+      name: McsAudits
+      schema: pre_adj
+      primaryKeyColumns:
+        - idrClmHdIcn
+        - priority
+      columns:
+        - name: idrClmHdIcn
+          sqlType: varchar(15)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+        - name: idrJAuditNum
+          sqlType: int
+        - name: idrJAuditInd
+          sqlType: char(1)
+        - name: idrJAuditDisp
+          sqlType: char(1)
+    transformations:
+      - from: PARENT
+        to: idrClmHdIcn
+      - from: INDEX
+        to: priority
+      - from: NOW
+        to: lastUpdated
+      - from: idrJAuditNum
+      - from: idrJAuditInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditIndicator
+      - from: idrJAuditDisp
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditDisposition

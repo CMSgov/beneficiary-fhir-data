@@ -1,0 +1,189 @@
+mappings:
+  - id: FissPayer
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissPayer
+    entityClassName: gov.cms.bfd.model.rda.PreAdjFissPayer
+    table:
+      name: FissPayers
+      schema: pre_adj
+      primaryKeyColumns:
+        - dcn
+        - priority
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: payerType
+          enumType: PayerType
+          sqlType: varchar(20)
+        - name: payersId
+          sqlType: varchar(1)
+        - name: payersName
+          sqlType: varchar(32)
+        - name: relInd
+          sqlType: varchar(1)
+        - name: assignInd
+          sqlType: varchar(1)
+        - name: providerNumber
+          sqlType: varchar(13)
+        - name: adjDcnIcn
+          sqlType: varchar(23)
+        - name: priorPmt
+          sqlType: decimal(11,2)
+        - name: estAmtDue
+          sqlType: decimal(11,2)
+        - name: beneRel
+          sqlType: varchar(2)
+          comment: "BeneZ only"
+        - name: beneLastName
+          sqlType: varchar(15)
+          comment: "BeneZ only"
+        - name: beneFirstName
+          sqlType: varchar(10)
+          comment: "BeneZ only"
+        - name: beneMidInit
+          sqlType: varchar(1)
+          comment: "BeneZ only"
+        - name: beneSsnHic
+          sqlType: varchar(19)
+          comment: "BeneZ only"
+        - name: insuredRel
+          sqlType: varchar(2)
+          comment: "Insured only"
+        - name: insuredName
+          sqlType: varchar(25)
+          comment: "Insured only"
+        - name: insuredSsnHic
+          sqlType: varchar(19)
+          comment: "Insured only"
+        - name: insuredGroupName
+          sqlType: varchar(17)
+        - name: insuredGroupNbr
+          sqlType: varchar(20)
+          comment: "Insured only"
+        - name: beneDob
+          sqlType: date
+          comment: "BeneZ only"
+        - name: beneSex
+          sqlType: varchar(1)
+          comment: "BeneZ only"
+        - name: treatAuthCd
+          sqlType: varchar(18)
+        - name: insuredSex
+          sqlType: varchar(1)
+        - name: insuredRelX12
+          sqlType: varchar(2)
+        - name: insuredDob
+          sqlType: date
+        - name: insuredDobText
+          sqlType: varchar(9)
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    enumTypes:
+      - name: PayerType
+        values:
+          - BeneZ
+          - Insured
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      # The payerType is set to one of 2 enum values depending on which of the 2
+      # nested payer fields is populated.
+      - from: beneZPayer
+        to: payerType
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: PayerType
+          enumValue: BeneZ
+      - from: insuredPayer
+        to: payerType
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: PayerType
+          enumValue: Insured
+      - from: NONE
+        to: payerType
+      - from: insuredPayer.payersId
+        to: payersId
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+      - from: insuredPayer.payersName
+      - from: insuredPayer.relInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation
+      - from: insuredPayer.assignInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator
+      - from: insuredPayer.providerNumber
+      - from: insuredPayer.adjDcnIcn
+      - from: insuredPayer.priorPmt
+      - from: insuredPayer.estAmtDue
+      - from: insuredPayer.insuredRel
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: insuredPayer.insuredName
+      - from: insuredPayer.insuredSsnHic
+      - from: insuredPayer.insuredGroupName
+      - from: insuredPayer.insuredGroupNbr
+      - from: insuredPayer.treatAuthCd
+      - from: insuredPayer.insuredSex
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+      - from: insuredPayer.insuredRelX12
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: insuredPayer.insuredDob
+      - from: insuredPayer.insuredDobText
+      - from: beneZPayer.payersId
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+      - from: beneZPayer.payersName
+      - from: beneZPayer.relInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator
+      - from: beneZPayer.assignInd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator
+      - from: beneZPayer.providerNumber
+      - from: beneZPayer.adjDcnIcn
+      - from: beneZPayer.priorPmt
+      - from: beneZPayer.estAmtDue
+      - from: beneZPayer.beneRel
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: beneZPayer.beneLastName
+      - from: beneZPayer.beneFirstName
+      - from: beneZPayer.beneMidInit
+      - from: beneZPayer.beneSsnHic
+      - from: beneZPayer.insuredGroupName
+      - from: beneZPayer.beneDob
+      - from: beneZPayer.beneSex
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+      - from: beneZPayer.treatAuthCd
+      - from: beneZPayer.insuredSex
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+      - from: beneZPayer.insuredRelX12
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: NOW
+        to: lastUpdated
