@@ -663,7 +663,7 @@ public final class TransformerUtils {
    *     Beneficiary}
    */
   public static IdDt buildPatientId(Long beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
+    return new IdDt(Patient.class.getSimpleName(), beneficiaryId.toString());
   }
 
   /**

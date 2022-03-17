@@ -2089,7 +2089,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   private Bundle fetchWithServiceDate(IGenericClient fhirClient, Long id, String serviceEndParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"
-            + id
+            + id.toString()
             + (serviceEndParam.isEmpty() ? "" : "&" + serviceEndParam)
             + "&_format=application%2Fjson%2Bfhir";
     return fhirClient.search().byUrl(url).returnBundle(Bundle.class).execute();

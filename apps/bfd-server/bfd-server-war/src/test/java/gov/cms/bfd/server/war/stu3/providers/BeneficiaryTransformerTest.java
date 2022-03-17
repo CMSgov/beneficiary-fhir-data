@@ -307,7 +307,10 @@ public final class BeneficiaryTransformerTest {
         parsedRecords.stream()
             .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
             .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId() == r.getBeneficiaryId().orElse(null))
+            .filter(
+                r ->
+                    (r.getBeneficiaryId().isPresent()
+                        && beneficiary.getBeneficiaryId() == r.getBeneficiaryId().get()))
             .collect(Collectors.toSet());
     beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
 
