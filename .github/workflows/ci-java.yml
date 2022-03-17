@@ -135,3 +135,9 @@ jobs:
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-server
+
+  ansible-role-bfd-db-migrator:
+    needs: mvn-verify
+    uses: ./.github/workflows/ci-ansible.yml
+    with:
+      role: bfd-db-migrator

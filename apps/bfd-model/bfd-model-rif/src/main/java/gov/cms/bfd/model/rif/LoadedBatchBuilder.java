@@ -27,11 +27,11 @@ public class LoadedBatchBuilder {
    *
    * @param beneficiaryId to put in the filter
    */
-  public synchronized void associateBeneficiary(Long beneficiaryId) {
-    if (beneficiaryId == null) {
+  public synchronized void associateBeneficiary(String beneficiaryId) {
+    if (beneficiaryId == null || beneficiaryId.isEmpty()) {
       throw new IllegalArgumentException("Null or empty beneficiary");
     }
-    beneficiaries.add(beneficiaryId.toString());
+    beneficiaries.add(beneficiaryId);
   }
 
   /**

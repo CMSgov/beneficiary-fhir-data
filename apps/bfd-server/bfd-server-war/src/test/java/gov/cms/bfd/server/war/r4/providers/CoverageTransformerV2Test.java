@@ -571,7 +571,7 @@ public final class CoverageTransformerV2Test {
   private static void verifySubscriber() {
     assertEquals("3456789", coverage.getSubscriberId());
     Reference ex = coverage.getBeneficiary();
-    Reference compare = TransformerUtilsV2.referencePatient(567834L);
+    Reference compare = TransformerUtilsV2.referencePatient("567834");
     assertTrue(compare.equalsDeep(ex));
   }
 
