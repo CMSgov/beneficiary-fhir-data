@@ -91,7 +91,6 @@ mappings:
     equalsNeeded: false
     joins:
     - entityClass: gov.cms.bfd.model.rif.HospiceClaim
-      fetchType: EAGER
       fieldName: parentClaim
       foreignKey: hospice_claim_lines_clm_id_to_hospice_claims
       joinColumnName: clm_id

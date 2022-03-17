@@ -169,7 +169,6 @@ mappings:
     equalsNeeded: false
     joins:
     - entityClass: gov.cms.bfd.model.rif.OutpatientClaim
-      fetchType: EAGER
       fieldName: parentClaim
       foreignKey: outpatient_claim_lines_clm_id_to_outpatient_claims
       joinColumnName: clm_id

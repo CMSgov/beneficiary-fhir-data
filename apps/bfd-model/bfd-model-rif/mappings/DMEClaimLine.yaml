@@ -204,7 +204,6 @@ mappings:
     equalsNeeded: false
     joins:
     - entityClass: gov.cms.bfd.model.rif.DMEClaim
-      fetchType: EAGER
       fieldName: parentClaim
       foreignKey: dme_claim_lines_clm_id_to_dme_claims
       joinColumnName: clm_id

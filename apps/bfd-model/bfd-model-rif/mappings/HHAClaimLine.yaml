@@ -98,7 +98,6 @@ mappings:
     equalsNeeded: false
     joins:
     - entityClass: gov.cms.bfd.model.rif.HHAClaim
-      fetchType: EAGER
       fieldName: parentClaim
       foreignKey: hha_claim_lines_clm_id_to_hha_claims
       joinColumnName: clm_id

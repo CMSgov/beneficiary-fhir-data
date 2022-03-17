@@ -150,7 +150,6 @@ def create_line_mapping(summary):
         "entityClass": parent_entity,
         "joinColumnName": parent_key,
         "joinType": "ManyToOne",
-        "fetchType": "EAGER",
         "foreignKey": f'{line_table}_{parent_key}_to_{parent_table}'
     }
     table["joins"] = [join]
@@ -328,7 +327,6 @@ def add_join_to_monthlies(all_mappings):
         join["entityClass"] = parent["entityClassName"]
         join["joinColumnName"] = "bene_id"
         join["joinType"] = "ManyToOne"
-        join["fetchType"] = "EAGER"
         join["foreignKey"] = "beneficiary_monthly_bene_id_to_beneficiary"
         joins.append(join)
 

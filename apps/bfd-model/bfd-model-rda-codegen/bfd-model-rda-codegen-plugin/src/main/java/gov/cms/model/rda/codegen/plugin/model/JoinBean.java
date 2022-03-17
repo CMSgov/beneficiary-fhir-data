@@ -1,7 +1,5 @@
 package gov.cms.model.rda.codegen.plugin.model;
 
-import static javax.persistence.FetchType.LAZY;
-
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import java.util.ArrayList;
@@ -35,7 +33,7 @@ public class JoinBean {
   private JoinType joinType;
 
   /** Name of the {@link FetchType}. Either {@code EAGER} or @{code LAZY}. */
-  private FetchType fetchType = LAZY;
+  private FetchType fetchType;
 
   /** Optional comment string to be added to the join field in the generated entity. */
   private String comment;

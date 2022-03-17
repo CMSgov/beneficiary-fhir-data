@@ -70,7 +70,6 @@ mappings:
     equalsNeeded: false
     joins:
     - entityClass: gov.cms.bfd.model.rif.Beneficiary
-      fetchType: EAGER
       fieldName: parentBeneficiary
       foreignKey: beneficiary_monthly_bene_id_to_beneficiary
       joinColumnName: bene_id
