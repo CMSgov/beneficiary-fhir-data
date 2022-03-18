@@ -501,7 +501,7 @@ public class FissClaimTransformerTest {
           .setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
-    } catch (DataTransformer.TransformationException actualException) {
+    } catch (DataTransformer.TransformationException ex) {
       List<DataTransformer.ErrorMessage> expectedErrors =
           List.of(
               new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=0"),
@@ -510,18 +510,17 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("currLoc1", "no value set"),
               new DataTransformer.ErrorMessage("currLoc2", "no value set"));
 
-      DataTransformer.TransformationException expectedException =
-          new DataTransformer.TransformationException(
-              String.format(
-                  "failed with %d errors: seq=%d dcn= errors=[%s]",
-                  expectedErrors.size(),
-                  SEQUENCE_NUM,
-                  expectedErrors.stream()
-                      .map(DataTransformer.ErrorMessage::toString)
-                      .collect(Collectors.joining(", "))),
-              expectedErrors);
+      String expectedMessage =
+          String.format(
+              "failed with %d errors: seq=%d dcn= errors=[%s]",
+              expectedErrors.size(),
+              SEQUENCE_NUM,
+              expectedErrors.stream()
+                  .map(DataTransformer.ErrorMessage::toString)
+                  .collect(Collectors.joining(", ")));
 
-      assertEquals(expectedException, actualException);
+      assertEquals(expectedMessage, ex.getMessage());
+      assertEquals(expectedErrors, ex.getErrors());
     }
   }
 

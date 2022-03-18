@@ -14,6 +14,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * Stateful, mutable, non-thread safe object to facilitate transformation of data from incoming RDA
@@ -445,9 +446,7 @@ public class DataTransformer {
     }
   }
 
-  // Lombok - Not calling super class `equals()` because it does not exist.
-  @SuppressWarnings("Lombok")
-  @Data
+  @Getter
   public static class TransformationException extends RuntimeException {
     private final List<ErrorMessage> errors;
 

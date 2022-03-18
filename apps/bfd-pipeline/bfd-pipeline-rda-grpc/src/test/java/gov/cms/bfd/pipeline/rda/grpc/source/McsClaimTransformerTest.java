@@ -291,7 +291,7 @@ public class McsClaimTransformerTest {
                   .build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
-    } catch (DataTransformer.TransformationException actualException) {
+    } catch (DataTransformer.TransformationException ex) {
       List<DataTransformer.ErrorMessage> expectedErrors =
           List.of(
               new DataTransformer.ErrorMessage(
@@ -302,18 +302,17 @@ public class McsClaimTransformerTest {
               new DataTransformer.ErrorMessage(
                   "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
 
-      DataTransformer.TransformationException expectedException =
-          new DataTransformer.TransformationException(
-              String.format(
-                  "failed with %d errors: seq=%d clmHdIcn= errors=[%s]",
-                  expectedErrors.size(),
-                  SEQUENCE_NUM,
-                  expectedErrors.stream()
-                      .map(DataTransformer.ErrorMessage::toString)
-                      .collect(Collectors.joining(", "))),
-              expectedErrors);
+      String expectedMessage =
+          String.format(
+              "failed with %d errors: seq=%d clmHdIcn= errors=[%s]",
+              expectedErrors.size(),
+              SEQUENCE_NUM,
+              expectedErrors.stream()
+                  .map(DataTransformer.ErrorMessage::toString)
+                  .collect(Collectors.joining(", ")));
 
-      assertEquals(expectedException, actualException);
+      assertEquals(expectedMessage, ex.getMessage());
+      assertEquals(expectedErrors, ex.getErrors());
     }
   }
 
