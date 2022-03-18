@@ -304,7 +304,7 @@ public class McsClaimTransformerTest {
               String.format(
                   "failed with 5 errors: seq=0 clmHdIcn= errors=[%s]",
                   expectedErrors.stream()
-                      .map(e -> String.format("<'%s','%s'>", e.getFieldName(), e.getErrorMessage()))
+                      .map(DataTransformer.ErrorMessage::toString)
                       .collect(Collectors.joining(", "))),
               expectedErrors);
 
