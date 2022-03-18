@@ -132,19 +132,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-      - name: 'Change dir'
-        run: cd ..
-      - name: 'Git Clone'
-        run: git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git myrepo
-      - name: 'Change dir'
-        run: cd myrepo
       - name: 'Git Fetch'
         run: git fetch
-      - name: 'Git Checkout'
-        run: git checkout $GITHUB_HEAD_REF
-      - name: 'Git Branch'
-        run: git branch
-      - name: 'Download fhir validator'
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
