@@ -172,21 +172,12 @@ public final class PipelineTestUtils {
           throw new BadCodeMonkeyException(
               "Unable to determine table name for entity: " + entityType.getCanonicalName());
         }
-        String tableNameSpecifier;
-        if (entityTableAnnotation.get().name().startsWith("`")) {
-          tableNameSpecifier = entityTableAnnotation.get().name().replaceAll("`", "\"");
-        } else {
-          tableNameSpecifier = entityTableAnnotation.get().name();
-        }
+        String tableNameSpecifier = normalizeSchemaName(entityTableAnnotation.get().name());
 
         // Then, switch to the appropriate schema.
         if (entityTableAnnotation.get().schema() != null
             && !entityTableAnnotation.get().schema().isEmpty()) {
-          /*
-           * Note: This may need to be quoted on PostgreSQL. If so, since HSQL DB blows up if we
-           * quote them, this code may have to first check the DB platform. TBD.
-           */
-          String schemaNameSpecifier = entityTableAnnotation.get().schema().replaceAll("`", "");
+          String schemaNameSpecifier = normalizeSchemaName(entityTableAnnotation.get().schema());
           connection.setSchema(schemaNameSpecifier);
         } else {
           connection.setSchema(defaultSchemaName.get());
@@ -210,6 +201,25 @@ public final class PipelineTestUtils {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Schemas that use mixed case use quotes and have their original case preserved but those without
+   * quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
+   *
+   * <p>Note: This may need to be quoted on PostgreSQL. If so, since HSQL DB blows up if we quote
+   * them, this code may have to first check the DB platform. TBD.
+   *
+   * @param schemaNameSpecifier name of a schema from a hibernate annotation
+   * @return value compatible with call to {@link Connection#setSchema(String)}
+   */
+  private String normalizeSchemaName(String schemaNameSpecifier) {
+    if (schemaNameSpecifier.startsWith("`")) {
+      schemaNameSpecifier = schemaNameSpecifier.replaceAll("`", "");
+    } else {
+      schemaNameSpecifier = schemaNameSpecifier.toUpperCase();
+    }
+    return schemaNameSpecifier;
   }
 
   /**

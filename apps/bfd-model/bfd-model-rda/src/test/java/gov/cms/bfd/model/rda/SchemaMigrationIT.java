@@ -48,11 +48,15 @@ public class SchemaMigrationIT {
     dataSource.setPassword("");
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
     entityManager = createEntityManager(dataSource);
+    // verify we have a clean database
+    assertEquals(
+        0, entityManager.createQuery("select c from Mbi c", Mbi.class).getResultList().size());
   }
 
   @AfterEach
   public void tearDown() throws SQLException {
     if (entityManager != null && entityManager.isOpen()) {
+      entityManager.getTransaction().rollback();
       entityManager.close();
       entityManager = null;
     }

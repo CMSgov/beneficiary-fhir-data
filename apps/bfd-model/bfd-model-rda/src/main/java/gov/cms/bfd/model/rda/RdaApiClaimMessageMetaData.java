@@ -34,27 +34,27 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`RdaApiClaimMessageMetaData`", schema = "`pre_adj`")
+@Table(name = "rda_api_claim_message_meta_data", schema = "part_adj")
 public class RdaApiClaimMessageMetaData {
-  private static final String SequenceName = "`rda_api_claim_message_meta_data_meta_data_id_seq`";
+  private static final String SequenceName = "rda_api_claim_message_meta_data_meta_data_id_seq";
 
   /**
    * We insert a record every time a change is received from RDA API so the primary key has to be
    * unique even if we receive the same message twice.
    */
   @Id
-  @Column(name = "`metaDataId`", nullable = false, updatable = false)
+  @Column(name = "meta_data_id", nullable = false, updatable = false)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SequenceName)
   @SequenceGenerator(
       name = SequenceName,
-      schema = "`pre_adj`",
+      schema = "part_adj",
       sequenceName = SequenceName,
       allocationSize = 25)
   @EqualsAndHashCode.Include
   private long metaDataId;
 
   /** Either F (FISS) or M (MCS). */
-  @Column(name = "`claimType`", nullable = false)
+  @Column(name = "claim_type", nullable = false)
   @EqualsAndHashCode.Include
   private Character claimType;
 
@@ -62,20 +62,20 @@ public class RdaApiClaimMessageMetaData {
    * sequenceNumber from the RDA API change message object. Indicates the version of the claim that
    * was written to the database.
    */
-  @Column(name = "`sequenceNumber`", nullable = false)
+  @Column(name = "sequence_number", nullable = false)
   @EqualsAndHashCode.Include
   private long sequenceNumber;
 
   /** Either dcn (FISS) or idrClmHdIcn (MCS). */
-  @Column(name = "`claimId`", length = 25, nullable = false)
+  @Column(name = "claim_id", length = 25, nullable = false)
   private String claimId;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "`mbiId`")
+  @JoinColumn(name = "mbi_id")
   private Mbi mbiRecord;
 
   /** Either currStatus (FISS) or idrStatusCode (MCS). */
-  @Column(name = "`claimState`", length = 1)
+  @Column(name = "claim_state", length = 1)
   private String claimState;
 
   /**
@@ -83,7 +83,7 @@ public class RdaApiClaimMessageMetaData {
    * multiple records for the same message in our database if we replay old data from the RDA API
    * (for example after RDA fixes some data problem or we fix a bug in our data ingestion).
    */
-  @Column(name = "`receivedDate`")
+  @Column(name = "received_date")
   private Instant receivedDate;
 
   /**

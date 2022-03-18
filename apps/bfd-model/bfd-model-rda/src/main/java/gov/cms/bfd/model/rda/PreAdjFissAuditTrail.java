@@ -27,34 +27,34 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjFissAuditTrail.PK.class)
-@Table(name = "`FissAuditTrails`", schema = "`pre_adj`")
+@Table(name = "fiss_audit_trails", schema = "part_adj")
 public class PreAdjFissAuditTrail {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
+  @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
   private String dcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`badtStatus`", length = 1)
+  @Column(name = "badt_status", length = 1)
   private String badtStatus;
 
-  @Column(name = "`badtLoc`", length = 5)
+  @Column(name = "badt_loc", length = 5)
   private String badtLoc;
 
-  @Column(name = "`badtOperId`", length = 9)
+  @Column(name = "badt_oper_id", length = 9)
   private String badtOperId;
 
-  @Column(name = "`badtReas`", length = 5)
+  @Column(name = "badt_reas", length = 5)
   private String badtReas;
 
-  @Column(name = "`badtCurrDate`")
+  @Column(name = "badt_curr_date")
   private LocalDate badtCurrDate;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
   /** PK class for the FissAuditTrails table */

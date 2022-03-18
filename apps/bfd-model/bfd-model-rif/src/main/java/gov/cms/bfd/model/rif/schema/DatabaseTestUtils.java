@@ -46,7 +46,7 @@ public final class DatabaseTestUtils {
    * properly.
    */
   public static final ImmutableList<String> FLYWAY_CLEAN_SCHEMAS =
-      ImmutableList.of("PUBLIC", "pre_adj");
+      ImmutableList.of("PUBLIC", "pre_adj", "PART_ADJ");
 
   private static final String HSQL_SERVER_USERNAME = "test";
   private static final String HSQL_SERVER_PASSWORD = "test";
