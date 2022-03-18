@@ -278,8 +278,11 @@ public class McsClaimTransformerTest {
 
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
+    final long SEQUENCE_NUM = 37;
+
     try {
       changeBuilder
+          .setSeq(SEQUENCE_NUM)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .setClaim(
               claimBuilder
@@ -302,7 +305,9 @@ public class McsClaimTransformerTest {
       DataTransformer.TransformationException expectedException =
           new DataTransformer.TransformationException(
               String.format(
-                  "failed with 5 errors: seq=0 clmHdIcn= errors=[%s]",
+                  "failed with %d errors: seq=%d clmHdIcn= errors=[%s]",
+                  expectedErrors.size(),
+                  SEQUENCE_NUM,
                   expectedErrors.stream()
                       .map(DataTransformer.ErrorMessage::toString)
                       .collect(Collectors.joining(", "))),

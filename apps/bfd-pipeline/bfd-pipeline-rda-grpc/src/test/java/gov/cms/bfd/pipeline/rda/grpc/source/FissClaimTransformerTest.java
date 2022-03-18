@@ -492,9 +492,11 @@ public class FissClaimTransformerTest {
 
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
+    final long SEQUENCE_NUM = 37;
+
     try {
       changeBuilder
-          .setSeq(MIN_SEQUENCE_NUM)
+          .setSeq(SEQUENCE_NUM)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
@@ -511,7 +513,9 @@ public class FissClaimTransformerTest {
       DataTransformer.TransformationException expectedException =
           new DataTransformer.TransformationException(
               String.format(
-                  "failed with 5 errors: seq=0 dcn= errors=[%s]",
+                  "failed with %d errors: seq=%d dcn= errors=[%s]",
+                  expectedErrors.size(),
+                  SEQUENCE_NUM,
                   expectedErrors.stream()
                       .map(DataTransformer.ErrorMessage::toString)
                       .collect(Collectors.joining(", "))),
