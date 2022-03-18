@@ -310,7 +310,8 @@ public final class BeneficiaryTransformerTest {
             .filter(
                 r ->
                     (r.getBeneficiaryId().isPresent()
-                        && beneficiary.getBeneficiaryId() == r.getBeneficiaryId().get()))
+                        && beneficiary.getBeneficiaryId()
+                            == r.getBeneficiaryId().get().longValue()))
             .collect(Collectors.toSet());
     beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
 
