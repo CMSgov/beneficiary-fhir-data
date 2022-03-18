@@ -8,12 +8,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+import lombok.Data;
 
 /**
  * Stateful, mutable, non-thread safe object to facilitate transformation of data from incoming RDA
@@ -434,36 +434,10 @@ public class DataTransformer {
     return sb.toString();
   }
 
+  @Data
   public static class ErrorMessage {
     private final String fieldName;
     private final String errorMessage;
-
-    public ErrorMessage(String fieldName, String errorMessage) {
-      this.fieldName = fieldName;
-      this.errorMessage = errorMessage;
-    }
-
-    public String getFieldName() {
-      return fieldName;
-    }
-
-    public String getErrorMessage() {
-      return errorMessage;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ErrorMessage that = (ErrorMessage) o;
-      return Objects.equals(fieldName, that.fieldName)
-          && Objects.equals(errorMessage, that.errorMessage);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(fieldName, errorMessage);
-    }
 
     @Override
     public String toString() {
@@ -471,16 +445,15 @@ public class DataTransformer {
     }
   }
 
+  // Lombok - Not calling super class `equals()` because it does not exist.
+  @SuppressWarnings("Lombok")
+  @Data
   public static class TransformationException extends RuntimeException {
     private final List<ErrorMessage> errors;
 
     public TransformationException(String message, List<ErrorMessage> errors) {
       super(message);
       this.errors = errors;
-    }
-
-    public List<ErrorMessage> getErrors() {
-      return errors;
     }
   }
 }

@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
 import gov.cms.bfd.model.rda.PreAdjMcsAudit;
@@ -48,6 +47,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -287,17 +288,27 @@ public class McsClaimTransformerTest {
                   .build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
-    } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          ImmutableList.of(
+    } catch (DataTransformer.TransformationException actualException) {
+      List<DataTransformer.ErrorMessage> expectedErrors =
+          List.of(
               new DataTransformer.ErrorMessage(
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
               new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0")),
-          ex.getErrors());
+                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+
+      DataTransformer.TransformationException expectedException =
+          new DataTransformer.TransformationException(
+              String.format(
+                  "failed with 5 errors: seq=0 clmHdIcn= errors=[%s]",
+                  expectedErrors.stream()
+                      .map(e -> String.format("<'%s','%s'>", e.getFieldName(), e.getErrorMessage()))
+                      .collect(Collectors.joining(", "))),
+              expectedErrors);
+
+      assertEquals(expectedException, actualException);
     }
   }
 
