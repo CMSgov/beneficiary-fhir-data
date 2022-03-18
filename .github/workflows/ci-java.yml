@@ -138,6 +138,8 @@ jobs:
         run: git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git myrepo
       - name: 'Change dir'
         run: cd myrepo
+      - name: 'Git Fetch'
+        run: git fetch
       - name: 'Git Checkout'
         run: git checkout $GITHUB_HEAD_REF
       - name: 'Git Branch'
