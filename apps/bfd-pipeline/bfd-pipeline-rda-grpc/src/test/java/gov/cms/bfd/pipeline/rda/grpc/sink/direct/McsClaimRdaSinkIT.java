@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsDetail;
-import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsDetail;
+import gov.cms.bfd.model.rda.PartAdjMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -33,7 +33,7 @@ public class McsClaimRdaSinkIT {
           final LocalDate today = LocalDate.of(2022, 1, 3);
           final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
-          final PreAdjMcsClaim claim = new PreAdjMcsClaim();
+          final PartAdjMcsClaim claim = new PartAdjMcsClaim();
           claim.setSequenceNumber(7L);
           claim.setIdrClmHdIcn("3");
           claim.setIdrContrId("c1");
@@ -42,13 +42,13 @@ public class McsClaimRdaSinkIT {
           claim.setIdrStatusCode("A");
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
-          final PreAdjMcsDetail detail = new PreAdjMcsDetail();
+          final PartAdjMcsDetail detail = new PartAdjMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
           detail.setPriority((short) 0);
           detail.setIdrDtlStatus("P");
           claim.getDetails().add(detail);
 
-          final PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
+          final PartAdjMcsDiagnosisCode diagCode = new PartAdjMcsDiagnosisCode();
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
           diagCode.setPriority((short) 0);
           diagCode.setIdrDiagIcdType("T");
@@ -94,12 +94,12 @@ public class McsClaimRdaSinkIT {
           int count = sink.writeMessage("version", message);
           assertEquals(1, count);
 
-          List<PreAdjMcsClaim> resultClaims =
+          List<PartAdjMcsClaim> resultClaims =
               entityManager
-                  .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
+                  .createQuery("select c from PartAdjMcsClaim c", PartAdjMcsClaim.class)
                   .getResultList();
           assertEquals(1, resultClaims.size());
-          PreAdjMcsClaim resultClaim = resultClaims.get(0);
+          PartAdjMcsClaim resultClaim = resultClaims.get(0);
           assertEquals(Long.valueOf(7), resultClaim.getSequenceNumber());
           assertEquals(claim.getIdrHic(), resultClaim.getIdrHic());
           assertEquals(claim.getIdrClaimMbi(), resultClaim.getIdrClaimMbi());

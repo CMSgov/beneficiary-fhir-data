@@ -11,8 +11,8 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
@@ -68,7 +68,7 @@ public class RdaServerJobIT {
       final GrpcResponseStream<FissClaimChange> fissStream =
           fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
       assertTrue(fissStream.hasNext());
-      RdaChange<PreAdjFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
+      RdaChange<PartAdjFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
       assertMatches(fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "Random:1:.*");
       assertEquals(2L, fissChange.getSequenceNumber());
       assertTrue(fissStream.hasNext());
@@ -81,7 +81,7 @@ public class RdaServerJobIT {
       final GrpcResponseStream<McsClaimChange> mcsStream =
           mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 3);
       assertTrue(mcsStream.hasNext());
-      RdaChange<PreAdjMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
+      RdaChange<PartAdjMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
       assertMatches(mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "Random:1:.*");
       assertEquals(3L, mcsChange.getSequenceNumber());
       assertFalse(mcsStream.hasNext());
@@ -120,7 +120,7 @@ public class RdaServerJobIT {
         final FissClaimStreamCaller fissCaller = new FissClaimStreamCaller();
         final var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 1098);
         assertTrue(fissStream.hasNext());
-        RdaChange<PreAdjFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
+        RdaChange<PartAdjFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
         assertMatches(
             fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
         assertEquals(1098L, fissChange.getSequenceNumber());
@@ -135,7 +135,7 @@ public class RdaServerJobIT {
         final McsClaimStreamCaller mcsCaller = new McsClaimStreamCaller();
         final var mcsStream = mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 1099);
         assertTrue(mcsStream.hasNext());
-        RdaChange<PreAdjMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
+        RdaChange<PartAdjMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
         assertMatches(mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
         assertEquals(1099L, mcsChange.getSequenceNumber());
         assertTrue(mcsStream.hasNext());

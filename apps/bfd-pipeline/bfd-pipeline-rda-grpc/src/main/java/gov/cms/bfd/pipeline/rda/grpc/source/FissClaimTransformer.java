@@ -1,11 +1,11 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.collect.ImmutableSet;
-import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
-import gov.cms.bfd.model.rda.PreAdjFissPayer;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PartAdjFissAuditTrail;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjFissPayer;
+import gov.cms.bfd.model.rda.PartAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -488,10 +488,10 @@ public class FissClaimTransformer {
     return new FissClaimTransformer(clock, mbiCache);
   }
 
-  public RdaChange<PreAdjFissClaim> transformClaim(FissClaimChange change) {
+  public RdaChange<PartAdjFissClaim> transformClaim(FissClaimChange change) {
     FissClaim from = change.getClaim();
     final DataTransformer transformer = new DataTransformer();
-    final PreAdjFissClaim to = transformMessage(from, transformer, clock.instant());
+    final PartAdjFissClaim to = transformMessage(from, transformer, clock.instant());
     to.setSequenceNumber(change.getSeq());
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
@@ -508,79 +508,79 @@ public class FissClaimTransformer {
         transformer.instant(change.getTimestamp()));
   }
 
-  private PreAdjFissClaim transformMessage(
+  private PartAdjFissClaim transformMessage(
       FissClaim from, DataTransformer transformer, Instant now) {
-    final PreAdjFissClaim to = transformMessageImpl(from, transformer, now, "");
+    final PartAdjFissClaim to = transformMessageImpl(from, transformer, now, "");
     transformMessageArrays(from, to, transformer, now, "");
     return to;
   }
 
-  private PreAdjFissClaim transformMessageImpl(
+  private PartAdjFissClaim transformMessageImpl(
       FissClaim from, DataTransformer transformer, Instant now, String namePrefix) {
-    final PreAdjFissClaim to = new PreAdjFissClaim();
+    final PartAdjFissClaim to = new PartAdjFissClaim();
     transformer.copyString(
-        namePrefix + PreAdjFissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn);
+        namePrefix + PartAdjFissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn);
     transformer.copyString(
-        namePrefix + PreAdjFissClaim.Fields.hicNo, false, 1, 12, from.getHicNo(), to::setHicNo);
+        namePrefix + PartAdjFissClaim.Fields.hicNo, false, 1, 12, from.getHicNo(), to::setHicNo);
     transformer.copyEnumAsCharacter(
-        namePrefix + PreAdjFissClaim.Fields.currStatus,
+        namePrefix + PartAdjFissClaim.Fields.currStatus,
         PreAdjFissClaim_currStatus_Extractor.getEnumString(from),
         to::setCurrStatus);
     transformer.copyEnumAsCharacter(
-        namePrefix + PreAdjFissClaim.Fields.currLoc1,
+        namePrefix + PartAdjFissClaim.Fields.currLoc1,
         PreAdjFissClaim_currLoc1_Extractor.getEnumString(from),
         to::setCurrLoc1);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.currLoc2,
+        namePrefix + PartAdjFissClaim.Fields.currLoc2,
         false,
         5,
         PreAdjFissClaim_currLoc2_Extractor.getEnumString(from),
         to::setCurrLoc2);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.medaProvId,
+        namePrefix + PartAdjFissClaim.Fields.medaProvId,
         1,
         13,
         from::hasMedaProvId,
         from::getMedaProvId,
         to::setMedaProvId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.medaProv_6,
+        namePrefix + PartAdjFissClaim.Fields.medaProv_6,
         1,
         6,
         from::hasMedaProv6,
         from::getMedaProv6,
         to::setMedaProv_6);
     transformer.copyOptionalAmount(
-        namePrefix + PreAdjFissClaim.Fields.totalChargeAmount,
+        namePrefix + PartAdjFissClaim.Fields.totalChargeAmount,
         from::hasTotalChargeAmount,
         from::getTotalChargeAmount,
         to::setTotalChargeAmount);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.receivedDate,
+        namePrefix + PartAdjFissClaim.Fields.receivedDate,
         from::hasRecdDtCymd,
         from::getRecdDtCymd,
         to::setReceivedDate);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.currTranDate,
+        namePrefix + PartAdjFissClaim.Fields.currTranDate,
         from::hasCurrTranDtCymd,
         from::getCurrTranDtCymd,
         to::setCurrTranDate);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.admitDiagCode,
+        namePrefix + PartAdjFissClaim.Fields.admitDiagCode,
         1,
         7,
         from::hasAdmDiagCode,
         from::getAdmDiagCode,
         to::setAdmitDiagCode);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.principleDiag,
+        namePrefix + PartAdjFissClaim.Fields.principleDiag,
         1,
         7,
         from::hasPrincipleDiag,
         from::getPrincipleDiag,
         to::setPrincipleDiag);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.npiNumber,
+        namePrefix + PartAdjFissClaim.Fields.npiNumber,
         1,
         10,
         from::hasNpiNumber,
@@ -588,362 +588,362 @@ public class FissClaimTransformer {
         to::setNpiNumber);
     if (from.hasMbi()) {
       final var mbi = from.getMbi();
-      if (transformer.validateString(namePrefix + PreAdjFissClaim.Fields.mbi, false, 1, 11, mbi)) {
+      if (transformer.validateString(namePrefix + PartAdjFissClaim.Fields.mbi, false, 1, 11, mbi)) {
         to.setMbiRecord(mbiCache.lookupMbi(mbi));
       }
     }
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.fedTaxNumber,
+        namePrefix + PartAdjFissClaim.Fields.fedTaxNumber,
         1,
         10,
         from::hasFedTaxNb,
         from::getFedTaxNb,
         to::setFedTaxNumber);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.pracLocAddr1,
+        namePrefix + PartAdjFissClaim.Fields.pracLocAddr1,
         1,
         2147483647,
         from::hasPracLocAddr1,
         from::getPracLocAddr1,
         to::setPracLocAddr1);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.pracLocAddr2,
+        namePrefix + PartAdjFissClaim.Fields.pracLocAddr2,
         1,
         2147483647,
         from::hasPracLocAddr2,
         from::getPracLocAddr2,
         to::setPracLocAddr2);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.pracLocCity,
+        namePrefix + PartAdjFissClaim.Fields.pracLocCity,
         1,
         2147483647,
         from::hasPracLocCity,
         from::getPracLocCity,
         to::setPracLocCity);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.pracLocState,
+        namePrefix + PartAdjFissClaim.Fields.pracLocState,
         1,
         2,
         from::hasPracLocState,
         from::getPracLocState,
         to::setPracLocState);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.pracLocZip,
+        namePrefix + PartAdjFissClaim.Fields.pracLocZip,
         1,
         15,
         from::hasPracLocZip,
         from::getPracLocZip,
         to::setPracLocZip);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.stmtCovFromDate,
+        namePrefix + PartAdjFissClaim.Fields.stmtCovFromDate,
         from::hasStmtCovFromCymd,
         from::getStmtCovFromCymd,
         to::setStmtCovFromDate);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.stmtCovToDate,
+        namePrefix + PartAdjFissClaim.Fields.stmtCovToDate,
         from::hasStmtCovToCymd,
         from::getStmtCovToCymd,
         to::setStmtCovToDate);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.lobCd,
+        namePrefix + PartAdjFissClaim.Fields.lobCd,
         true,
         1,
         PreAdjFissClaim_lobCd_Extractor.getEnumString(from),
         to::setLobCd);
     if (from.hasServTypeCdEnum()) {
-      to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Normal);
+      to.setServTypeCdMapping(PartAdjFissClaim.ServTypeCdMapping.Normal);
     }
     if (from.hasServTypeCdForClinicsEnum()) {
-      to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Clinic);
+      to.setServTypeCdMapping(PartAdjFissClaim.ServTypeCdMapping.Clinic);
     }
     if (from.hasServTypeCdForSpecialFacilitiesEnum()) {
-      to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.SpecialFacility);
+      to.setServTypeCdMapping(PartAdjFissClaim.ServTypeCdMapping.SpecialFacility);
     }
     if (from.hasServTypCdUnrecognized()) {
-      to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Unrecognized);
+      to.setServTypeCdMapping(PartAdjFissClaim.ServTypeCdMapping.Unrecognized);
     }
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.servTypeCd,
+        namePrefix + PartAdjFissClaim.Fields.servTypeCd,
         true,
         1,
         PreAdjFissClaim_servTypeCd_Extractor.getEnumString(from),
         to::setServTypeCd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.servTypeCd,
+        namePrefix + PartAdjFissClaim.Fields.servTypeCd,
         true,
         1,
         PreAdjFissClaim_servTypeCdForClinics_Extractor.getEnumString(from),
         to::setServTypeCd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.servTypeCd,
+        namePrefix + PartAdjFissClaim.Fields.servTypeCd,
         true,
         1,
         PreAdjFissClaim_servTypeCdForSpecialFacilities_Extractor.getEnumString(from),
         to::setServTypeCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.servTypeCd,
+        namePrefix + PartAdjFissClaim.Fields.servTypeCd,
         1,
         1,
         from::hasServTypCdUnrecognized,
         from::getServTypCdUnrecognized,
         to::setServTypeCd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.freqCd,
+        namePrefix + PartAdjFissClaim.Fields.freqCd,
         true,
         1,
         PreAdjFissClaim_freqCd_Extractor.getEnumString(from),
         to::setFreqCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.billTypCd,
+        namePrefix + PartAdjFissClaim.Fields.billTypCd,
         1,
         3,
         from::hasBillTypCd,
         from::getBillTypCd,
         to::setBillTypCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.rejectCd,
+        namePrefix + PartAdjFissClaim.Fields.rejectCd,
         1,
         5,
         from::hasRejectCd,
         from::getRejectCd,
         to::setRejectCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.fullPartDenInd,
+        namePrefix + PartAdjFissClaim.Fields.fullPartDenInd,
         1,
         1,
         from::hasFullPartDenInd,
         from::getFullPartDenInd,
         to::setFullPartDenInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.nonPayInd,
+        namePrefix + PartAdjFissClaim.Fields.nonPayInd,
         1,
         2,
         from::hasNonPayInd,
         from::getNonPayInd,
         to::setNonPayInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.xrefDcnNbr,
+        namePrefix + PartAdjFissClaim.Fields.xrefDcnNbr,
         1,
         23,
         from::hasXrefDcnNbr,
         from::getXrefDcnNbr,
         to::setXrefDcnNbr);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.adjReqCd,
+        namePrefix + PartAdjFissClaim.Fields.adjReqCd,
         true,
         1,
         PreAdjFissClaim_adjReqCd_Extractor.getEnumString(from),
         to::setAdjReqCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.adjReasCd,
+        namePrefix + PartAdjFissClaim.Fields.adjReasCd,
         1,
         2,
         from::hasAdjReasCd,
         from::getAdjReasCd,
         to::setAdjReasCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.cancelXrefDcn,
+        namePrefix + PartAdjFissClaim.Fields.cancelXrefDcn,
         1,
         23,
         from::hasCancelXrefDcn,
         from::getCancelXrefDcn,
         to::setCancelXrefDcn);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.cancelDate,
+        namePrefix + PartAdjFissClaim.Fields.cancelDate,
         from::hasCancelDateCymd,
         from::getCancelDateCymd,
         to::setCancelDate);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.cancAdjCd,
+        namePrefix + PartAdjFissClaim.Fields.cancAdjCd,
         true,
         1,
         PreAdjFissClaim_cancAdjCd_Extractor.getEnumString(from),
         to::setCancAdjCd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.originalXrefDcn,
+        namePrefix + PartAdjFissClaim.Fields.originalXrefDcn,
         1,
         23,
         from::hasOriginalXrefDcn,
         from::getOriginalXrefDcn,
         to::setOriginalXrefDcn);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.paidDt,
+        namePrefix + PartAdjFissClaim.Fields.paidDt,
         from::hasPaidDtCymd,
         from::getPaidDtCymd,
         to::setPaidDt);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissClaim.Fields.admDate,
+        namePrefix + PartAdjFissClaim.Fields.admDate,
         from::hasAdmDateCymd,
         from::getAdmDateCymd,
         to::setAdmDate);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.admSource,
+        namePrefix + PartAdjFissClaim.Fields.admSource,
         true,
         1,
         PreAdjFissClaim_admSource_Extractor.getEnumString(from),
         to::setAdmSource);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.primaryPayerCode,
+        namePrefix + PartAdjFissClaim.Fields.primaryPayerCode,
         true,
         1,
         PreAdjFissClaim_primaryPayerCode_Extractor.getEnumString(from),
         to::setPrimaryPayerCode);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.attendPhysId,
+        namePrefix + PartAdjFissClaim.Fields.attendPhysId,
         1,
         16,
         from::hasAttendPhysId,
         from::getAttendPhysId,
         to::setAttendPhysId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.attendPhysLname,
+        namePrefix + PartAdjFissClaim.Fields.attendPhysLname,
         1,
         17,
         from::hasAttendPhysLname,
         from::getAttendPhysLname,
         to::setAttendPhysLname);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.attendPhysFname,
+        namePrefix + PartAdjFissClaim.Fields.attendPhysFname,
         1,
         18,
         from::hasAttendPhysFname,
         from::getAttendPhysFname,
         to::setAttendPhysFname);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.attendPhysMint,
+        namePrefix + PartAdjFissClaim.Fields.attendPhysMint,
         1,
         1,
         from::hasAttendPhysMint,
         from::getAttendPhysMint,
         to::setAttendPhysMint);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.attendPhysFlag,
+        namePrefix + PartAdjFissClaim.Fields.attendPhysFlag,
         true,
         1,
         PreAdjFissClaim_attendPhysFlag_Extractor.getEnumString(from),
         to::setAttendPhysFlag);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.operatingPhysId,
+        namePrefix + PartAdjFissClaim.Fields.operatingPhysId,
         1,
         16,
         from::hasOperatingPhysId,
         from::getOperatingPhysId,
         to::setOperatingPhysId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.operPhysLname,
+        namePrefix + PartAdjFissClaim.Fields.operPhysLname,
         1,
         17,
         from::hasOperPhysLname,
         from::getOperPhysLname,
         to::setOperPhysLname);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.operPhysFname,
+        namePrefix + PartAdjFissClaim.Fields.operPhysFname,
         1,
         18,
         from::hasOperPhysFname,
         from::getOperPhysFname,
         to::setOperPhysFname);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.operPhysMint,
+        namePrefix + PartAdjFissClaim.Fields.operPhysMint,
         1,
         1,
         from::hasOperPhysMint,
         from::getOperPhysMint,
         to::setOperPhysMint);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.operPhysFlag,
+        namePrefix + PartAdjFissClaim.Fields.operPhysFlag,
         true,
         1,
         PreAdjFissClaim_operPhysFlag_Extractor.getEnumString(from),
         to::setOperPhysFlag);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.othPhysId,
+        namePrefix + PartAdjFissClaim.Fields.othPhysId,
         1,
         16,
         from::hasOthPhysId,
         from::getOthPhysId,
         to::setOthPhysId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.othPhysLname,
+        namePrefix + PartAdjFissClaim.Fields.othPhysLname,
         1,
         17,
         from::hasOthPhysLname,
         from::getOthPhysLname,
         to::setOthPhysLname);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.othPhysFname,
+        namePrefix + PartAdjFissClaim.Fields.othPhysFname,
         1,
         18,
         from::hasOthPhysFname,
         from::getOthPhysFname,
         to::setOthPhysFname);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.othPhysMint,
+        namePrefix + PartAdjFissClaim.Fields.othPhysMint,
         1,
         1,
         from::hasOthPhysMint,
         from::getOthPhysMint,
         to::setOthPhysMint);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.othPhysFlag,
+        namePrefix + PartAdjFissClaim.Fields.othPhysFlag,
         true,
         1,
         PreAdjFissClaim_othPhysFlag_Extractor.getEnumString(from),
         to::setOthPhysFlag);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.xrefHicNbr,
+        namePrefix + PartAdjFissClaim.Fields.xrefHicNbr,
         1,
         12,
         from::hasXrefHicNbr,
         from::getXrefHicNbr,
         to::setXrefHicNbr);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.procNewHicInd,
+        namePrefix + PartAdjFissClaim.Fields.procNewHicInd,
         true,
         1,
         PreAdjFissClaim_procNewHicInd_Extractor.getEnumString(from),
         to::setProcNewHicInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.newHic,
+        namePrefix + PartAdjFissClaim.Fields.newHic,
         1,
         12,
         from::hasNewHic,
         from::getNewHic,
         to::setNewHic);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.reposInd,
+        namePrefix + PartAdjFissClaim.Fields.reposInd,
         true,
         1,
         PreAdjFissClaim_reposInd_Extractor.getEnumString(from),
         to::setReposInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.reposHic,
+        namePrefix + PartAdjFissClaim.Fields.reposHic,
         1,
         12,
         from::hasReposHic,
         from::getReposHic,
         to::setReposHic);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.mbiSubmBeneInd,
+        namePrefix + PartAdjFissClaim.Fields.mbiSubmBeneInd,
         true,
         1,
         PreAdjFissClaim_mbiSubmBeneInd_Extractor.getEnumString(from),
         to::setMbiSubmBeneInd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissClaim.Fields.adjMbiInd,
+        namePrefix + PartAdjFissClaim.Fields.adjMbiInd,
         true,
         1,
         PreAdjFissClaim_adjMbiInd_Extractor.getEnumString(from),
         to::setAdjMbiInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.adjMbi,
+        namePrefix + PartAdjFissClaim.Fields.adjMbi,
         1,
         11,
         from::hasAdjMbi,
         from::getAdjMbi,
         to::setAdjMbi);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.medicalRecordNo,
+        namePrefix + PartAdjFissClaim.Fields.medicalRecordNo,
         1,
         17,
         from::hasMedicalRecordNo,
@@ -955,14 +955,14 @@ public class FissClaimTransformer {
 
   private void transformMessageArrays(
       FissClaim from,
-      PreAdjFissClaim to,
+      PartAdjFissClaim to,
       DataTransformer transformer,
       Instant now,
       String namePrefix) {
     for (short index = 0; index < from.getFissProcCodesCount(); ++index) {
       final String itemNamePrefix = namePrefix + "procCode" + "-" + index + "-";
       final FissProcedureCode itemFrom = from.getFissProcCodes(index);
-      final PreAdjFissProcCode itemTo =
+      final PartAdjFissProcCode itemTo =
           transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
       itemTo.setDcn(from.getDcn());
       itemTo.setPriority(index);
@@ -971,7 +971,7 @@ public class FissClaimTransformer {
     for (short index = 0; index < from.getFissDiagCodesCount(); ++index) {
       final String itemNamePrefix = namePrefix + "diagCode" + "-" + index + "-";
       final FissDiagnosisCode itemFrom = from.getFissDiagCodes(index);
-      final PreAdjFissDiagnosisCode itemTo =
+      final PartAdjFissDiagnosisCode itemTo =
           transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
       itemTo.setDcn(from.getDcn());
       itemTo.setPriority(index);
@@ -980,7 +980,7 @@ public class FissClaimTransformer {
     for (short index = 0; index < from.getFissPayersCount(); ++index) {
       final String itemNamePrefix = namePrefix + "payer" + "-" + index + "-";
       final FissPayer itemFrom = from.getFissPayers(index);
-      final PreAdjFissPayer itemTo =
+      final PartAdjFissPayer itemTo =
           transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
       itemTo.setDcn(from.getDcn());
       itemTo.setPriority(index);
@@ -989,7 +989,7 @@ public class FissClaimTransformer {
     for (short index = 0; index < from.getFissAuditTrailCount(); ++index) {
       final String itemNamePrefix = namePrefix + "auditTrail" + "-" + index + "-";
       final FissAuditTrail itemFrom = from.getFissAuditTrail(index);
-      final PreAdjFissAuditTrail itemTo =
+      final PartAdjFissAuditTrail itemTo =
           transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
       itemTo.setDcn(from.getDcn());
       itemTo.setPriority(index);
@@ -997,25 +997,25 @@ public class FissClaimTransformer {
     }
   }
 
-  private PreAdjFissProcCode transformMessageImpl(
+  private PartAdjFissProcCode transformMessageImpl(
       FissProcedureCode from, DataTransformer transformer, Instant now, String namePrefix) {
-    final PreAdjFissProcCode to = new PreAdjFissProcCode();
+    final PartAdjFissProcCode to = new PartAdjFissProcCode();
     transformer.copyString(
-        namePrefix + PreAdjFissProcCode.Fields.procCode,
+        namePrefix + PartAdjFissProcCode.Fields.procCode,
         false,
         1,
         10,
         from.getProcCd(),
         to::setProcCode);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissProcCode.Fields.procFlag,
+        namePrefix + PartAdjFissProcCode.Fields.procFlag,
         1,
         4,
         from::hasProcFlag,
         from::getProcFlag,
         to::setProcFlag);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissProcCode.Fields.procDate,
+        namePrefix + PartAdjFissProcCode.Fields.procDate,
         from::hasProcDt,
         from::getProcDt,
         to::setProcDate);
@@ -1023,24 +1023,24 @@ public class FissClaimTransformer {
     return to;
   }
 
-  private PreAdjFissDiagnosisCode transformMessageImpl(
+  private PartAdjFissDiagnosisCode transformMessageImpl(
       FissDiagnosisCode from, DataTransformer transformer, Instant now, String namePrefix) {
-    final PreAdjFissDiagnosisCode to = new PreAdjFissDiagnosisCode();
+    final PartAdjFissDiagnosisCode to = new PartAdjFissDiagnosisCode();
     transformer.copyString(
-        namePrefix + PreAdjFissDiagnosisCode.Fields.diagCd2,
+        namePrefix + PartAdjFissDiagnosisCode.Fields.diagCd2,
         false,
         1,
         7,
         from.getDiagCd2(),
         to::setDiagCd2);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissDiagnosisCode.Fields.diagPoaInd,
+        namePrefix + PartAdjFissDiagnosisCode.Fields.diagPoaInd,
         true,
         1,
         PreAdjFissDiagnosisCode_diagPoaInd_Extractor.getEnumString(from),
         to::setDiagPoaInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissDiagnosisCode.Fields.bitFlags,
+        namePrefix + PartAdjFissDiagnosisCode.Fields.bitFlags,
         1,
         4,
         from::hasBitFlags,
@@ -1050,245 +1050,245 @@ public class FissClaimTransformer {
     return to;
   }
 
-  private PreAdjFissPayer transformMessageImpl(
+  private PartAdjFissPayer transformMessageImpl(
       FissPayer from, DataTransformer transformer, Instant now, String namePrefix) {
-    final PreAdjFissPayer to = new PreAdjFissPayer();
+    final PartAdjFissPayer to = new PartAdjFissPayer();
     if (from.hasBeneZPayer()) {
-      to.setPayerType(PreAdjFissPayer.PayerType.BeneZ);
+      to.setPayerType(PartAdjFissPayer.PayerType.BeneZ);
     }
     if (from.hasInsuredPayer()) {
-      to.setPayerType(PreAdjFissPayer.PayerType.Insured);
+      to.setPayerType(PartAdjFissPayer.PayerType.Insured);
     }
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.payersId,
+        namePrefix + PartAdjFissPayer.Fields.payersId,
         true,
         1,
         PreAdjFissPayer_insuredPayer_payersId_Extractor.getEnumString(from),
         to::setPayersId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.payersName,
+        namePrefix + PartAdjFissPayer.Fields.payersName,
         1,
         32,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasPayersName(),
         () -> from.getInsuredPayer().getPayersName(),
         to::setPayersName);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.relInd,
+        namePrefix + PartAdjFissPayer.Fields.relInd,
         true,
         1,
         PreAdjFissPayer_insuredPayer_relInd_Extractor.getEnumString(from),
         to::setRelInd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.assignInd,
+        namePrefix + PartAdjFissPayer.Fields.assignInd,
         true,
         1,
         PreAdjFissPayer_insuredPayer_assignInd_Extractor.getEnumString(from),
         to::setAssignInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.providerNumber,
+        namePrefix + PartAdjFissPayer.Fields.providerNumber,
         1,
         13,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasProviderNumber(),
         () -> from.getInsuredPayer().getProviderNumber(),
         to::setProviderNumber);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.adjDcnIcn,
+        namePrefix + PartAdjFissPayer.Fields.adjDcnIcn,
         1,
         23,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasAdjDcnIcn(),
         () -> from.getInsuredPayer().getAdjDcnIcn(),
         to::setAdjDcnIcn);
     transformer.copyOptionalAmount(
-        namePrefix + PreAdjFissPayer.Fields.priorPmt,
+        namePrefix + PartAdjFissPayer.Fields.priorPmt,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasPriorPmt(),
         () -> from.getInsuredPayer().getPriorPmt(),
         to::setPriorPmt);
     transformer.copyOptionalAmount(
-        namePrefix + PreAdjFissPayer.Fields.estAmtDue,
+        namePrefix + PartAdjFissPayer.Fields.estAmtDue,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasEstAmtDue(),
         () -> from.getInsuredPayer().getEstAmtDue(),
         to::setEstAmtDue);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.insuredRel,
+        namePrefix + PartAdjFissPayer.Fields.insuredRel,
         true,
         2,
         PreAdjFissPayer_insuredPayer_insuredRel_Extractor.getEnumString(from),
         to::setInsuredRel);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.insuredName,
+        namePrefix + PartAdjFissPayer.Fields.insuredName,
         1,
         25,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredName(),
         () -> from.getInsuredPayer().getInsuredName(),
         to::setInsuredName);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.insuredSsnHic,
+        namePrefix + PartAdjFissPayer.Fields.insuredSsnHic,
         1,
         19,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredSsnHic(),
         () -> from.getInsuredPayer().getInsuredSsnHic(),
         to::setInsuredSsnHic);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.insuredGroupName,
+        namePrefix + PartAdjFissPayer.Fields.insuredGroupName,
         1,
         17,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredGroupName(),
         () -> from.getInsuredPayer().getInsuredGroupName(),
         to::setInsuredGroupName);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.insuredGroupNbr,
+        namePrefix + PartAdjFissPayer.Fields.insuredGroupNbr,
         1,
         20,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredGroupNbr(),
         () -> from.getInsuredPayer().getInsuredGroupNbr(),
         to::setInsuredGroupNbr);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.treatAuthCd,
+        namePrefix + PartAdjFissPayer.Fields.treatAuthCd,
         1,
         18,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasTreatAuthCd(),
         () -> from.getInsuredPayer().getTreatAuthCd(),
         to::setTreatAuthCd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.insuredSex,
+        namePrefix + PartAdjFissPayer.Fields.insuredSex,
         true,
         1,
         PreAdjFissPayer_insuredPayer_insuredSex_Extractor.getEnumString(from),
         to::setInsuredSex);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.insuredRelX12,
+        namePrefix + PartAdjFissPayer.Fields.insuredRelX12,
         true,
         2,
         PreAdjFissPayer_insuredPayer_insuredRelX12_Extractor.getEnumString(from),
         to::setInsuredRelX12);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissPayer.Fields.insuredDob,
+        namePrefix + PartAdjFissPayer.Fields.insuredDob,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredDob(),
         () -> from.getInsuredPayer().getInsuredDob(),
         to::setInsuredDob);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.insuredDobText,
+        namePrefix + PartAdjFissPayer.Fields.insuredDobText,
         1,
         9,
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredDobText(),
         () -> from.getInsuredPayer().getInsuredDobText(),
         to::setInsuredDobText);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.payersId,
+        namePrefix + PartAdjFissPayer.Fields.payersId,
         true,
         1,
         PreAdjFissPayer_beneZPayer_payersId_Extractor.getEnumString(from),
         to::setPayersId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.payersName,
+        namePrefix + PartAdjFissPayer.Fields.payersName,
         1,
         32,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasPayersName(),
         () -> from.getBeneZPayer().getPayersName(),
         to::setPayersName);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.relInd,
+        namePrefix + PartAdjFissPayer.Fields.relInd,
         true,
         1,
         PreAdjFissPayer_beneZPayer_relInd_Extractor.getEnumString(from),
         to::setRelInd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.assignInd,
+        namePrefix + PartAdjFissPayer.Fields.assignInd,
         true,
         1,
         PreAdjFissPayer_beneZPayer_assignInd_Extractor.getEnumString(from),
         to::setAssignInd);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.providerNumber,
+        namePrefix + PartAdjFissPayer.Fields.providerNumber,
         1,
         13,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasProviderNumber(),
         () -> from.getBeneZPayer().getProviderNumber(),
         to::setProviderNumber);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.adjDcnIcn,
+        namePrefix + PartAdjFissPayer.Fields.adjDcnIcn,
         1,
         23,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasAdjDcnIcn(),
         () -> from.getBeneZPayer().getAdjDcnIcn(),
         to::setAdjDcnIcn);
     transformer.copyOptionalAmount(
-        namePrefix + PreAdjFissPayer.Fields.priorPmt,
+        namePrefix + PartAdjFissPayer.Fields.priorPmt,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasPriorPmt(),
         () -> from.getBeneZPayer().getPriorPmt(),
         to::setPriorPmt);
     transformer.copyOptionalAmount(
-        namePrefix + PreAdjFissPayer.Fields.estAmtDue,
+        namePrefix + PartAdjFissPayer.Fields.estAmtDue,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasEstAmtDue(),
         () -> from.getBeneZPayer().getEstAmtDue(),
         to::setEstAmtDue);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.beneRel,
+        namePrefix + PartAdjFissPayer.Fields.beneRel,
         true,
         2,
         PreAdjFissPayer_beneZPayer_beneRel_Extractor.getEnumString(from),
         to::setBeneRel);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.beneLastName,
+        namePrefix + PartAdjFissPayer.Fields.beneLastName,
         1,
         15,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneLastName(),
         () -> from.getBeneZPayer().getBeneLastName(),
         to::setBeneLastName);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.beneFirstName,
+        namePrefix + PartAdjFissPayer.Fields.beneFirstName,
         1,
         10,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneFirstName(),
         () -> from.getBeneZPayer().getBeneFirstName(),
         to::setBeneFirstName);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.beneMidInit,
+        namePrefix + PartAdjFissPayer.Fields.beneMidInit,
         1,
         1,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneMidInit(),
         () -> from.getBeneZPayer().getBeneMidInit(),
         to::setBeneMidInit);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.beneSsnHic,
+        namePrefix + PartAdjFissPayer.Fields.beneSsnHic,
         1,
         19,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneSsnHic(),
         () -> from.getBeneZPayer().getBeneSsnHic(),
         to::setBeneSsnHic);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.insuredGroupName,
+        namePrefix + PartAdjFissPayer.Fields.insuredGroupName,
         1,
         17,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasInsuredGroupName(),
         () -> from.getBeneZPayer().getInsuredGroupName(),
         to::setInsuredGroupName);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissPayer.Fields.beneDob,
+        namePrefix + PartAdjFissPayer.Fields.beneDob,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneDob(),
         () -> from.getBeneZPayer().getBeneDob(),
         to::setBeneDob);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.beneSex,
+        namePrefix + PartAdjFissPayer.Fields.beneSex,
         true,
         1,
         PreAdjFissPayer_beneZPayer_beneSex_Extractor.getEnumString(from),
         to::setBeneSex);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissPayer.Fields.treatAuthCd,
+        namePrefix + PartAdjFissPayer.Fields.treatAuthCd,
         1,
         18,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasTreatAuthCd(),
         () -> from.getBeneZPayer().getTreatAuthCd(),
         to::setTreatAuthCd);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.insuredSex,
+        namePrefix + PartAdjFissPayer.Fields.insuredSex,
         true,
         1,
         PreAdjFissPayer_beneZPayer_insuredSex_Extractor.getEnumString(from),
         to::setInsuredSex);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissPayer.Fields.insuredRelX12,
+        namePrefix + PartAdjFissPayer.Fields.insuredRelX12,
         true,
         2,
         PreAdjFissPayer_beneZPayer_insuredRelX12_Extractor.getEnumString(from),
@@ -1297,39 +1297,39 @@ public class FissClaimTransformer {
     return to;
   }
 
-  private PreAdjFissAuditTrail transformMessageImpl(
+  private PartAdjFissAuditTrail transformMessageImpl(
       FissAuditTrail from, DataTransformer transformer, Instant now, String namePrefix) {
-    final PreAdjFissAuditTrail to = new PreAdjFissAuditTrail();
+    final PartAdjFissAuditTrail to = new PartAdjFissAuditTrail();
     to.setLastUpdated(now);
     transformer.copyEnumAsString(
-        namePrefix + PreAdjFissAuditTrail.Fields.badtStatus,
+        namePrefix + PartAdjFissAuditTrail.Fields.badtStatus,
         true,
         1,
         PreAdjFissAuditTrail_badtStatus_Extractor.getEnumString(from),
         to::setBadtStatus);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissAuditTrail.Fields.badtLoc,
+        namePrefix + PartAdjFissAuditTrail.Fields.badtLoc,
         1,
         5,
         from::hasBadtLoc,
         from::getBadtLoc,
         to::setBadtLoc);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissAuditTrail.Fields.badtOperId,
+        namePrefix + PartAdjFissAuditTrail.Fields.badtOperId,
         1,
         9,
         from::hasBadtOperId,
         from::getBadtOperId,
         to::setBadtOperId);
     transformer.copyOptionalString(
-        namePrefix + PreAdjFissAuditTrail.Fields.badtReas,
+        namePrefix + PartAdjFissAuditTrail.Fields.badtReas,
         1,
         5,
         from::hasBadtReas,
         from::getBadtReas,
         to::setBadtReas);
     transformer.copyOptionalDate(
-        namePrefix + PreAdjFissAuditTrail.Fields.badtCurrDate,
+        namePrefix + PartAdjFissAuditTrail.Fields.badtCurrDate,
         from::hasBadtCurrDateCymd,
         from::getBadtCurrDateCymd,
         to::setBadtCurrDate);

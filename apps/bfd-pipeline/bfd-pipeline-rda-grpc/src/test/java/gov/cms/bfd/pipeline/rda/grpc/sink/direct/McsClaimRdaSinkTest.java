@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
@@ -83,17 +83,17 @@ public class McsClaimRdaSinkTest {
 
   @Test
   public void mergeSuccessful() throws Exception {
-    final List<RdaChange<PreAdjMcsClaim>> batch =
+    final List<RdaChange<PartAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
     final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
-    for (RdaChange<PreAdjMcsClaim> change : batch) {
-      PreAdjMcsClaim claim = change.getClaim();
+    for (RdaChange<PartAdjMcsClaim> change : batch) {
+      PartAdjMcsClaim claim = change.getClaim();
       verify(entityManager).merge(claim);
     }
-    for (RdaChange<PreAdjMcsClaim> change : batch) {
+    for (RdaChange<PartAdjMcsClaim> change : batch) {
       verify(entityManager).persist(sink.createMetaData(change));
     }
     // the merge transaction will be committed
@@ -111,7 +111,7 @@ public class McsClaimRdaSinkTest {
 
   @Test
   public void mergeFatalError() {
-    final List<RdaChange<PreAdjMcsClaim>> batch =
+    final List<RdaChange<PartAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new RuntimeException("oops")).when(entityManager).merge(batch.get(1).getClaim());
 
@@ -144,9 +144,9 @@ public class McsClaimRdaSinkTest {
     verify(entityManager).close();
   }
 
-  private List<McsClaimChange> messagesForBatch(List<RdaChange<PreAdjMcsClaim>> batch) {
+  private List<McsClaimChange> messagesForBatch(List<RdaChange<PartAdjMcsClaim>> batch) {
     final var messages = ImmutableList.<McsClaimChange>builder();
-    for (RdaChange<PreAdjMcsClaim> change : batch) {
+    for (RdaChange<PartAdjMcsClaim> change : batch) {
       var message =
           McsClaimChange.newBuilder()
               .setIcn(change.getClaim().getIdrClmHdIcn())
@@ -158,8 +158,8 @@ public class McsClaimRdaSinkTest {
     return messages.build();
   }
 
-  private RdaChange<PreAdjMcsClaim> createClaim(String dcn) {
-    PreAdjMcsClaim claim = new PreAdjMcsClaim();
+  private RdaChange<PartAdjMcsClaim> createClaim(String dcn) {
+    PartAdjMcsClaim claim = new PartAdjMcsClaim();
     claim.setIdrClmHdIcn(dcn);
     claim.setApiSource(VERSION);
     return new RdaChange<>(

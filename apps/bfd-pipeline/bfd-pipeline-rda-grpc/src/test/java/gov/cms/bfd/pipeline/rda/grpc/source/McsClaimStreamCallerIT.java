@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -36,7 +36,7 @@ public class McsClaimStreamCallerIT {
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertTrue(results.hasNext());
 
-              PreAdjMcsClaim claim = transform(results.next());
+              PartAdjMcsClaim claim = transform(results.next());
               assertTrue(claim.getIdrClmHdIcn().length() > 0);
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertTrue(results.hasNext());
@@ -70,7 +70,7 @@ public class McsClaimStreamCallerIT {
             });
   }
 
-  private PreAdjMcsClaim transform(McsClaimChange change) {
+  private PartAdjMcsClaim transform(McsClaimChange change) {
     return transformer.transformClaim(change).getClaim();
   }
 }

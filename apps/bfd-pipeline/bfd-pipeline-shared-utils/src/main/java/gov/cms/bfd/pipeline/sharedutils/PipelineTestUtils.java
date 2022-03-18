@@ -2,8 +2,8 @@ package gov.cms.bfd.pipeline.sharedutils;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissProcCode;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
@@ -143,8 +143,8 @@ public final class PipelineTestUtils {
             Beneficiary.class,
             LoadedBatch.class,
             LoadedFile.class,
-            PreAdjFissClaim.class,
-            PreAdjFissProcCode.class,
+            PartAdjFissClaim.class,
+            PartAdjFissProcCode.class,
             SkippedRifRecord.class);
 
     try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection(); ) {
