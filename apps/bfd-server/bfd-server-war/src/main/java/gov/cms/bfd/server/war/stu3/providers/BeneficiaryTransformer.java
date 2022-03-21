@@ -110,10 +110,10 @@ final class BeneficiaryTransformer {
               TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY);
     }
 
-    patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
+    patient.setId(beneficiary.getBeneficiaryId());
     patient.addIdentifier(
         TransformerUtils.createIdentifier(
-            CcwCodebookVariable.BENE_ID, String.valueOf(beneficiary.getBeneficiaryId())));
+            CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
 
     // Add hicn-hash identifier ONLY if raw hicn is requested.
     if (requestHeader.isHICNinIncludeIdentifiers()) {

@@ -148,7 +148,13 @@ public final class PipelineApplicationState implements AutoCloseable {
 
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    /*
+     * Hibernate validation is being disabled in the applications so that
+     * validation failures do not prevent the pipeline from starting.
+     * With the implementation of RFC-0011 this validation will be moved
+     * to a more appropriate stage of the deployment.
+     */
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.NONE);
     hibernateProperties.put(
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 

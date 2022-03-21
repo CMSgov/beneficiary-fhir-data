@@ -35,8 +35,6 @@ public final class RifParsingUtils {
           .toFormatter();
 
   /**
-   * Construct a {@link CSVParser}
-   *
    * @param file the {@link RifFile} to parse
    * @return a {@link CSVParser} for the specified {@link RifFile}
    */
@@ -45,8 +43,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Construct a {@link CSVParser}
-   *
    * @param csvFormat the {@link CSVFormat} to use to parse the file
    * @param file the {@link RifFile} to parse
    * @return a {@link CSVParser} for the specified {@link RifFile}
@@ -57,8 +53,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Construct a {@link CSVParser}
-   *
    * @param csvFormat the {@link CSVFormat} to use to parse the file
    * @param fileStream the {@link InputStream} to build a {@link CSVParser} for
    * @param charset the {@link Charset} of the {@link InputStream} to be parsed
@@ -85,8 +79,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse a {@link String} from a {@link String}
-   *
    * @param string the value to parse
    * @return the {@link String} that was specified (yes, this is a silly method, but it's here for
    *     consistency)
@@ -96,8 +88,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Optional} {@link String} from a {@link String}
-   *
    * @param string the value to parse
    * @return an {@link Optional} {@link String}, where {@link Optional#isPresent()} will be <code>
    *     false</code> if the specified value was empty, and will otherwise contain the specified
@@ -108,8 +98,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse a {@link Integer} from a {@link String}
-   *
    * @param intText the number string to parse
    * @return the specified text parsed into an {@link Integer}
    */
@@ -127,23 +115,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse a {@link Long} from a {@link String}
-   *
-   * @param longText the number string to parse
-   * @return the specified text parsed into an {@link Long}
-   */
-  public static Long parseLong(String longText) {
-    try {
-      return Long.parseLong(longText);
-    } catch (NumberFormatException e) {
-      throw new InvalidRifValueException(
-          String.format("Unable to parse long value: '%s'.", longText), e);
-    }
-  }
-
-  /**
-   * Parse a {@link Optional} {@link Integer} from a {@link String}
-   *
    * @param intText the number string to parse
    * @return an {@link Optional} populated with an {@link Integer} if the input has data, or an
    *     empty Optional if not
@@ -157,23 +128,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Optional} {@link Long} from a {@link String}
-   *
-   * @param longText the number string to parse
-   * @return an {@link Optional} populated with an {@link Long} if the input has data, or an empty
-   *     Optional if not
-   */
-  public static Optional<Long> parseOptionalLong(String longText) {
-    if (longText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseLong(longText));
-    }
-  }
-
-  /**
-   * Parse a {@link BigDecimal} from a {@link String}
-   *
    * @param decimalText the decimal string to parse
    * @return the specified text parsed into a {@link BigDecimal}
    */
@@ -195,8 +149,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Optional} {@link BigDecimal} from a {@link String}
-   *
    * @param decimalText the decimal string to parse
    * @return the result of {@link #parseDecimal(String)} if the specified text isn't empty, or an
    *     empty Optional if it is empty
@@ -210,8 +162,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse a {@link LocalDate} from a {@link String}
-   *
    * @param dateText the date string to parse
    * @return the specified text as a {@link LocalDate}
    */
@@ -251,8 +201,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Instant} from a {@link String}
-   *
    * @param timestampText the timestamp string to parse
    * @return the specified text as a {@link Instant}, parsed using {@link #RIF_TIMESTAMP_FORMATTER}
    */
@@ -273,8 +221,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Optional} {@link LocalDate} from a {@link String}
-   *
    * @param dateText the date string to parse
    * @return an {@link Optional} populated with a {@link LocalDate} if the input has data, or an
    *     empty Optional if not
@@ -288,8 +234,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Optional} {@link Instant} from a {@link String}
-   *
    * @param timestampText the timestamp string to parse
    * @return an {@link Optional} populated with a {@link Instant} if the input has data, or an empty
    *     Optional if not
@@ -303,8 +247,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse a {@link Character} from a {@link String}
-   *
    * @param charText the char string to parse
    * @return the specified text as a {@link Character} (first character only),
    */
@@ -322,8 +264,6 @@ public final class RifParsingUtils {
   }
 
   /**
-   * Parse an {@link Optional} {@link Character} from a {@link String}
-   *
    * @param charText the date string to parse
    * @return an {@link Optional} populated with a {@link Character} if the input has data, or an
    *     empty Optional if not
