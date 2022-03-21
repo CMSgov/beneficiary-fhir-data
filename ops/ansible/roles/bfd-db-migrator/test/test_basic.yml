@@ -12,8 +12,9 @@
       vars:
         db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAPSHOT/bfd-db-migrator-1.0.0-SNAPSHOT.zip"
         db_migrator_db_url: 'jdbc:hsqldb:mem:test'
-        db_migrator_db_username: ""
-        db_migrator_db_password: ""
+        db_migrator_db_username: "bfd"
+        db_migrator_db_password: "bfd"
+        db_migrator_db_max_pool_size: "1"
 
 # Verify that things worked as expected.
 - hosts: bfd-db-migrator

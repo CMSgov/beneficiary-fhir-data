@@ -10,4 +10,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
 
 # Remove the Docker instance used in the tests.
-docker rm --force "$CONTAINER_NAME"
+if [ "$REMOVE_CONTAINER" ]; then
+    echo "Removing ${CONTAINER_NAME} container..."
+    docker rm --force "$CONTAINER_NAME"
+fi
