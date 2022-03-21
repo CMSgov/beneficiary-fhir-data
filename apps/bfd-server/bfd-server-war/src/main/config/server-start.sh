@@ -53,8 +53,8 @@ visualVm=""
 targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
-preadjEnabled="true"
-preadjOldMbiHashEnabled="false"
+partadjEnabled="true"
+partadjOldMbiHashEnabled="false"
 while true; do
 	case "$1" in
 		-j )
@@ -70,9 +70,9 @@ while true; do
 		-e )
 			v2Enabled="$2"; shift 2 ;;
 		-p )
-			preadjEnabled="$2"; shift 2 ;;
+			partadjEnabled="$2"; shift 2 ;;
 		-o )
-			preadjOldMbiHashEnabled="$2"; shift 2 ;;
+			partadjOldMbiHashEnabled="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -188,8 +188,8 @@ BFD_PORT="${serverPortHttps}" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
-	"-DbfdServer.preadj.enabled=${preadjEnabled}" \
-	"-DbfdServer.preadj.oldMbiHash.enabled=${preadjOldMbiHashEnabled}" \
+	"-DbfdServer.partadj.enabled=${partadjEnabled}" \
+	"-DbfdServer.partadj.oldMbiHash.enabled=${partadjOldMbiHashEnabled}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \

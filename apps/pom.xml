@@ -98,11 +98,11 @@
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
 
-		<!-- Whether the preadj endpoints should be enabled -->
-		<local.preadj.enabled>true</local.preadj.enabled>
+		<!-- Whether the partadj endpoints should be enabled -->
+		<local.partadj.enabled>true</local.partadj.enabled>
 
 		<!-- Whether the old MBI hash query feature should be enabled -->
-		<local.preadj.oldMbiHash.enabled>true</local.preadj.oldMbiHash.enabled>
+		<local.partadj.oldMbiHash.enabled>true</local.partadj.oldMbiHash.enabled>
 	</properties>
 
 	<dependencyManagement>

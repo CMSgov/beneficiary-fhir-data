@@ -349,10 +349,10 @@ public class SpringConfiguration {
    *
    * @return True if the resources should be available to consume, False otherwise.
    */
-  private static boolean isPreAdjResourcesEnabled() {
+  private static boolean isPartAdjResourcesEnabled() {
     return Boolean.TRUE
         .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.enabled", "false"));
+        .equalsIgnoreCase(System.getProperty("bfdServer.partadj.enabled", "false"));
   }
 
   /**
@@ -362,10 +362,10 @@ public class SpringConfiguration {
    *
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
-  public static boolean isPreAdjOldMbiHashEnabled() {
+  public static boolean isPartAdjOldMbiHashEnabled() {
     return Boolean.TRUE
         .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.oldMbiHash.enabled", "false"));
+        .equalsIgnoreCase(System.getProperty("bfdServer.partadj.oldMbiHash.enabled", "false"));
   }
 
   /**
@@ -390,7 +390,7 @@ public class SpringConfiguration {
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
-    if (isPreAdjResourcesEnabled()) {
+    if (isPartAdjResourcesEnabled()) {
       r4ResourceProviders.add(r4ClaimResourceProvider);
       r4ResourceProviders.add(r4ClaimResponseResourceProvider);
     }
