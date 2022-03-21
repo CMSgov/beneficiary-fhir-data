@@ -1,5 +1,5 @@
-# BASE_ANSIBLE tag, generally the latest available from https://github.com/CMSgov/beneficiary-fhir-data/pkgs/container/bfd-ansible
-ARG BASE_ANSIBLE_TAG=eb3ebdf
+# BASE_ANSIBLE tag, a known tag or latest available from https://github.com/CMSgov/beneficiary-fhir-data/pkgs/container/bfd-ansible
+ARG BASE_ANSIBLE_TAG=master
 FROM ghcr.io/cmsgov/bfd-ansible:$BASE_ANSIBLE_TAG
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 

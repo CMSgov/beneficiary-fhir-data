@@ -24,6 +24,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
+  // Maps RIF ICD type codes to their equivalent RDA model values
+  private static final Map<String, Integer> icdMap = Map.of("0", 1, "9", 0);
+
   private static final int MAX_DIAGNOSIS_CODES = 12;
 
   private final Map<String, BeneficiaryData> mbiMap;
@@ -146,14 +149,7 @@ public class McsTransformer extends AbstractTransformer {
                           .setIdrDiagCode(diagnosisCode)
                           .setIdrDiagIcdTypeEnumValue(
                               data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
-                                  .map(
-                                      dxVersionCode -> {
-                                        try {
-                                          return Integer.parseInt(dxVersionCode);
-                                        } catch (NumberFormatException e) {
-                                          return -1;
-                                        }
-                                      })
+                                  .map(dxVersionCode -> icdMap.getOrDefault(dxVersionCode, -1))
                                   .orElse(-1))
                           .build()));
     }
