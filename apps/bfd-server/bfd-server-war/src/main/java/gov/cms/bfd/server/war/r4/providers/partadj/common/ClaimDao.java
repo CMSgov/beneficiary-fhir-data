@@ -86,8 +86,8 @@ public class ClaimDao {
   }
 
   /**
-   * Find records by MBI (hashed or unhashed) based on a given PreAdjMbi attribute name and search
-   * value with a given last updated range.
+   * Find records by MBI (hashed or unhashed) based on a given attribute name and search value with
+   * a given last updated range.
    *
    * @param entityClass The entity type to retrieve.
    * @param mbiRecordAttributeName The name of the entity's mbiRecord attribute..

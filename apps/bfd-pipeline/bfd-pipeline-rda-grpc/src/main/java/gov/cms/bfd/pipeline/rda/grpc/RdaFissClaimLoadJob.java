@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * PipelineJob requires that the class of the job be used to define the PipelineJobType. This class
- * is a simple wrapper to ensure that PreAdjFissClaim processing has a unique PipelineJobType value
- * based on its class.
+ * is a simple wrapper to ensure that {@link PartAdjFissClaim} processing has a unique {@link
+ * gov.cms.bfd.pipeline.sharedutils.PipelineJobType} value based on its class.
  */
 public class RdaFissClaimLoadJob
     extends AbstractRdaLoadJob<FissClaimChange, RdaChange<PartAdjFissClaim>> {

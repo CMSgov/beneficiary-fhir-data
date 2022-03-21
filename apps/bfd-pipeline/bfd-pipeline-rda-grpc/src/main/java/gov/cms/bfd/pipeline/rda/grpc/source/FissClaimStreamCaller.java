@@ -23,12 +23,11 @@ public class FissClaimStreamCaller extends GrpcStreamCaller<FissClaimChange> {
   }
 
   /**
-   * Calls the getFissClaims RPC. The Iterator from the RPC call is wrapped with a transforming
-   * Iterator that converts the API FissClaim objects into database PreAdjFissClaim entity objects.
+   * Calls the getFissClaims RPC and returns a blocking {@link GrpcResponseStream} of the results.
    *
    * @param channel an already open channel to the service being called
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
-   * @return a blocking GrpcResponseStream of PreAdjFissClaim entity objects
+   * @return a blocking {@link GrpcResponseStream} of {@link FissClaimChange} entity objects
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override

@@ -23,12 +23,11 @@ public class McsClaimStreamCaller extends GrpcStreamCaller<McsClaimChange> {
   }
 
   /**
-   * Calls the getMcsClaims RPC. The Iterator from the RPC call is wrapped with a transforming
-   * Iterator that converts the API McsClaim objects into database PreAdjMcsClaim entity objects.
+   * Calls the getMcsClaims RPC and returns a blocking {@link GrpcResponseStream} of the results.
    *
    * @param channel an already open channel to the service being called
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
-   * @return a blocking GrpcResponseStream of PreAdjMcsClaim entity objects
+   * @return a blocking GrpcResponseStream of {@link McsClaimChange} entity objects
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override

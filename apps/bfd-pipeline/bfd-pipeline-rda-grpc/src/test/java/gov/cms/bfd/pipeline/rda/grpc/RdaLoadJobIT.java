@@ -96,7 +96,7 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
               JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
-          List<PartAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
+          List<PartAdjFissClaim> claims = getPartAdjFissClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (PartAdjFissClaim resultClaim : claims) {
             FissClaim expected = findMatchingFissClaim(expectedClaims, resultClaim);
@@ -144,7 +144,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getMessage().contains("invalid length"));
                     }
                   });
-          List<PartAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
+          List<PartAdjFissClaim> claims = getPartAdjFissClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -188,7 +188,7 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
               JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
-          List<PartAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          List<PartAdjMcsClaim> claims = getPartAdjMcsClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (PartAdjMcsClaim resultClaim : claims) {
             McsClaim expected = findMatchingMcsClaim(expectedClaims, resultClaim);
@@ -238,7 +238,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                     }
                   });
-          List<PartAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          List<PartAdjMcsClaim> claims = getPartAdjMcsClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -264,17 +264,17 @@ public class RdaLoadJobIT {
   }
 
   private void assertTablesAreEmpty(EntityManager entityManager) throws Exception {
-    assertEquals(0, getPreAdjFissClaims(entityManager).size());
-    assertEquals(0, getPreAdjMcsClaims(entityManager).size());
+    assertEquals(0, getPartAdjFissClaims(entityManager).size());
+    assertEquals(0, getPartAdjMcsClaims(entityManager).size());
   }
 
-  private List<PartAdjMcsClaim> getPreAdjMcsClaims(EntityManager entityManager) {
+  private List<PartAdjMcsClaim> getPartAdjMcsClaims(EntityManager entityManager) {
     return entityManager
         .createQuery("select c from PartAdjMcsClaim c", PartAdjMcsClaim.class)
         .getResultList();
   }
 
-  private List<PartAdjFissClaim> getPreAdjFissClaims(EntityManager entityManager) {
+  private List<PartAdjFissClaim> getPartAdjFissClaims(EntityManager entityManager) {
     return entityManager
         .createQuery("select c from PartAdjFissClaim c", PartAdjFissClaim.class)
         .getResultList();
