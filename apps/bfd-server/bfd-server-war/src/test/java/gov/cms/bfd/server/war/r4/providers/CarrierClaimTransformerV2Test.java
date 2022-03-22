@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -71,7 +72,8 @@ public class CarrierClaimTransformerV2Test {
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        new CarrierClaimTransformerV2().transform(new MetricRegistry(), claim, Optional.empty());
+        CarrierClaimTransformerV2.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -91,7 +93,8 @@ public class CarrierClaimTransformerV2Test {
 
     assertMatches(
         claim,
-        CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)));
+        CarrierClaimTransformerV2.transform(
+            new MetricRegistry(), claim, Optional.of(false), new FDADrugTestUtils()));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -106,7 +109,7 @@ public class CarrierClaimTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         CarrierClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugTestUtils());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 

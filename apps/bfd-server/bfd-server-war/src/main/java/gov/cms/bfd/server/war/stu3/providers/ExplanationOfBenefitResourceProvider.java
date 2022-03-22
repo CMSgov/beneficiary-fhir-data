@@ -21,6 +21,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -78,6 +79,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   private MetricRegistry metricRegistry;
   private Stu3EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
+  private IDrugCodeProvider drugCodeProvider;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -101,6 +103,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
+  }
+
+  /** @param drugCodeProvider the {@link IDrugCodeProvider} to use */
+  @Inject
+  public void setDrugCodeProvider(IDrugCodeProvider drugCodeProvider) {
+    this.drugCodeProvider = drugCodeProvider;
   }
 
   /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
@@ -179,7 +187,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
         eobIdType
             .get()
             .getTransformer()
-            .transform(metricRegistry, claimEntity, Optional.of(includeTaxNumbers));
+            .transform(
+                metricRegistry, claimEntity, Optional.of(includeTaxNumbers), drugCodeProvider);
     return eob;
   }
 
@@ -277,49 +286,57 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
           transformToEobs(
               ClaimType.CARRIER,
               findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.DME))
       eobs.addAll(
           transformToEobs(
               ClaimType.DME,
               findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.HHA))
       eobs.addAll(
           transformToEobs(
               ClaimType.HHA,
               findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.HOSPICE))
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
               findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.INPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
               findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.OUTPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.PDE))
       eobs.addAll(
           transformToEobs(
               ClaimType.PDE,
               findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
           transformToEobs(
               ClaimType.SNF,
               findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeProvider));
 
     if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
 
@@ -450,9 +467,16 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    */
   @Trace
   private List<ExplanationOfBenefit> transformToEobs(
-      ClaimType claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
+      ClaimType claimType,
+      List<?> claims,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     return claims.stream()
-        .map(c -> claimType.getTransformer().transform(metricRegistry, c, includeTaxNumbers))
+        .map(
+            c ->
+                claimType
+                    .getTransformer()
+                    .transform(metricRegistry, c, includeTaxNumbers, drugCodeProvider))
         .collect(Collectors.toList());
   }
 

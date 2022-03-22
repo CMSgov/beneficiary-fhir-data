@@ -38,7 +38,8 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        PartDEventTransformer.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
     assertMatches(claim, eob);
   }
 
@@ -88,7 +89,8 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        PartDEventTransformer.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -289,8 +291,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(),
-          "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE");
+          claim.getNationalDrugCode(), "Fake Diluent - WATER");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
@@ -29,15 +28,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  */
 public class OutpatientClaimTransformerV2 {
 
-  private IDrugCodeProvider drugCodeProvider;
-
-  public OutpatientClaimTransformerV2() {
-    drugCodeProvider = new FDADrugUtils();
-  }
-
-  public OutpatientClaimTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
-    drugCodeProvider = iDrugCodeProvider;
-  }
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link InpatientClaim} to transform
@@ -46,7 +36,10 @@ public class OutpatientClaimTransformerV2 {
    */
   @Trace
   static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object claim,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -58,7 +51,7 @@ public class OutpatientClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim, drugCodeProvider);
 
     timer.stop();
     return eob;
@@ -69,7 +62,8 @@ public class OutpatientClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      OutpatientClaim claimGroup, IDrugCodeProvider drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped

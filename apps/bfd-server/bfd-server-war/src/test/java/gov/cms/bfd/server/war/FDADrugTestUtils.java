@@ -83,7 +83,7 @@ public class FDADrugTestUtils implements IDrugCodeProvider {
      * SUBSTANCENAME
      */
     String line =
-        "0000-0000_00z00000-00zz-000z-zzzz-0z000zz00z00\t0000-0000\tHUMAN DRUG\tSterile Water, SOLUTION\t00000000\tNDA\tNDA000000\tCMS \tWATER\t1 tmL/mL\tN\t20201231";
+        "0000-0000_000000zz-0zz0-0z00-zzz0-0z00zzz00000\t0000-0000\tFAKE DRUG\tFake Diluent\t\tfake\tFAKE SOLUTION\tFake\t0\t\tFAK\tFAK000000\tFake Company\tWATER\t1\tmL/mL\t\t\tN\t00000000";
     String ndcProductColumns[] = line.split("\t");
     String nationalDrugCodeManufacturer =
         StringUtils.leftPad(

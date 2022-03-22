@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -33,14 +34,18 @@ final class CarrierClaimTransformer {
    */
   @Trace
   static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object claim,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        transformClaim((CarrierClaim) claim, includeTaxNumbers, drugCodeProvider);
 
     timer.stop();
     return eob;
@@ -52,7 +57,9 @@ final class CarrierClaimTransformer {
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      CarrierClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -217,6 +224,11 @@ final class CarrierClaimTransformer {
                 CcwCodebookVariable.CARR_LINE_MTUS_CNT, claimLine.getMtusCount()));
       }
 
+      String drugCodeName = null;
+      if (claimLine.getNationalDrugCode().isPresent()) {
+        drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode().get());
+      }
+
       // Common item level fields between Carrier and DME
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
@@ -244,7 +256,8 @@ final class CarrierClaimTransformer {
           claimLine.getHctHgbTestTypeCode(),
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          claimLine.getNationalDrugCode(),
+          drugCodeName);
 
       if (claimLine.getProviderStateCode().isPresent()) {
         item.getLocation()

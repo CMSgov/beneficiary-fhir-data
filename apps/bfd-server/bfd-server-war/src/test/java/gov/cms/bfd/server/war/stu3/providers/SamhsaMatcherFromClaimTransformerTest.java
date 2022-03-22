@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -73,42 +74,66 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     ExplanationOfBenefit inpatientEob =
         InpatientClaimTransformer.transform(
-            new MetricRegistry(), getClaim(InpatientClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(InpatientClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     ExplanationOfBenefit outpatientEob =
         OutpatientClaimTransformer.transform(
-            new MetricRegistry(), getClaim(OutpatientClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(OutpatientClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
     ExplanationOfBenefit dmeEob =
         DMEClaimTransformer.transform(
-            new MetricRegistry(), getClaim(DMEClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(DMEClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
     ExplanationOfBenefit hhaEob =
         HHAClaimTransformer.transform(
-            new MetricRegistry(), getClaim(HHAClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(HHAClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     ExplanationOfBenefit hospiceEob =
         HospiceClaimTransformer.transform(
-            new MetricRegistry(), getClaim(HospiceClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(HospiceClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
     ExplanationOfBenefit snfEob =
         SNFClaimTransformer.transform(
-            new MetricRegistry(), getClaim(SNFClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(SNFClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     ExplanationOfBenefit carrierEob =
         CarrierClaimTransformer.transform(
-            new MetricRegistry(), getClaim(CarrierClaim.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(CarrierClaim.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
     ExplanationOfBenefit pdeEob =
         PartDEventTransformer.transform(
-            new MetricRegistry(), getClaim(PartDEvent.class), Optional.empty());
+            new MetricRegistry(),
+            getClaim(PartDEvent.class),
+            Optional.empty(),
+            new FDADrugTestUtils());
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
 
     // Load the claim types into the test data that will be run against each test

@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
@@ -23,15 +22,7 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformer {
-  private IDrugCodeProvider drugCodeProvider;
 
-  public DMEClaimTransformer() {
-    drugCodeProvider = new FDADrugUtils();
-  }
-
-  public DMEClaimTransformer(IDrugCodeProvider iDrugCodeProvider) {
-    drugCodeProvider = iDrugCodeProvider;
-  }
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
@@ -43,14 +34,18 @@ final class DMEClaimTransformer {
    */
   @Trace
   static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object claim,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeProvider);
 
     timer.stop();
     return eob;
@@ -64,7 +59,9 @@ final class DMEClaimTransformer {
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      DMEClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -250,6 +247,10 @@ final class DMEClaimTransformer {
         TransformerUtils.setQuantityUnitInfo(
             CcwCodebookVariable.DMERC_LINE_MTUS_CD, claimLine.getMtusCode(), eob, mtusQuantity);
       }
+      String drugCodeName = null;
+      if (claimLine.getNationalDrugCode().isPresent()) {
+        drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode().get());
+      }
 
       // Common item level fields between Carrier and DME
       TransformerUtils.mapEobCommonItemCarrierDME(
@@ -278,7 +279,8 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestTypeCode(),
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          claimLine.getNationalDrugCode(),
+          drugCodeName);
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

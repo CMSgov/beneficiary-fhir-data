@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
@@ -41,7 +42,8 @@ public final class HHAClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        HHAClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        HHAClaimTransformer.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
     assertMatches(claim, eob);
   }
 

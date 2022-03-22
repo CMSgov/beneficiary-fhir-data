@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.commons;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.server.war.IDrugCodeProvider;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
@@ -24,5 +25,8 @@ public interface ClaimTypeTransformer {
    * @return a new FHIR {@link ExplanationOfBenefit} resource
    */
   ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object rifRecord, Optional<Boolean> includeTaxNumbers);
+      MetricRegistry metricRegistry,
+      Object rifRecord,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider);
 }

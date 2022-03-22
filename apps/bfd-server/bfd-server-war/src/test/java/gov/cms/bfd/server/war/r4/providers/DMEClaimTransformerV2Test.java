@@ -9,6 +9,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -74,7 +75,8 @@ public final class DMEClaimTransformerV2Test {
     claim = generateClaim();
     DMEClaimTransformerV2 DMEClaimTransformerV2 = new DMEClaimTransformerV2();
     ExplanationOfBenefit genEob =
-        DMEClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+        DMEClaimTransformerV2.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -517,10 +519,7 @@ public final class DMEClaimTransformerV2Test {
     Extension compare =
         new Extension(
             "http://hl7.org/fhir/sid/ndc",
-            new Coding(
-                "http://hl7.org/fhir/sid/ndc",
-                "500904610",
-                "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"));
+            new Coding("http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER"));
 
     assertTrue(compare.equalsDeep(ex));
   }
@@ -1163,7 +1162,8 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
+        DMEClaimTransformerV2.transform(
+            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugTestUtils());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

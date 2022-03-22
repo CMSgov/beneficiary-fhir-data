@@ -10,6 +10,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -76,7 +77,8 @@ public class HHAClaimTransformerV2Test {
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        HHAClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+        HHAClaimTransformerV2.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -885,7 +887,8 @@ public class HHAClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        HHAClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
+        HHAClaimTransformerV2.transform(
+            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugTestUtils());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

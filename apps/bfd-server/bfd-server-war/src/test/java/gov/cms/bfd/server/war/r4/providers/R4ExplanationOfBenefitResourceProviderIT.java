@@ -30,6 +30,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -404,7 +405,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         OutpatientClaimTransformerV2.transform(
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             claim,
-            Optional.of(false)),
+            Optional.of(false),
+            new FDADrugTestUtils()),
         eob);
   }
 
@@ -1453,7 +1455,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         PartDEventTransformerV2.transform(
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             partDEvent,
-            Optional.of(false)),
+            Optional.of(false),
+            new FDADrugTestUtils()),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -2054,7 +2057,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .transform(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 claim,
-                Optional.of(false)),
+                Optional.of(false),
+                new FDADrugTestUtils()),
         searchResults);
   }
 

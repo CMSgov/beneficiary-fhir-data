@@ -34,7 +34,6 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -126,16 +125,6 @@ import org.slf4j.MDC;
  */
 public final class TransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
-
-  private IDrugCodeProvider drugCodeProvider;
-
-  public TransformerUtils() {
-    drugCodeProvider = new FDADrugUtils();
-  }
-
-  public TransformerUtils(IDrugCodeProvider iDrugCodeProvider) {
-    drugCodeProvider = iDrugCodeProvider;
-  }
 
   /**
    * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
@@ -1844,7 +1833,8 @@ public final class TransformerUtils {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode) {
+      Optional<String> nationalDrugCode,
+      String drugCodeName) {
 
     SimpleQuantity serviceCnt = new SimpleQuantity();
     serviceCnt.setValue(serviceCount);
@@ -1944,7 +1934,7 @@ public final class TransformerUtils {
           item,
           TransformerConstants.CODING_NDC,
           TransformerConstants.CODING_NDC,
-          drugCodeProvider.retrieveFDADrugCodeDisplay(nationalDrugCode.get()),
+          drugCodeName,
           nationalDrugCode.get());
     }
 
@@ -2985,13 +2975,13 @@ public final class TransformerUtils {
     }
 
     // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
+    /*  if (!drugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
       drugCodeProvider.drugCodeLookupMissingFailures.add(icdCode);
       LOGGER.info(
           "No ICD code display value match found for ICD code {} in resource {}.",
           icdCode,
           "DGNS_CD.txt");
-    }
+    } */
 
     return null;
   }
@@ -3189,10 +3179,15 @@ public final class TransformerUtils {
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      MetricRegistry metricRegistry, Object rifRecord, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object rifRecord,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
-        return claimType.getTransformer().transform(metricRegistry, rifRecord, includeTaxNumbers);
+        return claimType
+            .getTransformer()
+            .transform(metricRegistry, rifRecord, includeTaxNumbers, drugCodeProvider);
       }
     }
 

@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
@@ -28,15 +27,6 @@ import org.hl7.fhir.r4.model.Quantity;
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 public final class DMEClaimTransformerV2 {
 
-  private IDrugCodeProvider drugCodeProvider;
-
-  public DMEClaimTransformerV2() {
-    drugCodeProvider = new FDADrugUtils();
-  }
-
-  public DMEClaimTransformerV2(IDrugCodeProvider iDrugCodeProvider) {
-    drugCodeProvider = iDrugCodeProvider;
-  }
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
@@ -45,7 +35,10 @@ public final class DMEClaimTransformerV2 {
    */
   @Trace
   static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object claim,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -54,7 +47,8 @@ public final class DMEClaimTransformerV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeProvider);
 
     timer.stop();
     return eob;
@@ -66,7 +60,9 @@ public final class DMEClaimTransformerV2 {
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      DMEClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -169,13 +165,16 @@ public final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob, includeTaxNumbers);
+    handleClaimLines(claimGroup, eob, includeTaxNumbers, drugCodeProvider);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 
   private static void handleClaimLines(
-      DMEClaim claimGroup, ExplanationOfBenefit eob, Optional<Boolean> includeTaxNumbers) {
+      DMEClaim claimGroup,
+      ExplanationOfBenefit eob,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 

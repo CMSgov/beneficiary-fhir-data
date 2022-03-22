@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -26,16 +25,6 @@ import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformer {
 
-  IDrugCodeProvider drugCodeProvider;
-
-  public PartDEventTransformer() {
-    drugCodeProvider = new FDADrugUtils();
-  }
-
-  public PartDEventTransformer(IDrugCodeProvider iDrugCodeProvider) {
-    drugCodeProvider = iDrugCodeProvider;
-  }
-
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link PartDEvent} to transform
@@ -47,14 +36,17 @@ final class PartDEventTransformer {
    */
   @Trace
   static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object claim,
+      Optional<Boolean> includeTaxNumbers,
+      IDrugCodeProvider drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof PartDEvent)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
+    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim, drugCodeProvider);
 
     timer.stop();
     return eob;
@@ -65,7 +57,8 @@ final class PartDEventTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
-  private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      PartDEvent claimGroup, IDrugCodeProvider drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types

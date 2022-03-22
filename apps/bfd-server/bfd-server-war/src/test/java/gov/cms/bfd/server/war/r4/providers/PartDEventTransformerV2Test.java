@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -66,7 +67,9 @@ public final class PartDEventTransformerV2Test {
   @BeforeEach
   public void before() {
     claim = generateClaim();
-    eob = PartDEventTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    eob =
+        PartDEventTransformerV2.transform(
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -584,9 +587,7 @@ public final class PartDEventTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding(
-                        "http://hl7.org/fhir/sid/ndc",
-                        "500904610",
-                        "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE")));
+                        "http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER")));
 
     assertTrue(compare.equalsDeep(pos));
   }
@@ -882,7 +883,7 @@ public final class PartDEventTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         PartDEventTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugTestUtils());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
