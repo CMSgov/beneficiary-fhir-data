@@ -80,7 +80,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * Both Maven and Eclipse hide compiler messages, so setting this constant to <code>true</code>
    * will also log messages out to a new source file.
    */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
@@ -665,8 +665,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     MethodSpec.Builder parentGetter =
         MethodSpec.methodBuilder("getParentBeneficiary")
-            .addStatement("return $N", PARENT_BENEFICIARY)
-            .returns(parentBeneficiaryIdFieldType);
+            .addStatement("return Long.parseLong($N)", PARENT_BENEFICIARY)
+            .returns(TypeName.LONG);
     beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
     MethodSpec.Builder yearMonthGetter =
         MethodSpec.methodBuilder("getYearMonth")
@@ -998,30 +998,74 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .build();
       headerEntityClass.addField(headerField);
 
-      MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField))
-              .addModifiers(Modifier.PUBLIC)
-              .returns(
-                  selectJavaPropertyType(
-                      rifField.getRifColumnType(),
-                      rifField.isRifColumnOptional(),
-                      rifField.getRifColumnLength(),
-                      rifField.getRifColumnScale()));
-      addGetterStatement(rifField, headerField, headerFieldGetter);
+      MethodSpec.Builder headerFieldGetter;
+
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        if (rifField.isRifColumnOptional()) {
+          headerFieldGetter =
+              MethodSpec.methodBuilder(calculateGetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .addStatement("return Optional.of(Long.parseLong($N))", headerField.name)
+                  .returns(
+                      ParameterizedTypeName.get(
+                          ClassName.get(Optional.class), ClassName.get(Long.class)));
+        } else {
+          headerFieldGetter =
+              MethodSpec.methodBuilder(calculateGetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .addStatement("return Long.parseLong($N)", headerField.name)
+                  .returns(TypeName.LONG);
+        }
+      } else {
+        headerFieldGetter =
+            MethodSpec.methodBuilder(calculateGetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(
+                    selectJavaPropertyType(
+                        rifField.getRifColumnType(),
+                        rifField.isRifColumnOptional(),
+                        rifField.getRifColumnLength(),
+                        rifField.getRifColumnScale()));
+        addGetterStatement(rifField, headerField, headerFieldGetter);
+      }
       headerEntityClass.addMethod(headerFieldGetter.build());
 
-      MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField))
-              .addModifiers(Modifier.PUBLIC)
-              .returns(void.class)
-              .addParameter(
-                  selectJavaPropertyType(
-                      rifField.getRifColumnType(),
-                      rifField.isRifColumnOptional(),
-                      rifField.getRifColumnLength(),
-                      rifField.getRifColumnScale()),
-                  headerField.name);
-      addSetterStatement(rifField, headerField, headerFieldSetter);
+      MethodSpec.Builder headerFieldSetter;
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        if (rifField.isRifColumnOptional()) {
+          headerFieldSetter =
+              MethodSpec.methodBuilder(calculateSetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .returns(void.class)
+                  .addParameter(
+                      ParameterizedTypeName.get(
+                          ClassName.get(Optional.class), ClassName.get(Long.class)),
+                      headerField.name);
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N.orElse(null))", headerField.name, headerField.name);
+        } else {
+          headerFieldSetter =
+              MethodSpec.methodBuilder(calculateSetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .returns(void.class)
+                  .addParameter(TypeName.LONG, headerField.name);
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N)", headerField.name, headerField.name);
+        }
+      } else {
+        headerFieldSetter =
+            MethodSpec.methodBuilder(calculateSetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(void.class)
+                .addParameter(
+                    selectJavaPropertyType(
+                        rifField.getRifColumnType(),
+                        rifField.isRifColumnOptional(),
+                        rifField.getRifColumnLength(),
+                        rifField.getRifColumnScale()),
+                    headerField.name);
+        addSetterStatement(rifField, headerField, headerFieldSetter);
+      }
       headerEntityClass.addMethod(headerFieldSetter.build());
     }
 
@@ -1227,6 +1271,42 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     return headerEntityFinal;
   }
+  /**
+   * Support method for the varchar to bigint transition that identifies the columns that are
+   * planned to be converted.
+   *
+   * <p>TODO: BFD-1583 This is a temporary method that should be removed along with all code blocks
+   * that are conditional on this method once all beneficiary and claim tables IDs have completed
+   * the transition from varchar to bigint.
+   *
+   * @param tableName the table name
+   * @param rifField the field model
+   * @return true if the field specified is one that will be converted to a bigint in the near
+   *     future
+   */
+  private boolean isFutureBigint(String tableName, RifField rifField) {
+    /*
+     * Remove elements from these arrays as they are converted. When everything is removed, remove
+     * the method and all blocks that are conditional on this method.
+     */
+    final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
+    final List<String> futureBigIntTables =
+        Arrays.asList(
+            "beneficiaries",
+            "beneficiaries_history",
+            "medicare_beneficiaryid_history",
+            "carrier_claims",
+            "dme_claims",
+            "hha_claims",
+            "hospice_claims",
+            "inpatient_claims",
+            "outpatient_claims",
+            "partd_events",
+            "snf_claims");
+
+    return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
+        && futureBigIntTables.contains(tableName.toLowerCase());
+  }
 
   /**
    * Generates a Java class that can handle RIF-to-Entity parsing.
@@ -1328,7 +1408,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
-      if (rifField.getRifColumnType() == RifColumnType.CHAR
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
+      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
           && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
         // Handle a String field.
         parseUtilsMethodName =
