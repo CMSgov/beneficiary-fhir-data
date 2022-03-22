@@ -27,11 +27,16 @@
       changed_when: false
       become: true
 
-    - name: Check Log Content
-      find:
-        paths: /usr/local/bfd-migrator/
-        patterns: migrator-log.json
-        contains: Successfully started
-      register: modified
-      retries: 20
-      delay: 5
+    - name: Grab Log Contents
+      command: cat /opt/bfd-db-migrator/migrator-log.json
+      changed_when: false
+      register: read_log
+
+    - name: Log Failed Application Launches
+      debug:
+        msg: "{{ read_log.stdout }}"
+      when: "'Successfully started' not in read_log.stdout"
+
+    - name: Verify Log Contents
+      action: fail
+      when: "'Successfully started' not in read_log.stdout"
