@@ -283,8 +283,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     @Nullable private final String authenticationToken;
     /** Object mapper for parsing JWT */
     @EqualsAndHashCode.Exclude
-    private final ObjectMapper mapper =
-        new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static final ObjectMapper mapper =
+        new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     /**
      * Specifies which type of server we want to connect to. {@code Remote} is the normal
