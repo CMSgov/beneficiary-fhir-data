@@ -30,12 +30,14 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import utils.TestingUtils;
 
 public class RdaLoadJobIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
@@ -281,6 +283,9 @@ public class RdaLoadJobIT {
   }
 
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
+    final String AUTH_TOKEN =
+        TestingUtils.createTokenWithExpiration(
+            Instant.now().plus(90, ChronoUnit.DAYS).getEpochSecond());
     final GrpcRdaSource.Config.ConfigBuilder rdaSourceConfig = GrpcRdaSource.Config.builder();
     if (serverPort > 0) {
       rdaSourceConfig
@@ -293,7 +298,7 @@ public class RdaLoadJobIT {
           .inProcessServerName(RdaServerJob.Config.DEFAULT_SERVER_NAME);
     }
     rdaSourceConfig.maxIdle(Duration.ofMinutes(1));
-    rdaSourceConfig.authenticationToken("secret-token");
+    rdaSourceConfig.authenticationToken(AUTH_TOKEN);
     return new RdaLoadOptions(
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(1))

@@ -1,9 +1,14 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -28,6 +33,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +41,8 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+import utils.TestingUtils;
 
 public class GrpcRdaSourceIT {
   private static final String SOURCE_CLAIM_1 =
@@ -231,14 +239,18 @@ public class GrpcRdaSourceIT {
 
   @Test
   public void grpcCallWithCorrectAuthToken() throws Exception {
+    final String AUTH_TOKEN =
+        TestingUtils.createTokenWithExpiration(
+            Instant.now().plus(90, ChronoUnit.DAYS).getEpochSecond());
+
     createServerConfig()
-        .authorizedToken("secret")
+        .authorizedToken(AUTH_TOKEN)
         .build()
         .runWithPortParam(
             port -> {
               int count;
               GrpcRdaSource.Config config =
-                  createSourceConfig(port).authenticationToken("secret").build();
+                  createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
               try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
                   createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
@@ -276,13 +288,17 @@ public class GrpcRdaSourceIT {
 
   @Test
   public void grpcCallWithIncorrectAuthToken() throws Exception {
+    final String AUTH_TOKEN =
+        TestingUtils.createTokenWithExpiration(
+            Instant.now().plus(90, ChronoUnit.DAYS).getEpochSecond());
+    final String WRONG_AUTH_TOKEN = AUTH_TOKEN + "Invalid";
     createServerConfig()
-        .authorizedToken("secret")
+        .authorizedToken(AUTH_TOKEN)
         .build()
         .runWithPortParam(
             port -> {
               GrpcRdaSource.Config config =
-                  createSourceConfig(port).authenticationToken("wrong-secret").build();
+                  createSourceConfig(port).authenticationToken(WRONG_AUTH_TOKEN).build();
               try {
                 try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
                     createSource(config)) {
@@ -297,6 +313,115 @@ public class GrpcRdaSourceIT {
                     ((StatusRuntimeException) ex.getOriginalCause()).getStatus());
               }
             });
+  }
+
+  @Test
+  public void grpcCallWithCorrectExpiringAuthTokenOneMonth() throws Exception {
+    final String AUTH_TOKEN =
+        TestingUtils.createTokenWithExpiration(
+            Instant.now().plus(20, ChronoUnit.DAYS).getEpochSecond());
+    assertHasLogMessage(
+        Level.WARN,
+        "JWT will expire in 19 days",
+        () ->
+            createServerConfig()
+                .authorizedToken(AUTH_TOKEN)
+                .build()
+                .runWithPortParam(
+                    port -> {
+                      int count;
+                      GrpcRdaSource.Config config =
+                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
+                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                          createSource(config)) {
+                        count = source.retrieveAndProcessObjects(3, sink);
+                      }
+                      assertEquals(2, count);
+                      assertEquals(2, sink.getValues().size());
+                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+                    }));
+  }
+
+  @Test
+  public void grpcCallWithCorrectExpiringAuthTokenTwoWeeks() throws Exception {
+    final String AUTH_TOKEN =
+        TestingUtils.createTokenWithExpiration(
+            Instant.now().plus(10, ChronoUnit.DAYS).getEpochSecond());
+    assertHasLogMessage(
+        Level.ERROR,
+        "JWT will expire in 9 days",
+        () ->
+            createServerConfig()
+                .authorizedToken(AUTH_TOKEN)
+                .build()
+                .runWithPortParam(
+                    port -> {
+                      int count;
+                      GrpcRdaSource.Config config =
+                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
+                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                          createSource(config)) {
+                        count = source.retrieveAndProcessObjects(3, sink);
+                      }
+                      assertEquals(2, count);
+                      assertEquals(2, sink.getValues().size());
+                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+                    }));
+  }
+
+  @Test
+  public void grpcCallWithCorrectExpiredAuthToken() {
+    final String AUTH_TOKEN =
+        TestingUtils.createTokenWithExpiration(
+            Instant.now().plus(-1, ChronoUnit.DAYS).getEpochSecond());
+
+    assertThrows(
+        ProcessingException.class,
+        () ->
+            createServerConfig()
+                .authorizedToken(AUTH_TOKEN)
+                .build()
+                .runWithPortParam(
+                    port -> {
+                      int count;
+                      GrpcRdaSource.Config config =
+                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
+                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                          createSource(config)) {
+                        count = source.retrieveAndProcessObjects(3, sink);
+                      }
+                      assertEquals(2, count);
+                      assertEquals(2, sink.getValues().size());
+                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+                    }));
+  }
+
+  private void assertHasLogMessage(
+      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
+    final Logger LOGGER = (Logger) LoggerFactory.getLogger(GrpcRdaSource.class);
+
+    ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+    listAppender.setName("UNIT_TEST_APPENDER");
+    listAppender.start();
+
+    LOGGER.addAppender(listAppender);
+
+    runnable.run();
+
+    boolean logMessageFound =
+        listAppender.list.stream()
+            .anyMatch(e -> e.getLevel() == logLevel && e.getMessage().equals(logMessage));
+
+    LOGGER.detachAppender("UNIT_TEST_APPENDER");
+
+    assertTrue(logMessageFound, "The expected log message was not found.");
+  }
+
+  private interface ThrowingRunnable<E extends Throwable> {
+    void run() throws E;
   }
 
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {

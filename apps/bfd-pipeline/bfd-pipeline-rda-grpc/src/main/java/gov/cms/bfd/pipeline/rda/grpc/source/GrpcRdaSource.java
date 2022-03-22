@@ -6,9 +6,13 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import gov.cms.bfd.pipeline.rda.grpc.AuthenticationException;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -18,6 +22,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -273,6 +281,10 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final Duration maxIdle;
     /** The token to pass to the RDA API server to authenticate the client. */
     @Nullable private final String authenticationToken;
+    /** Object mapper for parsing JWT */
+    @EqualsAndHashCode.Exclude
+    private final ObjectMapper mapper =
+        new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     /**
      * Specifies which type of server we want to connect to. {@code Remote} is the normal
@@ -333,6 +345,20 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     public CallOptions createCallOptions() {
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
+        long daysToExpire = daysToJWTExpire(authenticationToken);
+
+        if (daysToExpire < 0) {
+          throw new AuthenticationException("JWT is expired.");
+        } else if (daysToExpire < 31) {
+          String logMessage = String.format("JWT will expire in %d days", daysToExpire);
+
+          if (daysToExpire < 14) {
+            LOGGER.error(logMessage);
+          } else {
+            LOGGER.warn(logMessage);
+          }
+        }
+
         answer = answer.withCallCredentials(new BearerToken(authenticationToken));
       } else {
         LOGGER.warn("authenticationToken has not been set - calling server with no token");
@@ -363,6 +389,24 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private ManagedChannelBuilder<?> createInProcessChannelBuilder() {
       return InProcessChannelBuilder.forName(inProcessServerName);
     }
+
+    private long daysToJWTExpire(String token) {
+      try {
+        String[] jwtBits = token.split("\\.");
+        String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
+        JWTClaims claims = mapper.readValue(claimsString, JWTClaims.class);
+        Instant expiration = Instant.ofEpochMilli(claims.exp * 1000);
+        return Instant.now().until(expiration, ChronoUnit.DAYS);
+      } catch (JsonProcessingException e) {
+        LOGGER.error("Could not read JWT claims", e);
+        return 0;
+      }
+    }
+  }
+
+  @Data
+  private static class JWTClaims {
+    private long exp;
   }
 
   /**
