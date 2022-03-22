@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissProcCodes table */
+/** JPA class for the FissAuditTrails table */
 @Entity
 @Getter
 @Setter
@@ -26,9 +26,9 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissProcCode.PK.class)
-@Table(name = "fiss_proc_codes", schema = "rda")
-public class PreAdjFissProcCode {
+@IdClass(RdaFissAuditTrail.PK.class)
+@Table(name = "fiss_audit_trails", schema = "rda")
+public class RdaFissAuditTrail {
   @Id
   @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -39,19 +39,25 @@ public class PreAdjFissProcCode {
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "proc_code", length = 10, nullable = false)
-  private String procCode;
+  @Column(name = "badt_status", length = 1)
+  private String badtStatus;
 
-  @Column(name = "proc_flag", length = 4)
-  private String procFlag;
+  @Column(name = "badt_loc", length = 5)
+  private String badtLoc;
 
-  @Column(name = "proc_date")
-  private LocalDate procDate;
+  @Column(name = "badt_oper_id", length = 9)
+  private String badtOperId;
+
+  @Column(name = "badt_reas", length = 5)
+  private String badtReas;
+
+  @Column(name = "badt_curr_date")
+  private LocalDate badtCurrDate;
 
   @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  /** PK class for the FissProcCodes table */
+  /** PK class for the FissAuditTrails table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor

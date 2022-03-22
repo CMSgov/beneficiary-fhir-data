@@ -1,7 +1,9 @@
 package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsDiagnosisCodes table */
+/** JPA class for the McsAdjustments table */
 @Entity
 @Getter
 @Setter
@@ -25,9 +27,9 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsDiagnosisCode.PK.class)
-@Table(name = "mcs_diagnosis_codes", schema = "rda")
-public class PreAdjMcsDiagnosisCode {
+@IdClass(RdaMcsAdjustment.PK.class)
+@Table(name = "mcs_adjustments", schema = "rda")
+public class RdaMcsAdjustment {
   @Id
   @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
@@ -38,16 +40,31 @@ public class PreAdjMcsDiagnosisCode {
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "idr_diag_icd_type", length = 1)
-  private String idrDiagIcdType;
-
-  @Column(name = "idr_diag_code", length = 7, nullable = false)
-  private String idrDiagCode;
-
   @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  /** PK class for the McsDiagnosisCodes table */
+  @Column(name = "idr_adj_date")
+  private LocalDate idrAdjDate;
+
+  @Column(name = "idr_xref_icn", length = 15)
+  private String idrXrefIcn;
+
+  @Column(name = "idr_adj_clerk", length = 4)
+  private String idrAdjClerk;
+
+  @Column(name = "idr_init_ccn", length = 15)
+  private String idrInitCcn;
+
+  @Column(name = "idr_adj_chk_wrt_dt")
+  private LocalDate idrAdjChkWrtDt;
+
+  @Column(name = "idr_adj_b_eomb_amt", columnDefinition = "decimal(7,2)")
+  private BigDecimal idrAdjBEombAmt;
+
+  @Column(name = "idr_adj_p_eomb_amt", columnDefinition = "decimal(7,2)")
+  private BigDecimal idrAdjPEombAmt;
+
+  /** PK class for the McsAdjustments table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor

@@ -2,6 +2,7 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsAudits table */
+/** JPA class for the McsLocations table */
 @Entity
 @Getter
 @Setter
@@ -25,9 +26,9 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsAudit.PK.class)
-@Table(name = "mcs_audits", schema = "rda")
-public class PreAdjMcsAudit {
+@IdClass(RdaMcsLocation.PK.class)
+@Table(name = "mcs_locations", schema = "rda")
+public class RdaMcsLocation {
   @Id
   @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
@@ -41,16 +42,19 @@ public class PreAdjMcsAudit {
   @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  @Column(name = "idr_j_audit_num")
-  private Integer idrJAuditNum;
+  @Column(name = "idr_loc_clerk", length = 4)
+  private String idrLocClerk;
 
-  @Column(name = "idr_j_audit_ind", length = 1)
-  private String idrJAuditInd;
+  @Column(name = "idr_loc_code", length = 3)
+  private String idrLocCode;
 
-  @Column(name = "idr_j_audit_disp", length = 1)
-  private String idrJAuditDisp;
+  @Column(name = "idr_loc_date")
+  private LocalDate idrLocDate;
 
-  /** PK class for the McsAudits table */
+  @Column(name = "idr_loc_actv_code", length = 1)
+  private String idrLocActvCode;
+
+  /** PK class for the McsLocations table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor

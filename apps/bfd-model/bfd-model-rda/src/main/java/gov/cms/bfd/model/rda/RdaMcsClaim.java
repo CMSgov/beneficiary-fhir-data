@@ -33,7 +33,7 @@ import org.hibernate.annotations.BatchSize;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @Table(name = "mcs_claims", schema = "rda")
-public class PreAdjMcsClaim {
+public class RdaMcsClaim {
   @Id
   @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
@@ -208,7 +208,7 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjMcsDetail> details = new HashSet<>();
+  private Set<RdaMcsDetail> details = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -217,7 +217,7 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
+  private Set<RdaMcsDiagnosisCode> diagCodes = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -226,7 +226,7 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjMcsAdjustment> adjustments = new HashSet<>();
+  private Set<RdaMcsAdjustment> adjustments = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -235,7 +235,7 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjMcsAudit> audits = new HashSet<>();
+  private Set<RdaMcsAudit> audits = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -244,7 +244,7 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjMcsLocation> locations = new HashSet<>();
+  private Set<RdaMcsLocation> locations = new HashSet<>();
 
   public String getIdrClaimMbi() {
     return mbiRecord != null ? mbiRecord.getMbi() : null;

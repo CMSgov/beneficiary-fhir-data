@@ -35,7 +35,7 @@ import org.hibernate.annotations.BatchSize;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @Table(name = "fiss_claims", schema = "rda")
-public class PreAdjFissClaim {
+public class RdaFissClaim {
   @Id
   @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -322,7 +322,7 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
+  private Set<RdaFissProcCode> procCodes = new HashSet<>();
 
   @OneToMany(
       mappedBy = "dcn",
@@ -331,7 +331,7 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
+  private Set<RdaFissDiagnosisCode> diagCodes = new HashSet<>();
 
   @OneToMany(
       mappedBy = "dcn",
@@ -340,7 +340,7 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjFissPayer> payers = new HashSet<>();
+  private Set<RdaFissPayer> payers = new HashSet<>();
 
   @OneToMany(
       mappedBy = "dcn",
@@ -349,7 +349,7 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @BatchSize(size = 100)
   @Builder.Default
-  private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
+  private Set<RdaFissAuditTrail> auditTrail = new HashSet<>();
 
   public String getMbi() {
     return mbiRecord != null ? mbiRecord.getMbi() : null;
