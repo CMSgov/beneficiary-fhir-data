@@ -22,7 +22,7 @@ export ARTIFACT_DIRECTORY=".m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAP
 export ARTIFACT="bfd-db-migrator-1.0.0-SNAPSHOT.zip"
 
 # iterate getopts
-while getopts "h:k" option; do
+while getopts "hk" option; do
    case "$option" in
       h) # help
         help
