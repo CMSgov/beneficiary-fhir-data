@@ -34,42 +34,42 @@ import org.hibernate.annotations.BatchSize;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissClaims`", schema = "`pre_adj`")
+@Table(name = "fiss_claims", schema = "rda")
 public class PreAdjFissClaim {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
+  @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
   private String dcn;
 
-  @Column(name = "`sequenceNumber`", nullable = false)
+  @Column(name = "sequence_number", nullable = false)
   private Long sequenceNumber;
 
-  @Column(name = "`hicNo`", length = 12, nullable = false)
+  @Column(name = "hic_no", length = 12, nullable = false)
   private String hicNo;
 
-  @Column(name = "`currStatus`", nullable = false)
+  @Column(name = "curr_status", nullable = false)
   private char currStatus;
 
-  @Column(name = "`currLoc1`", nullable = false)
+  @Column(name = "curr_loc1", nullable = false)
   private char currLoc1;
 
-  @Column(name = "`currLoc2`", length = 5, nullable = false)
+  @Column(name = "curr_loc2", length = 5, nullable = false)
   private String currLoc2;
 
   /** Provider State Code */
-  @Column(name = "`provStateCd`", length = 2)
+  @Column(name = "prov_state_cd", length = 2)
   private String provStateCd;
 
   /** Provider Type Facility Code */
-  @Column(name = "`provTypFacilCd`", length = 1)
+  @Column(name = "prov_typ_facil_cd", length = 1)
   private String provTypFacilCd;
 
   /** Provider Emergency Indicator */
-  @Column(name = "`provEmerInd`", length = 1)
+  @Column(name = "prov_emer_ind", length = 1)
   private String provEmerInd;
 
   /** Provider Department Identification */
-  @Column(name = "`provDeptId`", length = 3)
+  @Column(name = "prov_dept_id", length = 3)
   private String provDeptId;
 
   /**
@@ -84,75 +84,75 @@ public class PreAdjFissClaim {
    *   <li>Provider Department Identification
    * </ul>
    */
-  @Column(name = "`medaProvId`", length = 13)
+  @Column(name = "meda_prov_id", length = 13)
   private String medaProvId;
 
-  @Column(name = "`medaProv_6`", length = 6)
+  @Column(name = "meda_prov_6", length = 6)
   private String medaProv_6;
 
-  @Column(name = "`totalChargeAmount`", columnDefinition = "decimal(11,2)")
+  @Column(name = "total_charge_amount", columnDefinition = "decimal(11,2)")
   private BigDecimal totalChargeAmount;
 
-  @Column(name = "`receivedDate`")
+  @Column(name = "received_date")
   private LocalDate receivedDate;
 
-  @Column(name = "`currTranDate`")
+  @Column(name = "curr_tran_date")
   private LocalDate currTranDate;
 
-  @Column(name = "`admitDiagCode`", length = 7)
+  @Column(name = "admit_diag_code", length = 7)
   private String admitDiagCode;
 
-  @Column(name = "`principleDiag`", length = 7)
+  @Column(name = "principle_diag", length = 7)
   private String principleDiag;
 
-  @Column(name = "`npiNumber`", length = 10)
+  @Column(name = "npi_number", length = 10)
   private String npiNumber;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "`mbiId`")
+  @JoinColumn(name = "mbi_id")
   private Mbi mbiRecord;
 
-  @Column(name = "`fedTaxNumber`", length = 10)
+  @Column(name = "fed_tax_number", length = 10)
   private String fedTaxNumber;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  @Column(name = "`pracLocAddr1`")
+  @Column(name = "prac_loc_addr1")
   private String pracLocAddr1;
 
-  @Column(name = "`pracLocAddr2`")
+  @Column(name = "prac_loc_addr2")
   private String pracLocAddr2;
 
-  @Column(name = "`pracLocCity`")
+  @Column(name = "prac_loc_city")
   private String pracLocCity;
 
-  @Column(name = "`pracLocState`", length = 2)
+  @Column(name = "prac_loc_state", length = 2)
   private String pracLocState;
 
-  @Column(name = "`pracLocZip`", length = 15)
+  @Column(name = "prac_loc_zip", length = 15)
   private String pracLocZip;
 
-  @Column(name = "`stmtCovFromDate`")
+  @Column(name = "stmt_cov_from_date")
   private LocalDate stmtCovFromDate;
 
-  @Column(name = "`stmtCovToDate`")
+  @Column(name = "stmt_cov_to_date")
   private LocalDate stmtCovToDate;
 
-  @Column(name = "`lobCd`", length = 1)
+  @Column(name = "lob_cd", length = 1)
   private String lobCd;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "`servTypeCdMapping`", length = 20)
+  @Column(name = "serv_type_cd_mapping", length = 20)
   private ServTypeCdMapping servTypeCdMapping;
 
-  @Column(name = "`servTypeCd`", length = 1)
+  @Column(name = "serv_type_cd", length = 1)
   private String servTypeCd;
 
-  @Column(name = "`freqCd`", length = 1)
+  @Column(name = "freq_cd", length = 1)
   private String freqCd;
 
-  @Column(name = "`billTypCd`", length = 3)
+  @Column(name = "bill_typ_cd", length = 3)
   private String billTypCd;
 
   /**
@@ -160,159 +160,159 @@ public class PreAdjFissClaim {
    * version string returned by the RDA API server but when populating data from mock server it will
    * also include information about the mode the server was running in.
    */
-  @Column(name = "`apiSource`", length = 24)
+  @Column(name = "api_source", length = 24)
   private String apiSource;
 
   /** Reject Code */
-  @Column(name = "`rejectCd`", length = 5)
+  @Column(name = "reject_cd", length = 5)
   private String rejectCd;
 
   /** Fully or Partially Denied Indicator */
-  @Column(name = "`fullPartDenInd`", length = 1)
+  @Column(name = "full_part_den_ind", length = 1)
   private String fullPartDenInd;
 
   /** Non-Pay Code Indicator */
-  @Column(name = "`nonPayInd`", length = 2)
+  @Column(name = "non_pay_ind", length = 2)
   private String nonPayInd;
 
   /** Cross-reference Document Control Number */
-  @Column(name = "`xrefDcnNbr`", length = 23)
+  @Column(name = "xref_dcn_nbr", length = 23)
   private String xrefDcnNbr;
 
   /** Adjustment Requestor Identification */
-  @Column(name = "`adjReqCd`", length = 1)
+  @Column(name = "adj_req_cd", length = 1)
   private String adjReqCd;
 
   /** Adjustment Reason Code */
-  @Column(name = "`adjReasCd`", length = 2)
+  @Column(name = "adj_reas_cd", length = 2)
   private String adjReasCd;
 
   /** Cancel Cross-reference Document Control Number */
-  @Column(name = "`cancelXrefDcn`", length = 23)
+  @Column(name = "cancel_xref_dcn", length = 23)
   private String cancelXrefDcn;
 
   /** Cancel Date */
-  @Column(name = "`cancelDate`")
+  @Column(name = "cancel_date")
   private LocalDate cancelDate;
 
   /** Cancel Adjustment Code */
-  @Column(name = "`cancAdjCd`", length = 1)
+  @Column(name = "canc_adj_cd", length = 1)
   private String cancAdjCd;
 
   /** Original Cross-Reference Document Control Number */
-  @Column(name = "`originalXrefDcn`", length = 23)
+  @Column(name = "original_xref_dcn", length = 23)
   private String originalXrefDcn;
 
   /** Paid Date */
-  @Column(name = "`paidDt`")
+  @Column(name = "paid_dt")
   private LocalDate paidDt;
 
   /** Admission Date */
-  @Column(name = "`admDate`")
+  @Column(name = "adm_date")
   private LocalDate admDate;
 
   /** Source of Admission */
-  @Column(name = "`admSource`", length = 1)
+  @Column(name = "adm_source", length = 1)
   private String admSource;
 
   /** Primary Payer Code */
-  @Column(name = "`primaryPayerCode`", length = 1)
+  @Column(name = "primary_payer_code", length = 1)
   private String primaryPayerCode;
 
   /** Attending Physician NPI */
-  @Column(name = "`attendPhysId`", length = 16)
+  @Column(name = "attend_phys_id", length = 16)
   private String attendPhysId;
 
   /** Attending Physician Last Name */
-  @Column(name = "`attendPhysLname`", length = 17)
+  @Column(name = "attend_phys_lname", length = 17)
   private String attendPhysLname;
 
   /** Attending Physician First Name */
-  @Column(name = "`attendPhysFname`", length = 18)
+  @Column(name = "attend_phys_fname", length = 18)
   private String attendPhysFname;
 
   /** Attending Physician Middle Initial */
-  @Column(name = "`attendPhysMint`", length = 1)
+  @Column(name = "attend_phys_mint", length = 1)
   private String attendPhysMint;
 
   /** Attending Physician Flag */
-  @Column(name = "`attendPhysFlag`", length = 1)
+  @Column(name = "attend_phys_flag", length = 1)
   private String attendPhysFlag;
 
   /** Operating Physician NPI */
-  @Column(name = "`operatingPhysId`", length = 16)
+  @Column(name = "operating_phys_id", length = 16)
   private String operatingPhysId;
 
   /** Operating Physician Last Name */
-  @Column(name = "`operPhysLname`", length = 17)
+  @Column(name = "oper_phys_lname", length = 17)
   private String operPhysLname;
 
   /** Operating Physician First Name */
-  @Column(name = "`operPhysFname`", length = 18)
+  @Column(name = "oper_phys_fname", length = 18)
   private String operPhysFname;
 
   /** Operating Physician Middle Initial */
-  @Column(name = "`operPhysMint`", length = 1)
+  @Column(name = "oper_phys_mint", length = 1)
   private String operPhysMint;
 
   /** Operating Physician Flag */
-  @Column(name = "`operPhysFlag`", length = 1)
+  @Column(name = "oper_phys_flag", length = 1)
   private String operPhysFlag;
 
   /** Other Physician NPI */
-  @Column(name = "`othPhysId`", length = 16)
+  @Column(name = "oth_phys_id", length = 16)
   private String othPhysId;
 
   /** Other Physician Last Name */
-  @Column(name = "`othPhysLname`", length = 17)
+  @Column(name = "oth_phys_lname", length = 17)
   private String othPhysLname;
 
   /** Other Physician First Name */
-  @Column(name = "`othPhysFname`", length = 18)
+  @Column(name = "oth_phys_fname", length = 18)
   private String othPhysFname;
 
   /** Other Physician Middle Initial */
-  @Column(name = "`othPhysMint`", length = 1)
+  @Column(name = "oth_phys_mint", length = 1)
   private String othPhysMint;
 
   /** Other Physician Flag */
-  @Column(name = "`othPhysFlag`", length = 1)
+  @Column(name = "oth_phys_flag", length = 1)
   private String othPhysFlag;
 
   /** Cross-Reference Health Insurance Claim Number */
-  @Column(name = "`xrefHicNbr`", length = 12)
+  @Column(name = "xref_hic_nbr", length = 12)
   private String xrefHicNbr;
 
   /** Process new Health Insurance Claim Number */
-  @Column(name = "`procNewHicInd`", length = 1)
+  @Column(name = "proc_new_hic_ind", length = 1)
   private String procNewHicInd;
 
   /** New Health Insurance Claim Number */
-  @Column(name = "`newHic`", length = 12)
+  @Column(name = "new_hic", length = 12)
   private String newHic;
 
   /** Repository Indicator */
-  @Column(name = "`reposInd`", length = 1)
+  @Column(name = "repos_ind", length = 1)
   private String reposInd;
 
   /** Repository HIC */
-  @Column(name = "`reposHic`", length = 12)
+  @Column(name = "repos_hic", length = 12)
   private String reposHic;
 
   /** Health Insurance Claim (HIC) Number or Medicare Beneficiary Identify (MBI) */
-  @Column(name = "`mbiSubmBeneInd`", length = 1)
+  @Column(name = "mbi_subm_bene_ind", length = 1)
   private String mbiSubmBeneInd;
 
   /** Adjustment Medicare Beneficiary Identifier (MBI) Indicator */
-  @Column(name = "`adjMbiInd`", length = 1)
+  @Column(name = "adj_mbi_ind", length = 1)
   private String adjMbiInd;
 
   /** Adjustment Medicare Beneficiary Identifier */
-  @Column(name = "`adjMbi`", length = 11)
+  @Column(name = "adj_mbi", length = 11)
   private String adjMbi;
 
   /** Medical Record Number */
-  @Column(name = "`medicalRecordNo`", length = 17)
+  @Column(name = "medical_record_no", length = 17)
   private String medicalRecordNo;
 
   @OneToMany(

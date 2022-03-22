@@ -24,20 +24,20 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`MbiCache`", schema = "`pre_adj`")
+@Table(name = "mbi_cache", schema = "rda")
 public class Mbi {
   @Id
-  @Column(name = "`mbiId`", nullable = false, updatable = false)
+  @Column(name = "mbi_id", nullable = false, updatable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long mbiId;
 
   /** Actual MBI value from RDA API. */
-  @Column(name = "`mbi`", length = 11, nullable = false, unique = true)
+  @Column(name = "mbi", length = 11, nullable = false, unique = true)
   @EqualsAndHashCode.Include
   private String mbi;
 
   /** Currently active hash value used to represent the MBI in client applications. */
-  @Column(name = "`hash`", length = 64, nullable = false, unique = true)
+  @Column(name = "hash", length = 64, nullable = false, unique = true)
   private String hash;
 
   /**
@@ -45,10 +45,10 @@ public class Mbi {
    * current hash to a new one. For example if the algorithm, number of iterations, or salt have
    * been changed. This column is nullable.
    */
-  @Column(name = "`oldHash`", length = 64)
+  @Column(name = "old_hash", length = 64)
   private String oldHash;
 
-  @Column(name = "`lastUpdated`", nullable = false)
+  @Column(name = "last_updated", nullable = false)
   private Instant lastUpdated;
 
   /**

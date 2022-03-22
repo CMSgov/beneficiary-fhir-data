@@ -26,25 +26,25 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjMcsDiagnosisCode.PK.class)
-@Table(name = "`McsDiagnosisCodes`", schema = "`pre_adj`")
+@Table(name = "mcs_diagnosis_codes", schema = "rda")
 public class PreAdjMcsDiagnosisCode {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`idrDiagIcdType`", length = 1)
+  @Column(name = "idr_diag_icd_type", length = 1)
   private String idrDiagIcdType;
 
-  @Column(name = "`idrDiagCode`", length = 7, nullable = false)
+  @Column(name = "idr_diag_code", length = 7, nullable = false)
   private String idrDiagCode;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
   /** PK class for the McsDiagnosisCodes table */

@@ -24,7 +24,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`RdaApiProgress`", schema = "`pre_adj`")
+@Table(name = "rda_api_progress", schema = "rda")
 public class RdaApiProgress {
   public enum ClaimType {
     FISS,
@@ -33,12 +33,12 @@ public class RdaApiProgress {
 
   @Id
   @Enumerated(EnumType.STRING)
-  @Column(name = "`claimType`", length = 20, nullable = false)
+  @Column(name = "claim_type", length = 20, nullable = false)
   private ClaimType claimType;
 
-  @Column(name = "`lastSequenceNumber`", nullable = false)
+  @Column(name = "last_sequence_number", nullable = false)
   private Long lastSequenceNumber;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 }

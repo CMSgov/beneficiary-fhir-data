@@ -27,31 +27,31 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjMcsLocation.PK.class)
-@Table(name = "`McsLocations`", schema = "`pre_adj`")
+@Table(name = "mcs_locations", schema = "rda")
 public class PreAdjMcsLocation {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  @Column(name = "`idrLocClerk`", length = 4)
+  @Column(name = "idr_loc_clerk", length = 4)
   private String idrLocClerk;
 
-  @Column(name = "`idrLocCode`", length = 3)
+  @Column(name = "idr_loc_code", length = 3)
   private String idrLocCode;
 
-  @Column(name = "`idrLocDate`")
+  @Column(name = "idr_loc_date")
   private LocalDate idrLocDate;
 
-  @Column(name = "`idrLocActvCode`", length = 1)
+  @Column(name = "idr_loc_actv_code", length = 1)
   private String idrLocActvCode;
 
   /** PK class for the McsLocations table */

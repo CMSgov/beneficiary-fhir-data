@@ -32,102 +32,102 @@ import org.hibernate.annotations.BatchSize;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`McsClaims`", schema = "`pre_adj`")
+@Table(name = "mcs_claims", schema = "rda")
 public class PreAdjMcsClaim {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
-  @Column(name = "`sequenceNumber`", nullable = false)
+  @Column(name = "sequence_number", nullable = false)
   private Long sequenceNumber;
 
-  @Column(name = "`idrContrId`", length = 5, nullable = false)
+  @Column(name = "idr_contr_id", length = 5, nullable = false)
   private String idrContrId;
 
-  @Column(name = "`idrHic`", length = 12)
+  @Column(name = "idr_hic", length = 12)
   private String idrHic;
 
-  @Column(name = "`idrClaimType`", length = 1, nullable = false)
+  @Column(name = "idr_claim_type", length = 1, nullable = false)
   private String idrClaimType;
 
-  @Column(name = "`idrDtlCnt`")
+  @Column(name = "idr_dtl_cnt")
   private Integer idrDtlCnt;
 
-  @Column(name = "`idrBeneLast_1_6`", length = 6)
+  @Column(name = "idr_bene_last_1_6", length = 6)
   private String idrBeneLast_1_6;
 
-  @Column(name = "`idrBeneFirstInit`", length = 1)
+  @Column(name = "idr_bene_first_init", length = 1)
   private String idrBeneFirstInit;
 
-  @Column(name = "`idrBeneMidInit`", length = 1)
+  @Column(name = "idr_bene_mid_init", length = 1)
   private String idrBeneMidInit;
 
-  @Column(name = "`idrBeneSex`", length = 1)
+  @Column(name = "idr_bene_sex", length = 1)
   private String idrBeneSex;
 
-  @Column(name = "`idrStatusCode`", length = 1)
+  @Column(name = "idr_status_code", length = 1)
   private String idrStatusCode;
 
-  @Column(name = "`idrStatusDate`")
+  @Column(name = "idr_status_date")
   private LocalDate idrStatusDate;
 
-  @Column(name = "`idrBillProvNpi`", length = 10)
+  @Column(name = "idr_bill_prov_npi", length = 10)
   private String idrBillProvNpi;
 
-  @Column(name = "`idrBillProvNum`", length = 10)
+  @Column(name = "idr_bill_prov_num", length = 10)
   private String idrBillProvNum;
 
-  @Column(name = "`idrBillProvEin`", length = 10)
+  @Column(name = "idr_bill_prov_ein", length = 10)
   private String idrBillProvEin;
 
-  @Column(name = "`idrBillProvType`", length = 2)
+  @Column(name = "idr_bill_prov_type", length = 2)
   private String idrBillProvType;
 
-  @Column(name = "`idrBillProvSpec`", length = 2)
+  @Column(name = "idr_bill_prov_spec", length = 2)
   private String idrBillProvSpec;
 
-  @Column(name = "`idrBillProvGroupInd`", length = 1)
+  @Column(name = "idr_bill_prov_group_ind", length = 1)
   private String idrBillProvGroupInd;
 
-  @Column(name = "`idrBillProvPriceSpec`", length = 2)
+  @Column(name = "idr_bill_prov_price_spec", length = 2)
   private String idrBillProvPriceSpec;
 
-  @Column(name = "`idrBillProvCounty`", length = 2)
+  @Column(name = "idr_bill_prov_county", length = 2)
   private String idrBillProvCounty;
 
-  @Column(name = "`idrBillProvLoc`", length = 2)
+  @Column(name = "idr_bill_prov_loc", length = 2)
   private String idrBillProvLoc;
 
-  @Column(name = "`idrTotAllowed`", columnDefinition = "decimal(7,2)")
+  @Column(name = "idr_tot_allowed", columnDefinition = "decimal(7,2)")
   private BigDecimal idrTotAllowed;
 
-  @Column(name = "`idrCoinsurance`", columnDefinition = "decimal(7,2)")
+  @Column(name = "idr_coinsurance", columnDefinition = "decimal(7,2)")
   private BigDecimal idrCoinsurance;
 
-  @Column(name = "`idrDeductible`", columnDefinition = "decimal(7,2)")
+  @Column(name = "idr_deductible", columnDefinition = "decimal(7,2)")
   private BigDecimal idrDeductible;
 
-  @Column(name = "`idrBillProvStatusCd`", length = 1)
+  @Column(name = "idr_bill_prov_status_cd", length = 1)
   private String idrBillProvStatusCd;
 
-  @Column(name = "`idrTotBilledAmt`", columnDefinition = "decimal(7,2)")
+  @Column(name = "idr_tot_billed_amt", columnDefinition = "decimal(7,2)")
   private BigDecimal idrTotBilledAmt;
 
-  @Column(name = "`idrClaimReceiptDate`")
+  @Column(name = "idr_claim_receipt_date")
   private LocalDate idrClaimReceiptDate;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "`mbiId`")
+  @JoinColumn(name = "mbi_id")
   private Mbi mbiRecord;
 
-  @Column(name = "`idrHdrFromDateOfSvc`")
+  @Column(name = "idr_hdr_from_date_of_svc")
   private LocalDate idrHdrFromDateOfSvc;
 
-  @Column(name = "`idrHdrToDateOfSvc`")
+  @Column(name = "idr_hdr_to_date_of_svc")
   private LocalDate idrHdrToDateOfSvc;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
   /**
@@ -135,70 +135,70 @@ public class PreAdjMcsClaim {
    * version string returned by the RDA API server but when populating data from mock server it will
    * also include information about the mode the server was running in.
    */
-  @Column(name = "`apiSource`", length = 24)
+  @Column(name = "api_source", length = 24)
   private String apiSource;
 
-  @Column(name = "`idrAssignment`", length = 1)
+  @Column(name = "idr_assignment", length = 1)
   private String idrAssignment;
 
-  @Column(name = "`idrClmLevelInd`", length = 1)
+  @Column(name = "idr_clm_level_ind", length = 1)
   private String idrClmLevelInd;
 
-  @Column(name = "`idrHdrAudit`")
+  @Column(name = "idr_hdr_audit")
   private Integer idrHdrAudit;
 
-  @Column(name = "`idrHdrAuditInd`", length = 1)
+  @Column(name = "idr_hdr_audit_ind", length = 1)
   private String idrHdrAuditInd;
 
-  @Column(name = "`idrUSplitReason`", length = 1)
+  @Column(name = "idr_u_split_reason", length = 1)
   private String idrUSplitReason;
 
-  @Column(name = "`idrJReferringProvNpi`", length = 10)
+  @Column(name = "idr_j_referring_prov_npi", length = 10)
   private String idrJReferringProvNpi;
 
-  @Column(name = "`idrJFacProvNpi`", length = 10)
+  @Column(name = "idr_j_fac_prov_npi", length = 10)
   private String idrJFacProvNpi;
 
-  @Column(name = "`idrUDemoProvNpi`", length = 10)
+  @Column(name = "idr_u_demo_prov_npi", length = 10)
   private String idrUDemoProvNpi;
 
-  @Column(name = "`idrUSuperNpi`", length = 10)
+  @Column(name = "idr_u_super_npi", length = 10)
   private String idrUSuperNpi;
 
-  @Column(name = "`idrUFcadjBilNpi`", length = 10)
+  @Column(name = "idr_u_fcadj_bil_npi", length = 10)
   private String idrUFcadjBilNpi;
 
-  @Column(name = "`idrAmbPickupAddresLine1`", length = 25)
+  @Column(name = "idr_amb_pickup_addres_line1", length = 25)
   private String idrAmbPickupAddresLine1;
 
-  @Column(name = "`idrAmbPickupAddresLine2`", length = 20)
+  @Column(name = "idr_amb_pickup_addres_line2", length = 20)
   private String idrAmbPickupAddresLine2;
 
-  @Column(name = "`idrAmbPickupCity`", length = 20)
+  @Column(name = "idr_amb_pickup_city", length = 20)
   private String idrAmbPickupCity;
 
-  @Column(name = "`idrAmbPickupState`", length = 2)
+  @Column(name = "idr_amb_pickup_state", length = 2)
   private String idrAmbPickupState;
 
-  @Column(name = "`idrAmbPickupZipcode`", length = 9)
+  @Column(name = "idr_amb_pickup_zipcode", length = 9)
   private String idrAmbPickupZipcode;
 
-  @Column(name = "`idrAmbDropoffName`", length = 24)
+  @Column(name = "idr_amb_dropoff_name", length = 24)
   private String idrAmbDropoffName;
 
-  @Column(name = "`idrAmbDropoffAddrLine1`", length = 25)
+  @Column(name = "idr_amb_dropoff_addr_line1", length = 25)
   private String idrAmbDropoffAddrLine1;
 
-  @Column(name = "`idrAmbDropoffAddrLine2`", length = 20)
+  @Column(name = "idr_amb_dropoff_addr_line2", length = 20)
   private String idrAmbDropoffAddrLine2;
 
-  @Column(name = "`idrAmbDropoffCity`", length = 20)
+  @Column(name = "idr_amb_dropoff_city", length = 20)
   private String idrAmbDropoffCity;
 
-  @Column(name = "`idrAmbDropoffState`", length = 2)
+  @Column(name = "idr_amb_dropoff_state", length = 2)
   private String idrAmbDropoffState;
 
-  @Column(name = "`idrAmbDropoffZipcode`", length = 9)
+  @Column(name = "idr_amb_dropoff_zipcode", length = 9)
   private String idrAmbDropoffZipcode;
 
   @OneToMany(

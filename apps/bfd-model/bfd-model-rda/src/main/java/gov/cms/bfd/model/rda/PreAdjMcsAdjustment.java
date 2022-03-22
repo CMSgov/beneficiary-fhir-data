@@ -28,40 +28,40 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjMcsAdjustment.PK.class)
-@Table(name = "`McsAdjustments`", schema = "`pre_adj`")
+@Table(name = "mcs_adjustments", schema = "rda")
 public class PreAdjMcsAdjustment {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  @Column(name = "`idrAdjDate`")
+  @Column(name = "idr_adj_date")
   private LocalDate idrAdjDate;
 
-  @Column(name = "`idrXrefIcn`", length = 15)
+  @Column(name = "idr_xref_icn", length = 15)
   private String idrXrefIcn;
 
-  @Column(name = "`idrAdjClerk`", length = 4)
+  @Column(name = "idr_adj_clerk", length = 4)
   private String idrAdjClerk;
 
-  @Column(name = "`idrInitCcn`", length = 15)
+  @Column(name = "idr_init_ccn", length = 15)
   private String idrInitCcn;
 
-  @Column(name = "`idrAdjChkWrtDt`")
+  @Column(name = "idr_adj_chk_wrt_dt")
   private LocalDate idrAdjChkWrtDt;
 
-  @Column(name = "`idrAdjBEombAmt`", columnDefinition = "decimal(7,2)")
+  @Column(name = "idr_adj_b_eomb_amt", columnDefinition = "decimal(7,2)")
   private BigDecimal idrAdjBEombAmt;
 
-  @Column(name = "`idrAdjPEombAmt`", columnDefinition = "decimal(7,2)")
+  @Column(name = "idr_adj_p_eomb_amt", columnDefinition = "decimal(7,2)")
   private BigDecimal idrAdjPEombAmt;
 
   /** PK class for the McsAdjustments table */
