@@ -8,7 +8,7 @@ function help() {
     echo "Usage: ${0} [-hk] [image id]"
     echo "Options:"
     echo "  ${0} -h:      [h]elp displays this message and exits."
-    # TODO: complete the getopts implementation
+    # TODO: complete the getopts implementation. See BFD-1628.
     # echo "  ${0} -i <ID>: image [i]d set in 'ghcr.io/cmsgov/bfd-apps:<ID>'. Defaults to current commit hash."
     echo "  ${0} -k:      [k]eep the container under test instead of removing it. Defaults to removing the container."
 }
@@ -27,7 +27,7 @@ while getopts "hk" option; do
       h) # help
         help
         exit;;
-      # TODO: complete the getopts implementation
+      # TODO: complete the getopts implementation. See BFD-1628.
       # i) # image id
       #    input_bfd_apps_image_id="$OPTARG";;
       k) # keep container
@@ -39,7 +39,7 @@ while getopts "hk" option; do
 done
 shift "$((OPTIND-1))"
 
-# TODO: complete the getopts implementation
+# TODO: complete the getopts implementation. See BFD-1628.
 # use the input from option '-i' or default to current commit's short sha
 # export BFD_APPS_IMAGE_ID="${input_bfd_apps_image_id:-$(git rev-parse --short HEAD)}"
 # use input "$1" or default to current commit's short sha
