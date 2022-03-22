@@ -14,7 +14,6 @@
         db_migrator_db_url: 'jdbc:hsqldb:mem:test'
         db_migrator_db_username: "bfd"
         db_migrator_db_password: "bfd"
-        db_migrator_db_max_pool_size: "1"
 
 # Verify that things worked as expected.
 - hosts: bfd-db-migrator
