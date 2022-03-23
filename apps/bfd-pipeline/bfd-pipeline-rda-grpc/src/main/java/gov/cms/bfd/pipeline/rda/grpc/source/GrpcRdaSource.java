@@ -360,7 +360,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
             }
           }
         } else {
-          LOGGER.info("Authentication token not identified as JWT");
+          LOGGER.warn("Authentication token not identified as JWT");
         }
 
         answer = answer.withCallCredentials(new BearerToken(authenticationToken));
@@ -399,12 +399,13 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         String[] jwtBits = token.split("\\.");
         String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
         JWTClaims claims = mapper.readValue(claimsString, JWTClaims.class);
+        if (claims.exp == null) throw new NullPointerException();
         Instant expiration = Instant.ofEpochMilli(claims.exp * 1000);
         return Optional.of(Instant.now().until(expiration, ChronoUnit.DAYS));
       } catch (JsonProcessingException e) {
-        LOGGER.info("Could not read JWT claims", e);
+        LOGGER.warn("Could not read JWT claims", e);
       } catch (Exception e) {
-        LOGGER.info("Could not parse JWT", e);
+        LOGGER.warn("Could not parse JWT", e);
       }
 
       return Optional.empty();
@@ -413,7 +414,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
 
   @Data
   private static class JWTClaims {
-    private long exp;
+    private Long exp;
   }
 
   /**
