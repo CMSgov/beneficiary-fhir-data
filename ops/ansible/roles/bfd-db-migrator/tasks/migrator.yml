@@ -1,10 +1,8 @@
 ---
 - name: Install Pre-requisites
   yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - java-11-openjdk
+    pkg:
+      - java-11-openjdk
   become: true
   tags:
     - pre-ami
