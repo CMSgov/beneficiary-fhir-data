@@ -4,6 +4,6 @@
       <pattern>%msg%n</pattern>
     </encoder>
   </appender>
-  <root level="WARN">
+  <root level="INFO">
   </root>
 </configuration>

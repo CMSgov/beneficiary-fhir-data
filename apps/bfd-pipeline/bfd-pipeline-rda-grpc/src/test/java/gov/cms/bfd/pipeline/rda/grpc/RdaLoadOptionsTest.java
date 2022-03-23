@@ -10,18 +10,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
-import utils.TestingUtils;
 
 public class RdaLoadOptionsTest {
   @Test
   public void configIsSerializable() throws Exception {
-    final String AUTH_TOKEN =
-        TestingUtils.createTokenWithExpiration(
-            Instant.now().plus(90, ChronoUnit.DAYS).getEpochSecond());
-
     final RdaLoadOptions original =
         new RdaLoadOptions(
             AbstractRdaLoadJob.Config.builder()
@@ -33,7 +26,7 @@ public class RdaLoadOptionsTest {
                 .host("localhost")
                 .port(5432)
                 .maxIdle(Duration.ofMinutes(59))
-                .authenticationToken(AUTH_TOKEN)
+                .authenticationToken("my-secret")
                 .build(),
             new RdaServerJob.Config(),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));

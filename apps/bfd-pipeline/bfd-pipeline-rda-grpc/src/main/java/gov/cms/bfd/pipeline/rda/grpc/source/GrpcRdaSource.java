@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import gov.cms.bfd.pipeline.rda.grpc.AuthenticationException;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -345,18 +344,23 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     public CallOptions createCallOptions() {
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
-        long daysToExpire = daysToJWTExpire(authenticationToken);
+        Optional<Long> expireOptional = daysToJWTExpire(authenticationToken);
 
-        if (daysToExpire < 0) {
-          throw new AuthenticationException("JWT is expired.");
-        } else if (daysToExpire < 31) {
-          String logMessage = String.format("JWT will expire in %d days", daysToExpire);
+        if (expireOptional.isPresent()) {
+          long daysToExpire = expireOptional.get();
+          if (daysToExpire < 31) {
+            String logMessage = String.format("JWT will expire in %d days", daysToExpire);
 
-          if (daysToExpire < 14) {
-            LOGGER.error(logMessage);
-          } else {
-            LOGGER.warn(logMessage);
+            if (daysToExpire < 0) {
+              LOGGER.error("JWT is expired!");
+            } else if (daysToExpire < 14) {
+              LOGGER.error(logMessage);
+            } else {
+              LOGGER.warn(logMessage);
+            }
           }
+        } else {
+          LOGGER.info("Authentication token not identified as JWT");
         }
 
         answer = answer.withCallCredentials(new BearerToken(authenticationToken));
@@ -390,17 +394,20 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       return InProcessChannelBuilder.forName(inProcessServerName);
     }
 
-    private long daysToJWTExpire(String token) {
+    private Optional<Long> daysToJWTExpire(String token) {
       try {
         String[] jwtBits = token.split("\\.");
         String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
         JWTClaims claims = mapper.readValue(claimsString, JWTClaims.class);
         Instant expiration = Instant.ofEpochMilli(claims.exp * 1000);
-        return Instant.now().until(expiration, ChronoUnit.DAYS);
+        return Optional.of(Instant.now().until(expiration, ChronoUnit.DAYS));
       } catch (JsonProcessingException e) {
-        LOGGER.error("Could not read JWT claims", e);
-        return 0;
+        LOGGER.info("Could not read JWT claims", e);
+      } catch (Exception e) {
+        LOGGER.info("Could not parse JWT", e);
       }
+
+      return Optional.empty();
     }
   }
 
