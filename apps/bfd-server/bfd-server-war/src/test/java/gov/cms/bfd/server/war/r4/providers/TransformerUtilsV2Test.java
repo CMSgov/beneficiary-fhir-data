@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -175,5 +178,47 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNull(fiNumExtension);
+  }
+
+  /** Verifies that createCoding can take a Character type value and create a Coding from it. */
+  @Test
+  public void createCodingWhenValueIsCharacterExpectCodingWithValue() {
+
+    Character codingValue = 'a';
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    Coding coding =
+        TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
+
+    assertEquals(codingValue.toString(), coding.getCode());
+  }
+
+  /** Verifies that createCoding can take a String type value and create a Coding from it. */
+  @Test
+  public void createCodingWhenValueIsStringExpectCodingWithValue() {
+
+    String codingValue = "abc";
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    Coding coding =
+        TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
+
+    assertEquals(codingValue, coding.getCode());
+  }
+
+  /**
+   * Verifies that createCoding throws an exception when an unexpected typed coding is passed to it.
+   */
+  @Test
+  public void createCodingWhenValueIsUnexpectedTypeExpectException() {
+
+    BigInteger codingValue = BigInteger.ONE;
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    assertThrows(
+        BadCodeMonkeyException.class,
+        () -> {
+          TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
+        });
   }
 }

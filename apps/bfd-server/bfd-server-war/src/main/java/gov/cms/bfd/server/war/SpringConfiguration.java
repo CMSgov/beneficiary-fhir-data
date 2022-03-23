@@ -276,7 +276,13 @@ public class SpringConfiguration {
   /** @return the {@link Properties} to configure Hibernate and JPA with */
   private Properties jpaProperties() {
     Properties extraProperties = new Properties();
-    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    /*
+     * Hibernate validation is being disabled in the applications so that
+     * validation failures do not prevent the server from starting.
+     * With the implementation of RFC-0011 this validation will be moved
+     * to a more appropriate stage of the deployment.
+     */
+    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.NONE);
 
     /*
      * These configuration settings will set Hibernate to log all SQL

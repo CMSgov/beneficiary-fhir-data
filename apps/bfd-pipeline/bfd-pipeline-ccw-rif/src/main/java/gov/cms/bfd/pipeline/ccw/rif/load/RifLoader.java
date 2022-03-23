@@ -493,7 +493,7 @@ public final class RifLoader {
                       SkipReasonCode.DELAYED_BACKDATED_ENROLLMENT_BFD_1566,
                       rifRecordEvent.getFileEvent().getFile().getFileType().name(),
                       rifRecordEvent.getRecordAction(),
-                      ((Beneficiary) record).getBeneficiaryId(),
+                      String.valueOf(((Beneficiary) record).getBeneficiaryId()),
                       rifData.toString());
               entityManager.persist(skippedRifRecord);
               LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
@@ -648,7 +648,8 @@ public final class RifLoader {
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(Beneficiary_.beneficiaryId), newBeneficiaryRecord.getBeneficiaryId()));
+              root.get(Beneficiary_.beneficiaryId),
+              String.valueOf(newBeneficiaryRecord.getBeneficiaryId())));
 
       oldBeneficiaryRecord =
           Optional.ofNullable(entityManager.createQuery(criteria).getSingleResult());
