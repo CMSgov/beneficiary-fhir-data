@@ -11,3 +11,7 @@ where cast(bene_id as numeric) < 0;
  -- Delete skipped RIF records. 
 delete from skipped_rif_records
 where cast(bene_id as numeric) < 0;
+
+-- Confirm skipped RIF records are gone i.e. count = 0.
+select count(*) from skipped_rif_records
+where cast(bene_id as numeric) < 0;
