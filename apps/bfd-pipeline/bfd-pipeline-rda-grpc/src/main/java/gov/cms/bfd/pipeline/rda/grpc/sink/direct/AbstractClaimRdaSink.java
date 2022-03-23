@@ -149,7 +149,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       mergeBatch(maxSeq, claims);
       metrics.objectsMerged.mark(claims.size());
       metrics.setLatestSequenceNumber(maxSeq);
-      logger.info("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
+      logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
           "writeBatch failed: size={} maxSeq={} error={}",
@@ -207,7 +207,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
             .lastUpdated(clock.instant())
             .build();
     entityManager.merge(progress);
-    logger.info("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
+    logger.debug("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
   private List<RdaChange<TClaim>> transformMessages(

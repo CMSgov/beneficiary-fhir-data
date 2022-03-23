@@ -241,9 +241,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   private int submitBatchToSink(
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
-    LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
     final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
-    LOGGER.info(
+    LOGGER.debug(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,
         batch.size(),
