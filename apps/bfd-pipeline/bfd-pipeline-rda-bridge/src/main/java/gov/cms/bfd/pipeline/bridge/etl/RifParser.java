@@ -16,6 +16,7 @@ public class RifParser implements Parser<String> {
 
   private final Source<String> source;
   private final Map<String, Integer> headerIndexMap = new HashMap<>();
+  private long rowCounter = 0;
 
   /**
    * Grabs the headers so they can be used to build maps for the {@link RifData} objects created
@@ -50,7 +51,7 @@ public class RifParser implements Parser<String> {
   public Data<String> read() throws IOException {
     if (!headerIndexMap.isEmpty()) {
       if (source.hasInput()) {
-        return new RifData(headerIndexMap, source.read().split(DELIMITER, 0));
+        return new RifData(++rowCounter, headerIndexMap, source.read().split(DELIMITER, 0));
       } else {
         throw new IOException("No mo data to read.");
       }
@@ -70,8 +71,14 @@ public class RifParser implements Parser<String> {
     private final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
     private final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    private final long rowId;
     private final Map<String, Integer> headerIndexMap;
     private final String[] rowData;
+
+    @Override
+    public long getEntryNumber() {
+      return rowId;
+    }
 
     @Override
     public Optional<String> get(String rifIdentifier) {

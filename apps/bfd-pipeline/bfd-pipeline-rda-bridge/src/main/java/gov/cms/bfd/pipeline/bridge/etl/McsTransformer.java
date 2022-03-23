@@ -7,12 +7,14 @@ import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.model.Mcs;
 import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
+import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
 import java.util.Map;
@@ -20,12 +22,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 
-/** Transforms data into MCS FISS claim change objects. */
+/** Transforms data into RDA MCS claim change objects. */
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
-
-  // Maps RIF ICD type codes to their equivalent RDA model values
-  private static final Map<String, Integer> icdMap = Map.of("0", 1, "9", 0);
 
   private static final int MAX_DIAGNOSIS_CODES = 12;
 
@@ -38,95 +37,146 @@ public class McsTransformer extends AbstractTransformer {
    * @return The RDA {@link McsClaimChange} object generated from the given data.
    */
   @Override
-  public MessageOrBuilder transform(
+  public Optional<MessageOrBuilder> transform(
+      WrappedMessage message,
+      WrappedCounter sequenceNumber,
+      Parser.Data<String> data,
+      DataSampler<String> mbiSampler,
+      int sampleId) {
+    McsClaimChange claimToReturn;
+
+    int lineNumber = getLineNumber(data, Mcs.LINE_NUM);
+
+    if (message.getMessage() instanceof McsClaimChange) {
+      // There is an existing claim from a previous run
+      McsClaimChange storedClaim = (McsClaimChange) message.getMessage();
+
+      if (message.getLineNumber() == (lineNumber - 1)) {
+        // If it's the next sequential line number, add to previous claim
+        message.setMessage(addToExistingClaim(storedClaim, data));
+        message.setLineNumber(lineNumber);
+        claimToReturn = null;
+      } else if (lineNumber == 1) {
+        // If the line number is 1, it's a new claim, return the old, store the new
+        claimToReturn = storedClaim;
+        message.setLineNumber(1);
+        message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
+      } else {
+        // If it's not the next claim or a new one starting at 1, then something is wrong.
+        throw new IllegalStateException(
+            String.format(
+                "Invalid row sequence, previous line number: %d, current line number: %d",
+                message.getLineNumber(), lineNumber));
+      }
+    } else {
+      if (lineNumber != 1) {
+        throw new IllegalStateException(
+            String.format(
+                "Invalid row sequence, expected: 1, current line number: %d", lineNumber));
+      }
+
+      message.setLineNumber(lineNumber);
+      message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
+      claimToReturn = null;
+    }
+
+    return Optional.ofNullable(claimToReturn);
+  }
+
+  /**
+   * Adds additional line items to an existing claim.
+   *
+   * @param mcsClaimChange The claim to add line items to.
+   * @param data The data to grab new line items from.
+   * @return The newly constructed claim with additional line items added.
+   */
+  @VisibleForTesting
+  McsClaimChange addToExistingClaim(McsClaimChange mcsClaimChange, Parser.Data<String> data) {
+    McsClaim.Builder claimBuilder = mcsClaimChange.getClaim().toBuilder();
+
+    claimBuilder.addMcsDetails(buildDetails(data));
+
+    return mcsClaimChange.toBuilder().setClaim(claimBuilder.build()).build();
+  }
+
+  /**
+   * Creates a new claim from the given {@link Parser.Data}.
+   *
+   * @param sequenceNumber The sequence number of the current claim.
+   * @param data The {@link Parser.Data} to pull claim data for building the claim.
+   * @return A new claim built from parsing the given {@link Parser.Data}.
+   */
+  McsClaimChange transformNewClaim(
       WrappedCounter sequenceNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
       int sampleId) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
+    String icn = ifNull(data.get(Mcs.CARR_CLM_CNTL_NUM).orElse(null), () -> convertIcn(data));
 
-    // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
-    // to protect against it if it does happen, we'll ignore any row with LINE_NUM > 1
-    if (isFirstLineNum(data)) {
-      mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
+    mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
-      McsClaim.Builder claimBuilder =
-          McsClaim.newBuilder()
-              .setIdrClmHdIcn(
-                  ifNull(data.get(Mcs.CARR_CLM_CNTRL_NUM).orElse(null), () -> convertIcn(data)))
-              .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
-              // Not generated
-              .setIdrBillProvEin("XX-XXXXXXX")
-              .setIdrBillProvSpec("01")
-              .setIdrBillProvType("20")
-              .setIdrClaimReceiptDate("1970-01-01")
-              .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL) // "3"
-              .setIdrContrId("00000")
-              .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
-              .setIdrStatusDate("1970-01-01");
+    McsClaim.Builder claimBuilder =
+        McsClaim.newBuilder()
+            .setIdrClmHdIcn(icn)
+            .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
+            // Not generated
+            .setIdrBillProvEin("XX-XXXXXXX")
+            .setIdrBillProvSpec("01")
+            .setIdrBillProvType("20")
+            .setIdrClaimReceiptDate("1970-01-01")
+            .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL) // "3"
+            .setIdrContrId("00000")
+            .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
+            .setIdrStatusDate("1970-01-01");
 
-      consumeIfNotNull(
-          mbiMap.get(beneId).getFirstName(),
-          value -> claimBuilder.setIdrBeneFirstInit(value.substring(0, 1)));
-      consumeIfNotNull(
-          mbiMap.get(beneId).getLastName(),
-          value -> claimBuilder.setIdrBeneLast16(String.format("%.6s", value)));
-      consumeIfNotNull(
-          mbiMap.get(beneId).getMidName(),
-          value -> claimBuilder.setIdrBeneMidInit(value.substring(0, 1)));
-      consumeIfNotNull(
-          mbiMap.get(beneId).getGender(),
-          value -> {
-            // RIF mappings are  0 - unknown, 1 - male, 2 - female
-            // RDA mappings are -1 - unrecognized, 0 - male, 1 - female
-            int enumValue = Integer.parseInt(value);
-            if (enumValue != 0) { // Skip RIF "unknown" values since they don't map to MCS RDA
-              --enumValue; // Transform to RDA values
-              enumValue = (enumValue == 0 || enumValue == 1) ? enumValue : -1;
-              claimBuilder.setIdrBeneSexEnumValue(enumValue);
-            }
-          });
-      data.getFromType(Mcs.CLM_FRM_DT, Parser.Data.Type.DATE)
-          .ifPresent(claimBuilder::setIdrHdrFromDos);
-      data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE)
-          .ifPresent(claimBuilder::setIdrHdrToDos);
-      data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).ifPresent(claimBuilder::setIdrTotBilledAmt);
-      data.get(Mcs.ORG_NPI_NUM).ifPresent(claimBuilder::setIdrBillProvNpi);
+    consumeIfNotNull(
+        mbiMap.get(beneId).getFirstName(),
+        value -> claimBuilder.setIdrBeneFirstInit(value.substring(0, 1)));
+    consumeIfNotNull(
+        mbiMap.get(beneId).getLastName(),
+        value -> claimBuilder.setIdrBeneLast16(String.format("%.6s", value)));
+    consumeIfNotNull(
+        mbiMap.get(beneId).getMidName(),
+        value -> claimBuilder.setIdrBeneMidInit(value.substring(0, 1)));
+    consumeIfNotNull(
+        mbiMap.get(beneId).getGender(),
+        value -> {
+          // RIF mappings are  0 - unknown, 1 - male, 2 - female
+          // RDA mappings are -1 - unrecognized, 0 - male, 1 - female
+          int enumValue = Integer.parseInt(value);
+          if (enumValue != 0) { // Skip RIF "unknown" values since they don't map to MCS RDA
+            --enumValue; // Transform to RDA values
+            enumValue = (enumValue == 0 || enumValue == 1) ? enumValue : -1;
+            claimBuilder.setIdrBeneSexEnumValue(enumValue);
+          }
+        });
+    data.getFromType(Mcs.CLM_FROM_DT, Parser.Data.Type.DATE)
+        .ifPresent(claimBuilder::setIdrHdrFromDos);
+    data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE)
+        .ifPresent(claimBuilder::setIdrHdrToDos);
+    data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).ifPresent(claimBuilder::setIdrTotBilledAmt);
+    data.get(Mcs.ORG_NPI_NUM).ifPresent(claimBuilder::setIdrBillProvNpi);
 
-      McsDetail.Builder detailBuilder = McsDetail.newBuilder();
+    claimBuilder.addMcsDetails(buildDetails(data));
 
-      data.get(Mcs.LINE_ICD_DGNS_CD).ifPresent(detailBuilder::setIdrDtlPrimaryDiagCode);
-      data.get(Mcs.HCPCS_CD).ifPresent(detailBuilder::setIdrProcCode);
-      data.get(Mcs.HCPCS_1_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
-      data.get(Mcs.HCPCS_2_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
-      data.getFromType(Mcs.LINE_1ST_EXPNS_DT, Parser.Data.Type.DATE)
-          .ifPresent(detailBuilder::setIdrDtlFromDate);
-      data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
-          .ifPresent(detailBuilder::setIdrDtlToDate);
+    addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
 
-      claimBuilder.addMcsDetails(detailBuilder.build());
-
-      addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
-
-      return McsClaimChange.newBuilder()
-          .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
-          .setSeq(sequenceNumber.inc())
-          .setClaim(claimBuilder)
-          .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-          .build();
-    }
-
-    // We're skipping any entry with LIN_NUM > 1
-    return null;
+    return McsClaimChange.newBuilder()
+        .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
+        .setSeq(sequenceNumber.inc())
+        .setClaim(claimBuilder)
+        .setIcn(icn)
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .build();
   }
 
-  @VisibleForTesting
-  boolean isFirstLineNum(Parser.Data<String> data) {
-    Optional<String> lineNum = data.get(Mcs.LINE_NUM);
-
-    return lineNum.isEmpty() || lineNum.get().equals("1");
-  }
-
+  /**
+   * Fallback method for creating a claim identifier from the CLM_ID field.
+   *
+   * @param data The data to pull from for claim data.
+   * @return The generated claim identifier.
+   */
   @VisibleForTesting
   String convertIcn(Parser.Data<String> data) {
     String claimId =
@@ -135,6 +185,12 @@ public class McsTransformer extends AbstractTransformer {
     return "-" + DigestUtils.sha256Hex(claimId).substring(0, 14);
   }
 
+  /**
+   * Adds diagnosis codes to the given claim, parsed from the given {@link Parser.Data}.
+   *
+   * @param claimBuilder The claim to add diagnosis codes to.
+   * @param data The {@link Parser.Data} to pull diagnosis codes from.
+   */
   @VisibleForTesting
   void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
     for (int i = 1; i <= MAX_DIAGNOSIS_CODES; ++i) {
@@ -147,11 +203,58 @@ public class McsTransformer extends AbstractTransformer {
                       McsDiagnosisCode.newBuilder()
                           .setIdrClmHdIcn(icn)
                           .setIdrDiagCode(diagnosisCode)
-                          .setIdrDiagIcdTypeEnumValue(
+                          .setIdrDiagIcdTypeEnum(
                               data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
-                                  .map(dxVersionCode -> icdMap.getOrDefault(dxVersionCode, -1))
-                                  .orElse(-1))
+                                  .map(this::mapVersionCode)
+                                  .orElse(McsDiagnosisIcdType.UNRECOGNIZED))
                           .build()));
     }
+  }
+
+  /**
+   * Maps the MCS raw string value to a {@link McsDiagnosisIcdType}.
+   *
+   * @param code The raw MCS string value.
+   * @return The converted {@link McsDiagnosisIcdType}.
+   */
+  private McsDiagnosisIcdType mapVersionCode(String code) {
+    McsDiagnosisIcdType icdType;
+
+    switch (code) {
+      case "0":
+        icdType = McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10;
+        break;
+      case "9":
+        icdType = McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9;
+        break;
+      default:
+        throw new IllegalStateException("Invalid diagnosis code type: '" + code + "'");
+    }
+
+    return icdType;
+  }
+
+  /**
+   * Builds a list of details (line items), parsed from the given {@link Parser.Data}.
+   *
+   * @param data The {@link Parser.Data} to pull procedure codes from.
+   * @return The list of build {@link McsDetail}s.
+   */
+  private McsDetail buildDetails(Parser.Data<String> data) {
+    McsDetail.Builder detailBuilder = McsDetail.newBuilder();
+
+    data.get(Mcs.LINE_ICD_DGNS_CD).ifPresent(detailBuilder::setIdrDtlPrimaryDiagCode);
+    data.get(Mcs.LINE_ICD_DGNS_VRSN_CD)
+        .map(this::mapVersionCode)
+        .ifPresent(detailBuilder::setIdrDtlDiagIcdTypeEnum);
+    data.get(Mcs.HCPCS_CD).ifPresent(detailBuilder::setIdrProcCode);
+    data.get(Mcs.HCPCS_1ST_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
+    data.get(Mcs.HCPCS_2ND_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
+    data.getFromType(Mcs.LINE_1ST_EXPNS_DT, Parser.Data.Type.DATE)
+        .ifPresent(detailBuilder::setIdrDtlFromDate);
+    data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
+        .ifPresent(detailBuilder::setIdrDtlToDate);
+
+    return detailBuilder.build();
   }
 }
