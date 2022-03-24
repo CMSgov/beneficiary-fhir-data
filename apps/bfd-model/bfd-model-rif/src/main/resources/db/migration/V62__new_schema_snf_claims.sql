@@ -1,11 +1,26 @@
--- flyway migration for carrier_claims and carrier_claim_lines
+-- NEW_SCHEMA_SNF_CLAIMS.SQL
+-- flyway migration for CARRIER_CLAIMS and CARRIER_CLAIM_LINES
+-- table(s) into a new schema structure that:
+--   1) changes data type of CLM_ID, CLM_GROUP_ID, BENE_ID to BIGINT.
+--   2) organizes parent claim table (SNF_CLAIMS) such that common
+--      claims data is organized at top of column definition.
+--
+-- Once current able data is migrated to new table name/strucutre,
+-- updatable db views are created wrapping the new table structure;
+-- this allows BFD services entity beans to temporarily use updatable
+-- data view(s) instead of actual database table names. This strategy
+-- facilitates and promotes minimal app/database downtime during that
+-- period when table structure and data are being migrated.
+--
 -- HSQL differs from PSQL (postgres) in that the table defintion
 -- must be explicitly declared prior to, or as part of, loading
 -- data into the table. PSQL can derive the table structure based
 -- on the data input (i.e., column name, data type). Thus, for HSQL
 -- we will define the table structure prior to loading data.
 --
-${logic.hsql-only}	create table public.snf_claims_bfd1595 (
+-- For HSQL, explicitly define/create a new SNF_CLAIMS_NEW table in
+-- the current PUBLIC schema
+${logic.hsql-only}	create table public.snf_claims_new (
 	${logic.hsql-only}	clm_id								bigint NOT NULL,
 	${logic.hsql-only}	bene_id								bigint NOT NULL,
 	${logic.hsql-only}	clm_grp_id							bigint NOT NULL,
@@ -224,10 +239,11 @@ ${logic.hsql-only}	create table public.snf_claims_bfd1595 (
 	${logic.hsql-only}	prcdr_dt23							date,
 	${logic.hsql-only}	prcdr_dt24							date,
 	${logic.hsql-only}	prcdr_dt25							date,
-	${logic.hsql-only} 	constraint public.snf_claims_bfd1595_pkey
+	${logic.hsql-only} 	constraint public.snf_claims_new_pkey
 	${logic.hsql-only} 	primary key (clm_id) );
 
-${logic.hsql-only}	CREATE TABLE IF NOT EXISTS public.snf_claim_lines_bfd1595 (
+-- create a new SNF_CLAIM_LINES_NEW table in the current PUBLIC schema
+${logic.hsql-only}	CREATE TABLE IF NOT EXISTS public.snf_claim_lines_new (
     ${logic.hsql-only}	clm_id						bigint NOT NULL,
     ${logic.hsql-only}	clm_line_num				smallint NOT NULL,
     ${logic.hsql-only}	rev_cntr					varchar(4) NOT NULL,
@@ -241,10 +257,11 @@ ${logic.hsql-only}	CREATE TABLE IF NOT EXISTS public.snf_claim_lines_bfd1595 (
     ${logic.hsql-only}	hcpcs_cd					varchar(5),
     ${logic.hsql-only}	rndrng_physn_npi			varchar(12),
     ${logic.hsql-only}	rndrng_physn_upin			varchar(12),
-    ${logic.hsql-only}	CONSTRAINT snf_claim_lines_bfd1595_pkey
+    ${logic.hsql-only}	CONSTRAINT snf_claim_lines_new_pkey
     ${logic.hsql-only}  PRIMARY KEY (clm_id, clm_line_num) );
 
-${logic.hsql-only} insert into public.snf_claims_bfd1595 (
+-- migrate data via INSERT from current SNF_CLAIMS table to SNF_CLAIMS_NEW table
+${logic.hsql-only} insert into public.snf_claims_new (
 	${logic.hsql-only}	clm_id,
 	${logic.hsql-only}	bene_id,
 	${logic.hsql-only}	clm_grp_id,
@@ -463,7 +480,9 @@ ${logic.hsql-only} insert into public.snf_claims_bfd1595 (
 	${logic.hsql-only}	prcdr_dt23,
 	${logic.hsql-only}	prcdr_dt24,
 	${logic.hsql-only}	prcdr_dt25 )
-${logic.psql-only} create table public.snf_claims_bfd1595 as
+-- PSQL allows us to dynamically create a table via the
+-- associated SELECT statement used to populate the table.
+${logic.psql-only} create table public.snf_claims_new as
 select
 	${logic.psql-only} cast(clm_id as bigint),
 	${logic.psql-only} cast(bene_id as bigint),
@@ -707,7 +726,9 @@ select
 from
 	public.snf_claims;
 
-${logic.psql-only} alter table public.snf_claims_bfd1595
+-- for PSQL need to define our not null constraints; for HSQL,
+-- we explicitly defined a table structure before migrating data.
+${logic.psql-only} alter table public.snf_claims_new
 ${logic.psql-only}     alter column clm_id SET NOT NULL,
 ${logic.psql-only}     alter column bene_id SET NOT NULL,
 ${logic.psql-only}     alter column clm_grp_id SET NOT NULL,
@@ -738,7 +759,8 @@ ${logic.psql-only}     alter column prvdr_num SET NOT NULL,
 ${logic.psql-only}     alter column prvdr_state_cd SET NOT NULL,
 ${logic.psql-only}     alter column ptnt_dschrg_stus_cd SET NOT NULL;
 
-${logic.hsql-only} insert into public.snf_claim_lines_bfd1595 (
+-- migrate data via INSERT from current SNF_CLAIM_LINES table to SNF_CLAIM_LINES_NEW table
+${logic.hsql-only} insert into public.snf_claim_lines_new (
 ${logic.hsql-only}	clm_id,
 ${logic.hsql-only}	clm_line_num,
 ${logic.hsql-only}	rev_cntr,
@@ -752,8 +774,9 @@ ${logic.hsql-only}	rev_cntr_ndc_qty,
 ${logic.hsql-only}	hcpcs_cd,
 ${logic.hsql-only}	rndrng_physn_npi,
 ${logic.hsql-only}	rndrng_physn_upin )
---
-${logic.psql-only} create table public.snf_claim_lines_bfd1595 as
+-- PSQL allows us to dynamically create a table via the
+-- associated SELECT statement used to populate the table.
+${logic.psql-only} create table public.snf_claim_lines_new as
 select
 	${logic.psql-only} cast(clm_id as bigint),
 	${logic.hsql-only} convert(clm_id, SQL_BIGINT),
@@ -777,8 +800,10 @@ select
 	rndrng_physn_upin
 from
 	public.snf_claim_lines;
-	
-${logic.psql-only} alter table public.snf_claim_lines_bfd1595
+
+-- for PSQL need to define our not null constraints; for HSQL,
+-- we explicitly defined a table structure before migrating data.
+${logic.psql-only} alter table public.snf_claim_lines_new
 ${logic.psql-only}     alter column clm_id SET NOT NULL,
 ${logic.psql-only}     alter column clm_line_num SET NOT NULL,
 ${logic.psql-only}     alter column rev_cntr SET NOT NULL,
@@ -787,25 +812,31 @@ ${logic.psql-only}     alter column rev_cntr_tot_chrg_amt SET NOT NULL,
 ${logic.psql-only}     alter column rev_cntr_rate_amt SET NOT NULL,
 ${logic.psql-only}     alter column rev_cntr_ncvrd_chrg_amt SET NOT NULL;
 
-${logic.psql-only} alter table public.snf_claims_bfd1595
-${logic.psql-only}     add CONSTRAINT snf_claims_bfd1595_pkey PRIMARY KEY (clm_id);
+-- for PSQL need to define our primary key	
+${logic.psql-only} alter table public.snf_claims_new
+${logic.psql-only}     add CONSTRAINT snf_claims_new_pkey PRIMARY KEY (clm_id);
 
-${logic.psql-only} alter table public.snf_claim_lines_bfd1595
-${logic.psql-only}     add CONSTRAINT snf_claim_lines_bfd1595_pkey PRIMARY KEY (clm_id, clm_line_num);
+-- for PSQL need to define our primary key	
+${logic.psql-only} alter table public.snf_claim_lines_new
+${logic.psql-only}     add CONSTRAINT snf_claim_lines_new_pkey PRIMARY KEY (clm_id, clm_line_num);
 
-ALTER TABLE IF EXISTS public.snf_claim_lines_bfd1595
-    ADD CONSTRAINT snf_claim_lines_clm_id_to_snf_claims_bfd1595 FOREIGN KEY (clm_id)
-    	REFERENCES public.snf_claims_bfd1595 (clm_id);
+-- define foreign key constraints between claim lineitems and a parent claims table.
+ALTER TABLE IF EXISTS public.snf_claim_lines_new
+    ADD CONSTRAINT snf_claim_lines_clm_id_to_snf_claims_new FOREIGN KEY (clm_id)
+    	REFERENCES public.snf_claims_new (clm_id);
 
-CREATE INDEX IF NOT EXISTS snf_claims_bfd1595_bene_id_idx
-	ON public.snf_claims_bfd1595 (bene_id);
+-- create an index of the BENE_ID in parent claims table
+CREATE INDEX IF NOT EXISTS snf_claims_new_bene_id_idx
+	ON public.snf_claims_new (bene_id);
 
+-- create an updateable db view on SNF_CLAIMS_NEW table, 
 ${logic.hsql-only} CREATE VIEW
 ${logic.psql-only} CREATE OR REPLACE VIEW
 	public.snf_claims_v as
-    	select * from public.snf_claims_bfd1595;
+    	select * from public.snf_claims_new;
 
+-- create an updateable db view on SNF_CLAIM_LINES_NEW table, 
 ${logic.hsql-only} CREATE VIEW
 ${logic.psql-only} CREATE OR REPLACE VIEW
 	public.snf_claim_lines_v as
-    	select * from public.snf_claim_lines_bfd1595;
+    	select * from public.snf_claim_lines_new;
