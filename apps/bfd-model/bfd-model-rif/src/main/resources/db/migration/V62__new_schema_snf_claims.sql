@@ -1,22 +1,23 @@
 -- NEW_SCHEMA_SNF_CLAIMS.SQL
--- flyway migration for CARRIER_CLAIMS and CARRIER_CLAIM_LINES
--- table(s) into a new schema structure that:
+-- flyway migration for SNF_CLAIMS and SNF_CLAIM_LINES tables into
+-- a new schema structure that:
 --   1) changes data type of CLM_ID, CLM_GROUP_ID, BENE_ID to BIGINT.
 --   2) organizes parent claim table (SNF_CLAIMS) such that common
 --      claims data is organized at top of column definition.
 --
--- Once current able data is migrated to new table name/strucutre,
+-- Once current table data is migrated to new table name/strucutre,
 -- updatable db views are created wrapping the new table structure;
 -- this allows BFD services entity beans to temporarily use updatable
 -- data view(s) instead of actual database table names. This strategy
 -- facilitates and promotes minimal app/database downtime during that
--- period when table structure and data are being migrated.
+-- period when table structure and data are being migrated and app
+-- services code is deployed.
 --
 -- HSQL differs from PSQL (postgres) in that the table defintion
--- must be explicitly declared prior to, or as part of, loading
--- data into the table. PSQL can derive the table structure based
--- on the data input (i.e., column name, data type). Thus, for HSQL
--- we will define the table structure prior to loading data.
+-- must be explicitly declared prior to loading data into the
+-- target table. PSQL can derive the table structure based on
+-- the data input (i.e., column name, data type). Thus, for HSQL,
+-- we need to explicitly define the table structure prior to loading data.
 --
 -- For HSQL, explicitly define/create a new SNF_CLAIMS_NEW table in
 -- the current PUBLIC schema
@@ -829,13 +830,13 @@ ALTER TABLE IF EXISTS public.snf_claim_lines_new
 CREATE INDEX IF NOT EXISTS snf_claims_new_bene_id_idx
 	ON public.snf_claims_new (bene_id);
 
--- create an updateable db view on SNF_CLAIMS_NEW table, 
+-- create an updateable db view on SNF_CLAIMS_NEW table
 ${logic.hsql-only} CREATE VIEW
 ${logic.psql-only} CREATE OR REPLACE VIEW
 	public.snf_claims_v as
     	select * from public.snf_claims_new;
 
--- create an updateable db view on SNF_CLAIM_LINES_NEW table, 
+-- create an updateable db view on SNF_CLAIM_LINES_NEW table
 ${logic.hsql-only} CREATE VIEW
 ${logic.psql-only} CREATE OR REPLACE VIEW
 	public.snf_claim_lines_v as
