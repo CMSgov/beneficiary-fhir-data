@@ -13,6 +13,10 @@
 
 	<description>An application integrated with Flyway and Hibernate responsible for executing database migrations and validations against BFD datastores.</description>
 
+	<properties>
+		<flyway.version>7.8.1</flyway.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
@@ -65,6 +69,69 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		<dependency>
+			<!-- Provides utility code and dependencies that are shared by (more or
+				less) all of the other BFD modules. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager
+				class. -->
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>${flyway.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+                    for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>dropwizard-metrics-newrelic</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>telemetry-http-okhttp</artifactId>
+			<version>0.6.1</version>
+		</dependency>
+		<dependency>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+		<dependency>
+			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!-- HSQL is used in this project's integration tests, which means it
+				needs to be baked into the JAR. -->
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!-- Used in tests to help with managing asynchronous behavior. Reference:
+				https://github.com/awaitility/awaitility -->
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used to run our unit and integration tests. -->
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -82,15 +149,22 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- Configure the dependency plugin such that it can be used to grab the
-						 the test dependency artifacts, for manual testing or for use in integration
-						 tests. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
+					<!-- Unpack the assembly for use in ITs. -->
 					<configuration>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
+						<artifactItems>
+							<artifactItem>
+								<groupId>${project.groupId}</groupId>
+								<artifactId>${project.artifactId}</artifactId>
+								<version>${project.version}</version>
+								<type>zip</type>
+								<outputDirectory>${project.build.directory}/db-migrator</outputDirectory>
+							</artifactItem>
+						</artifactItems>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -112,6 +186,33 @@
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>server-unpack-assembly</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in this project, as part
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>
