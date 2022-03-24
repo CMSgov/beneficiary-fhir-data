@@ -278,6 +278,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final String inProcessServerName;
     /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /** Authorization token expiration date, in epoch seconds */
+    private final Long expirationDate;
     /** The token to pass to the RDA API server to authenticate the client. */
     @Nullable private final String authenticationToken;
     /** Object mapper for parsing JWT */
@@ -318,6 +320,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       this.authenticationToken =
           Strings.isNullOrEmpty(authenticationToken) ? null : authenticationToken;
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
+
+      expirationDate = parseJWTExpirationDate(this.authenticationToken);
     }
 
     private ManagedChannel createChannel() {
@@ -344,23 +348,21 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     public CallOptions createCallOptions() {
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
-        Optional<Long> expireOptional = daysToJWTExpire(authenticationToken);
+        if (expirationDate != null) {
+          long daysToExpire =
+              Instant.now().until(Instant.ofEpochMilli(expirationDate * 1000), ChronoUnit.DAYS);
 
-        if (expireOptional.isPresent()) {
-          long daysToExpire = expireOptional.get();
-          if (daysToExpire < 31) {
+          if (daysToExpire < 0) {
+            LOGGER.error("JWT is expired!");
+          } else if (daysToExpire < 31) {
             String logMessage = String.format("JWT will expire in %d days", daysToExpire);
 
-            if (daysToExpire < 0) {
-              LOGGER.error("JWT is expired!");
-            } else if (daysToExpire < 14) {
+            if (daysToExpire < 14) {
               LOGGER.error(logMessage);
             } else {
               LOGGER.warn(logMessage);
             }
           }
-        } else {
-          LOGGER.warn("Authentication token not identified as JWT");
         }
 
         answer = answer.withCallCredentials(new BearerToken(authenticationToken));
@@ -394,21 +396,20 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       return InProcessChannelBuilder.forName(inProcessServerName);
     }
 
-    private Optional<Long> daysToJWTExpire(String token) {
+    private Long parseJWTExpirationDate(String token) {
       try {
         String[] jwtBits = token.split("\\.");
         String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
         JWTClaims claims = mapper.readValue(claimsString, JWTClaims.class);
         if (claims.exp == null) throw new NullPointerException();
-        Instant expiration = Instant.ofEpochMilli(claims.exp * 1000);
-        return Optional.of(Instant.now().until(expiration, ChronoUnit.DAYS));
+        return claims.exp;
       } catch (JsonProcessingException e) {
-        LOGGER.warn("Could not read JWT claims", e);
+        LOGGER.error("Could not read JWT claims", e);
       } catch (Exception e) {
-        LOGGER.warn("Could not parse JWT", e);
+        LOGGER.error("Could not parse Authorization token as JWT", e);
       }
 
-      return Optional.empty();
+      return null;
     }
   }
 

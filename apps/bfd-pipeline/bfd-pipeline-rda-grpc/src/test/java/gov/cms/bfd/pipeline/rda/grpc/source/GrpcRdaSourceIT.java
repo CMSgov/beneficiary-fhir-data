@@ -38,10 +38,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.annotation.Nonnull;
-import lombok.Builder;
-import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -311,13 +308,9 @@ public class GrpcRdaSourceIT {
 
   @Test
   public void grpcCallWithCorrectNonJWT() throws Exception {
-    assertHasLogMessages(
-        Set.of(
-            LoggingEventData.builder().level(Level.WARN).message("Could not parse JWT").build(),
-            LoggingEventData.builder()
-                .level(Level.WARN)
-                .message("Authentication token not identified as JWT")
-                .build()),
+    assertHasLogMessage(
+        Level.ERROR,
+        "Could not parse Authorization token as JWT",
         () ->
             createServerConfig()
                 .authorizedToken("secret")
@@ -343,13 +336,9 @@ public class GrpcRdaSourceIT {
     String claimsToken = Base64.getEncoder().encodeToString("{\"nexp\":0}".getBytes());
     final String AUTH_TOKEN = String.format("NotAReal.%s.Token", claimsToken);
 
-    assertHasLogMessages(
-        Set.of(
-            LoggingEventData.builder().level(Level.WARN).message("Could not parse JWT").build(),
-            LoggingEventData.builder()
-                .level(Level.WARN)
-                .message("Authentication token not identified as JWT")
-                .build()),
+    assertHasLogMessage(
+        Level.ERROR,
+        "Could not parse Authorization token as JWT",
         () ->
             createServerConfig()
                 .authorizedToken(AUTH_TOKEN)
@@ -374,12 +363,9 @@ public class GrpcRdaSourceIT {
   public void grpcCallWithCorrectExpiringAuthTokenOneMonth() throws Exception {
     final String AUTH_TOKEN =
         createTokenWithExpiration(Instant.now().plus(20, ChronoUnit.DAYS).getEpochSecond());
-    assertHasLogMessages(
-        Set.of(
-            LoggingEventData.builder()
-                .level(Level.WARN)
-                .message("JWT will expire in 19 days")
-                .build()),
+    assertHasLogMessage(
+        Level.WARN,
+        "JWT will expire in 19 days",
         () ->
             createServerConfig()
                 .authorizedToken(AUTH_TOKEN)
@@ -404,12 +390,9 @@ public class GrpcRdaSourceIT {
   public void grpcCallWithCorrectExpiringAuthTokenTwoWeeks() throws Exception {
     final String AUTH_TOKEN =
         createTokenWithExpiration(Instant.now().plus(10, ChronoUnit.DAYS).getEpochSecond());
-    assertHasLogMessages(
-        Set.of(
-            LoggingEventData.builder()
-                .level(Level.ERROR)
-                .message("JWT will expire in 9 days")
-                .build()),
+    assertHasLogMessage(
+        Level.ERROR,
+        "JWT will expire in 9 days",
         () ->
             createServerConfig()
                 .authorizedToken(AUTH_TOKEN)
@@ -434,8 +417,9 @@ public class GrpcRdaSourceIT {
   public void grpcCallWithCorrectExpiredAuthToken() throws Exception {
     final String AUTH_TOKEN =
         createTokenWithExpiration(Instant.now().plus(-1, ChronoUnit.DAYS).getEpochSecond());
-    assertHasLogMessages(
-        Set.of(LoggingEventData.builder().level(Level.ERROR).message("JWT is expired!").build()),
+    assertHasLogMessage(
+        Level.ERROR,
+        "JWT is expired!",
         () ->
             createServerConfig()
                 .authorizedToken(AUTH_TOKEN)
@@ -456,8 +440,8 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
-  private void assertHasLogMessages(
-      Set<LoggingEventData> events, ThrowingRunnable<Exception> runnable) throws Exception {
+  private void assertHasLogMessage(
+      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
     final Logger LOGGER = (Logger) LoggerFactory.getLogger(GrpcRdaSource.class);
 
     ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -470,17 +454,10 @@ public class GrpcRdaSourceIT {
 
     LOGGER.detachAppender("UNIT_TEST_APPENDER");
 
-    events.forEach(
-        expectedEvent ->
-            assertTrue(
-                listAppender.list.stream()
-                    .anyMatch(
-                        e ->
-                            e.getLevel() == expectedEvent.getLevel()
-                                && e.getMessage().equals(expectedEvent.getMessage())),
-                String.format(
-                    "Expected log message '[%s] %s' not found",
-                    expectedEvent.getLevel(), expectedEvent.getMessage())));
+    assertTrue(
+        listAppender.list.stream()
+            .anyMatch(e -> e.getLevel() == logLevel && e.getMessage().equals(logMessage)),
+        String.format("Expected log message '[%s] %s' not found", logLevel, logMessage));
   }
 
   private interface ThrowingRunnable<E extends Throwable> {
@@ -588,12 +565,5 @@ public class GrpcRdaSourceIT {
     public synchronized List<String> getValues() {
       return values;
     }
-  }
-
-  @Data
-  @Builder
-  private static class LoggingEventData {
-    private final Level level;
-    private final String message;
   }
 }
