@@ -338,7 +338,7 @@ public class GrpcRdaSourceIT {
 
     assertHasLogMessage(
         Level.ERROR,
-        "Could not parse Authorization token as JWT",
+        "Could not find expiration claim",
         () ->
             createServerConfig()
                 .authorizedToken(AUTH_TOKEN)

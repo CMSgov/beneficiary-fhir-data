@@ -6,7 +6,6 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -403,8 +402,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         JWTClaims claims = mapper.readValue(claimsString, JWTClaims.class);
         if (claims.exp == null) throw new NullPointerException();
         return claims.exp;
-      } catch (JsonProcessingException e) {
-        LOGGER.error("Could not read JWT claims", e);
+      } catch (NullPointerException e) {
+        LOGGER.error("Could not find expiration claim", e);
       } catch (Exception e) {
         LOGGER.error("Could not parse Authorization token as JWT", e);
       }
