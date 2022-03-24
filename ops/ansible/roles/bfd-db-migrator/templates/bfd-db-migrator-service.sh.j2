@@ -1,22 +1,31 @@
 #!/usr/bin/env bash
-export DATABASE_MAX_POOL_SIZE='{{ db_migrator_db_max_pool_size }}'
+
 export DATABASE_PASSWORD='{{ db_migrator_db_password }}'
 export DATABASE_URL='{{ db_migrator_db_url }}'
 export DATABASE_USERNAME='{{ db_migrator_db_username }}'
 
-{% if db_migrator_new_relic_metric_key is defined %}
+{#
+# The expression {{ '#' if foo|default('', true)|length < 1 }} prepends exports with '#' to prevent
+# undefined or empty 'foo' variable from entering the environment. Maintains the existing templating
+# strategy and remains flexible for manual manipulation of resultant script in development and
+# troubleshooting scenarios.
+#}
+# DATABASE_MAX_POOL_SIZE defaults to 1 in the bfd-db-migrator application
+{{ '#' if db_migrator_db_max_pool_size|default('', true)|length < 1 }}export DATABASE_MAX_POOL_SIZE='{{ db_migrator_db_max_pool_size|default('', true) }}'
+
+{%- if db_migrator_new_relic_metric_key is defined %}
 export NEW_RELIC_METRIC_KEY='{{ db_migrator_new_relic_metric_key }}'
 {%- endif %}
 
-{% if db_migrator_new_relic_metric_host is defined %}
+{%- if db_migrator_new_relic_metric_host is defined %}
 export NEW_RELIC_METRIC_HOST='{{ db_migrator_new_relic_metric_host }}'
 {%- endif %}
 
-{% if db_migrator_new_relic_metric_path is defined %}
+{%- if db_migrator_new_relic_metric_path is defined %}
 export NEW_RELIC_METRIC_PATH='{{ db_migrator_new_relic_metric_path }}'
 {%- endif %}
 
-{% if db_migrator_new_relic_metric_period is defined %}
+{%- if db_migrator_new_relic_metric_period is defined %}
 export NEW_RELIC_METRIC_PERIOD='{{ db_migrator_new_relic_metric_period }}'
 {%- endif %}
 
