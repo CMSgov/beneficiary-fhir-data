@@ -188,7 +188,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("BENE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
+                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED", "BENE_ID_NUMERIC")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -327,13 +327,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("snf_claims")
+              .setHeaderTable("snf_claims_v")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("snf_claim_lines")
+              .setLineTable("snf_claim_lines_v")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
-                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED")))
+              .setUseTableViewsInEntity(true));
     } finally {
       if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
     }
@@ -727,8 +728,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyEntity.addMethod(parentBeneficiarySetter.build());
 
     // These aren't "real" RifFields, as they're not in the spreadsheet; representing them here as
-    // such, to make
-    // it easier to add them into the spreadsheet in the future.
+    // such, to make it easier to add them into the spreadsheet in the future.
     RifField rifField =
         new RifField(
             "YEAR_MONTH",
@@ -1301,8 +1301,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "hospice_claims",
             "inpatient_claims",
             "outpatient_claims",
-            "partd_events",
-            "snf_claims");
+            "partd_events");
+    // "snf_claims");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());
@@ -1892,6 +1892,20 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         addlDatabaseFields.add(lastUpdated);
         continue;
       }
+      if (additionalDatabaseField.contentEquals("BENE_ID_NUMERIC")) {
+        RifField lastUpdated =
+            new RifField(
+                "BENE_ID_NUMERIC",
+                RifColumnType.BIGINT,
+                Optional.of(8),
+                Optional.of(0),
+                Boolean.FALSE,
+                null,
+                "BENE_ID_NUMERIC",
+                "beneficiaryIdNumeric");
+        addlDatabaseFields.add(lastUpdated);
+        continue;
+      }
     }
     return addlDatabaseFields;
   }
@@ -2203,26 +2217,27 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       boolean isColumnOptional,
       Optional<Integer> columnLength,
       Optional<Integer> columnScale) {
-    if (type == RifColumnType.CHAR
-        && columnLength.orElse(Integer.MAX_VALUE) == 1
-        && !isColumnOptional) return TypeName.CHAR;
-    else if (type == RifColumnType.CHAR
-        && columnLength.orElse(Integer.MAX_VALUE) == 1
-        && isColumnOptional) return ClassName.get(Character.class);
-    else if (type == RifColumnType.CHAR) return ClassName.get(String.class);
-    else if (type == RifColumnType.DATE && columnLength.orElse(0) == 8)
-      return ClassName.get(LocalDate.class);
-    else if (type == RifColumnType.TIMESTAMP && columnLength.orElse(0) == 20)
-      return ClassName.get(Instant.class);
+    if (type == RifColumnType.CHAR) {
+      if (columnLength.orElse(Integer.MAX_VALUE) == 1) {
+        return isColumnOptional ? ClassName.get(Character.class) : TypeName.CHAR;
+      } else {
+        return ClassName.get(String.class);
+      }
+    } else if (type == RifColumnType.DATE) return ClassName.get(LocalDate.class);
+    else if (type == RifColumnType.TIMESTAMP) return ClassName.get(Instant.class);
     else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0)
       return ClassName.get(BigDecimal.class);
     else if (type == RifColumnType.NUM
         && columnScale.orElse(Integer.MAX_VALUE) == 0
         && !isColumnOptional) return TypeName.INT;
-    else if (type == RifColumnType.NUM
-        && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && isColumnOptional) return ClassName.get(Integer.class);
-    else throw new IllegalArgumentException("Unhandled field type: " + type.name());
+    else if (type == RifColumnType.SMALLINT) {
+      return isColumnOptional ? ClassName.get(Short.class) : TypeName.SHORT;
+    } else if (type == RifColumnType.BIGINT) {
+      return isColumnOptional ? ClassName.get(Long.class) : TypeName.LONG;
+    } else if (type == RifColumnType.INTEGER || type == RifColumnType.NUM) {
+      return isColumnOptional ? ClassName.get(Integer.class) : TypeName.INT;
+    }
+    throw new IllegalArgumentException("Unhandled field type: " + type.name());
   }
 
   /**

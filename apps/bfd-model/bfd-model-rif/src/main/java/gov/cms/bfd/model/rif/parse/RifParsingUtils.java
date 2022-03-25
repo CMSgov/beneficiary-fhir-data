@@ -142,6 +142,23 @@ public final class RifParsingUtils {
   }
 
   /**
+   * @param shortText the number string to parse
+   * @return the specified text parsed into an {@link Long}
+   */
+  public static short parseShort(String shortText) {
+    /*
+     * Might seem silly to pull this out, but it makes the code a bit easier
+     * to read, and ensures that this parsing is standardized.
+     */
+    try {
+      return Short.parseShort(shortText);
+    } catch (NumberFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to parse short value: '%s'.", shortText), e);
+    }
+  }
+
+  /**
    * Parse a {@link Optional} {@link Integer} from a {@link String}
    *
    * @param intText the number string to parse
@@ -149,11 +166,7 @@ public final class RifParsingUtils {
    *     empty Optional if not
    */
   public static Optional<Integer> parseOptionalInteger(String intText) {
-    if (intText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseInteger(intText));
-    }
+    return intText.isEmpty() ? Optional.empty() : Optional.of(parseInteger(intText));
   }
 
   /**
@@ -164,11 +177,16 @@ public final class RifParsingUtils {
    *     Optional if not
    */
   public static Optional<Long> parseOptionalLong(String longText) {
-    if (longText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseLong(longText));
-    }
+    return longText.isEmpty() ? Optional.empty() : Optional.of(parseLong(longText));
+  }
+
+  /**
+   * @param shortText the number string to parse
+   * @return an {@link Optional} populated with an {@link Short} if the input has data, or an empty
+   *     Optional if not
+   */
+  public static Optional<Short> parseOptionalShort(String shortText) {
+    return shortText.isEmpty() ? Optional.empty() : Optional.of(parseShort(shortText));
   }
 
   /**
@@ -202,11 +220,7 @@ public final class RifParsingUtils {
    *     empty Optional if it is empty
    */
   public static Optional<BigDecimal> parseOptionalDecimal(String decimalText) {
-    if (decimalText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseDecimal(decimalText));
-    }
+    return decimalText.isEmpty() ? Optional.empty() : Optional.of(parseDecimal(decimalText));
   }
 
   /**
@@ -242,8 +256,7 @@ public final class RifParsingUtils {
     }
 
     try {
-      LocalDate dateFrom = LocalDate.parse(dateText, rifDateFormatter);
-      return dateFrom;
+      return LocalDate.parse(dateText, rifDateFormatter);
     } catch (DateTimeParseException e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse date value: '%s'.", dateText), e);
@@ -264,8 +277,7 @@ public final class RifParsingUtils {
 
     try {
       LocalDateTime localDateTime = LocalDateTime.parse(timestampText, RIF_TIMESTAMP_FORMATTER);
-      Instant instantFormatted = localDateTime.toInstant(ZoneOffset.UTC);
-      return instantFormatted;
+      return localDateTime.toInstant(ZoneOffset.UTC);
     } catch (DateTimeParseException e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse timestamp value: '%s'.", timestampText), e);
@@ -280,11 +292,7 @@ public final class RifParsingUtils {
    *     empty Optional if not
    */
   public static Optional<LocalDate> parseOptionalDate(String dateText) {
-    if (dateText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseDate(dateText));
-    }
+    return dateText.isEmpty() ? Optional.empty() : Optional.of(parseDate(dateText));
   }
 
   /**
@@ -295,11 +303,7 @@ public final class RifParsingUtils {
    *     Optional if not
    */
   public static Optional<Instant> parseOptionalTimestamp(String timestampText) {
-    if (timestampText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseTimestamp(timestampText));
-    }
+    return timestampText.isEmpty() ? Optional.empty() : Optional.of(parseTimestamp(timestampText));
   }
 
   /**
@@ -314,10 +318,10 @@ public final class RifParsingUtils {
      * to read, and ensures that this parsing is standardized.
      */
 
-    if (charText.length() != 1)
+    if (charText.length() != 1) {
       throw new InvalidRifValueException(
           String.format("Unable to parse character value: '%s'.", charText));
-
+    }
     return charText.charAt(0);
   }
 
@@ -329,10 +333,6 @@ public final class RifParsingUtils {
    *     empty Optional if not
    */
   public static Optional<Character> parseOptionalCharacter(String charText) {
-    if (charText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseCharacter(charText));
-    }
+    return charText.isEmpty() ? Optional.empty() : Optional.of(parseCharacter(charText));
   }
 }
