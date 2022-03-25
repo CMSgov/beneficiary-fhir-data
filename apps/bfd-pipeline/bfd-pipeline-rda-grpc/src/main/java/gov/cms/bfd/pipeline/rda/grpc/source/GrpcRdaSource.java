@@ -281,10 +281,6 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final Long expirationDate;
     /** The token to pass to the RDA API server to authenticate the client. */
     @Nullable private final String authenticationToken;
-    /** Object mapper for parsing JWT */
-    @EqualsAndHashCode.Exclude
-    private static final ObjectMapper mapper =
-        new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     /**
      * Specifies which type of server we want to connect to. {@code Remote} is the normal
@@ -348,9 +344,10 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
         /**
-         * The RDA API uses a JWT token for authentication, by design this is set to expire X days after being
-         * issued.  This check will alert the team of a token that is close to expiring so we can coordinate
-         * having a new one issued by the RDA API team before authentication fails.
+         * The RDA API uses a JWT token for authentication, by design this is set to expire X days
+         * after being issued. This check will alert the team of a token that is close to expiring
+         * so we can coordinate having a new one issued by the RDA API team before authentication
+         * fails.
          */
         if (expirationDate != null) {
           long daysToExpire =
@@ -404,7 +401,10 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       try {
         String[] jwtBits = token.split("\\.");
         String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
-        JWTClaims claims = mapper.readValue(claimsString, JWTClaims.class);
+        JWTClaims claims =
+            new ObjectMapper()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .readValue(claimsString, JWTClaims.class);
         if (claims.exp == null) throw new NullPointerException();
         return claims.exp;
       } catch (NullPointerException e) {
