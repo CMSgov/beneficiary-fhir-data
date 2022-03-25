@@ -309,7 +309,7 @@ public class GrpcRdaSourceIT {
   @Test
   public void grpcCallWithCorrectNonJWT() throws Exception {
     assertHasLogMessage(
-        Level.ERROR,
+        Level.WARN,
         "Could not parse Authorization token as JWT",
         () ->
             createServerConfig()
@@ -337,7 +337,7 @@ public class GrpcRdaSourceIT {
     final String AUTH_TOKEN = String.format("NotAReal.%s.Token", claimsToken);
 
     assertHasLogMessage(
-        Level.ERROR,
+        Level.WARN,
         "Could not find expiration claim",
         () ->
             createServerConfig()

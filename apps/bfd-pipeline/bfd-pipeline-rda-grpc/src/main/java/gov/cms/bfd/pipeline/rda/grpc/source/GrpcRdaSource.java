@@ -408,9 +408,9 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         if (claims.exp == null) throw new NullPointerException();
         return claims.exp;
       } catch (NullPointerException e) {
-        LOGGER.error("Could not find expiration claim", e);
+        LOGGER.warn("Could not find expiration claim", e);
       } catch (Exception e) {
-        LOGGER.error("Could not parse Authorization token as JWT", e);
+        LOGGER.warn("Could not parse Authorization token as JWT", e);
       }
 
       return null;
