@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
 
+/** Creates a {@link Sink} that writes out to a ndjson file. */
 @Slf4j
 public class NdJsonSink implements Sink<MessageOrBuilder> {
 
@@ -40,6 +41,7 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     writer.close();
 
     // File format should be [FISS|MCS]-<startSequence>-<endSequence>.ndjson
+    // Rename the file to follow this convention now that we have the sequence range
     long lastSequenceNumber =
         sequenceCounter.get() - 1; // Counter was incremented after the last claim
 
