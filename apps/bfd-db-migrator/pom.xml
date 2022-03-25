@@ -19,6 +19,24 @@
 
 	<dependencies>
 		<dependency>
+			<!-- contains the JPA entities for writing to the database -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rda</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the Blue Button API
+                backend's data in the database. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.10.2</version>
+		</dependency>
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
 				 Java. -->
 			<groupId>org.slf4j</groupId>
@@ -104,6 +122,12 @@
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->

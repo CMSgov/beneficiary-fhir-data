@@ -3,16 +3,19 @@ package gov.cms.bfd.migrator.app;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.migrator.util.DatabaseTestUtils;
 import gov.cms.bfd.migrator.util.DatabaseTestUtils.DataSourceComponents;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -89,7 +92,10 @@ public final class MigratorAppIT {
           .until(() -> !appProcess.isAlive());
 
       // Verify results
-      assertEquals(0, appProcess.exitValue());
+      assertEquals(
+          0,
+          appProcess.exitValue(),
+          "Did not get expected error code, \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
 
       // Test the migrations occurred by checking the log output
       boolean hasExpectedMigrationLine =
@@ -106,6 +112,7 @@ public final class MigratorAppIT {
       assertTrue(
           hasLogLine(appRunConsumer, String.format("now at version v%s", expectedVersion)),
           "Did not find log entry for expected final version (v" + expectedVersion + ")");
+      LOGGER.info("\\nSTDOUT:\\n\"" + appRunConsumer.getStdoutContents());
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(
           "Migration application failed to start within timeout, STDOUT:\n"
@@ -242,21 +249,29 @@ public final class MigratorAppIT {
   }
 
   /**
-   * Gets the number of migration scripts by checking the directory they are located in.
+   * Gets the number of migration scripts by checking the directory they are located in and counting
+   * the files.
    *
    * @return the number migration scripts
    */
-  public int getNumMigrationScripts() {
-    String migrationPath = "src/main/resources/db/migration";
+  public int getNumMigrationScripts() throws IOException {
 
-    long fileCount = 0;
-    try (Stream<Path> files = Files.list(Paths.get(migrationPath))) {
-      fileCount = files.count();
-    } catch (IOException io) {
-      fail("Could not find file path for migration scripts at: " + migrationPath);
+    JarFile migrationJar =
+        new JarFile(
+            new File(
+                "target/db-migrator/bfd-db-migrator-1.0.0-SNAPSHOT/lib/bfd-model-rif-1.0.0-SNAPSHOT.jar"));
+    Enumeration<? extends JarEntry> enumeration = migrationJar.entries();
+
+    int fileCount = 0;
+    while (enumeration.hasMoreElements()) {
+      ZipEntry entry = enumeration.nextElement();
+
+      // Check for sql migration scripts
+      if (entry.getName().startsWith("db/migration/") && entry.getName().endsWith(".sql")) {
+        fileCount++;
+      }
     }
-
-    return (int) fileCount;
+    return fileCount;
   }
 
   /**

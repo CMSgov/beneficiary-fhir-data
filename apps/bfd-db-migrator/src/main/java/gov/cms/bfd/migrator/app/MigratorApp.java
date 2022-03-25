@@ -10,7 +10,17 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.Entity;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +40,12 @@ public final class MigratorApp {
   /** This {@link System#exit(int)} value should be used when the migrations fail for any reason. */
   static final int EXIT_CODE_FAILED_MIGRATION = 2;
 
+  /**
+   * This {@link System#exit(int)} value should be used when hibernate validations fail for any
+   * reason.
+   */
+  static final int EXIT_CODE_FAILED_HIBERNATE_VALIDATION = 3;
+
   static final int EXIT_CODE_SUCCESS = 0;
 
   /**
@@ -47,7 +63,7 @@ public final class MigratorApp {
       appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (AppConfigurationException e) {
-      LOGGER.error("Invalid app configuration.", e);
+      LOGGER.error("Invalid app configuration, shutting down.", e);
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
@@ -61,11 +77,85 @@ public final class MigratorApp {
     boolean migrationSuccess =
         DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource, appConfig);
 
-    LOGGER.info("Shutting down");
     if (!migrationSuccess) {
+      LOGGER.error("Migration failed, shutting down");
       System.exit(EXIT_CODE_FAILED_MIGRATION);
     }
+
+    // Run hibernate validation after the migrations have succeeded
+    boolean validationSuccess = runHibernateValidation(pooledDataSource);
+
+    if (!validationSuccess) {
+      LOGGER.error("Validation failed, shutting down");
+      System.exit(EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
+    }
+
+    LOGGER.info("Migration and validation passed, shutting down");
     System.exit(EXIT_CODE_SUCCESS);
+  }
+
+  /**
+   * Runs hibernate validation and reports if it succeeded.
+   *
+   * @param dataSource the data source to connect to
+   * @return {@code true} if the validation succeeded
+   */
+  private static boolean runHibernateValidation(HikariDataSource dataSource) {
+
+    try {
+      Configuration cfg = new Configuration();
+
+      // Add the classes
+      Set<Class<?>> classes = getAnnotatedClassesFromPackage("gov.cms.bfd.model.rda");
+
+      if (classes.isEmpty()) {
+        LOGGER.error("Found no classes to validate.");
+        return false;
+      }
+
+      for (Class<?> clazz : classes) {
+        cfg.addAnnotatedClass(clazz);
+      }
+
+      LOGGER.info("Added {} classes to be validated.", classes.size());
+
+      // Set hibernate to validate the models on startup
+      cfg.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
+      cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "validate");
+
+      // Build the session factory with the datasource
+      SessionFactory sessions =
+          cfg.buildSessionFactory(
+              new StandardServiceRegistryBuilder()
+                  .applySettings(cfg.getProperties())
+                  .applySetting(Environment.DATASOURCE, dataSource)
+                  .build());
+
+      // Validation should occur as soon as the session is opened
+      Session session = sessions.openSession();
+      session.close();
+    } catch (HibernateException hx) {
+      LOGGER.error("Hibernate validation failed due to: ", hx);
+      return false;
+    } catch (Exception ex) {
+      LOGGER.error("Hibernate validation failed due to unexpected exception: ", ex);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Gets the annotated classes from package.
+   *
+   * @param packageName the package name
+   * @return the annotated classes from package
+   */
+  public static Set<Class<?>> getAnnotatedClassesFromPackage(String packageName) {
+    Reflections reflections = new Reflections(packageName);
+    Set<Class<?>> foundClasses = reflections.getTypesAnnotatedWith(Entity.class);
+    LOGGER.info("Found {} annotated entities.", foundClasses.size());
+    return foundClasses;
   }
 
   /**
