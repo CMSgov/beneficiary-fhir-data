@@ -347,6 +347,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     public CallOptions createCallOptions() {
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
+        /**
+         * The RDA API uses a JWT token for authentication, by design this is set to expire X days after being
+         * issued.  This check will alert the team of a token that is close to expiring so we can coordinate
+         * having a new one issued by the RDA API team before authentication fails.
+         */
         if (expirationDate != null) {
           long daysToExpire =
               Instant.now().until(Instant.ofEpochMilli(expirationDate * 1000), ChronoUnit.DAYS);
