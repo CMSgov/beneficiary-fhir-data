@@ -445,9 +445,6 @@ public final class DMEClaimTransformerV2Test {
                 "0",
                 "Service Subject to Deductible"));
 
-<<<<<<< HEAD
-    Assert.assertTrue(compare9.equalsDeep(ex9));
-=======
     assertTrue(compare9.equalsDeep(ex9));
 
     Extension ex10 =
@@ -464,7 +461,6 @@ public final class DMEClaimTransformerV2Test {
                 "Workers' compensation"));
 
     assertTrue(compare10.equalsDeep(ex10));
->>>>>>> 20c971863d7642043198dbae157fb0de42491908
   }
 
   @Test
