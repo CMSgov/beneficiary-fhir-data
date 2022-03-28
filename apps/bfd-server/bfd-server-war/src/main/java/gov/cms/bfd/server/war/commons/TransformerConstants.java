@@ -95,6 +95,24 @@ public final class TransformerConstants {
 
   public static final String CODED_MONEY_USD = "USD";
 
+  /** For custom [Resource].meta.tags entries. */
+  public static final String CODING_SYSTEM_BFD_TAGS = BASE_URL_BBAPI_RESOURCES + "/codesystem/tags";
+
+  /**
+   * Used to notify end users when they receive {@link Patient} records impacted by <a
+   * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>. See the documentation on <code>
+   * LoadAppOptions.isFilteringNonNullAndNon2022Benes()</code> for details
+   */
+  public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT =
+      "delayed-backdated-enrollment";
+
+  /**
+   * The {@link Coding#getDisplay()} value for {@link
+   * #CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT}.
+   */
+  public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY =
+      "Impacted by delayed backdated enrollment data.";
+
   public static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";
 
@@ -245,7 +263,7 @@ public final class TransformerConstants {
   public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Tax ID number";
 
   /**
-   * The standard {@link Coding#gCode()} for {@link Identifier#getType()} entries where the
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is an MC.
    */
   public static final String CODED_IDENTIFIER_TYPE_MC = "MC";

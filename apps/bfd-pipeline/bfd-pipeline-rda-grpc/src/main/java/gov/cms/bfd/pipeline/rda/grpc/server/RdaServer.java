@@ -10,7 +10,9 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.Builder;
@@ -24,9 +26,15 @@ public class RdaServer {
    *
    * @param config {@link LocalConfig} for the server
    * @return a running RDA API Server object
+   * @throws IOException if the server cannot bind at runtime
    */
   public static Server startLocal(LocalConfig config) throws IOException {
-    return ServerBuilder.forPort(config.getPort())
+    final ServerBuilder<?> serverBuilder =
+        config.hasHostname()
+            ? NettyServerBuilder.forAddress(
+                new InetSocketAddress(config.getHostname(), config.getPort()))
+            : ServerBuilder.forPort(config.getPort());
+    return serverBuilder
         .addService(config.createService())
         .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
@@ -38,6 +46,7 @@ public class RdaServer {
    *
    * @param config {@link InProcessConfig} for the server
    * @return a running RDA API Server object
+   * @throws IOException if the server cannot bind properly
    */
   public static Server startInProcess(InProcessConfig config) throws IOException {
     return InProcessServerBuilder.forName(config.getServerName())
@@ -71,8 +80,7 @@ public class RdaServer {
    * shuts down the server once the action has finished running. InProcess servers have less
    * overhead than Local servers but still exercise most of the GRPC plumbing.
    *
-   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
-   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
+   * @param config the config for the server
    * @param action the action to execute
    * @throws Exception any exception is passed through to the caller
    */
@@ -100,8 +108,7 @@ public class RdaServer {
    * exercise most of the GRPC plumbing. This assumes the test will know how to connect to the
    * server on its own without any parameters.
    *
-   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
-   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
+   * @param config the config for the server
    * @param test the test to execute
    * @throws Exception any exception is passed through to the caller
    */
@@ -159,6 +166,8 @@ public class RdaServer {
   /** Configuration data for running a server on a local port. */
   @Getter
   public static class LocalConfig extends BaseConfig {
+    private final String hostname;
+
     /**
      * The port for the server to listen on. A value of zero causes the server to allocate any open
      * port. Default for the builder is zero.
@@ -171,17 +180,26 @@ public class RdaServer {
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
         @NonNull @Singular Set<String> authorizedTokens,
+        String hostname,
         int port) {
       super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      this.hostname = Strings.isNullOrEmpty(hostname) ? "localhost" : hostname;
       this.port = port;
     }
 
     /**
      * Shorthand for calling {@link RdaServer#runWithLocalServer(LocalConfig, ThrowableConsumer)}
      * with this config object.
+     *
+     * @param action the action
+     * @throws Exception any exception running the action
      */
     public void runWithPortParam(ThrowableConsumer<Integer> action) throws Exception {
       runWithLocalServer(this, action);
+    }
+
+    public boolean hasHostname() {
+      return !Strings.isNullOrEmpty(hostname);
     }
   }
 
@@ -207,7 +225,10 @@ public class RdaServer {
 
     /**
      * Shorthand for calling {@link RdaServer#runWithInProcessServer(InProcessConfig,
-     * ThrowableConsumer)} with this config object.
+     * ThrowableConsumer)}* with this config object.
+     *
+     * @param action the action to execute
+     * @throws Exception any exception is passed through to the caller
      */
     public void runWithChannelParam(ThrowableConsumer<ManagedChannel> action) throws Exception {
       runWithInProcessServer(this, action);
@@ -215,7 +236,10 @@ public class RdaServer {
 
     /**
      * Shorthand for calling {@link RdaServer#runWithInProcessServerNoParam(InProcessConfig,
-     * ThrowableAction)} with this config object.
+     * ThrowableAction)}* with this config object.
+     *
+     * @param action the action to execute
+     * @throws Exception any exception is passed through to the caller
      */
     public void runWithNoParam(ThrowableAction action) throws Exception {
       runWithInProcessServerNoParam(this, action);

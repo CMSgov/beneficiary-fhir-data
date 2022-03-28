@@ -28,6 +28,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -115,7 +116,8 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Runs a <code>TRUNCATE</code> for all tables in the {@link #getUnpooledDataSource()} database.
+   * Runs a <code>TRUNCATE</code> for all tables in the {@link
+   * DatabaseTestUtils#getUnpooledDataSource()} database.
    */
   public void truncateTablesInDataSource() {
     List<Class<?>> entityTypes =
@@ -142,7 +144,8 @@ public final class PipelineTestUtils {
             LoadedBatch.class,
             LoadedFile.class,
             PreAdjFissClaim.class,
-            PreAdjFissProcCode.class);
+            PreAdjFissProcCode.class,
+            SkippedRifRecord.class);
 
     try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection(); ) {
       // Disable auto-commit and remember the default schema name.

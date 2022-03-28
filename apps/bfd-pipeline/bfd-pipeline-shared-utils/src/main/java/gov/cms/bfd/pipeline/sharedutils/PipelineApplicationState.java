@@ -31,7 +31,8 @@ public final class PipelineApplicationState implements AutoCloseable {
    *
    * @param metrics the value to use for {@link #getMetrics()}
    * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
-   * @param entityManagerFactory the value to use for {@link #getEntityManagerFactory()}
+   * @param persistenceUnitName the persistence unit name
+   * @param clock the clock
    */
   public PipelineApplicationState(
       MetricRegistry metrics,
@@ -52,8 +53,9 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param metrics the value to use for {@link #getMetrics()}
    * @param dataSource the {@link DatabaseOptions} for the application's DB (which this will use to
    *     create {@link #getPooledDataSource()})
-   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
    * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
+   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
+   * @param clock the clock
    */
   @VisibleForTesting
   public PipelineApplicationState(
@@ -77,6 +79,7 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param metrics the value to use for {@link #getMetrics()}
    * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
    * @param entityManagerFactory the value to use for {@link #getEntityManagerFactory()}
+   * @param clock the clock
    */
   @VisibleForTesting
   public PipelineApplicationState(
@@ -145,7 +148,13 @@ public final class PipelineApplicationState implements AutoCloseable {
 
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    /*
+     * Hibernate validation is being disabled in the applications so that
+     * validation failures do not prevent the pipeline from starting.
+     * With the implementation of RFC-0011 this validation will be moved
+     * to a more appropriate stage of the deployment.
+     */
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.NONE);
     hibernateProperties.put(
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 

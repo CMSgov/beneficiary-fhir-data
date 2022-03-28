@@ -1,9 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
@@ -20,12 +17,9 @@ import org.slf4j.LoggerFactory;
  * development there is no way to resume a stream from a given point in time so every time the
  * service is called it sends all of its values.
  */
-public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjMcsClaim>> {
-  private final McsClaimTransformer transformer;
-
-  public McsClaimStreamCaller(McsClaimTransformer transformer) {
+public class McsClaimStreamCaller extends GrpcStreamCaller<McsClaimChange> {
+  public McsClaimStreamCaller() {
     super(LoggerFactory.getLogger(McsClaimStreamCaller.class));
-    this.transformer = transformer;
   }
 
   /**
@@ -38,10 +32,9 @@ public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjMcsCl
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override
-  public GrpcResponseStream<RdaChange<PreAdjMcsClaim>> callService(
+  public GrpcResponseStream<McsClaimChange> callService(
       ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
       throws Exception {
-    final String apiSource = callVersionService(channel, callOptions);
     logger.info("calling service");
     Preconditions.checkNotNull(channel);
     final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
@@ -50,14 +43,6 @@ public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjMcsCl
     final ClientCall<ClaimRequest, McsClaimChange> call = channel.newCall(method, callOptions);
     final Iterator<McsClaimChange> apiResults =
         ClientCalls.blockingServerStreamingCall(call, request);
-    final Iterator<RdaChange<PreAdjMcsClaim>> transformedResults =
-        Iterators.transform(
-            apiResults,
-            apiClaim -> {
-              RdaChange<PreAdjMcsClaim> mcsChange = transformer.transformClaim(apiClaim);
-              mcsChange.getClaim().setApiSource(apiSource);
-              return mcsChange;
-            });
-    return new GrpcResponseStream<>(call, transformedResults);
+    return new GrpcResponseStream<>(call, apiResults);
   }
 }

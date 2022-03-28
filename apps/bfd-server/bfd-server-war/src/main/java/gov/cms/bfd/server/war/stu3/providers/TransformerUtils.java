@@ -133,7 +133,7 @@ public final class TransformerUtils {
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
    *
-   * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
+   * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
    */
   private static final Set<CcwCodebookInterface> codebookLookupMissingFailures = new HashSet<>();
 
@@ -143,7 +143,7 @@ public final class TransformerUtils {
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
    *
-   * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
+   * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
    */
   private static final Set<CcwCodebookInterface> codebookLookupDuplicateFailures = new HashSet<>();
 
@@ -595,6 +595,9 @@ public final class TransformerUtils {
   }
 
   /**
+   * TODO: BFD-1583 Remove this method and the calling unit test when fully converted to BigInt
+   * claim IDs.
+   *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
@@ -603,6 +606,17 @@ public final class TransformerUtils {
    */
   public static String buildEobId(ClaimType claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimType claimType, Long claimId) {
+    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
@@ -648,8 +662,8 @@ public final class TransformerUtils {
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
    *     Beneficiary}
    */
-  public static IdDt buildPatientId(String beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
+  public static IdDt buildPatientId(Long beneficiaryId) {
+    return new IdDt(Patient.class.getSimpleName(), beneficiaryId.toString());
   }
 
   /**
@@ -662,6 +676,21 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
+   *     Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Long beneficiaryId) {
+    return new IdDt(
+        Coverage.class.getSimpleName(),
+        String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * TODO: BFD-1583 Remove this method and anything that references it once beneficiaryId datatype
+   * conversion to Long is complete.
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
    *     Coverage#getId()} for
@@ -1249,6 +1278,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * TODO: Remove this method when the calling method has been removed as per BFD-1582
+   *
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
    * @param coverageType the {@link MedicareSegment} value to match
@@ -1260,13 +1291,24 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
+   *     value for the {@link Coverage#getBeneficiary()} value to match
+   * @param coverageType the {@link MedicareSegment} value to match
+   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
+   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
+   */
+  static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
+    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
+  }
+
+  /**
    * @param patientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID value for the
    *     beneficiary to match
    * @return a {@link Reference} to the {@link Patient} resource that matches the specified
    *     parameters
    */
-  static Reference referencePatient(String patientId) {
-    return new Reference(String.format("Patient/%s", patientId));
+  static Reference referencePatient(Long patientId) {
+    return new Reference(String.format("Patient/%d", patientId));
   }
 
   /**
@@ -1642,8 +1684,8 @@ public final class TransformerUtils {
    */
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
+      Long claimId,
+      Long beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -1655,8 +1697,8 @@ public final class TransformerUtils {
     eob.setId(buildEobId(claimType, claimId));
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
+    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
 
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
@@ -1714,7 +1756,7 @@ public final class TransformerUtils {
    */
   static void mapEobCommonGroupCarrierDME(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
+      Long beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,
@@ -1817,7 +1859,7 @@ public final class TransformerUtils {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,
@@ -2300,10 +2342,32 @@ public final class TransformerUtils {
   /**
    * Extract the Diagnosis values for codes 1-12
    *
-   * @param diagnosisPrincipalCode
-   * @param diagnosisPrincipalCodeVersion
+   * @param diagnosisPrincipalCode the diagnosis principal code
+   * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
    * @param diagnosis1Code through diagnosis12Code
    * @param diagnosis1CodeVersion through diagnosis12CodeVersion
+   * @param diagnosis2Code the diagnosis 2 code
+   * @param diagnosis2CodeVersion the diagnosis 2 code version
+   * @param diagnosis3Code the diagnosis 3 code
+   * @param diagnosis3CodeVersion the diagnosis 3 code version
+   * @param diagnosis4Code the diagnosis 4 code
+   * @param diagnosis4CodeVersion the diagnosis 4 code version
+   * @param diagnosis5Code the diagnosis 5 code
+   * @param diagnosis5CodeVersion the diagnosis 5 code version
+   * @param diagnosis6Code the diagnosis 6 code
+   * @param diagnosis6CodeVersion the diagnosis 6 code version
+   * @param diagnosis7Code the diagnosis 7 code
+   * @param diagnosis7CodeVersion the diagnosis 7 code version
+   * @param diagnosis8Code the diagnosis 8 code
+   * @param diagnosis8CodeVersion the diagnosis 8 code version
+   * @param diagnosis9Code the diagnosis 9 code
+   * @param diagnosis9CodeVersion the diagnosis 9 code version
+   * @param diagnosis10Code the diagnosis 10 code
+   * @param diagnosis10CodeVersion the diagnosis 10 code version
+   * @param diagnosis11Code the diagnosis 11 code
+   * @param diagnosis11CodeVersion the diagnosis 11 code version
+   * @param diagnosis12Code the diagnosis 12 code
+   * @param diagnosis12CodeVersion the diagnosis 12 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractDiagnoses1Thru12(
@@ -2364,12 +2428,34 @@ public final class TransformerUtils {
   /**
    * Extract the Diagnosis values for codes 1-12
    *
-   * @param diagnosisAdmittingCode
-   * @param diagnosisAdmittingCodeVersion
-   * @param diagnosisPrincipalCode
-   * @param diagnosisPrincipalCodeVersion
+   * @param diagnosisAdmittingCode the diagnosis admitting code
+   * @param diagnosisAdmittingCodeVersion the diagnosis admitting code version
+   * @param diagnosisPrincipalCode the diagnosis principal code
+   * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
    * @param diagnosis1Code through diagnosis12Code
    * @param diagnosis1CodeVersion through diagnosis12CodeVersion
+   * @param diagnosis2Code the diagnosis 2 code
+   * @param diagnosis2CodeVersion the diagnosis 2 code version
+   * @param diagnosis3Code the diagnosis 3 code
+   * @param diagnosis3CodeVersion the diagnosis 3 code version
+   * @param diagnosis4Code the diagnosis 4 code
+   * @param diagnosis4CodeVersion the diagnosis 4 code version
+   * @param diagnosis5Code the diagnosis 5 code
+   * @param diagnosis5CodeVersion the diagnosis 5 code version
+   * @param diagnosis6Code the diagnosis 6 code
+   * @param diagnosis6CodeVersion the diagnosis 6 code version
+   * @param diagnosis7Code the diagnosis 7 code
+   * @param diagnosis7CodeVersion the diagnosis 7 code version
+   * @param diagnosis8Code the diagnosis 8 code
+   * @param diagnosis8CodeVersion the diagnosis 8 code version
+   * @param diagnosis9Code the diagnosis 9 code
+   * @param diagnosis9CodeVersion the diagnosis 9 code version
+   * @param diagnosis10Code the diagnosis 10 code
+   * @param diagnosis10CodeVersion the diagnosis 10 code version
+   * @param diagnosis11Code the diagnosis 11 code
+   * @param diagnosis11CodeVersion the diagnosis 11 code version
+   * @param diagnosis12Code the diagnosis 12 code
+   * @param diagnosis12CodeVersion the diagnosis 12 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractDiagnoses1Thru12(
@@ -2430,11 +2516,36 @@ public final class TransformerUtils {
 
     return diagnoses;
   }
+
   /**
    * Extract the Diagnosis values for codes 13-25
    *
    * @param diagnosis13Code through diagnosis25Code
    * @param diagnosis13CodeVersion through diagnosis25CodeVersion
+   * @param diagnosis14Code the diagnosis 14 code
+   * @param diagnosis14CodeVersion the diagnosis 14 code version
+   * @param diagnosis15Code the diagnosis 15 code
+   * @param diagnosis15CodeVersion the diagnosis 15 code version
+   * @param diagnosis16Code the diagnosis 16 code
+   * @param diagnosis16CodeVersion the diagnosis 16 code version
+   * @param diagnosis17Code the diagnosis 17 code
+   * @param diagnosis17CodeVersion the diagnosis 17 code version
+   * @param diagnosis18Code the diagnosis 18 code
+   * @param diagnosis18CodeVersion the diagnosis 18 code version
+   * @param diagnosis19Code the diagnosis 19 code
+   * @param diagnosis19CodeVersion the diagnosis 19 code version
+   * @param diagnosis20Code the diagnosis 20 code
+   * @param diagnosis20CodeVersion the diagnosis 20 code version
+   * @param diagnosis21Code the diagnosis 21 code
+   * @param diagnosis21CodeVersion the diagnosis 21 code version
+   * @param diagnosis22Code the diagnosis 22 code
+   * @param diagnosis22CodeVersion the diagnosis 22 code version
+   * @param diagnosis23Code the diagnosis 23 code
+   * @param diagnosis23CodeVersion the diagnosis 23 code version
+   * @param diagnosis24Code the diagnosis 24 code
+   * @param diagnosis24CodeVersion the diagnosis 24 code version
+   * @param diagnosis25Code the diagnosis 25 code
+   * @param diagnosis25CodeVersion the diagnosis 25 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractDiagnoses13Thru25(
@@ -2495,10 +2606,32 @@ public final class TransformerUtils {
   /**
    * Extract the External Diagnosis values for codes 1-12
    *
-   * @param diagnosisExternalFirstCode
-   * @param diagnosisExternalFirstCodeVersion
+   * @param diagnosisExternalFirstCode the diagnosis external first code
+   * @param diagnosisExternalFirstCodeVersion the diagnosis external first code version
    * @param diagnosisExternal1Code through diagnosisExternal12Code
    * @param diagnosisExternal1CodeVersion through diagnosisExternal12CodeVersion
+   * @param diagnosisExternal2Code the diagnosis external 2 code
+   * @param diagnosisExternal2CodeVersion the diagnosis external 2 code version
+   * @param diagnosisExternal3Code the diagnosis external 3 code
+   * @param diagnosisExternal3CodeVersion the diagnosis external 3 code version
+   * @param diagnosisExternal4Code the diagnosis external 4 code
+   * @param diagnosisExternal4CodeVersion the diagnosis external 4 code version
+   * @param diagnosisExternal5Code the diagnosis external 5 code
+   * @param diagnosisExternal5CodeVersion the diagnosis external 5 code version
+   * @param diagnosisExternal6Code the diagnosis external 6 code
+   * @param diagnosisExternal6CodeVersion the diagnosis external 6 code version
+   * @param diagnosisExternal7Code the diagnosis external 7 code
+   * @param diagnosisExternal7CodeVersion the diagnosis external 7 code version
+   * @param diagnosisExternal8Code the diagnosis external 8 code
+   * @param diagnosisExternal8CodeVersion the diagnosis external 8 code version
+   * @param diagnosisExternal9Code the diagnosis external 9 code
+   * @param diagnosisExternal9CodeVersion the diagnosis external 9 code version
+   * @param diagnosisExternal10Code the diagnosis external 10 code
+   * @param diagnosisExternal10CodeVersion the diagnosis external 10 code version
+   * @param diagnosisExternal11Code the diagnosis external 11 code
+   * @param diagnosisExternal11CodeVersion the diagnosis external 11 code version
+   * @param diagnosisExternal12Code the diagnosis external 12 code
+   * @param diagnosisExternal12CodeVersion the diagnosis external 12 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractExternalDiagnoses1Thru12(
@@ -2590,6 +2723,78 @@ public final class TransformerUtils {
    * @param procedure1Code through procedure25Code,
    * @param procedure1CodeVersion through procedure25CodeVersion
    * @param procedure1Date through procedure25Date
+   * @param procedure2Code the procedure 2 code
+   * @param procedure2CodeVersion the procedure 2 code version
+   * @param procedure2Date the procedure 2 date
+   * @param procedure3Code the procedure 3 code
+   * @param procedure3CodeVersion the procedure 3 code version
+   * @param procedure3Date the procedure 3 date
+   * @param procedure4Code the procedure 4 code
+   * @param procedure4CodeVersion the procedure 4 code version
+   * @param procedure4Date the procedure 4 date
+   * @param procedure5Code the procedure 5 code
+   * @param procedure5CodeVersion the procedure 5 code version
+   * @param procedure5Date the procedure 5 date
+   * @param procedure6Code the procedure 6 code
+   * @param procedure6CodeVersion the procedure 6 code version
+   * @param procedure6Date the procedure 6 date
+   * @param procedure7Code the procedure 7 code
+   * @param procedure7CodeVersion the procedure 7 code version
+   * @param procedure7Date the procedure 7 date
+   * @param procedure8Code the procedure 8 code
+   * @param procedure8CodeVersion the procedure 8 code version
+   * @param procedure8Date the procedure 8 date
+   * @param procedure9Code the procedure 9 code
+   * @param procedure9CodeVersion the procedure 9 code version
+   * @param procedure9Date the procedure 9 date
+   * @param procedure10Code the procedure 10 code
+   * @param procedure10CodeVersion the procedure 10 code version
+   * @param procedure10Date the procedure 10 date
+   * @param procedure11Code the procedure 11 code
+   * @param procedure11CodeVersion the procedure 11 code version
+   * @param procedure11Date the procedure 11 date
+   * @param procedure12Code the procedure 12 code
+   * @param procedure12CodeVersion the procedure 12 code version
+   * @param procedure12Date the procedure 12 date
+   * @param procedure13Code the procedure 13 code
+   * @param procedure13CodeVersion the procedure 13 code version
+   * @param procedure13Date the procedure 13 date
+   * @param procedure14Code the procedure 14 code
+   * @param procedure14CodeVersion the procedure 14 code version
+   * @param procedure14Date the procedure 14 date
+   * @param procedure15Code the procedure 15 code
+   * @param procedure15CodeVersion the procedure 15 code version
+   * @param procedure15Date the procedure 15 date
+   * @param procedure16Code the procedure 16 code
+   * @param procedure16CodeVersion the procedure 16 code version
+   * @param procedure16Date the procedure 16 date
+   * @param procedure17Code the procedure 17 code
+   * @param procedure17CodeVersion the procedure 17 code version
+   * @param procedure17Date the procedure 17 date
+   * @param procedure18Code the procedure 18 code
+   * @param procedure18CodeVersion the procedure 18 code version
+   * @param procedure18Date the procedure 18 date
+   * @param procedure19Code the procedure 19 code
+   * @param procedure19CodeVersion the procedure 19 code version
+   * @param procedure19Date the procedure 19 date
+   * @param procedure20Code the procedure 20 code
+   * @param procedure20CodeVersion the procedure 20 code version
+   * @param procedure20Date the procedure 20 date
+   * @param procedure21Code the procedure 21 code
+   * @param procedure21CodeVersion the procedure 21 code version
+   * @param procedure21Date the procedure 21 date
+   * @param procedure22Code the procedure 22 code
+   * @param procedure22CodeVersion the procedure 22 code version
+   * @param procedure22Date the procedure 22 date
+   * @param procedure23Code the procedure 23 code
+   * @param procedure23CodeVersion the procedure 23 code version
+   * @param procedure23Date the procedure 23 date
+   * @param procedure24Code the procedure 24 code
+   * @param procedure24CodeVersion the procedure 24 code version
+   * @param procedure24Date the procedure 24 date
+   * @param procedure25Code the procedure 25 code
+   * @param procedure25CodeVersion the procedure 25 code version
+   * @param procedure25Date the procedure 25 date
    * @return the {@link CCWProcedure}es that can be extracted from the specified claim types
    */
   public static List<CCWProcedure> extractCCWProcedures(
@@ -2796,6 +3001,7 @@ public final class TransformerUtils {
    * Retrieves the Diagnosis display value from a Diagnosis code look up file
    *
    * @param icdCode - Diagnosis code
+   * @return the icd code display
    */
   public static String retrieveIcdCodeDisplay(String icdCode) {
 
@@ -2862,6 +3068,7 @@ public final class TransformerUtils {
    * Retrieves the NPI display value from an NPI code look up file
    *
    * @param npiCode - NPI code
+   * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
 
@@ -2947,6 +3154,7 @@ public final class TransformerUtils {
    * Retrieves the Procedure code and display value from a Procedure code look up file
    *
    * @param procedureCode - Procedure code
+   * @return the procedure code display
    */
   public static String retrieveProcedureCodeDisplay(String procedureCode) {
 
@@ -3015,6 +3223,7 @@ public final class TransformerUtils {
    * during the build process
    *
    * @param claimDrugCode - NDC value in claim records
+   * @return the fda drug code display string
    */
   public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
@@ -3060,6 +3269,8 @@ public final class TransformerUtils {
    * Products file which was downloaded during the build process.
    *
    * <p>See {@link FDADrugDataUtilityApp} for details.
+   *
+   * @return the map of drug codes and names
    */
   public static Map<String, String> readFDADrugCodeFile() {
     Map<String, String> ndcProductHashMap = new HashMap<String, String>();

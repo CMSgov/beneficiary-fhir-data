@@ -4,8 +4,6 @@ package gov.cms.bfd.sharedutils.exceptions;
  * This exception should only be used to cover edge cases that <em>appear</em> to be impossible;
  * edge cases that will only occur if the code itself is somehow incorrect.
  *
- * <p>
- *
  * <blockquote>
  *
  * Bad Code Monkey! No more cheesy snacks for you!

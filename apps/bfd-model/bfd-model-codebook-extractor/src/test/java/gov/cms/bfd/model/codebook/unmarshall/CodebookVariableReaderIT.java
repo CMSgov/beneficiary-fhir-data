@@ -1,10 +1,13 @@
 package gov.cms.bfd.model.codebook.unmarshall;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import gov.cms.bfd.model.codebook.extractor.CodebookPdfToXmlApp;
 import gov.cms.bfd.model.codebook.model.Variable;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for {@link gov.cms.bfd.model.codebook.unmarshall.CodebookVariableReader} (and
@@ -19,8 +22,8 @@ public final class CodebookVariableReaderIT {
   @Test
   public void buildVariablesMappedById() {
     Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
-    Assert.assertNotNull(variablesById);
-    Assert.assertFalse(variablesById.isEmpty());
+    assertNotNull(variablesById);
+    assertFalse(variablesById.isEmpty());
 
     for (Variable variable : variablesById.values()) assertVariableIsFixed(variable);
   }
@@ -33,10 +36,10 @@ public final class CodebookVariableReaderIT {
   public void unmarshalling_variableCodebookField() {
     Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
     for (Variable variable : variablesById.values()) {
-      Assert.assertNotNull(variable.getCodebook());
-      Assert.assertNotNull(variable.getCodebook().getId());
-      Assert.assertNotNull(variable.getCodebook().getName());
-      Assert.assertNotNull(variable.getCodebook().getVersion());
+      assertNotNull(variable.getCodebook());
+      assertNotNull(variable.getCodebook().getId());
+      assertNotNull(variable.getCodebook().getName());
+      assertNotNull(variable.getCodebook().getVersion());
     }
   }
 
@@ -56,6 +59,6 @@ public final class CodebookVariableReaderIT {
 
   /** @param variable the {@link Variable} to check */
   private static void assertTypoFixForNchClmPrvdtPmtAmt(Variable variable) {
-    Assert.assertNotEquals("NCH_CLM_PRVDT_PMT_AMT", variable.getId());
+    assertNotEquals("NCH_CLM_PRVDT_PMT_AMT", variable.getId());
   }
 }

@@ -1,10 +1,6 @@
 import os
-import gevent
-import time
 import common.config as config
 from locust.main import main
-from locust import events
-from locust.runners import STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP, WorkerRunner, MasterRunner
 
 '''
 Checks the config file for the client cert value.
@@ -104,27 +100,6 @@ Sets the test name for the test, useful when running from the command line.
 '''
 def set_locust_test_name(testFileName):
     os.environ['LOCUST_LOCUSTFILE'] = testFileName
-
-'''
-Adds a global listener to ensure that if the test response time is
-too long (in the event the database is being overwhelmed) we stop the test.
-'''
-def check_global_fail(environment):
-    while not environment.runner.state in [STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP]:
-        time.sleep(1)
-        if environment.stats.total.avg_response_time > 2000:
-            print("WARNING: Test aborted due to triggering global failsafe (average response time ratio > 2s)")
-            environment.runner.quit()
-            return
-
-'''
-Adds a listener that will add a repeating check for the global failsafe response time in order to stop the test
-if the event the environment/box under test is overwhelmed and at risk of crashing.
-'''
-@events.init.add_listener
-def on_locust_init(environment, **_kwargs):
-    if not isinstance(environment.runner, WorkerRunner):
-        gevent.spawn(check_global_fail, environment)
 
 '''
 If there is no server cert, disable warnings because thousands will appear in the logs and make it difficult

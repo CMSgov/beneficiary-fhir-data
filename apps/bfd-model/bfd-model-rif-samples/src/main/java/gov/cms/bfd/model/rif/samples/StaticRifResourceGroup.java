@@ -20,28 +20,6 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SAMPLE_A_SNF,
       StaticRifResource.SAMPLE_A_DME),
 
-  SAMPLE_B(
-      StaticRifResource.SAMPLE_B_BENES,
-      StaticRifResource.SAMPLE_B_CARRIER,
-      StaticRifResource.SAMPLE_B_INPATIENT,
-      StaticRifResource.SAMPLE_B_OUTPATIENT,
-      StaticRifResource.SAMPLE_B_SNF,
-      StaticRifResource.SAMPLE_B_HOSPICE,
-      StaticRifResource.SAMPLE_B_HHA,
-      StaticRifResource.SAMPLE_B_DME,
-      StaticRifResource.SAMPLE_B_PDE),
-
-  SAMPLE_C(
-      StaticRifResource.SAMPLE_C_BENES,
-      StaticRifResource.SAMPLE_C_CARRIER,
-      StaticRifResource.SAMPLE_C_INPATIENT,
-      StaticRifResource.SAMPLE_C_OUTPATIENT,
-      StaticRifResource.SAMPLE_C_SNF,
-      StaticRifResource.SAMPLE_C_HOSPICE,
-      StaticRifResource.SAMPLE_C_HHA,
-      StaticRifResource.SAMPLE_C_DME,
-      StaticRifResource.SAMPLE_C_PDE),
-
   SAMPLE_U(StaticRifResource.SAMPLE_U_BENES, StaticRifResource.SAMPLE_U_CARRIER),
 
   SAMPLE_U_BENES_UNCHANGED(
@@ -85,15 +63,6 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SYNTHETIC_OUTPATIENT_2014_2014,
       StaticRifResource.SYNTHETIC_OUTPATIENT_2015_2014,
       StaticRifResource.SYNTHETIC_OUTPATIENT_2016_2014),
-
-  SAMPLE_MCT(StaticRifResource.SAMPLE_MCT_BENES, StaticRifResource.SAMPLE_MCT_PDE),
-
-  SAMPLE_MCT_UPDATE_1(StaticRifResource.SAMPLE_MCT_UPDATE_1_BENES),
-
-  SAMPLE_MCT_UPDATE_2(StaticRifResource.SAMPLE_MCT_UPDATE_2_PDE),
-
-  SAMPLE_MCT_UPDATE_3(
-      StaticRifResource.SAMPLE_MCT_UPDATE_3_BENES, StaticRifResource.SAMPLE_MCT_UPDATE_3_PDE),
 
   SYNTHEA_DATA(
       StaticRifResource.SAMPLE_SYNTHEA_BENES2011,

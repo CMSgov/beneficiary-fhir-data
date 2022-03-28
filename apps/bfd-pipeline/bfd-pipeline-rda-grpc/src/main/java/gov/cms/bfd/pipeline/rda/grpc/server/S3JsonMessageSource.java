@@ -3,8 +3,10 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Implementation of {@link MessageSource} that reads and serves NDJSON data from a single {@link
@@ -15,7 +17,7 @@ import java.nio.charset.StandardCharsets;
  * data is streamed to the client directly from S3 rather than downloading and caching the data
  * locally.
  *
- * @param <T>
+ * @param <T> the type parameter
  */
 public class S3JsonMessageSource<T> implements MessageSource<T> {
   private final S3Object s3Object;
@@ -26,8 +28,7 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
   public S3JsonMessageSource(S3Object s3Object, JsonMessageSource.Parser<T> parser) {
     this.s3Object = s3Object;
     s3InputStream = s3Object.getObjectContent();
-    BufferedReader reader =
-        new BufferedReader(new InputStreamReader(s3InputStream, StandardCharsets.UTF_8));
+    BufferedReader reader = createReader(s3Object.getKey(), s3InputStream);
     jsonMessageSource = new JsonMessageSource<>(reader, parser);
     unfinished = true;
   }
@@ -88,6 +89,17 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
     }
     if (exception != null) {
       throw exception;
+    }
+  }
+
+  private static BufferedReader createReader(String resourceName, InputStream stream) {
+    try {
+      if (resourceName.endsWith(".gz")) {
+        stream = new GZIPInputStream(stream);
+      }
+      return new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
     }
   }
 }

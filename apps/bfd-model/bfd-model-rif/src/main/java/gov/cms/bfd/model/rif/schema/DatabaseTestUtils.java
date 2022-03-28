@@ -42,7 +42,7 @@ public final class DatabaseTestUtils {
   public static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bfd-test:";
 
   /**
-   * We need to inform Flyway of all of our schemas in order for {@link Flyway.clean()} to work
+   * We need to inform Flyway of all of our schemas in order for {@link Flyway#clean()} to work
    * properly.
    */
   public static final ImmutableList<String> FLYWAY_CLEAN_SCHEMAS =
@@ -332,6 +332,8 @@ public final class DatabaseTestUtils {
     /**
      * Constructs a {@link DataSourceComponents} instance for the specified test {@link DataSource}
      * (does not support more complicated {@link DataSource}s, as discussed in the class' JavaDoc)
+     *
+     * @param dataSource the data source
      */
     public DataSourceComponents(DataSource dataSource) {
       if (dataSource instanceof JDBCDataSource) {

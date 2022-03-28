@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -9,37 +7,30 @@ import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
@@ -96,65 +87,22 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setDiagnosis(getDiagnosis(claimGroup));
     claim.setItem(getItems(claimGroup));
 
-    FhirContext ctx = FhirContext.forR4();
-    IParser parser = ctx.newJsonParser();
-
-    String claimContent = parser.encodeResourceToString(claim);
-
-    String resourceHash = DigestUtils.sha1Hex(claimContent);
-
     claim.setCreated(new Date());
-    claim.setMeta(
-        new Meta()
-            .setLastUpdated(Date.from(claimGroup.getLastUpdated()))
-            .setVersionId("m-" + claimGroup.getIdrClmHdIcn() + "-" + resourceHash));
+    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
 
     return claim;
   }
 
   private static Resource getContainedPatient(PreAdjMcsClaim claimGroup) {
-    return new Patient()
-        .setIdentifier(
-            List.of(
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding(
-                                IdentifierType.MC.getSystem(),
-                                IdentifierType.MC.getCode(),
-                                IdentifierType.MC.getDisplay())))
-                    .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-                    .setValue(claimGroup.getIdrClaimMbi())))
-        .setName(getBeneName(claimGroup))
-        .setGender(
-            claimGroup.getIdrBeneSex() == null
-                ? null
-                : genderMap().get(claimGroup.getIdrBeneSex().toLowerCase()))
-        .setId("patient");
-  }
+    PatientInfo patientInfo =
+        new PatientInfo(
+            ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
+            ifNotNull(claimGroup.getIdrBeneLast_1_6(), s -> s.charAt(0) + "."),
+            ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
+            null, // MCS claims don't contain dob
+            claimGroup.getIdrBeneSex());
 
-  private static List<HumanName> getBeneName(PreAdjMcsClaim claimGroup) {
-    HumanName name =
-        new HumanName()
-            .setFamily(
-                claimGroup.getIdrBeneLast_1_6() == null || claimGroup.getIdrBeneLast_1_6().isEmpty()
-                    ? null
-                    : claimGroup.getIdrBeneLast_1_6().charAt(0) + ".");
-
-    if (claimGroup.getIdrBeneFirstInit() != null || claimGroup.getIdrBeneMidInit() != null) {
-      name.setGiven(
-          List.of(
-              new StringType(
-                  claimGroup.getIdrBeneFirstInit() == null
-                      ? null
-                      : claimGroup.getIdrBeneFirstInit() + "."),
-              new StringType(
-                  claimGroup.getIdrBeneMidInit() == null
-                      ? null
-                      : claimGroup.getIdrBeneMidInit() + ".")));
-    }
-
-    return List.of(name);
+    return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
 
   private static Resource getContainedProvider(PreAdjMcsClaim claimGroup) {
@@ -363,21 +311,5 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                     new Coding(BBCodingSystems.HCPCS, mods.get(index).get(), null)
                         .setVersion(String.valueOf(index + 1))))
         .collect(Collectors.toList());
-  }
-
-  private static Date localDateToDate(LocalDate localDate) {
-    return localDate == null
-        ? null
-        : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-  }
-
-  private static String normalizeIcdCode(String code) {
-    return code.trim().replace(".", "").toUpperCase();
-  }
-
-  private static boolean codesAreEqual(String code1, String code2) {
-    return code1 != null
-        && code2 != null
-        && normalizeIcdCode(code1).equals(normalizeIcdCode(code2));
   }
 }

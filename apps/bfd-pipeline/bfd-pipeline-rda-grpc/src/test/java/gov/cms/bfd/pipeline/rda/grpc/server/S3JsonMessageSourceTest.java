@@ -1,23 +1,27 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class S3JsonMessageSourceTest {
   private static final String MCS_CLAIMS_JSON =
@@ -28,10 +32,10 @@ public class S3JsonMessageSourceTest {
   private S3ObjectInputStream inputStream;
   private S3JsonMessageSource<McsClaimChange> source;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     inputStream = createInputStream();
-    s3Object = createObject();
+    s3Object = createObject("some/path/to/key/MCS_DATA.ndjson");
     source = new S3JsonMessageSource<>(s3Object, JsonMessageSource::parseMcsClaimChange);
   }
 
@@ -46,7 +50,7 @@ public class S3JsonMessageSourceTest {
 
   @Test
   public void abortCalledIfMessagesRemain() throws Exception {
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     source.close();
     verify(inputStream).abort();
     verify(inputStream).close();
@@ -82,14 +86,34 @@ public class S3JsonMessageSourceTest {
     }
   }
 
-  private S3Object createObject() {
+  @Test
+  public void uncompressesGzipData() throws Exception {
+    // replaces the standard test data with compressed data version
+    var bytes = new ByteArrayOutputStream();
+    try (PrintWriter out = new PrintWriter(new GZIPOutputStream(bytes))) {
+      out.write(MCS_CLAIMS_JSON);
+    }
+    inputStream = createInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+    s3Object = createObject("some/path/to/key/MCS_DATA.ndjson.gz");
+    source = new S3JsonMessageSource<>(s3Object, JsonMessageSource::parseMcsClaimChange);
+
+    // now just verify the data is loaded correctly
+    messagesParsedAndReturnedCorrectly();
+  }
+
+  private S3Object createObject(String objectKey) {
     S3Object object = mock(S3Object.class);
     doAnswer(i -> inputStream).when(object).getObjectContent();
+    doReturn(objectKey).when(object).getKey();
     return object;
   }
 
   private S3ObjectInputStream createInputStream() throws Exception {
-    InputStream input = new ByteArrayInputStream(MCS_CLAIMS_JSON.getBytes(StandardCharsets.UTF_8));
+    return createInputStream(
+        new ByteArrayInputStream(MCS_CLAIMS_JSON.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  private S3ObjectInputStream createInputStream(ByteArrayInputStream input) throws Exception {
     HttpRequestBase request = mock(HttpRequestBase.class);
     // using a spy here because we want the stream functionality of a real S3ObjectInputStream
     S3ObjectInputStream stream = spy(new S3ObjectInputStream(input, request));
