@@ -95,6 +95,18 @@ public final class Variable {
   /**
    * Constructs a new {@link Variable} instance for the CCWCodebookMissingVariable. Has to add new
    * constructor for instantiation of the CCWCodebookInterface
+   *
+   * @param id the id
+   * @param label the label
+   * @param description the description
+   * @param shortName the short name
+   * @param longName the long name
+   * @param type the type
+   * @param length the length
+   * @param source the source
+   * @param valueFormat the value format
+   * @param valueGroups the value groups
+   * @param comment the comment
    */
   public Variable(
       String id,
@@ -140,22 +152,36 @@ public final class Variable {
     this.codebook = (Codebook) parent;
   }
 
-  /** @return the parent {@link Codebook} that this {@link Variable} is part of */
+  /**
+   * Gets the codebook.
+   *
+   * @return the parent {@link Codebook} that this {@link Variable} is part of
+   */
   public Codebook getCodebook() {
     return codebook;
   }
 
-  /** @return the unique-within-a-{@link Codebook} identifier for this {@link Variable} */
+  /**
+   * Gets the id.
+   *
+   * @return the unique-within-a-{@link Codebook} identifier for this {@link Variable}
+   */
   public String getId() {
     return id;
   }
 
-  /** @param id the new value for {@link #getId()} */
+  /**
+   * Sets the id.
+   *
+   * @param id the new value for {@link #getId()}
+   */
   public void setId(String id) {
     this.id = id;
   }
 
   /**
+   * Gets the label.
+   *
    * @return a short description for this {@link Variable}, typically no more than a few (English)
    *     words long
    */
@@ -163,12 +189,18 @@ public final class Variable {
     return label;
   }
 
-  /** @param label the new value for {@link #getLabel()} */
+  /**
+   * Sets the label.
+   *
+   * @param label the new value for {@link #getLabel()}
+   */
   public void setLabel(String label) {
     this.label = label;
   }
 
   /**
+   * Gets the description.
+   *
    * @return a longer description for this {@link Variable}, typically one or more (English)
    *     paragraphs long, with one {@link List} entry per paragraph
    */
@@ -176,12 +208,18 @@ public final class Variable {
     return Optional.ofNullable(description);
   }
 
-  /** @param description the new value for {@link #getDescription()} */
+  /**
+   * Sets the description.
+   *
+   * @param description the new value for {@link #getDescription()}
+   */
   public void setDescription(List<String> description) {
     this.description = description;
   }
 
   /**
+   * Gets the short name.
+   *
    * @return the "short" name for this {@link Variable}, which will be unique-within-this-{@link
    *     Codebook} and to identify it by some systems, or <code>null</code> if that information is
    *     unknown for this {@link Variable}
@@ -190,12 +228,18 @@ public final class Variable {
     return Optional.ofNullable(shortName);
   }
 
-  /** @param shortName the new value for {@link #getShortName()} */
+  /**
+   * Sets the short name.
+   *
+   * @param shortName the new value for {@link #getShortName()}
+   */
   public void setShortName(String shortName) {
     this.shortName = shortName;
   }
 
   /**
+   * Gets the long name.
+   *
    * @return the "long" name for this {@link Variable}, which will be unique-within-this-{@link
    *     Codebook} and to identify it by some systems
    */
@@ -203,35 +247,55 @@ public final class Variable {
     return longName;
   }
 
-  /** @param longName the new value for {@link #getLongName()} */
+  /**
+   * Sets the long name.
+   *
+   * @param longName the new value for {@link #getLongName()}
+   */
   public void setLongName(String longName) {
     this.longName = longName;
   }
 
   /**
-   * @return the {@link VariableType} that constrains values of this {@link Variable}, or <code>null
-   *     </code> if that information is unknown for this {@link Variable}
+   * Gets the type.
+   *
+   * @return the {@link VariableType} that constrains values of this {@link Variable}, or <code>
+   *     null     </code> if that information is unknown for this {@link Variable}
    */
   public Optional<VariableType> getType() {
     return Optional.ofNullable(type);
   }
 
-  /** @param type the new value for {@link #getType()} */
+  /**
+   * Sets the type.
+   *
+   * @param type the new value for {@link #getType()}
+   */
   public void setType(VariableType type) {
     this.type = type;
   }
 
-  /** @return the maximum length that constrains values of this {@link Variable} */
+  /**
+   * Gets the length.
+   *
+   * @return the maximum length that constrains values of this {@link Variable}
+   */
   public Integer getLength() {
     return length;
   }
 
-  /** @param length the new value for {@link #getLength()} */
+  /**
+   * Sets the length.
+   *
+   * @param length the new value for {@link #getLength()}
+   */
   public void setLength(Integer length) {
     this.length = length;
   }
 
   /**
+   * Gets the source.
+   *
    * @return the source system that this {@link Variable}'s data was extracted and/or derived from,
    *     or <code>null</code> if that information is unknown for this {@link Variable}
    */
@@ -239,12 +303,18 @@ public final class Variable {
     return Optional.ofNullable(source);
   }
 
-  /** @param source the new value for {@link #getSource()} */
+  /**
+   * Sets the source.
+   *
+   * @param source the new value for {@link #getSource()}
+   */
   public void setSource(String source) {
     this.source = source;
   }
 
   /**
+   * Gets the value format.
+   *
    * @return the descriptive text that details the format of the {@link Variable}'s values, e.g.
    *     "XXX.XX" or "The value in this field is between '00' through '12'.", or <code>null</code>
    *     if no such description is available
@@ -253,12 +323,18 @@ public final class Variable {
     return Optional.ofNullable(valueFormat);
   }
 
-  /** @param valueFormat the new value for {@link #getValueFormat()} */
+  /**
+   * Sets the value format.
+   *
+   * @param valueFormat the new value for {@link #getValueFormat()}
+   */
   public void setValueFormat(String valueFormat) {
     this.valueFormat = valueFormat;
   }
 
   /**
+   * Gets the value groups.
+   *
    * @return the {@link List} of {@link ValueGroup}s that constrains the allowed coded values of
    *     this {@link Variable}, or <code>null</code> if this {@link Variable}'s values aren't
    *     constrained in that way
@@ -267,12 +343,18 @@ public final class Variable {
     return Optional.ofNullable(valueGroups);
   }
 
-  /** @param valueGroups the new value for {@link #getValueGroups()} */
+  /**
+   * Sets the value groups.
+   *
+   * @param valueGroups the new value for {@link #getValueGroups()}
+   */
   public void setValueGroups(List<ValueGroup> valueGroups) {
     this.valueGroups = valueGroups;
   }
 
   /**
+   * Gets the comment.
+   *
    * @return a comment providing more detail on this {@link Variable}'s purpose and/or history, zero
    *     or more (English) paragraphs long, with one {@link List} entry per paragraph, or <code>null
    *     </code> if that information is unknown for this {@link Variable}

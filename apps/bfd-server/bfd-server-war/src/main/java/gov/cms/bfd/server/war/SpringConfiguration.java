@@ -276,7 +276,13 @@ public class SpringConfiguration {
   /** @return the {@link Properties} to configure Hibernate and JPA with */
   private Properties jpaProperties() {
     Properties extraProperties = new Properties();
-    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    /*
+     * Hibernate validation is being disabled in the applications so that
+     * validation failures do not prevent the server from starting.
+     * With the implementation of RFC-0011 this validation will be moved
+     * to a more appropriate stage of the deployment.
+     */
+    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.NONE);
 
     /*
      * These configuration settings will set Hibernate to log all SQL
@@ -339,7 +345,7 @@ public class SpringConfiguration {
 
   /**
    * Determines if the fhir resources related to pre adj claim data should be accessible via the
-   * fhir api seice.
+   * fhir api service.
    *
    * @return True if the resources should be available to consume, False otherwise.
    */
@@ -350,7 +356,26 @@ public class SpringConfiguration {
   }
 
   /**
+   * Determines if the fhir resources related to pre adj claim data will accept {@link
+   * gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when enabled
+   * will simplify rotation of hash values.
+   *
+   * @return True if the resources should use oldHash values in queries, False otherwise.
+   */
+  public static boolean isPreAdjOldMbiHashEnabled() {
+    return Boolean.TRUE
+        .toString()
+        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.oldMbiHash.enabled", "false"));
+  }
+
+  /**
+   * Creates a new r4 resource provider list.
+   *
    * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
+   * @param r4CoverageResourceProvider the r4 coverage resource provider
+   * @param r4EOBResourceProvider the r4 eob resource provider
+   * @param r4ClaimResourceProvider the r4 claim resource provider
+   * @param r4ClaimResponseResourceProvider the r4 claim response resource provider
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)

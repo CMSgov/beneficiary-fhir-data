@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
@@ -20,9 +23,8 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer}. */
@@ -64,7 +66,7 @@ public final class OutpatientClaimTransformerTest {
    *
    * @throws FHIRException (indicates test failure)
    */
-  @Ignore
+  @Disabled
   @Test
   public void transformSyntheticRecord() throws FHIRException {
     List<Object> parsedRecords =
@@ -91,7 +93,7 @@ public final class OutpatientClaimTransformerTest {
    *
    * @throws FHIRException (indicates test failure)
    */
-  @Ignore
+  @Disabled
   @Test
   public void transformAllSyntheticRecords() throws FHIRException {
     List<StaticRifResource> outpatientSyntheticFiles =
@@ -182,9 +184,9 @@ public final class OutpatientClaimTransformerTest {
         claim.getFiDocumentClaimControlNumber(),
         claim.getFiOriginalClaimControlNumber());
 
-    Assert.assertTrue(
-        "Expect actual diagnosis count is less than or equal to the claim count",
-        countDiagnosisCodes(claim) >= eob.getDiagnosis().size());
+    assertTrue(
+        countDiagnosisCodes(claim) >= eob.getDiagnosis().size(),
+        "Expect actual diagnosis count is less than or equal to the claim count");
 
     if (claim.getProcedure1Code().isPresent()) {
       CCWProcedure ccwProcedure =
@@ -196,18 +198,18 @@ public final class OutpatientClaimTransformerTest {
           ccwProcedure.getFhirSystem().toString(),
           claim.getProcedure1Code().get(),
           eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
-      Assert.assertEquals(
+      assertEquals(
           claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant(),
           eob.getProcedure().get(0).getDate().toInstant());
     }
 
-    Assert.assertTrue("Expect actual item count is above 0", 1 <= eob.getItem().size());
+    assertTrue(1 <= eob.getItem().size(), "Expect actual item count is above 0");
     ItemComponent eobItem0 = eob.getItem().get(0);
     OutpatientClaimLine claimLine1 = claim.getLines().get(0);
-    Assert.assertEquals(
+    assertEquals(
         new Integer(claimLine1.getLineNumber().intValue()), new Integer(eobItem0.getSequence()));
 
-    Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
+    assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     // TODO re-map as described in CBBF-111
     /*

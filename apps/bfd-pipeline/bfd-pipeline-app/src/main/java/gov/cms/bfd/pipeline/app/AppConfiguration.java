@@ -54,16 +54,26 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()} value.
+   * #getCcwRifLoadOptions()} {@link IdHasher.Config#getHashIterations()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "HICN_HASH_ITERATIONS";
 
   /**
    * The name of the environment variable that should be used to provide a hex encoded
-   * representation of the {@link #getCcwRifLoadOptions()} {@link
-   * LoadAppOptions#getHicnHashPepper()} value.
+   * representation of the {@link #getCcwRifLoadOptions()} {@link IdHasher.Config#getHashPepper()}
+   * ()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
+
+  /**
+   * The name of the environment variable that should be used to provide an integer size for the
+   * in-memory cache of computed hicn/mbi hash values. Used to set the {@link
+   * IdHasher.Config#getCachSize()}.
+   */
+  private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
+
+  /** Default value for {@link IdHasher.Config#getCachSize()}. */
+  private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -109,15 +119,20 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
+   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} value, which is a bit complex; please see
+   * its description for details.
    */
-  public static final String ENV_VAR_KEY_FIXUPS_ENABLED = "FIXUPS_ENABLED";
+  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES =
+      "FILTERING_NON_NULL_AND_NON_2022_BENES";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
+   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES}
+   * configuration environment variable when it is not set.
+   *
+   * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
+   * removed as soon as is reasonable.
    */
-  public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
+  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES = false;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -156,8 +171,8 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getRunInterval()} value. This variable's value
-   * should be the frequency at which this job runs in seconds.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getRunInterval()} value. This variable's
+   * value should be the frequency at which this job runs in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS = "RDA_JOB_INTERVAL_SECONDS";
 
@@ -166,18 +181,26 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getBatchSize()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getBatchSize()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_BATCH_SIZE = "RDA_JOB_BATCH_SIZE";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_BATCH_SIZE}. */
   public static final int DEFAULT_RDA_JOB_BATCH_SIZE = 1;
 
   /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getWriteThreads()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_WRITE_THREADS = "RDA_JOB_WRITE_THREADS";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_WRITE_THREADS}. */
+  public static final int DEFAULT_RDA_JOB_WRITE_THREADS = 1;
+
+  /**
    * The name of the environment variable that specifies which type of RDA API server to connect to.
    * {@link GrpcRdaSource.Config#getServerType()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_TYPE}. */
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE}. */
   public static final GrpcRdaSource.Config.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
       GrpcRdaSource.Config.ServerType.Remote;
 
@@ -226,14 +249,14 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getStartingFissSeqNum()} ()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingFissSeqNum()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM =
       "RDA_JOB_STARTING_FISS_SEQ_NUM";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getStartingMcsSeqNum()} ()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingMcsSeqNum()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
       "RDA_JOB_STARTING_MCS_SEQ_NUM";
@@ -368,11 +391,16 @@ public final class AppConfiguration implements Serializable {
   static AppConfiguration readConfigFromEnvironmentVariables() {
     int hicnHashIterations = readEnvIntPositiveRequired(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
     byte[] hicnHashPepper = readEnvBytesRequired(ENV_VAR_KEY_HICN_HASH_PEPPER);
+    int hicnHashCacheSize =
+        readEnvIntOptional(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE).orElse(DEFAULT_HICN_HASH_CACHE_SIZE);
     String databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
     String databaseUsername = readEnvStringRequired(ENV_VAR_KEY_DATABASE_USERNAME);
     String databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
     int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
     boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+    boolean filteringNonNullAndNon2022Benes =
+        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES)
+            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES);
     Optional<String> newRelicMetricKey = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_KEY);
     Optional<String> newRelicAppName = readEnvStringOptional(ENV_VAR_NEW_RELIC_APP_NAME);
     Optional<String> newRelicMetricHost = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_HOST);
@@ -411,9 +439,14 @@ public final class AppConfiguration implements Serializable {
             databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.get());
     LoadAppOptions loadOptions =
         new LoadAppOptions(
-            new IdHasher.Config(hicnHashIterations, hicnHashPepper),
+            IdHasher.Config.builder()
+                .hashIterations(hicnHashIterations)
+                .hashPepper(hicnHashPepper)
+                .cacheSize(hicnHashCacheSize)
+                .build(),
             loaderThreads,
-            idempotencyRequired);
+            idempotencyRequired,
+            filteringNonNullAndNon2022Benes);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
@@ -493,7 +526,10 @@ public final class AppConfiguration implements Serializable {
                         .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)))
             .batchSize(
                 readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE));
+                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE))
+            .writeThreads(
+                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, Integer::parseInt)
+                    .orElse(DEFAULT_RDA_JOB_WRITE_THREADS));
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingFissSeqNum);
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)

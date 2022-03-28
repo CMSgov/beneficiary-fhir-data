@@ -3,27 +3,8 @@
 # Applies and verifies the role on the container being used for the test case.
 ##
 
-- hosts: localhost
+- hosts: bfd-pipeline
   tasks:
-    - name: Download BFD Pipeline ZIP
-      command: >
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
-          -DremoteRepositories=central::default::https://repo.maven.apache.org/maven2,github::default::https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
-          -Dartifact=gov.cms.bfd:bfd-pipeline-app:1.0.0-SNAPSHOT:zip
-          -Dtransitive=false
-      args:
-        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
-
-# Apply the role.
-- hosts: docker_container
-  tasks:
-    - name: Install Prerequisites
-      package:
-        name:
-          - unzip
-        state: present
-      become: true
-
     - name: Apply Role
       import_role:
         name: bfd-pipeline
@@ -37,7 +18,7 @@
         data_pipeline_db_password: ""
 
 # Verify that things worked as expected.
-- hosts: docker_container
+- hosts: bfd-pipeline
   tasks:
     - name: Ensure Service Is Running
       service:

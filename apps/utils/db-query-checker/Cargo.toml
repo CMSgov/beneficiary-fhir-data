@@ -36,3 +36,6 @@ serde = { version = "1", features = ["derive"] }
 
 # Allows us to define static hash maps at compile time.
 lazy_static = "1"
+
+# Gives us some date handling functionality
+chrono = "0.4"

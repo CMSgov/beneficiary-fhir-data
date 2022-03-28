@@ -51,7 +51,9 @@ public abstract class GrpcStreamCaller<TResponse> {
    * Make a call to the server's {@code getVersion()} service and return the version component.
    *
    * @param channel an already open channel to the server
+   * @param callOptions the call options
    * @return version string from the server
+   * @throws Exception if an IO issue occurs
    */
   public String callVersionService(ManagedChannel channel, CallOptions callOptions)
       throws Exception {

@@ -23,6 +23,7 @@ public final class RifLayout {
   /**
    * Constructs a new {@link RifLayout} instance.
    *
+   * @param name the name of this {@link RifLayout}
    * @param rifFields the value to use for {@link #getRifFields()}
    */
   public RifLayout(String name, List<RifField> rifFields) {
@@ -196,17 +197,26 @@ public final class RifLayout {
         URL dataDictionaryEntry,
         String rifColumnLabel,
         String javaFieldName) {
-      if (Strings.isNullOrEmpty(rifColumnName))
-        throw new IllegalArgumentException("Missing 'Column Name'.");
-      if (rifColumnType == null) throw new IllegalArgumentException("Missing 'Type'.");
-      if (rifColumnLength.isPresent() && rifColumnLength.get() < 0)
-        throw new IllegalArgumentException("Invalid 'Length'.");
-      if (rifColumnScale.isPresent() && rifColumnScale.get() < 0)
-        throw new IllegalArgumentException("Invalid 'Scale'.");
-      if (Objects.isNull(javaFieldName))
-        throw new IllegalArgumentException("Missing 'Column Label/Value'.");
-      if (Strings.isNullOrEmpty(javaFieldName))
-        throw new IllegalArgumentException("Missing 'Java Field Name'.");
+      if (Strings.isNullOrEmpty(rifColumnName)) {
+        throw new IllegalArgumentException("Missing 'Column Name'");
+      }
+      if (rifColumnType == null) {
+        throw new IllegalArgumentException("Missing 'Type' for column name: " + rifColumnName);
+      }
+      if (rifColumnLength.isPresent() && rifColumnLength.get() < 0) {
+        throw new IllegalArgumentException("Invalid 'Length' for column name: " + rifColumnName);
+      }
+      if (rifColumnScale.isPresent() && rifColumnScale.get() < 0) {
+        throw new IllegalArgumentException("Invalid 'Scale' for column name: " + rifColumnName);
+      }
+      if (Objects.isNull(javaFieldName)) {
+        throw new IllegalArgumentException(
+            "Missing 'Column Label/Value' for column name: " + rifColumnName);
+      }
+      if (Strings.isNullOrEmpty(javaFieldName)) {
+        throw new IllegalArgumentException(
+            "Missing 'Java Field Name' for column name: " + rifColumnName);
+      }
 
       this.rifColumnName = rifColumnName;
       this.rifColumnType = rifColumnType;
@@ -265,9 +275,24 @@ public final class RifLayout {
       return rifColumnLabel;
     }
 
-    /** @return the name of the JPA <code>Entity</code> field to store this RIF column's data in */
+    /** @return the java entity property name associated with the JPA <code>Entity</code> */
     public String getJavaFieldName() {
       return javaFieldName;
+    }
+
+    /** @return a String dumpt of the RifField */
+    public String toString() {
+      StringBuilder sb = new StringBuilder("RifField: { ");
+      sb.append("columnName=")
+          .append(rifColumnName)
+          .append(", ")
+          .append("columnType=")
+          .append(rifColumnType != null ? rifColumnType.toString() : "N/A")
+          .append(", ")
+          .append("javaName=")
+          .append(javaFieldName != null ? javaFieldName : "N/A")
+          .append(" }");
+      return sb.toString();
     }
   }
 
