@@ -1,10 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertGaugeReading;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
@@ -12,6 +17,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -70,6 +76,8 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.failures",
             "FissClaimRdaSink.lastSeq",
             "FissClaimRdaSink.successes",
+            "FissClaimRdaSink.transform.failures",
+            "FissClaimRdaSink.transform.successes",
             "FissClaimRdaSink.writes.merged",
             "FissClaimRdaSink.writes.persisted",
             "FissClaimRdaSink.writes.total"),
@@ -87,6 +95,9 @@ public class FissClaimRdaSinkTest {
     for (RdaChange<PreAdjFissClaim> change : batch) {
       verify(entityManager).merge(change.getClaim());
     }
+    for (RdaChange<PreAdjFissClaim> change : batch) {
+      verify(entityManager).persist(sink.createMetaData(change));
+    }
     // the merge transaction will be committed
     verify(transaction).commit();
 
@@ -95,6 +106,8 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "persists", metrics.getObjectsPersisted());
     assertMeterReading(3, "merges", metrics.getObjectsMerged());
     assertMeterReading(3, "writes", metrics.getObjectsWritten());
+    assertMeterReading(3, "transform successes", metrics.getTransformSuccesses());
+    assertMeterReading(0, "transform failures", metrics.getTransformFailures());
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
@@ -124,6 +137,8 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "persists", metrics.getObjectsPersisted());
     assertMeterReading(0, "merges", metrics.getObjectsMerged());
     assertMeterReading(0, "writes", metrics.getObjectsWritten());
+    assertMeterReading(3, "transform successes", metrics.getTransformSuccesses());
+    assertMeterReading(0, "transform failures", metrics.getTransformFailures());
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
@@ -133,6 +148,40 @@ public class FissClaimRdaSinkTest {
   public void closeMethodsAreCalled() throws Exception {
     sink.close();
     verify(entityManager).close();
+  }
+
+  @Test
+  public void transformClaimFailure() throws Exception {
+    final var claims = ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
+    final var messages = messagesForBatch(claims);
+    doThrow(
+            new DataTransformer.TransformationException(
+                "oops", List.of(new DataTransformer.ErrorMessage("field", "oops!"))))
+        .when(transformer)
+        .transformClaim(messages.get(2));
+
+    try {
+      sink.writeMessages(VERSION, messages);
+      fail("should have thrown");
+    } catch (ProcessingException error) {
+      assertEquals(0, error.getProcessedCount());
+      assertThat(
+          error.getCause(), CoreMatchers.instanceOf(DataTransformer.TransformationException.class));
+    }
+
+    verify(transaction, times(0)).begin();
+    verify(transaction, times(0)).rollback();
+
+    final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading(0, "calls", metrics.getCalls());
+    assertMeterReading(0, "persists", metrics.getObjectsPersisted());
+    assertMeterReading(0, "merges", metrics.getObjectsMerged());
+    assertMeterReading(0, "writes", metrics.getObjectsWritten());
+    assertMeterReading(2, "transform successes", metrics.getTransformSuccesses());
+    assertMeterReading(1, "transform failures", metrics.getTransformFailures());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
+    assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
   }
 
   private List<FissClaimChange> messagesForBatch(List<RdaChange<PreAdjFissClaim>> batch) {
