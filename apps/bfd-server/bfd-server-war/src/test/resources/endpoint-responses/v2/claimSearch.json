@@ -466,7 +466,7 @@
             "productOrService": {
               "coding": [
                 {
-                  "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+                  "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
                   "code": "FDSAE"
                 }
               ]
@@ -475,7 +475,7 @@
               {
                 "coding": [
                   {
-                    "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+                    "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
                     "version": "1",
                     "code": "A"
                   }
@@ -491,7 +491,7 @@
             "productOrService": {
               "coding": [
                 {
-                  "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+                  "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
                   "code": "FDAAA"
                 }
               ]
@@ -500,7 +500,7 @@
               {
                 "coding": [
                   {
-                    "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+                    "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
                     "version": "2",
                     "code": "B"
                   }

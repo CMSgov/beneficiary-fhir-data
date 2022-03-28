@@ -157,7 +157,7 @@ public final class TransformerConstants {
   public static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
   public static final String CODING_SYSTEM_CARIN_HCPCS =
-      "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+      "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
 
   public static final String CODING_SYSTEM_CPT = "http://www.ama-assn.org/go/cpt";
 
