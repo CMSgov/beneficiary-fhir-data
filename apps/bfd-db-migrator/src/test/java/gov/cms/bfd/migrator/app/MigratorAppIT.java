@@ -34,7 +34,8 @@ public final class MigratorAppIT {
   private enum TestDirectory {
     REAL(""),
     BAD_SQL("/bad-sql"),
-    DUPLICATE_VERSION("/duplicate-version");
+    DUPLICATE_VERSION("/duplicate-version"),
+    VALIDATION_FAILURE("/validation-failure");
 
     private final String path;
 
@@ -122,6 +123,44 @@ public final class MigratorAppIT {
   }
 
   /**
+   * Test when the migration app runs and the schema is not in the state the models imply, the exit
+   * code is 3 (hibernate validation failure).
+   *
+   * @throws IOException if there is an issue starting the app
+   */
+  @Test
+  public void testMigrationRunWhenSchemaDoesntMatchTablesExpectValidationError()
+      throws IOException {
+    // Setup
+    ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.VALIDATION_FAILURE);
+    appRunBuilder.redirectErrorStream(true);
+    Process appProcess = appRunBuilder.start();
+
+    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+    Thread appRunConsumerThread = new Thread(appRunConsumer);
+    appRunConsumerThread.start();
+
+    // Await start/finish of application
+    try {
+      Awaitility.await()
+          .atMost(new Duration(60, TimeUnit.SECONDS))
+          .until(() -> !appProcess.isAlive());
+
+      // Verify results
+      assertEquals(
+          3,
+          appProcess.exitValue(),
+          "Did not get expected error code for validation failure., \nSTDOUT:\n"
+              + appRunConsumer.getStdoutContents());
+    } catch (ConditionTimeoutException e) {
+      throw new RuntimeException(
+          "Migration application failed to start within timeout, STDOUT:\n"
+              + appRunConsumer.getStdoutContents(),
+          e);
+    }
+  }
+
+  /**
    * Test when the migration app runs and there is a configuration error, the exit code is 1.
    *
    * @throws IOException if there is an issue starting the app
@@ -183,7 +222,10 @@ public final class MigratorAppIT {
           hasLogLine(appRunConsumer, "Skipping filesystem location"),
           "Could not find path to test files");
 
-      assertEquals(2, appProcess.exitValue());
+      assertEquals(
+          2,
+          appProcess.exitValue(),
+          "Exited with the wrong exit code. STDOUT:\n" + appRunConsumer.getStdoutContents());
 
       // Test flyway threw an exception by checking the log output
       boolean hasExceptionLogLine = hasLogLine(appRunConsumer, "FlywayMigrateException");

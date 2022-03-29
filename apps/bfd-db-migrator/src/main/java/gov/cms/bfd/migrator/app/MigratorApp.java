@@ -13,6 +13,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.Entity;
+import javax.sql.DataSource;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,6 +21,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.query.Query;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,13 @@ import org.slf4j.LoggerFactory;
  */
 public final class MigratorApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
+
+  /**
+   * Set this to <code>true</code> to have Hibernate log a ton of info on the SQL statements being
+   * run and each session's performance. Be sure to also adjust the related logging levels in
+   * Wildfly or whatever (see <code>server-config.sh</code> for details).
+   */
+  private static final boolean HIBERNATE_DETAILED_LOGGING = true;
 
   /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
@@ -60,7 +69,11 @@ public final class MigratorApp {
 
     AppConfiguration appConfig = null;
     try {
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+      // Take some args for running locally (IDE run configs dont honor env vars)
+      String dbUrl = args.length > 1 ? args[0] : null;
+      String dbUser = args.length > 2 ? args[1] : null;
+      String dbPass = args.length > 3 ? args[2] : null;
+      appConfig = AppConfiguration.readConfigFromEnvironmentVariables(dbUrl, dbUser, dbPass);
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (AppConfigurationException e) {
       LOGGER.error("Invalid app configuration, shutting down.", e);
@@ -103,37 +116,7 @@ public final class MigratorApp {
   private static boolean runHibernateValidation(HikariDataSource dataSource) {
 
     try {
-      Configuration cfg = new Configuration();
-
-      // Add the classes
-      Set<Class<?>> classes = getAnnotatedClassesFromPackage("gov.cms.bfd.model.rda");
-
-      if (classes.isEmpty()) {
-        LOGGER.error("Found no classes to validate.");
-        return false;
-      }
-
-      for (Class<?> clazz : classes) {
-        cfg.addAnnotatedClass(clazz);
-      }
-
-      LOGGER.info("Added {} classes to be validated.", classes.size());
-
-      // Set hibernate to validate the models on startup
-      cfg.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
-      cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "validate");
-
-      // Build the session factory with the datasource
-      SessionFactory sessions =
-          cfg.buildSessionFactory(
-              new StandardServiceRegistryBuilder()
-                  .applySettings(cfg.getProperties())
-                  .applySetting(Environment.DATASOURCE, dataSource)
-                  .build());
-
-      // Validation should occur as soon as the session is opened
-      Session session = sessions.openSession();
-      session.close();
+      return manuallySetUpHibernateValidation(dataSource);
     } catch (HibernateException hx) {
       LOGGER.error("Hibernate validation failed due to: ", hx);
       return false;
@@ -141,21 +124,73 @@ public final class MigratorApp {
       LOGGER.error("Hibernate validation failed due to unexpected exception: ", ex);
       return false;
     }
+  }
 
+  /**
+   * Manually set up hibernate validation boolean.
+   *
+   * @param dataSource the data source
+   * @return the boolean
+   */
+  private static boolean manuallySetUpHibernateValidation(DataSource dataSource) {
+
+    Configuration cfg = new Configuration();
+
+    // Add the models to scan
+    Set<Class<?>> scannedClasses = getEntityClassesFromPackage("gov.cms.bfd.model.rda");
+    scannedClasses.addAll(getEntityClassesFromPackage("gov.cms.bfd.model.rif"));
+
+    for (Class<?> clazz : scannedClasses) {
+      cfg.addAnnotatedClass(clazz);
+    }
+
+    if (scannedClasses.isEmpty()) {
+      LOGGER.error("Found no classes to validate.");
+      return false;
+    }
+
+    LOGGER.info("Added {} classes to be validated.", scannedClasses.size());
+
+    // Set hibernate to validate the models on startup
+    cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "validate");
+    if (HIBERNATE_DETAILED_LOGGING) {
+      cfg.setProperty(AvailableSettings.FORMAT_SQL, "true");
+      cfg.setProperty(AvailableSettings.USE_SQL_COMMENTS, "true");
+      cfg.setProperty(AvailableSettings.SHOW_SQL, "true");
+      cfg.setProperty(AvailableSettings.GENERATE_STATISTICS, "true");
+    }
+
+    // Build the session factory with the datasource
+    SessionFactory sessions =
+        cfg.buildSessionFactory(
+            new StandardServiceRegistryBuilder()
+                .applySetting(Environment.DATASOURCE, dataSource)
+                .applySettings(cfg.getProperties())
+                .build());
+
+    // Validation should occur as soon as the session is opened
+    Session session = sessions.openSession();
+    // Run a tiny query on the scanned tables to trigger the hibernate validator
+    for (Class<?> scannedClass : scannedClasses) {
+      Query<?> q = session.createQuery("FROM " + scannedClass.getName(), scannedClass);
+      q.setFirstResult(1);
+      q.setMaxResults(1);
+      q.list();
+    }
+
+    session.close();
     return true;
   }
 
   /**
-   * Gets the annotated classes from package.
+   * Gets the {code @Entity} annotated classes from the listed package.
    *
-   * @param packageName the package name
-   * @return the annotated classes from package
+   * @param packageName the package name to find Entity classes in
+   * @return the Entity annotated classes from the package
    */
-  public static Set<Class<?>> getAnnotatedClassesFromPackage(String packageName) {
+  public static Set<Class<?>> getEntityClassesFromPackage(String packageName) {
     Reflections reflections = new Reflections(packageName);
-    Set<Class<?>> foundClasses = reflections.getTypesAnnotatedWith(Entity.class);
-    LOGGER.info("Found {} annotated entities.", foundClasses.size());
-    return foundClasses;
+    return reflections.getTypesAnnotatedWith(Entity.class);
   }
 
   /**
