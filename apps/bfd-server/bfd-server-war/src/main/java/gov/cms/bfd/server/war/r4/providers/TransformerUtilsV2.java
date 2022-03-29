@@ -3252,7 +3252,7 @@ public final class TransformerUtilsV2 {
         createAdjudicationAmtSlice(
             CcwCodebookVariable.LINE_ALOWD_CHRG_AMT,
             C4BBAdjudication.ELIGIBLE,
-            submittedChargeAmount));
+            allowedChargeAmount));
 
     // LINE_BENE_PRMRY_PYR_CD => ExplanationOfBenefit.item.extension
     processingIndicatorCode.ifPresent(
