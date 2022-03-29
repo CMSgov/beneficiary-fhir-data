@@ -1088,9 +1088,9 @@ public final class TransformerTestUtilsV2 {
   /**
    * Finds an {@link Extension} in a list based on the Extension URL and System URL
    *
-   * @param url
-   * @param system
-   * @param extensions
+   * @param url the expected {@link Extension#getUrl()} of the {@link Extension} to look for
+   * @param system the expected {@link Coding#getSystem()} value
+   * @param extensions the list of extensions to filter through
    */
   static Extension findExtensionByUrlAndSystem(
       String url, String system, List<Extension> extensions) {
