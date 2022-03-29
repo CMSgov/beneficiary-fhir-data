@@ -87,6 +87,7 @@
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.1</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
+		<newrelicAgent.version>7.5.0</newrelicAgent.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -107,6 +108,12 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<!-- The newrelic.jar javaagent dependency -->
+				<groupId>com.newrelic.agent.java</groupId>
+				<artifactId>newrelic-agent</artifactId>
+				<version>${newrelicAgent.version}</version>
+			</dependency>
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
