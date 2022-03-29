@@ -376,8 +376,17 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     criteria.select(root).distinct(true);
 
     // Search for a beneficiary's records. Use lastUpdated if present
+    // TODO - BFD-1596
+    // while we gradually convert entity beans to use long data type for patientId,
+    // we may need to change the expected type for beneficiaryId in the entity Predicate.
+    // Once all claims have been migrated we can modify the ClaimTypeV2 to specifically
+    // return a long data type and this extra data type checking can be removed.
+    java.lang.Class javaClass = claimType.getEntityBeneficiaryIdAttribute().getJavaType();
+
     Predicate wherePredicate =
-        builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId);
+        builder.equal(
+            root.get(claimType.getEntityBeneficiaryIdAttribute()),
+            javaClass.getName().equals("long") ? Long.parseLong(patientId) : patientId);
     if (lastUpdated != null && !lastUpdated.isEmpty()) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdated);
       wherePredicate = builder.and(wherePredicate, predicate);

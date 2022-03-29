@@ -165,7 +165,7 @@ public final class TransformerUtilsV2 {
    *     Beneficiary}
    */
   public static IdDt buildPatientId(Long beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId.toString());
+    return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
   }
 
   /**
@@ -399,6 +399,26 @@ public final class TransformerUtilsV2 {
         new Identifier()
             .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
+            .setType(createC4BBClaimCodeableConcept());
+
+    return identifier;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createClaimIdentifier(CcwCodebookInterface ccwVariable, Long identifierValue) {
+    if (identifierValue == null) {
+      throw new IllegalArgumentException();
+    }
+
+    Identifier identifier =
+        new Identifier()
+            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
+            .setValue(identifierValue.toString())
             .setType(createC4BBClaimCodeableConcept());
 
     return identifier;
@@ -1836,10 +1856,10 @@ public final class TransformerUtilsV2 {
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId.toString()));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, claimId.toString()));
     }
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier

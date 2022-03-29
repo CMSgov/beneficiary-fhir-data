@@ -188,7 +188,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("BENE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED", "BENE_ID_NUMERIC")))
+                      Arrays.asList(
+                          "HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED", "BENE_ID_NUMERIC")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -1408,31 +1409,48 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
-      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+      if (rifField.getRifColumnType() == RifColumnType.CHAR) {
+
+        if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+          parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
+
+        } else if (rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
+          // Handle a String field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
+        } else {
+          // Handle a Character field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
+        }
+
+      } else if (rifField.getRifColumnType() == RifColumnType.BIGINT) {
+        // Handle an BigInteger field.
         parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
-      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
-          && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
-        // Handle a String field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
-      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
-          && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1) {
-        // Handle a Character field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
-      } else if (rifField.getRifColumnType() == RifColumnType.NUM
-          && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
+
+      } else if (rifField.getRifColumnType() == RifColumnType.SMALLINT) {
+        // Handle an Short field.
+        parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalShort" : "parseShort";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.INTEGER) {
         // Handle an Integer field.
         parseUtilsMethodName =
             rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
-      } else if (rifField.getRifColumnType() == RifColumnType.NUM
-          && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0) {
-        // Handle a Decimal field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.NUM) {
+        if (rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
+          // Handle an Integer field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
+
+        } else {
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+        }
       } else if (rifField.getRifColumnType() == RifColumnType.DATE) {
         // Handle a LocalDate field.
         parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDate" : "parseDate";
+
       } else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP) {
         // Handle an Instant field.
         parseUtilsMethodName =

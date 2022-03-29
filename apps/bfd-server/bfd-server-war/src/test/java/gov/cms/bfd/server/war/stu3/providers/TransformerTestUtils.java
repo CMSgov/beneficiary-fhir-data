@@ -1477,9 +1477,8 @@ final class TransformerTestUtils {
     assertEquals(TransformerUtils.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     if (claimType.equals(ClaimType.PDE))
-      assertHasIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId), eob.getIdentifier());
-    else
-      assertHasIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId), eob.getIdentifier());
+      assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId.toString(), eob.getIdentifier());
+    else assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId.toString(), eob.getIdentifier());
 
     assertIdentifierExists(
         TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID,

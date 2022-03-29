@@ -179,6 +179,19 @@ public final class PipelineTestUtils {
           tableNameSpecifier = entityTableAnnotation.get().name();
         }
 
+        // FIX THIS - BFD-1596 : Hack alert!
+        // For the purpose of temporarily supporting views, we follow a view naming
+        // convention of tacking "_v" to the end of the table name; thus check to see if
+        // the entity is a view, and if it is, drop the "_v" from the tableNameSpecifier
+        // so we can truncate the actual table.
+        //
+        // Once all tables in the new schema have been migrated, the use of a view(s) as
+        // denoted here will disapper; so this next couple of lines of code can be removed
+        // as part of a final cleanup effort.
+        if (tableNameSpecifier.toLowerCase().endsWith("_v")) {
+          tableNameSpecifier = tableNameSpecifier.substring(0, tableNameSpecifier.length() - 2);
+        }
+
         // Then, switch to the appropriate schema.
         if (entityTableAnnotation.get().schema() != null
             && !entityTableAnnotation.get().schema().isEmpty()) {

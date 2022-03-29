@@ -101,7 +101,7 @@ public enum ClaimTypeV2 {
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
-  private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
+  private final SingularAttribute<?, ?> entityBeneficiaryIdAttribute;
   private final Function<Object, LocalDate> serviceEndAttributeFunction;
   private final ClaimTypeTransformerV2 transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
@@ -120,7 +120,7 @@ public enum ClaimTypeV2 {
   private ClaimTypeV2(
       Class<?> entityClass,
       SingularAttribute<?, ?> entityIdAttribute,
-      SingularAttribute<?, String> entityBeneficiaryIdAttribute,
+      SingularAttribute<?, ?> entityBeneficiaryIdAttribute,
       Function<Object, LocalDate> serviceEndAttributeFunction,
       ClaimTypeTransformerV2 transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
@@ -152,7 +152,7 @@ public enum ClaimTypeV2 {
    * @return the JPA {@link Entity} field that is a (foreign keyed) reference to {@link
    *     Beneficiary#getBeneficiaryId()}
    */
-  public SingularAttribute<?, String> getEntityBeneficiaryIdAttribute() {
+  public SingularAttribute<?, ?> getEntityBeneficiaryIdAttribute() {
     return entityBeneficiaryIdAttribute;
   }
 
@@ -185,8 +185,11 @@ public enum ClaimTypeV2 {
    * @return the {@link ClaimTypeV2} represented by the specified {@link String}
    */
   public static Optional<ClaimTypeV2> parse(String claimTypeText) {
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values())
-      if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
+    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+      if (claimType.name().toLowerCase().equals(claimTypeText)) {
+        return Optional.of(claimType);
+      }
+    }
     return Optional.empty();
   }
 }
