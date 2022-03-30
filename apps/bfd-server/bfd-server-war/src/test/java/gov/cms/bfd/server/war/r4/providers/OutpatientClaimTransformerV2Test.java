@@ -473,7 +473,9 @@ public final class OutpatientClaimTransformerV2Test {
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object
+    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // to the correct insurance
+    assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
