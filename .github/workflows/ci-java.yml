@@ -138,11 +138,11 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: ${{github.event.number}},
-            }).then(response -> {
+            }).then(response => {
               if (response.ok) {
                 return response.json()
               }
-            }).then(data -> {
+            }).then(data => {
               for (const entry of data) {
                 console.log(entry.user);
                 console.log(entry.body);
