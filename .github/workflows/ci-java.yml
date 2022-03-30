@@ -134,12 +134,11 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const comments = github.rest.issues.listComments({
+            github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: ${{github.event.number}},
-            });
-            console.log(comments);
+            }).then(console.log);
       - name: 'Check for new/modified resources'
         id: run_check
         run: |
