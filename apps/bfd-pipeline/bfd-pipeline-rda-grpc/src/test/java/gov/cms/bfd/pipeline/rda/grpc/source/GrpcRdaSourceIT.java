@@ -306,6 +306,7 @@ public class GrpcRdaSourceIT {
             });
   }
 
+  /** Checks to see if a log message was generated when a non-jwt token is used. */
   @Test
   public void grpcCallWithCorrectNonJWT() throws Exception {
     assertHasLogMessage(
@@ -331,6 +332,10 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
+  /**
+   * Checks to see if a log message was generated when the expected expiration claim was not found
+   * in the given JWT
+   */
   @Test
   public void grpcCallWithCorrectJWTMissingExp() throws Exception {
     String claimsToken = Base64.getEncoder().encodeToString("{\"nexp\":0}".getBytes());
@@ -359,6 +364,10 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
+  /**
+   * Checks to see if a log message was generated when a jwt is used that will expire within one
+   * month. This should be a warning level log message.
+   */
   @Test
   public void grpcCallWithCorrectExpiringAuthTokenOneMonth() throws Exception {
     final String AUTH_TOKEN =
@@ -386,6 +395,10 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
+  /**
+   * Checks to see if a log message was generated when a jwt is used that will expire within 2
+   * weeks. This should be an error level log message.
+   */
   @Test
   public void grpcCallWithCorrectExpiringAuthTokenTwoWeeks() throws Exception {
     final String AUTH_TOKEN =
@@ -413,6 +426,10 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
+  /**
+   * Checks to see if a log message was generated when an expired jwt is used. This should be an
+   * error level log message.
+   */
   @Test
   public void grpcCallWithCorrectExpiredAuthToken() throws Exception {
     final String AUTH_TOKEN =
@@ -440,6 +457,16 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
+  /**
+   * Helper method for checking if a particular log message was generated. This method creates a
+   * temporary appender to add to the logging framework, which it then removes again after the given
+   * runnable has been executed.
+   *
+   * @param logLevel The expected log level of the expected message to find
+   * @param logMessage The expected log message to find
+   * @param runnable The logic to execute that should generate the given expected log message.
+   * @throws Exception If anything unexpected went wrong
+   */
   private void assertHasLogMessage(
       Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
     final Logger LOGGER = (Logger) LoggerFactory.getLogger(GrpcRdaSource.class);
@@ -460,10 +487,22 @@ public class GrpcRdaSourceIT {
         String.format("Expected log message '[%s] %s' not found", logLevel, logMessage));
   }
 
+  /**
+   * Helper Functional Interface for defining runnable logic that can throw some sort of exception.
+   *
+   * @param <E> The type of exception the runnable logic can throw.
+   */
   private interface ThrowingRunnable<E extends Throwable> {
     void run() throws E;
   }
 
+  /**
+   * Helper method to generate a JWT with the given expiration date in epoch seconds.
+   *
+   * @param expirationDateEpochSeconds The desired expiration date (in epoch seconds) of the
+   *     generated jwt.
+   * @return The generated JWT with an expiration set to the given value.
+   */
   public String createTokenWithExpiration(long expirationDateEpochSeconds) {
     String claimsString = String.format("{\"exp\":%d}", expirationDateEpochSeconds);
     String claimsToken = Base64.getEncoder().encodeToString(claimsString.getBytes());

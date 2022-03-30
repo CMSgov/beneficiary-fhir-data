@@ -397,6 +397,13 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       return InProcessChannelBuilder.forName(inProcessServerName);
     }
 
+    /**
+     * Parses the given auth token as a JWT, extracting the commonly used `exp` claim to get the
+     * token's expiration date.
+     *
+     * @param token The token to parse
+     * @return The expiration date of the token, in epoch seconds.
+     */
     private Long parseJWTExpirationDate(String token) {
       try {
         String[] jwtBits = token.split("\\.");
