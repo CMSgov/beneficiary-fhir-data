@@ -141,6 +141,8 @@ jobs:
       - name: 'Verify FHIR resource'
         run: echo ::set-output name=validation::$(./validations.sh -r)
         id: validate_fhir
+      - name: 'Fhir Validation Output'
+        run: echo ${{steps.validate_fhir.outputs.validation}}
       - name: 'Commenting on found issues'
         if: |
           if [[ ${{steps.validate_fhir.outputs.validation}} = '0 resources'* ]]; then
