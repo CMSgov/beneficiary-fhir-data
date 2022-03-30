@@ -912,7 +912,7 @@ public final class DMEClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt",
                                 "Line Allowed Charge Amount"))))
             .setAmount(
-                new Money().setValue(130.45).setCurrency(TransformerConstants.CODED_MONEY_USD));
+                new Money().setValue(129.45).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }

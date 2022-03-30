@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -564,21 +566,47 @@ public class HHAClaimTransformerV2Test {
   public void shouldHaveLineItemRevenue() {
     CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
 
-    CodeableConcept compare =
-        new CodeableConcept()
-            .setCoding(
-                Arrays.asList(
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/rev_cntr",
-                        "0023",
-                        "Home Health services paid under PPS submitted as TOB 32X and 33X, effective 10/00. This code may appear multiple times on a claim to identify different HIPPS/Home Health Resource Groups (HRG)."),
-                    new Coding("https://www.nubc.org/CodeSystem/RevenueCodes", "4", null),
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
-                        "4",
-                        "No charge or units associated with this revenue center code. (For multiple HCPCS per single revenue center code) For revenue center code 0001, the following MSP override values may be present:")));
+    Coding code1 =
+        revenue.getCoding().stream()
+            .filter(
+                coding ->
+                    coding
+                        .getSystem()
+                        .equals("https://bluebutton.cms.gov/resources/variables/rev_cntr"))
+            .findFirst()
+            .orElse(null);
+    Coding code2 =
+        revenue.getCoding().stream()
+            .filter(
+                coding -> coding.getSystem().equals("https://www.nubc.org/CodeSystem/RevenueCodes"))
+            .findFirst()
+            .orElse(null);
+    Coding code3 =
+        revenue.getCoding().stream()
+            .filter(
+                coding ->
+                    coding
+                        .getSystem()
+                        .equals(
+                            "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd"))
+            .findFirst()
+            .orElse(null);
 
-    assertTrue(compare.equalsDeep(revenue));
+    assertNotNull(code1, "Missing expected rev_cntr coding");
+    assertEquals("0023", code1.getCode());
+    assertEquals(
+        "Home Health services paid under PPS submitted as TOB 32X and 33X, effective 10/00. This code may appear multiple times on a claim to identify different HIPPS/Home Health Resource Groups (HRG).",
+        code1.getDisplay());
+
+    assertNotNull(code2, "Missing expected RevenueCodes coding");
+    assertEquals("4", code2.getCode());
+    assertNull(code2.getDisplay());
+
+    assertNotNull(code3, "Missing expected rev_cntr_ddctbl_coinsrnc_cd coding");
+    assertEquals("4", code3.getCode());
+    assertEquals(
+        "No charge or units associated with this revenue center code. (For multiple HCPCS per single revenue center code) For revenue center code 0001, the following MSP override values may be present:",
+        code3.getDisplay());
   }
 
   @Test
@@ -877,6 +905,53 @@ public class HHAClaimTransformerV2Test {
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /**
+   * Ensure that when the revenue status code exists in the claim, it should be mapped to an
+   * extension.
+   *
+   * <p>The specific code value of the extension is tested in {@link
+   * TransformerUtilsV2Test#mapEobCommonItemRevenueStatusCodeWhenStatusCodeExistsExpectExtensionOnItem()}
+   */
+  @Test
+  public void shouldHaveRevenueStatusCode() {
+
+    String expectedExtensionUrl =
+        "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd";
+
+    assertNotNull(eob.getItem());
+    assertTrue(eob.getItem().size() > 0);
+    ExplanationOfBenefit.ItemComponent item = eob.getItem().get(0);
+    assertNotNull(item);
+    assertNotNull(item.getRevenue());
+    assertNotNull(item.getRevenue().getExtension());
+    assertEquals(1, item.getRevenue().getExtension().size());
+    Extension ext = item.getRevenue().getExtensionByUrl(expectedExtensionUrl);
+    assertNotNull(ext);
+    assertEquals(expectedExtensionUrl, ext.getUrl());
+    assertTrue(ext.getValue() instanceof Coding);
+    assertNotNull(((Coding) ext.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fi_num is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryNumber is present.
+   */
+  @Test
+  public void shouldHaveFiNumberExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiNumExtension);
+    assertEquals("15999", ((Coding) fiNumExtension.getValue()).getCode());
   }
 
   /**

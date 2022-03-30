@@ -51,6 +51,12 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "2"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "15999"
+    }
   } ],
   "identifier" : [ {
     "type" : {
@@ -384,6 +390,14 @@
     "sequence" : 1,
     "careTeamSequence" : [ 2 ],
     "revenue" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+          "code" : "A",
+          "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+        }
+      } ],
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
         "code" : "0023",

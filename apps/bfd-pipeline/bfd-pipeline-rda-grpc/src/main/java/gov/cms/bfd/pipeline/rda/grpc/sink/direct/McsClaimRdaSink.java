@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
@@ -37,5 +38,18 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, PreAdj
     var change = transformer.transformClaim(message);
     change.getClaim().setApiSource(apiVersion);
     return change;
+  }
+
+  @Override
+  RdaApiClaimMessageMetaData createMetaData(RdaChange<PreAdjMcsClaim> change) {
+    final PreAdjMcsClaim claim = change.getClaim();
+    return RdaApiClaimMessageMetaData.builder()
+        .sequenceNumber(change.getSequenceNumber())
+        .claimType(RdaApiProgress.ClaimType.MCS)
+        .claimId(claim.getIdrClmHdIcn())
+        .mbiRecord(claim.getMbiRecord())
+        .claimState(claim.getIdrStatusCode())
+        .receivedDate(claim.getLastUpdated())
+        .build();
   }
 }

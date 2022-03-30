@@ -13,7 +13,8 @@
   }]
 ```
 
-## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
+
 
 Added three new codes to `codes-cpt.csv`:
 ```

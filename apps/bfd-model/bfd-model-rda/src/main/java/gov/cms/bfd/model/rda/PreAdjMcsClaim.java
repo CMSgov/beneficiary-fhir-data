@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.BatchSize;
 
 /** JPA class for the McsClaims table */
 @Entity
@@ -120,12 +121,6 @@ public class PreAdjMcsClaim {
   @JoinColumn(name = "`mbiId`")
   private Mbi mbiRecord;
 
-  @Column(name = "`idrClaimMbi`", length = 13)
-  private String idrClaimMbi;
-
-  @Column(name = "`idrClaimMbiHash`", length = 64)
-  private String idrClaimMbiHash;
-
   @Column(name = "`idrHdrFromDateOfSvc`")
   private LocalDate idrHdrFromDateOfSvc;
 
@@ -211,6 +206,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsDetail> details = new HashSet<>();
 
@@ -219,6 +215,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
 
@@ -227,6 +224,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsAdjustment> adjustments = new HashSet<>();
 
@@ -235,6 +233,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsAudit> audits = new HashSet<>();
 
@@ -243,6 +242,23 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsLocation> locations = new HashSet<>();
+
+  public String getIdrClaimMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getIdrClaimMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String idrClaimMbi = "idrClaimMbi";
+  }
 }
