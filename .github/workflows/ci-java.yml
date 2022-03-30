@@ -198,16 +198,15 @@ jobs:
           echo ::set-output name=output::$([[ $output =~ [[:digit:]]+[[:space:]]resources[[:space:]]failed.* ]] && echo "${BASH_REMATCH[0]}")
       - name: 'Commenting on found issues'
         if: steps.run_check.outputs.skip == 'false' && steps.validate_fhir.outputs.valid == 'false'
-        run: printf ${{steps.validate_fhir.outputs.output}}
-#        uses: actions/github-script@v6
-#        with:
-#          script: |
-#            github.rest.issues.createComment({
-#              owner: context.repo.owner,
-#              repo: context.repo.repo,
-#              issue_number: ${{github.event.number}},
-#              body: "There were failed validations"
-#            })
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{github.event.number}},
+              body: "${{steps.validate_fhir.outputs.output}}"
+            })
 
   # ansible system testing
   ansible-role-bfd-pipeline:
