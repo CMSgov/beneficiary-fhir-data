@@ -113,7 +113,6 @@ public final class MigratorAppIT {
       assertTrue(
           hasLogLine(appRunConsumer, String.format("now at version v%s", expectedVersion)),
           "Did not find log entry for expected final version (v" + expectedVersion + ")");
-      LOGGER.info("\\nSTDOUT:\\n\"" + appRunConsumer.getStdoutContents());
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(
           "Migration application failed to start within timeout, STDOUT:\n"

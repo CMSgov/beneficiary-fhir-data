@@ -10,19 +10,7 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.Entity;
-import javax.sql.DataSource;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
-import org.hibernate.query.Query;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +20,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class MigratorApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
-
-  /**
-   * Set this to <code>true</code> to have Hibernate log a ton of info on the SQL statements being
-   * run and each session's performance. Be sure to also adjust the related logging levels in
-   * Wildfly or whatever (see <code>server-config.sh</code> for details).
-   */
-  private static final boolean HIBERNATE_DETAILED_LOGGING = true;
 
   /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
@@ -58,11 +39,11 @@ public final class MigratorApp {
   static final int EXIT_CODE_SUCCESS = 0;
 
   /**
-   * This method is called when the application is launched from the command line. Currently, this
-   * is a notional placeholder application that produces NDJSON-formatted log output.
+   * This method is called when the application is launched from the command line.
    *
-   * @param args (should be empty. Application <strong>will</strong> accept configuration via
-   *     environment variables)
+   * @param args generally, should be empty. Application <strong>will</strong> accept configuration
+   *     via environment variables, however for local development the application will also accept
+   *     the database url, user, and password as args 0, 1, and 2 respectively.
    */
   public static void main(String[] args) {
     LOGGER.info("Successfully started");
@@ -95,8 +76,11 @@ public final class MigratorApp {
       System.exit(EXIT_CODE_FAILED_MIGRATION);
     }
 
+    // Hibernate suggests not reusing data sources for validations
+    pooledDataSource = createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+
     // Run hibernate validation after the migrations have succeeded
-    boolean validationSuccess = runHibernateValidation(pooledDataSource);
+    boolean validationSuccess = HibernateValidator.runHibernateValidation(pooledDataSource);
 
     if (!validationSuccess) {
       LOGGER.error("Validation failed, shutting down");
@@ -105,92 +89,6 @@ public final class MigratorApp {
 
     LOGGER.info("Migration and validation passed, shutting down");
     System.exit(EXIT_CODE_SUCCESS);
-  }
-
-  /**
-   * Runs hibernate validation and reports if it succeeded.
-   *
-   * @param dataSource the data source to connect to
-   * @return {@code true} if the validation succeeded
-   */
-  private static boolean runHibernateValidation(HikariDataSource dataSource) {
-
-    try {
-      return manuallySetUpHibernateValidation(dataSource);
-    } catch (HibernateException hx) {
-      LOGGER.error("Hibernate validation failed due to: ", hx);
-      return false;
-    } catch (Exception ex) {
-      LOGGER.error("Hibernate validation failed due to unexpected exception: ", ex);
-      return false;
-    }
-  }
-
-  /**
-   * Manually set up hibernate validation boolean.
-   *
-   * @param dataSource the data source
-   * @return the boolean
-   */
-  private static boolean manuallySetUpHibernateValidation(DataSource dataSource) {
-
-    Configuration cfg = new Configuration();
-
-    // Add the models to scan
-    Set<Class<?>> scannedClasses = getEntityClassesFromPackage("gov.cms.bfd.model.rda");
-    scannedClasses.addAll(getEntityClassesFromPackage("gov.cms.bfd.model.rif"));
-
-    for (Class<?> clazz : scannedClasses) {
-      cfg.addAnnotatedClass(clazz);
-    }
-
-    if (scannedClasses.isEmpty()) {
-      LOGGER.error("Found no classes to validate.");
-      return false;
-    }
-
-    LOGGER.info("Added {} classes to be validated.", scannedClasses.size());
-
-    // Set hibernate to validate the models on startup
-    cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "validate");
-    if (HIBERNATE_DETAILED_LOGGING) {
-      cfg.setProperty(AvailableSettings.FORMAT_SQL, "true");
-      cfg.setProperty(AvailableSettings.USE_SQL_COMMENTS, "true");
-      cfg.setProperty(AvailableSettings.SHOW_SQL, "true");
-      cfg.setProperty(AvailableSettings.GENERATE_STATISTICS, "true");
-    }
-
-    // Build the session factory with the datasource
-    SessionFactory sessions =
-        cfg.buildSessionFactory(
-            new StandardServiceRegistryBuilder()
-                .applySetting(Environment.DATASOURCE, dataSource)
-                .applySettings(cfg.getProperties())
-                .build());
-
-    // Validation should occur as soon as the session is opened
-    Session session = sessions.openSession();
-    // Run a tiny query on the scanned tables to trigger the hibernate validator
-    for (Class<?> scannedClass : scannedClasses) {
-      Query<?> q = session.createQuery("FROM " + scannedClass.getName(), scannedClass);
-      q.setFirstResult(1);
-      q.setMaxResults(1);
-      q.list();
-    }
-
-    session.close();
-    return true;
-  }
-
-  /**
-   * Gets the {code @Entity} annotated classes from the listed package.
-   *
-   * @param packageName the package name to find Entity classes in
-   * @return the Entity annotated classes from the package
-   */
-  public static Set<Class<?>> getEntityClassesFromPackage(String packageName) {
-    Reflections reflections = new Reflections(packageName);
-    return reflections.getTypesAnnotatedWith(Entity.class);
   }
 
   /**
