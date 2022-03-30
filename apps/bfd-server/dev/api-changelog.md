@@ -1,5 +1,72 @@
 # API Changelog
 
+## BFD-1529: Populate Part B Termination Code Correctly
+
+For Coverage Claims, the Part A coverage termination code was being provided by the API for Part B events. 
+In the test dataset, Part A and Part B coverage termination codes are the same, 
+however in production, this will not always be the case.
+So in addition to providing the Part B termination code correctly, 
+Part A will have a different termination code than Part B  
+
+The part A coverage status will look like:
+
+```
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  {
+    "status" : "cancelled",
+  }
+  ...
+}
+```
+
+The part B coverage status will look like:
+```
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  {
+    "status" : "active",
+  }
+  ...
+}
+```
+
+The part A coverage termination code will look like
+```
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
+      "code" : "9",
+      "display" : "Other Termination"
+    }
+  }
+  ...
+}
+```
+
+The part B coverage termination code will look like
+```
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/b_trm_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/b_trm_cd",
+      "code" : "0",
+      "display" : "Not Terminated"
+    }
+  }
+  ...
+}
+```
+
 ## BFD-1516: Map Hospice Period Count in V2
 
 Added mapping for Hospice Period count
