@@ -134,6 +134,7 @@ jobs:
           java-version: '11'
       - name: 'Git Fetch'
         run: git fetch
+      - name: 'Download fhir validator'
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
