@@ -130,6 +130,15 @@ jobs:
         uses: actions/checkout@v2
       - name: 'Create local branch references'
         run: git fetch && git checkout master && git checkout $GITHUB_HEAD_REF
+      - name: 'Remove prior validation comment'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{github.event.number}},
+            })
       - name: 'Check for new/modified resources'
         id: run_check
         run: |
@@ -156,7 +165,7 @@ jobs:
           echo ::set-output name=output::$([[ $output =~ [[:digit:]]+[[:space:]]resources[[:space:]]failed.* ]] && echo "${BASH_REMATCH[0]}")
       - name: 'Commenting on found issues'
         if: steps.run_check.outputs.skip == 'false' && steps.validate_fhir.outputs.valid == 'false'
-        run: echo ${{steps.validate_fhir.outputs.output}}
+        run: printf ${{steps.validate_fhir.outputs.output}}
 #        uses: actions/github-script@v6
 #        with:
 #          script: |
