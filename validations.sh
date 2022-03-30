@@ -8,8 +8,11 @@ RECENT_FILES=$(git diff --name-only $GITHUB_BASE_REF... | grep $ENDPOINT_DIR | s
 
 if [[ $1 == *-r* ]]; then
   for file in $RECENT_FILES; do
-    if ! java -Xmx3G -Xms2G -jar validator_cli.jar $file -version 4.0; then
-      failedValidations+=($file)
+    # Some changes might be deletions, so check if the file still exists
+    if [[ -f "$file" ]]; then
+      if ! java -Xmx3G -Xms2G -jar validator_cli.jar $file -version 4.0; then
+        failedValidations+=($file)
+      fi
     fi
   done
 else
