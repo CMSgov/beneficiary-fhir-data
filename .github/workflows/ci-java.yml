@@ -129,7 +129,7 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
       - name: 'Checkout new repo'
-        run: cd .. && git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git bfd-checkout && cd bfd-checkout
+        run: cd .. && git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git bfd-checkout && cd bfd-checkout && ls -al
       - name: 'Git Fetch'
         run: git fetch
       - name: 'Check for new/modified resources'
