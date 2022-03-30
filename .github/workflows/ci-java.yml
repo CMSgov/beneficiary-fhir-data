@@ -129,7 +129,7 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
       - name: 'Check for new/modified resources'
-        run: git branch && git fetch && git checkout $GITHUB_HEAD_REF && git branch && git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2 | sort
+        run: git branch && git fetch && git checkout master && git checkout $GITHUB_HEAD_REF && git branch && git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2 | sort
       - name: 'Set up JDK'
         uses: actions/setup-java@v1
         with:
