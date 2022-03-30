@@ -21,19 +21,13 @@ public class S3JsonMessageSourcesTest {
   public void testPathConstructionWithADirectory() {
     AmazonS3 s3Client = mock(AmazonS3.class);
     S3JsonMessageSources sources = new S3JsonMessageSources(s3Client, "bucket", "a/bb/ccc");
-    assertEquals("a/bb/ccc/fiss.ndjson", sources.createFissObjectKey());
-    assertEquals("a/bb/ccc/fiss-1-100.ndjson", sources.createFissObjectKey(1, 100));
-    assertEquals("a/bb/ccc/mcs.ndjson", sources.createMcsObjectKey());
-    assertEquals("a/bb/ccc/mcs-80-471.ndjson", sources.createMcsObjectKey(80, 471));
+    assertEquals("a/bb/ccc/", sources.getDirectoryPath());
   }
 
   @Test
   public void testPathConstructionWithADirectoryAndTrailingSlash() {
     AmazonS3 s3Client = mock(AmazonS3.class);
     S3JsonMessageSources sources = new S3JsonMessageSources(s3Client, "bucket", "a/bb/");
-    assertEquals("a/bb/fiss.ndjson", sources.createFissObjectKey());
-    assertEquals("a/bb/fiss-1-100.ndjson", sources.createFissObjectKey(1, 100));
-    assertEquals("a/bb/mcs.ndjson", sources.createMcsObjectKey());
-    assertEquals("a/bb/mcs-80-471.ndjson", sources.createMcsObjectKey(80, 471));
+    assertEquals("a/bb/", sources.getDirectoryPath());
   }
 }

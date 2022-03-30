@@ -49,6 +49,7 @@ public class DiagnosisUtilV2 {
    * Retrieves the Diagnosis display value from a Diagnosis code look up file
    *
    * @param icdCode - Diagnosis code
+   * @return the icd code display value
    */
   public static String retrieveIcdCodeDisplay(String icdCode) {
     if (icdCode.isEmpty()) {
@@ -150,7 +151,7 @@ public class DiagnosisUtilV2 {
    *     from
    * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
    *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
-   * @param labels One or more labels to use when mapping the diagnosis.
+   * @param label One or more labels to use when mapping the diagnosis.
    * @return a {@link Diagnosis} or {@link Optional#empty()}
    */
   public static Optional<Diagnosis> extractDiagnosis(

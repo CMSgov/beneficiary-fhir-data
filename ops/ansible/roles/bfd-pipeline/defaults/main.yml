@@ -7,6 +7,7 @@ data_pipeline_loader_threads: 200
 data_pipeline_jvm_args: -Xmx64g
 data_pipeline_tmp_dir: /tmp
 data_pipeline_idempotency_required: true
+data_pipeline_filtering_non_null_and_non_2022_benes: true
 data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
 
@@ -33,3 +34,20 @@ data_pipeline_rda_grpc_max_idle_seconds: 600
 # By default call the RDA API with no token.  Override this value in env specific vault
 # to enable authentication.
 data_pipeline_rda_grpc_auth_token: ''
+
+# What type of RDA API server to use.  Can be Remote or InProcess. Defaults to Remote.
+data_pipeline_rda_grpc_server_type: 'Remote'
+
+# Source of data to serve.  Can be S3 or Random.  Defaults to Random.
+data_pipeline_rda_grpc_inproc_server_mode: ''
+
+# An InProcess server can serve data from NDJSON files in an S3 bucket.
+# These settings are defined in the vault rather than plain text but we 
+# provide empty string values here so the script has values for the
+# environment variables when the mock server is not in use.
+# Region containing S3 bucket.
+data_pipeline_rda_grpc_inproc_server_s3_region: ''
+# Name of the S3 bucket.
+data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
+# Optional directory within the S3 bucket.  Defaults to root directory.
+data_pipeline_rda_grpc_inproc_server_s3_directory: ''

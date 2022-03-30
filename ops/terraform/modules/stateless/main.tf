@@ -103,6 +103,14 @@ data "aws_ec2_managed_prefix_list" "vpn" {
   }
 }
 
+# get cbc jenkins cidr block
+data "aws_ec2_managed_prefix_list" "jenkins" {
+  filter {
+    name   = "prefix-list-name"
+    values = ["bfd-cbc-jenkins"]
+  }
+}
+
 # tools security group
 data "aws_security_group" "tools" {
   filter {
@@ -163,7 +171,7 @@ module "fhir_lb" {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
     port            = 443
     cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
 
   egress = {
@@ -344,7 +352,7 @@ module "bfd_server_alarm_all_eob_6s-p95" {
     datapoints       = "15"
     statistic        = null
     ext_statistic    = "p95"
-    threshold        = "6000.0"
+    threshold        = "6000.0" # milliseconds
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }

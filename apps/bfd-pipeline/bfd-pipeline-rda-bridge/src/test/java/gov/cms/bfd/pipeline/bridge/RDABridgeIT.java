@@ -1,15 +1,14 @@
 package gov.cms.bfd.pipeline.bridge;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -28,12 +27,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import utils.TestUtils;
 
 class RDABridgeIT {
 
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
+
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
+  private static final String EXPECTED_ATTRIBUTION = "expected-attribution.json";
+
+  private static final String ACTUAL_FISS = "rda-fiss-test-5-18.ndjson";
+  private static final String ACTUAL_MCS = "rda-mcs-test-1-4.ndjson";
+  private static final String ACTUAL_ATTRIBUTION = "attribution.json";
 
   @Test
   void shouldGenerateCorrectOutput() throws IOException {
@@ -68,19 +74,35 @@ class RDABridgeIT {
           "5",
           "-z",
           "1",
+          "-a",
+          "true",
+          "-x",
+          "4",
+          "-q",
+          outputDir.resolve("attribution.json").toString(),
+          "-t",
+          resourcesDir.resolve("attribution-template.json").toString(),
           rifDir
         });
 
     Set<String> ignorePaths = Collections.singleton("/timestamp");
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
-    List<String> actualFissJson =
-        Files.readAllLines(outputDir.resolve("rda-fiss-test-5-18.ndjson"));
-    assertJsonEquals(expectedFissJson, actualFissJson, ignorePaths);
+    List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));
+    TestUtils.assertJsonEquals(expectedFissJson, actualFissJson, ignorePaths);
 
     List<String> expectedMcsJson = Files.readAllLines(expectedDir.resolve(EXPECTED_MCS));
-    List<String> actualMcsJson = Files.readAllLines(outputDir.resolve("rda-mcs-test-1-4.ndjson"));
-    assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
+    List<String> actualMcsJson = Files.readAllLines(outputDir.resolve(ACTUAL_MCS));
+    TestUtils.assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
+
+    String expectedAttribution =
+        String.join("\n", Files.readAllLines(expectedDir.resolve(EXPECTED_ATTRIBUTION)));
+    String actualAttribution =
+        String.join("\n", Files.readAllLines(outputDir.resolve(ACTUAL_ATTRIBUTION)));
+    assertEquals(
+        expectedAttribution,
+        actualAttribution,
+        "Generated attribution file does not match expected.");
   }
 
   /**
@@ -112,6 +134,16 @@ class RDABridgeIT {
           public void close() throws IOException {}
         };
 
+    final int FISS_ID = 0;
+    final int MCS_ID = 1;
+
+    DataSampler<String> dataSampler =
+        DataSampler.<String>builder()
+            .maxValues(10_000)
+            .registerSampleSet(FISS_ID, 0.5f)
+            .registerSampleSet(MCS_ID, 0.5f)
+            .build();
+
     assertDoesNotThrow(
         () -> {
           bridge.executeTransformation(
@@ -120,19 +152,25 @@ class RDABridgeIT {
               inpatientData,
               new WrappedCounter(0),
               mbiMap,
-              testSink);
+              testSink,
+              dataSampler,
+              FISS_ID);
           bridge.executeTransformation(
               RDABridge.SourceType.MCS,
               resourcesDir,
               carrierData,
               new WrappedCounter(0),
               mbiMap,
-              testSink);
+              testSink,
+              dataSampler,
+              MCS_ID);
 
           Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-          IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-          FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
-          McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
+          IdHasher.Config hasherConfig = new IdHasher.Config(10, "justsomestring");
+          FissClaimTransformer fissTransformer =
+              new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+          McsClaimTransformer mcsTransformer =
+              new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
           for (MessageOrBuilder message : results) {
             if (message instanceof FissClaimChange) {
@@ -142,74 +180,6 @@ class RDABridgeIT {
             }
           }
         });
-  }
-
-  private void assertJsonEquals(
-      List<String> expectedJson, List<String> actualJson, Set<String> ignorePaths) {
-    int i;
-
-    List<String> diffList = new ArrayList<>();
-
-    for (i = 0; i < expectedJson.size() && i < actualJson.size(); ++i) {
-      String diffMessage = createDiff(expectedJson.get(i), actualJson.get(i), ignorePaths);
-
-      if (!diffMessage.isEmpty()) {
-        diffList.add("Entry " + (i + 1) + ": " + diffMessage);
-      }
-    }
-
-    if (i < actualJson.size()) {
-      for (int j = i; j < actualJson.size(); ++j) {
-        String diffMessage = createDiff("{}", actualJson.get(j), ignorePaths);
-
-        if (!diffMessage.isEmpty()) {
-          diffList.add("Entry " + (j + 1) + ": " + diffMessage);
-        }
-      }
-    } else if (i < expectedJson.size()) {
-      for (int j = i; j < expectedJson.size(); ++j) {
-        String diffMessage = createDiff(expectedJson.get(j), "{}", ignorePaths);
-
-        if (!diffMessage.isEmpty()) {
-          diffList.add("Entry " + (j + 1) + ": " + diffMessage);
-        }
-      }
-    }
-
-    assertTrue(diffList.isEmpty(), String.join("\n", diffList));
-  }
-
-  private String createDiff(String expectedJson, String actualJson, Set<String> ignorePaths) {
-    String message;
-
-    try {
-      List<String> diffs = diffJson(expectedJson, actualJson, ignorePaths);
-      message = String.join(",", diffs);
-    } catch (IOException e) {
-      message = "Failed to be read";
-    }
-
-    return message;
-  }
-
-  private List<String> diffJson(String expectedJson, String actualJson, Set<String> ignorePaths)
-      throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-
-    JsonNode expected = mapper.readTree(expectedJson);
-    JsonNode actual = mapper.readTree(actualJson);
-
-    JsonNode diff = JsonDiff.asJson(expected, actual);
-
-    List<String> diffs = new ArrayList<>();
-
-    for (int i = 0; i < diff.size(); ++i) {
-      if (!ignorePaths.contains(diff.get(i).get("path").asText())) {
-        diffs.add(diff.get(i).toString());
-      }
-    }
-
-    return diffs;
   }
 
   private Path getResourcePath() {

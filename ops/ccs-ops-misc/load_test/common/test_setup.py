@@ -1,7 +1,6 @@
 import os
 import common.config as config
 from locust.main import main
-from locust import events
 
 '''
 Checks the config file for the client cert value.

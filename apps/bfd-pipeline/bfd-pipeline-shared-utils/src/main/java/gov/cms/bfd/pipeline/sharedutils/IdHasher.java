@@ -8,6 +8,9 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import org.apache.commons.codec.binary.Hex;
 
 /**
@@ -23,7 +26,7 @@ public class IdHasher {
    */
   public static final int DERIVED_KEY_LENGTH = 256;
 
-  private final Config config;
+  @Getter private final Config config;
   private final SecretKeyFactory secretKeyFactory;
 
   public IdHasher(Config config) {
@@ -34,7 +37,7 @@ public class IdHasher {
   /**
    * Computes a one-way cryptographic hash of the specified ID value.
    *
-   * @param mbi any ID to be hashed
+   * @param identifier any ID to be hashed
    * @return a one-way cryptographic hash of the specified ID value, exactly 64 characters long
    */
   public String computeIdentifierHash(String identifier) {
@@ -72,28 +75,40 @@ public class IdHasher {
   }
 
   /** Configuration options that encapsulates the settings for computing a hash. */
+  @Builder
+  @AllArgsConstructor
   public static class Config implements Serializable {
     private static final long serialVersionUID = 4911655334835485L;
+    private static final int DEFAULT_CACHE_SIZE = 100;
 
-    private final int hashIterations;
+    @Getter private final int hashIterations;
     private final byte[] hashPepper;
+    @Builder.Default @Getter private final int cacheSize = DEFAULT_CACHE_SIZE;
 
     public Config(int hashIterations, byte[] hashPepper) {
-      this.hashIterations = hashIterations;
-      this.hashPepper = hashPepper;
+      this(hashIterations, hashPepper, DEFAULT_CACHE_SIZE);
     }
 
     public Config(int hashIterations, String hashPepper) {
-      this(hashIterations, hashPepper.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public int getHashIterations() {
-      return hashIterations;
+      this(hashIterations, hashPepper.getBytes(StandardCharsets.UTF_8), DEFAULT_CACHE_SIZE);
     }
 
     public byte[] getHashPepper() {
       // arrays aren't immutable so it's safest to return a copy
       return hashPepper.clone();
+    }
+
+    /**
+     * This partial builder implementation will be filled out by lombok to produce the entire
+     * builder. We just need to add extra method for setting the hashPepper as either a string.
+     */
+    public static class ConfigBuilder {
+      private byte[] hashPepper;
+
+      public ConfigBuilder hashPepperString(String hashPepper) {
+        this.hashPepper = hashPepper.getBytes(StandardCharsets.UTF_8);
+        return this;
+      }
     }
   }
 }

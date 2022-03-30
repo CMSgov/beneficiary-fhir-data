@@ -93,6 +93,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
    *
    * @param seed seed for the PRNG
    * @param optionalTrue true if all optional fields should be populated
+   * @param clock clock to generate current time/date values (needed for tests)
    */
   public RandomMcsClaimGenerator(long seed, boolean optionalTrue, Clock clock) {
     super(seed, optionalTrue, clock);
@@ -147,7 +148,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
         () -> claim.setIdrBillProvStatusCdUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrTotBilledAmt(randomAmount()));
     optional(() -> claim.setIdrClaimReceiptDate(randomDate()));
-    optional(() -> claim.setIdrClaimMbi(randomAlphaNumeric(1, 13)));
+    optional(() -> claim.setIdrClaimMbi(randomAlphaNumeric(11, 11)));
     // IdrHdrFromDos will be set later
     // IdrHdrToDos will be set later
     oneOf(

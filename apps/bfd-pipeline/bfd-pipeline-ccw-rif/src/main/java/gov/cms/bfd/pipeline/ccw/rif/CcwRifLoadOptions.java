@@ -31,4 +31,16 @@ public final class CcwRifLoadOptions implements Serializable {
   public LoadAppOptions getLoadOptions() {
     return loadOptions;
   }
+
+  /** @see java.lang.Object#toString() */
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("CcwRifLoadOptions [extractionOptions=");
+    builder.append(extractionOptions);
+    builder.append(", loadOptions=");
+    builder.append(loadOptions);
+    builder.append("]");
+    return builder.toString();
+  }
 }
