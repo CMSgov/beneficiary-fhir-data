@@ -129,7 +129,7 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
       - name: 'Create local branch references'
-        run: git checkout master && git checkout $GITHUB_HEAD_REF
+        run: git fetch && git checkout master && git checkout $GITHUB_HEAD_REF
       - name: 'Check for new/modified resources'
         id: mod_check
         run: echo ::set-output name=changed::$(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2)
@@ -139,21 +139,21 @@ jobs:
         id: run_check
         run: echo ::set-output name=skip::false
       - name: 'Set up JDK'
-#        if: steps.run_check.skip == 'false'
+        if: steps.run_check.skip == 'false'
         uses: actions/setup-java@v1
         with:
           java-version: '11'
       - name: 'Download fhir validator'
-#        if: steps.run_check.skip == 'false'
+        if: steps.run_check.skip == 'false'
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Verify FHIR resource'
         id: validate_fhir
-#        if: steps.run_check.skip == 'false'
+        if: steps.run_check.skip == 'false'
         run: echo ::set-output name=validation::$(./validations.sh -r)
       - name: 'Fhir Validation Output'
-#        if: steps.run_check.skip == 'false'
+        if: steps.run_check.skip == 'false'
         run: echo ${{steps.validate_fhir.outputs.validation}}
       - name: 'Commenting on found issues'
 #        if: steps.run_check.skip == 'false' && startsWith(steps.validate_fhir.outputs.validation, '0 resources'
