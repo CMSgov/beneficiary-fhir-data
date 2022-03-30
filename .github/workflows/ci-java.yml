@@ -174,10 +174,11 @@ jobs:
             getComments(100, 0);
       - name: 'Check for new/modified resources'
         id: run_check
+        # Checks if there are any modified resources in the v2 endpoint responses
+        # grep returns non-zero exit code when no matches are found, so only skip if the condition fails
         run: |
-          output=$(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2)
-          printf "$output\n"
-          echo ::set-output name=skip::$(if [[ ! "$output" ]]; then echo "true"; else echo "false"; fi)
+          can_skip=if [[ $(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2) ]]; then echo "false"; else echo "true"; fi
+          echo ::set-output name=skip::can_skip
       - name: 'Set up JDK'
         if: steps.run_check.outputs.skip == 'false'
         uses: actions/setup-java@v1
