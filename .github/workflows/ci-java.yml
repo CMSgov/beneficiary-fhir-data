@@ -139,24 +139,24 @@ jobs:
         id: run_check
         run: echo ::set-output name=skip::false
       - name: 'Set up JDK'
-        if: steps.run_check.skip == 'false'
+#        if: steps.run_check.skip == 'false'
         uses: actions/setup-java@v1
         with:
           java-version: '11'
       - name: 'Download fhir validator'
-        if: steps.run_check.skip == 'false'
+#        if: steps.run_check.skip == 'false'
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Verify FHIR resource'
         id: validate_fhir
-        if: steps.run_check.skip == 'false'
+#        if: steps.run_check.skip == 'false'
         run: echo ::set-output name=validation::$(./validations.sh -r)
       - name: 'Fhir Validation Output'
-        if: steps.run_check.skip == 'false'
+#        if: steps.run_check.skip == 'false'
         run: echo ${{steps.validate_fhir.outputs.validation}}
       - name: 'Commenting on found issues'
-        if: steps.run_check.skip == 'false' && startsWith(steps.validate_fhir.outputs.validation, '0 resources'
+#        if: steps.run_check.skip == 'false' && startsWith(steps.validate_fhir.outputs.validation, '0 resources'
         run: echo 'No validation errors found'
 
   # ansible system testing
