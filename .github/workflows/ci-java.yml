@@ -142,12 +142,7 @@ jobs:
               if (response.ok) {
                 return response.json()
               }
-            }).then(data => {
-              for (const entry of data) {
-                console.log(entry.user);
-                console.log(entry.body);
-              }
-            });
+            }).then(console.log);
       - name: 'Check for new/modified resources'
         id: run_check
         run: |
