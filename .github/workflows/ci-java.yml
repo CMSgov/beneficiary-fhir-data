@@ -144,7 +144,7 @@ jobs:
                 return response.data;
               }
             }).then(data => {
-              const botPosts = data.filter(entry -> entry.user.id === ${{github.event.comment.user.id}});
+              const botPosts = data.filter(entry => entry.user.id === ${{github.event.comment.user.id}});
               botPosts.forEach(entry => {
                 console.log(entry.id);
                 console.log(entry.user);
