@@ -158,7 +158,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.pulls.createReview({
+            github.rest.pulls.createReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{github.event.number}},
