@@ -401,6 +401,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -1082,6 +1083,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -1903,6 +1905,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -2743,6 +2746,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -3673,6 +3677,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -4341,6 +4346,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id",
@@ -4872,6 +4878,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -5597,6 +5604,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
