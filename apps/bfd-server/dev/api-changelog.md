@@ -5,13 +5,14 @@
 * Following FHIR mapping changes were made:
 
 	* eob.provider, in PDE, is mapped using serviceProviderId (the pharmacy id) in v2
-
+```
   "provider" : {
         "identifier" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
           "value" : "1023011079"
         }
       },
+  ```
 
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
