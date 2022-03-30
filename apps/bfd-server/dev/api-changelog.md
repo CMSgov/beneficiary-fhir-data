@@ -1,10 +1,34 @@
 # API Changelog
 
+## BFD-874 Fix diagnosis.sequence in V1 and V2
+
+ * Following FHIR mapping changes were made:
+  * Adds diagnosis.sequence if present in EOB.diagnosis, now, when a DRG is reported for V1 and V2, diagnosis.sequence is present in EOB.diagnosis. Previously, diagnosis.sequence was not present
+
+  "diagnosis" : [ {
+    "sequence" : 1,
+    ,
+    ,
+  }]
+  
+## BFD-1446: Added focal field to v2
+
+For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
+Additional Detail.
+
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurnace[N]. This is also ONLY A FIX FOR V2.
+````
+ "insurance" : [ {
+    "focal" : true,
+    ,
+    ,
+ }]
+````
+
 ## BFD-1383 Update V2 line item allowed charge amount mapping
 
 Previously, the allowed charge amount in the EOB FHIR response was incorrectly being populated by the submitted charge amount data field. The value for allowed charge amount is now being populated correctly by the respective allowed charge amount data field. Note that this is only for v2
 For DME the new allowed charge amount looks like:
-
 ````
 "amount" : {
     "value" : 129.45,
@@ -833,15 +857,4 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as a valueQuantity, not a valueCoding" issues were addressed by creating a new common method for adding quantities to an extension instead of codeable concepts for these fields. The new method is called addExtensionValueQuantity in TransformerUtils.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
- 
- ## BFD-874 Fix diagnosis.sequence in V1 and V2
-
- * Following FHIR mapping changes were made:
-  * Adds diagnosis.sequence if present in EOB.diagnosis, now, when a DRG is reported for V1 and V2, diagnosis.sequence is present in EOB.diagnosis. Previously, diagnosis.sequence was not present
-
-  "diagnosis" : [ {
-    "sequence" : 1,
-    ,
-    ,
-  }]
 

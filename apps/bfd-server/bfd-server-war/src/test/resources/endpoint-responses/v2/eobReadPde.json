@@ -379,6 +379,7 @@
     }
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id",
