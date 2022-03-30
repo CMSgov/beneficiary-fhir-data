@@ -139,11 +139,14 @@ jobs:
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Verify FHIR resource'
-        run: ./validations.sh -r
+        run: |
+          if [[ $(./validations.sh -r) = '0 resources'* ]]; then
+            echo ::set-output name=errors::true
+          fi
         id: validate_fhir
       - name: 'Commenting on found issues'
-#        if: ${{ startswith(steps.validate_fhir.outputs.*, '0 resources') }}
-        run: echo ${{join(steps.validate_fhir.outputs.*, '\n')}}
+        if: steps.validate_fhir.outputs.errors == 'true'
+        run: echo 'Validation errors found'
 
   # ansible system testing
   ansible-role-bfd-pipeline:
