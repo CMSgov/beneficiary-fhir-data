@@ -138,12 +138,7 @@ jobs:
           output="${output//$'\n'/'%0A'}"
           output="${output//$'\r'/'%0D'}"
           echo $output
-          echo ::set-output name=changed::$(if [[ ! "$output" ]]; then echo "true"; else echo "false"; fi)
-      - name: 'Modified files check output'
-        run: echo ${{steps.mod_check.outputs.changed}}
-      - name: 'Skip job condition'
-        id: run_check
-        run: echo ::set-output name=skip::false
+          echo ::set-output name=skip::$(if [[ ! "$output" ]]; then echo "true"; else echo "false"; fi)
       - name: 'Set up JDK'
         if: steps.run_check.outputs.skip == 'false'
         uses: actions/setup-java@v1
