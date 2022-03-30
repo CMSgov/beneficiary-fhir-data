@@ -134,7 +134,6 @@ jobs:
         id: run_check
         run: |
           output=$(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2)
-          output="${output//' '/'\n'}"
           printf "$output\n"
           echo ::set-output name=skip::$(if [[ ! "$output" ]]; then echo "true"; else echo "false"; fi)
       - name: 'Set up JDK'
@@ -150,13 +149,13 @@ jobs:
       - name: 'Verify FHIR resource'
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'
-        run: echo ::set-output name=validation::$(./validations.sh -r)
-      - name: 'Fhir Validation Output'
-        if: steps.run_check.outputs.skip == 'false'
-        run: echo ${{steps.validate_fhir.outputs.validation}}
+        run: |
+          output=$(./validations.sh -r)
+          printf "$output\n"
+          echo ::set-output name=valid::$(if [[ $output == '0 resources'* ]]; then echo "true"; else echo "false"; fi)
       - name: 'Commenting on found issues'
-#        if: steps.run_check.skip == 'false' && startsWith(steps.validate_fhir.outputs.validation, '0 resources'
-        run: echo 'No validation errors found'
+        if: steps.run_check.outputs.skip == 'false' && steps.validate_fhir.outputs.valid == 'false'
+        run: echo 'Creating comment about invalid FHIR resources'
 
   # ansible system testing
   ansible-role-bfd-pipeline:
