@@ -876,6 +876,12 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getPayment()));
   }
 
+  /**
+   * Verifies that {@link
+   * PartDEventTransformer has a provider set otherwise it throws an exception
+   *
+   * @throws Exception (indicates test failure)
+   */
   @Test
   public void shouldHaveProvider() throws Exception {
     Reference compare =

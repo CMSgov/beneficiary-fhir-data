@@ -1,5 +1,18 @@
 # API Changelog
 
+## BFD-1477 Map Provider for PDE
+
+* Following FHIR mapping changes were made:
+
+	* eob.provider, in PDE, is mapped using serviceProviderId (the pharmacy id) in v2
+
+  "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+      },
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
@@ -703,9 +716,3 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as a valueQuantity, not a valueCoding" issues were addressed by creating a new common method for adding quantities to an extension instead of codeable concepts for these fields. The new method is called addExtensionValueQuantity in TransformerUtils.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
-
-## BFD-1477 Map Provider for PDE
-
-* Following FHIR mapping changes were made:
-
-	* eob.provider, in PDE, is mapped using serviceProviderId (the pharmacy id) in v2
