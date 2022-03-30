@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import lombok.Builder;
@@ -46,6 +47,9 @@ import org.slf4j.LoggerFactory;
  */
 public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
+
+  /** Holds the underlying value of our uptime gauges. */
+  private static final NumericGauges GAUGES = new NumericGauges();
 
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
@@ -241,9 +245,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   private int submitBatchToSink(
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
-    LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
     final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
-    LOGGER.info(
+    LOGGER.debug(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,
         batch.size(),
@@ -396,7 +399,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final Gauge<?> uptime;
 
     /** Holds the value that is reported in the update gauge. */
-    private final AtomicInteger uptimeValue = new AtomicInteger();
+    private final AtomicLong uptimeValue;
 
     private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
@@ -406,7 +409,9 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
       batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
-      uptime = appMetrics.gauge(MetricRegistry.name(base, "uptime"), () -> uptimeValue::get);
+      final String uptimeGaugeName = MetricRegistry.name(base, "uptime");
+      uptime = GAUGES.getGaugeForName(appMetrics, uptimeGaugeName);
+      uptimeValue = GAUGES.getValueForName(uptimeGaugeName);
     }
   }
 }
