@@ -143,11 +143,11 @@ jobs:
                 return response.data;
               }
             }).then(data => {
-              for (const entry : data) {
+              data.forEach( entry => {
                 console.log(entry.id);
                 console.log(entry.user);
                 console.log(entry.body);
-              }
+              });
             });
       - name: 'Check for new/modified resources'
         id: run_check
