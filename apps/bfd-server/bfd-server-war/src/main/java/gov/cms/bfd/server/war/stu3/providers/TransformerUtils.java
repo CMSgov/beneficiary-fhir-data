@@ -1547,10 +1547,11 @@ public final class TransformerUtils {
        * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
        * field so if this is updated you'll need to update that as well.
        */
+      int maxSequence = eob.getDiagnosis().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
       eob.addDiagnosis()
           .setPackageCode(
               createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd))
-          .setSequence(eob.getDiagnosis().size());
+          .setSequence(maxSequence + 1);
     }
   }
 
