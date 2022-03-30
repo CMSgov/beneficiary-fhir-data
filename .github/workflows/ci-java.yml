@@ -134,23 +134,30 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100,
-              issue_number: ${{github.event.number}},
-            }).then(response => {
-              if (response.status >= 200 && response.status < 300) {
-                return response.data;
-              }
-            }).then(data => {
-              const botPosts = data.filter(entry => entry.user.login === 'github-actions[bot]');
-              botPosts.forEach(entry => {
-                console.log(entry.id);
-                console.log(entry.user);
-                console.log(entry.body);
+            const getComments = async (per_page, page) => {
+              return github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page,
+                page,
+                issue_number: ${{github.event.number}},
+              }).then(response => {
+                if (response.status >= 200 && response.status < 300) {
+                  return response.data;
+                }
+              }).then(data => {
+                const botPosts = data.filter(entry => entry.user.login === 'github-actions[bot]');
+                botPosts.forEach(entry => {
+                  console.log(entry.id + ":" + entry.body);
+                });
+            
+                if (data.size >= 100) {
+                  getComments(per_page, page + 1);
+                }
               });
-            });
+            }
+            
+            getComments(100, 0);
       - name: 'Check for new/modified resources'
         id: run_check
         run: |
