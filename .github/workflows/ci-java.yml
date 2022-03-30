@@ -140,7 +140,13 @@ jobs:
               issue_number: ${{github.event.number}},
             }).then(response => {
               if (response.status >= 200 && response.status < 300) {
-                console.log(response);
+                return response.data;
+              }
+            }).then(data => {
+              for (const entry : data) {
+                console.log(entry.id);
+                console.log(entry.user);
+                console.log(entry.body);
               }
             });
       - name: 'Check for new/modified resources'
