@@ -155,7 +155,15 @@ jobs:
           echo ::set-output name=valid::$(if [[ $output == '0 resources'* ]]; then echo "true"; else echo "false"; fi)
       - name: 'Commenting on found issues'
         if: steps.run_check.outputs.skip == 'false' && steps.validate_fhir.outputs.valid == 'false'
-        run: echo 'Creating comment about invalid FHIR resources'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{github.event.number}},
+              body: "There were failed validations"
+            })
 
   # ansible system testing
   ansible-role-bfd-pipeline:
