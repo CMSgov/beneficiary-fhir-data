@@ -1,5 +1,18 @@
 # API Changelog
 
+## BFD-1446 Populate Focal Insurance Field
+
+ * Following FHIR mapping changes were made:
+
+  * For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage element.  This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. IF there is more than one insurance. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurnace[N]. This is also ONLY A FIX FOR V2
+```
+  "insurance" : [ {
+        "focal" : true,
+        ,
+        ,
+  }]
+  ```
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
@@ -704,14 +717,3 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
  
-## BFD-1446 Populate Focal Insurance Field
-
- * Following FHIR mapping changes were made:
-
-  * For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage element.  This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. I can work with the engineer on determining this, IF there is more than one insurance. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurnace[N]. This is also ONLY A FIX FOR V2
-
-  "insurance" : [ {
-        "focal" : true,
-        ,
-        ,
-  }]
