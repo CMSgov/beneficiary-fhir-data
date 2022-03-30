@@ -707,4 +707,10 @@ Future updates may add `Coding.display` values for additional fields.
  ## BFD-874 Fix diagnosis.sequence in V1 and V2
 
  * Following FHIR mapping changes were made:
-  * Adds diagnosis.sequence if present in EOB.diagnosis, when a DRG is reported, for V1 & V2
+  * Adds diagnosis.sequence if present in EOB.diagnosis, now, when a DRG is reported for V1 and V2, diagnosis.sequence is present in EOB.diagnosis. Previously, diagnosis.sequence was not present
+
+  "diagnosis" : [ {
+    "sequence" : 1,
+    ,
+    ,
+  }]
