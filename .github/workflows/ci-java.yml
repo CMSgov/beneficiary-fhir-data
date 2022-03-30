@@ -139,10 +139,10 @@ jobs:
               repo: context.repo.repo,
               issue_number: ${{github.event.number}},
             }).then(response => {
-              if (response.ok) {
-                return response.json()
+              if (response.status >= 200 && response.status < 300) {
+                console.log(response);
               }
-            }).then(console.log);
+            });
       - name: 'Check for new/modified resources'
         id: run_check
         run: |
