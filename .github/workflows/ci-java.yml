@@ -128,12 +128,14 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
+      - name: 'Git Fetch'
+        run: git fetch
+      - name: 'Check for new/modified resources'
+        run: git log --name-only --pretty=oneline --full-index refs/heads/$GITHUB_HEAD_REF..$GITHUB_BASE_REF | grep $ENDPOINT_DIR | sort | uniq
       - name: 'Set up JDK'
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-      - name: 'Git Fetch'
-        run: git fetch
       - name: 'Download fhir validator'
         uses: wei/wget@v1
         with:
