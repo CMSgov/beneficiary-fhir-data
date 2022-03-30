@@ -142,8 +142,8 @@ jobs:
         run: ./validations.sh -r
         id: validate_fhir
       - name: 'Commenting on found issues'
-        if: ${{ startswith(steps.validate_fhir.outputs.*, '0 resources') }}
-        run: echo "No validation issues found"
+#        if: ${{ startswith(steps.validate_fhir.outputs.*, '0 resources') }}
+        run: echo ${{steps.validate_fhir.outputs.*}}
 
   # ansible system testing
   ansible-role-bfd-pipeline:
