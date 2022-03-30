@@ -56,7 +56,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_A */
-  @Disabled
+  // @Disabled
   @Test
   public void outputTransformCoveragePartA() throws FHIRException {
     transformCoverage(MedicareSegment.PART_A, true);
@@ -118,7 +118,7 @@ public final class CoverageTransformerV2Test {
 
     // a_trm_cd
     verifyCodedExtension(
-        "https://bluebutton.cms.gov/resources/variables/a_trm_cd", "0", "Not Terminated");
+        "https://bluebutton.cms.gov/resources/variables/a_trm_cd", "9", "Other Termination");
 
     // orec
     verifyCodedExtension(
@@ -145,7 +145,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageStatusPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyCoverageStatus();
+    assertEquals("cancelled", coverage.getStatus().toCode());
   }
 
   @Test
@@ -699,11 +699,11 @@ public final class CoverageTransformerV2Test {
     currSegment = MedicareSegment.PART_A;
     assertNotNull(coverage);
     assertNotNull(beneficiary);
+    assertEquals("cancelled", coverage.getStatus().toCode());
 
     verifyCoverageClass("Part A");
     verifyMeta();
     verifyExtensionsPartA();
-    verifyCoverageStatus();
     verifyType();
     verifySubscriber();
     verifyRelationship();
