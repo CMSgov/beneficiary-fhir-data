@@ -131,8 +131,14 @@ jobs:
       - name: 'Create local branch references'
         run: git fetch && git checkout master && git checkout $GITHUB_HEAD_REF
       - name: 'Check for new/modified resources'
-        id: mod_check
-        run: echo ::set-output name=changed::$(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2)
+        id: run_check
+        run: |
+          output=$(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2)
+          output="${output//'%'/'%25'}"
+          output="${output//$'\n'/'%0A'}"
+          output="${output//$'\r'/'%0D'}"
+          echo $output
+          echo ::set-output name=changed::$(if [[ ! "$output" ]]; then echo "true"; else echo "false"; fi)
       - name: 'Modified files check output'
         run: echo ${{steps.mod_check.outputs.changed}}
       - name: 'Skip job condition'
