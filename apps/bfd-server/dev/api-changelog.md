@@ -42,6 +42,25 @@ The new coding:
         "display":"Services"
       }
 ```
+## BFD-1383 Update V2 line item allowed charge amount mapping
+
+Previously, the allowed charge amount in the EOB FHIR response was incorrectly being populated by the submitted charge amount data field. The value for allowed charge amount is now being populated correctly by the respective allowed charge amount data field. Note that this is only for v2
+For DME the new allowed charge amount looks like:
+
+````
+"amount" : {
+    "value" : 129.45,
+    "currency" : "USD"
+}
+````
+
+For Carrier:
+````
+"amount" : {
+    "value" : 47.84,
+    "currency" : "USD"
+}
+````
 
 ## BFD-1516: Map Hospice Period Count in V2
 
