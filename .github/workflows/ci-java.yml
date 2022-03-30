@@ -134,6 +134,18 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const commentsToDelete = [];
+            
+            const deleteComments = async(commentIds) => {
+              commentIds.forEach(commentId => {
+                github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: conetxt.repo.repo,
+                  comment_id: commentId,
+                });
+              });
+            };
+            
             const getComments = async (per_page, page) => {
               return github.rest.issues.listComments({
                 owner: context.repo.owner,
@@ -148,11 +160,13 @@ jobs:
               }).then(data => {
                 const botPosts = data.filter(entry => entry.user.login === 'github-actions[bot]');
                 botPosts.forEach(entry => {
-                  console.log(entry.id + ":" + entry.body);
+                  commentsToDelete.push(entry.id);
                 });
             
                 if (data.size >= 100) {
                   getComments(per_page, page + 1);
+                } else {
+                  deleteComments(commentsToDelete);
                 }
               });
             }
