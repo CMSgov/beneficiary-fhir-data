@@ -131,7 +131,7 @@ jobs:
       - name: 'Checkout new repo'
         run: cd .. && git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git bfd-checkout && cd bfd-checkout && ls -al && pwd
       - name: 'Git Fetch'
-        run: git fetch
+        run: git fetch && git checkout $GITHUB_HEAD_REF
       - name: 'Check for new/modified resources'
         run: git log --name-only --pretty=oneline --full-index refs/heads/$GITHUB_HEAD_REF..$GITHUB_BASE_REF | grep $ENDPOINT_DIR | sort | uniq
       - name: 'Set up JDK'
