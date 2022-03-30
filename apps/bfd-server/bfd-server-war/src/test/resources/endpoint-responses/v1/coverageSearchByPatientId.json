@@ -223,7 +223,7 @@
           "display" : "Part A and Part B state buy-in"
         }
       } ],
-      "status" : "active",
+      "status" : "cancelled",
       "type" : {
         "coding" : [ {
           "system" : "Medicare",

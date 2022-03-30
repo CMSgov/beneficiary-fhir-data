@@ -224,7 +224,7 @@
           "display" : "Part A and Part B state buy-in"
         }
       } ],
-      "status" : "active",
+      "status" : "cancelled",
       "type" : {
         "coding" : [ {
           "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
