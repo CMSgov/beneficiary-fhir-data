@@ -1,20 +1,10 @@
-# API Changelog
-
-## BFD-1446 Populate Focal Insurance Field
+## BFD-1461 Implement Handling for Null Enrollment Reference Years
 
  * Following FHIR mapping changes were made:
 
-  * For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage element.  This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. I can work with the engineer on determining this, IF there is more than one insurance. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurnace[N]. This is also ONLY A FIX FOR V2
-```
-  "insurance" : [ {
-        "focal" : true,
-        ,
-        ,
-  }]
-```
+  * For V1 and V2, if there is a reference year, return data normally.  For V1 and V2, if there is a NULL reference year, do NOT return data that is associated with that specific reference year. All other data is returned as expected 
 
-## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
-
+## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
 ```
