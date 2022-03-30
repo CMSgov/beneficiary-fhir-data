@@ -128,12 +128,8 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
-      - name: 'Checkout new repo'
-        run: cd .. && git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git bfd-checkout && cd bfd-checkout && ls -al && pwd
-      - name: 'Git Fetch'
-        run: git fetch && git checkout $GITHUB_HEAD_REF
       - name: 'Check for new/modified resources'
-        run: git log --name-only --pretty=oneline --full-index refs/heads/$GITHUB_HEAD_REF..$GITHUB_BASE_REF | grep $ENDPOINT_DIR | sort | uniq
+        run: git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2 | sort
       - name: 'Set up JDK'
         uses: actions/setup-java@v1
         with:
