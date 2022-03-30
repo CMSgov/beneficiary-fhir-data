@@ -1,7 +1,11 @@
 package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.protobuf.MessageOrBuilder;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -9,7 +13,12 @@ import java.util.function.UnaryOperator;
 
 public abstract class AbstractTransformer {
 
-  public abstract MessageOrBuilder transform(Parser.Data<String> data);
+  public abstract Optional<MessageOrBuilder> transform(
+      WrappedMessage wrappedMessage,
+      WrappedCounter sequenceNumber,
+      Parser.Data<String> data,
+      DataSampler<String> mbiSampler,
+      int sampleId);
 
   /**
    * Returns the computed result of {@link Supplier} if value is null, otherwise returns value.
@@ -78,5 +87,35 @@ public abstract class AbstractTransformer {
    */
   public <T> void consumeIfNotNull(T value, Consumer<T> consumer) {
     consumeIf(value, Objects::nonNull, consumer);
+  }
+
+  /**
+   * Gets the line number from the given {@link Parser.Data} object.
+   *
+   * @param data The {@link Parser.Data} object to pull the line number from.
+   * @param identifier The reference to use to pull the line number from the {@link Parser.Data}
+   *     object.
+   * @return The line number pulled from the {@link Parser.Data} object.
+   */
+  protected int getLineNumber(Parser.Data<String> data, String identifier) {
+    int lineNumber;
+
+    Optional<String> lineNumberString = data.get(identifier);
+
+    if (lineNumberString.isPresent()) {
+      try {
+        lineNumber = Integer.parseInt(lineNumberString.get());
+      } catch (NumberFormatException e) {
+        throw new IllegalStateException(
+            "(entry "
+                + data.getEntryNumber()
+                + ") Line number expected to be a valid numeric value");
+      }
+    } else {
+      throw new IllegalStateException(
+          "(entry " + data.getEntryNumber() + ") Line number expected to be a valid numeric value");
+    }
+
+    return lineNumber;
   }
 }

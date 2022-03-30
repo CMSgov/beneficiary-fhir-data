@@ -53,7 +53,7 @@ public final class FDADrugDataUtilityApp {
    *           directory (i.e. <code>target/classes/</code>)
    *     </ol>
    *
-   * @throws IOException
+   * @throws IOException if there is an issue creating or iterating over the downloaded files
    */
   public static void main(String[] args) throws IOException {
     if (args.length < 1) {

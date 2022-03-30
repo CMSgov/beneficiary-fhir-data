@@ -1,0 +1,5 @@
+---
+db_migrator_dir: /opt/bfd-db-migrator
+db_migrator_user: bb-migrator
+db_migrator_jvm_args: -Xmx64g
+db_migrator_tmp_dir: /tmp

@@ -204,7 +204,7 @@ public final class DataServerLauncherApp {
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
     final String requestLogFormat =
-        "%{remote}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D"
+        "%{remote}a - \"%u\" %t \"%r\" \"%q\" %s %{CLF}S %{ms}T"
             + " %{BlueButton-OriginalQueryId}i"
             + " %{BlueButton-OriginalQueryCounter}i"
             + " [%{BlueButton-OriginalQueryTimestamp}i]"

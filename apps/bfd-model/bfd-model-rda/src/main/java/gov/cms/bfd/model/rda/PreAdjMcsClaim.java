@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.BatchSize;
 
 /** JPA class for the McsClaims table */
 @Entity
@@ -114,11 +117,9 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
 
-  @Column(name = "`idrClaimMbi`", length = 13)
-  private String idrClaimMbi;
-
-  @Column(name = "`idrClaimMbiHash`", length = 64)
-  private String idrClaimMbiHash;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`idrHdrFromDateOfSvc`")
   private LocalDate idrHdrFromDateOfSvc;
@@ -205,6 +206,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsDetail> details = new HashSet<>();
 
@@ -213,6 +215,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
 
@@ -221,6 +224,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsAdjustment> adjustments = new HashSet<>();
 
@@ -229,6 +233,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsAudit> audits = new HashSet<>();
 
@@ -237,6 +242,23 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsLocation> locations = new HashSet<>();
+
+  public String getIdrClaimMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getIdrClaimMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String idrClaimMbi = "idrClaimMbi";
+  }
 }

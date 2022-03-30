@@ -30,9 +30,7 @@ public class R4ClaimResponseResourceProviderIT {
   @BeforeAll
   public static void init() {
     testUtils.init();
-
-    testUtils.seedData(testUtils.fissTestData());
-    testUtils.seedData(testUtils.mcsTestData());
+    testUtils.seedData(true);
   }
 
   @AfterAll
@@ -42,7 +40,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectFissClaimResponseResourceById() {
+  void shouldGetCorrectFissClaimResponseResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ClaimResponse claimResult =
@@ -55,7 +53,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectMcsClaimResponseResourceById() {
+  void shouldGetCorrectMcsClaimResponseResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ClaimResponse claimResult =
@@ -68,7 +66,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectClaimResponseResourcesByMbiHash() {
+  void shouldGetCorrectClaimResponseResourcesByMbiHash() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Bundle claimResult =
@@ -77,7 +75,7 @@ public class R4ClaimResponseResourceProviderIT {
             .forResource(ClaimResponse.class)
             .where(
                 ImmutableMap.of(
-                    "mbi", Collections.singletonList(new ReferenceParam("a7f8e93f09")),
+                    "mbi", Collections.singletonList(new ReferenceParam(RDATestUtils.MBI_OLD_HASH)),
                     "service-date",
                         Arrays.asList(
                             new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))

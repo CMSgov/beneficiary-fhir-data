@@ -148,7 +148,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
-
+    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
@@ -426,7 +426,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
-    String joinsClause = "";
+    String joinsClause = "left join fetch b.skippedRifRecords";
     boolean passDistinctThrough = false;
 
     /*
@@ -734,6 +734,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
+    beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     // BFD379: in original V2, if check is commented out
     if (requestHeader.isMBIinIncludeIdentifiers()) {
@@ -823,7 +824,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       // bene reference year is > than prior reference year
       if (duplicateBene.getBeneEnrollmentReferenceYear().get().compareTo(maxReferenceYear) > 0) {
         maxReferenceYear = duplicateBene.getBeneEnrollmentReferenceYear().get();
-        maxReferenceYearMatchingBeneficiaryId = duplicateBene.getBeneficiaryId();
+        maxReferenceYearMatchingBeneficiaryId = String.valueOf(duplicateBene.getBeneficiaryId());
       }
     }
 
@@ -897,7 +898,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   /**
    * Check that coverageId value is valid
    *
-   * @param coverageId
+   * @param coverageId the coverage id
    * @throws InvalidRequestException if invalid coverageId
    */
   public static void checkCoverageId(TokenParam coverageId) {
@@ -922,6 +923,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
+    beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 

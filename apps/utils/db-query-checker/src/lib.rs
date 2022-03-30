@@ -24,6 +24,7 @@ use tokio::{fs::File, sync::Mutex};
 use tracing::{info, warn, Instrument};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
+use chrono::prelude::*;
 
 use crate::query::{fetch_all_monitored, DatabaseQuery, DATABASE_QUERY_SQL};
 
@@ -39,6 +40,8 @@ const BENES_PAGE_SIZE: u32 = 4000;
 pub async fn run_db_query_checker() -> Result<()> {
     dotenv().ok();
 
+    let date_now = Utc::now().date();
+
     // Pull config from environment variables
     let output_path = std::env::var("DB_QUERIES_OUTPUT")
         .unwrap_or_else(|_| "results/db_query_checker.csv".into());
@@ -48,7 +51,24 @@ pub async fn run_db_query_checker() -> Result<()> {
         .unwrap_or_else(|_| "5".into())
         .parse()
         .expect("Unable to parse environment variable: DB_QUERIES_CONNECTIONS");
-
+    let mut end_year: i32 = std::env::var("DB_QUERIES_END_YEAR")
+        .unwrap_or_else(|_| "-1".into())
+        .parse()
+        .expect("Unable to parse environment variable: DB_QUERIES_END_YEAR");
+    if end_year < 0 {
+        end_year = date_now.year();
+    }
+    let mut start_year: i32 = std::env::var("DB_QUERIES_START_YEAR")
+        .unwrap_or_else(|_| "-1".into())
+        .parse()
+        .expect("Unable to parse environment variable: DB_QUERIES_START_YEAR");
+    if start_year < 0 {
+        start_year = end_year -1;
+    }
+    if start_year > end_year {
+        panic!("Invalid start year {} cannot be GT end_year {}", start_year, end_year);
+    }
+    println!("using start_year: {}, end_year: {}", start_year, end_year);
     let fmt_layer = fmt::layer()
         .with_writer(std::io::stderr)
         .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
@@ -62,6 +82,7 @@ pub async fn run_db_query_checker() -> Result<()> {
         .with(tracing_error::ErrorLayer::default())
         .init();
     color_eyre::install()?;
+
 
     /*
      * Create the CSV serializer, which will automatically write out a header row the first time a row is
@@ -119,11 +140,14 @@ pub async fn run_db_query_checker() -> Result<()> {
 
     let year_months = {
         let mut year_months = vec![];
-        for year in 2020..=2021 {
+        for year in start_year..=end_year {
             for month in &[
                 "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
             ] {
-                year_months.push(format!("{}-{}-01", year, month));
+                // need a psql complaint year....i.e., 3 becomes '0003'
+                let yr_str: String = format!("{:04}", year);
+                let date_str: String = format!("{}-{}-01", yr_str, month);
+                year_months.push(date_str);
             }
         }
         year_months

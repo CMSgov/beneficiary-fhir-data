@@ -13,7 +13,12 @@ import gov.cms.bfd.pipeline.bridge.etl.RifParser;
 import gov.cms.bfd.pipeline.bridge.io.NdJsonSink;
 import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
+import gov.cms.bfd.pipeline.bridge.io.SinkArguments;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.bridge.util.AttributionBuilder;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.FileNotFoundException;
@@ -30,9 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -45,6 +48,9 @@ import org.apache.commons.io.FilenameUtils;
 @Slf4j
 public class RDABridge {
 
+  private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
+  private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
+
   enum SourceType {
     FISS,
     MCS
@@ -56,12 +62,20 @@ public class RDABridge {
   private static final String MCS_FLAG = "m";
   private static final String FISS_OUTPUT_FLAG = "g";
   private static final String MCS_OUTPUT_FLAG = "n";
+  private static final String FISS_SEQ_START = "s";
+  private static final String MCS_SEQ_START = "z";
   private static final String EXTERNAL_CONFIG_FLAG = "e";
+  private static final String BUILD_ATTRIBUTION_FILE = "a";
+  private static final String ATTRIBUTION_SIZE = "x";
+  private static final String ATTRIBUTION_SCRIPT_FILE = "q";
+  private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
+  private static final String ATTRIBUTION_FISS_RATIO = "u";
 
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
 
-  private static final Map<String, ThrowingFunction<Sink<MessageOrBuilder>, Path, IOException>>
+  private static final Map<
+          String, ThrowingFunction<Sink<MessageOrBuilder>, SinkArguments, IOException>>
       sinkMap = Map.of("ndjson", NdJsonSink::new);
 
   /**
@@ -81,7 +95,24 @@ public class RDABridge {
               .addOption(MCS_FLAG, true, "MCS file to read from")
               .addOption(FISS_OUTPUT_FLAG, true, "FISS RDA output file")
               .addOption(MCS_OUTPUT_FLAG, true, "MCS RDA output file")
-              .addOption(EXTERNAL_CONFIG_FLAG, true, "Path to yaml file containing run configs");
+              .addOption(EXTERNAL_CONFIG_FLAG, true, "Path to yaml file containing run configs")
+              .addOption(FISS_SEQ_START, true, "Starting point for FISS sequence values")
+              .addOption(MCS_SEQ_START, true, "Starting point for MCS sequence values")
+              .addOption(
+                  BUILD_ATTRIBUTION_FILE,
+                  true,
+                  "Indicates if the attribution sql script should be generated")
+              .addOption(
+                  ATTRIBUTION_SIZE,
+                  true,
+                  "The number of MBIs to pull for building the attribution file")
+              .addOption(
+                  ATTRIBUTION_TEMPLATE_FILE,
+                  true,
+                  "The template file to use for building the attribution script")
+              .addOption(ATTRIBUTION_SCRIPT_FILE, true, "The attribution script file to write to")
+              .addOption(
+                  ATTRIBUTION_FISS_RATIO, true, "Ratio of fiss to mcs MBIs to use in attribution");
 
       CommandLineParser parser = new DefaultParser();
       CommandLine cmd = parser.parse(options, args);
@@ -112,24 +143,31 @@ public class RDABridge {
    * @throws IOException If there was an issue accessing any of the files.
    */
   public void run(ConfigLoader config) throws IOException {
-    Path path = Paths.get(config.stringValue(AppConfig.Fields.inputDirPath));
-    Map<String, BeneficiaryData> mbiMap =
-        parseMbiNumbers(path.resolve(config.stringValue(AppConfig.Fields.mbiSource)));
+    WrappedCounter fissSequence =
+        new WrappedCounter(config.intValue(AppConfig.Fields.fissSeqStart));
+    WrappedCounter mcsSequence = new WrappedCounter(config.intValue(AppConfig.Fields.mcsSeqStart));
 
-    Path outputPath =
+    if (fissSequence.get() < 1 || mcsSequence.get() < 1) {
+      throw new IllegalArgumentException("Sequences must start at 1 or higher.");
+    }
+
+    Path inputDirectory = Paths.get(config.stringValue(AppConfig.Fields.inputDirPath));
+    Map<String, BeneficiaryData> mbiMap =
+        parseMbiNumbers(inputDirectory.resolve(config.stringValue(AppConfig.Fields.mbiSource)));
+
+    Path outputDirectory =
         Paths.get(config.stringOption(AppConfig.Fields.outputDirPath).orElse("output"));
 
     // ResultOfMethodCallIgnored - Don't need to know if it had to be created.
     //noinspection ResultOfMethodCallIgnored
-    outputPath.toFile().mkdir();
+    outputDirectory.toFile().mkdir();
 
     String fissOutputFile =
-        config.stringOption(AppConfig.Fields.fissOutputFile).orElse("rda-fiss.ndjson");
-    String mcsOutputFile =
-        config.stringOption(AppConfig.Fields.mcsOutputFile).orElse("rda-mcs.ndjson");
+        config.stringOption(AppConfig.Fields.fissOutputFile).orElse("FISS.ndjson");
+    String mcsOutputFile = config.stringOption(AppConfig.Fields.mcsOutputFile).orElse("MCS.ndjson");
 
-    Path fissOutputPath = outputPath.resolve(fissOutputFile);
-    Path mcsOutputPath = outputPath.resolve(mcsOutputFile);
+    Path fissOutputPath = outputDirectory.resolve(fissOutputFile);
+    Path mcsOutputPath = outputDirectory.resolve(mcsOutputFile);
 
     String fissOutputType = FilenameUtils.getExtension(fissOutputPath.getFileName().toString());
     String mcsOutputType = FilenameUtils.getExtension(mcsOutputPath.getFileName().toString());
@@ -141,14 +179,42 @@ public class RDABridge {
       throw new IllegalArgumentException(
           "Unsupported mcs output file type '" + mcsOutputType + "'");
     } else {
-      try (Sink<MessageOrBuilder> fissSink = sinkMap.get(fissOutputType).apply(fissOutputPath);
-          Sink<MessageOrBuilder> mcsSink = sinkMap.get(mcsOutputType).apply(mcsOutputPath)) {
+      final int FISS_ID = 0;
+      final int MCS_ID = 1;
+
+      // Grab given ratios for fiss/mcs attribution output
+      float fissRatio = config.floatOption(AppConfig.Fields.attributionFissRatio).orElse(1.0f);
+
+      // Convert ratio to proportion
+      float fissProportion = 1.0f - (1.0f / (1.0f + fissRatio));
+
+      float mcsProportion = 1.0f - fissProportion;
+
+      DataSampler<String> mbiSampler =
+          DataSampler.<String>builder()
+              .maxValues(config.intOption(AppConfig.Fields.attributionSetSize).orElse(10_000))
+              .registerSampleSet(FISS_ID, fissProportion)
+              .registerSampleSet(MCS_ID, mcsProportion)
+              .build();
+
+      try (Sink<MessageOrBuilder> fissSink =
+              sinkMap.get(fissOutputType).apply(new SinkArguments(fissOutputPath, fissSequence));
+          Sink<MessageOrBuilder> mcsSink =
+              sinkMap.get(mcsOutputType).apply(new SinkArguments(mcsOutputPath, mcsSequence))) {
         // Sorting the files so tests are more deterministic
         List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
         Collections.sort(fissSources);
 
         for (String fissSource : fissSources) {
-          executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
+          executeTransformation(
+              SourceType.FISS,
+              inputDirectory,
+              fissSource,
+              fissSequence,
+              mbiMap,
+              fissSink,
+              mbiSampler,
+              FISS_ID);
         }
 
         // Sorting the files so tests are more deterministic
@@ -156,8 +222,28 @@ public class RDABridge {
         Collections.sort(mcsSources);
 
         for (String mcsSource : mcsSources) {
-          executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
+          executeTransformation(
+              SourceType.MCS,
+              inputDirectory,
+              mcsSource,
+              mcsSequence,
+              mbiMap,
+              mcsSink,
+              mbiSampler,
+              MCS_ID);
         }
+      }
+
+      if (config.booleanValue(AppConfig.Fields.buildAttributionSet, false)) {
+        String templateFileName =
+            config
+                .stringOption(AppConfig.Fields.attributionTemplateFile)
+                .orElse(DEFAULT_INPUT_FILE);
+        String outputFileName =
+            config.stringOption(AppConfig.Fields.attributionScriptFile).orElse(DEFAULT_OUTPUT_FILE);
+
+        AttributionBuilder builder = new AttributionBuilder(templateFileName, outputFileName);
+        builder.run(mbiSampler);
       }
     }
   }
@@ -177,29 +263,53 @@ public class RDABridge {
       SourceType sourceType,
       Path path,
       String sourceName,
+      WrappedCounter sequenceCounter,
       Map<String, BeneficiaryData> mbiMap,
-      Sink<MessageOrBuilder> sink)
+      Sink<MessageOrBuilder> sink,
+      DataSampler<String> mbiSampler,
+      final int sampleId)
       throws IOException {
+    long claimsWritten = 0;
     Path file = path.resolve(sourceName);
     String fileType = FilenameUtils.getExtension(file.getFileName().toString());
 
     if (parserMap.containsKey(fileType)) {
       try (Parser<String> parser = parserMap.get(fileType).apply(file)) {
         parser.init();
-        int claimsWritten = 0;
 
         AbstractTransformer transformer = createTransformer(sourceType, mbiMap);
 
-        while (parser.hasData()) {
-          MessageOrBuilder message = transformer.transform(parser.read());
-          if (message != null) {
-            sink.write(message);
-          }
+        WrappedMessage wrappedMessage = new WrappedMessage();
 
+        while (parser.hasData()) {
+          // When new claims are parsed, the previous claim is returned and the new one is stored in
+          // wrappedMessage
+          Parser.Data<String> data = parser.read();
+
+          try {
+            Optional<MessageOrBuilder> message =
+                transformer.transform(wrappedMessage, sequenceCounter, data, mbiSampler, sampleId);
+
+            // If a message was returned, it has no more line items, and can be written.
+            if (message.isPresent()) {
+              sink.write(message.get());
+              ++claimsWritten;
+            }
+          } catch (IllegalStateException e) {
+            throw new IllegalStateException("Failed to parse entry #" + data.getEntryNumber());
+          }
+        }
+
+        // The last claim to be processed wouldn't get returned, so print it from storage.
+        if (wrappedMessage.getMessage() != null) {
+          sink.write(wrappedMessage.getMessage());
           ++claimsWritten;
         }
 
         log.info("Wrote {} {} claims", claimsWritten, sourceName);
+      } catch (IllegalStateException e) {
+        throw new IllegalStateException(
+            "Failed to parse file: " + file.getFileName().toString(), e);
       }
     } else {
       throw new IllegalArgumentException("No support for parsing files of type '" + fileType + "'");
@@ -270,13 +380,38 @@ public class RDABridge {
 
       Map<String, Collection<String>> mapConfig =
           ImmutableMap.<String, Collection<String>>builder()
-              .put(AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.inputDirPath))
-              .put(AppConfig.Fields.outputDirPath, Collections.singleton(appConfig.outputDirPath))
-              .put(AppConfig.Fields.fissOutputFile, Collections.singleton(appConfig.fissOutputFile))
-              .put(AppConfig.Fields.mcsOutputFile, Collections.singleton(appConfig.mcsOutputFile))
-              .put(AppConfig.Fields.fissSources, appConfig.fissSources)
-              .put(AppConfig.Fields.mcsSources, appConfig.mcsSources)
-              .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.mbiSource))
+              .put(
+                  AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.getInputDirPath()))
+              .put(
+                  AppConfig.Fields.outputDirPath,
+                  Collections.singleton(appConfig.getOutputDirPath()))
+              .put(
+                  AppConfig.Fields.fissOutputFile,
+                  Collections.singleton(appConfig.getFissOutputFile()))
+              .put(
+                  AppConfig.Fields.mcsOutputFile,
+                  Collections.singleton(appConfig.getMcsOutputFile()))
+              .put(
+                  AppConfig.Fields.fissSeqStart, Collections.singleton(appConfig.getFissSeqStart()))
+              .put(AppConfig.Fields.mcsSeqStart, Collections.singleton(appConfig.getMcsSeqStart()))
+              .put(
+                  AppConfig.Fields.buildAttributionSet,
+                  Collections.singleton(appConfig.getBuildAttributionSet()))
+              .put(
+                  AppConfig.Fields.attributionSetSize,
+                  Collections.singleton(appConfig.getAttributionSetSize()))
+              .put(
+                  AppConfig.Fields.attributionTemplateFile,
+                  Collections.singleton(appConfig.getAttributionTemplateFile()))
+              .put(
+                  AppConfig.Fields.attributionScriptFile,
+                  Collections.singleton(appConfig.getAttributionScriptFile()))
+              .put(
+                  AppConfig.Fields.attributionFissRatio,
+                  Collections.singleton(appConfig.getAttributionFissRatio()))
+              .put(AppConfig.Fields.fissSources, appConfig.getFissSources())
+              .put(AppConfig.Fields.mcsSources, appConfig.getMcsSources())
+              .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.getMbiSource()))
               .build();
 
       return new ConfigLoader(mapConfig::get);
@@ -298,6 +433,22 @@ public class RDABridge {
     putIfNotNull(builder, AppConfig.Fields.fissOutputFile, cmd.getOptionValue(FISS_OUTPUT_FLAG));
     putIfNotNull(builder, AppConfig.Fields.mcsOutputFile, cmd.getOptionValue(MCS_OUTPUT_FLAG));
     putIfNotNull(builder, AppConfig.Fields.fissSources, cmd.getOptionValues(FISS_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.fissSeqStart, cmd.getOptionValue(FISS_SEQ_START));
+    putIfNotNull(
+        builder, AppConfig.Fields.buildAttributionSet, cmd.getOptionValue(BUILD_ATTRIBUTION_FILE));
+    putIfNotNull(
+        builder, AppConfig.Fields.attributionSetSize, cmd.getOptionValue(ATTRIBUTION_SIZE));
+    putIfNotNull(
+        builder,
+        AppConfig.Fields.attributionTemplateFile,
+        cmd.getOptionValue(ATTRIBUTION_TEMPLATE_FILE));
+    putIfNotNull(
+        builder,
+        AppConfig.Fields.attributionScriptFile,
+        cmd.getOptionValue(ATTRIBUTION_SCRIPT_FILE));
+    putIfNotNull(
+        builder, AppConfig.Fields.attributionFissRatio, cmd.getOptionValue(ATTRIBUTION_FISS_RATIO));
+    putIfNotNull(builder, AppConfig.Fields.mcsSeqStart, cmd.getOptionValue(MCS_SEQ_START));
     putIfNotNull(builder, AppConfig.Fields.mcsSources, cmd.getOptionValues(MCS_FLAG));
     putIfNotNull(builder, AppConfig.Fields.mbiSource, cmd.getOptionValue(MBI_FLAG));
 
@@ -336,19 +487,5 @@ public class RDABridge {
     formatter.printOptions(writer, 80, options, 4, 4);
     writer.flush();
     log.error("Invalid execution \n" + stringValue);
-  }
-
-  /** Helper class for defining application specific configurations. */
-  @VisibleForTesting
-  @Data
-  @FieldNameConstants
-  public static class AppConfig {
-    private String inputDirPath;
-    private String outputDirPath;
-    private String fissOutputFile;
-    private String mcsOutputFile;
-    private String mbiSource;
-    private Set<String> fissSources = new HashSet<>();
-    private Set<String> mcsSources = new HashSet<>();
   }
 }
