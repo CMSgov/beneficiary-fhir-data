@@ -117,7 +117,8 @@ public class HibernateValidatorTest {
 
   /**
    * Test run hibernate validation when classes are found for the given packages, and those classes
-   * are valid against the schema, expect the run method to returns true signaling success.
+   * are valid against the schema (i.e. are validated and throw no exceptions), expect the run
+   * method returns true signaling success.
    */
   @Test
   public void testRunHibernateValidationWhenValidSchemaExpectSuccess() {
@@ -149,7 +150,8 @@ public class HibernateValidatorTest {
 
   /**
    * Test run hibernate validation when classes are found for the given packages, and there is an
-   * unexpected (which throws a HibernateException) the run method returns false signaling failure.
+   * unexpected exception in Hibernate or the Hibernate setup the run method returns false signaling
+   * failure.
    */
   @Test
   public void testRunHibernateValidationWhenUnexpectedHibernateExceptionExpectFailure() {

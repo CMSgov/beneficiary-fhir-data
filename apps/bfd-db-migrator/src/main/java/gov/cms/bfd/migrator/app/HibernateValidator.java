@@ -37,9 +37,9 @@ public class HibernateValidator {
 
   private SchemaValidator schemaValidator;
 
-  Configuration hibernateConfiguration;
+  private Configuration hibernateConfiguration;
 
-  List<String> modelPackagesToScan = new ArrayList<>();
+  private final List<String> modelPackagesToScan = new ArrayList<>();
 
   /**
    * Instantiates a new Hibernate validator.

@@ -133,28 +133,15 @@ public final class AppConfiguration {
    * via environment variables. Read those in, and build an {@link AppConfiguration} instance from
    * them.
    *
-   * @param dbUrl the dbUrl to use, if null will use the environment variable
-   * @param dbUser the dbUser to use, if null will use the environment variable
-   * @param dbPass the dbPass to use, if null will use the environment variable
    * @return the {@link AppConfiguration} instance represented by the configuration provided to this
    *     application via the environment variables
    * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
    *     configuration passed to the application are incomplete or incorrect.
    */
-  static AppConfiguration readConfigFromEnvironmentVariables(
-      String dbUrl, String dbUser, String dbPass) {
-    String databaseUrl = dbUrl;
-    if (databaseUrl == null) {
-      databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
-    }
-    String databaseUsername = dbUser;
-    if (databaseUsername == null) {
-      databaseUsername = readEnvStringRequired(ENV_VAR_KEY_DATABASE_USERNAME);
-    }
-    String databasePassword = dbPass;
-    if (databasePassword == null) {
-      databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
-    }
+  static AppConfiguration readConfigFromEnvironmentVariables() {
+    String databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
+    String databaseUsername = readEnvStringRequired(ENV_VAR_KEY_DATABASE_USERNAME);
+    String databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
     Optional<String> newRelicMetricKey = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_KEY);
     Optional<String> newRelicAppName = readEnvStringOptional(ENV_VAR_NEW_RELIC_APP_NAME);
     Optional<String> newRelicMetricHost = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_HOST);

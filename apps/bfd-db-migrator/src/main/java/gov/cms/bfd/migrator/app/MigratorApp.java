@@ -52,19 +52,14 @@ public final class MigratorApp {
    * This method is called when the application is launched from the command line.
    *
    * @param args generally, should be empty. Application <strong>will</strong> accept configuration
-   *     via environment variables, however for local development the application will also accept
-   *     the database url, user, and password as args 0, 1, and 2 respectively.
+   *     via environment variables.
    */
   public static void main(String[] args) {
     LOGGER.info("Successfully started");
 
     AppConfiguration appConfig = null;
     try {
-      // Take some args for running locally (IDE run configs dont honor env vars)
-      String dbUrl = args.length > 1 ? args[0] : null;
-      String dbUser = args.length > 2 ? args[1] : null;
-      String dbPass = args.length > 3 ? args[2] : null;
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables(dbUrl, dbUser, dbPass);
+      appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (AppConfigurationException e) {
       LOGGER.error("Invalid app configuration, shutting down.", e);

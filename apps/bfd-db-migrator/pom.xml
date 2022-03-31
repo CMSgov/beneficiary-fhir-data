@@ -15,6 +15,7 @@
 
 	<properties>
 		<flyway.version>7.8.1</flyway.version>
+		<reflections.version>0.10.2</reflections.version>
 	</properties>
 
 	<dependencies>
@@ -34,7 +35,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.10.2</version>
+			<version>${reflections.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
