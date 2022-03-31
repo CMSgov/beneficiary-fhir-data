@@ -96,7 +96,12 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${hapi-fhir.version}</version>
+		</dependency>
+
 		<dependency>
 			<!-- Needed for comparing JSON files to obtain the diff. See
 				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
@@ -249,6 +254,12 @@
 			<!-- Logging backend for tests.  -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.9.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
