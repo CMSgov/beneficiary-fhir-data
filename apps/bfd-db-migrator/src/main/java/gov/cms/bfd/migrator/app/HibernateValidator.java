@@ -1,6 +1,9 @@
 package gov.cms.bfd.migrator.app;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.sql.DataSource;
@@ -21,25 +24,67 @@ import org.slf4j.LoggerFactory;
 /** Class for containing logic related to Hibernate validation. */
 public class HibernateValidator {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(HibernateValidator.class);
+  private final Logger LOGGER = LoggerFactory.getLogger(HibernateValidator.class);
 
   /**
    * Set this to <code>true</code> to have Hibernate log a ton of info on the SQL statements being
-   * run and each session's performance.
+   * run and each session's performance. This should eventually be an application setting of some
+   * kind.
    */
-  private static final boolean HIBERNATE_DETAILED_LOGGING = false;
+  private final boolean HIBERNATE_DETAILED_LOGGING = false;
+
+  private final HikariDataSource dataSource;
+
+  private SchemaValidator schemaValidator;
+
+  Configuration hibernateConfiguration;
+
+  List<String> modelPackagesToScan = new ArrayList<>();
+
+  /**
+   * Instantiates a new Hibernate validator.
+   *
+   * @param dataSource the data source to use
+   * @param modelPackagesToScan the model packages to scan
+   */
+  public HibernateValidator(HikariDataSource dataSource, List<String> modelPackagesToScan) {
+    this.dataSource = dataSource;
+    this.modelPackagesToScan.addAll(modelPackagesToScan);
+    this.schemaValidator = new SchemaValidator();
+    this.hibernateConfiguration = new Configuration();
+  }
+
+  /**
+   * Sets the schema validator, primarily for testing.
+   *
+   * @param schemaValidator the schema validator
+   */
+  public void setSchemaValidator(SchemaValidator schemaValidator) {
+    this.schemaValidator = schemaValidator;
+  }
+
+  /**
+   * Sets the hibernate configuration, primarily for testing.
+   *
+   * @param configuration the configuration
+   */
+  public void setHibernateConfiguration(Configuration configuration) {
+    this.hibernateConfiguration = configuration;
+  }
 
   /**
    * Runs hibernate validation and reports if it succeeded.
    *
-   * @param dataSource the data source to connect to
    * @return {@code true} if the validation succeeded
    */
-  public static boolean runHibernateValidation(HikariDataSource dataSource) {
+  public boolean runHibernateValidation() {
     try {
       // Add the models to scan for (used in validation)
-      Set<Class<?>> scannedClasses = getEntityClassesFromPackage("gov.cms.bfd.model.rda");
-      scannedClasses.addAll(getEntityClassesFromPackage("gov.cms.bfd.model.rif"));
+      Set<Class<?>> scannedClasses = new HashSet<>();
+
+      for (String packagePath : modelPackagesToScan) {
+        scannedClasses.addAll(getEntityClassesFromPackage(packagePath));
+      }
 
       if (scannedClasses.isEmpty()) {
         LOGGER.error("Found no classes to validate.");
@@ -54,7 +99,7 @@ public class HibernateValidator {
       MetadataSources sources = new MetadataSources(registry);
       Metadata metadata = sources.buildMetadata(registry);
       // This will throw an exception if validation fails
-      new SchemaValidator().validate(metadata);
+      schemaValidator.validate(metadata);
     } catch (HibernateException hx) {
       LOGGER.error("Hibernate validation failed due to: ", hx);
       return false;
@@ -72,29 +117,27 @@ public class HibernateValidator {
    * @param classesToValidate the classes to validate
    * @return the session factory
    */
-  private static SessionFactory createHibernateSessionFactory(
+  private SessionFactory createHibernateSessionFactory(
       DataSource dataSource, Set<Class<?>> classesToValidate) {
 
-    Configuration cfg = new Configuration();
-
     for (Class<?> clazz : classesToValidate) {
-      cfg.addAnnotatedClass(clazz);
+      hibernateConfiguration.addAnnotatedClass(clazz);
     }
 
     // Set hibernate to validate the models on startup
-    cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "validate");
+    hibernateConfiguration.setProperty(AvailableSettings.HBM2DDL_AUTO, "validate");
     if (HIBERNATE_DETAILED_LOGGING) {
-      cfg.setProperty(AvailableSettings.FORMAT_SQL, "true");
-      cfg.setProperty(AvailableSettings.USE_SQL_COMMENTS, "true");
-      cfg.setProperty(AvailableSettings.SHOW_SQL, "true");
-      cfg.setProperty(AvailableSettings.GENERATE_STATISTICS, "true");
+      hibernateConfiguration.setProperty(AvailableSettings.FORMAT_SQL, "true");
+      hibernateConfiguration.setProperty(AvailableSettings.USE_SQL_COMMENTS, "true");
+      hibernateConfiguration.setProperty(AvailableSettings.SHOW_SQL, "true");
+      hibernateConfiguration.setProperty(AvailableSettings.GENERATE_STATISTICS, "true");
     }
 
     // Build the session factory with the datasource
-    return cfg.buildSessionFactory(
+    return hibernateConfiguration.buildSessionFactory(
         new StandardServiceRegistryBuilder()
             .applySetting(Environment.DATASOURCE, dataSource)
-            .applySettings(cfg.getProperties())
+            .applySettings(hibernateConfiguration.getProperties())
             .build());
   }
 
@@ -104,7 +147,7 @@ public class HibernateValidator {
    * @param packageName the package name to find Entity classes in
    * @return the Entity annotated classes from the package
    */
-  private static Set<Class<?>> getEntityClassesFromPackage(String packageName) {
+  private Set<Class<?>> getEntityClassesFromPackage(String packageName) {
     Reflections reflections = new Reflections(packageName);
     return reflections.getTypesAnnotatedWith(Entity.class);
   }
