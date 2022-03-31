@@ -740,7 +740,6 @@ public final class PatientResourceProviderIT {
         "hicn",
         expectsSingleBeneMatch);
 
-
     /*
      * The following scenario tests when the same hicn is in the
      * Beneficiaries and also in the BeneficiariesHistory table. The bene id
