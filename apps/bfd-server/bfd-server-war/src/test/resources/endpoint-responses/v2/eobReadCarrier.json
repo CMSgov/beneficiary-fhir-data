@@ -347,6 +347,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-b-567834"
     }
@@ -362,6 +363,13 @@
       "valueCoding" : {
         "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
         "code" : "3"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
