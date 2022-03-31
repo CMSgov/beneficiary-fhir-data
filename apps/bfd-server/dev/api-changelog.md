@@ -1,5 +1,47 @@
 # API Changelog
 
+## BFD-1424 Fix mtus code
+
+Added a new extension with the correct url/system for MTUS Code and kept the old extension with the MTUS Code value that had the incorrect url/system of MTUS Count:
+The old coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+}, 
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+}
+```
+The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+```
 ## BFD-1446: Added focal field to v2
 
 For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
