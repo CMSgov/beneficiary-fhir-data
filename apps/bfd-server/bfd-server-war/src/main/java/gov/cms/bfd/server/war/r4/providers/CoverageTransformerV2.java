@@ -363,6 +363,10 @@ final class CoverageTransformerV2 {
     return coverage;
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformHMOIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
     addCoverageCodeExtension(
@@ -391,6 +395,10 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
     addCoverageExtension(
@@ -419,6 +427,10 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_12, beneficiary.getPartCPlanTypeDecCode());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void tranformsPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     addCoverageExtension(
@@ -447,6 +459,10 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.PTC_PBP_ID_12, beneficiary.getPartCPbpNumberDecId());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTC_CNTRCT_ID_01, beneficiary.getPartCContractNumberJanId());
@@ -574,6 +590,10 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.RDSIND12, beneficiary.getPartDRetireeDrugSubsidyDecInd());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformPartDLowIncomeCostShareGroup(
       Coverage coverage, Beneficiary beneficiary) {
     // Monthly cost sharing group
@@ -627,6 +647,10 @@ final class CoverageTransformerV2 {
         beneficiary.getPartDLowIncomeCostShareGroupDecCode());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
     addCoverageExtension(
@@ -655,6 +679,10 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.SGMTID12, beneficiary.getPartDSegmentNumberDecId());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     addCoverageExtension(
@@ -683,6 +711,10 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId());
   }
 
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
     addCoverageExtension(

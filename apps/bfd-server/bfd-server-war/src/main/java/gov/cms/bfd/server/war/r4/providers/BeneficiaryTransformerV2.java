@@ -312,6 +312,10 @@ final class BeneficiaryTransformerV2 {
     }
   }
 
+  /**
+   * @param patient the FHIR {@link Patient} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
   private static void transformMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     addPatientExtension(
