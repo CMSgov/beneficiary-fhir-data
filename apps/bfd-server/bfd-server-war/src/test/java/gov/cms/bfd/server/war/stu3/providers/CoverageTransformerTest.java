@@ -65,6 +65,14 @@ public final class CoverageTransformerTest {
     assertPartAMatches(beneficiary, partACoverageNullLastUpdated);
   }
 
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformer#transform(MedicareSegment,
+   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER}
+   * {@link Beneficiary} with a null reference year.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
   @Test
   public void transformSampleARecordWithNullReferenceYear() throws FHIRException {
     List<Object> parsedRecords =

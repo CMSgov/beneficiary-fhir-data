@@ -249,6 +249,12 @@ public final class BeneficiaryTransformerTest {
     assertMatches(beneficiary, patient, requestHeader);
   }
 
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a reference year field not found.
+   */
   @Test
   public void transformSampleARecordWithoutReferenceYear() {
     Beneficiary beneficiary = loadSampleABeneficiary();
