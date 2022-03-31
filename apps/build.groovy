@@ -27,7 +27,7 @@ class AppBuildResults implements Serializable {
 def build(String build_env) {
 	dir ('apps') {
 
-		sh "mvn --update-snapshots -Dmaven.test.failure.ignore clean verify"
+		sh "mvn --threads 1C --update-snapshots -Dmaven.test.failure.ignore clean verify"
 
 		/*
 		 * Fingerprint the output artifacts and archive the test results.
