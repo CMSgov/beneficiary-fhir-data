@@ -50,8 +50,7 @@ This is a Boolean field and should be set to either true or false. The definitio
 ````
  "insurance" : [ {
     "focal" : true,
-    ,
-    ,
+    ...,
  }]
 ````
 
