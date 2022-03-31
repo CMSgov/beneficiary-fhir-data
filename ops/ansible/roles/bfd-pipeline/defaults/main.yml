@@ -7,6 +7,7 @@ data_pipeline_loader_threads: 200
 data_pipeline_jvm_args: -Xmx64g
 data_pipeline_tmp_dir: /tmp
 data_pipeline_idempotency_required: true
+data_pipeline_filtering_non_null_and_non_2022_benes: true
 data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
 

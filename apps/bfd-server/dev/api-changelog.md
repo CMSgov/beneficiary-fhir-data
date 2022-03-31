@@ -1,12 +1,196 @@
 # API Changelog
 
+
 ## BFD-1461 Implement Handling for Null Enrollment Reference Years
 
  * Following FHIR mapping changes were made:
 
   * For V1 and V2, if there is a reference year, return data normally.  For V1 and V2, if there is a NULL reference year, do NOT return data that is associated with that specific reference year. All other data is returned as expected 
 
-## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
+## BFD-1424 Fix mtus code
+
+Added a new extension with the correct url/system for MTUS Code and kept the old extension with the MTUS Code value that had the incorrect url/system of MTUS Count:
+The old coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+}, 
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+}
+```
+The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+```
+## BFD-1446: Added focal field to v2
+
+For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
+
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+````
+ "insurance" : [ {
+    "focal" : true,
+    ...,
+ }]
+````
+
+## BFD-1383 Update V2 line item allowed charge amount mapping
+
+Previously, the allowed charge amount in the EOB FHIR response was incorrectly being populated by the submitted charge amount data field. The value for allowed charge amount is now being populated correctly by the respective allowed charge amount data field. Note that this is only for v2
+For DME the new allowed charge amount looks like:
+````
+"amount" : {
+    "value" : 129.45,
+    "currency" : "USD"
+}
+````
+
+For Carrier:
+````
+"amount" : {
+    "value" : 47.84,
+    "currency" : "USD"
+}
+````
+
+## BFD-1516: Map Hospice Period Count in V2
+
+Added mapping for Hospice Period count
+BENE_HOSPC_PRD_CNT => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
+    }
+  }
+  ...
+}
+```
+
+## BFD-1517: Map FI Number in V2
+
+Added mapping for Fiscal Intermediary Number
+FI_NUM => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
+  }
+  ...
+}
+```
+
+## BFD-1518: Map Revenue Center Status Indicator Code in V2
+
+Added mapping for Revenue Status Code:
+REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
+## BFD-1566: Add Patient.meta.tag entry for Some Patients
+
+Our system has delayed the processing of demographic and enrollment data
+  for some persons who had previously been enrolled in Medicare
+  but are not enrolled in Medicare for the current year.
+This delay is due to errors in
+  how that data has been sent to our system for processing
+  that only impact such persons.
+Only around 0.3% of persons we have records for are impacted by this issue.
+
+Nevertheless, for such impacted persons,
+  their `Patient` resources are being tagged,
+  as follows:
+
+```
+{
+  "resourceType": "Patient",
+  ...
+  "meta": {
+    ...
+    "tag": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/codesystem/tags",
+        "code": "delayed-backdated-enrollment",
+        "display": "Impacted by delayed backdated enrollment data."
+      }
+    ]
+  },
+  ...
+```
+
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
 ```

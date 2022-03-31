@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.BatchSize;
 
 /** JPA class for the McsClaims table */
 @Entity
@@ -205,6 +206,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsDetail> details = new HashSet<>();
 
@@ -213,6 +215,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
 
@@ -221,6 +224,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsAdjustment> adjustments = new HashSet<>();
 
@@ -229,6 +233,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsAudit> audits = new HashSet<>();
 
@@ -237,6 +242,7 @@ public class PreAdjMcsClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjMcsLocation> locations = new HashSet<>();
 

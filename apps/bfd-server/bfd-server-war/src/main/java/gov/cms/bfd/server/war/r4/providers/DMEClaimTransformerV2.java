@@ -129,7 +129,6 @@ final class DMEClaimTransformerV2 {
     // CARR_CLM_CNTL_NUM              => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupCarrierDME(
         eob,
-        claimGroup.getBeneficiaryId(),
         claimGroup.getCarrierNumber(),
         claimGroup.getClinicalTrialNumber(),
         claimGroup.getBeneficiaryPartBDeductAmount(),

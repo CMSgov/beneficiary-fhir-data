@@ -52,6 +52,40 @@ public class ConfigLoaderTest {
   }
 
   @Test
+  public void requiredFloatValueFound() {
+    values.put("a", "3.3");
+    assertEquals(3.3f, loader.floatValue("a"));
+  }
+
+  @Test
+  public void requiredFloatValueNotFound() {
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.floatValue("not-there");
+        });
+  }
+
+  @Test
+  public void invalidFloatValue() {
+    values.put("a", "-not-a-number");
+    assertThrows(
+        ConfigException.class,
+        () -> {
+          loader.floatValue("a");
+        });
+  }
+
+  @Test
+  public void optionalFloatValue() {
+    values.put("a", "3.3");
+    assertEquals(3.3f, loader.floatValue("a", -10.0f));
+    assertEquals(-10.0f, loader.floatValue("z", -10.0f));
+    assertEquals(Optional.of(3.3f), loader.floatOption("a"));
+    assertEquals(Optional.empty(), loader.floatOption("z"));
+  }
+
+  @Test
   public void requiredIntValueFound() {
     values.put("a", "33");
     assertEquals(33, loader.intValue("a"));

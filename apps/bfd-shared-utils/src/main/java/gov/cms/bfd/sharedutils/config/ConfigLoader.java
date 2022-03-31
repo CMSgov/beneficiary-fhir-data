@@ -29,6 +29,7 @@ public class ConfigLoader {
   private final Function<String, Collection<String>> source;
 
   private static final String NOT_VALID_INTEGER = "not a valid integer";
+  private static final String NOT_VALID_FLOAT = "not a valid float";
 
   /**
    * Constructs a ConfigLoader that uses the provided Function as the source of key/value
@@ -109,6 +110,60 @@ public class ConfigLoader {
     Optional<List<String>> optional = stringsOption(name);
 
     return optional.map(strings -> strings.get(0));
+  }
+
+  /**
+   * Gets a required float configuration value.
+   *
+   * @param name name of configuration value
+   * @return float value
+   * @throws ConfigException if there is no valid float value
+   */
+  public float floatValue(String name) {
+    final String value = stringValue(name);
+
+    try {
+      return Float.parseFloat(value);
+    } catch (Exception ex) {
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
+    }
+  }
+
+  /**
+   * Gets an optional float configuration value or a defaultValue if there is no value.
+   *
+   * @param name name of configuration value
+   * @param defaultValue the default value
+   * @return either the float value or defaultValue
+   * @throws ConfigException if a value existed but was not a valid float
+   */
+  public float floatValue(String name, float defaultValue) {
+    Optional<String> optional = stringOption(name);
+
+    if (optional.isEmpty()) {
+      return defaultValue;
+    }
+
+    try {
+      return Float.parseFloat(optional.get());
+    } catch (Exception ex) {
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
+    }
+  }
+
+  /**
+   * Gets an Optional for the specified float configuration value.
+   *
+   * @param name name of configuration value
+   * @return empty Option if there is no value, otherwise Option holding the value
+   * @throws ConfigException if a value existed but was not a valid float
+   */
+  public Optional<Float> floatOption(String name) {
+    try {
+      return stringOption(name).map(Float::parseFloat);
+    } catch (Exception ex) {
+      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
+    }
   }
 
   /**
