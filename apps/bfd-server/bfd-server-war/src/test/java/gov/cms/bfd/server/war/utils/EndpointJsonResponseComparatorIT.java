@@ -582,6 +582,18 @@ public final class EndpointJsonResponseComparatorIT {
    *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
    */
   public static String patientByIdentifierWithoutReferenceYear() {
+
+    RifFilesEvent rifFilesEvent =
+        new RifFilesEvent(
+            Instant.now(),
+            sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
+
+    // Create the processors that will handle each stage of the pipeline.
+    RifFilesProcessor processor = new RifFilesProcessor();
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
+    RifLoader loader =
+        new RifLoader(options, PipelineTestUtils.get().getPipelineApplicationState());
+
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(

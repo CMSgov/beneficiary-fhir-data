@@ -191,6 +191,12 @@ public final class CoverageTransformerV2Test {
     verifyCoverageContract("part-a");
   }
 
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.CoverageTransformerV2#transform(Coverage)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Coverage} with a
+   * reference year field not found.
+   */
   @Test
   public void verifyPartAWithoutReferenceYear() {
     List<Object> parsedRecords =

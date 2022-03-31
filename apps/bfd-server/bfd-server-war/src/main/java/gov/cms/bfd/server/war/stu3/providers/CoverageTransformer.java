@@ -375,6 +375,10 @@ final class CoverageTransformer {
     return coverage;
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link HMOIndicator} {@link Coverage}
+   */
   private static void transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
     if (beneficiary.getHmoIndicatorJanInd().isPresent()) {
@@ -439,6 +443,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
+   *     Coverage}
+   */
   private static void transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartCPbpNumberJanId().isPresent()) {
@@ -503,6 +512,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
+   *     Coverage}
+   */
   private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
     if (beneficiary.getPartCPlanTypeJanCode().isPresent()) {
@@ -591,6 +605,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
+   *     Coverage}
+   */
   private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
     if (beneficiary.getPartCContractNumberJanId().isPresent()) {
@@ -750,6 +769,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment} {@link
+   *     Coverage}
+   */
   private static void transformMedicaidDualEligibility(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
@@ -838,6 +862,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
   private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     if (beneficiary.getPartDContractNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -925,6 +954,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
   private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartDPbpNumberJanId().isPresent()) {
@@ -989,6 +1023,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
   private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
     if (beneficiary.getPartDSegmentNumberJanId().isPresent()) {
@@ -1053,6 +1092,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
   private static void transformPartDLowIncomeCostShareGroup(
       Coverage coverage, Beneficiary beneficiary) {
     // Monthly cost sharing group
@@ -1142,6 +1186,11 @@ final class CoverageTransformer {
     }
   }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
   private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Part D Retiree Drug Subsidy Indicators
     if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent()) {
