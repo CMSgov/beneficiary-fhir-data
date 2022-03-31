@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
 import gov.cms.bfd.model.rda.PreAdjMcsAudit;
@@ -48,9 +47,27 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for the {@link McsClaimTransformer}. Unless otherwise stated on a method every test
+ * verifies that one or a set of fields within a source grpc message object for a claim have been
+ * correctly transformed into appropriate values and copied into a new {@link PreAdjMcsClaim} JPA
+ * entity object or one of its child objects.
+ *
+ * <p>Field tests are performed using an adaptor object appropriate for each type of grpc/jpa object
+ * pair. These adaptor objects ({@link ClaimFieldTester}, {@link AdjustmentFieldTester}, {@link
+ * AuditFieldTester}, {@link DetailFieldTester}, and {@link DiagCodeFieldTester}) extend the {@link
+ * LocationFieldTester} class and provide class specific implementations of the methods used to
+ * construct and transform objects under test.
+ *
+ * <p>Each individual field test is named after the field it tests and calls appropriate
+ * verification methods for that field. {@see ClaimTransformerFieldTester} for documentation of each
+ * of the verification methods.
+ */
 public class McsClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
@@ -277,8 +294,11 @@ public class McsClaimTransformerTest {
 
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
+    final long SEQUENCE_NUM = 37;
+
     try {
       changeBuilder
+          .setSeq(SEQUENCE_NUM)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .setClaim(
               claimBuilder
@@ -288,16 +308,27 @@ public class McsClaimTransformerTest {
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          ImmutableList.of(
+      List<DataTransformer.ErrorMessage> expectedErrors =
+          List.of(
               new DataTransformer.ErrorMessage(
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
               new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0")),
-          ex.getErrors());
+                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+
+      String expectedMessage =
+          String.format(
+              "failed with %d errors: seq=%d clmHdIcn= errors=[%s]",
+              expectedErrors.size(),
+              SEQUENCE_NUM,
+              expectedErrors.stream()
+                  .map(DataTransformer.ErrorMessage::toString)
+                  .collect(Collectors.joining(", ")));
+
+      assertEquals(expectedMessage, ex.getMessage());
+      assertEquals(expectedErrors, ex.getErrors());
     }
   }
 

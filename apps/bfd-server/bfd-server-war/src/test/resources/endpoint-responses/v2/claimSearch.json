@@ -17,7 +17,6 @@
         "resourceType": "Claim",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-8e50a587ef3ec5f80a2cbabc534c0205f0ab6f54",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -317,7 +316,6 @@
         "resourceType": "Claim",
         "id": "m-654323",
         "meta": {
-          "versionId": "m-654323-f12ea170155b8dd1ef0595c7a1f35393e36bbc43",
           "lastUpdated": "1970-01-01T00:00:04.000+00:00"
         },
         "contained": [

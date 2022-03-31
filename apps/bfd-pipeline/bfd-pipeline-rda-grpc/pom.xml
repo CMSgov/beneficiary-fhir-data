@@ -70,7 +70,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Adds java-8 types to jackson. -->

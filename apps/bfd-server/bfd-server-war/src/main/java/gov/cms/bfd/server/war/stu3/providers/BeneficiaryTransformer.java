@@ -96,10 +96,24 @@ final class BeneficiaryTransformer {
 
     Patient patient = new Patient();
 
-    patient.setId(beneficiary.getBeneficiaryId());
+    /*
+     * Notify end users when they receive Patient records impacted by
+     * https://jira.cms.gov/browse/BFD-1566. See the documentation on
+     * LoadAppOptions.isFilteringNonNullAndNon2022Benes() for details.
+     */
+    if (!beneficiary.getSkippedRifRecords().isEmpty()) {
+      patient
+          .getMeta()
+          .addTag(
+              TransformerConstants.CODING_SYSTEM_BFD_TAGS,
+              TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
+              TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY);
+    }
+
+    patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
     patient.addIdentifier(
         TransformerUtils.createIdentifier(
-            CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
+            CcwCodebookVariable.BENE_ID, String.valueOf(beneficiary.getBeneficiaryId())));
 
     // Add hicn-hash identifier ONLY if raw hicn is requested.
     if (requestHeader.isHICNinIncludeIdentifiers()) {

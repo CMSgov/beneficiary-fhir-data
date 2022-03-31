@@ -62,8 +62,8 @@ public class MbiCache {
    * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
    * entityManager.
    *
-   * @param config provides the information needed to configure the hash algorithm and cache
    * @param entityManager used to query and create records
+   * @param hasher the hasher
    * @return an MbiCache instance with a corresponding record in the database
    */
   public static MbiCache databaseCache(EntityManager entityManager, IdHasher hasher) {

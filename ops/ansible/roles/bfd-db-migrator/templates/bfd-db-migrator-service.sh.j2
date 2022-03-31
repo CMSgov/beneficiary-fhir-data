@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+export DATABASE_PASSWORD='{{ db_migrator_db_password }}'
+export DATABASE_URL='{{ db_migrator_db_url }}'
+export DATABASE_USERNAME='{{ db_migrator_db_username }}'
+
+{#
+# The expression {{ '#' if foo|default('', true)|length < 1 }} prepends exports with '#' to prevent
+# undefined or empty 'foo' variable from entering the environment. Maintains the existing templating
+# strategy and remains flexible for manual manipulation of resultant script in development and
+# troubleshooting scenarios.
+#}
+# DATABASE_MAX_POOL_SIZE defaults to 1 in the bfd-db-migrator application
+{{ '#' if db_migrator_db_max_pool_size|default('', true)|length < 1 }}export DATABASE_MAX_POOL_SIZE='{{ db_migrator_db_max_pool_size|default('', true) }}'
+
+{%- if db_migrator_new_relic_metric_key is defined %}
+export NEW_RELIC_METRIC_KEY='{{ db_migrator_new_relic_metric_key }}'
+{%- endif %}
+
+{%- if db_migrator_new_relic_metric_host is defined %}
+export NEW_RELIC_METRIC_HOST='{{ db_migrator_new_relic_metric_host }}'
+{%- endif %}
+
+{%- if db_migrator_new_relic_metric_path is defined %}
+export NEW_RELIC_METRIC_PATH='{{ db_migrator_new_relic_metric_path }}'
+{%- endif %}
+
+{%- if db_migrator_new_relic_metric_period is defined %}
+export NEW_RELIC_METRIC_PERIOD='{{ db_migrator_new_relic_metric_period }}'
+{%- endif %}
+
+LOGS_DIR='{{ db_migrator_dir }}/'
+
+exec "{{ db_migrator_dir }}/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh" \
+	"-DbfdDbMigrator.logs.dir=${LOGS_DIR}" \
+	-Djava.io.tmpdir={{ db_migrator_tmp_dir }} \
+	&>> "{{ db_migrator_dir }}/migrator-log.json"

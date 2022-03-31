@@ -503,7 +503,10 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(Patient.class)
-        .where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+        .where(
+            Patient.RES_ID
+                .exactly()
+                .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return sortPatientIdentifiers(jsonInterceptor.getResponse());
@@ -540,7 +543,10 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(Patient.class)
-        .where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+        .where(
+            Patient.RES_ID
+                .exactly()
+                .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return sortPatientIdentifiers(jsonInterceptor.getResponse());

@@ -99,15 +99,6 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SYNTHETIC_OUTPATIENT_2015_2014,
       StaticRifResource.SYNTHETIC_OUTPATIENT_2016_2014),
 
-  SAMPLE_MCT(StaticRifResource.SAMPLE_MCT_BENES, StaticRifResource.SAMPLE_MCT_PDE),
-
-  SAMPLE_MCT_UPDATE_1(StaticRifResource.SAMPLE_MCT_UPDATE_1_BENES),
-
-  SAMPLE_MCT_UPDATE_2(StaticRifResource.SAMPLE_MCT_UPDATE_2_PDE),
-
-  SAMPLE_MCT_UPDATE_3(
-      StaticRifResource.SAMPLE_MCT_UPDATE_3_BENES, StaticRifResource.SAMPLE_MCT_UPDATE_3_PDE),
-
   SYNTHEA_DATA(
       StaticRifResource.SAMPLE_SYNTHEA_BENES2011,
       StaticRifResource.SAMPLE_SYNTHEA_BENES2012,

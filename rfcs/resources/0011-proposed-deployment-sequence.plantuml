@@ -1,0 +1,32 @@
+@startuml
+title Proposed Deployment Sequence (Abbreviated)
+participant Jenkins
+participant "bfd-db-migrator"
+participant "bfd-pipeline"
+participant "bfd-server"
+database FHIR
+note over Jenkins,"bfd-db-migrator": Distinct database migration deployment step
+Jenkins -> "bfd-db-migrator": Deploy
+group Deployment
+       note right of "bfd-db-migrator": Recreate ec2\ninstance with\nnew AMI
+       "bfd-db-migrator" -> "bfd-db-migrator": Bootstrap,\nMigrate,\nValidate
+       "bfd-db-migrator" -> FHIR: Execute Migrations
+       FHIR --> "bfd-db-migrator": Changes committed
+       "bfd-db-migrator" -> FHIR: Hibernate Validations
+       FHIR --> "bfd-db-migrator": Valid
+       "bfd-db-migrator" --> Jenkins: Deployment Complete
+end
+note over Jenkins,"bfd-server": Subsequent deployment stage may remain parallel
+Jenkins -> "bfd-pipeline": Deploy
+Jenkins -> "bfd-server":
+group Deployment
+       note right of "bfd-server": Update launch template,\nre-create autoscaling group
+       "bfd-server" -> "bfd-server": Bootstrap
+       "bfd-server" -> "bfd-server": Serve HTTP Requests
+       "bfd-server" <-> FHIR: Continued Read Requests
+       note right of "bfd-pipeline": Recreate ec2\ninstance with\nnew AMI
+       "bfd-pipeline" -> "bfd-pipeline": Bootstrap
+       "bfd-pipeline" -> "bfd-pipeline": Run "bfd-pipelines"
+       "bfd-pipeline" <-> FHIR: Continued Database Interactions
+end
+@enduml
