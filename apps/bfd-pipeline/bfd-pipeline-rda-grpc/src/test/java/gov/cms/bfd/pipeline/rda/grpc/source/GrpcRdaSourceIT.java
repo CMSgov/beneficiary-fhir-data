@@ -314,13 +314,12 @@ public class GrpcRdaSourceIT {
         "Could not parse Authorization token as JWT",
         () ->
             createServerConfig()
-                .authorizedToken(null)
                 .build()
                 .runWithPortParam(
                     port -> {
                       int count;
                       GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken("secret").build();
+                          createSourceConfig(port).authenticationToken(null).build();
                       try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
                           createSource(config)) {
                         count = source.retrieveAndProcessObjects(3, sink);
@@ -340,13 +339,12 @@ public class GrpcRdaSourceIT {
         "Could not parse Authorization token as JWT",
         () ->
             createServerConfig()
-                .authorizedToken("")
                 .build()
                 .runWithPortParam(
                     port -> {
                       int count;
                       GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken("secret").build();
+                          createSourceConfig(port).authenticationToken("").build();
                       try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
                           createSource(config)) {
                         count = source.retrieveAndProcessObjects(3, sink);
