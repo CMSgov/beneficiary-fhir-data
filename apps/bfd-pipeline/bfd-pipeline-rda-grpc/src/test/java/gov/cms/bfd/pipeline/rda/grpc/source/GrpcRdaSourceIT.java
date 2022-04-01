@@ -306,6 +306,58 @@ public class GrpcRdaSourceIT {
             });
   }
 
+  /** Checks to see if a log message was NOT generated when a blank token is used. */
+  @Test
+  public void grpcCallWithNullJWT() throws Exception {
+    assertDoesNotHaveLogMessage(
+        Level.WARN,
+        "Could not parse Authorization token as JWT",
+        () ->
+            createServerConfig()
+                .authorizedToken(null)
+                .build()
+                .runWithPortParam(
+                    port -> {
+                      int count;
+                      GrpcRdaSource.Config config =
+                          createSourceConfig(port).authenticationToken("secret").build();
+                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                          createSource(config)) {
+                        count = source.retrieveAndProcessObjects(3, sink);
+                      }
+                      assertEquals(2, count);
+                      assertEquals(2, sink.getValues().size());
+                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+                    }));
+  }
+
+  /** Checks to see if a log message was NOT generated when a blank token is used. */
+  @Test
+  public void grpcCallWithBlankJWT() throws Exception {
+    assertDoesNotHaveLogMessage(
+        Level.WARN,
+        "Could not parse Authorization token as JWT",
+        () ->
+            createServerConfig()
+                .authorizedToken("")
+                .build()
+                .runWithPortParam(
+                    port -> {
+                      int count;
+                      GrpcRdaSource.Config config =
+                          createSourceConfig(port).authenticationToken("secret").build();
+                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                          createSource(config)) {
+                        count = source.retrieveAndProcessObjects(3, sink);
+                      }
+                      assertEquals(2, count);
+                      assertEquals(2, sink.getValues().size());
+                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+                    }));
+  }
+
   /** Checks to see if a log message was generated when a non-jwt token is used. */
   @Test
   public void grpcCallWithCorrectNonJWT() throws Exception {
@@ -457,6 +509,16 @@ public class GrpcRdaSourceIT {
                     }));
   }
 
+  private void assertHasLogMessage(
+      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
+    assertLogMessage(logLevel, logMessage, runnable, true);
+  }
+
+  private void assertDoesNotHaveLogMessage(
+      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
+    assertLogMessage(logLevel, logMessage, runnable, false);
+  }
+
   /**
    * Helper method for checking if a particular log message was generated. This method creates a
    * temporary appender to add to the logging framework, which it then removes again after the given
@@ -467,8 +529,9 @@ public class GrpcRdaSourceIT {
    * @param runnable The logic to execute that should generate the given expected log message.
    * @throws Exception If anything unexpected went wrong
    */
-  private void assertHasLogMessage(
-      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
+  private void assertLogMessage(
+      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable, boolean shouldExist)
+      throws Exception {
     final Logger LOGGER = (Logger) LoggerFactory.getLogger(GrpcRdaSource.class);
 
     ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -481,10 +544,16 @@ public class GrpcRdaSourceIT {
 
     LOGGER.detachAppender("UNIT_TEST_APPENDER");
 
-    assertTrue(
+    String message =
+        shouldExist
+            ? "Expected log message '[%s] %s' not found"
+            : "Unexpected log message '[%s] %s' found";
+
+    assertEquals(
+        shouldExist,
         listAppender.list.stream()
             .anyMatch(e -> e.getLevel() == logLevel && e.getMessage().equals(logMessage)),
-        String.format("Expected log message '[%s] %s' not found", logLevel, logMessage));
+        String.format(message, logLevel, logMessage));
   }
 
   /**
