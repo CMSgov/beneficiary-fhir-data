@@ -56,7 +56,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_A */
-  // @Disabled
+  @Disabled
   @Test
   public void outputTransformCoveragePartA() throws FHIRException {
     transformCoverage(MedicareSegment.PART_A, true);
