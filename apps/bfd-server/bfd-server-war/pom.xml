@@ -96,6 +96,7 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
+			<!-- This dependency includes the base HAPI-FHIR classes -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -254,12 +255,6 @@
 			<!-- Logging backend for tests.  -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.9.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
