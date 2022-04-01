@@ -162,7 +162,7 @@
 				child projects use, as incompatibility problems with Spring are common. -->
 			<dependency>
 				<!-- Lock & harmonize the versions of the various Spring Framework modules. 
-					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir:pom:4.1 
+					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir-base:pom:5.7.1
 					uses the 5.3.15 version of the Spring Framework. -->
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
