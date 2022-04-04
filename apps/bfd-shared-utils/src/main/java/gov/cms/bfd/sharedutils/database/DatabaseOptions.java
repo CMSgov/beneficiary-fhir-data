@@ -1,14 +1,19 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.sharedutils.database;
 
 import java.io.Serializable;
 
 /** The user-configurable options that specify how to access the application's database. */
 public final class DatabaseOptions implements Serializable {
+  /** Serialization UID. */
   private static final long serialVersionUID = 1L;
 
+  /** The JDBC URL of the database. */
   private final String databaseUrl;
+  /** The username for the database. */
   private final String databaseUsername;
+  /** The password for the database. */
   private final String databasePassword;
+  /** The maximum size of the database connection pool. */
   private final int maxPoolSize;
 
   /**
@@ -47,7 +52,7 @@ public final class DatabaseOptions implements Serializable {
     return maxPoolSize;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** @see Object#toString() */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

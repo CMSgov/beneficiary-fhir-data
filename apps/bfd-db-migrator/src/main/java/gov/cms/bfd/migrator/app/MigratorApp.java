@@ -10,6 +10,10 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.MetricOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -73,7 +77,8 @@ public final class MigratorApp {
 
     // run migration
     boolean migrationSuccess =
-        DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource, appConfig);
+        DatabaseSchemaManager.createOrUpdateSchema(
+            pooledDataSource, appConfig.getFlywayScriptLocationOverride());
 
     if (!migrationSuccess) {
       LOGGER.error("Migration failed, shutting down");

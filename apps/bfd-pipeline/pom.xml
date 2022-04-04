@@ -51,6 +51,11 @@
 				<artifactId>bfd-model-rif-samples</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>gov.cms.bfd</groupId>
+				<artifactId>bfd-shared-test-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

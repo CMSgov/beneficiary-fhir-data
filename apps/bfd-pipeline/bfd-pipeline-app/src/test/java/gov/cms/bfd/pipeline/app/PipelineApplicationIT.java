@@ -5,10 +5,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import gov.cms.bfd.DataSourceComponents;
+import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -24,22 +25,15 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
@@ -640,79 +634,6 @@ public final class PipelineApplicationIT {
       return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Managing external processes is tricky: at the OS level, all processes' output is sent to a
-   * buffer. If that buffer fills up (because you're not reading the output), the process will block
-   * -- forever. To avoid that, it's best to always have a separate thread running that consumes a
-   * process' output. This {@link ProcessOutputConsumer} is designed to allow for just that.
-   */
-  private static final class ProcessOutputConsumer implements Runnable {
-    private final BufferedReader stdoutReader;
-    private final List<String> stdoutContents;
-
-    /**
-     * Constructs a new {@link ProcessOutputConsumer} instance.
-     *
-     * @param process the {@link ProcessOutputConsumer} whose output should be consumed
-     */
-    public ProcessOutputConsumer(Process process) {
-      /*
-       * Note: we're only grabbing STDOUT, because we're assuming that
-       * STDERR has been piped to/merged with it. If that's not the case,
-       * you'd need a separate thread consuming that stream, too.
-       */
-
-      InputStream stdout = process.getInputStream();
-      this.stdoutReader = new BufferedReader(new InputStreamReader(stdout));
-      this.stdoutContents = new ArrayList<>();
-    }
-
-    /** @see java.lang.Runnable#run() */
-    @Override
-    public void run() {
-      /*
-       * Note: This will naturally stop once the process exits (due to the
-       * null check below).
-       */
-
-      try {
-        String line;
-        while ((line = stdoutReader.readLine()) != null) {
-          addLine(line);
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    /** @return a {@link String} that contains the <code>STDOUT</code> contents so far */
-    public synchronized String getStdoutContents() {
-      return String.join("\n", stdoutContents);
-    }
-
-    /**
-     * Matches every line in the current <code>STDOUT</code> contents looking for one that matches
-     * the given predicate. This has to be synchronized to avoid potential
-     * ConcurrentModificationExceptions.
-     *
-     * @param predicate used to test each line of the output
-     * @return true if any line matches the predicate
-     */
-    public synchronized boolean matches(Predicate<String> predicate) {
-      return stdoutContents.stream().anyMatch(predicate);
-    }
-
-    /**
-     * Used internally to add a line of output to the stdoutContents with proper synchronization.
-     *
-     * @param line text to add to the output
-     */
-    private synchronized void addLine(String line) {
-      stdoutContents.add(line);
     }
   }
 }

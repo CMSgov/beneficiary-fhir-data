@@ -1,17 +1,24 @@
-package gov.cms.bfd.pipeline.app;
+package gov.cms.bfd.sharedutils.config;
 
 import java.io.Serializable;
 import java.util.Optional;
 
 /** Models the user-configurable options for sending telemetry to New Relic. */
 public final class MetricOptions implements Serializable {
+  /** Serialization UID. */
   private static final long serialVersionUID = 1L;
 
+  /** The secret key granting access to the New Relic Metric API. */
   private final String newRelicMetricKey;
+  /** The name of the app with which metrics are tagged in New Relic. */
   private final String newRelicAppName;
+  /** The host of the New Relic Metric API where telemetry will be sent. */
   private final String newRelicMetricHost;
+  /** The relative path of the New Relic Metric API where telemetry will be sent. */
   private final String newRelicMetricPath;
+  /** The interval between when each batch of metrics is sent to New Relic. */
   private final Integer newRelicMetricPeriod;
+  /** The hostname that will send metrics to New Relic. */
   private final String hostname;
 
   /**
@@ -69,7 +76,7 @@ public final class MetricOptions implements Serializable {
     return Optional.ofNullable(newRelicMetricKey);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** @see Object#toString() */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

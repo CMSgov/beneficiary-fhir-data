@@ -12,14 +12,14 @@ import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
+import gov.cms.bfd.sharedutils.config.MetricOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -33,7 +33,7 @@ import org.apache.commons.codec.binary.Hex;
  * DefaultAWSCredentialsProviderChain}, which include environment variables, EC2 instance profiles,
  * etc.
  */
-public final class AppConfiguration implements Serializable {
+public final class AppConfiguration extends BaseAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
 
   /**
@@ -76,30 +76,6 @@ public final class AppConfiguration implements Serializable {
   private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUrl()} value.
-   */
-  public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUsername()} value.
-   */
-  public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabasePassword()} value.
-   */
-  public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getMaxPoolSize()} value.
-   */
-  public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
-
-  /**
    * The name of the environment variable that should be used to indicate whether or not to
    * configure the CCW RIF data load job. Defaults to true to run the job unless disabled.
    */
@@ -133,35 +109,6 @@ public final class AppConfiguration implements Serializable {
    * removed as soon as is reasonable.
    */
   public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES = false;
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricKey()} value.
-   */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicAppName()} value.
-   */
-  public static final String ENV_VAR_NEW_RELIC_APP_NAME = "NEW_RELIC_APP_NAME";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricHost()} value.
-   */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "NEW_RELIC_METRIC_HOST";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPath()} value.
-   */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "NEW_RELIC_METRIC_PATH";
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPeriod()} value.
-   */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
@@ -312,8 +259,6 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
-  private final MetricOptions metricOptions;
-  private final DatabaseOptions databaseOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
   @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
@@ -332,20 +277,9 @@ public final class AppConfiguration implements Serializable {
       DatabaseOptions databaseOptions,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
       @Nullable RdaLoadOptions rdaLoadOptions) {
-    this.metricOptions = metricOptions;
-    this.databaseOptions = databaseOptions;
+    super(metricOptions, databaseOptions);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
-  }
-
-  /** @return the {@link MetricOptions} that the application will use */
-  public MetricOptions getMetricOptions() {
-    return metricOptions;
-  }
-
-  /** @return the {@link DatabaseOptions} that the application will use */
-  public DatabaseOptions getDatabaseOptions() {
-    return databaseOptions;
   }
 
   /** @return the {@link CcwRifLoadOptions} that the application will use */
@@ -358,15 +292,12 @@ public final class AppConfiguration implements Serializable {
     return Optional.ofNullable(rdaLoadOptions);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [metricOptions=");
-    builder.append(metricOptions);
-    builder.append(", databaseOptions=");
-    builder.append(databaseOptions);
-    builder.append(", ccwRifLoadOptions=");
+    StringBuilder builder = new StringBuilder(super.toString());
+    builder.append("AppConfiguration [");
+    builder.append("ccwRifLoadOptions=");
     builder.append(ccwRifLoadOptions);
     builder.append(", rdaLoadOptions=");
     builder.append(rdaLoadOptions);
@@ -393,50 +324,16 @@ public final class AppConfiguration implements Serializable {
     byte[] hicnHashPepper = readEnvBytesRequired(ENV_VAR_KEY_HICN_HASH_PEPPER);
     int hicnHashCacheSize =
         readEnvIntOptional(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE).orElse(DEFAULT_HICN_HASH_CACHE_SIZE);
-    String databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
-    String databaseUsername = readEnvStringRequired(ENV_VAR_KEY_DATABASE_USERNAME);
-    String databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
+
     int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
     boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
     boolean filteringNonNullAndNon2022Benes =
         readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES)
             .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES);
-    Optional<String> newRelicMetricKey = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_KEY);
-    Optional<String> newRelicAppName = readEnvStringOptional(ENV_VAR_NEW_RELIC_APP_NAME);
-    Optional<String> newRelicMetricHost = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_HOST);
-    Optional<String> newRelicMetricPath = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_PATH);
-    Optional<Integer> newRelicMetricPeriod = readEnvIntOptional(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
 
-    /*
-     * Note: For CcwRifLoadJob, databaseMaxPoolSize needs to be double the number of loader threads
-     * when idempotent loads are being used. Apparently, the queries need a separate Connection?
-     */
-    Optional<Integer> databaseMaxPoolSize = readEnvIntOptional(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
-    if (databaseMaxPoolSize.isPresent() && databaseMaxPoolSize.get() < 1)
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSize));
-    if (!databaseMaxPoolSize.isPresent()) databaseMaxPoolSize = Optional.of(loaderThreads * 2);
+    MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
+    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(loaderThreads);
 
-    Optional<String> hostname;
-    try {
-      hostname = Optional.of(InetAddress.getLocalHost().getHostName());
-    } catch (UnknownHostException e) {
-      hostname = Optional.empty();
-    }
-
-    MetricOptions metricOptions =
-        new MetricOptions(
-            newRelicMetricKey,
-            newRelicAppName,
-            newRelicMetricHost,
-            newRelicMetricPath,
-            newRelicMetricPeriod,
-            hostname);
-    DatabaseOptions databaseOptions =
-        new DatabaseOptions(
-            databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.get());
     LoadAppOptions loadOptions =
         new LoadAppOptions(
             IdHasher.Config.builder()
@@ -456,6 +353,45 @@ public final class AppConfiguration implements Serializable {
     return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 
+  /**
+   * Reads database options from environment variables.
+   *
+   * @param loaderThreads the number loader threads, to determine fallback value for database max
+   *     pool size
+   * @return the database options
+   */
+  private static DatabaseOptions readDatabaseOptionsFromEnvironmentVariables(int loaderThreads) {
+    // Get the base database options from env vars
+    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables();
+
+    Optional<Integer> databaseMaxPoolSize = readEnvIntOptional(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
+
+    if (databaseMaxPoolSize.isPresent() && databaseMaxPoolSize.get() < 1) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSize));
+    }
+
+    /*
+     * Note: For CcwRifLoadJob, databaseMaxPoolSize needs to be double the number of loader threads
+     * when idempotent loads are being used. Apparently, the queries need a separate Connection?
+     */
+    if (databaseMaxPoolSize.isEmpty()) {
+      databaseMaxPoolSize = Optional.of(loaderThreads * 2);
+    }
+
+    return new DatabaseOptions(
+        databaseOptions.getDatabaseUrl(), databaseOptions.getDatabaseUsername(),
+        databaseOptions.getDatabasePassword(), databaseMaxPoolSize.orElse(1));
+  }
+
+  /**
+   * Reads the ccw rif load options from environment variables.
+   *
+   * @param loadOptions the load options to use when creating the {link CcwRifLoadOptions}
+   * @return the ccw rif load options
+   */
   @Nullable
   static CcwRifLoadOptions readCcwRifLoadOptionsFromEnvironmentVariables(
       LoadAppOptions loadOptions) {
@@ -501,8 +437,7 @@ public final class AppConfiguration implements Serializable {
           e);
     }
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
-    CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
-    return ccwRifLoadOptions;
+    return new CcwRifLoadOptions(extractionOptions, loadOptions);
   }
 
   /**
@@ -581,171 +516,18 @@ public final class AppConfiguration implements Serializable {
   }
 
   /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set
-   */
-  static Optional<String> readEnvStringOptional(String environmentVariableName) {
-    Optional<String> environmentVariableValue =
-        Optional.ofNullable(System.getenv(environmentVariableName));
-    return environmentVariableValue;
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set or contains an empty value
-   */
-  static Optional<String> readEnvNonEmptyStringOptional(String environmentVariableName) {
-    return readEnvStringOptional(environmentVariableName)
-        .map(String::trim)
-        .filter(s -> !s.isEmpty());
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value is missing.
-   */
-  static String readEnvStringRequired(String environmentVariableName) {
-    Optional<String> environmentVariableValue =
-        Optional.ofNullable(System.getenv(environmentVariableName));
-    if (!environmentVariableValue.isPresent()) {
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              environmentVariableName));
-    } else if (environmentVariableValue.get().isEmpty()) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValue.get()));
-    }
-
-    return environmentVariableValue.get();
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  static Optional<Integer> readEnvIntOptional(String environmentVariableName) {
-    Optional<String> environmentVariableValueText =
-        Optional.ofNullable(System.getenv(environmentVariableName));
-    if (!environmentVariableValueText.isPresent()) {
-      return Optional.empty();
-    }
-
-    try {
-      return Optional.of(Integer.valueOf(environmentVariableValueText.get()));
-    } catch (NumberFormatException e) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s' (%s)",
-              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
-          e);
-    }
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @param parser the function used to convert the name into a parsed value
-   * @return the value of the specified environment variable converted to a parsed value
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  static <T> Optional<T> readEnvParsedOptional(
-      String environmentVariableName, Function<String, T> parser) {
-    Optional<String> environmentVariableValueText =
-        readEnvNonEmptyStringOptional(environmentVariableName);
-
-    try {
-      return environmentVariableValueText.map(parser);
-    } catch (RuntimeException e) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s' (%s)",
-              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
-          e);
-    }
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed or is not positive.
-   */
-  static int readEnvIntPositiveRequired(String environmentVariableName) {
-    Optional<Integer> environmentVariableValue = readEnvIntOptional(environmentVariableName);
-    if (!environmentVariableValue.isPresent()) {
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              environmentVariableName));
-    } else if (environmentVariableValue.get() < 1) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValue.get()));
-    }
-
-    return environmentVariableValue.get();
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  static Optional<Boolean> readEnvBooleanOptional(String environmentVariableName) {
-    Optional<String> environmentVariableValueText =
-        Optional.ofNullable(System.getenv(environmentVariableName));
-    if (!environmentVariableValueText.isPresent()) {
-      return Optional.empty();
-    }
-
-    if ("true".equalsIgnoreCase(environmentVariableValueText.get())) return Optional.of(true);
-    else if ("false".equalsIgnoreCase(environmentVariableValueText.get()))
-      return Optional.of(false);
-    else
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
-  }
-
-  /**
+   * Reads an environment variable into bytes so it can be decoded into the appropriate value.
+   *
+   * <p>TODO: Hex/DecoderException seems to be using some transient dependency on apache commons
+   * (not the one declared in the pom); may want to fix this. Leaving this out of
+   * BaseAppConfiguration due to this strange dependency.
+   *
    * @param environmentVariableName the name of the environment variable to get the value of
    * @return the value of the specified environment variable
    * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
    *     value cannot be parsed.
    */
-  static boolean readEnvBooleanRequired(String environmentVariableName) {
-    Optional<Boolean> environmentVariableValue = readEnvBooleanOptional(environmentVariableName);
-    if (!environmentVariableValue.isPresent()) {
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              environmentVariableName));
-    }
-
-    return environmentVariableValue.get();
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  static byte[] readEnvBytesRequired(String environmentVariableName) {
+  private static byte[] readEnvBytesRequired(String environmentVariableName) {
     Optional<String> environmentVariableValueText =
         Optional.ofNullable(System.getenv(environmentVariableName));
     if (!environmentVariableValueText.isPresent()) {

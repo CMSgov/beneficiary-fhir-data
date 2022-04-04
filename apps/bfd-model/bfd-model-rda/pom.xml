@@ -39,13 +39,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- provides DatabaseSchemaManager to apply flyway migrations -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rif</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>

@@ -1,65 +1,63 @@
-package gov.cms.bfd.model.rda;
+package gov.cms.bfd.migrator.app;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.DatabaseTestSchemaManager;
+import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
+import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.RdaFissPayer;
+import gov.cms.bfd.model.rda.RdaFissProcCode;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.RdaMcsDetail;
+import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.hibernate.tool.schema.Action;
-import org.hsqldb.jdbc.JDBCDataSource;
+import javax.sql.DataSource;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SchemaMigrationIT {
-  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+public class RdaSchemaMigrationIT {
 
-  private Connection dbLifetimeConnection;
-  private EntityManager entityManager;
+  private Session session;
 
   @BeforeEach
-  public void setUp() throws SQLException {
-    final String dbUrl = "jdbc:hsqldb:mem:" + getClass().getSimpleName();
+  public void setUp() {
+    DataSource dataSource = DatabaseTestUtils.createTestDatabase("jdbc:hsqldb:mem", "30", null);
 
-    // the HSQLDB database will be destroyed when this connection is closed
-    dbLifetimeConnection = DriverManager.getConnection(dbUrl + ";shutdown=true", "", "");
-
-    final JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl(dbUrl);
-    dataSource.setUser("");
-    dataSource.setPassword("");
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
-    entityManager = createEntityManager(dataSource);
+    Path testFilePath = Path.of(".", "src", "main", "resources", "db", "migration");
+    DatabaseTestSchemaManager.createOrUpdateSchema(dataSource, testFilePath.toString());
+    HibernateValidator hv = new HibernateValidator(dataSource, List.of("gov.cms.bfd.model.rda"));
+    SessionFactory sessionFactory = hv.createHibernateSessionFactory(dataSource);
+    session = sessionFactory.openSession();
   }
 
   @AfterEach
-  public void tearDown() throws SQLException {
-    if (entityManager != null && entityManager.isOpen()) {
-      entityManager.close();
-      entityManager = null;
+  public void tearDown() {
+    if (session != null && session.isOpen()) {
+      session.close();
+      session = null;
     }
-    if (dbLifetimeConnection != null) {
-      dbLifetimeConnection.close();
-      dbLifetimeConnection = null;
-    }
+    DatabaseTestUtils.get().dropSchemaForDataSource();
   }
 
   /**
@@ -139,14 +137,12 @@ public class SchemaMigrationIT {
 
     // Insert a record and read it back to verify some columns and that the detail records were
     // written
-    entityManager.getTransaction().begin();
-    entityManager.persist(claim);
-    entityManager.getTransaction().commit();
+    session.getTransaction().begin();
+    session.persist(claim);
+    session.getTransaction().commit();
 
     List<RdaFissClaim> claims =
-        entityManager
-            .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
-            .getResultList();
+        session.createQuery("select c from RdaFissClaim c", RdaFissClaim.class).getResultList();
     assertEquals(1, claims.size());
 
     RdaFissClaim resultClaim = claims.get(0);
@@ -166,11 +162,11 @@ public class SchemaMigrationIT {
     procCode0.setProcFlag("H");
     diagCode1.setDiagPoaInd("S");
     payer1.setEstAmtDue(new BigDecimal("7.89"));
-    entityManager.getTransaction().begin();
-    entityManager.persist(claim);
-    entityManager.getTransaction().commit();
+    session.getTransaction().begin();
+    session.persist(claim);
+    session.getTransaction().commit();
     resultClaim =
-        entityManager
+        session
             .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
             .getResultList()
             .get(0);
@@ -208,12 +204,12 @@ public class SchemaMigrationIT {
 
     // Insert a record and read it back to verify some columns and that the detail records were
     // written
-    entityManager.getTransaction().begin();
-    entityManager.persist(claim);
-    entityManager.getTransaction().commit();
+    session.getTransaction().begin();
+    session.persist(claim);
+    session.getTransaction().commit();
 
     List<RdaMcsClaim> resultClaims =
-        entityManager.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
+        session.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
     assertEquals(1, resultClaims.size());
     RdaMcsClaim resultClaim = resultClaims.get(0);
     assertEquals("0:P,1:Q,2:R", summarizeMcsDetails(resultClaim));
@@ -226,12 +222,12 @@ public class SchemaMigrationIT {
     claim.getDiagCodes().remove(diag2);
     diag0.setIdrDiagIcdType("W");
 
-    entityManager.getTransaction().begin();
-    entityManager.persist(claim);
-    entityManager.getTransaction().commit();
+    session.getTransaction().begin();
+    session.persist(claim);
+    session.getTransaction().commit();
 
     resultClaims =
-        entityManager.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
+        session.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
     assertEquals(1, resultClaims.size());
     resultClaim = resultClaims.get(0);
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
@@ -248,8 +244,8 @@ public class SchemaMigrationIT {
     for (int mbiNumber = 1; mbiNumber <= 10; mbiNumber += 1) {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
-      entityManager.getTransaction().begin();
-      Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
+      session.getTransaction().begin();
+      Mbi mbiRecord = (Mbi) session.merge(new Mbi(mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final RdaFissClaim claim =
             RdaFissClaim.builder()
@@ -261,42 +257,42 @@ public class SchemaMigrationIT {
                 .sequenceNumber(seqNo++)
                 .mbiRecord(mbiRecord)
                 .build();
-        entityManager.merge(claim);
+        session.merge(claim);
       }
-      entityManager.getTransaction().commit();
-      entityManager.clear();
+      session.getTransaction().commit();
+      session.clear();
     }
 
     // verify the mbis were written to the MbiCache table
-    entityManager.getTransaction().begin();
+    session.getTransaction().begin();
     for (String mbi : mbis) {
-      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaBuilder builder = session.getCriteriaBuilder();
       CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
       Root<Mbi> root = criteria.from(Mbi.class);
       criteria.select(root);
       criteria.where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-      var record = entityManager.createQuery(criteria).getSingleResult();
+      var record = session.createQuery(criteria).getSingleResult();
       assertNotNull(record);
     }
-    entityManager.getTransaction().commit();
+    session.getTransaction().commit();
 
     // verify we can find the claims using their MBI hash through the mbiRecord
-    entityManager.getTransaction().begin();
+    session.getTransaction().begin();
     for (String mbi : mbis) {
-      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaBuilder builder = session.getCriteriaBuilder();
       CriteriaQuery<RdaFissClaim> criteria = builder.createQuery(RdaFissClaim.class);
       Root<RdaFissClaim> root = criteria.from(RdaFissClaim.class);
       criteria.select(root);
       criteria.where(
           builder.equal(
               root.get(RdaFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
-      var claims = entityManager.createQuery(criteria).getResultList();
+      var claims = session.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
       for (RdaFissClaim claim : claims) {
         assertEquals(mbi, claim.getDcn().substring(0, mbi.length()));
       }
     }
-    entityManager.getTransaction().commit();
+    session.getTransaction().commit();
   }
 
   @Test
@@ -308,8 +304,8 @@ public class SchemaMigrationIT {
     for (int mbiNumber = 1; mbiNumber <= 10; mbiNumber += 1) {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
-      entityManager.getTransaction().begin();
-      Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
+      session.getTransaction().begin();
+      Mbi mbiRecord = (Mbi) session.merge(new Mbi(mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final RdaMcsClaim claim =
             RdaMcsClaim.builder()
@@ -321,42 +317,42 @@ public class SchemaMigrationIT {
                 .sequenceNumber(seqNo++)
                 .mbiRecord(mbiRecord)
                 .build();
-        entityManager.merge(claim);
+        session.merge(claim);
       }
-      entityManager.getTransaction().commit();
-      entityManager.clear();
+      session.getTransaction().commit();
+      session.clear();
     }
 
     // verify the mbis were written to the MbiCache table
-    entityManager.getTransaction().begin();
+    session.getTransaction().begin();
     for (String mbi : mbis) {
-      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaBuilder builder = session.getCriteriaBuilder();
       CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
       Root<Mbi> root = criteria.from(Mbi.class);
       criteria.select(root);
       criteria.where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-      var record = entityManager.createQuery(criteria).getSingleResult();
+      var record = session.createQuery(criteria).getSingleResult();
       assertNotNull(record);
     }
-    entityManager.getTransaction().commit();
+    session.getTransaction().commit();
 
     // verify we can find the claims using their MBI hash through the mbiRecord
-    entityManager.getTransaction().begin();
+    session.getTransaction().begin();
     for (String mbi : mbis) {
-      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaBuilder builder = session.getCriteriaBuilder();
       CriteriaQuery<RdaMcsClaim> criteria = builder.createQuery(RdaMcsClaim.class);
       Root<RdaMcsClaim> root = criteria.from(RdaMcsClaim.class);
       criteria.select(root);
       criteria.where(
           builder.equal(
               root.get(RdaFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
-      var claims = entityManager.createQuery(criteria).getResultList();
+      var claims = session.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
       for (RdaMcsClaim claim : claims) {
         assertEquals(mbi, claim.getIdrClmHdIcn().substring(0, mbi.length()));
       }
     }
-    entityManager.getTransaction().commit();
+    session.getTransaction().commit();
   }
 
   /**
@@ -377,13 +373,13 @@ public class SchemaMigrationIT {
                         .claimType(RdaApiProgress.ClaimType.FISS)
                         .build())
             .collect(Collectors.toList());
-    entityManager.getTransaction().begin();
+    session.getTransaction().begin();
     for (RdaApiClaimMessageMetaData metaData : metaDataList) {
       assertEquals(0L, metaData.getMetaDataId());
-      entityManager.persist(metaData);
+      session.persist(metaData);
       assertEquals(metaData.getSequenceNumber(), metaData.getMetaDataId());
     }
-    entityManager.getTransaction().commit();
+    session.getTransaction().commit();
   }
 
   private RdaMcsDetail quickMcsDetail(RdaMcsClaim claim, int priority, String dtlStatus) {
@@ -435,19 +431,5 @@ public class SchemaMigrationIT {
 
   private <T> String summarizeObjects(Stream<T> objects, Function<T, String> mapping) {
     return objects.map(mapping).sorted().collect(Collectors.joining(","));
-  }
-
-  private EntityManager createEntityManager(JDBCDataSource dataSource) {
-    final Map<String, Object> hibernateProperties =
-        ImmutableMap.of(
-            org.hibernate.cfg.AvailableSettings.DATASOURCE,
-            dataSource,
-            org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO,
-            Action.VALIDATE,
-            org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE,
-            10);
-
-    return Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
-        .createEntityManager();
   }
 }

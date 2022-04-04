@@ -1,4 +1,4 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,11 +14,11 @@ import java.util.function.Predicate;
  * buffer. If that buffer fills up (because you're not reading the output), the process will block
  * -- forever. To avoid that, it's best to always have a separate thread running that consumes a
  * process' output. This {@link ProcessOutputConsumer} is designed to allow for just that.
- *
- * <p>TODO: BFD-1558 Move to a common location for pipeline and this app
  */
 public final class ProcessOutputConsumer implements Runnable {
+  /** The reader that consumes output from stdout. */
   private final BufferedReader stdoutReader;
+  /** Holds the contents of stdout. */
   private final List<String> stdoutContents;
 
   /**
@@ -38,7 +38,7 @@ public final class ProcessOutputConsumer implements Runnable {
     this.stdoutContents = new ArrayList<>();
   }
 
-  /** @see java.lang.Runnable#run() */
+  /** @see Runnable#run() */
   @Override
   public void run() {
     /*
