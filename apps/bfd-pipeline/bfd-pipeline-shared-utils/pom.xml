@@ -86,7 +86,11 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-shared-test-utils</artifactId>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<pluginManagement>

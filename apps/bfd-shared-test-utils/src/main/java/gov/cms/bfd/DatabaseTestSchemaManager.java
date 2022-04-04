@@ -1,8 +1,5 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd;
 
-import gov.cms.bfd.sharedutils.database.DatabaseUtils;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import gov.cms.bfd.sharedutils.exceptions.UncheckedSqlException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -14,48 +11,48 @@ import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.MigrationState;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.flywaydb.core.internal.sqlscript.FlywaySqlScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Manages the schema of the database being used to store the Blue Button API backend's data.
- *
- * <p>This uses <a href="http://www.liquibase.org/">Liquibase</a> to manage the schema. The main
- * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
+ * A copy of DatabaseSchemaManager for testing purposes, to eliminate dependencies between util
+ * packages.
  */
-public final class DatabaseSchemaManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
+public class DatabaseTestSchemaManager {
 
   /**
-   * Creates or updates, as appropriate, the Blue Button API backend database schema for the
-   * specified database. The Flyway migration scripts are stored in <code>
-   *  src/main/resources/db/migration</code>.
+   * Creates or updates, as appropriate, the backend database schema for the specified database.
    *
    * @param dataSource the JDBC {@link DataSource} for the database whose schema should be created
    *     or updated
-   * @param appConfiguration the app configuration
+   * @return {@code true} if the migration was successful
+   */
+  public static boolean createOrUpdateSchema(DataSource dataSource) {
+    return createOrUpdateSchema(dataSource, null);
+  }
+
+  /**
+   * Creates or updates, as appropriate, the Blue Button API backend database schema for the
+   * specified database.
+   *
+   * @param dataSource the JDBC {@link DataSource} for the database whose schema should be created
+   *     or updated
+   * @param flywayScriptLocationOverride the flyway script location override, can be null if no
+   *     override
    * @return {@code true} if the migration was successful
    */
   public static boolean createOrUpdateSchema(
-      DataSource dataSource, AppConfiguration appConfiguration) {
-    LOGGER.info("Schema create/upgrade: running...");
-
+      DataSource dataSource, String flywayScriptLocationOverride) {
     Flyway flyway;
     try {
-      flyway = createFlyway(dataSource, appConfiguration);
+      flyway = createFlyway(dataSource, flywayScriptLocationOverride);
       flyway.migrate();
     } catch (FlywaySqlScriptException sqlException) {
-      LOGGER.error("SQL Exception when running migration: ", sqlException);
-      return false;
+      throw new RuntimeException("SQL Exception when running migration: ", sqlException);
     } catch (FlywayException flywayException) {
-      LOGGER.error("Flyway Exception when running migration: ", flywayException);
-      return false;
+      throw new RuntimeException("Flyway Exception when running migration: ", flywayException);
     } catch (Exception ex) {
-      LOGGER.error("Unexpected Exception when running migration: ", ex);
-      return false;
+      throw new RuntimeException("Unexpected Exception when running migration: ", ex);
     }
 
-    LOGGER.info("Schema create/upgrade: complete.");
     // Ensure the final migration was a success to return true
     MigrationInfoService flywayInfo = flyway.info();
     return flywayInfo != null
@@ -64,14 +61,13 @@ public final class DatabaseSchemaManager {
   }
 
   /**
-   * Create flyway using the specified parameters.
+   * Creates a {@link Flyway} instance that can be used for the specified {@link DataSource}.
    *
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
-   * @param appConfiguration the app configuration to use, for gathering flyway specific
-   *     configuration
-   * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
+   * @param flywayScriptLocationOverride the flyway script location override
+   * @return a {@link Flyway} instance
    */
-  private static Flyway createFlyway(DataSource dataSource, AppConfiguration appConfiguration) {
+  private static Flyway createFlyway(DataSource dataSource, String flywayScriptLocationOverride) {
     FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
     flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 
@@ -87,9 +83,8 @@ public final class DatabaseSchemaManager {
 
     // If we want to point at a specific location for the migration scripts
     // Useful for testing
-    String scriptLocationOverride = appConfiguration.getFlywayScriptLocationOverride();
-    if (scriptLocationOverride != null && scriptLocationOverride.length() > 0) {
-      flywayBuilder.locations(scriptLocationOverride);
+    if (flywayScriptLocationOverride != null && flywayScriptLocationOverride.length() > 0) {
+      flywayBuilder.locations(flywayScriptLocationOverride);
     }
 
     return flywayBuilder.load();
@@ -105,7 +100,7 @@ public final class DatabaseSchemaManager {
   private static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
     Map<String, String> placeholders = new HashMap<>();
     try (Connection connection = dataSource.getConnection()) {
-      if (DatabaseUtils.isHsqlConnection(connection)) {
+      if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {
         placeholders.put("type.int4", "integer");
         placeholders.put("type.text", "longvarchar");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -122,7 +117,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.perms", "--");
         placeholders.put("logic.psql-only", "-- ");
         placeholders.put("logic.hsql-only", "");
-      } else if (DatabaseUtils.isPostgresConnection(connection)) {
+      } else if (connection.getMetaData().getDatabaseProductName().equals("PostgreSQL")) {
         placeholders.put("type.int4", "int4");
         placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -140,12 +135,10 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.psql-only", "");
         placeholders.put("logic.hsql-only", "-- ");
       } else {
-        throw new BadCodeMonkeyException(
-            String.format(
-                "Unknown database vendor: %s", DatabaseUtils.extractVendorName(connection)));
+        throw new RuntimeException("Unknown database vendor");
       }
     } catch (SQLException e) {
-      throw new UncheckedSqlException(e);
+      throw new RuntimeException("SQL Exception while running migrations: ", e);
     }
     return placeholders;
   }

@@ -304,6 +304,11 @@
 			<artifactId>spark-sketch_2.12</artifactId>
 			<version>2.4.7</version>
 		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-test-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

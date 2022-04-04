@@ -8,26 +8,14 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bfd-shared-utils</artifactId>
+	<artifactId>bfd-shared-test-utils</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
-		Provides utility code and dependencies that are shared by (more or less) all of the other BFD modules.
+		Provides test utility code and dependencies that are shared by more than one of the other BFD modules.
 	</description>
 
 	<dependencies>
-		<dependency>
-			<!-- Just useful. -->
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-		<!-- Compile time only -->
-		<dependency>
-			<!-- this allows the construction of POJOs without a lot of boilerplate code -->
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager
 				class. -->
@@ -36,33 +24,48 @@
 			<version>${flyway.version}</version>
 		</dependency>
 		<dependency>
+			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${hsqldb.version}</version>
+			<!-- Only used by tests, but included in compile scope for use with test
+				utilities in that scope. -->
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
 				 Java. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
-
-		<!-- Provide the api and implementation for XML bind which are used by many BFD modules. -->
 		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
+			<!-- An implementation of the JCL API that routes everything through to SLF4J,
+				 instead. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
-    
-		<!-- Testing -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
+			<!-- An implementation of the Log4J API that routes everything through to SLF4J,
+				 instead. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
+			<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything to SLF4J,
+				 instead. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Logback is used as the logging target/backend for SLF4J during runtime: all logging
+				 events will be sent to it. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
 			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
@@ -74,17 +77,6 @@
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
 			<version>${newrelic.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-shared-test-utils</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
