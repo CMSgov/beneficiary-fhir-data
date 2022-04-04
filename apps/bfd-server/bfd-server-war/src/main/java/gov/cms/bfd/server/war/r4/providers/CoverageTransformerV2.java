@@ -89,8 +89,6 @@ final class CoverageTransformerV2 {
         .getMedicareCoverageStartDate()
         .ifPresent(value -> TransformerUtilsV2.setPeriodStart(coverage.getPeriod(), value));
 
-    coverage.addContract(TransformerUtilsV2.referenceCoverage("contract1", MedicareSegment.PART_A));
-
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
     setTypeAndIssuer(coverage);

@@ -255,8 +255,5 @@
       } ]
     },
     "value" : "Part A"
-  } ],
-  "contract" : [ {
-    "reference" : "Coverage/part-a-contract1"
   } ]
 }
