@@ -33,28 +33,6 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SAMPLE_A_SNF,
       StaticRifResource.SAMPLE_A_DME),
 
-  SAMPLE_B(
-      StaticRifResource.SAMPLE_B_BENES,
-      StaticRifResource.SAMPLE_B_CARRIER,
-      StaticRifResource.SAMPLE_B_INPATIENT,
-      StaticRifResource.SAMPLE_B_OUTPATIENT,
-      StaticRifResource.SAMPLE_B_SNF,
-      StaticRifResource.SAMPLE_B_HOSPICE,
-      StaticRifResource.SAMPLE_B_HHA,
-      StaticRifResource.SAMPLE_B_DME,
-      StaticRifResource.SAMPLE_B_PDE),
-
-  SAMPLE_C(
-      StaticRifResource.SAMPLE_C_BENES,
-      StaticRifResource.SAMPLE_C_CARRIER,
-      StaticRifResource.SAMPLE_C_INPATIENT,
-      StaticRifResource.SAMPLE_C_OUTPATIENT,
-      StaticRifResource.SAMPLE_C_SNF,
-      StaticRifResource.SAMPLE_C_HOSPICE,
-      StaticRifResource.SAMPLE_C_HHA,
-      StaticRifResource.SAMPLE_C_DME,
-      StaticRifResource.SAMPLE_C_PDE),
-
   SAMPLE_U(StaticRifResource.SAMPLE_U_BENES, StaticRifResource.SAMPLE_U_CARRIER),
 
   SAMPLE_U_BENES_UNCHANGED(

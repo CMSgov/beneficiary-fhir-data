@@ -408,27 +408,6 @@ public final class BeneficiaryTransformerV2Test {
     newBeneficiary.setMbiHash(Optional.of("someMBIhash"));
     newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
-    // Add the history records to the Beneficiary, but nill out the HICN fields.
-    Set<BeneficiaryHistory> beneficiaryHistories =
-        parsedRecords.stream()
-            .filter(r -> r instanceof BeneficiaryHistory)
-            .map(r -> (BeneficiaryHistory) r)
-            .filter(r -> newBeneficiary.getBeneficiaryId().equals(r.getBeneficiaryId()))
-            .collect(Collectors.toSet());
-
-    newBeneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
-
-    // Add the MBI history records to the Beneficiary.
-    Set<MedicareBeneficiaryIdHistory> beneficiaryMbis =
-        parsedRecords.stream()
-            .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
-            .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(
-                r -> newBeneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
-            .collect(Collectors.toSet());
-    newBeneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
-    assertThat(newBeneficiary, is(notNullValue()));
-
     Patient genPatient =
         BeneficiaryTransformerV2.transform(
             new MetricRegistry(), newBeneficiary, RequestHeaders.getHeaderWrapper());
@@ -440,6 +419,7 @@ public final class BeneficiaryTransformerV2Test {
     Optional<Extension> ex =
         newPatient.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
 
+    assertEquals(false, ex.isPresent());
     assertEquals(true, ex.isEmpty());
   }
 
