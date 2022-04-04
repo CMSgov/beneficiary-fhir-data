@@ -35,7 +35,7 @@ import org.mockito.MockitoAnnotations;
 /** Tests the functionality of the HibernateValidator. */
 public class HibernateValidatorTest {
 
-  HibernateValidator classUnderTest;
+  HibernateValidator hibernateValidator;
 
   @Mock HikariDataSource dataSource;
 
@@ -53,9 +53,9 @@ public class HibernateValidatorTest {
     /* Set the package to a spot that will find an annotated entity,
     to pass the validation that we have at least one class */
     List<String> packagesToScan = List.of("gov.cms.bfd.model.rif");
-    classUnderTest = new HibernateValidator(dataSource, packagesToScan);
-    classUnderTest.setSchemaValidator(mockSchemaValidator);
-    classUnderTest.setHibernateConfiguration(configuration);
+    hibernateValidator = new HibernateValidator(dataSource, packagesToScan);
+    hibernateValidator.setSchemaValidator(mockSchemaValidator);
+    hibernateValidator.setHibernateConfiguration(configuration);
     when(configuration.buildSessionFactory(any())).thenReturn(mockSessionFactory);
   }
 
@@ -103,13 +103,13 @@ public class HibernateValidatorTest {
   public void testRunHibernateValidationWhenNoClassesFoundExpectFailure() {
     // Given
     List<String> packagesToScan = List.of("package.doesnt.exist");
-    classUnderTest = new HibernateValidator(dataSource, packagesToScan);
-    classUnderTest.setSchemaValidator(mockSchemaValidator);
-    classUnderTest.setHibernateConfiguration(configuration);
+    hibernateValidator = new HibernateValidator(dataSource, packagesToScan);
+    hibernateValidator.setSchemaValidator(mockSchemaValidator);
+    hibernateValidator.setHibernateConfiguration(configuration);
     when(configuration.buildSessionFactory(any())).thenReturn(mockSessionFactory);
 
     // When
-    boolean result = classUnderTest.runHibernateValidation();
+    boolean result = hibernateValidator.runHibernateValidation();
 
     // Then
     assertFalse(result);
@@ -125,7 +125,7 @@ public class HibernateValidatorTest {
     // The default test setup should pass, so test that
 
     // When
-    boolean result = classUnderTest.runHibernateValidation();
+    boolean result = hibernateValidator.runHibernateValidation();
 
     // Then
     assertTrue(result);
@@ -142,7 +142,7 @@ public class HibernateValidatorTest {
     doThrow(new HibernateException("bad validation")).when(mockSchemaValidator).validate(any());
 
     // When
-    boolean result = classUnderTest.runHibernateValidation();
+    boolean result = hibernateValidator.runHibernateValidation();
 
     // Then
     assertFalse(result);
@@ -159,7 +159,7 @@ public class HibernateValidatorTest {
     doThrow(new RuntimeException("unexpected error")).when(mockSchemaValidator).validate(any());
 
     // When
-    boolean result = classUnderTest.runHibernateValidation();
+    boolean result = hibernateValidator.runHibernateValidation();
 
     // Then
     assertFalse(result);
