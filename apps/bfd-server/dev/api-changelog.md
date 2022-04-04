@@ -1,5 +1,29 @@
 # API Changelog
 
+## BFD-1582 Remove spurious coverage contracts
+
+Removed hardcoded coverage contracts that were inadvertantly introduced in V1 and V2 during testing.
+
+The contract that was removed in V1:
+
+```
+"contract" : [ {
+        "id" : "ptc-contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1 reference"
+      } ]
+```
+
+The contract that was removed in V2:
+
+```
+"contract" : [ {
+        "id" : "contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1"
+      } ]
+```
+
 ## BFD-1477 Map Provider for PDE
 
 * Following FHIR mapping changes were made:
