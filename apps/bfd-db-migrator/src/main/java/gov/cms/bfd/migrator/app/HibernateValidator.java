@@ -1,7 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +38,7 @@ public class HibernateValidator {
 
   private Configuration hibernateConfiguration;
 
-  private final List<String> modelPackagesToScan = new ArrayList<>();
+  private final List<String> modelPackagesToScan;
 
   /**
    * Instantiates a new Hibernate validator.
@@ -49,7 +48,7 @@ public class HibernateValidator {
    */
   public HibernateValidator(HikariDataSource dataSource, List<String> modelPackagesToScan) {
     this.dataSource = dataSource;
-    this.modelPackagesToScan.addAll(modelPackagesToScan);
+    this.modelPackagesToScan = modelPackagesToScan;
     this.schemaValidator = new SchemaValidator();
     this.hibernateConfiguration = new Configuration();
   }
@@ -59,7 +58,7 @@ public class HibernateValidator {
    *
    * @param schemaValidator the schema validator
    */
-  public void setSchemaValidator(SchemaValidator schemaValidator) {
+  void setSchemaValidator(SchemaValidator schemaValidator) {
     this.schemaValidator = schemaValidator;
   }
 
@@ -68,7 +67,7 @@ public class HibernateValidator {
    *
    * @param configuration the configuration
    */
-  public void setHibernateConfiguration(Configuration configuration) {
+  void setHibernateConfiguration(Configuration configuration) {
     this.hibernateConfiguration = configuration;
   }
 

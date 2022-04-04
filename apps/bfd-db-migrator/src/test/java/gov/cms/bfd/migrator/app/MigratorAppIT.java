@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.migrator.util.DatabaseTestUtils;
 import gov.cms.bfd.migrator.util.DatabaseTestUtils.DataSourceComponents;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -297,10 +296,20 @@ public final class MigratorAppIT {
    */
   public int getNumMigrationScripts() throws IOException {
 
-    JarFile migrationJar =
-        new JarFile(
-            new File(
-                "target/db-migrator/bfd-db-migrator-1.0.0-SNAPSHOT/lib/bfd-model-rif-1.0.0-SNAPSHOT.jar"));
+    int MAX_SEARCH_DEPTH = 5;
+    Path jarFilePath =
+        Files.find(
+                Path.of("target/db-migrator/"),
+                MAX_SEARCH_DEPTH,
+                (path, basicFileAttributes) ->
+                    path.toFile().getName().matches("bfd-model-rif-.*.\\.jar"))
+            .findFirst()
+            .orElse(null);
+    if (jarFilePath == null) {
+      throw new IOException("Could not find jar file for testing num migrations");
+    }
+
+    JarFile migrationJar = new JarFile(jarFilePath.toFile());
     Enumeration<? extends JarEntry> enumeration = migrationJar.entries();
 
     int fileCount = 0;

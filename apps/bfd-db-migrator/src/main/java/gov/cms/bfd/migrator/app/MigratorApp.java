@@ -10,7 +10,6 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -46,7 +45,7 @@ public final class MigratorApp {
    * external packages. This may be better served coming from an application configuration.
    */
   static final List<String> hibernateValidationModelPackages =
-      Arrays.asList("gov.cms.bfd.model.rda", "gov.cms.bfd.model.rif");
+      List.of("gov.cms.bfd.model.rda", "gov.cms.bfd.model.rif");
 
   /**
    * This method is called when the application is launched from the command line.
