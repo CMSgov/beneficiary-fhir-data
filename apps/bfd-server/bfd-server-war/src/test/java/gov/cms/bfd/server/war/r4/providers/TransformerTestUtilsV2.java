@@ -1086,6 +1086,34 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Finds an {@link Extension} in a list based on the Extension URL and System URL
+   *
+   * @param url the expected {@link Extension#getUrl()} of the {@link Extension} to look for
+   * @param system the expected {@link Coding#getSystem()} value
+   * @param extensions the list of extensions to filter through
+   */
+  static Extension findExtensionByUrlAndSystem(
+      String url, String system, List<Extension> extensions) {
+
+    Coding cod =
+        extensions.stream()
+            .filter(e -> e.getValue() instanceof Coding)
+            .map(e -> (Coding) e.getValue())
+            .filter(e -> system.equals(e.getSystem()))
+            .findFirst()
+            .get();
+
+    Optional<Extension> ex =
+        extensions.stream()
+            .filter(e -> url.equals(e.getUrl()) && e.getValue().equalsDeep(cod))
+            .findFirst();
+
+    assertTrue(ex.isPresent());
+
+    return ex.get();
+  }
+
+  /**
    * Finds a specific {@link Coding} in a list given the system
    *
    * @param system
