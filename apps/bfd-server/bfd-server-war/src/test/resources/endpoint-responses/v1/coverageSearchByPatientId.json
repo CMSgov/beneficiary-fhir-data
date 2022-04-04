@@ -17,17 +17,6 @@
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD"
       },
-      "contained" : [ {
-        "resourceType" : "Contract",
-        "id" : "1",
-        "identifier" : {
-          "system" : "part C System",
-          "value" : "contract 5555"
-        },
-        "applies" : {
-          "start" : "2022-04-01"
-        }
-      } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {
