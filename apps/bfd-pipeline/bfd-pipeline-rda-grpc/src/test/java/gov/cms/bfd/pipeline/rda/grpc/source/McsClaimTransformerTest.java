@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaMcsAdjustment;
 import gov.cms.bfd.model.rda.RdaMcsAudit;
@@ -48,6 +47,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -293,8 +294,11 @@ public class McsClaimTransformerTest {
 
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
+    final long SEQUENCE_NUM = 37;
+
     try {
       changeBuilder
+          .setSeq(SEQUENCE_NUM)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .setClaim(
               claimBuilder
@@ -304,16 +308,27 @@ public class McsClaimTransformerTest {
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          ImmutableList.of(
+      List<DataTransformer.ErrorMessage> expectedErrors =
+          List.of(
               new DataTransformer.ErrorMessage(
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
               new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0")),
-          ex.getErrors());
+                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+
+      String expectedMessage =
+          String.format(
+              "failed with %d errors: seq=%d clmHdIcn= errors=[%s]",
+              expectedErrors.size(),
+              SEQUENCE_NUM,
+              expectedErrors.stream()
+                  .map(DataTransformer.ErrorMessage::toString)
+                  .collect(Collectors.joining(", ")));
+
+      assertEquals(expectedMessage, ex.getMessage());
+      assertEquals(expectedErrors, ex.getErrors());
     }
   }
 

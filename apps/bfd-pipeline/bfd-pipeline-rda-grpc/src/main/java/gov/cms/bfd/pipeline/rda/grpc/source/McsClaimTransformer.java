@@ -269,8 +269,8 @@ public class McsClaimTransformer {
     if (errors.size() > 0) {
       String message =
           String.format(
-              "failed with %d errors: clmHdIcn=%s errors=%s",
-              errors.size(), from.getIdrClmHdIcn(), errors);
+              "failed with %d errors: seq=%d clmHdIcn=%s errors=%s",
+              errors.size(), change.getSeq(), from.getIdrClmHdIcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
     return new RdaChange<>(

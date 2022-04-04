@@ -1,5 +1,93 @@
 # API Changelog
 
+## BFD-1477 Map Provider for PDE
+
+* Following FHIR mapping changes were made:
+
+	* eob.provider, in PDE, is mapped using serviceProviderId (the pharmacy id) in v2
+```
+  "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+      },
+  ```
+
+## BFD-1424 Fix mtus code
+
+Added a new extension with the correct url/system for MTUS Code and kept the old extension with the MTUS Code value that had the incorrect url/system of MTUS Count:
+The old coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+}, 
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+}
+```
+The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+```
+
+## BFD-1446: Added focal field to v2
+
+For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
+
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+````
+ "insurance" : [ {
+    "focal" : true,
+    ...,
+ }]
+````
+
+## BFD-1383 Update V2 line item allowed charge amount mapping
+
+Previously, the allowed charge amount in the EOB FHIR response was incorrectly being populated by the submitted charge amount data field. The value for allowed charge amount is now being populated correctly by the respective allowed charge amount data field. Note that this is only for v2
+For DME the new allowed charge amount looks like:
+````
+"amount" : {
+    "value" : 129.45,
+    "currency" : "USD"
+}
+````
+
+For Carrier:
+````
+"amount" : {
+    "value" : 47.84,
+    "currency" : "USD"
+}
+````
+
 ## BFD-1516: Map Hospice Period Count in V2
 
 Added mapping for Hospice Period count
@@ -813,4 +901,3 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as a valueQuantity, not a valueCoding" issues were addressed by creating a new common method for adding quantities to an extension instead of codeable concepts for these fields. The new method is called addExtensionValueQuantity in TransformerUtils.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
- 

@@ -64,6 +64,7 @@ public class McsClaimRdaSinkTest {
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
     sink = new McsClaimRdaSink(appState, transformer, true);
+    sink.getMetrics().setLatestSequenceNumber(0);
     nextSeq = 0L;
   }
 
