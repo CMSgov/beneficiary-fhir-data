@@ -5,12 +5,13 @@ set -eou pipefail
 
 function help() {
     echo "This script runs our test cases locally, via Docker."
-    echo "Usage: ${0} [-hk] [image id]"
+    echo "Usage: ${0} [-e extra-vars] [-hk] [image id]"
     echo "Options:"
-    echo "  ${0} -h:      [h]elp displays this message and exits."
+    echo "  ${0} -e <extra-vars>: [e]xtra variables for ansible-playbook."
+    echo "  ${0} -h:              [h]elp displays this message and exits."
     # TODO: complete the getopts implementation. See BFD-1628.
     # echo "  ${0} -i <ID>: image [i]d set in 'ghcr.io/cmsgov/bfd-apps:<ID>'. Defaults to current commit hash."
-    echo "  ${0} -k:      [k]eep the container under test instead of removing it. Defaults to removing the container."
+    echo "  ${0} -k:              [k]eeps the container under test instead of removing it. Defaults to removing the container."
 }
 
 REMOVE_CONTAINER=true # exported after getopts below...
@@ -22,20 +23,26 @@ export ARTIFACT_DIRECTORY=".m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAP
 export ARTIFACT="bfd-db-migrator-1.0.0-SNAPSHOT.zip"
 
 # iterate getopts
-while getopts "hk" option; do
-   case "$option" in
+while getopts "e:hk" option; do
+    case "$option" in
+      e) # extra-vars
+        EXTRA_VARS="$OPTARG"
+        ;;
       h) # help
         help
-        exit;;
+        exit
+        ;;
       # TODO: complete the getopts implementation. See BFD-1628.
       # i) # image id
       #    input_bfd_apps_image_id="$OPTARG";;
       k) # keep container
-         REMOVE_CONTAINER=false;;
+        REMOVE_CONTAINER=false
+        ;;
      \?) # Invalid
-         help
-         exit 1;;
-   esac
+        help
+        exit 1
+        ;;
+    esac
 done
 shift "$((OPTIND-1))"
 
@@ -44,7 +51,7 @@ shift "$((OPTIND-1))"
 # export BFD_APPS_IMAGE_ID="${input_bfd_apps_image_id:-$(git rev-parse --short HEAD)}"
 # use input "$1" or default to current commit's short sha
 export BFD_APPS_IMAGE_ID="${1:-$(git rev-parse --short HEAD)}"
-export REMOVE_CONTAINER
+export REMOVE_CONTAINER EXTRA_VARS
 
 # Determine the directory that this script is in.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

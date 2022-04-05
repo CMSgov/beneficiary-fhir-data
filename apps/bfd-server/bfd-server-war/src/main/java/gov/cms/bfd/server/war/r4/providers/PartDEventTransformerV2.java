@@ -339,6 +339,8 @@ final class PartDEventTransformerV2 {
             TransformerUtilsV2.createIdentifierReference(
                 identifierType, claimGroup.getServiceProviderId()));
       }
+
+      TransformerUtilsV2.setProviderNumber(eob, claimGroup.getServiceProviderId());
     }
 
     /*

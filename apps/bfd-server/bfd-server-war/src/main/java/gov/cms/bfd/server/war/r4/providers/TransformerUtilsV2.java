@@ -1860,7 +1860,11 @@ public final class TransformerUtilsV2 {
         .setType(createC4BBClaimCodeableConcept());
 
     // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage (ref)
-    eob.addInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
+    // There is always just one insurance coverage documented, since they are hard coded by
+    // claim type. If we get to a point where this is no longer hard coded, and we may have more
+    // than one insurance coverage per claim, we may have
+    // to additional logic to determine which insurance coverage(s) are used for adjudication.
+    eob.addInsurance().setFocal(true).setCoverage(referenceCoverage(beneficiaryId, coverageType));
 
     // BENE_ID => ExplanationOfBenefit.patient (reference)
     eob.setPatient(referencePatient(beneficiaryId));
@@ -3263,7 +3267,7 @@ public final class TransformerUtilsV2 {
         createAdjudicationAmtSlice(
             CcwCodebookVariable.LINE_ALOWD_CHRG_AMT,
             C4BBAdjudication.ELIGIBLE,
-            submittedChargeAmount));
+            allowedChargeAmount));
 
     // LINE_BENE_PRMRY_PYR_CD => ExplanationOfBenefit.item.extension
     processingIndicatorCode.ifPresent(
@@ -3740,6 +3744,22 @@ public final class TransformerUtilsV2 {
       default:
         return RaceCategory.UNKNOWN;
     }
+  }
+
+  /**
+   * Sets the provider number field which is common among these claim types: Inpatient, Outpatient,
+   * Hospice, HHA and SNF.
+   *
+   * @param eob the {@link ExplanationOfBenefit} this method will modify
+   * @param providerNumber a {@link String} PRVDR_NUM: representing the provider number for the
+   *     claim
+   */
+  static void setProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+    eob.setProvider(
+        new Reference()
+            .setIdentifier(
+                TransformerUtilsV2.createIdentifier(
+                    CcwCodebookVariable.PRVDR_NUM, providerNumber)));
   }
 
   public static void logMbiHashToMdc(String mbiHash) {

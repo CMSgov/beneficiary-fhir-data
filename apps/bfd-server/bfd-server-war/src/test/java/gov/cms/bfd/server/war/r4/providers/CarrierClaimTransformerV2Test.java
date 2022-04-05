@@ -648,6 +648,114 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
+  public void shouldHaveLineItemExtension() {
+    assertNotNull(eob.getItemFirstRep().getExtension());
+    assertEquals(7, eob.getItemFirstRep().getExtension().size());
+
+    Extension ex1 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare1 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            new Quantity().setValue(1));
+
+    assertTrue(compare1.equalsDeep(ex1));
+
+    Extension ex2 =
+        TransformerTestUtilsV2.findExtensionByUrlAndSystem(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare2 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            new Coding()
+                .setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt")
+                .setCode("3"));
+
+    assertTrue(compare2.equalsDeep(ex2));
+
+    Extension ex3 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare3 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            new Coding()
+                .setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd")
+                .setCode("3")
+                .setDisplay("Services"));
+
+    assertTrue(compare3.equalsDeep(ex3));
+
+    Extension ex4 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/betos_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare4 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/betos_cd",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/betos_cd",
+                "T2D",
+                "Other tests - other"));
+
+    assertTrue(compare4.equalsDeep(ex4));
+
+    Extension ex5 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare5 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+                "E",
+                "Workers' compensation"));
+
+    assertTrue(compare5.equalsDeep(ex5));
+
+    Extension ex6 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare6 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd",
+                "A",
+                "Allowed"));
+
+    assertTrue(compare6.equalsDeep(ex6));
+
+    Extension ex7 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare7 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
+                "0",
+                "Service Subject to Deductible"));
+
+    assertTrue(compare7.equalsDeep(ex7));
+  }
+
+  @Test
   public void shouldHaveLineItemAdjudications() {
     assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
   }
@@ -885,7 +993,8 @@ public class CarrierClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/codesystem/adjudication",
                                 "https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt",
                                 "Line Allowed Charge Amount"))))
-            .setAmount(new Money().setValue(75).setCurrency(TransformerConstants.CODED_MONEY_USD));
+            .setAmount(
+                new Money().setValue(47.84).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }
