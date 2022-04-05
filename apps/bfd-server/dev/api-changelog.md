@@ -128,7 +128,8 @@ The new coding:
 
 For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
 
-This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". My guess is that there will only be one insurance per claim. If this is the case then the focal should always be set to true. If there is more than one, then we need to determine if that insurance/coverage was used for adjudication or not. However, this is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim. If this is the case then the focal should always be set to true.  This is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+
 ````
  "insurance" : [ {
     "focal" : true,
