@@ -1,6 +1,13 @@
 -- add a column to beneficiaries table; an ALTER TABLE by definition
--- creates an exclusive lock on the table.
+-- creates an 'access exclusive' lock on the table.
 ALTER TABLE public.beneficiaries ADD bene_id_numeric bigint;
+
+-- create a database trigger which will be used to imbue a bigint value
+-- into the bene_id_numeric column  during a table record INSERT operation.
+-- The trigger is defined as a pre-insert trigger, which means that prior to
+-- new record being written, the database engine will execute the trigger,
+-- which in turn, fills the bene_id_numeric with a value based on a 'cast'
+-- of the bene_id (varchar).
 
 -- HSQL always gets created/initialized from scratch so no need to drop trigger
 ${logic.hsql-only} CREATE TRIGGER beneficiaries_insert_trigger BEFORE INSERT ON public.beneficiaries

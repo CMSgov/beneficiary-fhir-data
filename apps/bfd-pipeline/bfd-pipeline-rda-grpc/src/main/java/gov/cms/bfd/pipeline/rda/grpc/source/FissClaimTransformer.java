@@ -498,7 +498,8 @@ public class FissClaimTransformer {
     if (errors.size() > 0) {
       String message =
           String.format(
-              "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
+              "failed with %d errors: seq=%d dcn=%s errors=%s",
+              errors.size(), change.getSeq(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
     return new RdaChange<>(
@@ -543,6 +544,34 @@ public class FissClaimTransformer {
         from::hasMedaProvId,
         from::getMedaProvId,
         to::setMedaProvId);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.provStateCd,
+        1,
+        2,
+        from::hasProvStateCd,
+        from::getProvStateCd,
+        to::setProvStateCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.provTypFacilCd,
+        1,
+        1,
+        from::hasProvTypFacilCd,
+        from::getProvTypFacilCd,
+        to::setProvTypFacilCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.provEmerInd,
+        1,
+        1,
+        from::hasProvEmerInd,
+        from::getProvEmerInd,
+        to::setProvEmerInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.provDeptId,
+        1,
+        3,
+        from::hasProvDeptId,
+        from::getProvDeptId,
+        to::setProvDeptId);
     transformer.copyOptionalString(
         namePrefix + PreAdjFissClaim.Fields.medaProv_6,
         1,
