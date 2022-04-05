@@ -3,15 +3,11 @@
 -- a new schema structure that:
 --   1) changes data type of CLM_ID, CLM_GROUP_ID, BENE_ID to BIGINT.
 --   2) organizes parent claim table (SNF_CLAIMS) such that common
---      claims data is organized at top of column definition.
+--      claims data columns are organized at top of table structure.
 --
 -- Once current table data is migrated to new table name/strucutre,
--- updatable db views are created wrapping the new table structure;
--- this allows BFD services entity beans to temporarily use updatable
--- data view(s) instead of actual database table names. This strategy
--- facilitates and promotes minimal app/database downtime during that
--- period when table structure and data are being migrated and app
--- services code is deployed.
+-- a subsequent PR will be deployed that changes the ORM model(s)
+-- for SNF table(s).
 --
 -- HSQL differs from PSQL (postgres) in that the table defintion
 -- must be explicitly declared prior to loading data into the
