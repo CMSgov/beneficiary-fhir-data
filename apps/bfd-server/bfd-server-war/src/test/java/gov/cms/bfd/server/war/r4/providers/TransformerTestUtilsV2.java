@@ -67,8 +67,8 @@ public final class TransformerTestUtilsV2 {
    */
   static void assertEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
+      Long claimId,
+      Long beneficiaryId,
       ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -82,9 +82,9 @@ public final class TransformerTestUtilsV2 {
     assertEquals(TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
-      assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId, eob.getIdentifier());
+      assertHasIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId), eob.getIdentifier());
     } else {
-      assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
+      assertHasIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId), eob.getIdentifier());
     }
 
     assertIdentifierExists(
@@ -1079,6 +1079,34 @@ public final class TransformerTestUtilsV2 {
    */
   static Extension findExtensionByUrl(String url, List<Extension> extensions) {
     Optional<Extension> ex = extensions.stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    assertTrue(ex.isPresent());
+
+    return ex.get();
+  }
+
+  /**
+   * Finds an {@link Extension} in a list based on the Extension URL and System URL
+   *
+   * @param url the expected {@link Extension#getUrl()} of the {@link Extension} to look for
+   * @param system the expected {@link Coding#getSystem()} value
+   * @param extensions the list of extensions to filter through
+   */
+  static Extension findExtensionByUrlAndSystem(
+      String url, String system, List<Extension> extensions) {
+
+    Coding cod =
+        extensions.stream()
+            .filter(e -> e.getValue() instanceof Coding)
+            .map(e -> (Coding) e.getValue())
+            .filter(e -> system.equals(e.getSystem()))
+            .findFirst()
+            .get();
+
+    Optional<Extension> ex =
+        extensions.stream()
+            .filter(e -> url.equals(e.getUrl()) && e.getValue().equalsDeep(cod))
+            .findFirst();
 
     assertTrue(ex.isPresent());
 
