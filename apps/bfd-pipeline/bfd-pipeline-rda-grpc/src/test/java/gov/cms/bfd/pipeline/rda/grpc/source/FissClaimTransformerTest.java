@@ -52,7 +52,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -507,22 +508,35 @@ public class FissClaimTransformerTest {
 
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
+    final long SEQUENCE_NUM = 37;
+
     try {
       changeBuilder
-          .setSeq(MIN_SEQUENCE_NUM)
+          .setSeq(SEQUENCE_NUM)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          Arrays.asList(
+      List<DataTransformer.ErrorMessage> expectedErrors =
+          List.of(
               new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=0"),
               new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=0"),
               new DataTransformer.ErrorMessage("currStatus", "no value set"),
               new DataTransformer.ErrorMessage("currLoc1", "no value set"),
-              new DataTransformer.ErrorMessage("currLoc2", "no value set")),
-          ex.getErrors());
+              new DataTransformer.ErrorMessage("currLoc2", "no value set"));
+
+      String expectedMessage =
+          String.format(
+              "failed with %d errors: seq=%d dcn= errors=[%s]",
+              expectedErrors.size(),
+              SEQUENCE_NUM,
+              expectedErrors.stream()
+                  .map(DataTransformer.ErrorMessage::toString)
+                  .collect(Collectors.joining(", ")));
+
+      assertEquals(expectedMessage, ex.getMessage());
+      assertEquals(expectedErrors, ex.getErrors());
     }
   }
 

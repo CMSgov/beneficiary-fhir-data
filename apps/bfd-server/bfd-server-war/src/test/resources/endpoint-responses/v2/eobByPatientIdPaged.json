@@ -407,6 +407,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -1088,6 +1089,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -1387,7 +1389,7 @@
             } ]
           },
           "amount" : {
-            "value" : 130.45,
+            "value" : 129.45,
             "currency" : "USD"
           }
         }, {
@@ -1902,6 +1904,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -2742,6 +2745,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -3672,6 +3676,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -4022,6 +4027,12 @@
           "value" : "CMS"
         }
       },
+      "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+      },
       "facility" : {
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd",
@@ -4340,6 +4351,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id",
@@ -4871,6 +4883,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -4882,10 +4895,17 @@
             "value" : 1
           }
         }, {
-          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+              "code" : "3"
+            }
+          }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-            "code" : "3"
+            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            "code" : "3",
+            "display":"Services"
           }
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
@@ -5135,7 +5155,7 @@
             } ]
           },
           "amount" : {
-            "value" : 75.0,
+            "value" : 47.84,
             "currency" : "USD"
           }
         } ]
@@ -5589,6 +5609,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
