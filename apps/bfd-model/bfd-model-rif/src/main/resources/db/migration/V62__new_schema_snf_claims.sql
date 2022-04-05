@@ -484,6 +484,12 @@ ${logic.hsql-only}    prcdr_dt25 )
 -- PSQL allows us to dynamically create a table via the
 -- associated SELECT statement used to populate the table.
 --
+${logic.psql-only} SET max_parallel_workers = 24;
+${logic.psql-only} SET max_parallel_workers_per_gather = 20;
+${logic.psql-only} SET parallel_leader_participation = off;
+${logic.psql-only} SET parallel_tuple_cost = 0;
+${logic.psql-only} SET parallel_setup_cost = 0;
+
 ${logic.psql-only} create table public.snf_claims_new as
 select
 ${logic.psql-only}  cast(clm_id as bigint),
