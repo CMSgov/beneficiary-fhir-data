@@ -133,9 +133,9 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     var primaryKeySpecs = new ArrayList<FieldSpec>();
     var primaryKeyFieldNames = Set.copyOf(mapping.getTable().getPrimaryKeyColumns());
     var accessorSpecs = new ArrayList<AccessorSpec>();
-    addPrimaryKeyFields(
+    addPrimaryKeyJoinFields(
         mapping, classBuilder, findMappingWithEntityClassName, primaryKeySpecs, accessorSpecs);
-    addColumnFields(mapping, classBuilder, primaryKeyFieldNames, accessorSpecs);
+    addColumnFields(mapping, classBuilder, primaryKeyFieldNames, primaryKeySpecs, accessorSpecs);
     addArrayFields(
         mapping, findMappingWithId, classBuilder, primaryKeyFieldNames.size(), accessorSpecs);
     addJoinFields(mapping, classBuilder, primaryKeyFieldNames, accessorSpecs);
@@ -163,7 +163,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     return builder.build();
   }
 
-  private void addPrimaryKeyFields(
+  private void addPrimaryKeyJoinFields(
       MappingBean mapping,
       TypeSpec.Builder classBuilder,
       Function<String, Optional<MappingBean>> findMappingWithEntityClassName,
@@ -177,18 +177,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
         primaryKeySpecs.add(
             createPrimaryKeyFieldSpecForJoin(
                 mapping, findMappingWithEntityClassName, primaryKeyColumn, join.get()));
-        continue;
       }
-      var column = mapping.findColumnByFieldName(primaryKeyColumn);
-      if (column.isPresent()) {
-        addColumnField(mapping, column.get(), classBuilder, accessorSpecs);
-        primaryKeySpecs.add(
-            createPrimaryKeyFieldSpecForColumn(mapping, primaryKeyColumn, column.get()));
-        continue;
-      }
-      throw failure(
-          "no column or join matches primary key field name: mapping=%s field=%s",
-          mapping.getId(), primaryKeyColumn);
     }
   }
 
@@ -257,12 +246,14 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
   private void addColumnFields(
       MappingBean mapping,
       TypeSpec.Builder classBuilder,
-      Collection<String> namesToSkip,
+      Set<String> primaryKeyFieldNames,
+      List<FieldSpec> primaryKeySpecs,
       List<AccessorSpec> accessorSpecs)
       throws MojoExecutionException {
     for (ColumnBean column : mapping.getTable().getColumns()) {
-      if (!namesToSkip.contains(column.getName())) {
-        addColumnField(mapping, column, classBuilder, accessorSpecs);
+      addColumnField(mapping, column, classBuilder, accessorSpecs);
+      if (primaryKeyFieldNames.contains(column.getName())) {
+        primaryKeySpecs.add(createPrimaryKeyFieldSpecForColumn(mapping, column.getName(), column));
       }
     }
   }
