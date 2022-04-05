@@ -352,7 +352,7 @@ module "bfd_server_alarm_all_eob_6s-p95" {
     datapoints       = "15"
     statistic        = null
     ext_statistic    = "p95"
-    threshold        = "6000.0"
+    threshold        = "6000.0" # milliseconds
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }

@@ -412,6 +412,9 @@ public class OutpatientClaimTransformerV2 {
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
+
+      // REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+      TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, eob, line.getStatusCode());
     }
 
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());

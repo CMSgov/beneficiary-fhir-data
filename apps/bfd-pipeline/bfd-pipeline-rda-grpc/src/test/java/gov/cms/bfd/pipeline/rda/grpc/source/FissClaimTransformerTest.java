@@ -56,6 +56,22 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for the {@link FissClaimTransformer}. Unless otherwise stated on a method every test
+ * verifies that one or a set of fields within a source grpc message object for a claim have been
+ * correctly transformed into appropriate values and copied into a new {@link PreAdjFissClaim} JPA
+ * entity object.
+ *
+ * <p>Field tests are performed using an adaptor object appropriate for each type of grpc/jpa object
+ * pair. These adaptor objects ({@link ClaimFieldTester}, {@link AuditTrailFieldTester}, {@link
+ * BeneZPayerFieldTester}, {@link InsuredPayerFieldTester}, and {@link ProcCodeFieldTester}) extend
+ * the {@link ClaimTransformerFieldTester} class and provide class specific implementations of the
+ * methods used to construct and transform objects under test.
+ *
+ * <p>Each individual field test is named after the field it tests and calls appropriate
+ * verification methods for that field. {@see ClaimTransformerFieldTester} for documentation of each
+ * of the verification methods.
+ */
 public class FissClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
@@ -566,6 +582,46 @@ public class FissClaimTransformerTest {
             PreAdjFissClaim::getCurrLoc2,
             PreAdjFissClaim.Fields.currLoc2,
             5);
+  }
+
+  @Test
+  public void testClaimProvStateCd() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvStateCd,
+            PreAdjFissClaim::getProvStateCd,
+            PreAdjFissClaim.Fields.provStateCd,
+            2);
+  }
+
+  @Test
+  public void testClaimProvTypFacilCd() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvTypFacilCd,
+            PreAdjFissClaim::getProvTypFacilCd,
+            PreAdjFissClaim.Fields.provTypFacilCd,
+            1);
+  }
+
+  @Test
+  public void testClaimProvEmerInd() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvEmerInd,
+            PreAdjFissClaim::getProvEmerInd,
+            PreAdjFissClaim.Fields.provEmerInd,
+            1);
+  }
+
+  @Test
+  public void testClaimProvDeptId() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setProvDeptId,
+            PreAdjFissClaim::getProvDeptId,
+            PreAdjFissClaim.Fields.provDeptId,
+            3);
   }
 
   @Test

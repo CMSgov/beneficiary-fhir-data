@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Stop immediately if any command returns a non-zero result.
 set -e
@@ -7,21 +7,17 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Run everything from that directory.
-cd "${SCRIPT_DIR}"
+cd "$SCRIPT_DIR"
 
-# Activate the Python virtual env.
+# Re-activate existing virtualenv or exit 1
+if [ ! -d venv ]; then
+  echo 'Error: Missing directory venv.'
+  exit 1
+fi
 source venv/bin/activate
 
 # Basic role syntax check
-ansible-playbook "${TEST_PLAY}" --inventory=inventory --syntax-check
+ansible-playbook "$TEST_PLAY" --syntax-check --inventory=inventory.docker.yaml
 
 # Run the Ansible test case.
-ansible-playbook "${TEST_PLAY}" --inventory=inventory
-
-# Run the role/playbook again, checking to make sure it's idempotent.
-# Note: This is disabled, as the role is explicitly **not** idempotent, since it rebuilds the server's trust store every time.
-#ansible-playbook "${TEST_PLAY}" --inventory=inventory \
-#  | tee /dev/stderr \
-#  | grep -q 'docker_container.*changed=0.*failed=0' \
-#  && (echo 'Idempotence test: pass' && exit 0) \
-#  || (echo 'Idempotence test: fail' && exit 1)
+ansible-playbook "$TEST_PLAY" --inventory=inventory.docker.yaml

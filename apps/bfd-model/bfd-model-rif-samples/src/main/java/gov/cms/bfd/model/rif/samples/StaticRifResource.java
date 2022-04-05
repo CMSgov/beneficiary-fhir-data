@@ -66,92 +66,6 @@ public enum StaticRifResource {
 
   SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
-  SAMPLE_B_BENES(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
-      RifFileType.BENEFICIARY,
-      100),
-
-  SAMPLE_B_CARRIER(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"),
-      RifFileType.CARRIER,
-      4378),
-
-  SAMPLE_B_INPATIENT(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
-      RifFileType.INPATIENT,
-      49),
-
-  SAMPLE_B_OUTPATIENT(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "outpatient_test.rif"),
-      RifFileType.OUTPATIENT,
-      829),
-
-  SAMPLE_B_SNF(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"),
-      RifFileType.SNF,
-      14),
-
-  SAMPLE_B_HOSPICE(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hospice_test.rif"),
-      RifFileType.HOSPICE,
-      10),
-
-  SAMPLE_B_HHA(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"),
-      RifFileType.HHA,
-      51),
-
-  SAMPLE_B_DME(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"),
-      RifFileType.DME,
-      248),
-
-  SAMPLE_B_PDE(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"),
-      RifFileType.PDE,
-      5714),
-
-  SAMPLE_C_BENES(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"),
-      RifFileType.BENEFICIARY,
-      1000000),
-
-  SAMPLE_C_CARRIER(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "carrier_test.rif"),
-      RifFileType.CARRIER,
-      32943217),
-
-  SAMPLE_C_DME(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "dme_test.rif"),
-      RifFileType.DME,
-      2320363),
-
-  SAMPLE_C_HHA(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"), RifFileType.HHA, 228623),
-
-  SAMPLE_C_HOSPICE(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hospice_test.rif"),
-      RifFileType.HOSPICE,
-      106462),
-
-  SAMPLE_C_INPATIENT(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "inpatient_test.rif"),
-      RifFileType.INPATIENT,
-      384616),
-
-  SAMPLE_C_OUTPATIENT(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "outpatient_test.rif"),
-      RifFileType.OUTPATIENT,
-      6195549),
-
-  SAMPLE_C_PDE(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"),
-      RifFileType.PDE,
-      67566673),
-
-  SAMPLE_C_SNF(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175),
-
   SAMPLE_U_BENES(
       resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
@@ -356,27 +270,6 @@ public enum StaticRifResource {
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2016-2014.rif"),
       RifFileType.OUTPATIENT,
       27955),
-
-  SAMPLE_MCT_BENES(
-      resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
-
-  SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40),
-
-  SAMPLE_MCT_UPDATE_1_BENES(
-      resourceUrl("rif-static-samples/sample-mct-update-1-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      8),
-
-  SAMPLE_MCT_UPDATE_2_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-2-pde.txt"), RifFileType.PDE, 40),
-
-  SAMPLE_MCT_UPDATE_3_BENES(
-      resourceUrl("rif-static-samples/sample-mct-update-3-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      2),
-
-  SAMPLE_MCT_UPDATE_3_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-3-pde.txt"), RifFileType.PDE, 7),
 
   SAMPLE_HICN_MULT_BENES(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaries.txt"),

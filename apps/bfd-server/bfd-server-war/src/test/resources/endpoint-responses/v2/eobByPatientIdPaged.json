@@ -70,6 +70,12 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "3"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "15444"
+        }
       } ],
       "identifier" : [ {
         "type" : {
@@ -409,6 +415,14 @@
         "sequence" : 25,
         "careTeamSequence" : [ 4 ],
         "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
             "code" : "1"
@@ -1380,7 +1394,7 @@
             } ]
           },
           "amount" : {
-            "value" : 130.45,
+            "value" : 129.45,
             "currency" : "USD"
           }
         }, {
@@ -1564,6 +1578,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "2"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "15999"
         }
       } ],
       "identifier" : [ {
@@ -1897,6 +1917,14 @@
         "sequence" : 1,
         "careTeamSequence" : [ 2 ],
         "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
             "code" : "0023",
@@ -2125,6 +2153,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "1"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "8299"
         }
       } ],
       "identifier" : [ {
@@ -3129,6 +3163,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "1"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "11111"
         }
       } ],
       "identifier" : [ {
@@ -5102,7 +5142,7 @@
             } ]
           },
           "amount" : {
-            "value" : 75.0,
+            "value" : 47.84,
             "currency" : "USD"
           }
         } ]
@@ -5254,6 +5294,17 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "1"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "6666"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+        "valueQuantity" : {
+          "value" : 2
         }
       } ],
       "identifier" : [ {
