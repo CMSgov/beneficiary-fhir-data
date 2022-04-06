@@ -21,6 +21,7 @@ This RFC has been deferred for the following reasons:
 
 * The performance improvement on a production Aurora cluster was less significant than that on a local postgresql database.
 * A normalized database schema has some advantages for data exploration that could be helpful during the early phases of RDA production data ingestion.
+* There was some interest in adopting JSONB for adjudicated claims at the same time.  This would require more experimentation and impact assessment before moving forward.
 
 **Note:** The [PR containing a proof of concept implementation](https://github.com/CMSgov/beneficiary-fhir-data/pull/751) has been closed but should still be available in github.
 
