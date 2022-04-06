@@ -34,7 +34,6 @@ public final class MappingSpec {
   private String headerEntityGeneratedIdField;
   private boolean hasLines = false;
   private boolean isBeneficiaryEntity = false;
-  private boolean usesTableViewInEntity = false;
   private String lineTable;
   private String lineEntityLineNumberField;
   private String sequenceNumberGeneratorName;
@@ -203,23 +202,6 @@ public final class MappingSpec {
   /** @return the index of the last header field in {@link #getRifLayout()} */
   public int calculateLastHeaderFieldIndex() {
     return hasLines ? (calculateFirstLineFieldIndex() - 1) : (rifLayout.getRifFields().size() - 1);
-  }
-
-  /**
-   * @return <code>true</code> boolean to trigger use of a table view rather than a table for the
-   *     generated entity bean; <code>false</code> to use the table name.
-   */
-  public boolean isUsesTableViewInEntity() {
-    return usesTableViewInEntity;
-  }
-
-  /**
-   * @param usesTableViewInEntity the new value for {@link #isUsesTableViewInEntity()}
-   * @return the {@link MappingSpec} whose usesTableViewInEntity is set
-   */
-  public MappingSpec setUseTableViewsInEntity(boolean usesTableViewInEntity) {
-    this.usesTableViewInEntity = usesTableViewInEntity;
-    return this;
   }
 
   /** @return the index of the first line field in {@link #getRifLayout()} */
