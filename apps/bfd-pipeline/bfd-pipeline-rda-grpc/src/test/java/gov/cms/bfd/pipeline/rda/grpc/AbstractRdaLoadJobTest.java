@@ -2,7 +2,9 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob.Config;
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 import com.codahale.metrics.MetricRegistry;
@@ -15,7 +17,6 @@ import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -24,27 +25,29 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AbstractRdaLoadJobTest {
-  @Mock private Callable<RdaSource<Integer>> sourceFactory;
-  @Mock private Callable<RdaSink<Integer>> sinkFactory;
-  @Mock private RdaSource<Integer> source;
-  @Mock private RdaSink<Integer> sink;
+  @Mock private Callable<RdaSource<Integer, Integer>> sourceFactory;
+  @Mock private Callable<RdaSink<Integer, Integer>> sinkFactory;
+  @Mock private RdaSource<Integer, Integer> source;
+  @Mock private RdaSink<Integer, Integer> sink;
   private TestingLoadJob job;
   private MetricRegistry appMetrics;
   private Config config;
 
-  @Before
+  @BeforeEach
   public void setUp() {
-    config = new Config(Duration.ofSeconds(10), 3, Optional.empty(), Optional.empty());
+    MockitoAnnotations.openMocks(this);
+    config =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofSeconds(10))
+            .batchSize(3)
+            .build();
     appMetrics = new MetricRegistry();
     job = new TestingLoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
@@ -65,7 +68,7 @@ public class AbstractRdaLoadJobTest {
     doThrow(new IOException("oops")).when(sourceFactory).call();
     try {
       job.callRdaServiceAndStoreRecords();
-      Assert.fail("job should have thrown exception");
+      fail("job should have thrown exception");
     } catch (Exception ex) {
       assertEquals("oops", ex.getCause().getMessage());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
@@ -83,7 +86,7 @@ public class AbstractRdaLoadJobTest {
     doThrow(new IOException("oops")).when(sinkFactory).call();
     try {
       job.callRdaServiceAndStoreRecords();
-      Assert.fail("job should have thrown exception");
+      fail("job should have thrown exception");
     } catch (Exception ex) {
       assertEquals("oops", ex.getCause().getMessage());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
@@ -104,9 +107,9 @@ public class AbstractRdaLoadJobTest {
         .retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       job.callRdaServiceAndStoreRecords();
-      Assert.fail("job should have thrown exception");
+      fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertNotNull(ex.getCause());
+      assertNotNull(ex.getCause());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(ProcessingException.class));
       assertEquals(7, ((ProcessingException) ex.getCause()).getProcessedCount());
       final Throwable actualCause = ex.getCause().getCause();
@@ -130,7 +133,7 @@ public class AbstractRdaLoadJobTest {
       PipelineJobOutcome outcome = job.call();
       assertEquals(PipelineJobOutcome.NOTHING_TO_DO, outcome);
     } catch (Exception ex) {
-      Assert.fail("job should NOT have thrown exception");
+      fail("job should NOT have thrown exception");
     }
     verify(source).close();
     verify(sink).close();
@@ -149,7 +152,7 @@ public class AbstractRdaLoadJobTest {
       PipelineJobOutcome outcome = job.call();
       assertEquals(PipelineJobOutcome.WORK_DONE, outcome);
     } catch (Exception ex) {
-      Assert.fail("job should NOT have thrown exception");
+      fail("job should NOT have thrown exception");
     }
     verify(source).close();
     verify(sink).close();
@@ -211,7 +214,10 @@ public class AbstractRdaLoadJobTest {
   @Test
   public void configIsSerializable() throws Exception {
     final AbstractRdaLoadJob.Config original =
-        new Config(Duration.ofMillis(1000), 45, Optional.empty(), Optional.empty());
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofSeconds(1))
+            .batchSize(45)
+            .build();
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(original);
@@ -224,11 +230,11 @@ public class AbstractRdaLoadJobTest {
     assertEquals(original, loaded);
   }
 
-  private static class TestingLoadJob extends AbstractRdaLoadJob<Integer> {
+  private static class TestingLoadJob extends AbstractRdaLoadJob<Integer, Integer> {
     public TestingLoadJob(
         Config config,
-        Callable<RdaSource<Integer>> sourceFactory,
-        Callable<RdaSink<Integer>> sinkFactory,
+        Callable<RdaSource<Integer, Integer>> sourceFactory,
+        Callable<RdaSink<Integer, Integer>> sinkFactory,
         MetricRegistry appMetrics) {
       super(
           config,

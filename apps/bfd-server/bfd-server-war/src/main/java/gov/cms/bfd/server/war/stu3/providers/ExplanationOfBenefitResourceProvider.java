@@ -55,7 +55,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -77,7 +76,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private SamhsaMatcher samhsaMatcher;
+  private Stu3EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -92,9 +91,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link SamhsaMatcher} to use */
+  /** @param samhsaMatcher the {@link Stu3EobSamhsaMatcher} to use */
   @Inject
-  public void setSamhsaFilterer(SamhsaMatcher samhsaMatcher) {
+  public void setSamhsaFilterer(Stu3EobSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
@@ -198,7 +197,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
-   *     SamhsaMatcher} to filter out all SAMHSA-related claims from the results
+   *     Stu3EobSamhsaMatcher} to filter out all SAMHSA-related claims from the results
    * @param lastUpdated an {@link OptionalParam} that specifies a date range for the lastUpdated
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
@@ -327,7 +326,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneficiaryId);
+    TransformerUtils.logBeneIdToMdc(Arrays.asList(beneficiaryId));
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -562,9 +561,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   /**
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out the HTTP header that controls this setting
-   * @return <code>true</code> if {@link CarrierClaimColumn#TAX_NUM} and {@link
-   *     DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>false</code> if
-   *     not (defaults to <code>false</code>)
+   * @return <code>true</code> if {@link gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} and
+   *     {@link gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the
+   *     results, <code>false</code> if not (defaults to <code>false</code>)
    */
   public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
     /*

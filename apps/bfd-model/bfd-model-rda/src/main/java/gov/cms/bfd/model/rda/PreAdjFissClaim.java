@@ -12,6 +12,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.BatchSize;
 
 /** JPA class for the FissClaims table */
 @Entity
@@ -53,6 +56,34 @@ public class PreAdjFissClaim {
   @Column(name = "`currLoc2`", length = 5, nullable = false)
   private String currLoc2;
 
+  /** Provider State Code */
+  @Column(name = "`provStateCd`", length = 2)
+  private String provStateCd;
+
+  /** Provider Type Facility Code */
+  @Column(name = "`provTypFacilCd`", length = 1)
+  private String provTypFacilCd;
+
+  /** Provider Emergency Indicator */
+  @Column(name = "`provEmerInd`", length = 1)
+  private String provEmerInd;
+
+  /** Provider Department Identification */
+  @Column(name = "`provDeptId`", length = 3)
+  private String provDeptId;
+
+  /**
+   * Medicare Provider ID:
+   *
+   * <p>The Medicare Provider ID consists of the following:
+   *
+   * <ul>
+   *   <li>Provider State Code
+   *   <li>Provider Type Facility Code
+   *   <li>Provider Emergency Indicator
+   *   <li>Provider Department Identification
+   * </ul>
+   */
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 
@@ -77,11 +108,9 @@ public class PreAdjFissClaim {
   @Column(name = "`npiNumber`", length = 10)
   private String npiNumber;
 
-  @Column(name = "`mbi`", length = 13)
-  private String mbi;
-
-  @Column(name = "`mbiHash`", length = 64)
-  private String mbiHash;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`fedTaxNumber`", length = 10)
   private String fedTaxNumber;
@@ -113,13 +142,6 @@ public class PreAdjFissClaim {
   @Column(name = "`lobCd`", length = 1)
   private String lobCd;
 
-  public enum ServTypeCdMapping {
-    Normal,
-    Clinic,
-    SpecialFacility,
-    Unrecognized
-  }
-
   @Enumerated(EnumType.STRING)
   @Column(name = "`servTypeCdMapping`", length = 20)
   private ServTypeCdMapping servTypeCdMapping;
@@ -133,11 +155,172 @@ public class PreAdjFissClaim {
   @Column(name = "`billTypCd`", length = 3)
   private String billTypCd;
 
+  /**
+   * String specifying the source of the data contained in this record. Generally this will be the
+   * version string returned by the RDA API server but when populating data from mock server it will
+   * also include information about the mode the server was running in.
+   */
+  @Column(name = "`apiSource`", length = 24)
+  private String apiSource;
+
+  /** Reject Code */
+  @Column(name = "`rejectCd`", length = 5)
+  private String rejectCd;
+
+  /** Fully or Partially Denied Indicator */
+  @Column(name = "`fullPartDenInd`", length = 1)
+  private String fullPartDenInd;
+
+  /** Non-Pay Code Indicator */
+  @Column(name = "`nonPayInd`", length = 2)
+  private String nonPayInd;
+
+  /** Cross-reference Document Control Number */
+  @Column(name = "`xrefDcnNbr`", length = 23)
+  private String xrefDcnNbr;
+
+  /** Adjustment Requestor Identification */
+  @Column(name = "`adjReqCd`", length = 1)
+  private String adjReqCd;
+
+  /** Adjustment Reason Code */
+  @Column(name = "`adjReasCd`", length = 2)
+  private String adjReasCd;
+
+  /** Cancel Cross-reference Document Control Number */
+  @Column(name = "`cancelXrefDcn`", length = 23)
+  private String cancelXrefDcn;
+
+  /** Cancel Date */
+  @Column(name = "`cancelDate`")
+  private LocalDate cancelDate;
+
+  /** Cancel Adjustment Code */
+  @Column(name = "`cancAdjCd`", length = 1)
+  private String cancAdjCd;
+
+  /** Original Cross-Reference Document Control Number */
+  @Column(name = "`originalXrefDcn`", length = 23)
+  private String originalXrefDcn;
+
+  /** Paid Date */
+  @Column(name = "`paidDt`")
+  private LocalDate paidDt;
+
+  /** Admission Date */
+  @Column(name = "`admDate`")
+  private LocalDate admDate;
+
+  /** Source of Admission */
+  @Column(name = "`admSource`", length = 1)
+  private String admSource;
+
+  /** Primary Payer Code */
+  @Column(name = "`primaryPayerCode`", length = 1)
+  private String primaryPayerCode;
+
+  /** Attending Physician NPI */
+  @Column(name = "`attendPhysId`", length = 16)
+  private String attendPhysId;
+
+  /** Attending Physician Last Name */
+  @Column(name = "`attendPhysLname`", length = 17)
+  private String attendPhysLname;
+
+  /** Attending Physician First Name */
+  @Column(name = "`attendPhysFname`", length = 18)
+  private String attendPhysFname;
+
+  /** Attending Physician Middle Initial */
+  @Column(name = "`attendPhysMint`", length = 1)
+  private String attendPhysMint;
+
+  /** Attending Physician Flag */
+  @Column(name = "`attendPhysFlag`", length = 1)
+  private String attendPhysFlag;
+
+  /** Operating Physician NPI */
+  @Column(name = "`operatingPhysId`", length = 16)
+  private String operatingPhysId;
+
+  /** Operating Physician Last Name */
+  @Column(name = "`operPhysLname`", length = 17)
+  private String operPhysLname;
+
+  /** Operating Physician First Name */
+  @Column(name = "`operPhysFname`", length = 18)
+  private String operPhysFname;
+
+  /** Operating Physician Middle Initial */
+  @Column(name = "`operPhysMint`", length = 1)
+  private String operPhysMint;
+
+  /** Operating Physician Flag */
+  @Column(name = "`operPhysFlag`", length = 1)
+  private String operPhysFlag;
+
+  /** Other Physician NPI */
+  @Column(name = "`othPhysId`", length = 16)
+  private String othPhysId;
+
+  /** Other Physician Last Name */
+  @Column(name = "`othPhysLname`", length = 17)
+  private String othPhysLname;
+
+  /** Other Physician First Name */
+  @Column(name = "`othPhysFname`", length = 18)
+  private String othPhysFname;
+
+  /** Other Physician Middle Initial */
+  @Column(name = "`othPhysMint`", length = 1)
+  private String othPhysMint;
+
+  /** Other Physician Flag */
+  @Column(name = "`othPhysFlag`", length = 1)
+  private String othPhysFlag;
+
+  /** Cross-Reference Health Insurance Claim Number */
+  @Column(name = "`xrefHicNbr`", length = 12)
+  private String xrefHicNbr;
+
+  /** Process new Health Insurance Claim Number */
+  @Column(name = "`procNewHicInd`", length = 1)
+  private String procNewHicInd;
+
+  /** New Health Insurance Claim Number */
+  @Column(name = "`newHic`", length = 12)
+  private String newHic;
+
+  /** Repository Indicator */
+  @Column(name = "`reposInd`", length = 1)
+  private String reposInd;
+
+  /** Repository HIC */
+  @Column(name = "`reposHic`", length = 12)
+  private String reposHic;
+
+  /** Health Insurance Claim (HIC) Number or Medicare Beneficiary Identify (MBI) */
+  @Column(name = "`mbiSubmBeneInd`", length = 1)
+  private String mbiSubmBeneInd;
+
+  /** Adjustment Medicare Beneficiary Identifier (MBI) Indicator */
+  @Column(name = "`adjMbiInd`", length = 1)
+  private String adjMbiInd;
+
+  /** Adjustment Medicare Beneficiary Identifier */
+  @Column(name = "`adjMbi`", length = 11)
+  private String adjMbi;
+
+  /** Medical Record Number */
+  @Column(name = "`medicalRecordNo`", length = 17)
+  private String medicalRecordNo;
+
   @OneToMany(
       mappedBy = "dcn",
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 
@@ -146,6 +329,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
 
@@ -154,6 +338,39 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
   @Builder.Default
   private Set<PreAdjFissPayer> payers = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "dcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @BatchSize(size = 100)
+  @Builder.Default
+  private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
+
+  public String getMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getMbiHash() {
+    return mbiRecord != null ? mbiRecord.getHash() : null;
+  }
+
+  public enum ServTypeCdMapping {
+    Normal,
+    Clinic,
+    SpecialFacility,
+    Unrecognized
+  }
+
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
+  public static class Fields {
+    public static final String mbi = "mbi";
+  }
 }

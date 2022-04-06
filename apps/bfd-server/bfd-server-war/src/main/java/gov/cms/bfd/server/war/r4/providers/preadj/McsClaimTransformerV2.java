@@ -6,34 +6,41 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.r4.model.CanonicalType;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
-public class McsClaimTransformerV2 {
+public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
+
+  private static final List<String> CANCELED_STATUS_CODES = List.of("r", "z", "9");
 
   private McsClaimTransformerV2() {}
 
@@ -61,76 +68,143 @@ public class McsClaimTransformerV2 {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
-    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
-    claim.setContained(getContainedProvider(claimGroup));
+    claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
+    claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
-    claim.setStatus(Claim.ClaimStatus.ACTIVE);
+    if (claimGroup.getIdrStatusCode() != null) {
+      claim.setStatus(
+          CANCELED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
+              ? Claim.ClaimStatus.CANCELLED
+              : Claim.ClaimStatus.ACTIVE);
+    }
     claim.setType(getType());
+    claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
-    claim.setCreated(new Date());
     claim.setPriority(getPriority());
     claim.setTotal(getTotal(claimGroup));
     claim.setProvider(new Reference("#provider-org"));
-    claim.setPatient(getPatient(claimGroup));
+    claim.setPatient(new Reference("#patient"));
     claim.setDiagnosis(getDiagnosis(claimGroup));
-    claim.setProcedure(getProcedure(claimGroup));
+    claim.setItem(getItems(claimGroup));
+
+    claim.setCreated(new Date());
+    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
 
     return claim;
   }
 
-  private static List<Resource> getContainedProvider(PreAdjMcsClaim claimGroup) {
-    return Collections.singletonList(
-        new Organization()
-            .setIdentifier(
-                Arrays.asList(
-                    new Identifier()
-                        .setType(
-                            new CodeableConcept(
-                                new Coding(
-                                    C4BBOrganizationIdentifierType.PRN.getSystem(),
-                                    C4BBOrganizationIdentifierType.PRN.toCode(),
-                                    C4BBOrganizationIdentifierType.PRN.getDisplay())))
-                        .setValue(claimGroup.getIdrBillProvNum()),
-                    new Identifier()
-                        .setType(
-                            new CodeableConcept(
-                                new Coding(
-                                    C4BBIdentifierType.NPI.getSystem(),
-                                    C4BBIdentifierType.NPI.toCode(),
-                                    C4BBIdentifierType.NPI.getDisplay())))
-                        .setSystem("http://hl7.org/fhir/sid/us-npi")
-                        .setValue(claimGroup.getIdrBillProvNpi())))
-            .setId("provider-org")
-            .setMeta(
-                new Meta()
-                    .setProfile(
-                        Collections.singletonList(
-                            new CanonicalType(
-                                "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization")))));
+  private static Resource getContainedPatient(PreAdjMcsClaim claimGroup) {
+    PatientInfo patientInfo =
+        new PatientInfo(
+            ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
+            ifNotNull(claimGroup.getIdrBeneLast_1_6(), s -> s.charAt(0) + "."),
+            ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
+            null, // MCS claims don't contain dob
+            claimGroup.getIdrBeneSex());
+
+    return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
+  }
+
+  private static Resource getContainedProvider(PreAdjMcsClaim claimGroup) {
+    Organization organization = new Organization();
+
+    if (claimGroup.getIdrBillProvType() != null) {
+      organization
+          .getExtension()
+          .add(
+              new Extension(BBCodingSystems.MCS.BILL_PROV_TYPE)
+                  .setValue(
+                      new Coding(
+                          BBCodingSystems.MCS.BILL_PROV_TYPE,
+                          claimGroup.getIdrBillProvType(),
+                          null)));
+    }
+
+    if (claimGroup.getIdrBillProvSpec() != null) {
+      organization
+          .getExtension()
+          .add(
+              new Extension(BBCodingSystems.MCS.BILL_PROV_SPEC)
+                  .setValue(
+                      new Coding(
+                          BBCodingSystems.MCS.BILL_PROV_SPEC,
+                          claimGroup.getIdrBillProvSpec(),
+                          null)));
+    }
+
+    if (claimGroup.getIdrBillProvEin() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBOrganizationIdentifierType.TAX.getSystem(),
+                              C4BBOrganizationIdentifierType.TAX.toCode(),
+                              C4BBOrganizationIdentifierType.TAX.getDisplay())))
+                  .setSystem(BBCodingSystems.MCS.BILL_PROV_EIN)
+                  .setValue(claimGroup.getIdrBillProvEin()));
+    }
+
+    if (claimGroup.getIdrBillProvNum() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBIdentifierType.NPI.getSystem(),
+                              C4BBIdentifierType.NPI.toCode(),
+                              C4BBIdentifierType.NPI.getDisplay())))
+                  .setSystem(TransformerConstants.CODING_NPI_US)
+                  .setValue(claimGroup.getIdrBillProvNpi()));
+    }
+
+    organization.setId("provider-org");
+
+    return organization;
+  }
+
+  private static List<Extension> getExtension(PreAdjMcsClaim claimGroup) {
+    return claimGroup.getIdrClaimType() == null
+        ? null
+        : List.of(
+            new Extension(BBCodingSystems.MCS.CLM_TYPE)
+                .setValue(
+                    new Coding(BBCodingSystems.MCS.CLM_TYPE, claimGroup.getIdrClaimType(), null)));
   }
 
   private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
-    return Collections.singletonList(
-        new Identifier()
-            .setType(
-                new CodeableConcept(
-                    new Coding(
-                        C4BBIdentifierType.UC.getSystem(),
-                        C4BBIdentifierType.UC.toCode(),
-                        C4BBIdentifierType.UC.getDisplay())))
-            .setSystem("https://dcgeo.cms.gov/resources/variables/icn")
-            .setValue(claimGroup.getIdrClmHdIcn()));
+    return claimGroup.getIdrClmHdIcn() == null
+        ? null
+        : List.of(
+            new Identifier()
+                .setType(
+                    new CodeableConcept(
+                        new Coding(
+                            C4BBIdentifierType.UC.getSystem(),
+                            C4BBIdentifierType.UC.toCode(),
+                            C4BBIdentifierType.UC.getDisplay())))
+                .setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM)
+                .setValue(claimGroup.getIdrClmHdIcn()));
   }
 
   private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(
-            Arrays.asList(
-                new Coding("https://dcgeo.cms.gov/resources/codesystem/rda-type", "MCS", null),
+            List.of(
                 new Coding(
                     ClaimType.PROFESSIONAL.getSystem(),
                     ClaimType.PROFESSIONAL.toCode(),
                     ClaimType.PROFESSIONAL.getDisplay())));
+  }
+
+  private static Period getBillablePeriod(PreAdjMcsClaim claimGroup) {
+    return new Period()
+        .setStart(localDateToDate(claimGroup.getIdrHdrFromDateOfSvc()))
+        .setEnd(localDateToDate(claimGroup.getIdrHdrToDateOfSvc()));
   }
 
   private static CodeableConcept getPriority() {
@@ -156,78 +230,86 @@ public class McsClaimTransformerV2 {
     return total;
   }
 
-  private static Reference getPatient(PreAdjMcsClaim claimGroup) {
-    return new Reference()
-        .setIdentifier(
-            new Identifier()
-                .setType(
-                    new CodeableConcept()
-                        .setCoding(
-                            Collections.singletonList(
-                                new Coding(
-                                    "http://terminology.hl7.org/CodeSystem/v2-0203",
-                                    "MC",
-                                    "Patient's Medicare number"))))
-                .setSystem("http://hl7.org/fhir/sid/us-mbi")
-                .setValue(claimGroup.getIdrClaimMbi()));
-  }
-
   private static List<Claim.DiagnosisComponent> getDiagnosis(PreAdjMcsClaim claimGroup) {
-    List<Claim.DiagnosisComponent> diagnosisComponents = new ArrayList<>();
+    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<PreAdjMcsDiagnosisCode>of())
+        .stream()
+        .map(
+            diagCode -> {
+              String icdVersion = diagCode.getIdrDiagIcdType().equals("0") ? "10" : "9-cm";
 
-    // Sort diagnosis codes by priority prior to building resource
-    List<PreAdjMcsDiagnosisCode> dxCodes = new ArrayList<>(claimGroup.getDiagCodes());
-    dxCodes.sort(Comparator.comparingInt(PreAdjMcsDiagnosisCode::getPriority));
-
-    for (int i = 0; i < dxCodes.size(); ++i) {
-      diagnosisComponents.add(getDiagnosis(dxCodes.get(i), i + 1));
-    }
-
-    return diagnosisComponents;
+              return new Claim.DiagnosisComponent()
+                  .setSequence(diagCode.getPriority() + 1)
+                  .setDiagnosis(
+                      new CodeableConcept()
+                          .setCoding(
+                              List.of(
+                                  new Coding(
+                                      "http://hl7.org/fhir/sid/icd-" + icdVersion,
+                                      diagCode.getIdrDiagCode(),
+                                      null))));
+            })
+        .sorted(Comparator.comparing(Claim.DiagnosisComponent::getSequence))
+        .collect(Collectors.toList());
   }
 
-  private static Claim.DiagnosisComponent getDiagnosis(PreAdjMcsDiagnosisCode code, int sequence) {
-    String icdVersion = code.getIdrDiagIcdType().equals("0") ? "10" : "9";
+  private static List<Claim.ItemComponent> getItems(PreAdjMcsClaim claimGroup) {
+    return ObjectUtils.defaultIfNull(claimGroup.getDetails(), List.<PreAdjMcsDetail>of()).stream()
+        .map(
+            detail -> {
+              Claim.ItemComponent item =
+                  new Claim.ItemComponent()
+                      .setSequence(detail.getPriority() + 1)
+                      .setProductOrService(
+                          new CodeableConcept(
+                              new Coding(BBCodingSystems.HCPCS, detail.getIdrProcCode(), null)))
+                      .setServiced(
+                          new Period()
+                              .setStart(localDateToDate(detail.getIdrDtlFromDate()))
+                              .setEnd(localDateToDate(detail.getIdrDtlToDate())))
+                      .setModifier(getModifiers(detail));
 
-    return new Claim.DiagnosisComponent()
-        .setSequence(sequence)
-        .setDiagnosis(
-            new CodeableConcept()
-                .setCoding(
-                    Collections.singletonList(
-                        new Coding(
-                            "http://hl7.org/fhir/sid/icd-" + icdVersion,
-                            code.getIdrDiagCode(),
-                            null))));
+              // Set the DiagnosisSequence only if the detail Dx Code is not null and present in the
+              // Dx table.
+              Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())
+                  .ifPresent(
+                      detailDiagnosisCode -> {
+                        Optional<PreAdjMcsDiagnosisCode> matchingCode =
+                            claimGroup.getDiagCodes().stream()
+                                .filter(
+                                    diagnosisCode ->
+                                        codesAreEqual(
+                                            diagnosisCode.getIdrDiagCode(), detailDiagnosisCode))
+                                .findFirst();
+
+                        matchingCode.ifPresent(
+                            diagnosisCode ->
+                                item.setDiagnosisSequence(
+                                    List.of(new PositiveIntType(diagnosisCode.getPriority() + 1))));
+                      });
+
+              return item;
+            })
+        .sorted(Comparator.comparing(Claim.ItemComponent::getSequence))
+        .collect(Collectors.toList());
   }
 
-  private static List<Claim.ProcedureComponent> getProcedure(PreAdjMcsClaim claimGroup) {
-    List<Claim.ProcedureComponent> procedure = new ArrayList<>();
+  private static List<CodeableConcept> getModifiers(PreAdjMcsDetail detail) {
+    List<Optional<String>> mods =
+        List.of(
+            Optional.ofNullable(detail.getIdrModOne()),
+            Optional.ofNullable(detail.getIdrModTwo()),
+            Optional.ofNullable(detail.getIdrModThree()),
+            Optional.ofNullable(detail.getIdrModFour()));
 
-    // Sort proc codes by priority prior to building resource
-    List<PreAdjMcsDetail> procCodes = new ArrayList<>(claimGroup.getDetails());
-    procCodes.sort(Comparator.comparingInt(PreAdjMcsDetail::getPriority));
-
-    for (int i = 0; i < procCodes.size(); ++i) {
-      procedure.add(getProcedure(procCodes.get(i), i + 1));
-    }
-
-    return procedure;
-  }
-
-  private static Claim.ProcedureComponent getProcedure(PreAdjMcsDetail procCode, int sequence) {
-    return new Claim.ProcedureComponent()
-        .setSequence(sequence)
-        .setDate(
-            procCode.getIdrDtlToDate() == null
-                ? null
-                : Date.from(
-                    procCode.getIdrDtlToDate().atStartOfDay(ZoneId.systemDefault()).toInstant()))
-        .setProcedure(
-            new CodeableConcept()
-                .setCoding(
-                    Collections.singletonList(
-                        new Coding(
-                            "http://www.ama-assn.org/go/cpt", procCode.getIdrProcCode(), null))));
+    // OptionalGetWithoutIsPresent - IsPresent used in filter
+    //noinspection OptionalGetWithoutIsPresent
+    return IntStream.range(0, mods.size())
+        .filter(i -> mods.get(i).isPresent())
+        .mapToObj(
+            index ->
+                new CodeableConcept(
+                    new Coding(BBCodingSystems.HCPCS, mods.get(index).get(), null)
+                        .setVersion(String.valueOf(index + 1))))
+        .collect(Collectors.toList());
   }
 }

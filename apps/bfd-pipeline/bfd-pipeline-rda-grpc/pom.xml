@@ -21,8 +21,6 @@
         <!-- Version of the plugin used to build the gRPC stubs from the Health.proto file. -->
         <protoc.version>3.15.8</protoc.version>
         <protobuf.version>3.12.0</protobuf.version>
-        <mockito.version>3.8.0</mockito.version>
-        <jackson.version>2.12.3</jackson.version>
     </properties>
 
     <dependencies>
@@ -72,14 +70,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Used to serialize and deserialize objects to JSON during testing. -->
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Adds java-8 types to jackson. -->
@@ -122,8 +112,8 @@
 
         <dependency>
             <!-- Used to run our unit and integration tests. -->
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -160,13 +150,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Logback is used as the logging target/backend for SLF4J during tests:
-                    all logging events will be sent to it. -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
                     at runtime. -->
             <groupId>io.dropwizard.metrics</groupId>
@@ -179,6 +162,11 @@
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used for annotating RDA API. -->
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
         </dependency>
     </dependencies>
 

@@ -68,7 +68,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
@@ -83,8 +83,8 @@
 
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

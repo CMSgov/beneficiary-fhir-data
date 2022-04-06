@@ -1,50 +1,85 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static gov.cms.bfd.pipeline.rda.grpc.source.TransformerTestUtils.assertListContentsHaveSamePropertyValues;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
+import gov.cms.bfd.model.rda.PreAdjMcsAudit;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
+import gov.cms.mpsm.rda.v1.mcs.McsAudit;
+import gov.cms.mpsm.rda.v1.mcs.McsAuditIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsBeneficiarySex;
+import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderStatusCode;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import gov.cms.mpsm.rda.v1.mcs.McsClaimAssignmentCode;
+import gov.cms.mpsm.rda.v1.mcs.McsClaimLevelIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
+import gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditDisposition;
+import gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDetailStatus;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
+import gov.cms.mpsm.rda.v1.mcs.McsLocation;
+import gov.cms.mpsm.rda.v1.mcs.McsLocationActivityCode;
+import gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
+import gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService;
+import gov.cms.mpsm.rda.v1.mcs.McsTypeOfService;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.function.Consumer;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for the {@link McsClaimTransformer}. Unless otherwise stated on a method every test
+ * verifies that one or a set of fields within a source grpc message object for a claim have been
+ * correctly transformed into appropriate values and copied into a new {@link PreAdjMcsClaim} JPA
+ * entity object or one of its child objects.
+ *
+ * <p>Field tests are performed using an adaptor object appropriate for each type of grpc/jpa object
+ * pair. These adaptor objects ({@link ClaimFieldTester}, {@link AdjustmentFieldTester}, {@link
+ * AuditFieldTester}, {@link DetailFieldTester}, and {@link DiagCodeFieldTester}) extend the {@link
+ * LocationFieldTester} class and provide class specific implementations of the methods used to
+ * construct and transform objects under test.
+ *
+ * <p>Each individual field test is named after the field it tests and calls appropriate
+ * verification methods for that field. {@see ClaimTransformerFieldTester} for documentation of each
+ * of the verification methods.
+ */
 public class McsClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
+  private final IdHasher idHasher =
+      new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final McsClaimTransformer transformer =
-      new McsClaimTransformer(
-          clock,
-          new IdHasher(
-              new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8))));
+      new McsClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
   private McsClaimChange.Builder changeBuilder;
   private McsClaim.Builder claimBuilder;
   private PreAdjMcsClaim claim;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     changeBuilder = McsClaimChange.newBuilder();
     claimBuilder = McsClaim.newBuilder();
@@ -66,8 +101,12 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
+  /**
+   * Basic smoke test for transformation of claim objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void allFields() {
+  public void basicFieldsTestForClaimObjectTransformation() {
     claim.setSequenceNumber(42L);
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
@@ -95,8 +134,9 @@ public class McsClaimTransformerTest {
     claim.setIdrBillProvStatusCd("P");
     claim.setIdrTotBilledAmt(new BigDecimal("67591.96"));
     claim.setIdrClaimReceiptDate(LocalDate.of(2020, 2, 1));
-    claim.setIdrClaimMbi("5467891245678");
-    claim.setIdrClaimMbiHash("8033928eb4cf902474141065280c51791663e86d760da5a0fadf354daffb4b01");
+    claim.setMbiRecord(
+        new Mbi(
+            1L, "54678912456", "717ac79ed263a61100f92f7ca67df9249501d52ee4d1af49ea43b457fcabf0d1"));
     claim.setIdrHdrFromDateOfSvc(LocalDate.of(2020, 1, 7));
     claim.setIdrHdrToDateOfSvc(LocalDate.of(2020, 1, 14));
     claim.setLastUpdated(clock.instant());
@@ -128,7 +168,7 @@ public class McsClaimTransformerTest {
             McsBillingProviderStatusCode.BILLING_PROVIDER_STATUS_CODE_PARTICIPATING)
         .setIdrTotBilledAmt("67591.96")
         .setIdrClaimReceiptDate("2020-02-01")
-        .setIdrClaimMbi("5467891245678")
+        .setIdrClaimMbi("54678912456")
         .setIdrHdrFromDos("2020-01-07")
         .setIdrHdrToDos("2020-01-14");
     changeBuilder
@@ -138,8 +178,12 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
+  /**
+   * Basic smoke test for transformation of detail objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void details() {
+  public void basicFieldsTestForDetailObjectTransformation() {
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrClaimType("3");
@@ -201,8 +245,12 @@ public class McsClaimTransformerTest {
         claim.getDetails(), transformed.getDetails(), PreAdjMcsDetail::getPriority);
   }
 
+  /**
+   * Basic smoke test for transformation of diagnosis code objects prior to all of the individual
+   * field tests.
+   */
   @Test
-  public void diagnosisCodes() {
+  public void basicFieldsTestForDiagCodeObjectTransformation() {
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrClaimType("3");
@@ -245,9 +293,12 @@ public class McsClaimTransformerTest {
   }
 
   @Test
-  public void requiredFieldsMissing() {
+  public void testMissingRequiredFieldsGenerateErrors() {
+    final long SEQUENCE_NUM = 37;
+
     try {
       changeBuilder
+          .setSeq(SEQUENCE_NUM)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .setClaim(
               claimBuilder
@@ -257,491 +308,1317 @@ public class McsClaimTransformerTest {
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          ImmutableList.of(
+      List<DataTransformer.ErrorMessage> expectedErrors =
+          List.of(
               new DataTransformer.ErrorMessage(
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
               new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=0")),
-          ex.getErrors());
+                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+
+      String expectedMessage =
+          String.format(
+              "failed with %d errors: seq=%d clmHdIcn= errors=[%s]",
+              expectedErrors.size(),
+              SEQUENCE_NUM,
+              expectedErrors.stream()
+                  .map(DataTransformer.ErrorMessage::toString)
+                  .collect(Collectors.joining(", ")));
+
+      assertEquals(expectedMessage, ex.getMessage());
+      assertEquals(expectedErrors, ex.getErrors());
     }
   }
 
-  @Test
-  public void testBadIdrClmHdIcn() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrClmHdIcn("123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "idrClmHdIcn", "invalid length: expected=[1,15] actual=18"));
-  }
+  // region McsClaim
 
   @Test
-  public void testBadIdrContrId() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrContrId("12345---"),
-        new DataTransformer.ErrorMessage("idrContrId", "invalid length: expected=[1,5] actual=8"));
+  public void testClaimIdrClmHdIcn() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrClmHdIcn,
+            PreAdjMcsClaim::getIdrClmHdIcn,
+            PreAdjMcsClaim.Fields.idrClmHdIcn,
+            15);
   }
 
   @Test
-  public void testBadIdrHic() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrHic("123456789012---"),
-        new DataTransformer.ErrorMessage("idrHic", "invalid length: expected=[1,12] actual=15"));
+  public void testClaimIdrContrId() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrContrId,
+            PreAdjMcsClaim::getIdrContrId,
+            PreAdjMcsClaim.Fields.idrContrId,
+            5);
   }
 
   @Test
-  public void testBadIdrClaimType() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrClaimTypeUnrecognized("55558873478237821782317821782317823783287"),
-        new DataTransformer.ErrorMessage(
-            "idrClaimType", "invalid length: expected=[1,1] actual=41"));
+  public void testClaimIdrHic() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrHic,
+            PreAdjMcsClaim::getIdrHic,
+            PreAdjMcsClaim.Fields.idrHic,
+            12);
   }
 
   @Test
-  public void testBadIdrBeneLast16() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBeneLast16("123456---"),
-        new DataTransformer.ErrorMessage(
-            "idrBeneLast_1_6", "invalid length: expected=[1,6] actual=9"));
+  public void testClaimIdrClaimType() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrClaimTypeEnum,
+            PreAdjMcsClaim::getIdrClaimType,
+            McsClaimType.CLAIM_TYPE_MEDICAL,
+            "3")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrClaimTypeUnrecognized,
+            PreAdjMcsClaim::getIdrClaimType,
+            PreAdjMcsClaim.Fields.idrClaimType,
+            1);
   }
 
   @Test
-  public void testBadIdrBeneFirstInit() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBeneFirstInit("7---"),
-        new DataTransformer.ErrorMessage(
-            "idrBeneFirstInit", "invalid length: expected=[1,1] actual=4"));
+  public void testClaimIdrBeneLast16() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBeneLast16,
+            PreAdjMcsClaim::getIdrBeneLast_1_6,
+            PreAdjMcsClaim.Fields.idrBeneLast_1_6,
+            6);
   }
 
   @Test
-  public void testBadIdrBeneMidInit() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBeneMidInit("8---"),
-        new DataTransformer.ErrorMessage(
-            "idrBeneMidInit", "invalid length: expected=[1,1] actual=4"));
+  public void testClaimIdrBeneFirstInit() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBeneFirstInit,
+            PreAdjMcsClaim::getIdrBeneFirstInit,
+            PreAdjMcsClaim.Fields.idrBeneFirstInit,
+            1);
   }
 
   @Test
-  public void testBadIdrBeneSex() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBeneSexUnrecognized("ZZZ"),
-        new DataTransformer.ErrorMessage("idrBeneSex", "invalid length: expected=[1,1] actual=3"));
+  public void testClaimIdrBeneMidInit() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBeneMidInit,
+            PreAdjMcsClaim::getIdrBeneMidInit,
+            PreAdjMcsClaim.Fields.idrBeneMidInit,
+            1);
   }
 
   @Test
-  public void testBadIdrStatusCode() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrStatusCodeUnrecognized("ZZZ"),
-        new DataTransformer.ErrorMessage("idrStatusCode", "unsupported enum value"));
+  public void testClaimIdrBeneSex() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrBeneSexEnum,
+            PreAdjMcsClaim::getIdrBeneSex,
+            McsBeneficiarySex.BENEFICIARY_SEX_MALE,
+            "M")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrBeneSexUnrecognized,
+            PreAdjMcsClaim::getIdrBeneSex,
+            PreAdjMcsClaim.Fields.idrBeneSex,
+            1);
   }
 
   @Test
-  public void testBadIdrStatusDate() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrStatusDate("2020-02-03---"),
-        new DataTransformer.ErrorMessage("idrStatusDate", "invalid date"));
+  public void testClaimIdrStatusCode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrStatusCodeEnum,
+            PreAdjMcsClaim::getIdrStatusCode,
+            McsStatusCode.STATUS_CODE_DENIED_E,
+            "E")
+        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
+            McsClaim.Builder::setIdrStatusCodeUnrecognized,
+            PreAdjMcsClaim.Fields.idrStatusCode,
+            "ZZZ")
+        .verifyEnumFieldTransformationRejectsSpecificValues(
+            McsClaim.Builder::setIdrStatusCodeEnum,
+            PreAdjMcsClaim.Fields.idrStatusCode,
+            McsStatusCode.STATUS_CODE_NOT_USED);
   }
 
   @Test
-  public void testBadIdrBillProvNpi() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvNpi("CDEFGHIJKL---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvNpi", "invalid length: expected=[1,10] actual=13"));
+  public void testClaimIdrStatusDate() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrStatusDate,
+            PreAdjMcsClaim::getIdrStatusDate,
+            PreAdjMcsClaim.Fields.idrStatusDate);
   }
 
   @Test
-  public void testBadIdrBillProvNum() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvNum("MNOPQRSTUV---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvNum", "invalid length: expected=[1,10] actual=13"));
+  public void testClaimIdrBillProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvNpi,
+            PreAdjMcsClaim::getIdrBillProvNpi,
+            PreAdjMcsClaim.Fields.idrBillProvNpi,
+            10);
   }
 
   @Test
-  public void testBadIdrBillProvEin() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvEin("WXYZabcdef---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvEin", "invalid length: expected=[1,10] actual=13"));
+  public void testClaimIdrBillProvNum() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvNum,
+            PreAdjMcsClaim::getIdrBillProvNum,
+            PreAdjMcsClaim.Fields.idrBillProvNum,
+            10);
   }
 
   @Test
-  public void testBadIdrBillProvType() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvType("RS---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvType", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrBillProvEin() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvEin,
+            PreAdjMcsClaim::getIdrBillProvEin,
+            PreAdjMcsClaim.Fields.idrBillProvEin,
+            10);
   }
 
   @Test
-  public void testBadIdrBillProvSpec() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvSpec("tu---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvSpec", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrBillProvType() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvType,
+            PreAdjMcsClaim::getIdrBillProvType,
+            PreAdjMcsClaim.Fields.idrBillProvType,
+            2);
   }
 
   @Test
-  public void testBadIdrBillProvGroup() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvGroupIndUnrecognized("v---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvGroupInd", "invalid length: expected=[1,1] actual=4"));
+  public void testClaimIdrBillProvSpec() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvSpec,
+            PreAdjMcsClaim::getIdrBillProvSpec,
+            PreAdjMcsClaim.Fields.idrBillProvSpec,
+            2);
   }
 
   @Test
-  public void testBadIdrBillProvPriceSpec() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvPriceSpec("rw---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvPriceSpec", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrBillProvGroupInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrBillProvGroupIndEnum,
+            PreAdjMcsClaim::getIdrBillProvGroupInd,
+            McsBillingProviderIndicator.BILLING_PROVIDER_INDICATOR_GROUP,
+            "G")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrBillProvGroupIndUnrecognized,
+            PreAdjMcsClaim::getIdrBillProvGroupInd,
+            PreAdjMcsClaim.Fields.idrBillProvGroupInd,
+            1);
   }
 
   @Test
-  public void testBadIdrBillProvCounty() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvCounty("34---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvCounty", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrBillProvPriceSpec() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvPriceSpec,
+            PreAdjMcsClaim::getIdrBillProvPriceSpec,
+            PreAdjMcsClaim.Fields.idrBillProvPriceSpec,
+            2);
   }
 
   @Test
-  public void testBadIdrBillProvLoc() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvLoc("43---"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvLoc", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrBillProvCounty() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvCounty,
+            PreAdjMcsClaim::getIdrBillProvCounty,
+            PreAdjMcsClaim.Fields.idrBillProvCounty,
+            2);
   }
 
   @Test
-  public void testBadIdrTotAllowed() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrTotAllowed("12345.42---"),
-        new DataTransformer.ErrorMessage("idrTotAllowed", "invalid amount"));
+  public void testClaimIdrBillProvLoc() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrBillProvLoc,
+            PreAdjMcsClaim::getIdrBillProvLoc,
+            PreAdjMcsClaim.Fields.idrBillProvLoc,
+            2);
   }
 
   @Test
-  public void testBadIdrCoinsurance() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrCoinsurance("67890.94---"),
-        new DataTransformer.ErrorMessage("idrCoinsurance", "invalid amount"));
+  public void testClaimIdrTotAllowed() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyAmountStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrTotAllowed,
+            PreAdjMcsClaim::getIdrTotAllowed,
+            PreAdjMcsClaim.Fields.idrTotAllowed);
   }
 
   @Test
-  public void testBadIdrDeductible() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrDeductible("87945.28---"),
-        new DataTransformer.ErrorMessage("idrDeductible", "invalid amount"));
+  public void testClaimIdrCoinsurance() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyAmountStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrCoinsurance,
+            PreAdjMcsClaim::getIdrCoinsurance,
+            PreAdjMcsClaim.Fields.idrCoinsurance);
   }
 
   @Test
-  public void testBadIdrBillProvStatusCd() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrBillProvStatusCdUnrecognized("123"),
-        new DataTransformer.ErrorMessage(
-            "idrBillProvStatusCd", "invalid length: expected=[1,1] actual=3"));
+  public void testClaimIdrDeductible() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyAmountStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrDeductible,
+            PreAdjMcsClaim::getIdrDeductible,
+            PreAdjMcsClaim.Fields.idrDeductible);
   }
 
   @Test
-  public void testBadIdrTotBilledAmt() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrTotBilledAmt("67591.96---"),
-        new DataTransformer.ErrorMessage("idrTotBilledAmt", "invalid amount"));
+  public void testClaimIdrBillProvStatusCd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrBillProvStatusCdEnum,
+            PreAdjMcsClaim::getIdrBillProvStatusCd,
+            McsBillingProviderStatusCode.BILLING_PROVIDER_STATUS_CODE_NON_PARTICIPATING,
+            "N")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrBillProvStatusCdUnrecognized,
+            PreAdjMcsClaim::getIdrBillProvStatusCd,
+            PreAdjMcsClaim.Fields.idrBillProvStatusCd,
+            1);
   }
 
   @Test
-  public void testBadIdrClaimReceiptDate() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrClaimReceiptDate("2020-02-01---"),
-        new DataTransformer.ErrorMessage("idrClaimReceiptDate", "invalid date"));
+  public void testClaimIdrBilledAmt() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyAmountStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrTotBilledAmt,
+            PreAdjMcsClaim::getIdrTotBilledAmt,
+            PreAdjMcsClaim.Fields.idrTotBilledAmt);
   }
 
   @Test
-  public void testBadIdrClaimMbi() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrClaimMbi("5467891245678---"),
-        new DataTransformer.ErrorMessage(
-            "idrClaimMbi", "invalid length: expected=[1,13] actual=16"));
+  public void testClaimIdrClaimReceiptDate() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrClaimReceiptDate,
+            PreAdjMcsClaim::getIdrClaimReceiptDate,
+            PreAdjMcsClaim.Fields.idrClaimReceiptDate);
   }
 
   @Test
-  public void testBadIdrHdrFromDos() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrHdrFromDos("2020-01-07---"),
-        new DataTransformer.ErrorMessage("idrHdrFromDateOfSvc", "invalid date"));
+  public void testClaimIdrClaimMbi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrClaimMbi,
+            PreAdjMcsClaim::getIdrClaimMbi,
+            PreAdjMcsClaim.Fields.idrClaimMbi,
+            11)
+        .verifyIdHashFieldPopulatedCorrectly(
+            McsClaim.Builder::setIdrClaimMbi, PreAdjMcsClaim::getIdrClaimMbiHash, 11, idHasher);
   }
 
   @Test
-  public void testBadIdrHdrToDos() {
-    assertClaimTransformationError(
-        () -> claimBuilder.setIdrHdrToDos("2020-01-14---"),
-        new DataTransformer.ErrorMessage("idrHdrToDateOfSvc", "invalid date"));
+  public void testClaimIdrHdrFromDos() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrHdrFromDos,
+            PreAdjMcsClaim::getIdrHdrFromDateOfSvc,
+            PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc);
   }
 
   @Test
-  public void testBadDiagnosisCodeIdrClmHdIcn() {
-    assertDiagnosisCodeTransformationError(
-        codeBuilder -> codeBuilder.setIdrClmHdIcn("123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=18"));
+  public void testClaimIdrHdrToDos() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsClaim.Builder::setIdrHdrToDos,
+            PreAdjMcsClaim::getIdrHdrToDateOfSvc,
+            PreAdjMcsClaim.Fields.idrHdrToDateOfSvc);
   }
 
   @Test
-  public void testBadDiagnosisCodeIdrDiagCode() {
-    assertDiagnosisCodeTransformationError(
-        codeBuilder -> codeBuilder.setIdrDiagCode("1234567---"),
-        new DataTransformer.ErrorMessage(
-            "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=10"));
+  public void testClaimIdrAssignment() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrAssignmentEnum,
+            PreAdjMcsClaim::getIdrAssignment,
+            McsClaimAssignmentCode.CLAIM_ASSIGNMENT_CODE,
+            "A")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrAssignmentUnrecognized,
+            PreAdjMcsClaim::getIdrAssignment,
+            PreAdjMcsClaim.Fields.idrAssignment,
+            1);
   }
 
   @Test
-  public void testBadDiagnosisCodeIdrDiagIcdType() {
-    assertDiagnosisCodeTransformationError(
-        codeBuilder -> codeBuilder.setIdrDiagIcdTypeEnumUnrecognized("sdjbfdskjbdfskjbsdf---"),
-        new DataTransformer.ErrorMessage(
-            "diagCode-0-idrDiagIcdType", "invalid length: expected=[1,1] actual=22"));
+  public void testClaimIdrClmLevelInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrClmLevelIndEnum,
+            PreAdjMcsClaim::getIdrClmLevelInd,
+            McsClaimLevelIndicator.CLAIM_LEVEL_INDICATOR_ORIGINAL,
+            "O")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrClmLevelIndUnrecognized,
+            PreAdjMcsClaim::getIdrClmLevelInd,
+            PreAdjMcsClaim.Fields.idrClmLevelInd,
+            1);
   }
 
   @Test
-  public void testBadDetailIdrDtlStatus() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrDtlStatusUnrecognized("ZZZ"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrDtlStatus", "invalid length: expected=[1,1] actual=3"));
+  public void testClaimIdrHdrAudit() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyIntFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrHdrAudit, PreAdjMcsClaim::getIdrHdrAudit);
   }
 
   @Test
-  public void testBadDetailIdrDtlFromDate() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrDtlFromDate("--not-a-date--"),
-        new DataTransformer.ErrorMessage("detail-0-idrDtlFromDate", "invalid date"));
+  public void testClaimIdrHdrAuditInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrHdrAuditIndEnum,
+            PreAdjMcsClaim::getIdrHdrAuditInd,
+            McsAuditIndicator.AUDIT_INDICATOR_AUDIT_NUMBER,
+            "A")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
+            PreAdjMcsClaim::getIdrHdrAuditInd,
+            PreAdjMcsClaim.Fields.idrHdrAuditInd,
+            1);
   }
 
   @Test
-  public void testBadDetailIdrDtlToDate() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrDtlToDate("--not-a-date--"),
-        new DataTransformer.ErrorMessage("detail-0-idrDtlToDate", "invalid date"));
+  public void testClaimIdrUSplitReason() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsClaim.Builder::setIdrUSplitReasonEnum,
+            PreAdjMcsClaim::getIdrUSplitReason,
+            McsSplitReasonCode.SPLIT_REASON_CODE_GHI_SPLIT,
+            "4")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsClaim.Builder::setIdrUSplitReasonUnrecognized,
+            PreAdjMcsClaim::getIdrUSplitReason,
+            PreAdjMcsClaim.Fields.idrUSplitReason,
+            1);
   }
 
   @Test
-  public void testBadDetailIdrProcCode() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrProcCode("abCDe---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrProcCode", "invalid length: expected=[1,5] actual=8"));
+  public void testClaimIdrJReferringProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrJReferringProvNpi,
+            PreAdjMcsClaim::getIdrJReferringProvNpi,
+            PreAdjMcsClaim.Fields.idrJReferringProvNpi,
+            10);
   }
 
   @Test
-  public void testBadDetailIdrModOne() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrModOne("aB---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrModOne", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrJFacProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrJFacProvNpi,
+            PreAdjMcsClaim::getIdrJFacProvNpi,
+            PreAdjMcsClaim.Fields.idrJFacProvNpi,
+            10);
   }
 
   @Test
-  public void testBadDetailIdrModTwo() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrModTwo("Cd---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrModTwo", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrUDemoProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrUDemoProvNpi,
+            PreAdjMcsClaim::getIdrUDemoProvNpi,
+            PreAdjMcsClaim.Fields.idrUDemoProvNpi,
+            10);
   }
 
   @Test
-  public void testBadDetailIdrModThree() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrModThree("EF---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrModThree", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrUSuperNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrUSuperNpi,
+            PreAdjMcsClaim::getIdrUSuperNpi,
+            PreAdjMcsClaim.Fields.idrUSuperNpi,
+            10);
   }
 
   @Test
-  public void testBadDetailIdrModFour() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrModFour("gh---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrModFour", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrUFcadjBilNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrUFcadjBilNpi,
+            PreAdjMcsClaim::getIdrUFcadjBilNpi,
+            PreAdjMcsClaim.Fields.idrUFcadjBilNpi,
+            10);
   }
 
   @Test
-  public void testBadDetailIdrDtlDiagIcdType() {
-    assertDetailTransformationError(
-        detailBuilder ->
-            detailBuilder.setIdrDtlDiagIcdTypeUnrecognized(
-                "jbkasjdbkjadsfbflasdbglbasdfljbfdsaj---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrDtlDiagIcdType", "invalid length: expected=[1,1] actual=39"));
+  public void testClaimIdrAmbPickupAddresLine1() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbPickupAddresLine1,
+            PreAdjMcsClaim::getIdrAmbPickupAddresLine1,
+            PreAdjMcsClaim.Fields.idrAmbPickupAddresLine1,
+            25);
   }
 
   @Test
-  public void testBadDetailIdrDtlPrimaryDiagCode() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrDtlPrimaryDiagCode("hetwpqj---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrDtlPrimaryDiagCode", "invalid length: expected=[1,7] actual=10"));
+  public void testClaimIdrAmbPickupAddresLine2() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbPickupAddresLine2,
+            PreAdjMcsClaim::getIdrAmbPickupAddresLine2,
+            PreAdjMcsClaim.Fields.idrAmbPickupAddresLine2,
+            20);
   }
 
   @Test
-  public void testBadDetailIdrKPosLnameOrg() {
-    assertDetailTransformationError(
-        detailBuilder ->
-            detailBuilder.setIdrKPosLnameOrg(
-                "123456789012345678901234567890123456789012345678901234567890---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosLnameOrg", "invalid length: expected=[1,60] actual=63"));
+  public void testClaimIdrAmbPickupCity() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbPickupCity,
+            PreAdjMcsClaim::getIdrAmbPickupCity,
+            PreAdjMcsClaim.Fields.idrAmbPickupCity,
+            20);
   }
 
   @Test
-  public void testBadDetailIdrKPosFname() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosFname("12345678901234567890123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosFname", "invalid length: expected=[1,35] actual=38"));
+  public void testClaimIdrAmbPickupState() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbPickupState,
+            PreAdjMcsClaim::getIdrAmbPickupState,
+            PreAdjMcsClaim.Fields.idrAmbPickupState,
+            2);
   }
 
   @Test
-  public void testBadDetailIdrKPosMname() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosMname("1234567890123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosMname", "invalid length: expected=[1,25] actual=28"));
+  public void testClaimIdrAmbPickupZipcode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbPickupZipcode,
+            PreAdjMcsClaim::getIdrAmbPickupZipcode,
+            PreAdjMcsClaim.Fields.idrAmbPickupZipcode,
+            9);
   }
 
   @Test
-  public void testBadDetailIdrKPosAddr1() {
-    assertDetailTransformationError(
-        detailBuilder ->
-            detailBuilder.setIdrKPosAddr1(
-                "1234567890123456789012345678901234567890123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosAddr1", "invalid length: expected=[1,55] actual=58"));
+  public void testClaimIdrAmbDropoffName() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbDropoffName,
+            PreAdjMcsClaim::getIdrAmbDropoffName,
+            PreAdjMcsClaim.Fields.idrAmbDropoffName,
+            24);
   }
 
   @Test
-  public void testBadDetailIdrKPosAddr21St() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosAddr21St("123456789012345678901234567890---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosAddr2_1st", "invalid length: expected=[1,30] actual=33"));
+  public void testClaimIdrAmbDropoffAddrLine1() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbDropoffAddrLine1,
+            PreAdjMcsClaim::getIdrAmbDropoffAddrLine1,
+            PreAdjMcsClaim.Fields.idrAmbDropoffAddrLine1,
+            25);
   }
 
   @Test
-  public void testBadDetailIdrKPosAddr22Nd() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosAddr22Nd("1234567890123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosAddr2_2nd", "invalid length: expected=[1,25] actual=28"));
+  public void testClaimIdrAmbDropoffAddrLine2() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbDropoffAddrLine2,
+            PreAdjMcsClaim::getIdrAmbDropoffAddrLine2,
+            PreAdjMcsClaim.Fields.idrAmbDropoffAddrLine2,
+            20);
   }
 
   @Test
-  public void testBadDetailIdrKPosCity() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosCity("123456789012345678901234567890---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosCity", "invalid length: expected=[1,30] actual=33"));
+  public void testClaimIdrAmbDropoffCity() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbDropoffCity,
+            PreAdjMcsClaim::getIdrAmbDropoffCity,
+            PreAdjMcsClaim.Fields.idrAmbDropoffCity,
+            20);
   }
 
   @Test
-  public void testBadDetailIdrKPosState() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosState("12---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosState", "invalid length: expected=[1,2] actual=5"));
+  public void testClaimIdrAmbDropoffState() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbDropoffState,
+            PreAdjMcsClaim::getIdrAmbDropoffState,
+            PreAdjMcsClaim.Fields.idrAmbDropoffState,
+            2);
   }
 
   @Test
-  public void testBadDetailIdrKPosZip() {
-    assertDetailTransformationError(
-        detailBuilder -> detailBuilder.setIdrKPosZip("123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "detail-0-idrKPosZip", "invalid length: expected=[1,15] actual=18"));
+  public void testClaimIdrAmbDropoffZipcode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrAmbDropoffZipcode,
+            PreAdjMcsClaim::getIdrAmbDropoffZipcode,
+            PreAdjMcsClaim.Fields.idrAmbDropoffZipcode,
+            9);
   }
 
-  private void assertClaimTransformationError(
-      Runnable claimUpdate, DataTransformer.ErrorMessage... expectedErrors) {
-    try {
-      claimBuilder
-          .setIdrClmHdIcn("123456789012345")
-          .setIdrContrId("12345")
-          .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
-      claimUpdate.run();
-      changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
-      transformer.transformClaim(changeBuilder.build());
-      fail("should have thrown");
-    } catch (DataTransformer.TransformationException ex) {
-      assertEquals(ImmutableList.copyOf(expectedErrors), ex.getErrors());
-    }
-  }
+  // endregion McsClaim
 
-  private void assertDiagnosisCodeTransformationError(
-      Consumer<McsDiagnosisCode.Builder> updater, DataTransformer.ErrorMessage... expectedErrors) {
-    assertClaimTransformationError(
-        () -> {
-          final McsDiagnosisCode.Builder codeBuilder = McsDiagnosisCode.newBuilder();
-          codeBuilder.setIdrClmHdIcn("123456789012345");
-          updater.accept(codeBuilder);
-          claimBuilder.addMcsDiagnosisCodes(codeBuilder.build());
-        },
-        expectedErrors);
-  }
+  // region McsAdjustments
 
-  private void assertDetailTransformationError(
-      Consumer<McsDetail.Builder> updater, DataTransformer.ErrorMessage... expectedErrors) {
-    assertClaimTransformationError(
-        () -> {
-          final McsDetail.Builder detailBuilder = McsDetail.newBuilder();
-          updater.accept(detailBuilder);
-          claimBuilder.addMcsDetails(detailBuilder.build());
-        },
-        expectedErrors);
+  @Test
+  public void testAdjustmentIdrAdjDate() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsAdjustment.Builder::setIdrAdjDate,
+            PreAdjMcsAdjustment::getIdrAdjDate,
+            PreAdjMcsAdjustment.Fields.idrAdjDate);
   }
 
   @Test
-  public void unrecognizedStatusCode() {
-    claimBuilder
-        .setIdrClmHdIcn("123456789012345")
-        .setIdrContrId("12345")
-        .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL)
-        .setIdrStatusCodeUnrecognized("X");
-    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
-    try {
-      transformer.transformClaim(changeBuilder.build());
-      fail("should have thrown");
-    } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          ImmutableList.of(
-              new DataTransformer.ErrorMessage("idrStatusCode", "unsupported enum value")),
-          ex.getErrors());
-    }
+  public void testAdjustmentIdrXrefIcn() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsAdjustment.Builder::setIdrXrefIcn,
+            PreAdjMcsAdjustment::getIdrXrefIcn,
+            PreAdjMcsAdjustment.Fields.idrXrefIcn,
+            15);
   }
 
   @Test
-  public void rejectedStatusCodeEnum() {
-    claimBuilder
-        .setIdrClmHdIcn("123456789012345")
-        .setIdrContrId("12345")
-        .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL)
-        .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_NOT_USED);
-    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
-    try {
-      transformer.transformClaim(changeBuilder.build());
-      fail("should have thrown");
-    } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          ImmutableList.of(
-              new DataTransformer.ErrorMessage("idrStatusCode", "unsupported enum value")),
-          ex.getErrors());
-    }
+  public void testAdjustmentIdrAdjClerk() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsAdjustment.Builder::setIdrAdjClerk,
+            PreAdjMcsAdjustment::getIdrAdjClerk,
+            PreAdjMcsAdjustment.Fields.idrAdjClerk,
+            4);
   }
+
+  @Test
+  public void testAdjustmentIdrInitCcn() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsAdjustment.Builder::setIdrInitCcn,
+            PreAdjMcsAdjustment::getIdrInitCcn,
+            PreAdjMcsAdjustment.Fields.idrInitCcn,
+            15);
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjChkWrtDt() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsAdjustment.Builder::setIdrAdjChkWrtDt,
+            PreAdjMcsAdjustment::getIdrAdjChkWrtDt,
+            PreAdjMcsAdjustment.Fields.idrAdjChkWrtDt);
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjBEombAmt() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyAmountStringFieldTransformedCorrectly(
+            McsAdjustment.Builder::setIdrAdjBEombAmt,
+            PreAdjMcsAdjustment::getIdrAdjBEombAmt,
+            PreAdjMcsAdjustment.Fields.idrAdjBEombAmt);
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjPEombAmt() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .verifyAmountStringFieldTransformedCorrectly(
+            McsAdjustment.Builder::setIdrAdjPEombAmt,
+            PreAdjMcsAdjustment::getIdrAdjPEombAmt,
+            PreAdjMcsAdjustment.Fields.idrAdjPEombAmt);
+  }
+
+  // endregion McsAdjustments
+
+  // region McsAudit
+
+  @Test
+  public void testAuditIdrJAuditNum() {
+    new McsClaimTransformerTest.AuditFieldTester()
+        .verifyIntFieldCopiedCorrectly(
+            McsAudit.Builder::setIdrJAuditNum, PreAdjMcsAudit::getIdrJAuditNum);
+  }
+
+  @Test
+  public void testAuditIdrJAuditInd() {
+    new McsClaimTransformerTest.AuditFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsAudit.Builder::setIdrJAuditIndEnum,
+            PreAdjMcsAudit::getIdrJAuditInd,
+            McsCutbackAuditIndicator.CUTBACK_AUDIT_INDICATOR_AUDIT_NUMBER,
+            "A")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsAudit.Builder::setIdrJAuditIndUnrecognized,
+            PreAdjMcsAudit::getIdrJAuditInd,
+            PreAdjMcsAudit.Fields.idrJAuditInd,
+            1);
+  }
+
+  @Test
+  public void testAuditIdrJAuditDisp() {
+    new McsClaimTransformerTest.AuditFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsAudit.Builder::setIdrJAuditDispEnum,
+            PreAdjMcsAudit::getIdrJAuditDisp,
+            McsCutbackAuditDisposition.CUTBACK_AUDIT_DISPOSITION_ADS_LETTER,
+            "S")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsAudit.Builder::setIdrJAuditDispUnrecognized,
+            PreAdjMcsAudit::getIdrJAuditDisp,
+            PreAdjMcsAudit.Fields.idrJAuditDisp,
+            1);
+  }
+
+  // endregion McsAudit
+
+  // region McsDiagnosisCode
+
+  @Test
+  public void testDiagnosisCodeIdrDiagCode() {
+    new McsClaimTransformerTest.DiagCodeFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDiagnosisCode.Builder::setIdrDiagCode,
+            PreAdjMcsDiagnosisCode::getIdrDiagCode,
+            PreAdjMcsDiagnosisCode.Fields.idrDiagCode,
+            7);
+  }
+
+  @Test
+  public void testDiagnosisCodeIdrDiagIcdType() {
+    new McsClaimTransformerTest.DiagCodeFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsDiagnosisCode.Builder::setIdrDiagIcdTypeEnum,
+            PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
+            McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9,
+            "9")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsDiagnosisCode.Builder::setIdrDiagIcdTypeUnrecognized,
+            PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
+            PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
+            1);
+  }
+
+  // endregion McsDiagnosisCode
+
+  // region McsDetail
+  @Test
+  public void testDetailIdrDtlStatus() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsDetail.Builder::setIdrDtlStatusEnum,
+            PreAdjMcsDetail::getIdrDtlStatus,
+            McsDetailStatus.DETAIL_STATUS_FINAL,
+            "F")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsDetail.Builder::setIdrDtlStatusUnrecognized,
+            PreAdjMcsDetail::getIdrDtlStatus,
+            PreAdjMcsDetail.Fields.idrDtlStatus,
+            1);
+  }
+
+  @Test
+  public void testDetailIdrDtlFromDate() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsDetail.Builder::setIdrDtlFromDate,
+            PreAdjMcsDetail::getIdrDtlFromDate,
+            PreAdjMcsDetail.Fields.idrDtlFromDate);
+  }
+
+  @Test
+  public void testDetailIdrDtlToDate() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsDetail.Builder::setIdrDtlToDate,
+            PreAdjMcsDetail::getIdrDtlToDate,
+            PreAdjMcsDetail.Fields.idrDtlToDate);
+  }
+
+  @Test
+  public void testDetailIdrProcCode() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrProcCode,
+            PreAdjMcsDetail::getIdrProcCode,
+            PreAdjMcsDetail.Fields.idrProcCode,
+            5);
+  }
+
+  @Test
+  public void testDetailIdrModOne() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrModOne,
+            PreAdjMcsDetail::getIdrModOne,
+            PreAdjMcsDetail.Fields.idrModOne,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrModTwo() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrModTwo,
+            PreAdjMcsDetail::getIdrModTwo,
+            PreAdjMcsDetail.Fields.idrModTwo,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrModThree() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrModThree,
+            PreAdjMcsDetail::getIdrModThree,
+            PreAdjMcsDetail.Fields.idrModThree,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrModFour() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrModFour,
+            PreAdjMcsDetail::getIdrModFour,
+            PreAdjMcsDetail.Fields.idrModFour,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlDiagIcdType() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsDetail.Builder::setIdrDtlDiagIcdTypeEnum,
+            PreAdjMcsDetail::getIdrDtlDiagIcdType,
+            McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10,
+            "0")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsDetail.Builder::setIdrDtlDiagIcdTypeUnrecognized,
+            PreAdjMcsDetail::getIdrDtlDiagIcdType,
+            PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
+            1);
+  }
+
+  @Test
+  public void testDetailIdrDtlPrimaryDiagCode() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlPrimaryDiagCode,
+            PreAdjMcsDetail::getIdrDtlPrimaryDiagCode,
+            PreAdjMcsDetail.Fields.idrDtlPrimaryDiagCode,
+            7);
+  }
+
+  @Test
+  public void testDetailIdrKPosLnameOrg() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosLnameOrg,
+            PreAdjMcsDetail::getIdrKPosLnameOrg,
+            PreAdjMcsDetail.Fields.idrKPosLnameOrg,
+            60);
+  }
+
+  @Test
+  public void testDetailIdrKPosFname() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosFname,
+            PreAdjMcsDetail::getIdrKPosFname,
+            PreAdjMcsDetail.Fields.idrKPosFname,
+            35);
+  }
+
+  @Test
+  public void testDetailIdrKPosMname() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosMname,
+            PreAdjMcsDetail::getIdrKPosMname,
+            PreAdjMcsDetail.Fields.idrKPosMname,
+            25);
+  }
+
+  @Test
+  public void testDetailIdrKPosAddr1() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosAddr1,
+            PreAdjMcsDetail::getIdrKPosAddr1,
+            PreAdjMcsDetail.Fields.idrKPosAddr1,
+            55);
+  }
+
+  @Test
+  public void testDetailIdrKPosAddr21St() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosAddr21St,
+            PreAdjMcsDetail::getIdrKPosAddr2_1st,
+            PreAdjMcsDetail.Fields.idrKPosAddr2_1st,
+            30);
+  }
+
+  @Test
+  public void testDetailIdrKPosAddr22Nd() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosAddr22Nd,
+            PreAdjMcsDetail::getIdrKPosAddr2_2nd,
+            PreAdjMcsDetail.Fields.idrKPosAddr2_2nd,
+            25);
+  }
+
+  @Test
+  public void testDetailIdrKPosCity() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosCity,
+            PreAdjMcsDetail::getIdrKPosCity,
+            PreAdjMcsDetail.Fields.idrKPosCity,
+            30);
+  }
+
+  @Test
+  public void testDetailIdrKPosState() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosState,
+            PreAdjMcsDetail::getIdrKPosState,
+            PreAdjMcsDetail.Fields.idrKPosState,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrKPosZip() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKPosZip,
+            PreAdjMcsDetail::getIdrKPosZip,
+            PreAdjMcsDetail.Fields.idrKPosZip,
+            15);
+  }
+
+  @Test
+  public void testDetailIdrTos() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsDetail.Builder::setIdrTosEnum,
+            PreAdjMcsDetail::getIdrTos,
+            McsTypeOfService.TYPE_OF_SERVICE_ANESTHESIA,
+            "7")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsDetail.Builder::setIdrTosUnrecognized,
+            PreAdjMcsDetail::getIdrTos,
+            PreAdjMcsDetail.Fields.idrTos,
+            1);
+  }
+
+  @Test
+  public void testDetailIdrTwoDigitPos() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsDetail.Builder::setIdrTwoDigitPosEnum,
+            PreAdjMcsDetail::getIdrTwoDigitPos,
+            McsTwoDigitPlanOfService.TWO_DIGIT_PLAN_OF_SERVICE_AMBULANCE_LAND,
+            "41")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsDetail.Builder::setIdrTwoDigitPosUnrecognized,
+            PreAdjMcsDetail::getIdrTwoDigitPos,
+            PreAdjMcsDetail.Fields.idrTwoDigitPos,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendType() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlRendType,
+            PreAdjMcsDetail::getIdrDtlRendType,
+            PreAdjMcsDetail.Fields.idrDtlRendType,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendSpec() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlRendSpec,
+            PreAdjMcsDetail::getIdrDtlRendSpec,
+            PreAdjMcsDetail.Fields.idrDtlRendSpec,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendNpi() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlRendNpi,
+            PreAdjMcsDetail::getIdrDtlRendNpi,
+            PreAdjMcsDetail.Fields.idrDtlRendNpi,
+            10);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendProv() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlRendProv,
+            PreAdjMcsDetail::getIdrDtlRendProv,
+            PreAdjMcsDetail.Fields.idrDtlRendProv,
+            10);
+  }
+
+  @Test
+  public void testDetailIdrKDtlFacProvNpi() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrKDtlFacProvNpi,
+            PreAdjMcsDetail::getIdrKDtlFacProvNpi,
+            PreAdjMcsDetail.Fields.idrKDtlFacProvNpi,
+            10);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupAddres1() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbPickupAddres1,
+            PreAdjMcsDetail::getIdrDtlAmbPickupAddres1,
+            PreAdjMcsDetail.Fields.idrDtlAmbPickupAddres1,
+            25);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupAddres2() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbPickupAddres2,
+            PreAdjMcsDetail::getIdrDtlAmbPickupAddres2,
+            PreAdjMcsDetail.Fields.idrDtlAmbPickupAddres2,
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupCity() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbPickupCity,
+            PreAdjMcsDetail::getIdrDtlAmbPickupCity,
+            PreAdjMcsDetail.Fields.idrDtlAmbPickupCity,
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupState() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbPickupState,
+            PreAdjMcsDetail::getIdrDtlAmbPickupState,
+            PreAdjMcsDetail.Fields.idrDtlAmbPickupState,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupZipcode() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbPickupZipcode,
+            PreAdjMcsDetail::getIdrDtlAmbPickupZipcode,
+            PreAdjMcsDetail.Fields.idrDtlAmbPickupZipcode,
+            9);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffName() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbDropoffName,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffName,
+            PreAdjMcsDetail.Fields.idrDtlAmbDropoffName,
+            24);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffAddrL1() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbDropoffAddrL1,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffAddrL1,
+            PreAdjMcsDetail.Fields.idrDtlAmbDropoffAddrL1,
+            25);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffAddrL2() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbDropoffAddrL2,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffAddrL2,
+            PreAdjMcsDetail.Fields.idrDtlAmbDropoffAddrL2,
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffCity() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbDropoffCity,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffCity,
+            PreAdjMcsDetail.Fields.idrDtlAmbDropoffCity,
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffState() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbDropoffState,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffState,
+            PreAdjMcsDetail.Fields.idrDtlAmbDropoffState,
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffZipcode() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlAmbDropoffZipcode,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffZipcode,
+            PreAdjMcsDetail.Fields.idrDtlAmbDropoffZipcode,
+            9);
+  }
+
+  // endregion McsDetail
+
+  // region McsLocation
+
+  @Test
+  public void testLocationIdrLocClerk() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsLocation.Builder::setIdrLocClerk,
+            PreAdjMcsLocation::getIdrLocClerk,
+            PreAdjMcsLocation.Fields.idrLocClerk,
+            4);
+  }
+
+  @Test
+  public void testLocationIdrLocCode() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsLocation.Builder::setIdrLocCode,
+            PreAdjMcsLocation::getIdrLocCode,
+            PreAdjMcsLocation.Fields.idrLocCode,
+            3);
+  }
+
+  @Test
+  public void testLocationIdrLocDate() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .verifyDateStringFieldTransformedCorrectly(
+            McsLocation.Builder::setIdrLocDate,
+            PreAdjMcsLocation::getIdrLocDate,
+            PreAdjMcsLocation.Fields.idrLocDate);
+  }
+
+  @Test
+  public void testLocationIdrLocActvCode() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            McsLocation.Builder::setIdrLocActvCodeEnum,
+            PreAdjMcsLocation::getIdrLocActvCode,
+            McsLocationActivityCode.LOCATION_ACTIVITY_CODE_CAS_ACTIVITY,
+            "Q")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            McsLocation.Builder::setIdrLocActvCodeUnrecognized,
+            PreAdjMcsLocation::getIdrLocActvCode,
+            PreAdjMcsLocation.Fields.idrLocActvCode,
+            1);
+  }
+
+  // endregion McsLocation
 
   private void assertChangeMatches(RdaChange.Type changeType) {
     RdaChange<PreAdjMcsClaim> changed = transformer.transformClaim(changeBuilder.build());
     assertEquals(changeType, changed.getType());
     assertThat(changed.getClaim(), samePropertyValuesAs(claim));
   }
+
+  // region Field Tester Classes
+
+  private abstract class AbstractFieldTester<TBuilder, TEntity>
+      extends ClaimTransformerFieldTester<
+          McsClaim.Builder, McsClaim, PreAdjMcsClaim, TBuilder, TEntity> {
+    @Override
+    McsClaim.Builder createClaimBuilder() {
+      return McsClaim.newBuilder()
+          .setIdrClmHdIcn("idrClmHdIcn")
+          .setIdrContrId("contr")
+          .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
+    }
+
+    @Override
+    RdaChange<PreAdjMcsClaim> transformClaim(McsClaim claim) {
+      var changeBuilder =
+          McsClaimChange.newBuilder()
+              .setSeq(MIN_SEQUENCE_NUM)
+              .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+              .setClaim(claim);
+      return transformer.transformClaim(changeBuilder.build());
+    }
+
+    @Override
+    McsClaim buildClaim(McsClaim.Builder builder) {
+      return builder.build();
+    }
+  }
+
+  private class ClaimFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsClaim.Builder, PreAdjMcsClaim> {
+    @Override
+    McsClaim.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      return claimBuilder;
+    }
+
+    @Override
+    PreAdjMcsClaim getTestEntity(PreAdjMcsClaim claim) {
+      return claim;
+    }
+  }
+
+  class AdjustmentFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<
+          McsAdjustment.Builder, PreAdjMcsAdjustment> {
+    @Override
+    McsAdjustment.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsAdjustmentsBuilderList().isEmpty()) {
+        claimBuilder.addMcsAdjustmentsBuilder();
+      }
+      return claimBuilder.getMcsAdjustmentsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsAdjustment getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getAdjustments().size());
+      PreAdjMcsAdjustment answer = claim.getAdjustments().iterator().next();
+      assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
+      assertEquals((short) 0, answer.getPriority());
+      return answer;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "adjustment-0-" + basicLabel;
+    }
+  }
+
+  class AuditFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsAudit.Builder, PreAdjMcsAudit> {
+    @Override
+    McsAudit.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsAuditsBuilderList().isEmpty()) {
+        claimBuilder.addMcsAuditsBuilder();
+      }
+      return claimBuilder.getMcsAuditsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsAudit getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getAudits().size());
+      PreAdjMcsAudit answer = claim.getAudits().iterator().next();
+      assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
+      assertEquals((short) 0, answer.getPriority());
+      return answer;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "audit-0-" + basicLabel;
+    }
+  }
+
+  class DetailFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsDetail.Builder, PreAdjMcsDetail> {
+    @Override
+    McsDetail.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsDetailsBuilderList().isEmpty()) {
+        claimBuilder.addMcsDetailsBuilder();
+      }
+      return claimBuilder.getMcsDetailsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsDetail getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getDetails().size());
+      PreAdjMcsDetail answer = claim.getDetails().iterator().next();
+      assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
+      assertEquals((short) 0, answer.getPriority());
+      return answer;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "detail-0-" + basicLabel;
+    }
+  }
+
+  class DiagCodeFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<
+          McsDiagnosisCode.Builder, PreAdjMcsDiagnosisCode> {
+    @Override
+    McsDiagnosisCode.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsDiagnosisCodesBuilderList().isEmpty()) {
+        claimBuilder.addMcsDiagnosisCodesBuilder();
+        claimBuilder.getMcsDiagnosisCodesBuilder(0).setIdrDiagCode("DC");
+      }
+      return claimBuilder.getMcsDiagnosisCodesBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsDiagnosisCode getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getDiagCodes().size());
+      PreAdjMcsDiagnosisCode answer = claim.getDiagCodes().iterator().next();
+      assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
+      assertEquals((short) 0, answer.getPriority());
+      return answer;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "diagCode-0-" + basicLabel;
+    }
+  }
+
+  class LocationFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsLocation.Builder, PreAdjMcsLocation> {
+    @Override
+    McsLocation.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsLocationsBuilderList().isEmpty()) {
+        claimBuilder.addMcsLocationsBuilder();
+      }
+      return claimBuilder.getMcsLocationsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsLocation getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getLocations().size());
+      PreAdjMcsLocation answer = claim.getLocations().iterator().next();
+      assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
+      assertEquals((short) 0, answer.getPriority());
+      return answer;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "location-0-" + basicLabel;
+    }
+  }
+
+  // endregion Field Tester Classes
 }

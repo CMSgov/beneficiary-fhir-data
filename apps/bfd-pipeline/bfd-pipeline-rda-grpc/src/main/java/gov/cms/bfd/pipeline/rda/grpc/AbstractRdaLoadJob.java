@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 import javax.annotation.Nullable;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -32,11 +33,11 @@ import org.slf4j.Logger;
  * will do any work. The other threads will all immediately return with an indication that they have
  * no work to do.
  */
-public abstract class AbstractRdaLoadJob<TResponse>
+public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
   private final Config config;
-  private final Callable<RdaSource<TResponse>> sourceFactory;
-  private final Callable<RdaSink<TResponse>> sinkFactory;
+  private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
+  private final Callable<RdaSink<TResponse, TClaim>> sinkFactory;
   private final Logger logger; // each subclass provides its own logger
   private final Metrics metrics;
   // This is used to enforce that this job can only be executed by a single thread at any given
@@ -45,8 +46,8 @@ public abstract class AbstractRdaLoadJob<TResponse>
 
   AbstractRdaLoadJob(
       Config config,
-      Callable<RdaSource<TResponse>> sourceFactory,
-      Callable<RdaSink<TResponse>> sinkFactory,
+      Callable<RdaSource<TResponse, TClaim>> sourceFactory,
+      Callable<RdaSink<TResponse, TClaim>> sinkFactory,
       MetricRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
@@ -99,8 +100,8 @@ public abstract class AbstractRdaLoadJob<TResponse>
     Exception error = null;
     try {
       metrics.calls.mark();
-      try (RdaSource<TResponse> source = sourceFactory.call();
-          RdaSink<TResponse> sink = sinkFactory.call()) {
+      try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {
@@ -156,6 +157,14 @@ public abstract class AbstractRdaLoadJob<TResponse>
     @Getter private final Duration runInterval;
 
     /**
+     * writeThreads specifies the number of threads to be used for writing claims to the database.
+     * Setting this to one perform all writes synchronously. Higher numbers use {@link
+     * gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink} to perform writes
+     * asynchronously.
+     */
+    @Getter private final int writeThreads;
+
+    /**
      * batchSize specifies the number of records per batch sent to the RdaSink for processing. This
      * value will likely be tuned for a specific type of sink object and for performance tuning
      * purposes (i.e. finding most efficient transaction size for a specific database).
@@ -174,17 +183,23 @@ public abstract class AbstractRdaLoadJob<TResponse>
      */
     @Nullable private final Long startingMcsSeqNum;
 
-    public Config(
+    @Builder
+    private Config(
         Duration runInterval,
         int batchSize,
-        Optional<Long> startingFissSeqNum,
-        Optional<Long> startingMcsSeqNum) {
+        int writeThreads,
+        @Nullable Long startingFissSeqNum,
+        @Nullable Long startingMcsSeqNum) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
-      this.startingFissSeqNum = startingFissSeqNum.orElse(null);
-      this.startingMcsSeqNum = startingMcsSeqNum.orElse(null);
-      Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s");
-      Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
+      this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
+      this.startingFissSeqNum = startingFissSeqNum;
+      this.startingMcsSeqNum = startingMcsSeqNum;
+      Preconditions.checkArgument(
+          runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
+      Preconditions.checkArgument(
+          this.writeThreads >= 1, "writeThreads less than 1: %s", writeThreads);
+      Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
     }
 
     public Optional<Long> getStartingFissSeqNum() {

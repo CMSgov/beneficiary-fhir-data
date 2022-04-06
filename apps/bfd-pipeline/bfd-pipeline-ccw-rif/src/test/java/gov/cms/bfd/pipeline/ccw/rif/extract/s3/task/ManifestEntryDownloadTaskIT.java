@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
@@ -23,8 +25,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,10 +98,10 @@ public final class ManifestEntryDownloadTaskIT {
       String downloadedFileMD5ChkSum =
           downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
       LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
-      Assert.assertEquals(
-          "Checksum doesn't match on downloaded file " + objectRequest.getKey(),
+      assertEquals(
           downloadedFileMD5ChkSum,
-          generatedMD5ChkSum);
+          generatedMD5ChkSum,
+          "Checksum doesn't match on downloaded file " + objectRequest.getKey());
       LOGGER.info(
           "Downloaded '{}' to '{}'.",
           objectRequest.getKey(),

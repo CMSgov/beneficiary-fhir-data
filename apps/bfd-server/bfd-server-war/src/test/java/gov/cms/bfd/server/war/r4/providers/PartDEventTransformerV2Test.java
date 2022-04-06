@@ -1,10 +1,16 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -26,13 +32,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.PaymentComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public final class PartDEventTransformerV2Test {
   PartDEvent claim;
@@ -60,7 +67,7 @@ public final class PartDEventTransformerV2Test {
     return claim;
   }
 
-  @Before
+  @BeforeEach
   public void before() {
     claim = generateClaim();
     eob = PartDEventTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
@@ -70,19 +77,19 @@ public final class PartDEventTransformerV2Test {
 
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("pde-" + claim.getEventId(), eob.getId());
+    assertEquals("pde-" + claim.getEventId(), eob.getId());
   }
 
   @Test
   public void shouldSetLastUpdated() {
-    Assert.assertNotNull(eob.getMeta().getLastUpdated());
+    assertNotNull(eob.getMeta().getLastUpdated());
   }
 
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it
     // to a string
-    Assert.assertTrue(
+    assertTrue(
         eob.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL)));
@@ -90,40 +97,40 @@ public final class PartDEventTransformerV2Test {
 
   @Test
   public void shouldSetUse() {
-    Assert.assertEquals(Use.CLAIM, eob.getUse());
+    assertEquals(Use.CLAIM, eob.getUse());
   }
 
   @Test
   public void shouldSetFinalAction() {
-    Assert.assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
+    assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
-    Assert.assertNotNull(eob.getBillablePeriod());
-    Assert.assertEquals(
+    assertNotNull(eob.getBillablePeriod());
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2015-05-12"),
         eob.getBillablePeriod().getStart());
-    Assert.assertEquals(
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2015-05-12"), eob.getBillablePeriod().getEnd());
   }
 
   @Test
   public void shouldReferencePatient() {
-    Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    assertNotNull(eob.getPatient());
+    assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
   @Test
   public void shouldHaveCreatedDate() {
-    Assert.assertNotNull(eob.getCreated());
+    assertNotNull(eob.getCreated());
   }
 
   @Test
   public void shouldHaveFacilityTypeExtension() {
-    Assert.assertNotNull(eob.getFacility());
-    Assert.assertEquals(1, eob.getFacility().getExtension().size());
+    assertNotNull(eob.getFacility());
+    assertEquals(1, eob.getFacility().getExtension().size());
 
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -138,7 +145,7 @@ public final class PartDEventTransformerV2Test {
                 "01",
                 "Community/retail pharmacy"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**
@@ -149,20 +156,20 @@ public final class PartDEventTransformerV2Test {
    */
   @Test
   public void shouldHaveCareTeamList() {
-    Assert.assertEquals(1, eob.getCareTeam().size());
+    assertEquals(1, eob.getCareTeam().size());
   }
 
   @Test
   public void shouldHaveCareTeamMembers() {
     // Single member
     CareTeamComponent member = TransformerTestUtilsV2.findCareTeamBySequence(1, eob.getCareTeam());
-    Assert.assertEquals("1750384806", member.getProvider().getIdentifier().getValue());
+    assertEquals("1750384806", member.getProvider().getIdentifier().getValue());
   }
 
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    Assert.assertEquals(15, eob.getSupportingInfo().size());
+    assertEquals(14, eob.getSupportingInfo().size());
   }
 
   @Test
@@ -186,7 +193,7 @@ public final class PartDEventTransformerV2Test {
                 "RXDINV",
                 "Rx dispense invoice"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -207,7 +214,7 @@ public final class PartDEventTransformerV2Test {
             // valueQuantity
             .setValue(new SimpleQuantity().setValue(3));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -228,7 +235,7 @@ public final class PartDEventTransformerV2Test {
             // valueQuantity
             .setValue(new SimpleQuantity().setValue(30));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -258,7 +265,7 @@ public final class PartDEventTransformerV2Test {
                 "C",
                 "Covered"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -288,7 +295,7 @@ public final class PartDEventTransformerV2Test {
                 "0",
                 "No Product Selection Indicated (may also have missing values)"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -318,7 +325,7 @@ public final class PartDEventTransformerV2Test {
                 "P",
                 "Partial fill"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -348,7 +355,7 @@ public final class PartDEventTransformerV2Test {
                 "A",
                 "Adjustment"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -375,7 +382,7 @@ public final class PartDEventTransformerV2Test {
             new Coding(
                 "https://bluebutton.cms.gov/resources/variables/nstd_frmt_cd", "X", "X12 837"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -405,7 +412,7 @@ public final class PartDEventTransformerV2Test {
                 "M",
                 "Medicare is a secondary payer (MSP)"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -435,7 +442,7 @@ public final class PartDEventTransformerV2Test {
                 "C",
                 "Above attachment point"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -457,7 +464,7 @@ public final class PartDEventTransformerV2Test {
             new Coding(
                 "https://bluebutton.cms.gov/resources/variables/rx_orgn_cd", "3", "Electronic"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -482,7 +489,7 @@ public final class PartDEventTransformerV2Test {
                 "G",
                 "Generic Null/missing"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -512,7 +519,7 @@ public final class PartDEventTransformerV2Test {
                 "02",
                 "Skilled Nursing Facility"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -542,35 +549,34 @@ public final class PartDEventTransformerV2Test {
                 "08",
                 "Process compound for approved ingredients"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
     // Only one insurance object
-    Assert.assertEquals(1, eob.getInsurance().size());
-    Assert.assertNotNull(eob.getInsuranceFirstRep());
-    Assert.assertEquals(
-        "Coverage/part-d-567834", eob.getInsuranceFirstRep().getCoverage().getReference());
+    assertEquals(1, eob.getInsurance().size());
+    assertNotNull(eob.getInsuranceFirstRep());
+    assertEquals("Coverage/part-d-567834", eob.getInsuranceFirstRep().getCoverage().getReference());
   }
 
   /** Line Items */
   @Test
   public void shouldHaveLineItems() {
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(1, eob.getItem().size());
   }
 
   @Test
   public void shouldHaveLineItemSequence() {
-    Assert.assertEquals(1, eob.getItemFirstRep().getSequence());
+    assertEquals(1, eob.getItemFirstRep().getSequence());
   }
 
   @Test
   public void shouldHaveLineItemCareTeamRef() {
     // The order isn't important but this should reference a care team member
-    Assert.assertNotNull(eob.getItemFirstRep().getCareTeamSequence());
-    Assert.assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
+    assertNotNull(eob.getItemFirstRep().getCareTeamSequence());
+    assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
   }
 
   @Test
@@ -583,10 +589,10 @@ public final class PartDEventTransformerV2Test {
                 Arrays.asList(
                     new Coding(
                         "http://hl7.org/fhir/sid/ndc",
-                        "495800192",
-                        "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE")));
+                        "500904610",
+                        "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE")));
 
-    Assert.assertTrue(compare.equalsDeep(pos));
+    assertTrue(compare.equalsDeep(pos));
   }
 
   @Test
@@ -595,7 +601,7 @@ public final class PartDEventTransformerV2Test {
 
     DateType compare = new DateType("2015-05-12");
 
-    Assert.assertEquals(servicedDate.toString(), compare.toString());
+    assertEquals(servicedDate.toString(), compare.toString());
   }
 
   @Test
@@ -604,12 +610,12 @@ public final class PartDEventTransformerV2Test {
 
     Quantity compare = new Quantity(60);
 
-    Assert.assertTrue(compare.equalsDeep(quantity));
+    assertTrue(compare.equalsDeep(quantity));
   }
 
   @Test
   public void shouldHaveLineItemAdjudications() {
-    Assert.assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
+    assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
   }
 
   @Test
@@ -636,7 +642,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(126.99).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -663,7 +669,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(995.34).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -690,7 +696,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(15.25).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -717,7 +723,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(235.85).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -747,7 +753,7 @@ public final class PartDEventTransformerV2Test {
                                 "Other True Out-of-Pocket (TrOOP) Amount"))))
             .setAmount(new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -774,7 +780,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(122.23).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -801,7 +807,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(42.42).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -831,7 +837,7 @@ public final class PartDEventTransformerV2Test {
                                 "Total drug cost (Part D)"))))
             .setAmount(new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -858,7 +864,7 @@ public final class PartDEventTransformerV2Test {
             .setAmount(
                 new Money().setValue(317.22).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   /** Payment */
@@ -867,7 +873,26 @@ public final class PartDEventTransformerV2Test {
     PaymentComponent compare =
         new PaymentComponent().setDate(new SimpleDateFormat("yyy-MM-dd").parse("2015-05-27"));
 
-    Assert.assertTrue(compare.equalsDeep(eob.getPayment()));
+    assertTrue(compare.equalsDeep(eob.getPayment()));
+  }
+
+  /**
+   * Verifies that {@link
+   * PartDEventTransformer has a provider set otherwise it throws an exception
+   *
+   * @throws Exception (indicates test failure)
+   */
+  @Test
+  public void shouldHaveProvider() throws Exception {
+    Reference compare =
+        new Reference()
+            .setIdentifier(
+                new Identifier()
+                    .setSystem(
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRVDR_NUM))
+                    .setValue("1023011079"));
+
+    assertTrue(compare.equalsDeep(eob.getProvider()));
   }
 
   /**
@@ -875,7 +900,7 @@ public final class PartDEventTransformerV2Test {
    *
    * @throws FHIRException
    */
-  @Ignore
+  @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =

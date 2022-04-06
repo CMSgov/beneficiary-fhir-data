@@ -270,6 +270,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
@@ -358,8 +359,8 @@
         "url" : "http://hl7.org/fhir/sid/ndc",
         "valueCoding" : {
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "495800192",
-          "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
+          "code" : "500904610",
+          "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
         }
       } ],
       "coding" : [ {
@@ -576,7 +577,7 @@
         } ]
       },
       "amount" : {
-        "value" : 130.45,
+        "value" : 129.45,
         "currency" : "USD"
       }
     }, {

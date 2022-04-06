@@ -1,5 +1,11 @@
 package gov.cms.bfd.server.war;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.VersionUtil;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -11,8 +17,7 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests to verify that our FHIR server supports {@link CapabilityStatement}s via the
@@ -35,22 +40,21 @@ public final class ServerCapabilityStatementIT {
 
     CapabilityStatement capabilities =
         fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
-    Assert.assertNotNull(capabilities);
+    assertNotNull(capabilities);
 
     // Verify that our custom server metadata is correct.
-    Assert.assertEquals(V1Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
-    Assert.assertEquals(V1Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
-    Assert.assertEquals(
-        "gov.cms.bfd:bfd-server-war", capabilities.getImplementation().getDescription());
-    Assert.assertNotEquals(null, capabilities.getSoftware().getVersion());
-    Assert.assertNotEquals("", capabilities.getSoftware().getVersion());
+    assertEquals(V1Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
+    assertEquals(V1Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
+    assertEquals("gov.cms.bfd:bfd-server-war", capabilities.getImplementation().getDescription());
+    assertNotEquals(null, capabilities.getSoftware().getVersion());
+    assertNotEquals("", capabilities.getSoftware().getVersion());
 
     // The default for this field is HAPI's version but we don't use that.
-    Assert.assertNotEquals(VersionUtil.getVersion(), capabilities.getSoftware().getVersion());
+    assertNotEquals(VersionUtil.getVersion(), capabilities.getSoftware().getVersion());
 
-    Assert.assertEquals(1, capabilities.getRest().size());
+    assertEquals(1, capabilities.getRest().size());
     CapabilityStatementRestComponent restCapabilities = capabilities.getRestFirstRep();
-    Assert.assertEquals(RestfulCapabilityMode.SERVER, restCapabilities.getMode());
+    assertEquals(RestfulCapabilityMode.SERVER, restCapabilities.getMode());
 
     // Verify that Patient resource support looks like expected.
     CapabilityStatementRestResourceComponent patientCapabilities =
@@ -58,17 +62,17 @@ public final class ServerCapabilityStatementIT {
             .filter(r -> r.getType().equals(Patient.class.getSimpleName()))
             .findAny()
             .get();
-    Assert.assertTrue(
+    assertTrue(
         patientCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.READ)
             .findAny()
             .isPresent());
-    Assert.assertTrue(
+    assertTrue(
         patientCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE)
             .findAny()
             .isPresent());
-    Assert.assertFalse(
+    assertFalse(
         patientCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.CREATE)
             .findAny()
@@ -80,12 +84,12 @@ public final class ServerCapabilityStatementIT {
             .filter(r -> r.getType().equals(Coverage.class.getSimpleName()))
             .findAny()
             .get();
-    Assert.assertTrue(
+    assertTrue(
         coverageCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.READ)
             .findAny()
             .isPresent());
-    Assert.assertTrue(
+    assertTrue(
         coverageCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE)
             .findAny()
@@ -97,19 +101,19 @@ public final class ServerCapabilityStatementIT {
             .filter(r -> r.getType().equals(ExplanationOfBenefit.class.getSimpleName()))
             .findAny()
             .get();
-    Assert.assertTrue(
+    assertTrue(
         eobCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.READ)
             .findAny()
             .isPresent());
-    Assert.assertTrue(
+    assertTrue(
         eobCapabilities.getInteraction().stream()
             .filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE)
             .findAny()
             .isPresent());
 
     // Spot check that an arbitrary unsupported resource isn't listed.
-    Assert.assertFalse(
+    assertFalse(
         restCapabilities.getResource().stream()
             .filter(r -> r.getType().equals(DiagnosticReport.class.getSimpleName()))
             .findAny()

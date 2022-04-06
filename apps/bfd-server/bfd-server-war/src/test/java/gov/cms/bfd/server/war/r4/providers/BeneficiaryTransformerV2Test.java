@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -13,11 +16,13 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -42,10 +47,9 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}. */
 public final class BeneficiaryTransformerV2Test {
@@ -54,7 +58,7 @@ public final class BeneficiaryTransformerV2Test {
   private static Beneficiary beneficiary = null;
   private static Patient patient = null;
 
-  @Before
+  @BeforeEach
   public void setup() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -66,6 +70,7 @@ public final class BeneficiaryTransformerV2Test {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
+    beneficiary.getSkippedRifRecords().add(new SkippedRifRecord());
 
     beneficiary.setLastUpdated(Instant.now());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
@@ -75,7 +80,7 @@ public final class BeneficiaryTransformerV2Test {
         parsedRecords.stream()
             .filter(r -> r instanceof BeneficiaryHistory)
             .map(r -> (BeneficiaryHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId()))
+            .filter(r -> beneficiary.getBeneficiaryId() == r.getBeneficiaryId())
             .collect(Collectors.toSet());
 
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
@@ -85,7 +90,11 @@ public final class BeneficiaryTransformerV2Test {
         parsedRecords.stream()
             .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
             .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
+            .filter(
+                r ->
+                    (r.getBeneficiaryId().isPresent()
+                        && r.getBeneficiaryId().get().longValue()
+                            == beneficiary.getBeneficiaryId()))
             .collect(Collectors.toSet());
     beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
     assertThat(beneficiary, is(notNullValue()));
@@ -102,36 +111,49 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /** Common top level Patient ouput to console */
-  @Ignore
+  @Disabled
   @Test
   public void shouldOutputJSON() {
-    Assert.assertNotNull(patient);
+    assertNotNull(patient);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void shouldOutputMbiHistory() {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
-    Assert.assertNotNull(patient);
+    assertNotNull(patient);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+  }
+
+  /**
+   * Verify that {@link TransformerConstants#CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT} is
+   * populated, as expected (it's hardcoded into the test data used by this class).
+   */
+  @Test
+  public void shouldHaveDelayedBackdatedEnrollmentTag() {
+    assertEquals(1, patient.getMeta().getTag().size());
+    TransformerTestUtilsV2.assertCodingEquals(
+        TransformerConstants.CODING_SYSTEM_BFD_TAGS,
+        TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
+        patient.getMeta().getTag().get(0));
   }
 
   /** Common top level Patient values */
   @Test
   public void shouldSetID() {
-    Assert.assertEquals(patient.getId(), "Patient/" + beneficiary.getBeneficiaryId());
+    assertEquals(patient.getId(), "Patient/" + beneficiary.getBeneficiaryId());
   }
 
   @Test
   public void shouldSetLastUpdated() {
-    Assert.assertNotNull(patient.getMeta().getLastUpdated());
+    assertNotNull(patient.getMeta().getLastUpdated());
   }
 
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
-    Assert.assertTrue(
+    assertTrue(
         patient.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
@@ -140,14 +162,14 @@ public final class BeneficiaryTransformerV2Test {
   /** Top level Identifiers */
   @Test
   public void shouldHaveKnownIdentifiersNoMbiHistory() {
-    Assert.assertEquals(2, patient.getIdentifier().size());
+    assertEquals(2, patient.getIdentifier().size());
   }
 
   /** Sample_A data */
   @Test
   public void shouldHaveKnownIdentifiersWithMbiHistory() {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
-    Assert.assertEquals(2, patient.getIdentifier().size());
+    assertEquals(2, patient.getIdentifier().size());
   }
 
   @Test
@@ -164,7 +186,7 @@ public final class BeneficiaryTransformerV2Test {
             "MB",
             "Member Number");
 
-    Assert.assertTrue(compare.equalsDeep(mbId));
+    assertTrue(compare.equalsDeep(mbId));
   }
 
   @Test
@@ -200,7 +222,7 @@ public final class BeneficiaryTransformerV2Test {
         .setDisplay("Patient's Medicare number")
         .addExtension(extension);
 
-    Assert.assertTrue(compare.equalsDeep(mcId));
+    assertTrue(compare.equalsDeep(mcId));
   }
 
   @Test
@@ -208,7 +230,7 @@ public final class BeneficiaryTransformerV2Test {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
 
     List<Identifier> patientIdentList = patient.getIdentifier();
-    Assert.assertEquals(2, patientIdentList.size());
+    assertEquals(2, patientIdentList.size());
 
     ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
 
@@ -280,16 +302,16 @@ public final class BeneficiaryTransformerV2Test {
     compareIdentList.add(ident);
     */
 
-    Assert.assertEquals(compareIdentList.size(), patientIdentList.size());
+    assertEquals(compareIdentList.size(), patientIdentList.size());
     for (int i = 0; i < compareIdentList.size(); i++) {
-      Assert.assertTrue(compareIdentList.get(i).equalsDeep(patientIdentList.get(i)));
+      assertTrue(compareIdentList.get(i).equalsDeep(patientIdentList.get(i)));
     }
   }
 
   /** Top level Extension(s) */
   @Test
   public void shouldHaveRaceExtension() {
-    Assert.assertNotNull(beneficiary.getRace());
+    assertNotNull(beneficiary.getRace());
 
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -300,7 +322,7 @@ public final class BeneficiaryTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/race",
             new Coding("https://bluebutton.cms.gov/resources/variables/race", "1", "White"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**
@@ -313,15 +335,15 @@ public final class BeneficiaryTransformerV2Test {
         TransformerTestUtilsV2.findExtensionByUrl(
             "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race", patient.getExtension());
 
-    Assert.assertNotNull(core);
-    Assert.assertEquals(2, core.getExtension().size());
+    assertNotNull(core);
+    assertEquals(2, core.getExtension().size());
 
     Extension ombCateg =
         TransformerTestUtilsV2.findExtensionByUrl("ombCategory", core.getExtension());
     Extension txt = TransformerTestUtilsV2.findExtensionByUrl("text", core.getExtension());
 
-    Assert.assertNotNull(ombCateg);
-    Assert.assertNotNull(txt);
+    assertNotNull(ombCateg);
+    assertNotNull(txt);
 
     Extension cmp1 =
         new Extension(
@@ -335,7 +357,7 @@ public final class BeneficiaryTransformerV2Test {
     compare.addExtension(cmp1);
     compare.addExtension(cmp2);
 
-    Assert.assertTrue(compare.equalsDeep(core));
+    assertTrue(compare.equalsDeep(core));
   }
 
   /**
@@ -360,7 +382,7 @@ public final class BeneficiaryTransformerV2Test {
             .setValue(yearValue)
             .setUrl("https://bluebutton.cms.gov/resources/variables/rfrnc_yr");
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**
@@ -380,7 +402,7 @@ public final class BeneficiaryTransformerV2Test {
                 CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
             .getValue();
 
-    Assert.assertEquals(ex.toString().length(), compare.toString().length());
+    assertEquals(ex.toString().length(), compare.toString().length());
   }
 
   /**
@@ -412,7 +434,7 @@ public final class BeneficiaryTransformerV2Test {
     String uri = "https://bluebutton.cms.gov/resources/variables/" + dualId;
 
     Extension ex = TransformerTestUtilsV2.findExtensionByUrl(uri, patient.getExtension());
-    Assert.assertNotNull(ex);
+    assertNotNull(ex);
 
     Extension compare =
         new Extension(
@@ -422,20 +444,20 @@ public final class BeneficiaryTransformerV2Test {
                 "**",
                 "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /** Top level beneficiary info */
   @Test
   public void shouldMatchBeneficiaryName() {
     List<HumanName> name = patient.getName();
-    Assert.assertNotNull(name);
-    Assert.assertEquals(1, name.size());
+    assertNotNull(name);
+    assertEquals(1, name.size());
     HumanName hn = name.get(0);
-    Assert.assertEquals(HumanName.NameUse.USUAL, hn.getUse());
-    Assert.assertEquals("Doe", hn.getFamily().toString());
-    Assert.assertEquals("John", hn.getGiven().get(0).toString());
-    Assert.assertEquals("A", hn.getGiven().get(1).toString());
+    assertEquals(HumanName.NameUse.USUAL, hn.getUse());
+    assertEquals("Doe", hn.getFamily().toString());
+    assertEquals("John", hn.getGiven().get(0).toString());
+    assertEquals("A", hn.getGiven().get(1).toString());
   }
 
   /**
@@ -444,7 +466,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchBeneficiaryGender() {
-    Assert.assertEquals(AdministrativeGender.MALE, patient.getGender());
+    assertEquals(AdministrativeGender.MALE, patient.getGender());
   }
 
   /**
@@ -453,7 +475,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchBeneficiaryBirthDate() {
-    Assert.assertEquals(parseDate("1981-03-17"), patient.getBirthDate());
+    assertEquals(parseDate("1981-03-17"), patient.getBirthDate());
   }
 
   /**
@@ -464,9 +486,9 @@ public final class BeneficiaryTransformerV2Test {
   public void shouldMatchBeneficiaryDeathDate() {
     DateTimeType deceasedDate = patient.getDeceasedDateTimeType();
     if (deceasedDate != null) {
-      Assert.assertEquals("1981-03-17", deceasedDate.getValueAsString());
+      assertEquals("1981-03-17", deceasedDate.getValueAsString());
     } else {
-      Assert.assertEquals(new BooleanType(false), patient.getDeceasedBooleanType());
+      assertEquals(new BooleanType(false), patient.getDeceasedBooleanType());
     }
   }
 
@@ -477,11 +499,11 @@ public final class BeneficiaryTransformerV2Test {
   @Test
   public void shouldMatchAddressNoAddrHeader() {
     List<Address> addrList = patient.getAddress();
-    Assert.assertEquals(1, addrList.size());
+    assertEquals(1, addrList.size());
     Address compare = new Address();
     compare.setPostalCode("12345");
     compare.setState("MO");
-    Assert.assertTrue(compare.equalsDeep(addrList.get(0)));
+    assertTrue(compare.equalsDeep(addrList.get(0)));
   }
 
   /**
@@ -492,10 +514,10 @@ public final class BeneficiaryTransformerV2Test {
   public void shouldMatchAddressWithAddrHeader() {
     RequestHeaders reqHdr = getRHwithIncldAddrFldHdr("true");
     createPatient(reqHdr);
-    Assert.assertNotNull(patient);
+    assertNotNull(patient);
     List<Address> addrList = patient.getAddress();
-    Assert.assertEquals(1, addrList.size());
-    Assert.assertEquals(6, addrList.get(0).getLine().size());
+    assertEquals(1, addrList.size());
+    assertEquals(6, addrList.get(0).getLine().size());
 
     Address compare = new Address();
     compare.setPostalCode("12345");
@@ -511,7 +533,7 @@ public final class BeneficiaryTransformerV2Test {
                 new StringType("COLOMBIA"),
                 new StringType("SURREY")));
     compare.setLine(lineList);
-    Assert.assertTrue(compare.equalsDeep(addrList.get(0)));
+    assertTrue(compare.equalsDeep(addrList.get(0)));
   }
 
   /**
@@ -520,7 +542,7 @@ public final class BeneficiaryTransformerV2Test {
    * Beneficiary, RequestHeaders)} works as expected when run against the {@link
    * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
-  @Ignore
+  @Disabled
   @Test
   public void transformSampleARecord() {
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));

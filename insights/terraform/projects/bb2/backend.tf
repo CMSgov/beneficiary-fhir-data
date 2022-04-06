@@ -1,9 +1,9 @@
 terraform {
-  required_version = "~> 0.12"
+  required_version = "0.13.7"
   # Use the common terraform bucket for all of BFD's state
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "bfd-insights/bb2/terraform.tfstate"
+    key            = "bfd-insights/bb2/custom/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"
@@ -12,6 +12,6 @@ terraform {
 }
 
 provider "aws" {
-  version = "~> 2.61"
-  region = "us-east-1"
+  version = "~> 3.66"
+  region  = "us-east-1"
 }

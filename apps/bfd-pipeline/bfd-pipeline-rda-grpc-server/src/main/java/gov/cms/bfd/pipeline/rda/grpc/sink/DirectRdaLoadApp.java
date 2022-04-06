@@ -7,12 +7,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
-import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -53,9 +54,12 @@ public class DirectRdaLoadApp {
     reporter.start(5, TimeUnit.SECONDS);
 
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(options);
-    final DatabaseOptions databaseConfig = readDatabaseOptions(options);
+    final DatabaseOptions databaseConfig =
+        readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
     HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+    System.out.printf("thread count is %d%n", jobConfig.getJobConfig().getWriteThreads());
+    System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
     DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
     try (PipelineApplicationState appState =
         new PipelineApplicationState(
@@ -88,12 +92,12 @@ public class DirectRdaLoadApp {
     }
   }
 
-  private static DatabaseOptions readDatabaseOptions(ConfigLoader options) {
+  private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
     return new DatabaseOptions(
         options.stringValue("database.url", null),
         options.stringValue("database.user", null),
         options.stringValue("database.password", null),
-        10);
+        options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)));
   }
 
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(ConfigLoader options) {
@@ -101,16 +105,21 @@ public class DirectRdaLoadApp {
         new IdHasher.Config(
             options.intValue("hash.iterations", 100),
             options.stringValue("hash.pepper", "notarealpepper"));
-    final AbstractRdaLoadJob.Config jobConfig =
-        new AbstractRdaLoadJob.Config(
-            Duration.ofDays(1), options.intValue("job.batchSize", 1),
-            options.longOption("job.startingFissSeqNum"),
-                options.longOption("job.startingMcsSeqNum"));
+    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofDays(1))
+            .batchSize(options.intValue("job.batchSize", 1))
+            .writeThreads(options.intValue("job.writeThreads", 1));
+    options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
+    options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
     final GrpcRdaSource.Config grpcConfig =
-        new GrpcRdaSource.Config(
-            options.stringValue("api.host", "localhost"),
-            options.intValue("api.port", 5003),
-            Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)));
-    return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
+        GrpcRdaSource.Config.builder()
+            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+            .host(options.stringValue("api.host", "localhost"))
+            .port(options.intValue("api.port", 5003))
+            .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
+            .build();
+    return new RdaLoadOptions(
+        jobConfig.build(), grpcConfig, new RdaServerJob.Config(), idHasherConfig);
   }
 }

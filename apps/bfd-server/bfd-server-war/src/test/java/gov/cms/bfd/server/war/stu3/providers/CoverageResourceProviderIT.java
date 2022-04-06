@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -18,9 +22,9 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +32,24 @@ import org.slf4j.LoggerFactory;
 public final class CoverageResourceProviderIT {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProviderIT.class);
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeAll
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @AfterEach
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   /**
    * Verifies that {@link
@@ -93,24 +115,24 @@ public final class CoverageResourceProviderIT {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, "1234"))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, 1234L))
           .execute();
     } catch (ResourceNotFoundException e) {
       exception = e;
     }
-    Assert.assertNotNull(exception);
+    assertNotNull(exception);
 
     exception = null;
     try {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, "1234"))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, 1234L))
           .execute();
     } catch (ResourceNotFoundException e) {
       exception = e;
     }
-    Assert.assertNotNull(exception);
+    assertNotNull(exception);
 
     // Tests negative ID will pass regex pattern for valid coverageId.
     exception = null;
@@ -118,12 +140,12 @@ public final class CoverageResourceProviderIT {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, "-1234"))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, -1234L))
           .execute();
     } catch (ResourceNotFoundException e) {
       exception = e;
     }
-    Assert.assertNotNull(exception);
+    assertNotNull(exception);
   }
 
   /**
@@ -149,7 +171,7 @@ public final class CoverageResourceProviderIT {
     } catch (InvalidRequestException e) {
       exception = e;
     }
-    Assert.assertNotNull(exception);
+    assertNotNull(exception);
   }
 
   /**
@@ -180,16 +202,16 @@ public final class CoverageResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(MedicareSegment.values().length, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(MedicareSegment.values().length, searchResults.getTotal());
 
     /*
      * Verify that no paging links exist within the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
     /*
      * Verify that each of the expected Coverages (one for every
@@ -256,17 +278,17 @@ public final class CoverageResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(MedicareSegment.values().length, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(MedicareSegment.values().length, searchResults.getTotal());
 
     /*
      * Verify that only the first and last paging links exist, since there should
      * only be one page.
      */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
 
     /*
      * Verify that each of the expected Coverages (one for every MedicareSegment) is
@@ -318,12 +340,12 @@ public final class CoverageResourceProviderIT {
         fhirClient
             .search()
             .forResource(Coverage.class)
-            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId("1234")))
+            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(1234L)))
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -370,8 +392,8 @@ public final class CoverageResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchInBoundsResults);
-    Assert.assertEquals(MedicareSegment.values().length, searchInBoundsResults.getTotal());
+    assertNotNull(searchInBoundsResults);
+    assertEquals(MedicareSegment.values().length, searchInBoundsResults.getTotal());
 
     Date hourAgoDate = Date.from(Instant.now().minusSeconds(3600));
     DateRangeParam outOfBoundsRange = new DateRangeParam(hourAgoDate, secondsAgoDate);
@@ -383,16 +405,7 @@ public final class CoverageResourceProviderIT {
             .lastUpdated(outOfBoundsRange)
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNotNull(searchOutOfBoundsResult);
-    Assert.assertEquals(0, searchOutOfBoundsResult.getTotal());
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
+    assertNotNull(searchOutOfBoundsResult);
+    assertEquals(0, searchOutOfBoundsResult.getTotal());
   }
 }

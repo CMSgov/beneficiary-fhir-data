@@ -6,21 +6,35 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
+import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +49,18 @@ import org.slf4j.LoggerFactory;
  * batching received objects and passing them to the RdaSink object for storage. Basic metrics are
  * tracked at this level.
  *
- * @param <TResponse> type of objects returned by the gRPC service
+ * @param <TMessage> type of objects returned by the gRPC service
  */
-public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
+public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
 
-  private final GrpcStreamCaller<TResponse> caller;
+  /** Holds the underlying value of our uptime gauges. */
+  private static final NumericGauges GAUGES = new NumericGauges();
+
+  private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
+  private final Supplier<CallOptions> callOptionsFactory;
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -53,15 +71,22 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param config the configuration values used to establish the channel
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param claimType the claim type
    * @param startingSequenceNumber optional hard coded sequence number
    */
   public GrpcRdaSource(
       Config config,
-      GrpcStreamCaller<TResponse> caller,
+      GrpcStreamCaller<TMessage> caller,
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
-    this(config.createChannel(), caller, appMetrics, claimType, startingSequenceNumber);
+    this(
+        config.createChannel(),
+        caller,
+        config::createCallOptions,
+        appMetrics,
+        claimType,
+        startingSequenceNumber);
   }
 
   /**
@@ -77,12 +102,14 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   @VisibleForTesting
   GrpcRdaSource(
       ManagedChannel channel,
-      GrpcStreamCaller<TResponse> caller,
+      GrpcStreamCaller<TMessage> caller,
+      Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
+    this.callOptionsFactory = callOptionsFactory;
     this.channel = Preconditions.checkNotNull(channel);
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     metrics = new Metrics(appMetrics, claimType);
@@ -98,7 +125,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @throws ProcessingException wrapper around any Exception thrown by the service or sink
    */
   @Override
-  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TResponse> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
     metrics.calls.mark();
     boolean interrupted = false;
@@ -111,21 +138,23 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
           "calling API for {} claims starting at sequence number {}",
           claimType,
           startingSequenceNumber);
-      final GrpcResponseStream<TResponse> responseStream =
-          caller.callService(channel, startingSequenceNumber);
-      final List<TResponse> batch = new ArrayList<>();
+      final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+
+      final GrpcResponseStream<TMessage> responseStream =
+          caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
+      final Map<Object, TMessage> batch = new LinkedHashMap<>();
       try {
         while (responseStream.hasNext()) {
           setUptimeToReceiving();
-          final TResponse result = responseStream.next();
+          final TMessage result = responseStream.next();
           metrics.objectsReceived.mark();
-          batch.add(result);
+          batch.put(sink.getDedupKeyForMessage(result), result);
           if (batch.size() >= maxPerBatch) {
-            processed += submitBatchToSink(sink, batch);
+            processed += submitBatchToSink(apiVersion, sink, batch);
           }
         }
         if (batch.size() > 0) {
-          processed += submitBatchToSink(sink, batch);
+          processed += submitBatchToSink(apiVersion, sink, batch);
         }
       } catch (GrpcResponseStream.StreamInterruptedException ex) {
         // If our thread is interrupted we cancel the stream so the server knows we're done
@@ -133,6 +162,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
       }
+      sink.shutdown(Duration.ofMinutes(5));
+      processed += sink.getProcessedCount();
     } catch (ProcessingException ex) {
       processed += ex.getProcessedCount();
       error = ex;
@@ -165,7 +196,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param sink used to obtain the maximum known sequence number
    * @return a valid RDA change sequence number
    */
-  private long getStartingSequenceNumber(RdaSink<TResponse> sink) throws ProcessingException {
+  private long getStartingSequenceNumber(RdaSink<TMessage, TClaim> sink)
+      throws ProcessingException {
     if (startingSequenceNumber.isPresent()) {
       return startingSequenceNumber.get();
     } else {
@@ -216,11 +248,11 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     metrics.uptimeValue.set(0);
   }
 
-  private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
+  private int submitBatchToSink(
+      String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
-    LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
-    int processed = sink.writeBatch(batch);
-    LOGGER.info(
+    final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
+    LOGGER.debug(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,
         batch.size(),
@@ -233,30 +265,115 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   }
 
   /** This class contains the configuration settings specific to the RDA rRPC service. */
+  @Getter
+  @EqualsAndHashCode
   public static class Config implements Serializable {
     private static final long serialVersionUID = 6667857735839524L;
 
+    /** The type of RDA API server to connect to. */
+    private final ServerType serverType;
+    /** The hostname or IP address of the host running the RDA API. */
     private final String host;
+    /** The port on which the RDA API listens for connections. */
     private final int port;
+    /** The name used to connect to an in-process mock RDA API server. */
+    private final String inProcessServerName;
+    /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /** Authorization token expiration date, in epoch seconds */
+    private final Long expirationDate;
+    /** The token to pass to the RDA API server to authenticate the client. */
+    @Nullable private final String authenticationToken;
 
-    public Config(String host, int port, Duration maxIdle) {
-      this.host = Preconditions.checkNotNull(host);
+    /**
+     * Specifies which type of server we want to connect to. {@code Remote} is the normal
+     * configuration. {@code InProcess} is used when populating an environment with synthetic data
+     * served by a mock RDA API server running as a pipeline job.
+     */
+    public enum ServerType {
+      Remote,
+      InProcess
+    }
+
+    @Builder
+    private Config(
+        ServerType serverType,
+        String host,
+        int port,
+        String inProcessServerName,
+        Duration maxIdle,
+        String authenticationToken) {
+      this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
+      this.host = host;
       this.port = port;
+      this.inProcessServerName = inProcessServerName;
       this.maxIdle = maxIdle;
-      Preconditions.checkArgument(host.length() >= 1, "host name is empty");
-      Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
+      if (serverType == ServerType.Remote) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(host), "host name is required");
+        Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
+      } else {
+        Preconditions.checkArgument(
+            !Strings.isNullOrEmpty(inProcessServerName), "inProcessServerName is required");
+      }
+      this.authenticationToken =
+          Strings.isNullOrEmpty(authenticationToken) ? null : authenticationToken;
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
+
+      expirationDate = parseJWTExpirationDate(this.authenticationToken);
     }
 
-    /** @return the hostname or IP address of the host running the RDA API. */
-    public String getHost() {
-      return host;
+    private ManagedChannel createChannel() {
+      return createChannelBuilder()
+          .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
+          .enableRetry()
+          .build();
     }
 
-    /** @return the port on which the RDA API listens for connections. */
-    public int getPort() {
-      return port;
+    private ManagedChannelBuilder<?> createChannelBuilder() {
+      if (serverType == ServerType.InProcess) {
+        return createInProcessChannelBuilder();
+      } else {
+        return createRemoteChannelBuilder();
+      }
+    }
+
+    /**
+     * Creates a CallOptions object for an API call. Will be {@link CallOptions#DEFAULT} if no token
+     * has been defined or a BearerToken if one has been defined.
+     *
+     * @return a valid CallOptions object
+     */
+    public CallOptions createCallOptions() {
+      CallOptions answer = CallOptions.DEFAULT;
+      if (authenticationToken != null) {
+        /**
+         * The RDA API uses a JWT token for authentication, by design this is set to expire X days
+         * after being issued. This check will alert the team of a token that is close to expiring
+         * so we can coordinate having a new one issued by the RDA API team before authentication
+         * fails.
+         */
+        if (expirationDate != null) {
+          long daysToExpire =
+              Instant.now().until(Instant.ofEpochMilli(expirationDate * 1000), ChronoUnit.DAYS);
+
+          if (daysToExpire < 0) {
+            LOGGER.error("JWT is expired!");
+          } else if (daysToExpire < 31) {
+            String logMessage = String.format("JWT will expire in %d days", daysToExpire);
+
+            if (daysToExpire < 14) {
+              LOGGER.error(logMessage);
+            } else {
+              LOGGER.warn(logMessage);
+            }
+          }
+        }
+
+        answer = answer.withCallCredentials(new BearerToken(authenticationToken));
+      } else {
+        LOGGER.warn("authenticationToken has not been set - calling server with no token");
+      }
+      return answer;
     }
 
     /**
@@ -271,35 +388,48 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       return maxIdle;
     }
 
-    private ManagedChannel createChannel() {
-      final ManagedChannelBuilder<?> builder =
-          ManagedChannelBuilder.forAddress(host, port)
-              .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
-              .enableRetry();
+    private ManagedChannelBuilder<?> createRemoteChannelBuilder() {
+      final ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forAddress(host, port);
       if (host.equals("localhost")) {
         builder.usePlaintext();
       }
-      return builder.build();
+      return builder;
     }
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof Config)) {
-        return false;
-      }
-      Config config = (Config) o;
-      return port == config.port
-          && Objects.equals(host, config.host)
-          && Objects.equals(maxIdle, config.maxIdle);
+    private ManagedChannelBuilder<?> createInProcessChannelBuilder() {
+      return InProcessChannelBuilder.forName(inProcessServerName);
     }
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(host, port, maxIdle);
+    /**
+     * Parses the given auth token as a JWT, extracting the commonly used `exp` claim to get the
+     * token's expiration date.
+     *
+     * @param token The token to parse
+     * @return The expiration date of the token, in epoch seconds.
+     */
+    private Long parseJWTExpirationDate(String token) {
+      try {
+        String[] jwtBits = token.split("\\.");
+        String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
+        JWTClaims claims =
+            new ObjectMapper()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .readValue(claimsString, JWTClaims.class);
+        if (claims.exp == null) throw new NullPointerException();
+        return claims.exp;
+      } catch (NullPointerException e) {
+        LOGGER.warn("Could not find expiration claim", e);
+      } catch (Exception e) {
+        LOGGER.warn("Could not parse Authorization token as JWT", e);
+      }
+
+      return null;
     }
+  }
+
+  @Data
+  private static class JWTClaims {
+    private Long exp;
   }
 
   /**
@@ -333,7 +463,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     private final Gauge<?> uptime;
 
     /** Holds the value that is reported in the update gauge. */
-    private final AtomicInteger uptimeValue = new AtomicInteger();
+    private final AtomicLong uptimeValue;
 
     private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
@@ -343,7 +473,9 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
       batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
-      uptime = appMetrics.gauge(MetricRegistry.name(base, "uptime"), () -> uptimeValue::get);
+      final String uptimeGaugeName = MetricRegistry.name(base, "uptime");
+      uptime = GAUGES.getGaugeForName(appMetrics, uptimeGaugeName);
+      uptimeValue = GAUGES.getValueForName(uptimeGaugeName);
     }
   }
 }

@@ -55,7 +55,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -75,15 +74,16 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   /**
    * The header key used to determine whether or not tax numbers should be included in responses.
    *
-   * <p>Should be set to <code>"true"</code> if {@link CarrierClaimColumn#TAX_NUM} or {@link
-   * DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>"false"</code> if
-   * not. Defaults to <code>"false"</code>.
+   * <p>Should be set to <code>"true"</code> if {@link
+   * gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} or {@link
+   * gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the results,
+   * <code>"false"</code> if not. Defaults to <code>"false"</code>.
    */
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private R4SamhsaMatcher samhsaMatcher;
+  private R4EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -98,9 +98,9 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link R4SamhsaMatcher} to use */
+  /** @param samhsaMatcher the {@link R4EobSamhsaMatcher} to use */
   @Inject
-  public void setSamhsaFilterer(R4SamhsaMatcher samhsaMatcher) {
+  public void setSamhsaFilterer(R4EobSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
@@ -125,6 +125,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    *
    * @param eobId The read operation takes one parameter, which must be of type {@link IdType} and
    *     must be annotated with the {@link IdParam} annotation.
+   * @param requestDetails the request details for the read
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
    *     exists.
    */
@@ -199,7 +200,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
-   *     SamhsaMatcher} to filter out all SAMHSA-related claims from the results
+   *     R4EobSamhsaMatcher} to filter out all SAMHSA-related claims from the results
    * @param lastUpdated an {@link OptionalParam} that specifies a date range for the lastUpdated
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
@@ -347,7 +348,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneficiaryId);
+    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneficiaryId));
 
     return TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -584,9 +585,9 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   /**
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out the HTTP header that controls this setting
-   * @return <code>true</code> if {@link CarrierClaimColumn#TAX_NUM} and {@link
-   *     DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>false</code> if
-   *     not (defaults to <code>false</code>)
+   * @return <code>true</code> if {@link gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} and
+   *     {@link gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the
+   *     results, <code>false</code> if not (defaults to <code>false</code>)
    */
   public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
     /*

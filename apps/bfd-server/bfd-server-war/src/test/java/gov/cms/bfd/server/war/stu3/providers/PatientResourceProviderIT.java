@@ -1,5 +1,13 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -16,6 +24,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -35,12 +44,30 @@ import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
 public final class PatientResourceProviderIT {
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeAll
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @AfterEach
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
@@ -62,7 +89,7 @@ public final class PatientResourceProviderIT {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    Assert.assertNotNull(patient);
+    assertNotNull(patient);
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patient, getRHwithIncldAddrFldHdr("false"));
   }
@@ -175,16 +202,20 @@ public final class PatientResourceProviderIT {
    * works as expected for a {@link Patient} when include identifiers value =
    * "invalid-identifier-value" and that an exception is thrown.
    */
-  @Test(expected = InvalidRequestException.class)
+  @Test
   public void readExistingPatientIncludeIdentifiersInvalid1() {
-    assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
-        RequestHeaders.getHeaderWrapper(
-            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            "invalid-identifier-value",
-            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-            "true"));
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          assertExistingPatientIncludeIdentifiersExpected(
+              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+              RequestHeaders.getHeaderWrapper(
+                  PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+                  "invalid-identifier-value",
+                  PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+                  "true"));
+        });
   }
 
   /**
@@ -193,16 +224,20 @@ public final class PatientResourceProviderIT {
    * works as expected for a {@link Patient} when include identifiers value =
    * ["mbi,invalid-identifier-value"] and that an exception is thrown.
    */
-  @Test(expected = InvalidRequestException.class)
+  @Test
   public void readExistingPatientIncludeIdentifiersInvalid2() {
-    assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
-        RequestHeaders.getHeaderWrapper(
-            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            "mbi,invalid-identifier-value",
-            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-            "true"));
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          assertExistingPatientIncludeIdentifiersExpected(
+              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+              RequestHeaders.getHeaderWrapper(
+                  PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+                  "mbi,invalid-identifier-value",
+                  PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+                  "true"));
+        });
   }
 
   /**
@@ -210,10 +245,9 @@ public final class PatientResourceProviderIT {
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
    * contains expected/present identifiers for a {@link Patient}.
    *
-   * @param includeIdentifiersValue header value
    * @param expectingHicn true if expecting a HICN
    * @param expectingMbi true if expecting a MBI
-   * @param includeAddressValues header value
+   * @param requestHeader requested header
    */
   public void assertExistingPatientIncludeIdentifiersExpected(
       boolean expectingHicn, boolean expectingMbi, RequestHeaders requestHeader) {
@@ -232,7 +266,7 @@ public final class PatientResourceProviderIT {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    Assert.assertNotNull(patient);
+    assertNotNull(patient);
     BeneficiaryTransformerTest.assertMatches(beneficiary, patient, requestHeader);
 
     /*
@@ -251,11 +285,11 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    if (expectingHicn) Assert.assertTrue(hicnUnhashedPresent);
-    else Assert.assertFalse(hicnUnhashedPresent);
+    if (expectingHicn) assertTrue(hicnUnhashedPresent);
+    else assertFalse(hicnUnhashedPresent);
 
-    if (expectingMbi) Assert.assertTrue(mbiUnhashedPresent);
-    else Assert.assertFalse(mbiUnhashedPresent);
+    if (expectingMbi) assertTrue(mbiUnhashedPresent);
+    else assertFalse(mbiUnhashedPresent);
   }
 
   /**
@@ -286,7 +320,7 @@ public final class PatientResourceProviderIT {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    Assert.assertNotNull(patient);
+    assertNotNull(patient);
     BeneficiaryTransformerTest.assertMatches(beneficiary, patient, requestHeader);
 
     /*
@@ -305,8 +339,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertTrue(hicnUnhashedPresent);
-    Assert.assertTrue(mbiUnhashedPresent);
+    assertTrue(hicnUnhashedPresent);
+    assertTrue(mbiUnhashedPresent);
   }
 
   /**
@@ -314,11 +348,15 @@ public final class PatientResourceProviderIT {
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
    * works as expected for a {@link Patient} that does not exist in the DB.
    */
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void readMissingPatient() {
     IGenericClient fhirClient = createFhirClient();
     // No data is loaded, so this should return nothing.
-    fhirClient.read().resource(Patient.class).withId("1234").execute();
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> {
+          fhirClient.read().resource(Patient.class).withId("1234").execute();
+        });
   }
 
   /**
@@ -344,21 +382,23 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify that no paging links exist within the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
-    Assert.assertEquals(1, searchResults.getTotal());
+    assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
@@ -388,11 +428,13 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
@@ -411,8 +453,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertTrue(hicnUnhashedPresent);
-    Assert.assertTrue(mbiUnhashedPresent);
+    assertTrue(hicnUnhashedPresent);
+    assertTrue(mbiUnhashedPresent);
   }
 
   /**
@@ -439,11 +481,13 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
@@ -462,8 +506,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertFalse(hicnUnhashedPresent);
-    Assert.assertFalse(mbiUnhashedPresent);
+    assertFalse(hicnUnhashedPresent);
+    assertFalse(mbiUnhashedPresent);
   }
 
   /**
@@ -489,22 +533,24 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getTotal());
 
     /*
      * Verify that only the first and last paging links exist, since there should
      * only be one page.
      */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
   }
 
   /**
@@ -525,8 +571,8 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -559,17 +605,17 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify that no paging links exist within the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
-    Assert.assertEquals(1, searchResults.getTotal());
+    assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
@@ -606,7 +652,7 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
@@ -625,8 +671,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertTrue(hicnUnhashedPresent);
-    Assert.assertTrue(mbiUnhashedPresent);
+    assertTrue(hicnUnhashedPresent);
+    assertTrue(mbiUnhashedPresent);
   }
 
   /**
@@ -672,7 +718,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "567834",
+        567834L,
         "543217066U",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -687,7 +733,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "123456NULLREFYR",
+        -123456L,
         "543217066N",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -704,7 +750,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "BENE1234",
+        1234L,
         "SAMEHICN",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -722,7 +768,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "55555",
+        55555L,
         "HISTHICN",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -739,7 +785,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "66666",
+        66666L,
         "DUPHISTHIC",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -761,7 +807,7 @@ public final class PatientResourceProviderIT {
                         TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "notfoundhicn"))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -795,7 +841,7 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
@@ -814,8 +860,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertFalse(hicnUnhashedPresent);
-    Assert.assertFalse(mbiUnhashedPresent);
+    assertFalse(hicnUnhashedPresent);
+    assertFalse(mbiUnhashedPresent);
   }
 
   /**
@@ -849,8 +895,8 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
@@ -859,10 +905,10 @@ public final class PatientResourceProviderIT {
      * Verify that only the first and last paging links exist, since there should
      * only be one page.
      */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
   }
 
   /**
@@ -894,12 +940,13 @@ public final class PatientResourceProviderIT {
                       .returnBundle(Bundle.class)
                       .execute();
 
-              Assert.assertNotNull(searchResults);
-              Assert.assertEquals(1, searchResults.getTotal());
+              assertNotNull(searchResults);
+              assertEquals(1, searchResults.getTotal());
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
-              Assert.assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+              assertEquals(
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -932,12 +979,13 @@ public final class PatientResourceProviderIT {
                       .returnBundle(Bundle.class)
                       .execute();
 
-              Assert.assertNotNull(searchResults);
-              Assert.assertEquals(1, searchResults.getTotal());
+              assertNotNull(searchResults);
+              assertEquals(1, searchResults.getTotal());
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
-              Assert.assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+              assertEquals(
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -970,12 +1018,13 @@ public final class PatientResourceProviderIT {
                       .returnBundle(Bundle.class)
                       .execute();
 
-              Assert.assertNotNull(searchResults);
-              Assert.assertEquals(1, searchResults.getTotal());
+              assertNotNull(searchResults);
+              assertEquals(1, searchResults.getTotal());
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
-              Assert.assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+              assertEquals(
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1000,8 +1049,8 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -1036,17 +1085,17 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
 
     /*
      * Verify that no paging links exist within the bundle.
      */
-    Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
-    Assert.assertEquals(1, searchResults.getTotal());
+    assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
@@ -1059,8 +1108,7 @@ public final class PatientResourceProviderIT {
             .findFirst()
             .get()
             .getValue();
-    Assert.assertEquals(
-        "mbiHash identifier exists", beneficiary.getMbiHash().get(), mbiHashIdentifier);
+    assertEquals(beneficiary.getMbiHash().get(), mbiHashIdentifier, "mbiHash identifier exists");
   }
 
   /**
@@ -1095,7 +1143,7 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
@@ -1114,8 +1162,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertTrue(hicnUnhashedPresent);
-    Assert.assertTrue(mbiUnhashedPresent);
+    assertTrue(hicnUnhashedPresent);
+    assertTrue(mbiUnhashedPresent);
   }
 
   /**
@@ -1160,7 +1208,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "567834",
+        567834L,
         "3456789",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1176,7 +1224,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "123456NULLREFYR",
+        -123456L,
         "3456789N",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1196,7 +1244,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "BENE1234",
+        1234L,
         "SAMEMBI",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1213,7 +1261,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "55555",
+        55555L,
         "HISTMBI",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1230,7 +1278,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "66666",
+        66666L,
         "DUPHISTMBI",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1252,7 +1300,7 @@ public final class PatientResourceProviderIT {
                         TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "notfoundmbi"))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -1277,7 +1325,7 @@ public final class PatientResourceProviderIT {
       IGenericClient fhirClient,
       List<Beneficiary> beneficiariesList,
       List<BeneficiaryHistory> beneficiariesHistoryList,
-      String beneficiaryId,
+      Long beneficiaryId,
       String unhashedValue,
       Boolean useFromBeneficiaryTable,
       String hashType,
@@ -1288,7 +1336,7 @@ public final class PatientResourceProviderIT {
     String mbiHash = "";
 
     if (hashType != "hicn" && hashType != "mbi") {
-      Assert.fail("hashType value must be: hicn or mbi.");
+      fail("hashType value must be: hicn or mbi.");
     }
 
     if (useFromBeneficiaryTable) {
@@ -1355,7 +1403,7 @@ public final class PatientResourceProviderIT {
 
       if (!expectsSingleBeneMatch) {
         // Should throw exception before here, so assert a failed test.
-        Assert.fail("An exception was expected when there are duplicate bene id matches.");
+        fail("An exception was expected when there are duplicate bene id matches.");
       }
     } catch (ResourceNotFoundException e) {
       // Test passes if an exception was thrown.
@@ -1363,8 +1411,8 @@ public final class PatientResourceProviderIT {
 
     // Validate result if a single match is expected for test.
     if (expectsSingleBeneMatch) {
-      Assert.assertNotNull(searchResults);
-      Assert.assertEquals(1, searchResults.getTotal());
+      assertNotNull(searchResults);
+      assertEquals(1, searchResults.getTotal());
 
       Beneficiary beneficiary =
           beneficiariesList.stream()
@@ -1409,7 +1457,7 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
+    assertNotNull(searchResults);
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
@@ -1428,8 +1476,8 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertFalse(hicnUnhashedPresent);
-    Assert.assertFalse(mbiUnhashedPresent);
+    assertFalse(hicnUnhashedPresent);
+    assertFalse(mbiUnhashedPresent);
   }
 
   /**
@@ -1464,8 +1512,8 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
@@ -1474,10 +1522,10 @@ public final class PatientResourceProviderIT {
      * Verify that only the first and last paging links exist, since there should
      * only be one page.
      */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
   }
 
   /**
@@ -1510,12 +1558,13 @@ public final class PatientResourceProviderIT {
                       .returnBundle(Bundle.class)
                       .execute();
 
-              Assert.assertNotNull(searchResults);
-              Assert.assertEquals(1, searchResults.getTotal());
+              assertNotNull(searchResults);
+              assertEquals(1, searchResults.getTotal());
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
-              Assert.assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+              assertEquals(
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1549,12 +1598,13 @@ public final class PatientResourceProviderIT {
                       .returnBundle(Bundle.class)
                       .execute();
 
-              Assert.assertNotNull(searchResults);
-              Assert.assertEquals(1, searchResults.getTotal());
+              assertNotNull(searchResults);
+              assertEquals(1, searchResults.getTotal());
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
-              Assert.assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+              assertEquals(
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1588,12 +1638,13 @@ public final class PatientResourceProviderIT {
                       .returnBundle(Bundle.class)
                       .execute();
 
-              Assert.assertNotNull(searchResults);
-              Assert.assertEquals(1, searchResults.getTotal());
+              assertNotNull(searchResults);
+              assertEquals(1, searchResults.getTotal());
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
-              Assert.assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+              assertEquals(
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1618,8 +1669,8 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getTotal());
+    assertNotNull(searchResults);
+    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -1648,32 +1699,31 @@ public final class PatientResourceProviderIT {
                 new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
             .where(
                 new TokenClientParam("_has:Coverage.rfrncyr")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
                         "2018"))
             .returnBundle(Bundle.class)
             .execute();
 
     // Verify that it found the expected bene.
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getEntry().size());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    Assert.assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+    assertEquals(
+        String.valueOf(expectedBene.getBeneficiaryId()),
+        patientFromSearchResult.getIdElement().getIdPart());
 
     /*
      * Verify that the unhashed MBIs are present, as expected. Note that checking for more than just
      * one MBI and verifying that they're all unique is a regression test for BFD-525.
      */
-    Assert.assertEquals(
+    assertEquals(
         3,
         patientFromSearchResult.getIdentifier().stream()
             .filter(
@@ -1743,19 +1793,19 @@ public final class PatientResourceProviderIT {
                 new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
             .returnBundle(Bundle.class)
             .execute();
 
     // Verify that it found the expected bene.
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getEntry().size());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    Assert.assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+    assertEquals(
+        String.valueOf(expectedBene.getBeneficiaryId()),
+        patientFromSearchResult.getIdElement().getIdPart());
   }
 
   /**
@@ -1778,24 +1828,22 @@ public final class PatientResourceProviderIT {
                 new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
             .where(
                 new TokenClientParam("_has:Coverage.rfrncyr")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
                         "2018"))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
 
     // Verify that it found the expected bene and no extra pages.
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getEntry().size());
+    assertNull(searchResults.getLink(Constants.LINK_NEXT));
   }
 
   /**
@@ -1818,21 +1866,19 @@ public final class PatientResourceProviderIT {
                 new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
                         "A1234"))
             .where(
                 new TokenClientParam("_has:Coverage.rfrncyr")
                     .exactly()
                     .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
                         "2010"))
             .returnBundle(Bundle.class)
             .execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getEntry().size());
+    assertNotNull(searchResults);
+    assertEquals(0, searchResults.getEntry().size());
   }
 
   /**
@@ -1841,28 +1887,32 @@ public final class PatientResourceProviderIT {
    * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
    * as expected, when an invalid year is specified.
    */
-  @Test(expected = InvalidRequestException.class)
+  @Test
   public void searchByPartDContractWithInvalidYear() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
-    fhirClient
-        .search()
-        .forResource(Patient.class)
-        .where(
-            new TokenClientParam("_has:Coverage.extension")
-                .exactly()
-                .systemAndIdentifier(
-                    TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
-                    "S4607"))
-        .where(
-            new TokenClientParam("_has:Coverage.rfrncyr")
-                .exactly()
-                .systemAndIdentifier(
-                    TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
-                    "ABC"))
-        .returnBundle(Bundle.class)
-        .execute();
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          fhirClient
+              .search()
+              .forResource(Patient.class)
+              .where(
+                  new TokenClientParam("_has:Coverage.extension")
+                      .exactly()
+                      .systemAndIdentifier(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
+                          "S4607"))
+              .where(
+                  new TokenClientParam("_has:Coverage.rfrncyr")
+                      .exactly()
+                      .systemAndIdentifier(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
+                          "ABC"))
+              .returnBundle(Bundle.class)
+              .execute();
+        });
   }
 
   @Test
@@ -1906,7 +1956,7 @@ public final class PatientResourceProviderIT {
    * @param expectedValue number of matches
    */
   private void testLastUpdatedUrls(
-      IGenericClient fhirClient, String id, List<String> urls, int expectedValue) {
+      IGenericClient fhirClient, Long id, List<String> urls, int expectedValue) {
     String baseResourceUrl = "Patient?_id=" + id + "&_format=application%2Fjson%2Bfhir";
 
     // Search for each lastUpdated value
@@ -1914,21 +1964,12 @@ public final class PatientResourceProviderIT {
       String theSearchUrl = baseResourceUrl + "&" + lastUpdatedValue;
       Bundle searchResults =
           fhirClient.search().byUrl(theSearchUrl).returnBundle(Bundle.class).execute();
-      Assert.assertEquals(
-          String.format(
-              "Expected %s to filter resources using lastUpdated correctly", lastUpdatedValue),
+      assertEquals(
           expectedValue,
-          searchResults.getTotal());
+          searchResults.getTotal(),
+          String.format(
+              "Expected %s to filter resources using lastUpdated correctly", lastUpdatedValue));
     }
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

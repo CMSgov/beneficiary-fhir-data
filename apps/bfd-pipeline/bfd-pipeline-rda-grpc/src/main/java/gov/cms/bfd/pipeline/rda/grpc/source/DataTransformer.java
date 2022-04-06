@@ -8,12 +8,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+import lombok.Data;
+import lombok.Getter;
 
 /**
  * Stateful, mutable, non-thread safe object to facilitate transformation of data from incoming RDA
@@ -56,6 +57,21 @@ public class DataTransformer {
   }
 
   /**
+   * Checks the nullability and length of a string.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param value value to validate
+   * @return true if the string value is valid
+   */
+  public boolean validateString(
+      String fieldName, boolean nullable, int minLength, int maxLength, String value) {
+    return nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength);
+  }
+
+  /**
    * Checks the nullability and length of a string and then delivers it to the Consumer if the
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    *
@@ -74,7 +90,7 @@ public class DataTransformer {
       int maxLength,
       String value,
       Consumer<String> copier) {
-    if (nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength)) {
+    if (validateString(fieldName, nullable, minLength, maxLength, value)) {
       copier.accept(value);
     }
     return this;
@@ -154,11 +170,9 @@ public class DataTransformer {
    * or add an error otherwise.
    *
    * @param fieldName name of the field from which the value originates
-   * @param enumValue value of the enum
-   * @param unsetValue enum instance for unset values
-   * @param unrecognizedValue enum instance for unrecognized values
+   * @param enumResult the enum result
    * @param copier Consumer to receive the character value
-   * @return this
+   * @return this data transformer
    */
   public DataTransformer copyEnumAsCharacter(
       String fieldName, EnumStringExtractor.Result enumResult, Consumer<Character> copier) {
@@ -166,14 +180,34 @@ public class DataTransformer {
   }
 
   /**
+   * Same as copyString() but with a EnumStringExtractor.Result and minLength of 0.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable if the field should be nullable
+   * @param maxLength the max length
+   * @param enumResult the enum result
+   * @param copier Consumer to receive the character value as a String
+   * @return this data transformer
+   */
+  public DataTransformer copyEnumAsString(
+      String fieldName,
+      boolean nullable,
+      int maxLength,
+      EnumStringExtractor.Result enumResult,
+      Consumer<String> copier) {
+    return copyEnumAsString(fieldName, nullable, 0, maxLength, enumResult, copier);
+  }
+
+  /**
    * Same as copyString() but with a EnumStringExtractor.Result.
    *
    * @param fieldName name of the field from which the value originates
-   * @param enumValue value of the enum
-   * @param unsetValue enum instance for unset values
-   * @param unrecognizedValue enum instance for unrecognized values
+   * @param nullable if the field should be nullable
+   * @param minLength the min length
+   * @param maxLength the max length
+   * @param enumResult the enum result
    * @param copier Consumer to receive the character value as a String
-   * @return this
+   * @return this data transformer
    */
   public DataTransformer copyEnumAsString(
       String fieldName,
@@ -401,36 +435,10 @@ public class DataTransformer {
     return sb.toString();
   }
 
+  @Data
   public static class ErrorMessage {
     private final String fieldName;
     private final String errorMessage;
-
-    public ErrorMessage(String fieldName, String errorMessage) {
-      this.fieldName = fieldName;
-      this.errorMessage = errorMessage;
-    }
-
-    public String getFieldName() {
-      return fieldName;
-    }
-
-    public String getErrorMessage() {
-      return errorMessage;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ErrorMessage that = (ErrorMessage) o;
-      return Objects.equals(fieldName, that.fieldName)
-          && Objects.equals(errorMessage, that.errorMessage);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(fieldName, errorMessage);
-    }
 
     @Override
     public String toString() {
@@ -438,16 +446,13 @@ public class DataTransformer {
     }
   }
 
+  @Getter
   public static class TransformationException extends RuntimeException {
     private final List<ErrorMessage> errors;
 
     public TransformationException(String message, List<ErrorMessage> errors) {
       super(message);
       this.errors = errors;
-    }
-
-    public List<ErrorMessage> getErrors() {
-      return errors;
     }
   }
 }

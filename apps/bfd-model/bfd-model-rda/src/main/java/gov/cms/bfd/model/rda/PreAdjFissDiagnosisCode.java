@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the FissDiagnosisCodes table */
 @Entity
 @Getter
 @Setter
@@ -24,7 +25,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissProcCode.PK.class)
+@IdClass(PreAdjFissDiagnosisCode.PK.class)
 @Table(name = "`FissDiagnosisCodes`", schema = "`pre_adj`")
 public class PreAdjFissDiagnosisCode {
   @Id
@@ -40,7 +41,7 @@ public class PreAdjFissDiagnosisCode {
   @Column(name = "`diagCd2`", length = 7, nullable = false)
   private String diagCd2;
 
-  @Column(name = "`diagPoaInd`", length = 1, nullable = false)
+  @Column(name = "`diagPoaInd`", length = 1)
   private String diagPoaInd;
 
   @Column(name = "`bitFlags`", length = 4)
@@ -49,12 +50,13 @@ public class PreAdjFissDiagnosisCode {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /** PK class for the FissDiagnosisCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the FissDiagnosisCodes table */
   public static class PK implements Serializable {
     private String dcn;
+
     private short priority;
   }
 }

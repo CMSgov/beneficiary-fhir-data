@@ -1,20 +1,21 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class DataTransformerTest {
   private DataTransformer transformer;
   private List<Object> copied;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     transformer = new DataTransformer();
     copied = new ArrayList<>();
@@ -132,47 +133,33 @@ public class DataTransformerTest {
         .copyEnumAsString(
             "no-value",
             false,
-            0,
             10,
             new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
             copied::add)
         .copyEnumAsString(
             "no-value-ok",
             true,
-            0,
             10,
             new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
             copied::add)
         .copyEnumAsString(
             "invalid-value",
             true,
-            0,
             10,
             new EnumStringExtractor.Result(EnumStringExtractor.Status.InvalidValue),
             copied::add)
         .copyEnumAsString(
-            "null-value-ok",
-            true,
-            0,
-            10,
-            new EnumStringExtractor.Result((String) null),
-            copied::add)
+            "null-value-ok", true, 10, new EnumStringExtractor.Result((String) null), copied::add)
         .copyEnumAsString(
-            "null-value-bad",
-            false,
-            0,
-            10,
-            new EnumStringExtractor.Result((String) null),
-            copied::add)
+            "null-value-bad", false, 10, new EnumStringExtractor.Result((String) null), copied::add)
         .copyEnumAsString(
             "unsupported-value-bad",
             false,
-            0,
             10,
             new EnumStringExtractor.Result(EnumStringExtractor.Status.UnsupportedValue, "boo!"),
             copied::add)
         .copyEnumAsString(
-            "good-value", false, 0, 10, new EnumStringExtractor.Result("boo!"), copied::add);
+            "good-value", false, 10, new EnumStringExtractor.Result("boo!"), copied::add);
     assertEquals(ImmutableList.of("boo!"), copied);
     assertEquals(
         ImmutableList.of(

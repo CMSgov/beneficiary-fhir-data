@@ -63,6 +63,12 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "1"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
   } ],
   "identifier" : [ {
     "type" : {
@@ -652,6 +658,7 @@
     }
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
@@ -674,6 +681,9 @@
     "productOrService" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",
+        "code" : "M55"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
         "code" : "M55"
       } ]
     },

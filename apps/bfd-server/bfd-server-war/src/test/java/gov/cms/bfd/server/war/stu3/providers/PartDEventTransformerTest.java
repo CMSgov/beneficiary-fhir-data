@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
@@ -19,8 +21,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer}. */
 public final class PartDEventTransformerTest {
@@ -136,8 +137,8 @@ public final class PartDEventTransformerTest {
         claim.getPlanBenefitPackageId(),
         eob.getInsurance().getCoverage());
 
-    Assert.assertEquals("01", claim.getServiceProviderIdQualiferCode());
-    Assert.assertEquals("01", claim.getPrescriberIdQualifierCode());
+    assertEquals("01", claim.getServiceProviderIdQualiferCode());
+    assertEquals("01", claim.getPrescriberIdQualifierCode());
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
@@ -153,7 +154,7 @@ public final class PartDEventTransformerTest {
         V3ActCode.RXDINV.toCode(),
         rxItem.getDetail().get(0).getType().getCoding());
 
-    Assert.assertEquals(
+    assertEquals(
         Date.valueOf(claim.getPrescriptionFillDate()), rxItem.getServicedDateType().getValue());
 
     TransformerTestUtils.assertReferenceEquals(
@@ -286,7 +287,7 @@ public final class PartDEventTransformerTest {
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
           claim.getNationalDrugCode(),
-          "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE");
+          "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

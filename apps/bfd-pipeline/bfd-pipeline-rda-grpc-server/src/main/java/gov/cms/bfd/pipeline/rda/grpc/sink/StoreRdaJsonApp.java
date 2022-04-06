@@ -4,11 +4,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
-import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -17,6 +17,7 @@ import io.grpc.stub.ClientCalls;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -35,17 +36,16 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
-      System.err.println("usage: DownloadRdaJsonApp config");
+      System.err.println("usage: StoreRdaJsonApp config");
       System.exit(1);
     }
     final ConfigLoader loader =
         ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
     final Config config = new Config(loader);
 
-    final ManagedChannel channel = createChannel(config.apiHost, config.apiPort);
+    final ManagedChannel channel = createChannel(config);
     try {
-      final GrpcResponseStream<? extends MessageOrBuilder> results =
-          callService(config.claimType, config.startingSequenceNumber, channel);
+      final GrpcResponseStream<? extends MessageOrBuilder> results = callService(config, channel);
       int received = 0;
       try (PrintWriter output = new PrintWriter(new FileWriter(config.outputFile))) {
         while (received < config.maxToReceive && results.hasNext()) {
@@ -68,21 +68,23 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     }
   }
 
-  private static ManagedChannel createChannel(String host, int port) {
-    final ManagedChannelBuilder<?> channelBuilder = ManagedChannelBuilder.forAddress(host, port);
-    if (host.equals("localhost")) {
+  private static ManagedChannel createChannel(Config config) {
+    final ManagedChannelBuilder<?> channelBuilder =
+        ManagedChannelBuilder.forAddress(config.grpcConfig.getHost(), config.grpcConfig.getPort());
+    if (config.grpcConfig.getHost().equals("localhost")) {
       channelBuilder.usePlaintext();
     }
     return channelBuilder.build();
   }
 
   private static GrpcResponseStream<? extends MessageOrBuilder> callService(
-      ClaimType claimType, long startingSequenceNumber, ManagedChannel channel) {
-    final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
+      Config config, ManagedChannel channel) {
+    final ClaimRequest request =
+        ClaimRequest.newBuilder().setSince(config.startingSequenceNumber).build();
     final MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder> method =
-        claimType.methodSource.get();
+        config.claimType.methodSource.get();
     final ClientCall<ClaimRequest, ? extends MessageOrBuilder> call =
-        channel.newCall(method, CallOptions.DEFAULT);
+        channel.newCall(method, config.grpcConfig.createCallOptions());
     Iterator<? extends MessageOrBuilder> iterator =
         ClientCalls.blockingServerStreamingCall(call, request);
     return new GrpcResponseStream<>(call, iterator);
@@ -94,20 +96,25 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   }
 
   private static class Config {
-    private final String apiHost;
-    private final int apiPort;
+    final GrpcRdaSource.Config grpcConfig;
     private final ClaimType claimType;
     private final int maxToReceive;
     private final File outputFile;
     private final long startingSequenceNumber;
 
     private Config(ConfigLoader options) {
-      apiHost = options.stringValue("api.host", "localhost");
-      apiPort = options.intValue("api.port", 443);
       claimType = options.enumValue("output.type", ClaimType::valueOf);
       maxToReceive = options.intValue("output.maxCount", Integer.MAX_VALUE);
       outputFile = options.writeableFile("output.file");
       startingSequenceNumber = options.longOption("output.seq").orElse(RdaChange.MIN_SEQUENCE_NUM);
+      grpcConfig =
+          GrpcRdaSource.Config.builder()
+              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+              .host(options.stringValue("api.host", "localhost"))
+              .port(options.intValue("api.port", 5003))
+              .authenticationToken(options.stringValue("api.token", ""))
+              .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
+              .build();
     }
   }
 }

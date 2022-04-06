@@ -1,7 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -9,6 +12,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
+import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -21,35 +25,39 @@ import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(MockitoJUnitRunner.class)
 public class GrpcRdaSourceTest {
   private static final Integer CLAIM_1 = 101;
   private static final Integer CLAIM_2 = 102;
   private static final Integer CLAIM_3 = 103;
   private static final Integer CLAIM_4 = 104;
   private static final Integer CLAIM_5 = 105;
+  public static final String VERSION = "version";
   private MetricRegistry appMetrics;
   @Mock private GrpcStreamCaller<Integer> caller;
   @Mock private ManagedChannel channel;
-  @Mock private RdaSink<Integer> sink;
+  @Mock private RdaSink<Integer, Integer> sink;
   @Mock private ClientCall<Integer, Integer> clientCall;
-  private GrpcRdaSource<Integer> source;
+  private GrpcRdaSource<Integer, Integer> source;
   private GrpcRdaSource.Metrics metrics;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
+    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
-    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.empty()));
+    source =
+        spy(
+            new GrpcRdaSource<>(
+                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
+    doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
+    doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
   }
 
@@ -70,9 +78,11 @@ public class GrpcRdaSourceTest {
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
     doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
-    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel, 42L);
-    doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
-    doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
+    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, 42L);
+    doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
+    doReturn(1).when(sink).writeMessages(VERSION, List.of(CLAIM_3));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
     assertEquals(3, result);
@@ -87,14 +97,17 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   @Test
   public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
-    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.of(18L)));
-    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, 18L);
-    doReturn(1).when(sink).writeBatch(Arrays.asList(CLAIM_1));
+    source =
+        spy(
+            new GrpcRdaSource<>(
+                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.of(18L)));
+    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
+    doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
     assertEquals(1, result);
@@ -109,7 +122,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(1)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 18L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 18L);
     verify(sink, times(0)).readMaxExistingSequenceNumber();
   }
 
@@ -119,12 +132,12 @@ public class GrpcRdaSourceTest {
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(same(channel), anyLong());
-    doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
+        .callService(same(channel), any(), anyLong());
+    doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     doThrow(new ProcessingException(error, 1))
         .when(sink)
-        .writeBatch(Arrays.asList(CLAIM_3, CLAIM_4));
+        .writeMessages(VERSION, Arrays.asList(CLAIM_3, CLAIM_4));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -145,23 +158,19 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   @Test
   public void testHandlesExceptionFromCaller() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
+    final GrpcStreamCaller<Integer> caller = mock(GrpcStreamCaller.class);
+    doThrow(error).when(caller).callService(any(), any(), anyLong());
     source =
         spy(
             new GrpcRdaSource<>(
-                channel,
-                (channel, sequenceNumber) -> {
-                  throw error;
-                },
-                appMetrics,
-                "ints",
-                Optional.empty()));
+                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -186,11 +195,11 @@ public class GrpcRdaSourceTest {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(same(channel), anyLong());
-    doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
+        .callService(same(channel), eq(CallOptions.DEFAULT), anyLong());
+    doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     final Exception error = new RuntimeException("oops");
-    doThrow(error).when(sink).writeBatch(Arrays.asList(CLAIM_3, CLAIM_4));
+    doThrow(error).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_3, CLAIM_4));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -210,7 +219,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 0L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 0L);
   }
 
   @Test
@@ -223,10 +232,10 @@ public class GrpcRdaSourceTest {
         .thenReturn(true)
         .thenReturn(true)
         .thenThrow(new StreamInterruptedException(new StatusRuntimeException(Status.INTERNAL)));
-    doReturn(response).when(caller).callService(same(channel), anyLong());
+    doReturn(response).when(caller).callService(same(channel), any(), anyLong());
 
     // we expect to write a single batch with the first two records
-    doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
+    doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_2));
 
     int processed = source.retrieveAndProcessObjects(2, sink);
     assertEquals(2, processed);
@@ -242,7 +251,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(2)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   @Test
@@ -257,7 +266,13 @@ public class GrpcRdaSourceTest {
   @Test
   public void configIsSerializable() throws Exception {
     final GrpcRdaSource.Config original =
-        new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59));
+        GrpcRdaSource.Config.builder()
+            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+            .host("localhost")
+            .port(5432)
+            .maxIdle(Duration.ofMinutes(59))
+            .authenticationToken("secret")
+            .build();
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(original);
@@ -267,7 +282,7 @@ public class GrpcRdaSourceTest {
         new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
       loaded = (GrpcRdaSource.Config) inp.readObject();
     }
-    Assert.assertEquals(original, loaded);
+    assertEquals(original, loaded);
   }
 
   private GrpcResponseStream<Integer> createResponse(int... values) {

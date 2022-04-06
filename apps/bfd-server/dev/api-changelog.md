@@ -1,5 +1,241 @@
 # API Changelog
 
+## BFD-1423 Remove Duplicate Drug Status Code
+
+Removed duplicate drug status coding from API output for PDE claims:
+There will only be one of these:
+```
+ "category" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code" : "info",
+            "display" : "Information"
+          }, {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "display" : "Drug Coverage Status Code"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "code" : "C",
+            "display" : "Covered"
+          } ]
+        }
+}
+```
+
+## BFD-1477 Map Provider for PDE
+
+* Following FHIR mapping changes were made:
+
+	* eob.provider, in PDE, is mapped using serviceProviderId (the pharmacy id) in v2
+```
+  "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+      },
+  ```
+
+## BFD-1424 Fix mtus code
+
+Added a new extension with the correct url/system for MTUS Code and kept the old extension with the MTUS Code value that had the incorrect url/system of MTUS Count:
+The old coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+}, 
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+}
+```
+The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+```
+
+## BFD-1446: Added focal field to v2
+
+For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
+
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim. If this is the case then the focal should always be set to true.  This is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+
+````
+ "insurance" : [ {
+    "focal" : true,
+    ...,
+ }]
+````
+
+## BFD-1383 Update V2 line item allowed charge amount mapping
+
+Previously, the allowed charge amount in the EOB FHIR response was incorrectly being populated by the submitted charge amount data field. The value for allowed charge amount is now being populated correctly by the respective allowed charge amount data field. Note that this is only for v2
+For DME the new allowed charge amount looks like:
+````
+"amount" : {
+    "value" : 129.45,
+    "currency" : "USD"
+}
+````
+
+For Carrier:
+````
+"amount" : {
+    "value" : 47.84,
+    "currency" : "USD"
+}
+````
+
+## BFD-1516: Map Hospice Period Count in V2
+
+Added mapping for Hospice Period count
+BENE_HOSPC_PRD_CNT => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
+    }
+  }
+  ...
+}
+```
+
+## BFD-1517: Map FI Number in V2
+
+Added mapping for Fiscal Intermediary Number
+FI_NUM => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
+  }
+  ...
+}
+```
+
+## BFD-1518: Map Revenue Center Status Indicator Code in V2
+
+Added mapping for Revenue Status Code:
+REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
+## BFD-1566: Add Patient.meta.tag entry for Some Patients
+
+Our system has delayed the processing of demographic and enrollment data
+  for some persons who had previously been enrolled in Medicare
+  but are not enrolled in Medicare for the current year.
+This delay is due to errors in
+  how that data has been sent to our system for processing
+  that only impact such persons.
+Only around 0.3% of persons we have records for are impacted by this issue.
+
+Nevertheless, for such impacted persons,
+  their `Patient` resources are being tagged,
+  as follows:
+
+```
+{
+  "resourceType": "Patient",
+  ...
+  "meta": {
+    ...
+    "tag": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/codesystem/tags",
+        "code": "delayed-backdated-enrollment",
+        "display": "Impacted by delayed backdated enrollment data."
+      }
+    ]
+  },
+  ...
+```
+
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
+
+Added three new codes to `codes-cpt.csv`:
+```
+G1028
+G2215
+G2216
+```
+
+These new codes allow for enhanced SAMHSA filtering for the v1 and v2 endpoints to remain compliant with SAMHSA data sharing policy.
+
 ## BLUEBUTTON-865: Adding Carrier & DME Tax Numbers to ExplanationOfBenefit resource
 
 A new optional flag has been added that will cause tax numbers from a claim to be included in response `ExplanationOfBenefit` resources.
@@ -692,4 +928,3 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as a valueQuantity, not a valueCoding" issues were addressed by creating a new common method for adding quantities to an extension instead of codeable concepts for these fields. The new method is called addExtensionValueQuantity in TransformerUtils.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
- 

@@ -11,9 +11,9 @@ message McsDiagnosisCode {
 
   oneof idr_diag_icd_type {
     McsDiagnosisIcdType idr_diag_icd_type_enum = 2;
-    string idr_diag_icd_type_enum_unrecognized = 4;
+    string idr_diag_icd_type_unrecognized = 4;
   };
 
   // Note: Not on original claim.
-  optional string idr_diag_code = 3;
+  string idr_diag_code = 3;
 }

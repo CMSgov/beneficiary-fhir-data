@@ -16,9 +16,9 @@ import java.util.HashSet;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class R4ClaimResponseResourceProviderIT {
 
@@ -27,22 +27,20 @@ public class R4ClaimResponseResourceProviderIT {
   private static final Set<String> IGNORE_PATTERNS =
       ImmutableSet.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
 
-  @BeforeClass
+  @BeforeAll
   public static void init() {
     testUtils.init();
-
-    testUtils.seedData(testUtils.fissTestData());
-    testUtils.seedData(testUtils.mcsTestData());
+    testUtils.seedData(true);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() {
     testUtils.truncateTables();
     testUtils.destroy();
   }
 
   @Test
-  public void shouldGetCorrectFissClaimResponseResourceById() {
+  void shouldGetCorrectFissClaimResponseResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ClaimResponse claimResult =
@@ -55,7 +53,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectMcsClaimResponseResourceById() {
+  void shouldGetCorrectMcsClaimResponseResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ClaimResponse claimResult =
@@ -68,7 +66,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectClaimResponseResourcesByMbiHash() {
+  void shouldGetCorrectClaimResponseResourcesByMbiHash() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Bundle claimResult =
@@ -77,7 +75,7 @@ public class R4ClaimResponseResourceProviderIT {
             .forResource(ClaimResponse.class)
             .where(
                 ImmutableMap.of(
-                    "mbi", Collections.singletonList(new ReferenceParam("a7f8e93f09")),
+                    "mbi", Collections.singletonList(new ReferenceParam(RDATestUtils.MBI_OLD_HASH)),
                     "service-date",
                         Arrays.asList(
                             new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))

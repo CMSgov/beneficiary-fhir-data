@@ -26,7 +26,7 @@ public class ProfileConstants {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy";
 
   /**
-   * C4BB Resource Profile: C4BB ExplanationOfBenefit Professional NonClinician
+   * C4BB Resource Profile: C4BB ExplanationOfBenefit Professional NonClinician <a
    * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-ExplanationOfBenefit-Professional-NonClinician.html">
    * C4BBExplanationOfBenefitProfessionalNonClinician</a>
    */
@@ -34,7 +34,7 @@ public class ProfileConstants {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician";
 
   /**
-   * C4BB Resource Profile: C4BB Coverage
+   * C4BB Resource Profile: C4BB Coverage <a
    * href="http://hl7.org/fhir/us/carin-bb/STU1/StructureDefinition-C4BB-Coverage.html">
    * C4BBCoverage</a>
    */
@@ -42,7 +42,7 @@ public class ProfileConstants {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage";
 
   /**
-   * C4BB Resource Profile: C4BB Organization
+   * C4BB Resource Profile: C4BB Organization <a
    * href="http://hl7.org/fhir/us/carin-bb/STU1/StructureDefinition-C4BB-Organization.html">
    * C4BBOrganization</a>
    */
@@ -50,7 +50,7 @@ public class ProfileConstants {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization";
 
   /**
-   * C4BB Resource Profile: C4BB Patient
+   * C4BB Resource Profile: C4BB Patient <a
    * href="http://hl7.org/fhir/us/carin-bb/STU1/StructureDefinition-C4BB-Patient.html">
    * C4BBOrganization</a>
    */

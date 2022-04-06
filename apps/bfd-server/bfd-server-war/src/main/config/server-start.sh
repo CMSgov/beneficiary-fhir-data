@@ -39,7 +39,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	j:m:v:t:u:e:p: \
+	j:m:v:t:u:e:p:o: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -54,6 +54,7 @@ targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
 preadjEnabled="true"
+preadjOldMbiHashEnabled="false"
 while true; do
 	case "$1" in
 		-j )
@@ -70,6 +71,8 @@ while true; do
 			v2Enabled="$2"; shift 2 ;;
 		-p )
 			preadjEnabled="$2"; shift 2 ;;
+		-o )
+			preadjOldMbiHashEnabled="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -124,6 +127,7 @@ workDirectory="${targetDirectory}/server-work"
 serverLauncher=$(echo ${workDirectory}/bfd-server-launcher-*/bfd-server-launcher.sh)
 serverPortsFile="${workDirectory}/server-ports.properties"
 serverLog="${workDirectory}/server-console.log"
+gcLog="${workDirectory}/gc.log"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
 keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.jks"
 trustStore="${scriptDirectory}/../../../../dev/ssl-stores/server-truststore.jks"
@@ -180,10 +184,12 @@ BFD_PORT="${serverPortHttps}" \
 	BFD_JAVA_HOME="${javaHome}" \
 	"${serverLauncher}" \
 	"${maxHeapArg}" \
+	"-Xlog:gc*:${gcLog}:time,level,tags" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
 	"-DbfdServer.preadj.enabled=${preadjEnabled}" \
+	"-DbfdServer.preadj.oldMbiHash.enabled=${preadjOldMbiHashEnabled}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \

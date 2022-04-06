@@ -20,12 +20,10 @@
         <grpc_java.version>1.37.0</grpc_java.version>
         <!-- Version of the plugin used to build the gRPC stubs from the Health.proto file. -->
         <protoc.version>3.15.8</protoc.version>
-        <mockito.version>3.8.0</mockito.version>
         <hibernate.version>5.4.31.Final</hibernate.version>
         <jpa.version>1.0.2.Final</jpa.version>
         <postgresql.version>42.2.20</postgresql.version>
         <hsqldb.version>2.6.0</hsqldb.version>
-        <junit.version>4.13.2</junit.version>
         <slf4j.version>1.7.7</slf4j.version>
         <hikari.version>4.0.3</hikari.version>
     </properties>
@@ -111,12 +109,6 @@
         <dependency>
             <!-- contains the JPA entities for writing to the database -->
             <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rda</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- contains the JPA entities for writing to the database -->
-            <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-rda-grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -142,7 +134,7 @@
         </dependency>
 
         <dependency>
-            <!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+            <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
@@ -150,8 +142,8 @@
 
         <dependency>
             <!-- Used to run our unit and integration tests. -->
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -181,9 +173,33 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <configuration>
+                        <appendAssemblyId>false</appendAssemblyId>
+                        <descriptors>
+                            <descriptor>src/main/assembly/zip.xml</descriptor>
+                        </descriptors>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <!-- Will run the `*IT.java` integration tests in this project, as part
                         of the build. -->
