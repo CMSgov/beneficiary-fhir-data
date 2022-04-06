@@ -334,10 +334,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setLineTable("snf_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
-                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED")))
-              .setUseTableViewsInEntity(true));
+                  createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
     } finally {
-      if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
+      if (spreadsheetWorkbook != null) {
+        spreadsheetWorkbook.close();
+      }
     }
     logNote(annotatedPackage, "Generated mapping specification: '%s'", mappingSpecs);
 
