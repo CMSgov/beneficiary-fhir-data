@@ -1,7 +1,7 @@
 # RFC Proposal
 [RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: `0000-rda-claims-jsonb`
+* RFC Proposal ID: `0012-rda-claims-jsonb`
 * Start Date: 2021-10-18
 * RFC PR: [CMSgov/beneficiary-fhir-data#???](https://github.com/CMSgov/beneficiary-fhir-data/pull/???)
 * JIRA Ticket(s):
@@ -12,10 +12,23 @@ More tables and indexes will be needed in the near future as the data returned b
 By switching to a single table per type of claim with a JSONB column to store all of a claim's data in a single column we can simplify the schema and improve performance.
 Benchmarking on a local postresql database saw ingestion rates 3-5 times faster with this structure.
 
+## Status
+[Status]: #status
+
+* Status: Deferred
+
+This RFC has been deferred for the following reasons:
+
+* The performance improvement on a production Aurora cluster was less significant than that on a local postgresql database.
+* A normalized database schema has some advantages for data exploration that could be helpful during the early phases of RDA production data ingestion.
+
+**Note:** The [PR containing a proof of concept implementation](https://github.com/CMSgov/beneficiary-fhir-data/pull/751) has been closed but should still be available in github.
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
