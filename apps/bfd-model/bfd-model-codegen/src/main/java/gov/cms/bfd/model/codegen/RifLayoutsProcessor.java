@@ -1303,7 +1303,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "inpatient_claims",
             "outpatient_claims",
             "partd_events");
-    // "snf_claims");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());
