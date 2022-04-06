@@ -369,7 +369,7 @@
       "valueCoding" : {
         "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
         "code" : "3",
-        "display":"Services"
+        "display" : "Services"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
