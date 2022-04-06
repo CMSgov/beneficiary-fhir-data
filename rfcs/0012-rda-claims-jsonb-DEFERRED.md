@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0012-rda-claims-jsonb`
 * Start Date: 2021-10-18
-* RFC PR: [CMSgov/beneficiary-fhir-data#???](https://github.com/CMSgov/beneficiary-fhir-data/pull/???)
+* RFC PR: [CMSgov/beneficiary-fhir-data#794](https://github.com/CMSgov/beneficiary-fhir-data/pull/794)
 * JIRA Ticket(s):
     * [DCGEO-219](https://jira.cms.gov/browse/DCGEO-219)
 
