@@ -2,6 +2,25 @@ mappings:
 - entityClassName: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
+  enumTypes:
+  - name: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistoryColumn
+    values:
+    - BENE_MBI_ID
+    - BENE_ID
+    - BENE_CLM_ACNT_NUM
+    - BENE_IDENT_CD
+    - MBI_SQNC_NUM
+    - MBI_NUM
+    - MBI_EFCTV_BGN_DT
+    - MBI_EFCTV_END_DT
+    - MBI_BGN_RSN_CD
+    - MBI_END_RSN_CD
+    - MBI_CARD_RQST_DT
+    - CREAT_USER_ID
+    - CREAT_TS
+    - UPDT_USER_ID
+    - UPDT_TS
+    - BENE_CRNT_REC_IND_ID
   id: MedicareBeneficiaryIdHistory
   messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
   minStringLength: 0

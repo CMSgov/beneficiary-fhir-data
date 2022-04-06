@@ -361,7 +361,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     /*
      * First, create the Java enum for the RIF columns.
      */
-    TypeSpec columnEnum = generateColumnEnum(mappingSpec);
+    //    TypeSpec columnEnum = generateColumnEnum(mappingSpec);
 
     /*
      * Then, create the JPA Entity for the "line" fields, containing: fields
@@ -384,7 +384,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      * Then, create code that can be used to parse incoming RIF rows into
      * instances of those entities.
      */
-    generateParser(mappingSpec, columnEnum, headerEntity, lineEntity);
+    generateParser(mappingSpec, headerEntity, lineEntity);
 
     /*
      * Then, create code that can be used to write the JPA Entity out to CSV
@@ -1350,10 +1350,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private TypeSpec generateParser(
-      MappingSpec mappingSpec,
-      TypeSpec columnEnum,
-      TypeSpec headerEntity,
-      Optional<TypeSpec> lineEntity)
+      MappingSpec mappingSpec, TypeSpec headerEntity, Optional<TypeSpec> lineEntity)
       throws IOException {
     int rifFieldsSize = mappingSpec.getRifLayout().getRifFields().size();
     int firstLineFieldIx =

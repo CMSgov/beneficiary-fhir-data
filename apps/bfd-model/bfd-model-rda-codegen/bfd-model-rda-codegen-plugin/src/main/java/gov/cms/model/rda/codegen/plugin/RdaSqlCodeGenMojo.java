@@ -1,7 +1,5 @@
 package gov.cms.model.rda.codegen.plugin;
 
-import static gov.cms.model.rda.codegen.plugin.model.ModelUtil.isValidMappingSource;
-
 import gov.cms.model.rda.codegen.plugin.model.MappingBean;
 import gov.cms.model.rda.codegen.plugin.model.ModelUtil;
 import gov.cms.model.rda.codegen.plugin.model.RootBean;
@@ -36,14 +34,10 @@ public class RdaSqlCodeGenMojo extends AbstractMojo {
 
   @SneakyThrows(IOException.class)
   public void execute() throws MojoExecutionException {
-    if (!isValidMappingSource(mappingFile)) {
-      fail("mappingFile not defined or does not exist");
-    }
-
     File outputFile = new File(this.outputFile);
     outputFile.getParentFile().mkdirs();
     try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)))) {
-      RootBean root = ModelUtil.loadMappingsFromYamlFile(mappingFile);
+      RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingFile);
       List<MappingBean> rootMappings = root.getMappings();
       out.println("/************************** CREATES **************************/");
       out.println();
@@ -153,10 +147,5 @@ public class RdaSqlCodeGenMojo extends AbstractMojo {
 
   private String quoted(String value) {
     return "\"" + value + "\"";
-  }
-
-  private void fail(String formatString, Object... args) throws MojoExecutionException {
-    String message = String.format(formatString, args);
-    throw new MojoExecutionException(message);
   }
 }

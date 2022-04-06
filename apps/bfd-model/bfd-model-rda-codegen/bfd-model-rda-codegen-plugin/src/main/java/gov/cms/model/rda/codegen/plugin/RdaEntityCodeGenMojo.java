@@ -1,7 +1,5 @@
 package gov.cms.model.rda.codegen.plugin;
 
-import static gov.cms.model.rda.codegen.plugin.model.ModelUtil.isValidMappingSource;
-
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -79,25 +77,37 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
 
   @SneakyThrows(IOException.class)
   public void execute() throws MojoExecutionException {
-    if (!isValidMappingSource(mappingFile)) {
-      throw failure("mappingFile not defined or does not exist");
-    }
+    final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
+    final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingFile);
+    createEnumClasses(outputDir, root);
+    createEntityClasses(outputDir, root);
+    project.addCompileSourceRoot(outputDirectory);
+  }
 
-    File outputDir = new File(outputDirectory);
-    outputDir.mkdirs();
-    RootBean root = ModelUtil.loadMappingsFromYamlFile(mappingFile);
-    List<MappingBean> rootMappings = root.getMappings();
-    for (MappingBean mapping : rootMappings) {
+  // region Implementation Details
+  private void createEntityClasses(File outputDir, RootBean root)
+      throws MojoExecutionException, IOException {
+    for (MappingBean mapping : root.getMappings()) {
       TypeSpec rootEntity =
           createEntityFromMapping(
               mapping, root::findMappingWithId, root::findMappingWithEntityClassName);
       JavaFile javaFile = JavaFile.builder(mapping.entityPackageName(), rootEntity).build();
       javaFile.writeTo(outputDir);
     }
-    project.addCompileSourceRoot(outputDirectory);
   }
 
-  // region Implementation Details
+  private void createEnumClasses(File outputDir, RootBean root) throws IOException {
+    for (MappingBean mapping : root.getMappings()) {
+      for (EnumTypeBean enumType : mapping.getEnumTypes()) {
+        if (!enumType.isInnerClass()) {
+          final TypeSpec enumSpec = createEnum(enumType);
+          JavaFile javaFile = JavaFile.builder(enumType.enumPackageName(), enumSpec).build();
+          javaFile.writeTo(outputDir);
+        }
+      }
+    }
+  }
+
   private TypeSpec createEntityFromMapping(
       MappingBean mapping,
       Function<String, Optional<MappingBean>> findMappingWithId,
@@ -126,7 +136,8 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       classBuilder.addJavadoc(mapping.getTable().getComment());
     }
     if (!mapping.getTable().hasPrimaryKey()) {
-      throw failure("mapping has no primary key fields: mapping=%s", mapping.getId());
+      throw MojoUtil.createException(
+          "mapping has no primary key fields: mapping=%s", mapping.getId());
     }
     classBuilder.addAnnotation(createTableAnnotation(mapping.getTable()));
     addEnums(mapping.getEnumTypes(), classBuilder);
@@ -150,13 +161,15 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
 
   private void addEnums(List<EnumTypeBean> enumMappings, TypeSpec.Builder classBuilder) {
     for (EnumTypeBean enumMapping : enumMappings) {
-      classBuilder.addType(createEnum(enumMapping));
+      if (enumMapping.isInnerClass()) {
+        classBuilder.addType(createEnum(enumMapping));
+      }
     }
   }
 
   private TypeSpec createEnum(EnumTypeBean mapping) {
     TypeSpec.Builder builder =
-        TypeSpec.enumBuilder(mapping.getName()).addModifiers(Modifier.PUBLIC);
+        TypeSpec.enumBuilder(mapping.enumClassName()).addModifiers(Modifier.PUBLIC);
     for (String value : mapping.getValues()) {
       builder.addEnumConstant(value);
     }
@@ -197,7 +210,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       throws MojoExecutionException {
     var parentMapping = findMappingWithEntityClassName.apply(join.getEntityClass());
     if (parentMapping.isEmpty()) {
-      throw failure(
+      throw MojoUtil.createException(
           "no mapping found for primary key join class: mapping=%s join=%s entityClass=%s",
           mapping.getId(), join.getFieldName(), join.getEntityClass());
     }
@@ -230,12 +243,12 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       List<AccessorSpec> accessorSpecs)
       throws MojoExecutionException {
     if (!join.isValidEntityClass()) {
-      throw failure(
+      throw MojoUtil.createException(
           "entityClass for join must include package: mapping=%s join=%s entityClass=%s",
           mapping.getId(), join.getFieldName(), join.getEntityClass());
     }
     if (isJoinForArray(mapping, join)) {
-      throw failure(
+      throw MojoUtil.createException(
           "array join field added as ordinary join: mapping=%s join=%s entityClass=%s",
           mapping.getId(), join.getFieldName(), join.getEntityClass());
     }
@@ -299,7 +312,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     if (column.getFieldType() == ColumnBean.FieldType.Transient) {
       builder.addAnnotation(Transient.class);
       if (mapping.getTable().isPrimaryKey(column.getName())) {
-        throw failure(
+        throw MojoUtil.createException(
             "transient fields cannot be primary keys: mapping=%s field=%s",
             mapping.getId(), column.getName());
       }
@@ -317,13 +330,13 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       MappingBean mapping, FieldSpec.Builder builder, ColumnBean column)
       throws MojoExecutionException {
     if (column.isIdentity() && column.hasSequence()) {
-      throw failure(
+      throw MojoUtil.createException(
           "identity fields cannot have sequences: mapping=%s field=%s",
           mapping.getId(), column.getName());
     }
     if (column.getFieldType() == ColumnBean.FieldType.Transient
         && mapping.getTable().isPrimaryKey(column.getName())) {
-      throw failure(
+      throw MojoUtil.createException(
           "transient fields cannot be primary keys: mapping=%s field=%s",
           mapping.getId(), column.getName());
     }
@@ -397,7 +410,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
   private AnnotationSpec createEnumeratedAnnotation(MappingBean mapping, ColumnBean column)
       throws MojoExecutionException {
     if (!column.isString()) {
-      throw failure(
+      throw MojoUtil.createException(
           "enum columns must have String type but this one does not: mapping=%s column=%s",
           mapping.getId(), column.getName());
     }
@@ -414,14 +427,14 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       List<AccessorSpec> accessorSpecs)
       throws MojoExecutionException {
     if (mapping.getArrays().size() > 0 && primaryKeyFieldCount != 1) {
-      throw failure(
+      throw MojoUtil.createException(
           "classes with arrays must have a single primary key column but this one has %d: mapping=%s",
           primaryKeyFieldCount, mapping.getId());
     }
     for (ArrayElement arrayElement : mapping.getArrays()) {
       Optional<MappingBean> arrayMapping = mappingFinder.apply(arrayElement.getMapping());
       if (!arrayMapping.isPresent()) {
-        throw failure(
+        throw MojoUtil.createException(
             "array references unknown mapping: mapping=%s array=%s missing=%s",
             mapping.getId(), arrayElement.getTo(), arrayElement.getMapping());
       }
@@ -451,7 +464,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
   private AnnotationSpec createJoinTypeAnnotation(MappingBean mapping, JoinBean join)
       throws MojoExecutionException {
     if (join.getJoinType() == null) {
-      throw failure(
+      throw MojoUtil.createException(
           "missing joinType: mapping=%s join=%s joinType=%s",
           mapping.getId(), join.getFieldName(), join.getJoinType());
     }
@@ -475,7 +488,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
   private AnnotationSpec createJoinColumnAnnotation(MappingBean mapping, JoinBean join)
       throws MojoExecutionException {
     if (!join.hasColumnName()) {
-      throw failure(
+      throw MojoUtil.createException(
           "missing joinColumnName: mapping=%s join=%s", mapping.getId(), join.getFieldName());
     }
     AnnotationSpec.Builder builder =
@@ -559,7 +572,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       throws MojoExecutionException {
     final var join = getJoinForArray(mapping, primaryKeyFieldName, arrayElement, elementMapping);
     if (!join.getJoinType().isMultiValue()) {
-      throw failure(
+      throw MojoUtil.createException(
           "array mappings must have multi-value joins: array=%s joinType=%s",
           arrayElement.getTo(), join.getJoinType());
     }
@@ -635,11 +648,6 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     return fieldType;
   }
   // endregion
-
-  private MojoExecutionException failure(String formatString, Object... args) {
-    String message = String.format(formatString, args);
-    return new MojoExecutionException(message);
-  }
 
   @AllArgsConstructor
   private static class AccessorSpec {

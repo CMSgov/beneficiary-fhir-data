@@ -13,6 +13,12 @@ stringToLongFieldNames = {"beneficiaryId", "claimId", "eventId"}
 def create_mapping(summary):
     columns = list()
     transformations = list()
+    enumValues = list()
+
+    enumType = {
+        "name": f'{summary["packageName"]}.{summary["headerEntity"]}Column{classNameSuffix}',
+        "values": enumValues
+    }
 
     primary_key_columns = list()
     table = {
@@ -30,7 +36,8 @@ def create_mapping(summary):
         "sourceType": "RifCsv",
         "nullableFieldAccessorType": "Optional",
         "minStringLength": 0,
-        "table": table
+        "table": table,
+        "enumTypes": [enumType]
     }
     if is_rif_record_base_compatible(summary):
         mapping["entityInterfaces"] = ["gov.cms.bfd.model.rif.RifRecordBase"]
@@ -55,6 +62,9 @@ def create_mapping(summary):
         add_transient_to_column(summary, column)
         columns.append(column)
         add_field_transform(rif_field, transformations)
+
+    for rif_field in summary["rifLayout"]["fields"]:
+        enumValues.append(rif_field["rifColumnName"])
 
     for rif_field in summary["headerEntityAdditionalDatabaseFields"]:
         column = create_column(rif_field)

@@ -1,5 +1,22 @@
 mappings:
 - entityClassName: gov.cms.bfd.model.rif.BeneficiaryMonthly
+  enumTypes:
+  - name: gov.cms.bfd.model.rif.BeneficiaryMonthlyColumn
+    values:
+    - YEAR_MONTH
+    - FIPS_STATE_CNTY_CODE
+    - MEDICARE_STATUS_CODE
+    - ENTITLEMENT_BUY_IN_IND
+    - HMO_INDICATOR_IND
+    - PARTC_CONTRACT_NUMBER_ID
+    - PARTC_PBP_NUMBER_ID
+    - PARTC_PLAN_TYPE_CODE
+    - PARTD_CONTRACT_NUMBER_ID
+    - PARTD_PBP_NUMBER_ID
+    - PARTD_SEGMENT_NUMBER_ID
+    - PARTD_RETIREE_DRUG_SUBSIDY_IND
+    - MEDICAID_DUAL_ELIGIBILITY_CODE
+    - PARTD_LOW_INCOME_COST_SHARE_GROUP_CODE
   id: BeneficiaryMonthly
   messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
   minStringLength: 0

@@ -1,6 +1,5 @@
 package gov.cms.model.rda.codegen.plugin;
 
-import static gov.cms.model.rda.codegen.plugin.model.ModelUtil.isValidMappingSource;
 import static gov.cms.model.rda.codegen.plugin.transformer.TransformerUtil.capitalize;
 
 import com.google.common.collect.ImmutableList;
@@ -71,15 +70,9 @@ public class RdaTransformerCodeGenMojo extends AbstractMojo {
 
   @SneakyThrows(IOException.class)
   public void execute() throws MojoExecutionException {
-    if (!isValidMappingSource(mappingFile)) {
-      fail("mappingFile not defined or does not exist");
-    }
-
-    File outputDir = new File(outputDirectory);
-    outputDir.mkdirs();
-    RootBean root = ModelUtil.loadMappingsFromYamlFile(mappingFile);
-    List<MappingBean> rootMappings = root.getMappings();
-    for (MappingBean mapping : rootMappings) {
+    final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
+    final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingFile);
+    for (MappingBean mapping : root.getMappings()) {
       if (mapping.hasTransformer()) {
         TypeSpec rootEntity = createTransformerClassForMapping(mapping, root::findMappingWithId);
         JavaFile javaFile = JavaFile.builder(mapping.transformerPackage(), rootEntity).build();

@@ -24,4 +24,16 @@ public class EnumTypeBean {
       return value;
     }
   }
+
+  public boolean isInnerClass() {
+    return name.indexOf('.') < 0;
+  }
+
+  public String enumPackageName() {
+    return ModelUtil.packageName(name);
+  }
+
+  public String enumClassName() {
+    return ModelUtil.className(name);
+  }
 }
