@@ -390,7 +390,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      * Then, create code that can be used to write the JPA Entity out to CSV
      * files, for use with PostgreSQL's copy APIs.
      */
-    generateCsvWriter(mappingSpec, headerEntity, lineEntity);
+    //    generateCsvWriter(mappingSpec, headerEntity, lineEntity);
   }
 
   /**
@@ -1599,6 +1599,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       csvWriterMethod.addStatement(
           "csvRecordsByTable.put($S, lineRecords)", mappingSpec.getLineTable());
 
+      for (RifField rifField : mappingSpec.getRifLayout().getRifFields()) {
+        csvWriterMethod.addComment(
+            rifField.getJavaFieldName() + " => " + rifField.getRifColumnName());
+      }
       String lineColumnsList = calculateCsvColumns(lineEntity.get().fieldSpecs, mappingSpec);
 
       if (DEBUG) {

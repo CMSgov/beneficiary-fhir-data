@@ -107,7 +107,7 @@ public class PoetUtil {
     }
   }
 
-  private static String fieldToMethodName(String prefix, String fieldName) {
+  public static String fieldToMethodName(String prefix, String fieldName) {
     return prefix + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
   }
 

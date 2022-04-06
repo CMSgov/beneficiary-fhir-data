@@ -205,6 +205,7 @@
 							<goal>entities</goal>
 							<goal>sql</goal>
 							<goal>transformers</goal>
+							<goal>csv-writers</goal>
 						</goals>
 					</execution>
 				</executions>

@@ -47,6 +47,10 @@ public class TableBean {
                         "reference to non-existent column %s in table %s", columnName, name)));
   }
 
+  public boolean hasColumnWithName(String columnName) {
+    return columns.stream().anyMatch(c -> columnName.equals(c.getName()));
+  }
+
   public boolean hasComment() {
     return !Strings.isNullOrEmpty(comment);
   }

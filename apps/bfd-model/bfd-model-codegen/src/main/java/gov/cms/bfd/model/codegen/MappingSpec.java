@@ -404,7 +404,7 @@ public final class MappingSpec {
    *     layout
    */
   public ClassName getCsvWriterClass() {
-    return ClassName.get(packageName, headerEntity + "CsvWriter");
+    return ClassName.get(packageName, headerEntity + "CsvWriterIgnore");
   }
 
   /** @see java.lang.Object#toString() */

@@ -80,6 +80,14 @@ public class MappingBean {
     return table.getColumns().stream().filter(c -> name.equals(c.getName())).findAny();
   }
 
+  public Optional<TransformationBean> findTransformationByToName(String toName) {
+    return transformations.stream().filter(t -> t.getTo().equals(toName)).findFirst();
+  }
+
+  public Optional<ArrayElement> findArrayByFromName(String fromName) {
+    return arrays.stream().filter(a -> a.getFrom().equals(fromName)).findFirst();
+  }
+
   public Optional<JoinBean> findJoinByFieldName(String name) {
     return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findAny();
   }
