@@ -1,7 +1,149 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.BeneficiaryHistory
+- id: BeneficiaryHistory
+  entityClassName: gov.cms.bfd.model.rif.BeneficiaryHistory
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  sourceType: RifCsv
+  nullableFieldAccessorType: Optional
+  minStringLength: 0
+  table:
+    name: beneficiaries_history
+    primaryKeyColumns:
+    - beneHistoryId
+    quoteNames: false
+    equalsNeeded: false
+    columns:
+    - name: beneHistoryId
+      dbName: bene_history_id
+      nullable: false
+      sqlType: bigint
+      javaType: long
+      updatable: false
+      sequence:
+        name: beneficiaryhistory_beneficiaryhistoryid_seq
+        allocationSize: 50
+    - name: beneficiaryId
+      dbName: bene_id
+      nullable: false
+      sqlType: varchar(15)
+      javaType: String
+      javaAccessorType: long
+      comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
+    - name: stateCode
+      dbName: state_code
+      sqlType: varchar(2)
+      comment: State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/state_cd.txt)
+      fieldType: Transient
+    - name: countyCode
+      dbName: bene_county_cd
+      sqlType: varchar(10)
+      comment: County Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cnty_cd.txt)
+      fieldType: Transient
+    - name: postalCode
+      dbName: bene_zip_cd
+      sqlType: varchar(9)
+      comment: Zip Code of Residence (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_zip.txt)
+      fieldType: Transient
+    - name: birthDate
+      dbName: bene_birth_dt
+      nullable: false
+      sqlType: date
+      comment: Date of Birth (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_dob.txt)
+    - name: sex
+      dbName: bene_sex_ident_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Sex (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sex.txt)
+    - name: race
+      dbName: bene_race_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Beneficiary Race Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt)
+      fieldType: Transient
+    - name: entitlementCodeOriginal
+      dbName: bene_entlmt_rsn_orig
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Original Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt)
+      fieldType: Transient
+    - name: entitlementCodeCurrent
+      dbName: bene_entlmt_rsn_curr
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Current Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt)
+      fieldType: Transient
+    - name: endStageRenalDiseaseCode
+      dbName: bene_esrd_ind
+      sqlType: varchar(1)
+      javaType: Character
+      comment: ESRD Indicator (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt)
+      fieldType: Transient
+    - name: medicareEnrollmentStatusCode
+      dbName: bene_mdcr_status_cd
+      sqlType: varchar(2)
+      comment: Medicare Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt)
+      fieldType: Transient
+    - name: partATerminationCode
+      dbName: bene_pta_trmntn_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Part A Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt)
+      fieldType: Transient
+    - name: partBTerminationCode
+      dbName: bene_ptb_trmntn_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Part B Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt)
+      fieldType: Transient
+    - name: hicn
+      dbName: bene_crnt_hic_num
+      nullable: false
+      sqlType: varchar(64)
+      comment: Beneficiary Current HIC Number
+    - name: nameSurname
+      dbName: bene_srnm_name
+      sqlType: varchar(24)
+      comment: Beneficiary Surname Name
+      fieldType: Transient
+    - name: nameGiven
+      dbName: bene_gvn_name
+      sqlType: varchar(15)
+      comment: Beneficiary Given Name
+      fieldType: Transient
+    - name: nameMiddleInitial
+      dbName: bene_mdl_name
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Beneficiary Middle Name
+      fieldType: Transient
+    - name: medicareBeneficiaryId
+      dbName: mbi_num
+      sqlType: varchar(11)
+      comment: Medicare Beneficiary ID
+    - name: mbiEffectiveDate
+      dbName: efctv_bgn_dt
+      sqlType: date
+      comment: MBI Effective Date
+    - name: mbiObsoleteDate
+      dbName: efctv_end_dt
+      sqlType: date
+      comment: MBI Obsolete Date
+    - name: hicnUnhashed
+      dbName: hicn_unhashed
+      sqlType: varchar(64)
+      comment: HICN_UNHASHED (https://bluebutton.cms.gov/resources/variables/hicnUnhashed)
+    - name: mbiHash
+      dbName: mbi_hash
+      sqlType: varchar(64)
+      comment: MBI_HASH (https://bluebutton.cms.gov/resources/variables/mbiHash)
+    - name: lastUpdated
+      dbName: last_updated
+      sqlType: timestamp with time zone
+      comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+    joins: []
+  arrays: []
   enumTypes:
   - name: gov.cms.bfd.model.rif.BeneficiaryHistoryColumn
     values:
@@ -25,206 +167,66 @@ mappings:
     - MBI_NUM
     - EFCTV_BGN_DT
     - EFCTV_END_DT
-  id: BeneficiaryHistory
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
-  minStringLength: 0
-  nullableFieldAccessorType: Optional
-  sourceType: RifCsv
-  table:
-    columns:
-    - dbName: bene_history_id
-      javaType: long
-      name: beneHistoryId
-      nullable: false
-      sequence:
-        allocationSize: 50
-        name: beneficiaryhistory_beneficiaryhistoryid_seq
-      sqlType: bigint
-      updatable: false
-    - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
-      dbName: bene_id
-      javaAccessorType: long
-      javaType: String
-      name: beneficiaryId
-      nullable: false
-      sqlType: varchar(15)
-    - comment: State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/state_cd.txt)
-      dbName: state_code
-      fieldType: Transient
-      name: stateCode
-      sqlType: varchar(2)
-    - comment: County Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cnty_cd.txt)
-      dbName: bene_county_cd
-      fieldType: Transient
-      name: countyCode
-      sqlType: varchar(10)
-    - comment: Zip Code of Residence (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_zip.txt)
-      dbName: bene_zip_cd
-      fieldType: Transient
-      name: postalCode
-      sqlType: varchar(9)
-    - comment: Date of Birth (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_dob.txt)
-      dbName: bene_birth_dt
-      name: birthDate
-      nullable: false
-      sqlType: date
-    - comment: Sex (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sex.txt)
-      dbName: bene_sex_ident_cd
-      javaType: char
-      name: sex
-      nullable: false
-      sqlType: varchar(1)
-    - comment: Beneficiary Race Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt)
-      dbName: bene_race_cd
-      fieldType: Transient
-      javaType: Character
-      name: race
-      sqlType: varchar(1)
-    - comment: Original Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt)
-      dbName: bene_entlmt_rsn_orig
-      fieldType: Transient
-      javaType: Character
-      name: entitlementCodeOriginal
-      sqlType: varchar(1)
-    - comment: Current Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt)
-      dbName: bene_entlmt_rsn_curr
-      fieldType: Transient
-      javaType: Character
-      name: entitlementCodeCurrent
-      sqlType: varchar(1)
-    - comment: ESRD Indicator (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt)
-      dbName: bene_esrd_ind
-      fieldType: Transient
-      javaType: Character
-      name: endStageRenalDiseaseCode
-      sqlType: varchar(1)
-    - comment: Medicare Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt)
-      dbName: bene_mdcr_status_cd
-      fieldType: Transient
-      name: medicareEnrollmentStatusCode
-      sqlType: varchar(2)
-    - comment: Part A Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt)
-      dbName: bene_pta_trmntn_cd
-      fieldType: Transient
-      javaType: Character
-      name: partATerminationCode
-      sqlType: varchar(1)
-    - comment: Part B Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt)
-      dbName: bene_ptb_trmntn_cd
-      fieldType: Transient
-      javaType: Character
-      name: partBTerminationCode
-      sqlType: varchar(1)
-    - comment: Beneficiary Current HIC Number
-      dbName: bene_crnt_hic_num
-      name: hicn
-      nullable: false
-      sqlType: varchar(64)
-    - comment: Beneficiary Surname Name
-      dbName: bene_srnm_name
-      fieldType: Transient
-      name: nameSurname
-      sqlType: varchar(24)
-    - comment: Beneficiary Given Name
-      dbName: bene_gvn_name
-      fieldType: Transient
-      name: nameGiven
-      sqlType: varchar(15)
-    - comment: Beneficiary Middle Name
-      dbName: bene_mdl_name
-      fieldType: Transient
-      javaType: Character
-      name: nameMiddleInitial
-      sqlType: varchar(1)
-    - comment: Medicare Beneficiary ID
-      dbName: mbi_num
-      name: medicareBeneficiaryId
-      sqlType: varchar(11)
-    - comment: MBI Effective Date
-      dbName: efctv_bgn_dt
-      name: mbiEffectiveDate
-      sqlType: date
-    - comment: MBI Obsolete Date
-      dbName: efctv_end_dt
-      name: mbiObsoleteDate
-      sqlType: date
-    - comment: HICN_UNHASHED (https://bluebutton.cms.gov/resources/variables/hicnUnhashed)
-      dbName: hicn_unhashed
-      name: hicnUnhashed
-      sqlType: varchar(64)
-    - comment: MBI_HASH (https://bluebutton.cms.gov/resources/variables/mbiHash)
-      dbName: mbi_hash
-      name: mbiHash
-      sqlType: varchar(64)
-    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
-      dbName: last_updated
-      name: lastUpdated
-      sqlType: timestamp with time zone
-    equalsNeeded: false
-    name: beneficiaries_history
-    primaryKeyColumns:
-    - beneHistoryId
-    quoteNames: false
+  transformerClassName: gov.cms.bfd.model.rif.BeneficiaryHistoryParser
   transformations:
   - from: BENE_ID
-    optional: false
     to: beneficiaryId
+    optional: false
     transformer: LongString
   - from: STATE_CODE
-    optional: true
     to: stateCode
+    optional: true
   - from: BENE_COUNTY_CD
-    optional: true
     to: countyCode
+    optional: true
   - from: BENE_ZIP_CD
-    optional: true
     to: postalCode
+    optional: true
   - from: BENE_BIRTH_DT
-    optional: false
     to: birthDate
+    optional: false
   - from: BENE_SEX_IDENT_CD
-    optional: false
     to: sex
-  - from: BENE_RACE_CD
-    optional: true
-    to: race
-  - from: BENE_ENTLMT_RSN_ORIG
-    optional: true
-    to: entitlementCodeOriginal
-  - from: BENE_ENTLMT_RSN_CURR
-    optional: true
-    to: entitlementCodeCurrent
-  - from: BENE_ESRD_IND
-    optional: true
-    to: endStageRenalDiseaseCode
-  - from: BENE_MDCR_STATUS_CD
-    optional: true
-    to: medicareEnrollmentStatusCode
-  - from: BENE_PTA_TRMNTN_CD
-    optional: true
-    to: partATerminationCode
-  - from: BENE_PTB_TRMNTN_CD
-    optional: true
-    to: partBTerminationCode
-  - from: BENE_CRNT_HIC_NUM
     optional: false
+  - from: BENE_RACE_CD
+    to: race
+    optional: true
+  - from: BENE_ENTLMT_RSN_ORIG
+    to: entitlementCodeOriginal
+    optional: true
+  - from: BENE_ENTLMT_RSN_CURR
+    to: entitlementCodeCurrent
+    optional: true
+  - from: BENE_ESRD_IND
+    to: endStageRenalDiseaseCode
+    optional: true
+  - from: BENE_MDCR_STATUS_CD
+    to: medicareEnrollmentStatusCode
+    optional: true
+  - from: BENE_PTA_TRMNTN_CD
+    to: partATerminationCode
+    optional: true
+  - from: BENE_PTB_TRMNTN_CD
+    to: partBTerminationCode
+    optional: true
+  - from: BENE_CRNT_HIC_NUM
     to: hicn
+    optional: false
   - from: BENE_SRNM_NAME
-    optional: true
     to: nameSurname
+    optional: true
   - from: BENE_GVN_NAME
-    optional: true
     to: nameGiven
+    optional: true
   - from: BENE_MDL_NAME
-    optional: true
     to: nameMiddleInitial
+    optional: true
   - from: MBI_NUM
-    optional: true
     to: medicareBeneficiaryId
+    optional: true
   - from: EFCTV_BGN_DT
-    optional: true
     to: mbiEffectiveDate
-  - from: EFCTV_END_DT
     optional: true
+  - from: EFCTV_END_DT
     to: mbiObsoleteDate
-  transformerClassName: gov.cms.bfd.model.rif.BeneficiaryHistoryParser
+    optional: true

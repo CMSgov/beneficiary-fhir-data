@@ -13,34 +13,40 @@ stringToLongFieldNames = {"beneficiaryId", "claimId", "eventId"}
 def create_mapping(summary):
     columns = list()
     transformations = list()
-    enumValues = list()
+    enum_values = list()
+    arrays = list()
+    entity_interfaces = list()
+    joins = list()
 
     enumType = {
         "name": f'{summary["packageName"]}.{summary["headerEntity"]}Column{classNameSuffix}',
-        "values": enumValues
+        "values": enum_values
     }
 
     primary_key_columns = list()
     table = {
         "name": summary["headerTable"],
         "primaryKeyColumns": primary_key_columns,
-        "columns": columns,
         "quoteNames": False,
-        "equalsNeeded": False
+        "equalsNeeded": False,
+        "columns": columns,
+        "joins": joins
     }
 
     mapping = {
         "id": summary["headerEntity"],
         "entityClassName": f'{summary["packageName"]}.{summary["headerEntity"]}{classNameSuffix}',
+        "entityInterfaces": entity_interfaces,
         "messageClassName": "gov.cms.model.rda.codegen.library.RifObjectWrapper",
         "sourceType": "RifCsv",
         "nullableFieldAccessorType": "Optional",
         "minStringLength": 0,
         "table": table,
+        "arrays": arrays,
         "enumTypes": [enumType]
     }
     if is_rif_record_base_compatible(summary):
-        mapping["entityInterfaces"] = ["gov.cms.bfd.model.rif.RifRecordBase"]
+        entity_interfaces.append("gov.cms.bfd.model.rif.RifRecordBase")
 
     if mapping["id"] not in noTransformerMappings:
         mapping["transformerClassName"] = f'{summary["packageName"]}.{summary["headerEntity"]}Parser{classNameSuffix}'
@@ -64,7 +70,7 @@ def create_mapping(summary):
         add_field_transform(rif_field, transformations)
 
     for rif_field in summary["rifLayout"]["fields"]:
-        enumValues.append(rif_field["rifColumnName"])
+        enum_values.append(rif_field["rifColumnName"])
 
     for rif_field in summary["headerEntityAdditionalDatabaseFields"]:
         column = create_column(rif_field)
@@ -75,7 +81,7 @@ def create_mapping(summary):
         add_primary_key(summary, primary_key_columns, summary["headerEntityIdField"])
 
     for join_relationship in summary["innerJoinRelationship"]:
-        joins_for_mapping(mapping).append(create_join(summary, join_relationship))
+        joins.append(create_join(summary, join_relationship))
 
     if summary["hasLines"]:
         line_name = f'{summary["headerEntity"]}Line'
@@ -86,20 +92,20 @@ def create_mapping(summary):
             "namePrefix": "line",
             "parentField": "parentClaim"
         }
-        mapping["arrays"] = [line_array]
+        arrays.append(line_array)
 
         line_join = {
+            "fieldName": "lines",
+            "entityClass": f'{summary["packageName"]}.{line_name}{classNameSuffix}',
+            "collectionType": "List",
+            "joinType": "OneToMany",
             "mappedBy": "parentClaim",
             "orphanRemoval": True,
             "fetchType": "LAZY",
             "cascadeTypes": ["ALL"],
-            "orderBy": f'{summary["lineEntityLineNumberField"]} ASC',
-            "collectionType": "List",
-            "fieldName": "lines",
-            "entityClass": f'{summary["packageName"]}.{line_name}{classNameSuffix}',
-            "joinType": "OneToMany"
+            "orderBy": f'{summary["lineEntityLineNumberField"]} ASC'
         }
-        joins_for_mapping(mapping).append(line_join)
+        joins.append(line_join)
 
     return mapping
 
@@ -121,14 +127,16 @@ def create_line_mapping(summary):
 
     columns = list()
     transformations = list()
+    joins = list()
 
     primary_key_columns = list()
     table = {
         "name": line_table,
         "primaryKeyColumns": primary_key_columns,
-        "columns": columns,
         "quoteNames": False,
-        "equalsNeeded": False
+        "equalsNeeded": False,
+        "columns": columns,
+        "joins": joins
     }
 
     mapping = {
@@ -171,30 +179,30 @@ def create_line_mapping(summary):
 
 
 def create_generated_id_column(summary, column_name, field_name):
-    sequence = {"name": summary["sequenceNumberGeneratorName"], "allocationSize": 50}
+    sequence = {
+        "name": summary["sequenceNumberGeneratorName"],
+        "allocationSize": 50
+    }
     column = dict()
     column["name"] = field_name
     if field_name != column_name:
         column["dbName"] = column_name
+    column["nullable"] = False
     column["sqlType"] = "bigint"
     column["javaType"] = "long"
-    column["nullable"] = False
     column["updatable"] = False
     column["sequence"] = sequence
     return column
 
 
 def create_column(rif_field):
-    column = {"name": rif_field["javaFieldName"], "dbName": rif_field["rifColumnName"].lower()}
+    column = {
+        "name": rif_field["javaFieldName"],
+        "dbName": rif_field["rifColumnName"].lower()
+    }
     required = not rif_field["rifColumnOptional"]
     if required:
         column["nullable"] = False
-    comment = ""
-    if rif_field["rifColumnLabel"] != "":
-        comment = rif_field["rifColumnLabel"]
-    if rif_field["dataDictionaryEntry"] != "":
-        comment = f'{comment} ({rif_field["dataDictionaryEntry"]})'
-    column["comment"] = comment
     column_type = rif_field["rifColumnType"]
     if column_type == "CHAR":
         column["sqlType"] = f'varchar({rif_field["rifColumnLength"]})'
@@ -226,6 +234,13 @@ def create_column(rif_field):
     if column["name"] in stringToLongFieldNames:
         column["javaType"] = "String"
         column["javaAccessorType"] = "long"
+    comment = ""
+    if rif_field["rifColumnLabel"] != "":
+        comment = rif_field["rifColumnLabel"]
+    if rif_field["dataDictionaryEntry"] != "":
+        comment = f'{comment} ({rif_field["dataDictionaryEntry"]})'
+    if comment:
+        column["comment"] = comment
     return column
 
 
@@ -315,15 +330,6 @@ def mapping_with_id(all_mappings, id):
     return None
 
 
-def joins_for_mapping(mapping):
-    if "joins" in mapping["table"].keys():
-        joins = mapping["table"]["joins"]
-    else:
-        joins = []
-        mapping["table"]["joins"] = joins
-    return joins
-
-
 # Unfortunately the BeneficiaryMonthly is a special case in the RifLayoutsProcessor and uses
 # hard coded values so we have to do the same here.  In particular the foreignKey does not
 # follow the normal pattern so there is nothing in the summary to handle it.
@@ -331,7 +337,7 @@ def add_join_to_monthlies(all_mappings):
     parent = mapping_with_id(all_mappings, "Beneficiary")
     monthly = mapping_with_id(all_mappings, "BeneficiaryMonthly")
     if (parent is not None) and (monthly is not None):
-        joins = joins_for_mapping(monthly)
+        joins = monthly["table"]["joins"]
         join = dict()
         join["fieldName"] = "parentBeneficiary"
         join["entityClass"] = parent["entityClassName"]
@@ -340,7 +346,7 @@ def add_join_to_monthlies(all_mappings):
         join["foreignKey"] = "beneficiary_monthly_bene_id_to_beneficiary"
         joins.append(join)
 
-        joins = joins_for_mapping(parent)
+        joins = parent["table"]["joins"]
         join = dict()
         join["fieldName"] = "beneficiaryMonthlys"
         join["entityClass"] = monthly["entityClassName"]
@@ -359,7 +365,7 @@ def add_join_to_monthlies(all_mappings):
 # Unfortunately the new skippedRifRecords join is not reflected in the MappingSpecs.
 def add_join_to_beneficiary(all_mappings):
     parent = mapping_with_id(all_mappings, "Beneficiary")
-    joins = joins_for_mapping(parent)
+    joins = parent["table"]["joins"]
     join = dict()
     join["fieldName"] = "skippedRifRecords"
     join["entityClass"] = "gov.cms.bfd.model.rif.SkippedRifRecord"
@@ -401,9 +407,9 @@ if len(sys.argv) > 1:
     for mapping in output_mappings:
         with open(f'{sys.argv[1]}/{mapping["id"]}.yaml', "w") as text_file:
             result = {"mappings": [mapping]}
-            result_yaml = yaml.dump(result, default_flow_style=False)
+            result_yaml = yaml.dump(result, default_flow_style=False, sort_keys=False)
             text_file.write(result_yaml)
 else:
     result = {"mappings": output_mappings}
-    result_yaml = yaml.dump(result, default_flow_style=False)
+    result_yaml = yaml.dump(result, default_flow_style=False, sort_keys=False)
     print(result_yaml)

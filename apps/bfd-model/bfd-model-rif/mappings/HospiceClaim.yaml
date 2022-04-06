@@ -1,13 +1,567 @@
 mappings:
-- arrays:
-  - from: lines
-    mapping: HospiceClaimLine
-    namePrefix: line
-    parentField: parentClaim
-    to: lines
+- id: HospiceClaim
   entityClassName: gov.cms.bfd.model.rif.HospiceClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  sourceType: RifCsv
+  nullableFieldAccessorType: Optional
+  minStringLength: 0
+  table:
+    name: hospice_claims
+    primaryKeyColumns:
+    - claimId
+    quoteNames: false
+    equalsNeeded: false
+    columns:
+    - name: beneficiaryId
+      dbName: bene_id
+      nullable: false
+      sqlType: varchar(15)
+      javaType: String
+      javaAccessorType: long
+      comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
+    - name: claimId
+      dbName: clm_id
+      nullable: false
+      sqlType: varchar(15)
+      javaType: String
+      javaAccessorType: long
+      comment: Claim ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt)
+    - name: claimGroupId
+      dbName: clm_grp_id
+      nullable: false
+      sqlType: numeric(12)
+      comment: Claim Group ID
+    - name: finalAction
+      dbName: final_action
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Final Action (F/N) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
+    - name: nearLineRecordIdCode
+      dbName: nch_near_line_rec_ident_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: NCH Near Line Record Identification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
+    - name: claimTypeCode
+      dbName: nch_clm_type_cd
+      nullable: false
+      sqlType: varchar(2)
+      comment: NCH Claim Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt)
+    - name: dateFrom
+      dbName: clm_from_dt
+      nullable: false
+      sqlType: date
+      comment: Claim From Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/from_dt.txt)
+    - name: dateThrough
+      dbName: clm_thru_dt
+      nullable: false
+      sqlType: date
+      comment: Claim Through Date  (Determines Year of Claim) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/thru_dt.txt)
+    - name: weeklyProcessDate
+      dbName: nch_wkly_proc_dt
+      nullable: false
+      sqlType: date
+      comment: NCH Weekly Claim Processing Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/wkly_dt.txt)
+    - name: fiscalIntermediaryClaimProcessDate
+      dbName: fi_clm_proc_dt
+      sqlType: date
+      comment: FI Claim Process Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_clm_proc_dt.txt)
+    - name: providerNumber
+      dbName: prvdr_num
+      nullable: false
+      sqlType: varchar(9)
+      comment: Provider Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt)
+    - name: claimFacilityTypeCode
+      dbName: clm_fac_type_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Claim Facility Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fac_type.txt)
+    - name: claimServiceClassificationTypeCode
+      dbName: clm_srvc_clsfctn_type_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Claim Service classification Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrvc.txt)
+    - name: claimFrequencyCode
+      dbName: clm_freq_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Claim Frequency Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt)
+    - name: fiscalIntermediaryNumber
+      dbName: fi_num
+      sqlType: varchar(5)
+      comment: FI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_num.txt)
+    - name: claimNonPaymentReasonCode
+      dbName: clm_mdcr_non_pmt_rsn_cd
+      sqlType: varchar(2)
+      comment: Claim Medicare Non Payment Reason Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt)
+    - name: paymentAmount
+      dbName: clm_pmt_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: Claim Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmt_amt.txt)
+    - name: primaryPayerPaidAmount
+      dbName: nch_prmry_pyr_clm_pd_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: NCH Primary Payer Claim Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt)
+    - name: claimPrimaryPayerCode
+      dbName: nch_prmry_pyr_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: NCH Primary Payer Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt)
+    - name: providerStateCode
+      dbName: prvdr_state_cd
+      nullable: false
+      sqlType: varchar(2)
+      comment: NCH Provider State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prstate.txt)
+    - name: organizationNpi
+      dbName: org_npi_num
+      sqlType: varchar(10)
+      comment: Organization NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orgnpinm.txt)
+    - name: attendingPhysicianUpin
+      dbName: at_physn_upin
+      sqlType: varchar(9)
+      comment: Claim Attending Physician UPIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_upin.txt)
+    - name: attendingPhysicianNpi
+      dbName: at_physn_npi
+      sqlType: varchar(10)
+      comment: Claim Attending Physician NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_npi.txt)
+    - name: patientDischargeStatusCode
+      dbName: ptnt_dschrg_stus_cd
+      nullable: false
+      sqlType: varchar(2)
+      comment: Patient Discharge Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt)
+    - name: totalChargeAmount
+      dbName: clm_tot_chrg_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: Claim Total Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_chrg.txt)
+    - name: patientStatusCd
+      dbName: nch_ptnt_status_ind_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: NCH Patient Status Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt)
+    - name: utilizationDayCount
+      dbName: clm_utlztn_day_cnt
+      nullable: false
+      sqlType: numeric
+      comment: Claim Utilization Day Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt)
+    - name: beneficiaryDischargeDate
+      dbName: nch_bene_dschrg_dt
+      sqlType: date
+      comment: NCH Beneficiary Discharge Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt)
+    - name: diagnosisPrincipalCode
+      dbName: prncpal_dgns_cd
+      sqlType: varchar(7)
+      comment: Primary Claim Diagnosis Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_cd.txt)
+    - name: diagnosisPrincipalCodeVersion
+      dbName: prncpal_dgns_vrsn_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Primary Claim Diagnosis Code Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt)
+    - name: diagnosis1Code
+      dbName: icd_dgns_cd1
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd1.txt)
+    - name: diagnosis1CodeVersion
+      dbName: icd_dgns_vrsn_cd1
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd1.txt)
+    - name: diagnosis2Code
+      dbName: icd_dgns_cd2
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
+    - name: diagnosis2CodeVersion
+      dbName: icd_dgns_vrsn_cd2
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code II Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd2.txt)
+    - name: diagnosis3Code
+      dbName: icd_dgns_cd3
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
+    - name: diagnosis3CodeVersion
+      dbName: icd_dgns_vrsn_cd3
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code III Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd3.txt)
+    - name: diagnosis4Code
+      dbName: icd_dgns_cd4
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
+    - name: diagnosis4CodeVersion
+      dbName: icd_dgns_vrsn_cd4
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code IV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd4.txt)
+    - name: diagnosis5Code
+      dbName: icd_dgns_cd5
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
+    - name: diagnosis5CodeVersion
+      dbName: icd_dgns_vrsn_cd5
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd5.txt)
+    - name: diagnosis6Code
+      dbName: icd_dgns_cd6
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
+    - name: diagnosis6CodeVersion
+      dbName: icd_dgns_vrsn_cd6
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code VI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd6.txt)
+    - name: diagnosis7Code
+      dbName: icd_dgns_cd7
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
+    - name: diagnosis7CodeVersion
+      dbName: icd_dgns_vrsn_cd7
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code VII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd7.txt)
+    - name: diagnosis8Code
+      dbName: icd_dgns_cd8
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
+    - name: diagnosis8CodeVersion
+      dbName: icd_dgns_vrsn_cd8
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd8.txt)
+    - name: diagnosis9Code
+      dbName: icd_dgns_cd9
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
+    - name: diagnosis9CodeVersion
+      dbName: icd_dgns_vrsn_cd9
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code IX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd9.txt)
+    - name: diagnosis10Code
+      dbName: icd_dgns_cd10
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
+    - name: diagnosis10CodeVersion
+      dbName: icd_dgns_vrsn_cd10
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd10.txt)
+    - name: diagnosis11Code
+      dbName: icd_dgns_cd11
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
+    - name: diagnosis11CodeVersion
+      dbName: icd_dgns_vrsn_cd11
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd11.txt)
+    - name: diagnosis12Code
+      dbName: icd_dgns_cd12
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
+    - name: diagnosis12CodeVersion
+      dbName: icd_dgns_vrsn_cd12
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd12.txt)
+    - name: diagnosis13Code
+      dbName: icd_dgns_cd13
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd13.txt)
+    - name: diagnosis13CodeVersion
+      dbName: icd_dgns_vrsn_cd13
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XIII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd13.txt)
+    - name: diagnosis14Code
+      dbName: icd_dgns_cd14
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd14.txt)
+    - name: diagnosis14CodeVersion
+      dbName: icd_dgns_vrsn_cd14
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XIV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd14.txt)
+    - name: diagnosis15Code
+      dbName: icd_dgns_cd15
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd15.txt)
+    - name: diagnosis15CodeVersion
+      dbName: icd_dgns_vrsn_cd15
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd15.txt)
+    - name: diagnosis16Code
+      dbName: icd_dgns_cd16
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XVI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd16.txt)
+    - name: diagnosis16CodeVersion
+      dbName: icd_dgns_vrsn_cd16
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XVI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd16.txt)
+    - name: diagnosis17Code
+      dbName: icd_dgns_cd17
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XVII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd17.txt)
+    - name: diagnosis17CodeVersion
+      dbName: icd_dgns_vrsn_cd17
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XVII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd17.txt)
+    - name: diagnosis18Code
+      dbName: icd_dgns_cd18
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XVIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd18.txt)
+    - name: diagnosis18CodeVersion
+      dbName: icd_dgns_vrsn_cd18
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XVIII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd18.txt)
+    - name: diagnosis19Code
+      dbName: icd_dgns_cd19
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XIX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd19.txt)
+    - name: diagnosis19CodeVersion
+      dbName: icd_dgns_vrsn_cd19
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XIX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd19.txt)
+    - name: diagnosis20Code
+      dbName: icd_dgns_cd20
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd20.txt)
+    - name: diagnosis20CodeVersion
+      dbName: icd_dgns_vrsn_cd20
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd20.txt)
+    - name: diagnosis21Code
+      dbName: icd_dgns_cd21
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XXI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd21.txt)
+    - name: diagnosis21CodeVersion
+      dbName: icd_dgns_vrsn_cd21
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XXI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd21.txt)
+    - name: diagnosis22Code
+      dbName: icd_dgns_cd22
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XXII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd22.txt)
+    - name: diagnosis22CodeVersion
+      dbName: icd_dgns_vrsn_cd22
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XXII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd22.txt)
+    - name: diagnosis23Code
+      dbName: icd_dgns_cd23
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XXIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd23.txt)
+    - name: diagnosis23CodeVersion
+      dbName: icd_dgns_vrsn_cd23
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XXIII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd23.txt)
+    - name: diagnosis24Code
+      dbName: icd_dgns_cd24
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XXIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd24.txt)
+    - name: diagnosis24CodeVersion
+      dbName: icd_dgns_vrsn_cd24
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XXIV Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd24.txt)
+    - name: diagnosis25Code
+      dbName: icd_dgns_cd25
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XXV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd25.txt)
+    - name: diagnosis25CodeVersion
+      dbName: icd_dgns_vrsn_cd25
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XXV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd25.txt)
+    - name: diagnosisExternalFirstCode
+      dbName: fst_dgns_e_cd
+      sqlType: varchar(7)
+      comment: First Claim Diagnosis E Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_cd.txt)
+    - name: diagnosisExternalFirstCodeVersion
+      dbName: fst_dgns_e_vrsn_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: First Claim Diagnosis E Code Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_vrsn_cd.txt)
+    - name: diagnosisExternal1Code
+      dbName: icd_dgns_e_cd1
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd1.txt)
+    - name: diagnosisExternal1CodeVersion
+      dbName: icd_dgns_e_vrsn_cd1
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd1.txt)
+    - name: diagnosisExternal2Code
+      dbName: icd_dgns_e_cd2
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd2.txt)
+    - name: diagnosisExternal2CodeVersion
+      dbName: icd_dgns_e_vrsn_cd2
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code II Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd2.txt)
+    - name: diagnosisExternal3Code
+      dbName: icd_dgns_e_cd3
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd3.txt)
+    - name: diagnosisExternal3CodeVersion
+      dbName: icd_dgns_e_vrsn_cd3
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code III Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd3.txt)
+    - name: diagnosisExternal4Code
+      dbName: icd_dgns_e_cd4
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd4.txt)
+    - name: diagnosisExternal4CodeVersion
+      dbName: icd_dgns_e_vrsn_cd4
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code IV Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd4.txt)
+    - name: diagnosisExternal5Code
+      dbName: icd_dgns_e_cd5
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd5.txt)
+    - name: diagnosisExternal5CodeVersion
+      dbName: icd_dgns_e_vrsn_cd5
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd5.txt)
+    - name: diagnosisExternal6Code
+      dbName: icd_dgns_e_cd6
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd6.txt)
+    - name: diagnosisExternal6CodeVersion
+      dbName: icd_dgns_e_vrsn_cd6
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code VI Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd6.txt)
+    - name: diagnosisExternal7Code
+      dbName: icd_dgns_e_cd7
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd7.txt)
+    - name: diagnosisExternal7CodeVersion
+      dbName: icd_dgns_e_vrsn_cd7
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code VII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd7.txt)
+    - name: diagnosisExternal8Code
+      dbName: icd_dgns_e_cd8
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd8.txt)
+    - name: diagnosisExternal8CodeVersion
+      dbName: icd_dgns_e_vrsn_cd8
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd8.txt)
+    - name: diagnosisExternal9Code
+      dbName: icd_dgns_e_cd9
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd9.txt)
+    - name: diagnosisExternal9CodeVersion
+      dbName: icd_dgns_e_vrsn_cd9
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code IX Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd9.txt)
+    - name: diagnosisExternal10Code
+      dbName: icd_dgns_e_cd10
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd10.txt)
+    - name: diagnosisExternal10CodeVersion
+      dbName: icd_dgns_e_vrsn_cd10
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd10.txt)
+    - name: diagnosisExternal11Code
+      dbName: icd_dgns_e_cd11
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd11.txt)
+    - name: diagnosisExternal11CodeVersion
+      dbName: icd_dgns_e_vrsn_cd11
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code XI Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd11.txt)
+    - name: diagnosisExternal12Code
+      dbName: icd_dgns_e_cd12
+      sqlType: varchar(7)
+      comment: Claim Diagnosis E Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd12.txt)
+    - name: diagnosisExternal12CodeVersion
+      dbName: icd_dgns_e_vrsn_cd12
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis E Code XII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd12.txt)
+    - name: claimHospiceStartDate
+      dbName: clm_hospc_start_dt_id
+      sqlType: date
+      comment: Claim Hospice Start Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hspcstrt.txt)
+    - name: hospicePeriodCount
+      dbName: bene_hospc_prd_cnt
+      sqlType: numeric(2)
+      comment: Beneficiary's Hospice Period Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hospcprd.txt)
+    - name: fiDocumentClaimControlNumber
+      dbName: fi_doc_clm_cntl_num
+      sqlType: varchar(23)
+      comment: "FI Document Claim Control Number\_"
+    - name: fiOriginalClaimControlNumber
+      dbName: fi_orig_clm_cntl_num
+      sqlType: varchar(23)
+      comment: "FI Original Claim Control Number\_"
+    - name: lastUpdated
+      dbName: last_updated
+      sqlType: timestamp with time zone
+      comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+    joins:
+    - fieldName: lines
+      entityClass: gov.cms.bfd.model.rif.HospiceClaimLine
+      collectionType: List
+      joinType: OneToMany
+      mappedBy: parentClaim
+      orphanRemoval: true
+      fetchType: LAZY
+      cascadeTypes:
+      - ALL
+      orderBy: CLM_LINE_NUM ASC
+  arrays:
+  - from: lines
+    to: lines
+    mapping: HospiceClaimLine
+    namePrefix: line
+    parentField: parentClaim
   enumTypes:
   - name: gov.cms.bfd.model.rif.HospiceClaimColumn
     values:
@@ -139,897 +693,343 @@ mappings:
     - REV_CNTR_NDC_QTY_QLFR_CD
     - RNDRNG_PHYSN_UPIN
     - RNDRNG_PHYSN_NPI
-  id: HospiceClaim
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
-  minStringLength: 0
-  nullableFieldAccessorType: Optional
-  sourceType: RifCsv
-  table:
-    columns:
-    - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
-      dbName: bene_id
-      javaAccessorType: long
-      javaType: String
-      name: beneficiaryId
-      nullable: false
-      sqlType: varchar(15)
-    - comment: Claim ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt)
-      dbName: clm_id
-      javaAccessorType: long
-      javaType: String
-      name: claimId
-      nullable: false
-      sqlType: varchar(15)
-    - comment: Claim Group ID
-      dbName: clm_grp_id
-      name: claimGroupId
-      nullable: false
-      sqlType: numeric(12)
-    - comment: Final Action (F/N) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
-      dbName: final_action
-      javaType: char
-      name: finalAction
-      nullable: false
-      sqlType: varchar(1)
-    - comment: NCH Near Line Record Identification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
-      dbName: nch_near_line_rec_ident_cd
-      javaType: char
-      name: nearLineRecordIdCode
-      nullable: false
-      sqlType: varchar(1)
-    - comment: NCH Claim Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt)
-      dbName: nch_clm_type_cd
-      name: claimTypeCode
-      nullable: false
-      sqlType: varchar(2)
-    - comment: Claim From Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/from_dt.txt)
-      dbName: clm_from_dt
-      name: dateFrom
-      nullable: false
-      sqlType: date
-    - comment: Claim Through Date  (Determines Year of Claim) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/thru_dt.txt)
-      dbName: clm_thru_dt
-      name: dateThrough
-      nullable: false
-      sqlType: date
-    - comment: NCH Weekly Claim Processing Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/wkly_dt.txt)
-      dbName: nch_wkly_proc_dt
-      name: weeklyProcessDate
-      nullable: false
-      sqlType: date
-    - comment: FI Claim Process Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_clm_proc_dt.txt)
-      dbName: fi_clm_proc_dt
-      name: fiscalIntermediaryClaimProcessDate
-      sqlType: date
-    - comment: Provider Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt)
-      dbName: prvdr_num
-      name: providerNumber
-      nullable: false
-      sqlType: varchar(9)
-    - comment: Claim Facility Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fac_type.txt)
-      dbName: clm_fac_type_cd
-      javaType: char
-      name: claimFacilityTypeCode
-      nullable: false
-      sqlType: varchar(1)
-    - comment: Claim Service classification Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrvc.txt)
-      dbName: clm_srvc_clsfctn_type_cd
-      javaType: char
-      name: claimServiceClassificationTypeCode
-      nullable: false
-      sqlType: varchar(1)
-    - comment: Claim Frequency Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt)
-      dbName: clm_freq_cd
-      javaType: char
-      name: claimFrequencyCode
-      nullable: false
-      sqlType: varchar(1)
-    - comment: FI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_num.txt)
-      dbName: fi_num
-      name: fiscalIntermediaryNumber
-      sqlType: varchar(5)
-    - comment: Claim Medicare Non Payment Reason Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt)
-      dbName: clm_mdcr_non_pmt_rsn_cd
-      name: claimNonPaymentReasonCode
-      sqlType: varchar(2)
-    - comment: Claim Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmt_amt.txt)
-      dbName: clm_pmt_amt
-      name: paymentAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: NCH Primary Payer Claim Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt)
-      dbName: nch_prmry_pyr_clm_pd_amt
-      name: primaryPayerPaidAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: NCH Primary Payer Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt)
-      dbName: nch_prmry_pyr_cd
-      javaType: Character
-      name: claimPrimaryPayerCode
-      sqlType: varchar(1)
-    - comment: NCH Provider State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prstate.txt)
-      dbName: prvdr_state_cd
-      name: providerStateCode
-      nullable: false
-      sqlType: varchar(2)
-    - comment: Organization NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orgnpinm.txt)
-      dbName: org_npi_num
-      name: organizationNpi
-      sqlType: varchar(10)
-    - comment: Claim Attending Physician UPIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_upin.txt)
-      dbName: at_physn_upin
-      name: attendingPhysicianUpin
-      sqlType: varchar(9)
-    - comment: Claim Attending Physician NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_npi.txt)
-      dbName: at_physn_npi
-      name: attendingPhysicianNpi
-      sqlType: varchar(10)
-    - comment: Patient Discharge Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt)
-      dbName: ptnt_dschrg_stus_cd
-      name: patientDischargeStatusCode
-      nullable: false
-      sqlType: varchar(2)
-    - comment: Claim Total Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_chrg.txt)
-      dbName: clm_tot_chrg_amt
-      name: totalChargeAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: NCH Patient Status Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt)
-      dbName: nch_ptnt_status_ind_cd
-      javaType: Character
-      name: patientStatusCd
-      sqlType: varchar(1)
-    - comment: Claim Utilization Day Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt)
-      dbName: clm_utlztn_day_cnt
-      name: utilizationDayCount
-      nullable: false
-      sqlType: numeric
-    - comment: NCH Beneficiary Discharge Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt)
-      dbName: nch_bene_dschrg_dt
-      name: beneficiaryDischargeDate
-      sqlType: date
-    - comment: Primary Claim Diagnosis Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_cd.txt)
-      dbName: prncpal_dgns_cd
-      name: diagnosisPrincipalCode
-      sqlType: varchar(7)
-    - comment: Primary Claim Diagnosis Code Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt)
-      dbName: prncpal_dgns_vrsn_cd
-      javaType: Character
-      name: diagnosisPrincipalCodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd1.txt)
-      dbName: icd_dgns_cd1
-      name: diagnosis1Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd1.txt)
-      dbName: icd_dgns_vrsn_cd1
-      javaType: Character
-      name: diagnosis1CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
-      dbName: icd_dgns_cd2
-      name: diagnosis2Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code II Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd2.txt)
-      dbName: icd_dgns_vrsn_cd2
-      javaType: Character
-      name: diagnosis2CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
-      dbName: icd_dgns_cd3
-      name: diagnosis3Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code III Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd3.txt)
-      dbName: icd_dgns_vrsn_cd3
-      javaType: Character
-      name: diagnosis3CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
-      dbName: icd_dgns_cd4
-      name: diagnosis4Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code IV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd4.txt)
-      dbName: icd_dgns_vrsn_cd4
-      javaType: Character
-      name: diagnosis4CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
-      dbName: icd_dgns_cd5
-      name: diagnosis5Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd5.txt)
-      dbName: icd_dgns_vrsn_cd5
-      javaType: Character
-      name: diagnosis5CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
-      dbName: icd_dgns_cd6
-      name: diagnosis6Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code VI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd6.txt)
-      dbName: icd_dgns_vrsn_cd6
-      javaType: Character
-      name: diagnosis6CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
-      dbName: icd_dgns_cd7
-      name: diagnosis7Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code VII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd7.txt)
-      dbName: icd_dgns_vrsn_cd7
-      javaType: Character
-      name: diagnosis7CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
-      dbName: icd_dgns_cd8
-      name: diagnosis8Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd8.txt)
-      dbName: icd_dgns_vrsn_cd8
-      javaType: Character
-      name: diagnosis8CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
-      dbName: icd_dgns_cd9
-      name: diagnosis9Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code IX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd9.txt)
-      dbName: icd_dgns_vrsn_cd9
-      javaType: Character
-      name: diagnosis9CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
-      dbName: icd_dgns_cd10
-      name: diagnosis10Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd10.txt)
-      dbName: icd_dgns_vrsn_cd10
-      javaType: Character
-      name: diagnosis10CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
-      dbName: icd_dgns_cd11
-      name: diagnosis11Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd11.txt)
-      dbName: icd_dgns_vrsn_cd11
-      javaType: Character
-      name: diagnosis11CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
-      dbName: icd_dgns_cd12
-      name: diagnosis12Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd12.txt)
-      dbName: icd_dgns_vrsn_cd12
-      javaType: Character
-      name: diagnosis12CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd13.txt)
-      dbName: icd_dgns_cd13
-      name: diagnosis13Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XIII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd13.txt)
-      dbName: icd_dgns_vrsn_cd13
-      javaType: Character
-      name: diagnosis13CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd14.txt)
-      dbName: icd_dgns_cd14
-      name: diagnosis14Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XIV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd14.txt)
-      dbName: icd_dgns_vrsn_cd14
-      javaType: Character
-      name: diagnosis14CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd15.txt)
-      dbName: icd_dgns_cd15
-      name: diagnosis15Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd15.txt)
-      dbName: icd_dgns_vrsn_cd15
-      javaType: Character
-      name: diagnosis15CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XVI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd16.txt)
-      dbName: icd_dgns_cd16
-      name: diagnosis16Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XVI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd16.txt)
-      dbName: icd_dgns_vrsn_cd16
-      javaType: Character
-      name: diagnosis16CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XVII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd17.txt)
-      dbName: icd_dgns_cd17
-      name: diagnosis17Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XVII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd17.txt)
-      dbName: icd_dgns_vrsn_cd17
-      javaType: Character
-      name: diagnosis17CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XVIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd18.txt)
-      dbName: icd_dgns_cd18
-      name: diagnosis18Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XVIII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd18.txt)
-      dbName: icd_dgns_vrsn_cd18
-      javaType: Character
-      name: diagnosis18CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XIX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd19.txt)
-      dbName: icd_dgns_cd19
-      name: diagnosis19Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XIX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd19.txt)
-      dbName: icd_dgns_vrsn_cd19
-      javaType: Character
-      name: diagnosis19CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd20.txt)
-      dbName: icd_dgns_cd20
-      name: diagnosis20Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd20.txt)
-      dbName: icd_dgns_vrsn_cd20
-      javaType: Character
-      name: diagnosis20CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XXI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd21.txt)
-      dbName: icd_dgns_cd21
-      name: diagnosis21Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XXI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd21.txt)
-      dbName: icd_dgns_vrsn_cd21
-      javaType: Character
-      name: diagnosis21CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XXII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd22.txt)
-      dbName: icd_dgns_cd22
-      name: diagnosis22Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XXII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd22.txt)
-      dbName: icd_dgns_vrsn_cd22
-      javaType: Character
-      name: diagnosis22CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XXIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd23.txt)
-      dbName: icd_dgns_cd23
-      name: diagnosis23Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XXIII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd23.txt)
-      dbName: icd_dgns_vrsn_cd23
-      javaType: Character
-      name: diagnosis23CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XXIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd24.txt)
-      dbName: icd_dgns_cd24
-      name: diagnosis24Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XXIV Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd24.txt)
-      dbName: icd_dgns_vrsn_cd24
-      javaType: Character
-      name: diagnosis24CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XXV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd25.txt)
-      dbName: icd_dgns_cd25
-      name: diagnosis25Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XXV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd25.txt)
-      dbName: icd_dgns_vrsn_cd25
-      javaType: Character
-      name: diagnosis25CodeVersion
-      sqlType: varchar(1)
-    - comment: First Claim Diagnosis E Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_cd.txt)
-      dbName: fst_dgns_e_cd
-      name: diagnosisExternalFirstCode
-      sqlType: varchar(7)
-    - comment: First Claim Diagnosis E Code Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_vrsn_cd.txt)
-      dbName: fst_dgns_e_vrsn_cd
-      javaType: Character
-      name: diagnosisExternalFirstCodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd1.txt)
-      dbName: icd_dgns_e_cd1
-      name: diagnosisExternal1Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd1.txt)
-      dbName: icd_dgns_e_vrsn_cd1
-      javaType: Character
-      name: diagnosisExternal1CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd2.txt)
-      dbName: icd_dgns_e_cd2
-      name: diagnosisExternal2Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code II Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd2.txt)
-      dbName: icd_dgns_e_vrsn_cd2
-      javaType: Character
-      name: diagnosisExternal2CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd3.txt)
-      dbName: icd_dgns_e_cd3
-      name: diagnosisExternal3Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code III Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd3.txt)
-      dbName: icd_dgns_e_vrsn_cd3
-      javaType: Character
-      name: diagnosisExternal3CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd4.txt)
-      dbName: icd_dgns_e_cd4
-      name: diagnosisExternal4Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code IV Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd4.txt)
-      dbName: icd_dgns_e_vrsn_cd4
-      javaType: Character
-      name: diagnosisExternal4CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd5.txt)
-      dbName: icd_dgns_e_cd5
-      name: diagnosisExternal5Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd5.txt)
-      dbName: icd_dgns_e_vrsn_cd5
-      javaType: Character
-      name: diagnosisExternal5CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd6.txt)
-      dbName: icd_dgns_e_cd6
-      name: diagnosisExternal6Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code VI Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd6.txt)
-      dbName: icd_dgns_e_vrsn_cd6
-      javaType: Character
-      name: diagnosisExternal6CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd7.txt)
-      dbName: icd_dgns_e_cd7
-      name: diagnosisExternal7Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code VII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd7.txt)
-      dbName: icd_dgns_e_vrsn_cd7
-      javaType: Character
-      name: diagnosisExternal7CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd8.txt)
-      dbName: icd_dgns_e_cd8
-      name: diagnosisExternal8Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd8.txt)
-      dbName: icd_dgns_e_vrsn_cd8
-      javaType: Character
-      name: diagnosisExternal8CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd9.txt)
-      dbName: icd_dgns_e_cd9
-      name: diagnosisExternal9Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code IX Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd9.txt)
-      dbName: icd_dgns_e_vrsn_cd9
-      javaType: Character
-      name: diagnosisExternal9CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd10.txt)
-      dbName: icd_dgns_e_cd10
-      name: diagnosisExternal10Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd10.txt)
-      dbName: icd_dgns_e_vrsn_cd10
-      javaType: Character
-      name: diagnosisExternal10CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd11.txt)
-      dbName: icd_dgns_e_cd11
-      name: diagnosisExternal11Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code XI Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd11.txt)
-      dbName: icd_dgns_e_vrsn_cd11
-      javaType: Character
-      name: diagnosisExternal11CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis E Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd12.txt)
-      dbName: icd_dgns_e_cd12
-      name: diagnosisExternal12Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis E Code XII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd12.txt)
-      dbName: icd_dgns_e_vrsn_cd12
-      javaType: Character
-      name: diagnosisExternal12CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Hospice Start Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hspcstrt.txt)
-      dbName: clm_hospc_start_dt_id
-      name: claimHospiceStartDate
-      sqlType: date
-    - comment: Beneficiary's Hospice Period Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hospcprd.txt)
-      dbName: bene_hospc_prd_cnt
-      name: hospicePeriodCount
-      sqlType: numeric(2)
-    - comment: "FI Document Claim Control Number\_"
-      dbName: fi_doc_clm_cntl_num
-      name: fiDocumentClaimControlNumber
-      sqlType: varchar(23)
-    - comment: "FI Original Claim Control Number\_"
-      dbName: fi_orig_clm_cntl_num
-      name: fiOriginalClaimControlNumber
-      sqlType: varchar(23)
-    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
-      dbName: last_updated
-      name: lastUpdated
-      sqlType: timestamp with time zone
-    equalsNeeded: false
-    joins:
-    - cascadeTypes:
-      - ALL
-      collectionType: List
-      entityClass: gov.cms.bfd.model.rif.HospiceClaimLine
-      fetchType: LAZY
-      fieldName: lines
-      joinType: OneToMany
-      mappedBy: parentClaim
-      orderBy: CLM_LINE_NUM ASC
-      orphanRemoval: true
-    name: hospice_claims
-    primaryKeyColumns:
-    - claimId
-    quoteNames: false
+  transformerClassName: gov.cms.bfd.model.rif.HospiceClaimParser
   transformations:
   - from: BENE_ID
-    optional: false
     to: beneficiaryId
+    optional: false
     transformer: LongString
   - from: CLM_ID
-    optional: false
     to: claimId
+    optional: false
     transformer: LongString
-  - defaultValue: '0'
-    from: CLM_GRP_ID
-    optional: false
+  - from: CLM_GRP_ID
     to: claimGroupId
+    optional: false
+    defaultValue: '0'
   - from: FINAL_ACTION
-    optional: false
     to: finalAction
+    optional: false
   - from: NCH_NEAR_LINE_REC_IDENT_CD
-    optional: false
     to: nearLineRecordIdCode
+    optional: false
   - from: NCH_CLM_TYPE_CD
-    optional: false
     to: claimTypeCode
+    optional: false
   - from: CLM_FROM_DT
-    optional: false
     to: dateFrom
+    optional: false
   - from: CLM_THRU_DT
-    optional: false
     to: dateThrough
+    optional: false
   - from: NCH_WKLY_PROC_DT
-    optional: false
     to: weeklyProcessDate
+    optional: false
   - from: FI_CLM_PROC_DT
-    optional: true
     to: fiscalIntermediaryClaimProcessDate
+    optional: true
   - from: PRVDR_NUM
-    optional: false
     to: providerNumber
+    optional: false
   - from: CLM_FAC_TYPE_CD
-    optional: false
     to: claimFacilityTypeCode
+    optional: false
   - from: CLM_SRVC_CLSFCTN_TYPE_CD
-    optional: false
     to: claimServiceClassificationTypeCode
+    optional: false
   - from: CLM_FREQ_CD
-    optional: false
     to: claimFrequencyCode
+    optional: false
   - from: FI_NUM
-    optional: true
     to: fiscalIntermediaryNumber
+    optional: true
   - from: CLM_MDCR_NON_PMT_RSN_CD
-    optional: true
     to: claimNonPaymentReasonCode
-  - defaultValue: '0'
-    from: CLM_PMT_AMT
-    optional: false
+    optional: true
+  - from: CLM_PMT_AMT
     to: paymentAmount
-  - defaultValue: '0'
-    from: NCH_PRMRY_PYR_CLM_PD_AMT
     optional: false
+    defaultValue: '0'
+  - from: NCH_PRMRY_PYR_CLM_PD_AMT
     to: primaryPayerPaidAmount
+    optional: false
+    defaultValue: '0'
   - from: NCH_PRMRY_PYR_CD
-    optional: true
     to: claimPrimaryPayerCode
+    optional: true
   - from: PRVDR_STATE_CD
-    optional: false
     to: providerStateCode
+    optional: false
   - from: ORG_NPI_NUM
-    optional: true
     to: organizationNpi
+    optional: true
   - from: AT_PHYSN_UPIN
-    optional: true
     to: attendingPhysicianUpin
+    optional: true
   - from: AT_PHYSN_NPI
-    optional: true
     to: attendingPhysicianNpi
+    optional: true
   - from: PTNT_DSCHRG_STUS_CD
-    optional: false
     to: patientDischargeStatusCode
-  - defaultValue: '0'
-    from: CLM_TOT_CHRG_AMT
     optional: false
+  - from: CLM_TOT_CHRG_AMT
     to: totalChargeAmount
-  - from: NCH_PTNT_STATUS_IND_CD
-    optional: true
-    to: patientStatusCd
-  - defaultValue: '0'
-    from: CLM_UTLZTN_DAY_CNT
     optional: false
+    defaultValue: '0'
+  - from: NCH_PTNT_STATUS_IND_CD
+    to: patientStatusCd
+    optional: true
+  - from: CLM_UTLZTN_DAY_CNT
     to: utilizationDayCount
+    optional: false
+    defaultValue: '0'
   - from: NCH_BENE_DSCHRG_DT
-    optional: true
     to: beneficiaryDischargeDate
+    optional: true
   - from: PRNCPAL_DGNS_CD
-    optional: true
     to: diagnosisPrincipalCode
+    optional: true
   - from: PRNCPAL_DGNS_VRSN_CD
-    optional: true
     to: diagnosisPrincipalCodeVersion
+    optional: true
   - from: ICD_DGNS_CD1
-    optional: true
     to: diagnosis1Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD1
-    optional: true
     to: diagnosis1CodeVersion
+    optional: true
   - from: ICD_DGNS_CD2
-    optional: true
     to: diagnosis2Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD2
-    optional: true
     to: diagnosis2CodeVersion
+    optional: true
   - from: ICD_DGNS_CD3
-    optional: true
     to: diagnosis3Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD3
-    optional: true
     to: diagnosis3CodeVersion
+    optional: true
   - from: ICD_DGNS_CD4
-    optional: true
     to: diagnosis4Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD4
-    optional: true
     to: diagnosis4CodeVersion
+    optional: true
   - from: ICD_DGNS_CD5
-    optional: true
     to: diagnosis5Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD5
-    optional: true
     to: diagnosis5CodeVersion
+    optional: true
   - from: ICD_DGNS_CD6
-    optional: true
     to: diagnosis6Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD6
-    optional: true
     to: diagnosis6CodeVersion
+    optional: true
   - from: ICD_DGNS_CD7
-    optional: true
     to: diagnosis7Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD7
-    optional: true
     to: diagnosis7CodeVersion
+    optional: true
   - from: ICD_DGNS_CD8
-    optional: true
     to: diagnosis8Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD8
-    optional: true
     to: diagnosis8CodeVersion
+    optional: true
   - from: ICD_DGNS_CD9
-    optional: true
     to: diagnosis9Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD9
-    optional: true
     to: diagnosis9CodeVersion
+    optional: true
   - from: ICD_DGNS_CD10
-    optional: true
     to: diagnosis10Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD10
-    optional: true
     to: diagnosis10CodeVersion
+    optional: true
   - from: ICD_DGNS_CD11
-    optional: true
     to: diagnosis11Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD11
-    optional: true
     to: diagnosis11CodeVersion
+    optional: true
   - from: ICD_DGNS_CD12
-    optional: true
     to: diagnosis12Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD12
-    optional: true
     to: diagnosis12CodeVersion
+    optional: true
   - from: ICD_DGNS_CD13
-    optional: true
     to: diagnosis13Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD13
-    optional: true
     to: diagnosis13CodeVersion
+    optional: true
   - from: ICD_DGNS_CD14
-    optional: true
     to: diagnosis14Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD14
-    optional: true
     to: diagnosis14CodeVersion
+    optional: true
   - from: ICD_DGNS_CD15
-    optional: true
     to: diagnosis15Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD15
-    optional: true
     to: diagnosis15CodeVersion
+    optional: true
   - from: ICD_DGNS_CD16
-    optional: true
     to: diagnosis16Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD16
-    optional: true
     to: diagnosis16CodeVersion
+    optional: true
   - from: ICD_DGNS_CD17
-    optional: true
     to: diagnosis17Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD17
-    optional: true
     to: diagnosis17CodeVersion
+    optional: true
   - from: ICD_DGNS_CD18
-    optional: true
     to: diagnosis18Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD18
-    optional: true
     to: diagnosis18CodeVersion
+    optional: true
   - from: ICD_DGNS_CD19
-    optional: true
     to: diagnosis19Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD19
-    optional: true
     to: diagnosis19CodeVersion
+    optional: true
   - from: ICD_DGNS_CD20
-    optional: true
     to: diagnosis20Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD20
-    optional: true
     to: diagnosis20CodeVersion
+    optional: true
   - from: ICD_DGNS_CD21
-    optional: true
     to: diagnosis21Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD21
-    optional: true
     to: diagnosis21CodeVersion
+    optional: true
   - from: ICD_DGNS_CD22
-    optional: true
     to: diagnosis22Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD22
-    optional: true
     to: diagnosis22CodeVersion
+    optional: true
   - from: ICD_DGNS_CD23
-    optional: true
     to: diagnosis23Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD23
-    optional: true
     to: diagnosis23CodeVersion
+    optional: true
   - from: ICD_DGNS_CD24
-    optional: true
     to: diagnosis24Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD24
-    optional: true
     to: diagnosis24CodeVersion
+    optional: true
   - from: ICD_DGNS_CD25
-    optional: true
     to: diagnosis25Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD25
-    optional: true
     to: diagnosis25CodeVersion
+    optional: true
   - from: FST_DGNS_E_CD
-    optional: true
     to: diagnosisExternalFirstCode
+    optional: true
   - from: FST_DGNS_E_VRSN_CD
-    optional: true
     to: diagnosisExternalFirstCodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD1
-    optional: true
     to: diagnosisExternal1Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD1
-    optional: true
     to: diagnosisExternal1CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD2
-    optional: true
     to: diagnosisExternal2Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD2
-    optional: true
     to: diagnosisExternal2CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD3
-    optional: true
     to: diagnosisExternal3Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD3
-    optional: true
     to: diagnosisExternal3CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD4
-    optional: true
     to: diagnosisExternal4Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD4
-    optional: true
     to: diagnosisExternal4CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD5
-    optional: true
     to: diagnosisExternal5Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD5
-    optional: true
     to: diagnosisExternal5CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD6
-    optional: true
     to: diagnosisExternal6Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD6
-    optional: true
     to: diagnosisExternal6CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD7
-    optional: true
     to: diagnosisExternal7Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD7
-    optional: true
     to: diagnosisExternal7CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD8
-    optional: true
     to: diagnosisExternal8Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD8
-    optional: true
     to: diagnosisExternal8CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD9
-    optional: true
     to: diagnosisExternal9Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD9
-    optional: true
     to: diagnosisExternal9CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD10
-    optional: true
     to: diagnosisExternal10Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD10
-    optional: true
     to: diagnosisExternal10CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD11
-    optional: true
     to: diagnosisExternal11Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD11
-    optional: true
     to: diagnosisExternal11CodeVersion
+    optional: true
   - from: ICD_DGNS_E_CD12
-    optional: true
     to: diagnosisExternal12Code
+    optional: true
   - from: ICD_DGNS_E_VRSN_CD12
-    optional: true
     to: diagnosisExternal12CodeVersion
+    optional: true
   - from: CLM_HOSPC_START_DT_ID
-    optional: true
     to: claimHospiceStartDate
-  - defaultValue: '0'
-    from: BENE_HOSPC_PRD_CNT
     optional: true
+  - from: BENE_HOSPC_PRD_CNT
     to: hospicePeriodCount
+    optional: true
+    defaultValue: '0'
   - from: FI_DOC_CLM_CNTL_NUM
-    optional: true
     to: fiDocumentClaimControlNumber
-  - from: FI_ORIG_CLM_CNTL_NUM
     optional: true
+  - from: FI_ORIG_CLM_CNTL_NUM
     to: fiOriginalClaimControlNumber
-  transformerClassName: gov.cms.bfd.model.rif.HospiceClaimParser
+    optional: true

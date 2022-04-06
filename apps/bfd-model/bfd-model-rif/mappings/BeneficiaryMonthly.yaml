@@ -1,5 +1,72 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.BeneficiaryMonthly
+- id: BeneficiaryMonthly
+  entityClassName: gov.cms.bfd.model.rif.BeneficiaryMonthly
+  entityInterfaces: []
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  sourceType: RifCsv
+  nullableFieldAccessorType: Optional
+  minStringLength: 0
+  table:
+    name: beneficiary_monthly
+    primaryKeyColumns:
+    - parentBeneficiary
+    - yearMonth
+    quoteNames: false
+    equalsNeeded: false
+    columns:
+    - name: yearMonth
+      dbName: year_month
+      nullable: false
+      sqlType: date
+    - name: fipsStateCntyCode
+      dbName: fips_state_cnty_code
+      sqlType: varchar(5)
+    - name: medicareStatusCode
+      dbName: medicare_status_code
+      sqlType: varchar(2)
+    - name: entitlementBuyInInd
+      dbName: entitlement_buy_in_ind
+      sqlType: varchar(1)
+      javaType: Character
+    - name: hmoIndicatorInd
+      dbName: hmo_indicator_ind
+      sqlType: varchar(1)
+      javaType: Character
+    - name: partCContractNumberId
+      dbName: partc_contract_number_id
+      sqlType: varchar(5)
+    - name: partCPbpNumberId
+      dbName: partc_pbp_number_id
+      sqlType: varchar(3)
+    - name: partCPlanTypeCode
+      dbName: partc_plan_type_code
+      sqlType: varchar(3)
+    - name: partDContractNumberId
+      dbName: partd_contract_number_id
+      sqlType: varchar(5)
+    - name: partDPbpNumberId
+      dbName: partd_pbp_number_id
+      sqlType: varchar(3)
+    - name: partDSegmentNumberId
+      dbName: partd_segment_number_id
+      sqlType: varchar(3)
+    - name: partDRetireeDrugSubsidyInd
+      dbName: partd_retiree_drug_subsidy_ind
+      sqlType: varchar(1)
+      javaType: Character
+    - name: medicaidDualEligibilityCode
+      dbName: medicaid_dual_eligibility_code
+      sqlType: varchar(2)
+    - name: partDLowIncomeCostShareGroupCode
+      dbName: partd_low_income_cost_share_group_code
+      sqlType: varchar(2)
+    joins:
+    - fieldName: parentBeneficiary
+      entityClass: gov.cms.bfd.model.rif.Beneficiary
+      joinColumnName: bene_id
+      joinType: ManyToOne
+      foreignKey: beneficiary_monthly_bene_id_to_beneficiary
+  arrays: []
   enumTypes:
   - name: gov.cms.bfd.model.rif.BeneficiaryMonthlyColumn
     values:
@@ -17,82 +84,3 @@ mappings:
     - PARTD_RETIREE_DRUG_SUBSIDY_IND
     - MEDICAID_DUAL_ELIGIBILITY_CODE
     - PARTD_LOW_INCOME_COST_SHARE_GROUP_CODE
-  id: BeneficiaryMonthly
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
-  minStringLength: 0
-  nullableFieldAccessorType: Optional
-  sourceType: RifCsv
-  table:
-    columns:
-    - comment: null
-      dbName: year_month
-      name: yearMonth
-      nullable: false
-      sqlType: date
-    - comment: null
-      dbName: fips_state_cnty_code
-      name: fipsStateCntyCode
-      sqlType: varchar(5)
-    - comment: null
-      dbName: medicare_status_code
-      name: medicareStatusCode
-      sqlType: varchar(2)
-    - comment: null
-      dbName: entitlement_buy_in_ind
-      javaType: Character
-      name: entitlementBuyInInd
-      sqlType: varchar(1)
-    - comment: null
-      dbName: hmo_indicator_ind
-      javaType: Character
-      name: hmoIndicatorInd
-      sqlType: varchar(1)
-    - comment: null
-      dbName: partc_contract_number_id
-      name: partCContractNumberId
-      sqlType: varchar(5)
-    - comment: null
-      dbName: partc_pbp_number_id
-      name: partCPbpNumberId
-      sqlType: varchar(3)
-    - comment: null
-      dbName: partc_plan_type_code
-      name: partCPlanTypeCode
-      sqlType: varchar(3)
-    - comment: null
-      dbName: partd_contract_number_id
-      name: partDContractNumberId
-      sqlType: varchar(5)
-    - comment: null
-      dbName: partd_pbp_number_id
-      name: partDPbpNumberId
-      sqlType: varchar(3)
-    - comment: null
-      dbName: partd_segment_number_id
-      name: partDSegmentNumberId
-      sqlType: varchar(3)
-    - comment: null
-      dbName: partd_retiree_drug_subsidy_ind
-      javaType: Character
-      name: partDRetireeDrugSubsidyInd
-      sqlType: varchar(1)
-    - comment: null
-      dbName: medicaid_dual_eligibility_code
-      name: medicaidDualEligibilityCode
-      sqlType: varchar(2)
-    - comment: null
-      dbName: partd_low_income_cost_share_group_code
-      name: partDLowIncomeCostShareGroupCode
-      sqlType: varchar(2)
-    equalsNeeded: false
-    joins:
-    - entityClass: gov.cms.bfd.model.rif.Beneficiary
-      fieldName: parentBeneficiary
-      foreignKey: beneficiary_monthly_bene_id_to_beneficiary
-      joinColumnName: bene_id
-      joinType: ManyToOne
-    name: beneficiary_monthly
-    primaryKeyColumns:
-    - parentBeneficiary
-    - yearMonth
-    quoteNames: false

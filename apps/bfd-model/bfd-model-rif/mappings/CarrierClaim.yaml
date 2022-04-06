@@ -1,13 +1,298 @@
 mappings:
-- arrays:
-  - from: lines
-    mapping: CarrierClaimLine
-    namePrefix: line
-    parentField: parentClaim
-    to: lines
+- id: CarrierClaim
   entityClassName: gov.cms.bfd.model.rif.CarrierClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
+  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  sourceType: RifCsv
+  nullableFieldAccessorType: Optional
+  minStringLength: 0
+  table:
+    name: carrier_claims
+    primaryKeyColumns:
+    - claimId
+    quoteNames: false
+    equalsNeeded: false
+    columns:
+    - name: beneficiaryId
+      dbName: bene_id
+      nullable: false
+      sqlType: varchar(15)
+      javaType: String
+      javaAccessorType: long
+      comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
+    - name: claimId
+      dbName: clm_id
+      nullable: false
+      sqlType: varchar(15)
+      javaType: String
+      javaAccessorType: long
+      comment: Claim ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt)
+    - name: claimGroupId
+      dbName: clm_grp_id
+      nullable: false
+      sqlType: numeric(12)
+      comment: Claim Group ID
+    - name: finalAction
+      dbName: final_action
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Final Action (F/N) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
+    - name: nearLineRecordIdCode
+      dbName: nch_near_line_rec_ident_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: NCH Near Line Record Identification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
+    - name: claimTypeCode
+      dbName: nch_clm_type_cd
+      nullable: false
+      sqlType: varchar(2)
+      comment: NCH Claim Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt)
+    - name: dateFrom
+      dbName: clm_from_dt
+      nullable: false
+      sqlType: date
+      comment: Claim From Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/from_dt.txt)
+    - name: dateThrough
+      dbName: clm_thru_dt
+      nullable: false
+      sqlType: date
+      comment: Claim Through Date  (Determines Year of Claim) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/thru_dt.txt)
+    - name: weeklyProcessDate
+      dbName: nch_wkly_proc_dt
+      nullable: false
+      sqlType: date
+      comment: NCH Weekly Claim Processing Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/wkly_dt.txt)
+    - name: claimEntryCode
+      dbName: carr_clm_entry_cd
+      nullable: false
+      sqlType: varchar(1)
+      javaType: char
+      comment: Carrier Claim Entry Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/entry_cd.txt)
+    - name: claimDispositionCode
+      dbName: clm_disp_cd
+      nullable: false
+      sqlType: varchar(2)
+      comment: Claim Disposition Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/disp_cd.txt)
+    - name: carrierNumber
+      dbName: carr_num
+      nullable: false
+      sqlType: varchar(5)
+      comment: Carrier Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt)
+    - name: paymentDenialCode
+      dbName: carr_clm_pmt_dnl_cd
+      nullable: false
+      sqlType: varchar(2)
+      comment: Carrier Claim Payment Denial Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt)
+    - name: paymentAmount
+      dbName: clm_pmt_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: Claim Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmt_amt.txt)
+    - name: primaryPayerPaidAmount
+      dbName: carr_clm_prmry_pyr_pd_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: Carrier Claim Primary Payer Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt)
+    - name: referringPhysicianUpin
+      dbName: rfr_physn_upin
+      sqlType: varchar(12)
+      comment: Carrier Claim Refering Physician UPIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_upin.txt)
+    - name: referringPhysicianNpi
+      dbName: rfr_physn_npi
+      sqlType: varchar(12)
+      comment: Carrier Claim Refering Physician NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_npi.txt)
+    - name: providerAssignmentIndicator
+      dbName: carr_clm_prvdr_asgnmt_ind_sw
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Carrier Claim Provider Assignment Indicator Switch (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt)
+    - name: providerPaymentAmount
+      dbName: nch_clm_prvdr_pmt_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: NCH Claim Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prov_pmt.txt)
+    - name: beneficiaryPaymentAmount
+      dbName: nch_clm_bene_pmt_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: NCH Claim Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_pmt.txt)
+    - name: submittedChargeAmount
+      dbName: nch_carr_clm_sbmtd_chrg_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: NCH Carrier Claim Submitted Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sbmtchrg.txt)
+    - name: allowedChargeAmount
+      dbName: nch_carr_clm_alowd_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: NCH Carrier Claim Allowed Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/alowchrg.txt)
+    - name: beneficiaryPartBDeductAmount
+      dbName: carr_clm_cash_ddctbl_apld_amt
+      nullable: false
+      sqlType: decimal(12,2)
+      comment: Carrier Claim Cash Deductible Applied Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dedapply.txt)
+    - name: hcpcsYearCode
+      dbName: carr_clm_hcpcs_yr_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Carrier Claim HCPCS Year Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt)
+    - name: referringProviderIdNumber
+      dbName: carr_clm_rfrng_pin_num
+      nullable: false
+      sqlType: varchar(14)
+      comment: Carrier Claim Referring PIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_prfl.txt)
+    - name: diagnosisPrincipalCode
+      dbName: prncpal_dgns_cd
+      sqlType: varchar(7)
+      comment: Primary Claim Diagnosis Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_cd.txt)
+    - name: diagnosisPrincipalCodeVersion
+      dbName: prncpal_dgns_vrsn_cd
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Primary Claim Diagnosis Code Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt)
+    - name: diagnosis1Code
+      dbName: icd_dgns_cd1
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd1.txt)
+    - name: diagnosis1CodeVersion
+      dbName: icd_dgns_vrsn_cd1
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd1.txt)
+    - name: diagnosis2Code
+      dbName: icd_dgns_cd2
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
+    - name: diagnosis2CodeVersion
+      dbName: icd_dgns_vrsn_cd2
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code II Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd2.txt)
+    - name: diagnosis3Code
+      dbName: icd_dgns_cd3
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
+    - name: diagnosis3CodeVersion
+      dbName: icd_dgns_vrsn_cd3
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code III Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd3.txt)
+    - name: diagnosis4Code
+      dbName: icd_dgns_cd4
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
+    - name: diagnosis4CodeVersion
+      dbName: icd_dgns_vrsn_cd4
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code IV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd4.txt)
+    - name: diagnosis5Code
+      dbName: icd_dgns_cd5
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
+    - name: diagnosis5CodeVersion
+      dbName: icd_dgns_vrsn_cd5
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd5.txt)
+    - name: diagnosis6Code
+      dbName: icd_dgns_cd6
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
+    - name: diagnosis6CodeVersion
+      dbName: icd_dgns_vrsn_cd6
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code VI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd6.txt)
+    - name: diagnosis7Code
+      dbName: icd_dgns_cd7
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
+    - name: diagnosis7CodeVersion
+      dbName: icd_dgns_vrsn_cd7
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code VII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd7.txt)
+    - name: diagnosis8Code
+      dbName: icd_dgns_cd8
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
+    - name: diagnosis8CodeVersion
+      dbName: icd_dgns_vrsn_cd8
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
+        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd8.txt)
+    - name: diagnosis9Code
+      dbName: icd_dgns_cd9
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
+    - name: diagnosis9CodeVersion
+      dbName: icd_dgns_vrsn_cd9
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code IX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd9.txt)
+    - name: diagnosis10Code
+      dbName: icd_dgns_cd10
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
+    - name: diagnosis10CodeVersion
+      dbName: icd_dgns_vrsn_cd10
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd10.txt)
+    - name: diagnosis11Code
+      dbName: icd_dgns_cd11
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
+    - name: diagnosis11CodeVersion
+      dbName: icd_dgns_vrsn_cd11
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd11.txt)
+    - name: diagnosis12Code
+      dbName: icd_dgns_cd12
+      sqlType: varchar(7)
+      comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
+    - name: diagnosis12CodeVersion
+      dbName: icd_dgns_vrsn_cd12
+      sqlType: varchar(1)
+      javaType: Character
+      comment: Claim Diagnosis Code XII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd12.txt)
+    - name: clinicalTrialNumber
+      dbName: clm_clncl_tril_num
+      sqlType: varchar(8)
+      comment: Clinical Trial Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt)
+    - name: claimCarrierControlNumber
+      dbName: carr_clm_cntl_num
+      sqlType: varchar(23)
+      comment: Unique control number assigned by a carrier to a non-institutional
+        claim.
+    - name: lastUpdated
+      dbName: last_updated
+      sqlType: timestamp with time zone
+      comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+    joins:
+    - fieldName: lines
+      entityClass: gov.cms.bfd.model.rif.CarrierClaimLine
+      collectionType: List
+      joinType: OneToMany
+      mappedBy: parentClaim
+      orphanRemoval: true
+      fetchType: LAZY
+      cascadeTypes:
+      - ALL
+      orderBy: LINE_NUM ASC
+  arrays:
+  - from: lines
+    to: lines
+    mapping: CarrierClaimLine
+    namePrefix: line
+    parentField: parentClaim
   enumTypes:
   - name: gov.cms.bfd.model.rif.CarrierClaimColumn
     values:
@@ -109,459 +394,174 @@ mappings:
     - LINE_NDC_CD
     - CARR_LINE_CLIA_LAB_NUM
     - CARR_LINE_ANSTHSA_UNIT_CNT
-  id: CarrierClaim
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
-  minStringLength: 0
-  nullableFieldAccessorType: Optional
-  sourceType: RifCsv
-  table:
-    columns:
-    - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
-      dbName: bene_id
-      javaAccessorType: long
-      javaType: String
-      name: beneficiaryId
-      nullable: false
-      sqlType: varchar(15)
-    - comment: Claim ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt)
-      dbName: clm_id
-      javaAccessorType: long
-      javaType: String
-      name: claimId
-      nullable: false
-      sqlType: varchar(15)
-    - comment: Claim Group ID
-      dbName: clm_grp_id
-      name: claimGroupId
-      nullable: false
-      sqlType: numeric(12)
-    - comment: Final Action (F/N) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
-      dbName: final_action
-      javaType: char
-      name: finalAction
-      nullable: false
-      sqlType: varchar(1)
-    - comment: NCH Near Line Record Identification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
-      dbName: nch_near_line_rec_ident_cd
-      javaType: char
-      name: nearLineRecordIdCode
-      nullable: false
-      sqlType: varchar(1)
-    - comment: NCH Claim Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt)
-      dbName: nch_clm_type_cd
-      name: claimTypeCode
-      nullable: false
-      sqlType: varchar(2)
-    - comment: Claim From Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/from_dt.txt)
-      dbName: clm_from_dt
-      name: dateFrom
-      nullable: false
-      sqlType: date
-    - comment: Claim Through Date  (Determines Year of Claim) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/thru_dt.txt)
-      dbName: clm_thru_dt
-      name: dateThrough
-      nullable: false
-      sqlType: date
-    - comment: NCH Weekly Claim Processing Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/wkly_dt.txt)
-      dbName: nch_wkly_proc_dt
-      name: weeklyProcessDate
-      nullable: false
-      sqlType: date
-    - comment: Carrier Claim Entry Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/entry_cd.txt)
-      dbName: carr_clm_entry_cd
-      javaType: char
-      name: claimEntryCode
-      nullable: false
-      sqlType: varchar(1)
-    - comment: Claim Disposition Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/disp_cd.txt)
-      dbName: clm_disp_cd
-      name: claimDispositionCode
-      nullable: false
-      sqlType: varchar(2)
-    - comment: Carrier Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt)
-      dbName: carr_num
-      name: carrierNumber
-      nullable: false
-      sqlType: varchar(5)
-    - comment: Carrier Claim Payment Denial Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt)
-      dbName: carr_clm_pmt_dnl_cd
-      name: paymentDenialCode
-      nullable: false
-      sqlType: varchar(2)
-    - comment: Claim Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmt_amt.txt)
-      dbName: clm_pmt_amt
-      name: paymentAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: Carrier Claim Primary Payer Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt)
-      dbName: carr_clm_prmry_pyr_pd_amt
-      name: primaryPayerPaidAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: Carrier Claim Refering Physician UPIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_upin.txt)
-      dbName: rfr_physn_upin
-      name: referringPhysicianUpin
-      sqlType: varchar(12)
-    - comment: Carrier Claim Refering Physician NPI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_npi.txt)
-      dbName: rfr_physn_npi
-      name: referringPhysicianNpi
-      sqlType: varchar(12)
-    - comment: Carrier Claim Provider Assignment Indicator Switch (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt)
-      dbName: carr_clm_prvdr_asgnmt_ind_sw
-      javaType: Character
-      name: providerAssignmentIndicator
-      sqlType: varchar(1)
-    - comment: NCH Claim Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prov_pmt.txt)
-      dbName: nch_clm_prvdr_pmt_amt
-      name: providerPaymentAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: NCH Claim Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_pmt.txt)
-      dbName: nch_clm_bene_pmt_amt
-      name: beneficiaryPaymentAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: NCH Carrier Claim Submitted Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sbmtchrg.txt)
-      dbName: nch_carr_clm_sbmtd_chrg_amt
-      name: submittedChargeAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: NCH Carrier Claim Allowed Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/alowchrg.txt)
-      dbName: nch_carr_clm_alowd_amt
-      name: allowedChargeAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: Carrier Claim Cash Deductible Applied Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dedapply.txt)
-      dbName: carr_clm_cash_ddctbl_apld_amt
-      name: beneficiaryPartBDeductAmount
-      nullable: false
-      sqlType: decimal(12,2)
-    - comment: Carrier Claim HCPCS Year Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt)
-      dbName: carr_clm_hcpcs_yr_cd
-      javaType: Character
-      name: hcpcsYearCode
-      sqlType: varchar(1)
-    - comment: Carrier Claim Referring PIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_prfl.txt)
-      dbName: carr_clm_rfrng_pin_num
-      name: referringProviderIdNumber
-      nullable: false
-      sqlType: varchar(14)
-    - comment: Primary Claim Diagnosis Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_cd.txt)
-      dbName: prncpal_dgns_cd
-      name: diagnosisPrincipalCode
-      sqlType: varchar(7)
-    - comment: Primary Claim Diagnosis Code Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt)
-      dbName: prncpal_dgns_vrsn_cd
-      javaType: Character
-      name: diagnosisPrincipalCodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd1.txt)
-      dbName: icd_dgns_cd1
-      name: diagnosis1Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd1.txt)
-      dbName: icd_dgns_vrsn_cd1
-      javaType: Character
-      name: diagnosis1CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
-      dbName: icd_dgns_cd2
-      name: diagnosis2Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code II Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd2.txt)
-      dbName: icd_dgns_vrsn_cd2
-      javaType: Character
-      name: diagnosis2CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
-      dbName: icd_dgns_cd3
-      name: diagnosis3Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code III Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd3.txt)
-      dbName: icd_dgns_vrsn_cd3
-      javaType: Character
-      name: diagnosis3CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
-      dbName: icd_dgns_cd4
-      name: diagnosis4Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code IV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd4.txt)
-      dbName: icd_dgns_vrsn_cd4
-      javaType: Character
-      name: diagnosis4CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
-      dbName: icd_dgns_cd5
-      name: diagnosis5Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd5.txt)
-      dbName: icd_dgns_vrsn_cd5
-      javaType: Character
-      name: diagnosis5CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
-      dbName: icd_dgns_cd6
-      name: diagnosis6Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code VI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd6.txt)
-      dbName: icd_dgns_vrsn_cd6
-      javaType: Character
-      name: diagnosis6CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
-      dbName: icd_dgns_cd7
-      name: diagnosis7Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code VII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd7.txt)
-      dbName: icd_dgns_vrsn_cd7
-      javaType: Character
-      name: diagnosis7CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
-      dbName: icd_dgns_cd8
-      name: diagnosis8Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
-        (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd8.txt)
-      dbName: icd_dgns_vrsn_cd8
-      javaType: Character
-      name: diagnosis8CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
-      dbName: icd_dgns_cd9
-      name: diagnosis9Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code IX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd9.txt)
-      dbName: icd_dgns_vrsn_cd9
-      javaType: Character
-      name: diagnosis9CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
-      dbName: icd_dgns_cd10
-      name: diagnosis10Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd10.txt)
-      dbName: icd_dgns_vrsn_cd10
-      javaType: Character
-      name: diagnosis10CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
-      dbName: icd_dgns_cd11
-      name: diagnosis11Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd11.txt)
-      dbName: icd_dgns_vrsn_cd11
-      javaType: Character
-      name: diagnosis11CodeVersion
-      sqlType: varchar(1)
-    - comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
-      dbName: icd_dgns_cd12
-      name: diagnosis12Code
-      sqlType: varchar(7)
-    - comment: Claim Diagnosis Code XII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd12.txt)
-      dbName: icd_dgns_vrsn_cd12
-      javaType: Character
-      name: diagnosis12CodeVersion
-      sqlType: varchar(1)
-    - comment: Clinical Trial Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt)
-      dbName: clm_clncl_tril_num
-      name: clinicalTrialNumber
-      sqlType: varchar(8)
-    - comment: Unique control number assigned by a carrier to a non-institutional
-        claim.
-      dbName: carr_clm_cntl_num
-      name: claimCarrierControlNumber
-      sqlType: varchar(23)
-    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
-      dbName: last_updated
-      name: lastUpdated
-      sqlType: timestamp with time zone
-    equalsNeeded: false
-    joins:
-    - cascadeTypes:
-      - ALL
-      collectionType: List
-      entityClass: gov.cms.bfd.model.rif.CarrierClaimLine
-      fetchType: LAZY
-      fieldName: lines
-      joinType: OneToMany
-      mappedBy: parentClaim
-      orderBy: LINE_NUM ASC
-      orphanRemoval: true
-    name: carrier_claims
-    primaryKeyColumns:
-    - claimId
-    quoteNames: false
+  transformerClassName: gov.cms.bfd.model.rif.CarrierClaimParser
   transformations:
   - from: BENE_ID
-    optional: false
     to: beneficiaryId
+    optional: false
     transformer: LongString
   - from: CLM_ID
-    optional: false
     to: claimId
+    optional: false
     transformer: LongString
-  - defaultValue: '0'
-    from: CLM_GRP_ID
-    optional: false
+  - from: CLM_GRP_ID
     to: claimGroupId
+    optional: false
+    defaultValue: '0'
   - from: FINAL_ACTION
-    optional: false
     to: finalAction
+    optional: false
   - from: NCH_NEAR_LINE_REC_IDENT_CD
-    optional: false
     to: nearLineRecordIdCode
+    optional: false
   - from: NCH_CLM_TYPE_CD
-    optional: false
     to: claimTypeCode
+    optional: false
   - from: CLM_FROM_DT
-    optional: false
     to: dateFrom
+    optional: false
   - from: CLM_THRU_DT
-    optional: false
     to: dateThrough
+    optional: false
   - from: NCH_WKLY_PROC_DT
-    optional: false
     to: weeklyProcessDate
+    optional: false
   - from: CARR_CLM_ENTRY_CD
-    optional: false
     to: claimEntryCode
+    optional: false
   - from: CLM_DISP_CD
-    optional: false
     to: claimDispositionCode
+    optional: false
   - from: CARR_NUM
-    optional: false
     to: carrierNumber
+    optional: false
   - from: CARR_CLM_PMT_DNL_CD
-    optional: false
     to: paymentDenialCode
-  - defaultValue: '0'
-    from: CLM_PMT_AMT
     optional: false
+  - from: CLM_PMT_AMT
     to: paymentAmount
-  - defaultValue: '0'
-    from: CARR_CLM_PRMRY_PYR_PD_AMT
     optional: false
+    defaultValue: '0'
+  - from: CARR_CLM_PRMRY_PYR_PD_AMT
     to: primaryPayerPaidAmount
+    optional: false
+    defaultValue: '0'
   - from: RFR_PHYSN_UPIN
-    optional: true
     to: referringPhysicianUpin
+    optional: true
   - from: RFR_PHYSN_NPI
-    optional: true
     to: referringPhysicianNpi
+    optional: true
   - from: CARR_CLM_PRVDR_ASGNMT_IND_SW
-    optional: true
     to: providerAssignmentIndicator
-  - defaultValue: '0'
-    from: NCH_CLM_PRVDR_PMT_AMT
-    optional: false
+    optional: true
+  - from: NCH_CLM_PRVDR_PMT_AMT
     to: providerPaymentAmount
-  - defaultValue: '0'
-    from: NCH_CLM_BENE_PMT_AMT
     optional: false
+    defaultValue: '0'
+  - from: NCH_CLM_BENE_PMT_AMT
     to: beneficiaryPaymentAmount
-  - defaultValue: '0'
-    from: NCH_CARR_CLM_SBMTD_CHRG_AMT
     optional: false
+    defaultValue: '0'
+  - from: NCH_CARR_CLM_SBMTD_CHRG_AMT
     to: submittedChargeAmount
-  - defaultValue: '0'
-    from: NCH_CARR_CLM_ALOWD_AMT
     optional: false
+    defaultValue: '0'
+  - from: NCH_CARR_CLM_ALOWD_AMT
     to: allowedChargeAmount
-  - defaultValue: '0'
-    from: CARR_CLM_CASH_DDCTBL_APLD_AMT
     optional: false
+    defaultValue: '0'
+  - from: CARR_CLM_CASH_DDCTBL_APLD_AMT
     to: beneficiaryPartBDeductAmount
-  - from: CARR_CLM_HCPCS_YR_CD
-    optional: true
-    to: hcpcsYearCode
-  - from: CARR_CLM_RFRNG_PIN_NUM
     optional: false
+    defaultValue: '0'
+  - from: CARR_CLM_HCPCS_YR_CD
+    to: hcpcsYearCode
+    optional: true
+  - from: CARR_CLM_RFRNG_PIN_NUM
     to: referringProviderIdNumber
+    optional: false
   - from: PRNCPAL_DGNS_CD
-    optional: true
     to: diagnosisPrincipalCode
+    optional: true
   - from: PRNCPAL_DGNS_VRSN_CD
-    optional: true
     to: diagnosisPrincipalCodeVersion
+    optional: true
   - from: ICD_DGNS_CD1
-    optional: true
     to: diagnosis1Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD1
-    optional: true
     to: diagnosis1CodeVersion
+    optional: true
   - from: ICD_DGNS_CD2
-    optional: true
     to: diagnosis2Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD2
-    optional: true
     to: diagnosis2CodeVersion
+    optional: true
   - from: ICD_DGNS_CD3
-    optional: true
     to: diagnosis3Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD3
-    optional: true
     to: diagnosis3CodeVersion
+    optional: true
   - from: ICD_DGNS_CD4
-    optional: true
     to: diagnosis4Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD4
-    optional: true
     to: diagnosis4CodeVersion
+    optional: true
   - from: ICD_DGNS_CD5
-    optional: true
     to: diagnosis5Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD5
-    optional: true
     to: diagnosis5CodeVersion
+    optional: true
   - from: ICD_DGNS_CD6
-    optional: true
     to: diagnosis6Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD6
-    optional: true
     to: diagnosis6CodeVersion
+    optional: true
   - from: ICD_DGNS_CD7
-    optional: true
     to: diagnosis7Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD7
-    optional: true
     to: diagnosis7CodeVersion
+    optional: true
   - from: ICD_DGNS_CD8
-    optional: true
     to: diagnosis8Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD8
-    optional: true
     to: diagnosis8CodeVersion
+    optional: true
   - from: ICD_DGNS_CD9
-    optional: true
     to: diagnosis9Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD9
-    optional: true
     to: diagnosis9CodeVersion
+    optional: true
   - from: ICD_DGNS_CD10
-    optional: true
     to: diagnosis10Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD10
-    optional: true
     to: diagnosis10CodeVersion
+    optional: true
   - from: ICD_DGNS_CD11
-    optional: true
     to: diagnosis11Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD11
-    optional: true
     to: diagnosis11CodeVersion
+    optional: true
   - from: ICD_DGNS_CD12
-    optional: true
     to: diagnosis12Code
+    optional: true
   - from: ICD_DGNS_VRSN_CD12
-    optional: true
     to: diagnosis12CodeVersion
+    optional: true
   - from: CLM_CLNCL_TRIL_NUM
-    optional: true
     to: clinicalTrialNumber
-  - from: CARR_CLM_CNTL_NUM
     optional: true
+  - from: CARR_CLM_CNTL_NUM
     to: claimCarrierControlNumber
-  transformerClassName: gov.cms.bfd.model.rif.CarrierClaimParser
+    optional: true
