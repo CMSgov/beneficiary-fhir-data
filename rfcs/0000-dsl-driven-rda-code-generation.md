@@ -3,7 +3,8 @@
 
 * RFC Proposal ID: `0000-dsl-driven-rda-code-generation`
 * Start Date: 2021-10-11
-* RFC PR: [CMSgov/beneficiary-fhir-data#788](https://github.com/CMSgov/beneficiary-fhir-data/pull/788)
+* Revised Date: 2022-04-07
+* RFC PR: [CMSgov/beneficiary-fhir-data#1047](https://github.com/CMSgov/beneficiary-fhir-data/pull/1047)
 * JIRA Ticket(s):
   * [DCGEO-196](https://jira.cms.gov/browse/DCGEO-196)
   * [PACA-280](https://jira.cms.gov/browse/PACA-280)
