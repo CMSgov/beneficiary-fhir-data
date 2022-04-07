@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -38,9 +39,13 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 
 public class GrpcRdaSourceIT {
@@ -306,215 +311,95 @@ public class GrpcRdaSourceIT {
             });
   }
 
-  /** Checks to see if a log message was NOT generated when a blank token is used. */
-  @Test
-  public void grpcCallWithNullJWT() throws Exception {
-    assertDoesNotHaveLogMessage(
-        Level.WARN,
-        "Could not parse Authorization token as JWT",
-        () ->
-            createServerConfig()
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken(null).build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
-  }
-
-  /** Checks to see if a log message was NOT generated when a blank token is used. */
-  @Test
-  public void grpcCallWithBlankJWT() throws Exception {
-    assertDoesNotHaveLogMessage(
-        Level.WARN,
-        "Could not parse Authorization token as JWT",
-        () ->
-            createServerConfig()
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken("").build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
-  }
-
-  /** Checks to see if a log message was generated when a non-jwt token is used. */
-  @Test
-  public void grpcCallWithCorrectNonJWT() throws Exception {
-    assertHasLogMessage(
-        Level.WARN,
-        "Could not parse Authorization token as JWT",
-        () ->
-            createServerConfig()
-                .authorizedToken("secret")
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken("secret").build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
-  }
-
-  /**
-   * Checks to see if a log message was generated when the expected expiration claim was not found
-   * in the given JWT
-   */
-  @Test
-  public void grpcCallWithCorrectJWTMissingExp() throws Exception {
+  public static Stream<Arguments> grpcCallLogMessages() {
     String claimsToken = Base64.getEncoder().encodeToString("{\"nexp\":0}".getBytes());
-    final String AUTH_TOKEN = String.format("NotAReal.%s.Token", claimsToken);
+    final String NO_EXP_AUTH_TOKEN = String.format("NotAReal.%s.Token", claimsToken);
 
-    assertHasLogMessage(
-        Level.WARN,
-        "Could not find expiration claim",
-        () ->
-            createServerConfig()
-                .authorizedToken(AUTH_TOKEN)
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
-  }
-
-  /**
-   * Checks to see if a log message was generated when a jwt is used that will expire within one
-   * month. This should be a warning level log message.
-   */
-  @Test
-  public void grpcCallWithCorrectExpiringAuthTokenOneMonth() throws Exception {
-    final String AUTH_TOKEN =
+    final String ONE_MONTH_EXP_AUTH_TOKEN =
         createTokenWithExpiration(Instant.now().plus(20, ChronoUnit.DAYS).getEpochSecond());
-    assertHasLogMessage(
-        Level.WARN,
-        "JWT will expire in 19 days",
-        () ->
-            createServerConfig()
-                .authorizedToken(AUTH_TOKEN)
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
-  }
 
-  /**
-   * Checks to see if a log message was generated when a jwt is used that will expire within 2
-   * weeks. This should be an error level log message.
-   */
-  @Test
-  public void grpcCallWithCorrectExpiringAuthTokenTwoWeeks() throws Exception {
-    final String AUTH_TOKEN =
+    final String TWO_WEEK_EXP_AUTH_TOKEN =
         createTokenWithExpiration(Instant.now().plus(10, ChronoUnit.DAYS).getEpochSecond());
-    assertHasLogMessage(
-        Level.ERROR,
-        "JWT will expire in 9 days",
-        () ->
-            createServerConfig()
-                .authorizedToken(AUTH_TOKEN)
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
-  }
 
-  /**
-   * Checks to see if a log message was generated when an expired jwt is used. This should be an
-   * error level log message.
-   */
-  @Test
-  public void grpcCallWithCorrectExpiredAuthToken() throws Exception {
-    final String AUTH_TOKEN =
+    final String EXPIRED_AUTH_TOKEN =
         createTokenWithExpiration(Instant.now().plus(-1, ChronoUnit.DAYS).getEpochSecond());
-    assertHasLogMessage(
-        Level.ERROR,
-        "JWT is expired!",
-        () ->
-            createServerConfig()
-                .authorizedToken(AUTH_TOKEN)
-                .build()
-                .runWithPortParam(
-                    port -> {
-                      int count;
-                      GrpcRdaSource.Config config =
-                          createSourceConfig(port).authenticationToken(AUTH_TOKEN).build();
-                      try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
-                          createSource(config)) {
-                        count = source.retrieveAndProcessObjects(3, sink);
-                      }
-                      assertEquals(2, count);
-                      assertEquals(2, sink.getValues().size());
-                      assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
-                      assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-                    }));
+
+    return Stream.of(
+        arguments(
+            "Token null, expect NO log message",
+            false,
+            Level.WARN,
+            "Could not parse Authorization token as JWT",
+            null),
+        arguments(
+            "Token blank, expect NO log message",
+            false,
+            Level.WARN,
+            "Could not parse Authorization token as JWT",
+            ""),
+        arguments(
+            "Unparsable Token, expect log message",
+            true,
+            Level.WARN,
+            "Could not parse Authorization token as JWT",
+            "secret"),
+        arguments(
+            "No 'exp' claim Token, expect log message",
+            true,
+            Level.WARN,
+            "Could not find expiration claim",
+            NO_EXP_AUTH_TOKEN),
+        arguments(
+            "Expire in <1 month Token, expect log message",
+            true,
+            Level.WARN,
+            "JWT will expire in 19 days",
+            ONE_MONTH_EXP_AUTH_TOKEN),
+        arguments(
+            "Expire in <2 weeks Token, expect log message",
+            true,
+            Level.ERROR,
+            "JWT will expire in 9 days",
+            TWO_WEEK_EXP_AUTH_TOKEN),
+        arguments(
+            "Expired Token, expect log message",
+            true,
+            Level.ERROR,
+            "JWT is expired!",
+            EXPIRED_AUTH_TOKEN));
   }
 
-  private void assertHasLogMessage(
-      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
-    assertLogMessage(logLevel, logMessage, runnable, true);
-  }
+  @ParameterizedTest(name = "{index}: {0}")
+  @MethodSource
+  public void grpcCallLogMessages(
+      final String testName,
+      final boolean expectLog,
+      final Level logLevel,
+      final String logMessage,
+      final String token)
+      throws Exception {
+    boolean logFound =
+        messageIsLogged(
+            logLevel,
+            logMessage,
+            () ->
+                createServerConfig()
+                    .build()
+                    .runWithPortParam(
+                        port -> {
+                          GrpcRdaSource.Config config =
+                              createSourceConfig(port).authenticationToken(token).build();
+                          try (var source = createSource(config)) {
+                            source.retrieveAndProcessObjects(3, sink);
+                          }
+                        }));
 
-  private void assertDoesNotHaveLogMessage(
-      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
-    assertLogMessage(logLevel, logMessage, runnable, false);
+    String errorMessage =
+        expectLog
+            ? "Expected log message '[%s] %s' not found"
+            : "Unexpected log message '[%s] %s' found";
+
+    assertEquals(expectLog, logFound, String.format(errorMessage, logLevel, logMessage));
   }
 
   /**
@@ -525,11 +410,11 @@ public class GrpcRdaSourceIT {
    * @param logLevel The expected log level of the expected message to find
    * @param logMessage The expected log message to find
    * @param runnable The logic to execute that should generate the given expected log message.
+   * @return True if the expected log message was logged, False otherwise.
    * @throws Exception If anything unexpected went wrong
    */
-  private void assertLogMessage(
-      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable, boolean shouldExist)
-      throws Exception {
+  private boolean messageIsLogged(
+      Level logLevel, String logMessage, ThrowingRunnable<Exception> runnable) throws Exception {
     final Logger LOGGER = (Logger) LoggerFactory.getLogger(GrpcRdaSource.class);
 
     ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -542,16 +427,8 @@ public class GrpcRdaSourceIT {
 
     LOGGER.detachAppender("UNIT_TEST_APPENDER");
 
-    String message =
-        shouldExist
-            ? "Expected log message '[%s] %s' not found"
-            : "Unexpected log message '[%s] %s' found";
-
-    assertEquals(
-        shouldExist,
-        listAppender.list.stream()
-            .anyMatch(e -> e.getLevel() == logLevel && e.getMessage().equals(logMessage)),
-        String.format(message, logLevel, logMessage));
+    return listAppender.list.stream()
+        .anyMatch(e -> e.getLevel() == logLevel && e.getMessage().equals(logMessage));
   }
 
   /**
@@ -570,7 +447,7 @@ public class GrpcRdaSourceIT {
    *     generated jwt.
    * @return The generated JWT with an expiration set to the given value.
    */
-  public String createTokenWithExpiration(long expirationDateEpochSeconds) {
+  public static String createTokenWithExpiration(long expirationDateEpochSeconds) {
     String claimsString = String.format("{\"exp\":%d}", expirationDateEpochSeconds);
     String claimsToken = Base64.getEncoder().encodeToString(claimsString.getBytes());
     return String.format("NotAReal.%s.Token", claimsToken);
