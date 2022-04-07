@@ -39,6 +39,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
@@ -1398,7 +1399,7 @@ public class SNFClaimTransformerV2Test {
             .findFirst()
             .orElse(null);
     assertNotNull(fiNumExtension);
-    assertEquals("11111", ((Coding) fiNumExtension.getValue()).getCode());
+    assertEquals("11111", ((Identifier) fiNumExtension.getValue()).getValue());
   }
 
   /**

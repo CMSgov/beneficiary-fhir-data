@@ -53,9 +53,9 @@
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
-    "valueCoding" : {
+    "valueIdentifier" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
-      "code" : "11111"
+      "value" : "11111"
     }
   } ],
   "identifier" : [ {

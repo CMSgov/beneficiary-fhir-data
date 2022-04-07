@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.junit.jupiter.api.Test;
 
 /** Tests the utility methods within the {@link TransformerUtilsV2}. */
@@ -142,7 +143,7 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNotNull(fiNumExtension);
-    assertEquals(fiNum, ((Coding) fiNumExtension.getValue()).getCode());
+    assertEquals(fiNum, ((Identifier) fiNumExtension.getValue()).getValue());
   }
 
   /**

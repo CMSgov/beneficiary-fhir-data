@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
@@ -951,7 +952,7 @@ public class HHAClaimTransformerV2Test {
             .findFirst()
             .orElse(null);
     assertNotNull(fiNumExtension);
-    assertEquals("15999", ((Coding) fiNumExtension.getValue()).getCode());
+    assertEquals("15999", ((Identifier) fiNumExtension.getValue()).getValue());
   }
 
   /**

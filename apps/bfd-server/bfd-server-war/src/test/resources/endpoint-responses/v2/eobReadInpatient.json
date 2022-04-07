@@ -65,9 +65,9 @@
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
-    "valueCoding" : {
+    "valueIdentifier" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
-      "code" : "8299"
+      "value" : "8299"
     }
   } ],
   "identifier" : [ {

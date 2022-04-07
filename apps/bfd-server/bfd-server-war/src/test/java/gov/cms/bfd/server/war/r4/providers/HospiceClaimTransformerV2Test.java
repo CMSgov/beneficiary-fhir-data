@@ -260,6 +260,10 @@ public final class HospiceClaimTransformerV2Test {
                 "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt", null, null));
     hospiceCountExtension.setValue(new Quantity(2));
 
+    String fiNumSystem = "https://bluebutton.cms.gov/resources/variables/fi_num";
+    Identifier expectedFiNumIdentifier = new Identifier();
+    expectedFiNumIdentifier.setValue("6666");
+    expectedFiNumIdentifier.setSystem(fiNumSystem);
     List<Extension> compare =
         Arrays.asList(
             new Extension(
@@ -280,9 +284,7 @@ public final class HospiceClaimTransformerV2Test {
                     "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
                     "1",
                     null)),
-            new Extension(
-                "https://bluebutton.cms.gov/resources/variables/fi_num",
-                new Coding("https://bluebutton.cms.gov/resources/variables/fi_num", "6666", null)),
+            new Extension(fiNumSystem, expectedFiNumIdentifier),
             hospiceCountExtension);
 
     for (int i = 0; i < expected.size(); i++) {

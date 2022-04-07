@@ -1674,7 +1674,7 @@ public final class InpatientClaimTransformerV2Test {
             .findFirst()
             .orElse(null);
     assertNotNull(fiNumExtension);
-    assertEquals("8299", ((Coding) fiNumExtension.getValue()).getCode());
+    assertEquals("8299", ((Identifier) fiNumExtension.getValue()).getValue());
   }
 
   /**

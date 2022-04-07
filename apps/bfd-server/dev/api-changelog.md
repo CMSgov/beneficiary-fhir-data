@@ -1,5 +1,28 @@
 # API Changelog
 
+## BFD-1667 Add FI_NUM extension Identifier
+
+Corrects a bug with FI_NUM where a Coding instead of an Identifier path for its value.
+This fix adjusts the value of FI_NUM to correctly be located at 
+_eob.extension.valueIdentifer.value_
+
+The corrected path will be added to the extension and look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "value" : "8299"
+    }
+  }
+  ...
+}
+```
+
 ## BFD-1582 Remove spurious coverage contracts
 
 Removed hardcoded coverage contracts that were inadvertantly introduced in V1 and V2 during testing.

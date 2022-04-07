@@ -3061,7 +3061,7 @@ public final class TransformerUtilsV2 {
     // FI_NUM => ExplanationOfBenefit.extension
     if (fiscalIntermediaryNumber.isPresent()) {
       eob.addExtension(
-          createExtensionCoding(eob, CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
+          createExtensionIdentifier(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
     }
 
     // CLM_TOT_CHRG_AMT => ExplainationOfBenefit.total
