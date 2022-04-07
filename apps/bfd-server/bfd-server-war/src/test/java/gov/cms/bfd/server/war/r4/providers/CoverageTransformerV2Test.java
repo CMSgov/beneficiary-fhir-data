@@ -184,12 +184,6 @@ public final class CoverageTransformerV2Test {
     verifyCoverageClass("Part A");
   }
 
-  @Test
-  public void verifyCoverageContractPartA() {
-    transformCoverage(MedicareSegment.PART_A, false);
-    verifyCoverageContract("part-a");
-  }
-
   // ==================
   // Begin PART B Tests
   // ==================
@@ -631,15 +625,6 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.getClass_().get(1).equalsDeep(coverage.getClass_().get(1)));
   }
 
-  private static void verifyCoverageContract(String partId) {
-    assertEquals(2, coverage.getContract().size());
-    Coverage compare = new Coverage();
-    compare.addContract().setId("contract1");
-    compare.addContract().setReference("Coverage/" + partId + "-contract1");
-    assertTrue(compare.getContract().get(0).equalsDeep(coverage.getContract().get(0)));
-    assertTrue(compare.getContract().get(1).equalsDeep(coverage.getContract().get(1)));
-  }
-
   /** Standalone wrapper to create and optionall printout a MedicareSegment coverage */
   public static void transformCoverage(MedicareSegment medSeg, boolean showJson)
       throws FHIRException {
@@ -709,7 +694,6 @@ public final class CoverageTransformerV2Test {
     verifyRelationship();
     verifyPeriod();
     verifyPayor();
-    verifyCoverageContract("part-a");
   }
 
   static void assertPartBMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
