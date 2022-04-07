@@ -12,9 +12,9 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
-@Bean
+@Component
 public class FDADrugUtils implements IDrugCodeProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FDADrugUtils.class);
@@ -117,10 +117,30 @@ public class FDADrugUtils implements IDrugCodeProvider {
         } catch (StringIndexOutOfBoundsException e) {
           continue;
         }
+
+        getFDATestCode(ndcProductHashMap);
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
     }
     return ndcProductHashMap;
+  }
+
+  private void getFDATestCode(Map<String, String> ndcProductHashMap) {
+    String line =
+        "0000-0000_000000zz-0zz0-0z00-zzz0-0z00zzz00000\t0000-0000\tFAKE DRUG\tFake Diluent\t\tfake\tFAKE SOLUTION\tFake\t0\t\tFAK\tFAK000000\tFake Company\tWATER\t1\tmL/mL\t\t\tN\t00000000";
+    String ndcProductColumns[] = line.split("\t");
+    String nationalDrugCodeManufacturer =
+        StringUtils.leftPad(
+            ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+    String nationalDrugCodeIngredient =
+        StringUtils.leftPad(
+            ndcProductColumns[1].substring(
+                ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
+            4,
+            '0');
+    ndcProductHashMap.put(
+        String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+        ndcProductColumns[3] + " - " + ndcProductColumns[13]);
   }
 }

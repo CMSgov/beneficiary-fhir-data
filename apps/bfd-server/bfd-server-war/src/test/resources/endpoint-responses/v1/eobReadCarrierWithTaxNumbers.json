@@ -185,7 +185,7 @@
         "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
       }
     } ],
-    "sequence" : 2,
+    "sequence" : 1,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -208,7 +208,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
@@ -324,7 +324,7 @@
       }
     } ],
     "sequence" : 6,
-    "careTeamLinkId" : [ 2, 3 ],
+    "careTeamLinkId" : [ 1, 2 ],
     "diagnosisLinkId" : [ 5 ],
     "category" : {
       "coding" : [ {

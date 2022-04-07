@@ -187,7 +187,7 @@
     }
   } ],
   "careTeam" : [ {
-    "sequence" : 2,
+    "sequence" : 1,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -202,7 +202,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -289,7 +289,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamLinkId" : [ 3 ],
+    "careTeamLinkId" : [ 2 ],
     "revenue" : {
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",

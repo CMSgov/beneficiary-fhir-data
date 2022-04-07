@@ -170,7 +170,7 @@
         "display" : "Participating"
       }
     } ],
-    "sequence" : 2,
+    "sequence" : 1,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -193,7 +193,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
@@ -295,12 +295,11 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "500904610",
-        "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
+        "code" : "000000000"
       }
     } ],
     "sequence" : 1,
-    "careTeamLinkId" : [ 2, 3 ],
+    "careTeamLinkId" : [ 1, 2 ],
     "diagnosisLinkId" : [ 3 ],
     "category" : {
       "coding" : [ {
