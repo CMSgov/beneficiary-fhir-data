@@ -120,7 +120,7 @@ public final class SNFClaimTransformerTest {
         eob,
         claim.getClaimAdmissionDate(),
         claim.getBeneficiaryDischargeDate(),
-        Optional.of(new BigDecimal(claim.getUtilizationDayCount())));
+        Optional.of(BigDecimal.valueOf(claim.getUtilizationDayCount())));
 
     // Test to ensure common group fields between Inpatient, Outpatient and SNF
     TransformerTestUtils.assertEobCommonGroupInpOutSNFEquals(

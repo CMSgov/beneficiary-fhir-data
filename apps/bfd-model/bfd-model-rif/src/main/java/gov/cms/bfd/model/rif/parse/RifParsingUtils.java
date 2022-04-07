@@ -201,7 +201,7 @@ public final class RifParsingUtils {
      * to read, and ensures that this parsing is standardized.
      */
     if (decimalText.isEmpty()) {
-      return new BigDecimal(0);
+      return BigDecimal.valueOf(0);
     } else {
       try {
         return new BigDecimal(decimalText);
