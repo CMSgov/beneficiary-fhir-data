@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -9,7 +8,6 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +15,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Contract;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
@@ -91,27 +86,11 @@ final class CoverageTransformer {
           coverage.getPeriod(), beneficiary.getMedicareCoverageStartDate().get());
     }
 
-    // deh start
-    coverage.addContract().setId("ptc-contract1");
-
-    Contract newContract = new Contract();
-    LocalDate localDate = LocalDate.now();
-    newContract.setIdentifier(
-        new Identifier().setSystem("part C System").setValue("contract 5555"));
-    newContract.setApplies(
-        (new Period()
-            .setStart((TransformerUtils.convertToDate(localDate)), TemporalPrecisionEnum.DAY)));
-    coverage.addContained(newContract);
-
-    coverage.addContract(
-        TransformerUtils.referenceCoverage("contract1 reference", MedicareSegment.PART_A));
-
     coverage
         .getGrouping()
         .setSubGroup(TransformerConstants.COVERAGE_PLAN)
-
-        // deh end
         .setSubPlan(TransformerConstants.COVERAGE_PLAN_PART_A);
+
     coverage.setType(
         TransformerUtils.createCodeableConcept(
             TransformerConstants.COVERAGE_PLAN, TransformerConstants.COVERAGE_PLAN_PART_A));

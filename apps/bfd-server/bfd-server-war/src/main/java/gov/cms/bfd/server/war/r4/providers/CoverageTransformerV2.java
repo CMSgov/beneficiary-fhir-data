@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -13,7 +12,6 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,11 +22,9 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Contract;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
 final class CoverageTransformerV2 {
@@ -92,21 +88,6 @@ final class CoverageTransformerV2 {
     beneficiary
         .getMedicareCoverageStartDate()
         .ifPresent(value -> TransformerUtilsV2.setPeriodStart(coverage.getPeriod(), value));
-
-    // deh start
-    coverage.addContract().setId("contract1");
-
-    Contract newContract = new Contract();
-    newContract
-        .addIdentifier(new Identifier().setSystem("part C System").setValue("contract 5555"))
-        .setApplies(
-            (new Period()
-                .setStart(
-                    (TransformerUtilsV2.convertToDate(LocalDate.now())),
-                    TemporalPrecisionEnum.DAY)));
-    coverage.addContained(newContract);
-
-    coverage.addContract(TransformerUtilsV2.referenceCoverage("contract1", MedicareSegment.PART_A));
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 

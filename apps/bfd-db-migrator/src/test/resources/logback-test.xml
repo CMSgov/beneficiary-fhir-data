@@ -8,7 +8,7 @@
 			<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
-
+	<logger name="org.hibernate.validator" level="debug" />
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
 	<root level="info">
