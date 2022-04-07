@@ -20,6 +20,7 @@ public class TableBean {
   private String comment;
   @Builder.Default private boolean quoteNames = true;
   @Builder.Default private boolean equalsNeeded = true;
+  @Builder.Default private String compositeKeyClassName = "PK";
   @Singular private List<String> primaryKeyColumns = new ArrayList<>();
   @Singular private List<String> equalsColumns = new ArrayList<>();
   @Singular private List<ColumnBean> columns = new ArrayList<>();

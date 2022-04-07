@@ -13,6 +13,7 @@ mappings:
     - claimId
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: LineId
     columns:
     - name: beneficiaryId
       dbName: bene_id
@@ -549,6 +550,7 @@ mappings:
     - fieldName: lines
       entityClass: gov.cms.bfd.model.rif.HospiceClaimLine
       collectionType: List
+      readOnly: true
       joinType: OneToMany
       mappedBy: parentClaim
       orphanRemoval: true

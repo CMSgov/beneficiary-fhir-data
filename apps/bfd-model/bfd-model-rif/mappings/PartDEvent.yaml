@@ -13,6 +13,7 @@ mappings:
     - eventId
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: LineId
     columns:
     - name: eventId
       dbName: pde_id

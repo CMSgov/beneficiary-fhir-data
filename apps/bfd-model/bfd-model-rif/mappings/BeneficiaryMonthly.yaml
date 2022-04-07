@@ -13,6 +13,7 @@ mappings:
     - yearMonth
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: BeneficiaryMonthlyId
     columns:
     - name: yearMonth
       dbName: year_month

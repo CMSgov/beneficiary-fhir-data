@@ -13,6 +13,7 @@ mappings:
     - beneficiaryId
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: LineId
     columns:
     - name: beneficiaryId
       dbName: bene_id
@@ -899,41 +900,45 @@ mappings:
     joins:
     - fieldName: beneficiaryMonthlys
       entityClass: gov.cms.bfd.model.rif.BeneficiaryMonthly
+      collectionType: List
+      readOnly: false
+      joinType: OneToMany
       mappedBy: parentBeneficiary
       orphanRemoval: 'true'
-      joinType: OneToMany
       fetchType: LAZY
-      collectionType: List
-      orderBy: YEAR_MONTH ASC
       cascadeTypes:
       - ALL
+      orderBy: YEAR_MONTH ASC
     - fieldName: skippedRifRecords
       entityClass: gov.cms.bfd.model.rif.SkippedRifRecord
+      collectionType: Set
+      readOnly: true
+      joinType: OneToMany
       mappedBy: beneId
       orphanRemoval: 'false'
-      joinType: OneToMany
       fetchType: LAZY
-      collectionType: Set
       cascadeTypes:
       - ALL
     - fieldName: beneficiaryHistories
       entityClass: gov.cms.bfd.model.rif.BeneficiaryHistory
-      mappedBy: beneficiaryId
-      joinType: OneToMany
       collectionType: Set
+      readOnly: true
+      joinType: OneToMany
+      mappedBy: beneficiaryId
+      orphanRemoval: false
+      fetchType: LAZY
       cascadeTypes:
       - ALL
-      fetchType: LAZY
-      orphanRemoval: false
     - fieldName: medicareBeneficiaryIdHistories
       entityClass: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
-      mappedBy: beneficiaryId
-      joinType: OneToMany
       collectionType: Set
+      readOnly: true
+      joinType: OneToMany
+      mappedBy: beneficiaryId
+      orphanRemoval: false
+      fetchType: LAZY
       cascadeTypes:
       - ALL
-      fetchType: LAZY
-      orphanRemoval: false
   arrays: []
   enumTypes:
   - name: gov.cms.bfd.model.rif.BeneficiaryColumn

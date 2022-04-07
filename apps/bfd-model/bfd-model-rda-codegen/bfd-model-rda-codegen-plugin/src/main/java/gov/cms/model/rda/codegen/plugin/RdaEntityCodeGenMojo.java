@@ -114,19 +114,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       Function<String, Optional<MappingBean>> findMappingWithEntityClassName)
       throws MojoExecutionException {
     TypeSpec.Builder classBuilder =
-        TypeSpec.classBuilder(mapping.entityClassName())
-            .addModifiers(Modifier.PUBLIC)
-            .addAnnotation(Entity.class)
-            .addAnnotation(FieldNameConstants.class);
-    if (mapping.getTable().isEqualsNeeded()) {
-      classBuilder.addAnnotation(createEqualsAndHashCodeAnnotation());
-    }
-    if (mapping.getTable().getColumns().size() < 100) {
-      classBuilder
-          .addAnnotation(NoArgsConstructor.class)
-          .addAnnotation(AllArgsConstructor.class)
-          .addAnnotation(Builder.class);
-    }
+        TypeSpec.classBuilder(mapping.entityClassName()).addModifiers(Modifier.PUBLIC);
     if (mapping.hasEntityInterfaces()) {
       for (String interfaceName : mapping.getEntityInterfaces()) {
         classBuilder.addSuperinterface(PoetUtil.toClassName(interfaceName));
@@ -139,7 +127,6 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
       throw MojoUtil.createException(
           "mapping has no primary key fields: mapping=%s", mapping.getId());
     }
-    classBuilder.addAnnotation(createTableAnnotation(mapping.getTable()));
     addEnums(mapping.getEnumTypes(), classBuilder);
     var primaryKeySpecs = new ArrayList<FieldSpec>();
     var primaryKeyFieldNames = Set.copyOf(mapping.getTable().getPrimaryKeyColumns());
@@ -151,12 +138,29 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
         mapping, findMappingWithId, classBuilder, primaryKeyFieldNames.size(), accessorSpecs);
     addJoinFields(mapping, classBuilder, primaryKeyFieldNames, accessorSpecs);
     addAccessors(mapping, classBuilder, accessorSpecs);
+    addEntityClassAnnotations(mapping, classBuilder, primaryKeySpecs);
+    return classBuilder.build();
+  }
+
+  private void addEntityClassAnnotations(
+      MappingBean mapping, TypeSpec.Builder classBuilder, ArrayList<FieldSpec> primaryKeySpecs) {
+    classBuilder.addAnnotation(Entity.class);
     if (primaryKeySpecs.size() > 1) {
       classBuilder
           .addAnnotation(createIdClassAnnotation(mapping))
           .addType(createPrimaryKeyClass(mapping, primaryKeySpecs));
     }
-    return classBuilder.build();
+    classBuilder.addAnnotation(createTableAnnotation(mapping.getTable()));
+    classBuilder.addAnnotation(FieldNameConstants.class);
+    if (mapping.getTable().isEqualsNeeded()) {
+      classBuilder.addAnnotation(createEqualsAndHashCodeAnnotation());
+    }
+    if (mapping.getTable().getColumns().size() < 100) {
+      classBuilder
+          .addAnnotation(NoArgsConstructor.class)
+          .addAnnotation(AllArgsConstructor.class)
+          .addAnnotation(Builder.class);
+    }
   }
 
   private void addEnums(List<EnumTypeBean> enumMappings, TypeSpec.Builder classBuilder) {
@@ -279,13 +283,17 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
               == MappingBean.NullableFieldAccessorType.Optional) {
         classBuilder.addMethod(
             PoetUtil.createOptionalGetter(spec.fieldName, spec.fieldType, spec.accessorType));
-        classBuilder.addMethod(
-            PoetUtil.createOptionalSetter(spec.fieldName, spec.fieldType, spec.accessorType));
+        if (!spec.isReadOnly) {
+          classBuilder.addMethod(
+              PoetUtil.createOptionalSetter(spec.fieldName, spec.fieldType, spec.accessorType));
+        }
       } else {
         classBuilder.addMethod(
             PoetUtil.createStandardGetter(spec.fieldName, spec.fieldType, spec.accessorType));
-        classBuilder.addMethod(
-            PoetUtil.createStandardSetter(spec.fieldName, spec.fieldType, spec.accessorType));
+        if (!spec.isReadOnly) {
+          classBuilder.addMethod(
+              PoetUtil.createStandardSetter(spec.fieldName, spec.fieldType, spec.accessorType));
+        }
       }
     }
   }
@@ -300,7 +308,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     final TypeName fieldType = createFieldTypeForColumn(mapping, column);
     final TypeName accessorType = createAccessorTypeForColumn(mapping, column);
     accessorSpecs.add(
-        new AccessorSpec(column.getName(), fieldType, accessorType, column.isNullable()));
+        new AccessorSpec(column.getName(), fieldType, accessorType, column.isNullable(), false));
     FieldSpec.Builder builder =
         FieldSpec.builder(fieldType, column.getName()).addModifiers(Modifier.PRIVATE);
     if (column.hasComment()) {
@@ -376,7 +384,8 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     if (join.getJoinType().isMultiValue()) {
       fieldType = ParameterizedTypeName.get(join.getCollectionType().getInterfaceName(), fieldType);
     }
-    accessorSpecs.add(new AccessorSpec(join.getFieldName(), fieldType, fieldType, false));
+    accessorSpecs.add(
+        new AccessorSpec(join.getFieldName(), fieldType, fieldType, false, join.isReadOnly()));
     FieldSpec.Builder builder =
         FieldSpec.builder(fieldType, join.getFieldName()).addModifiers(Modifier.PRIVATE);
     if (mapping.getTable().isPrimaryKey(join)) {
@@ -452,7 +461,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     return ClassName.get(
         mapping.entityPackageName(),
         mapping.entityClassName(),
-        mapping.entityClassName() + PRIMARY_KEY_CLASS_NAME_SUFFIX);
+        mapping.getTable().getCompositeKeyClassName());
   }
 
   private AnnotationSpec createIdClassAnnotation(MappingBean mapping) {
@@ -541,7 +550,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     TypeSpec.Builder pkClassBuilder =
         TypeSpec.classBuilder(computePrimaryKeyClassName(mapping))
             .addSuperinterface(Serializable.class)
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addAnnotation(Getter.class)
             .addAnnotation(EqualsAndHashCode.class)
             .addAnnotation(NoArgsConstructor.class)
@@ -655,6 +664,7 @@ public class RdaEntityCodeGenMojo extends AbstractMojo {
     private TypeName fieldType;
     private TypeName accessorType;
     private boolean isNullableColumn;
+    private boolean isReadOnly;
 
     private boolean hasDifferentAccessorType() {
       return !fieldType.equals(accessorType);

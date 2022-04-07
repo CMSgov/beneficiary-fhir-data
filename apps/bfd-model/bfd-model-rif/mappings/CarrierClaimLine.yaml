@@ -12,6 +12,7 @@ mappings:
     - lineNumber
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: LineId
     columns:
     - name: lineNumber
       dbName: line_num

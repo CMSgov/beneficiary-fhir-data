@@ -13,6 +13,7 @@ mappings:
     - beneHistoryId
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: LineId
     columns:
     - name: beneHistoryId
       dbName: bene_history_id

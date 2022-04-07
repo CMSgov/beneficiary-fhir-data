@@ -58,6 +58,8 @@ public class JoinBean {
    */
   private String foreignKey;
 
+  @Builder.Default private boolean readOnly = false;
+
   public boolean isValidEntityClass() {
     return entityClass.indexOf('.') > 0;
   }

@@ -13,6 +13,7 @@ mappings:
     - medicareBeneficiaryIdKey
     quoteNames: false
     equalsNeeded: false
+    compositeKeyClassName: LineId
     columns:
     - name: medicareBeneficiaryIdKey
       dbName: bene_mbi_id
