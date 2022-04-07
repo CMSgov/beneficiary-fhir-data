@@ -638,7 +638,7 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("5.00"), claimGroup.getClaimPPSCapitalExceptionAmount().get());
     assertEquals(
         new BigDecimal("4.00"), claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount().get());
-    assertEquals(17L, claimGroup.getUtilizationDayCount());
+    assertEquals(17, claimGroup.getUtilizationDayCount());
     assertEquals(17, claimGroup.getCoinsuranceDayCount());
     assertEquals(0, claimGroup.getNonUtilizationDayCount());
     assertEquals(19, claimGroup.getBloodPintsFurnishedQty());
