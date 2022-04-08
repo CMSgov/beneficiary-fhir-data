@@ -628,7 +628,20 @@
         }
       }, 
   ```
+  
+## BFD-874 Fix diagnosis.sequence in V1 and V2
 
+* The Following FHIR mapping changes were made:
+
+For both V1 and V2 eob.diagnosis.sequence is now correctly populated. This can now be utilized whenever a DRG is reported.
+
+```
+  "diagnosis" : [ {
+    "sequence" : 1,
+    ...,
+  }]
+ ```
+  
 ## BFD-1582 Remove spurious coverage contracts
 
 Removed hardcoded coverage contracts that were inadvertantly introduced in V1 and V2 during testing.
