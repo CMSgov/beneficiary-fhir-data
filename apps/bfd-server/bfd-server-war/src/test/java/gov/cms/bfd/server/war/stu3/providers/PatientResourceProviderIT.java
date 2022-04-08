@@ -730,16 +730,6 @@ public final class PatientResourceProviderIT {
     useHicnFromBeneficiaryTable = true;
     expectsSingleBeneMatch = true;
 
-    assertPatientByHashTypeMatch(
-        fhirClient,
-        beneficiariesList,
-        beneficiariesHistoryList,
-        -123456L,
-        "543217066N",
-        useHicnFromBeneficiaryTable,
-        "hicn",
-        expectsSingleBeneMatch);
-
     /*
      * The following scenario tests when the same hicn is in the
      * Beneficiaries and also in the BeneficiariesHistory table. The bene id
@@ -1221,15 +1211,6 @@ public final class PatientResourceProviderIT {
      */
     useMbiFromBeneficiaryTable = true;
     expectsSingleBeneMatch = true;
-    assertPatientByHashTypeMatch(
-        fhirClient,
-        beneficiariesList,
-        beneficiariesHistoryList,
-        -123456L,
-        "3456789N",
-        useMbiFromBeneficiaryTable,
-        "mbi",
-        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the same mbi is in the
