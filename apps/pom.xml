@@ -88,6 +88,9 @@
 		<jackson.version>2.13.1</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
 		<newrelicAgent.version>7.5.0</newrelicAgent.version>
+		<checkstyle.version>10.1</checkstyle.version>
+		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
+
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -529,21 +532,6 @@ checkJavaFormat
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<configuration>
-						<configLocation>checkstyle.xml</configLocation>
-					</configuration>
-					<version>3.1.2</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>9.3</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>2.4</version>
 				</plugin>
@@ -581,6 +569,21 @@ checkJavaFormat
 						<pushChanges>false</pushChanges>
 						<localCheckout>true</localCheckout>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<configuration>
+						<configLocation>checkstyle.xml</configLocation>
+					</configuration>
+					<version>${checkstyle.plugin.version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${checkstyle.version}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
