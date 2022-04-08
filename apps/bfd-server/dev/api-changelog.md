@@ -629,6 +629,56 @@
       }, 
   ```
 
+## BFD-1582 Remove spurious coverage contracts
+
+Removed hardcoded coverage contracts that were inadvertantly introduced in V1 and V2 during testing.
+
+The contract that was removed in V1:
+
+```
+"contract" : [ {
+        "id" : "ptc-contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1 reference"
+      } ]
+```
+
+The contract that was removed in V2:
+
+```
+"contract" : [ {
+        "id" : "contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1"
+      } ]
+```
+
+## BFD-1423 Remove Duplicate Drug Status Code
+
+Removed duplicate drug status coding from API output for PDE claims:
+There will only be one of these:
+```
+ "category" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code" : "info",
+            "display" : "Information"
+          }, {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "display" : "Drug Coverage Status Code"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "code" : "C",
+            "display" : "Covered"
+          } ]
+        }
+}
+```
+
 ## BFD-1477 Map Provider for PDE
 
 * Following FHIR mapping changes were made:
@@ -688,9 +738,9 @@ The new coding:
 
 ## BFD-1446: Added focal field to v2
 
-For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
+For V2, set eob.insurance.focal to 'true' for all eob.insurance.coverage elements
 
-This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim. If this is the case then the focal should always be set to true.  This is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim at this time. This fix applies to V2 only.
 
 ````
  "insurance" : [ {

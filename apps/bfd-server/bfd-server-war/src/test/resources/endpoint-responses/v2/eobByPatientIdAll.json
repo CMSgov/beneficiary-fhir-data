@@ -4187,26 +4187,6 @@
             "display" : "Information"
           }, {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
-            "display" : "Drug Coverage Status Code"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
-            "code" : "C",
-            "display" : "Covered"
-          } ]
-        }
-      }, {
-        "sequence" : 8,
-        "category" : {
-          "coding" : [ {
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code" : "info",
-            "display" : "Information"
-          }, {
-            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/adjstmt_dltn_cd",
             "display" : "Adjustment Deletion Code"
           } ]
@@ -4219,7 +4199,7 @@
           } ]
         }
       }, {
-        "sequence" : 9,
+        "sequence" : 8,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4239,7 +4219,7 @@
           } ]
         }
       }, {
-        "sequence" : 10,
+        "sequence" : 9,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4259,7 +4239,7 @@
           } ]
         }
       }, {
-        "sequence" : 11,
+        "sequence" : 10,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4279,7 +4259,7 @@
           } ]
         }
       }, {
-        "sequence" : 12,
+        "sequence" : 11,
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4295,7 +4275,7 @@
           } ]
         }
       }, {
-        "sequence" : 13,
+        "sequence" : 12,
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4311,7 +4291,7 @@
           } ]
         }
       }, {
-        "sequence" : 14,
+        "sequence" : 13,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4331,7 +4311,7 @@
           } ]
         }
       }, {
-        "sequence" : 15,
+        "sequence" : 14,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4896,17 +4876,17 @@
             "value" : 1
           }
         }, {
-            "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-            "valueCoding" : {
-              "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-              "code" : "3"
-            }
-          }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            "code" : "3"
+          }
+        }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
           "valueCoding" : {
             "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
             "code" : "3",
-            "display":"Services"
+            "display" : "Services"
           }
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
