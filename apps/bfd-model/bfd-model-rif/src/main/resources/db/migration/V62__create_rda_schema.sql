@@ -1,3 +1,13 @@
+/*
+ * This migration creates a new schema to hold partially adjudicated claims data sourced from the RDA API.
+ * The primary motivation of the change is to rename the schema to more generally reflect the data source
+ * and to rename all tables, indexes, and columns to follow the snake case naming convention used
+ * in the public schema.
+ *
+ * Because the production database is not yet populated the simplest approach is to create a new schema
+ * and reload data into that new schema.  A later migration will drop the old pre_adj schema completely.
+ */
+
 create schema if not exists rda;
 
 create table rda.rda_api_progress (
