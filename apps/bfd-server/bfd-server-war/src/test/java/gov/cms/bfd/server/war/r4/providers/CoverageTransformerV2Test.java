@@ -185,12 +185,6 @@ public final class CoverageTransformerV2Test {
     verifyCoverageClass("Part A");
   }
 
-  @Test
-  public void verifyCoverageContractPartA() {
-    transformCoverage(MedicareSegment.PART_A, false);
-    verifyCoverageContract("part-a");
-  }
-
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.CoverageTransformerV2#transform(Coverage)} works as

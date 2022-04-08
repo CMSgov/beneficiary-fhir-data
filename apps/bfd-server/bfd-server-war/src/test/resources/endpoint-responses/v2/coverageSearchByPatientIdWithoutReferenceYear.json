@@ -97,11 +97,6 @@
           } ]
         },
         "value" : "Part A"
-      } ],
-      "contract" : [ {
-        "id" : "contract1"
-      }, {
-        "reference" : "Coverage/part-a-contract1"
       } ]
     }
   }, {
