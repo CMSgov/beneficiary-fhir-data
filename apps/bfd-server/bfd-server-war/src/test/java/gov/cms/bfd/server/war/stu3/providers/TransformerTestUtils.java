@@ -1444,6 +1444,8 @@ final class TransformerTestUtils {
         CcwCodebookVariable.CLM_DRG_CD,
         diagnosisRelatedGroupCd,
         eob.getDiagnosisFirstRep().getPackageCode());
+
+    assertEquals(1, eob.getDiagnosisFirstRep().getSequence());
   }
 
   /**
