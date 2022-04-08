@@ -169,7 +169,7 @@ public final class PartDEventTransformerV2Test {
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    assertEquals(15, eob.getSupportingInfo().size());
+    assertEquals(14, eob.getSupportingInfo().size());
   }
 
   @Test
