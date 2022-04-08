@@ -204,7 +204,7 @@ public final class EndpointJsonResponseComparatorIT {
    * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
    * the <code>@Ignore</code> annotation and running this method as JUnit.
    */
-  // @Disabled
+  @Disabled
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
   public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
