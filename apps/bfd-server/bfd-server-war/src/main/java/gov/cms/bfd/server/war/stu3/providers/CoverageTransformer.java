@@ -126,95 +126,11 @@ final class CoverageTransformer {
       coverage.addExtension(
           TransformerUtils.createExtensionDate(
               CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-    }
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_01,
-              beneficiary.getMedicaidDualEligibilityJanCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_02,
-              beneficiary.getMedicaidDualEligibilityFebCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_03,
-              beneficiary.getMedicaidDualEligibilityMarCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_04,
-              beneficiary.getMedicaidDualEligibilityAprCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_05,
-              beneficiary.getMedicaidDualEligibilityMayCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_06,
-              beneficiary.getMedicaidDualEligibilityJunCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_07,
-              beneficiary.getMedicaidDualEligibilityJulCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_08,
-              beneficiary.getMedicaidDualEligibilityAugCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_09,
-              beneficiary.getMedicaidDualEligibilitySeptCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_10,
-              beneficiary.getMedicaidDualEligibilityOctCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_11,
-              beneficiary.getMedicaidDualEligibilityNovCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_12,
-              beneficiary.getMedicaidDualEligibilityDecCode()));
-    }
+      transformMedicaidDualEligibility(coverage, beneficiary);
 
-    transformEntitlementBuyInIndicators(coverage, beneficiary);
+      transformEntitlementBuyInIndicators(coverage, beneficiary);
+    }
     TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
@@ -274,95 +190,11 @@ final class CoverageTransformer {
       coverage.addExtension(
           TransformerUtils.createExtensionDate(
               CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-    }
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_01,
-              beneficiary.getMedicaidDualEligibilityJanCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_02,
-              beneficiary.getMedicaidDualEligibilityFebCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_03,
-              beneficiary.getMedicaidDualEligibilityMarCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_04,
-              beneficiary.getMedicaidDualEligibilityAprCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_05,
-              beneficiary.getMedicaidDualEligibilityMayCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_06,
-              beneficiary.getMedicaidDualEligibilityJunCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_07,
-              beneficiary.getMedicaidDualEligibilityJulCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_08,
-              beneficiary.getMedicaidDualEligibilityAugCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_09,
-              beneficiary.getMedicaidDualEligibilitySeptCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_10,
-              beneficiary.getMedicaidDualEligibilityOctCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_11,
-              beneficiary.getMedicaidDualEligibilityNovCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_12,
-              beneficiary.getMedicaidDualEligibilityDecCode()));
-    }
+      transformMedicaidDualEligibility(coverage, beneficiary);
 
-    transformEntitlementBuyInIndicators(coverage, beneficiary);
+      transformEntitlementBuyInIndicators(coverage, beneficiary);
+    }
     TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
@@ -399,91 +231,203 @@ final class CoverageTransformer {
             TransformerConstants.COVERAGE_PLAN, TransformerConstants.COVERAGE_PLAN_PART_C));
     coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
 
-    // Contract Number
-    if (beneficiary.getPartCContractNumberJanId().isPresent()) {
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      transformPartCContractNumber(coverage, beneficiary);
+
+      transformPartCPbpNumber(coverage, beneficiary);
+
+      transformPartCPlanType(coverage, beneficiary);
+
+      transformHmoIndicator(coverage, beneficiary);
+
+      coverage.addExtension(
+          TransformerUtils.createExtensionDate(
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+
+      transformMedicaidDualEligibility(coverage, beneficiary);
+    }
+
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
+
+    timer.stop();
+    return coverage;
+  }
+
+  /**
+   * @param metricRegistry the {@link MetricRegistry} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage} resource for
+   * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
+   *     Beneficiary}
+   */
+  private static Coverage transformPartD(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+    Timer.Context timer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    CoverageTransformer.class.getSimpleName(), "transform", "part_d"))
+            .time();
+
+    Objects.requireNonNull(beneficiary);
+
+    Coverage coverage = new Coverage();
+    coverage.setId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
+    coverage
+        .getGrouping()
+        .setSubGroup(TransformerConstants.COVERAGE_PLAN)
+        .setSubPlan(TransformerConstants.COVERAGE_PLAN_PART_D);
+    coverage.setType(
+        TransformerUtils.createCodeableConcept(
+            TransformerConstants.COVERAGE_PLAN, TransformerConstants.COVERAGE_PLAN_PART_D));
+    coverage.setStatus(CoverageStatus.ACTIVE);
+    coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
+    if (beneficiary.getMedicareEnrollmentStatusCode().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_01,
-              beneficiary.getPartCContractNumberJanId()));
+              coverage, CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode()));
     }
-    if (beneficiary.getPartCContractNumberFebId().isPresent()) {
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      transformPartDContractNumber(coverage, beneficiary);
+
+      // Beneficiary Monthly Data
+      beneficiary
+          .getBeneficiaryMonthlys()
+          .forEach(
+              beneMonthly -> {
+                int month = beneMonthly.getYearMonth().getMonthValue();
+                String yearMonth =
+                    String.format(
+                        "%s-%s",
+                        String.valueOf(beneMonthly.getYearMonth().getYear()),
+                        String.valueOf(month));
+
+                Map<Integer, CcwCodebookVariable> mapOfMonth =
+                    new HashMap<Integer, CcwCodebookVariable>() {
+                      {
+                        put(1, CcwCodebookVariable.PTDCNTRCT01);
+                        put(2, CcwCodebookVariable.PTDCNTRCT02);
+                        put(3, CcwCodebookVariable.PTDCNTRCT03);
+                        put(4, CcwCodebookVariable.PTDCNTRCT04);
+                        put(5, CcwCodebookVariable.PTDCNTRCT05);
+                        put(6, CcwCodebookVariable.PTDCNTRCT06);
+                        put(7, CcwCodebookVariable.PTDCNTRCT07);
+                        put(8, CcwCodebookVariable.PTDCNTRCT08);
+                        put(9, CcwCodebookVariable.PTDCNTRCT09);
+                        put(10, CcwCodebookVariable.PTDCNTRCT10);
+                        put(11, CcwCodebookVariable.PTDCNTRCT11);
+                        put(12, CcwCodebookVariable.PTDCNTRCT12);
+                      }
+                    };
+
+                if (mapOfMonth.containsKey(month)) {
+                  if (!beneMonthly.getPartDContractNumberId().isPresent()
+                      || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
+                    beneMonthly.setPartDContractNumberId(Optional.of("0"));
+                  }
+
+                  coverage.addExtension(
+                      TransformerUtils.createExtensionCoding(
+                          coverage,
+                          mapOfMonth.get(month),
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                }
+              });
+
+      transformPartDPbpNumber(coverage, beneficiary);
+
+      transformPartDSegmentNumber(coverage, beneficiary);
+
+      transformPartDLowIncomeCostShareGroup(coverage, beneficiary);
+
+      transformPartDRetireeDrugSubsidy(coverage, beneficiary);
+
+      coverage.addExtension(
+          TransformerUtils.createExtensionDate(
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+
+      transformMedicaidDualEligibility(coverage, beneficiary);
+    }
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
+
+    timer.stop();
+    return coverage;
+  }
+
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link HMOIndicator} {@link Coverage}
+   */
+  private static void transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
+    // Monthly Medicare Advantage (MA) enrollment indicators:
+    if (beneficiary.getHmoIndicatorJanInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_02,
-              beneficiary.getPartCContractNumberFebId()));
+              coverage, CcwCodebookVariable.HMO_IND_01, beneficiary.getHmoIndicatorJanInd()));
     }
-    if (beneficiary.getPartCContractNumberMarId().isPresent()) {
+    if (beneficiary.getHmoIndicatorFebInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_03,
-              beneficiary.getPartCContractNumberMarId()));
+              coverage, CcwCodebookVariable.HMO_IND_02, beneficiary.getHmoIndicatorFebInd()));
     }
-    if (beneficiary.getPartCContractNumberAprId().isPresent()) {
+    if (beneficiary.getHmoIndicatorMarInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_04,
-              beneficiary.getPartCContractNumberAprId()));
+              coverage, CcwCodebookVariable.HMO_IND_03, beneficiary.getHmoIndicatorMarInd()));
     }
-    if (beneficiary.getPartCContractNumberMayId().isPresent()) {
+    if (beneficiary.getHmoIndicatorAprInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_05,
-              beneficiary.getPartCContractNumberMayId()));
+              coverage, CcwCodebookVariable.HMO_IND_04, beneficiary.getHmoIndicatorAprInd()));
     }
-    if (beneficiary.getPartCContractNumberJunId().isPresent()) {
+    if (beneficiary.getHmoIndicatorMayInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_06,
-              beneficiary.getPartCContractNumberJunId()));
+              coverage, CcwCodebookVariable.HMO_IND_05, beneficiary.getHmoIndicatorMayInd()));
     }
-    if (beneficiary.getPartCContractNumberJulId().isPresent()) {
+    if (beneficiary.getHmoIndicatorJunInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_07,
-              beneficiary.getPartCContractNumberJulId()));
+              coverage, CcwCodebookVariable.HMO_IND_06, beneficiary.getHmoIndicatorJunInd()));
     }
-    if (beneficiary.getPartCContractNumberAugId().isPresent()) {
+    if (beneficiary.getHmoIndicatorJulInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_08,
-              beneficiary.getPartCContractNumberAugId()));
+              coverage, CcwCodebookVariable.HMO_IND_07, beneficiary.getHmoIndicatorJulInd()));
     }
-    if (beneficiary.getPartCContractNumberSeptId().isPresent()) {
+    if (beneficiary.getHmoIndicatorAugInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_09,
-              beneficiary.getPartCContractNumberSeptId()));
+              coverage, CcwCodebookVariable.HMO_IND_08, beneficiary.getHmoIndicatorAugInd()));
     }
-    if (beneficiary.getPartCContractNumberOctId().isPresent()) {
+    if (beneficiary.getHmoIndicatorSeptInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_10,
-              beneficiary.getPartCContractNumberOctId()));
+              coverage, CcwCodebookVariable.HMO_IND_09, beneficiary.getHmoIndicatorSeptInd()));
     }
-    if (beneficiary.getPartCContractNumberNovId().isPresent()) {
+    if (beneficiary.getHmoIndicatorOctInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_11,
-              beneficiary.getPartCContractNumberNovId()));
+              coverage, CcwCodebookVariable.HMO_IND_10, beneficiary.getHmoIndicatorOctInd()));
     }
-    if (beneficiary.getPartCContractNumberDecId().isPresent()) {
+    if (beneficiary.getHmoIndicatorNovInd().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.PTC_CNTRCT_ID_12,
-              beneficiary.getPartCContractNumberDecId()));
+              coverage, CcwCodebookVariable.HMO_IND_11, beneficiary.getHmoIndicatorNovInd()));
     }
+    if (beneficiary.getHmoIndicatorDecInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd()));
+    }
+  }
+
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
+   *     Coverage}
+   */
+  private static void transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartCPbpNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -545,7 +489,14 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_12, beneficiary.getPartCPbpNumberDecId()));
     }
+  }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
+   *     Coverage}
+   */
+  private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
     if (beneficiary.getPartCPlanTypeJanCode().isPresent()) {
       coverage.addExtension(
@@ -631,77 +582,178 @@ final class CoverageTransformer {
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_12,
               beneficiary.getPartCPlanTypeDecCode()));
     }
+  }
 
-    // Monthly Medicare Advantage (MA) enrollment indicators:
-    if (beneficiary.getHmoIndicatorJanInd().isPresent()) {
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
+   *     Coverage}
+   */
+  private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
+    // Contract Number
+    if (beneficiary.getPartCContractNumberJanId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_01, beneficiary.getHmoIndicatorJanInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_01,
+              beneficiary.getPartCContractNumberJanId()));
     }
-    if (beneficiary.getHmoIndicatorFebInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberFebId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_02, beneficiary.getHmoIndicatorFebInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_02,
+              beneficiary.getPartCContractNumberFebId()));
     }
-    if (beneficiary.getHmoIndicatorMarInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberMarId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_03, beneficiary.getHmoIndicatorMarInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_03,
+              beneficiary.getPartCContractNumberMarId()));
     }
-    if (beneficiary.getHmoIndicatorAprInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberAprId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_04, beneficiary.getHmoIndicatorAprInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_04,
+              beneficiary.getPartCContractNumberAprId()));
     }
-    if (beneficiary.getHmoIndicatorMayInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberMayId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_05, beneficiary.getHmoIndicatorMayInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_05,
+              beneficiary.getPartCContractNumberMayId()));
     }
-    if (beneficiary.getHmoIndicatorJunInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberJunId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_06, beneficiary.getHmoIndicatorJunInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_06,
+              beneficiary.getPartCContractNumberJunId()));
     }
-    if (beneficiary.getHmoIndicatorJulInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberJulId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_07, beneficiary.getHmoIndicatorJulInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_07,
+              beneficiary.getPartCContractNumberJulId()));
     }
-    if (beneficiary.getHmoIndicatorAugInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberAugId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_08, beneficiary.getHmoIndicatorAugInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_08,
+              beneficiary.getPartCContractNumberAugId()));
     }
-    if (beneficiary.getHmoIndicatorSeptInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberSeptId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_09, beneficiary.getHmoIndicatorSeptInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_09,
+              beneficiary.getPartCContractNumberSeptId()));
     }
-    if (beneficiary.getHmoIndicatorOctInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberOctId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_10, beneficiary.getHmoIndicatorOctInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_10,
+              beneficiary.getPartCContractNumberOctId()));
     }
-    if (beneficiary.getHmoIndicatorNovInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberNovId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_11, beneficiary.getHmoIndicatorNovInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_11,
+              beneficiary.getPartCContractNumberNovId()));
     }
-    if (beneficiary.getHmoIndicatorDecInd().isPresent()) {
+    if (beneficiary.getPartCContractNumberDecId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd()));
+              coverage,
+              CcwCodebookVariable.PTC_CNTRCT_ID_12,
+              beneficiary.getPartCContractNumberDecId()));
     }
-    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
+  }
 
-    // The reference year of the enrollment data
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionDate(
-              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-    }
+  /**
+   * @param coverage the {@link Coverage} to generate
+   * @param beneficiary the {@link Beneficiary} to generate Coverage for
+   * @return {@link Coverage} resource for the
+   */
+  private static void transformEntitlementBuyInIndicators(
+      Coverage coverage, Beneficiary beneficiary) {
 
+    // Medicare Entitlement Buy In Indicator
+    if (beneficiary.getEntitlementBuyInJanInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN01, beneficiary.getEntitlementBuyInJanInd()));
+    }
+    if (beneficiary.getEntitlementBuyInFebInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN02, beneficiary.getEntitlementBuyInFebInd()));
+    }
+    if (beneficiary.getEntitlementBuyInMarInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN03, beneficiary.getEntitlementBuyInMarInd()));
+    }
+    if (beneficiary.getEntitlementBuyInAprInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN04, beneficiary.getEntitlementBuyInAprInd()));
+    }
+    if (beneficiary.getEntitlementBuyInMayInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN05, beneficiary.getEntitlementBuyInMayInd()));
+    }
+    if (beneficiary.getEntitlementBuyInJunInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN06, beneficiary.getEntitlementBuyInJunInd()));
+    }
+    if (beneficiary.getEntitlementBuyInJulInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN07, beneficiary.getEntitlementBuyInJulInd()));
+    }
+    if (beneficiary.getEntitlementBuyInAugInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN08, beneficiary.getEntitlementBuyInAugInd()));
+    }
+    if (beneficiary.getEntitlementBuyInSeptInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN09, beneficiary.getEntitlementBuyInSeptInd()));
+    }
+    if (beneficiary.getEntitlementBuyInOctInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN10, beneficiary.getEntitlementBuyInOctInd()));
+    }
+    if (beneficiary.getEntitlementBuyInNovInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN11, beneficiary.getEntitlementBuyInNovInd()));
+    }
+    if (beneficiary.getEntitlementBuyInDecInd().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage, CcwCodebookVariable.BUYIN12, beneficiary.getEntitlementBuyInDecInd()));
+    }
+  }
+
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment} {@link
+   *     Coverage}
+   */
+  private static void transformMedicaidDualEligibility(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
       coverage.addExtension(
@@ -787,46 +839,14 @@ final class CoverageTransformer {
               CcwCodebookVariable.DUAL_12,
               beneficiary.getMedicaidDualEligibilityDecCode()));
     }
-
-    timer.stop();
-    return coverage;
   }
 
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
+   * @param coverage the {@link Coverage} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
-   *     Coverage} resource for
-   * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
-   *     Beneficiary}
+   *     Coverage}
    */
-  private static Coverage transformPartD(MetricRegistry metricRegistry, Beneficiary beneficiary) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    CoverageTransformer.class.getSimpleName(), "transform", "part_d"))
-            .time();
-
-    Objects.requireNonNull(beneficiary);
-
-    Coverage coverage = new Coverage();
-    coverage.setId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
-    coverage
-        .getGrouping()
-        .setSubGroup(TransformerConstants.COVERAGE_PLAN)
-        .setSubPlan(TransformerConstants.COVERAGE_PLAN_PART_D);
-    coverage.setType(
-        TransformerUtils.createCodeableConcept(
-            TransformerConstants.COVERAGE_PLAN, TransformerConstants.COVERAGE_PLAN_PART_D));
-    coverage.setStatus(CoverageStatus.ACTIVE);
-    coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
-    if (beneficiary.getMedicareEnrollmentStatusCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode()));
-    }
-
-    // Contract Number
+  private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     if (beneficiary.getPartDContractNumberJanId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
@@ -911,51 +931,14 @@ final class CoverageTransformer {
               CcwCodebookVariable.PTDCNTRCT12,
               beneficiary.getPartDContractNumberDecId()));
     }
+  }
 
-    // Beneficiary Monthly Data
-    beneficiary
-        .getBeneficiaryMonthlys()
-        .forEach(
-            beneMonthly -> {
-              int month = beneMonthly.getYearMonth().getMonthValue();
-              String yearMonth =
-                  String.format(
-                      "%s-%s",
-                      String.valueOf(beneMonthly.getYearMonth().getYear()), String.valueOf(month));
-
-              Map<Integer, CcwCodebookVariable> mapOfMonth =
-                  new HashMap<Integer, CcwCodebookVariable>() {
-                    {
-                      put(1, CcwCodebookVariable.PTDCNTRCT01);
-                      put(2, CcwCodebookVariable.PTDCNTRCT02);
-                      put(3, CcwCodebookVariable.PTDCNTRCT03);
-                      put(4, CcwCodebookVariable.PTDCNTRCT04);
-                      put(5, CcwCodebookVariable.PTDCNTRCT05);
-                      put(6, CcwCodebookVariable.PTDCNTRCT06);
-                      put(7, CcwCodebookVariable.PTDCNTRCT07);
-                      put(8, CcwCodebookVariable.PTDCNTRCT08);
-                      put(9, CcwCodebookVariable.PTDCNTRCT09);
-                      put(10, CcwCodebookVariable.PTDCNTRCT10);
-                      put(11, CcwCodebookVariable.PTDCNTRCT11);
-                      put(12, CcwCodebookVariable.PTDCNTRCT12);
-                    }
-                  };
-
-              if (mapOfMonth.containsKey(month)) {
-                if (!beneMonthly.getPartDContractNumberId().isPresent()
-                    || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
-                  beneMonthly.setPartDContractNumberId(Optional.of("0"));
-                }
-
-                coverage.addExtension(
-                    TransformerUtils.createExtensionCoding(
-                        coverage,
-                        mapOfMonth.get(month),
-                        yearMonth,
-                        beneMonthly.getPartDContractNumberId()));
-              }
-            });
-
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
+  private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartDPbpNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -1017,7 +1000,14 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId()));
     }
+  }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
+  private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
     if (beneficiary.getPartDSegmentNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -1079,7 +1069,15 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID12, beneficiary.getPartDSegmentNumberDecId()));
     }
+  }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
+  private static void transformPartDLowIncomeCostShareGroup(
+      Coverage coverage, Beneficiary beneficiary) {
     // Monthly cost sharing group
     if (beneficiary.getPartDLowIncomeCostShareGroupJanCode().isPresent()) {
       coverage.addExtension(
@@ -1165,7 +1163,14 @@ final class CoverageTransformer {
               CcwCodebookVariable.CSTSHR12,
               beneficiary.getPartDLowIncomeCostShareGroupDecCode()));
     }
+  }
 
+  /**
+   * @param coverage the {@link Coverage} to use
+   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
+   *     Coverage}
+   */
+  private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Part D Retiree Drug Subsidy Indicators
     if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent()) {
       coverage.addExtension(
@@ -1251,175 +1256,5 @@ final class CoverageTransformer {
               CcwCodebookVariable.RDSIND12,
               beneficiary.getPartDRetireeDrugSubsidyDecInd()));
     }
-
-    // The reference year of the enrollment data
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionDate(
-              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-    }
-
-    // Monthly Medicare-Medicaid dual eligibility codes
-    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_01,
-              beneficiary.getMedicaidDualEligibilityJanCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_02,
-              beneficiary.getMedicaidDualEligibilityFebCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_03,
-              beneficiary.getMedicaidDualEligibilityMarCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_04,
-              beneficiary.getMedicaidDualEligibilityAprCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_05,
-              beneficiary.getMedicaidDualEligibilityMayCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_06,
-              beneficiary.getMedicaidDualEligibilityJunCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_07,
-              beneficiary.getMedicaidDualEligibilityJulCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_08,
-              beneficiary.getMedicaidDualEligibilityAugCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_09,
-              beneficiary.getMedicaidDualEligibilitySeptCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_10,
-              beneficiary.getMedicaidDualEligibilityOctCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_11,
-              beneficiary.getMedicaidDualEligibilityNovCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage,
-              CcwCodebookVariable.DUAL_12,
-              beneficiary.getMedicaidDualEligibilityDecCode()));
-    }
-
-    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
-
-    timer.stop();
-    return coverage;
-  }
-
-  /**
-   * @param coverage the {@link Coverage} to generate
-   * @param beneficiary the {@link Beneficiary} to generate Coverage for
-   * @return {@link Coverage} resource for the
-   */
-  private static Coverage transformEntitlementBuyInIndicators(
-      Coverage coverage, Beneficiary beneficiary) {
-
-    // Medicare Entitlement Buy In Indicator
-    if (beneficiary.getEntitlementBuyInJanInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN01, beneficiary.getEntitlementBuyInJanInd()));
-    }
-    if (beneficiary.getEntitlementBuyInFebInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN02, beneficiary.getEntitlementBuyInFebInd()));
-    }
-    if (beneficiary.getEntitlementBuyInMarInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN03, beneficiary.getEntitlementBuyInMarInd()));
-    }
-    if (beneficiary.getEntitlementBuyInAprInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN04, beneficiary.getEntitlementBuyInAprInd()));
-    }
-    if (beneficiary.getEntitlementBuyInMayInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN05, beneficiary.getEntitlementBuyInMayInd()));
-    }
-    if (beneficiary.getEntitlementBuyInJunInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN06, beneficiary.getEntitlementBuyInJunInd()));
-    }
-    if (beneficiary.getEntitlementBuyInJulInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN07, beneficiary.getEntitlementBuyInJulInd()));
-    }
-    if (beneficiary.getEntitlementBuyInAugInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN08, beneficiary.getEntitlementBuyInAugInd()));
-    }
-    if (beneficiary.getEntitlementBuyInSeptInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN09, beneficiary.getEntitlementBuyInSeptInd()));
-    }
-    if (beneficiary.getEntitlementBuyInOctInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN10, beneficiary.getEntitlementBuyInOctInd()));
-    }
-    if (beneficiary.getEntitlementBuyInNovInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN11, beneficiary.getEntitlementBuyInNovInd()));
-    }
-    if (beneficiary.getEntitlementBuyInDecInd().isPresent()) {
-      coverage.addExtension(
-          TransformerUtils.createExtensionCoding(
-              coverage, CcwCodebookVariable.BUYIN12, beneficiary.getEntitlementBuyInDecInd()));
-    }
-    return coverage;
   }
 }

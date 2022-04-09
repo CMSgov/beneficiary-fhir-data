@@ -1,5 +1,71 @@
 # API Changelog
 
+## BFD-1461 Implement Handling for Null Enrollment Reference Years
+
+ * Following FHIR mapping changes were made:
+
+  * For V1 and V2, if there is a reference year, return data normally.  For V1 and V2, if there is a NULL reference year, do NOT return data that is associated with that specific reference year. All other data is returned as expected.  If there is a null reference year the following fields will not be present.
+
+```
+  {
+     "url":"https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+     "valueDate":"2018"
+  },
+  {
+     "url":"https://bluebutton.cms.gov/resources/variables/dual_01...12",
+     "valueCoding":{
+        "system":"https://bluebutton.cms.gov/resources/variables/dual_01...12",
+        "code":"**",
+        "display":"Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+     }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/buyin01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/buyin01...12",
+         "code":"C",
+         "display":"Part A and Part B state buy-in"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/ptdcntrct01/yyyy-1...yyy-12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/ptdcntrct01...12",
+         "code":"S4607"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/ptdpbpid01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/ptdpbpid01...12",
+         "code":"003"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/sgmtid01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/sgmtid01...12",
+         "code":"000"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/cstshr01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/cstshr01...12",
+         "code":"00",
+         "display":"Not Medicare enrolled for the month"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/rdsind01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/rdsind01...12",
+         "code":"Y",
+         "display":"Employer subsidized for the retired beneficiary"
+      }
+   }
+  ```
+  
 ## BFD-874 Fix diagnosis.sequence in V1 and V2
 
 * The Following FHIR mapping changes were made:

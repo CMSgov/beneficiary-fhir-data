@@ -386,6 +386,44 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a reference year field not found.
+   */
+  @Test
+  public void shouldNotHaveReferenceYearExtension() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
+    Beneficiary newBeneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    newBeneficiary.setLastUpdated(Instant.now());
+    newBeneficiary.setMbiHash(Optional.of("someMBIhash"));
+    newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+
+    Patient genPatient =
+        BeneficiaryTransformerV2.transform(
+            new MetricRegistry(), newBeneficiary, RequestHeaders.getHeaderWrapper());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genPatient);
+    Patient newPatient = parser.parseResource(Patient.class, json);
+
+    String url = "https://bluebutton.cms.gov/resources/variables/rfrnc_yr";
+    Optional<Extension> ex =
+        newPatient.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    assertEquals(false, ex.isPresent());
+    assertEquals(true, ex.isEmpty());
+  }
+
+  /**
    * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} sets a
    * valid extension date.
    */
@@ -394,12 +432,11 @@ public final class BeneficiaryTransformerV2Test {
 
     IBaseDatatype ex =
         TransformerUtilsV2.createExtensionDate(
-                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear())
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear().get())
             .getValue();
 
     IBaseDatatype compare =
-        TransformerUtilsV2.createExtensionDate(
-                CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
+        TransformerUtilsV2.createExtensionDate(CcwCodebookVariable.RFRNC_YR, new BigDecimal(3))
             .getValue();
 
     assertEquals(ex.toString().length(), compare.toString().length());
