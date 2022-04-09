@@ -384,6 +384,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Helper function to create the {@link Identifier} for the specified {@link CodeableConcept}.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -1856,10 +1858,10 @@ public final class TransformerUtilsV2 {
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId.toString()));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, claimId.toString()));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
     }
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier

@@ -114,10 +114,6 @@ public final class RifParsingUtils {
    * @return the specified text parsed into an {@link Integer}
    */
   public static Integer parseInteger(String intText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
     try {
       return Integer.parseInt(intText);
     } catch (NumberFormatException e) {
@@ -146,10 +142,6 @@ public final class RifParsingUtils {
    * @return the specified text parsed into an {@link Long}
    */
   public static short parseShort(String shortText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
     try {
       return Short.parseShort(shortText);
     } catch (NumberFormatException e) {
@@ -196,10 +188,6 @@ public final class RifParsingUtils {
    * @return the specified text parsed into a {@link BigDecimal}
    */
   public static BigDecimal parseDecimal(String decimalText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
     if (decimalText.isEmpty()) {
       return BigDecimal.valueOf(0);
     } else {
@@ -230,11 +218,6 @@ public final class RifParsingUtils {
    * @return the specified text as a {@link LocalDate}
    */
   public static LocalDate parseDate(String dateText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
-
     DateTimeFormatter rifDateFormatter;
     /*
      * Incoming dates usually are in the format of dd-MMM-yyyy (01-MAR-2019). There
@@ -270,11 +253,6 @@ public final class RifParsingUtils {
    * @return the specified text as a {@link Instant}, parsed using {@link #RIF_TIMESTAMP_FORMATTER}
    */
   public static Instant parseTimestamp(String timestampText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier to
-     * read, and ensures that this parsing is standardized.
-     */
-
     try {
       LocalDateTime localDateTime = LocalDateTime.parse(timestampText, RIF_TIMESTAMP_FORMATTER);
       return localDateTime.toInstant(ZoneOffset.UTC);
@@ -313,11 +291,6 @@ public final class RifParsingUtils {
    * @return the specified text as a {@link Character} (first character only),
    */
   public static Character parseCharacter(String charText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
-
     if (charText.length() != 1) {
       throw new InvalidRifValueException(
           String.format("Unable to parse character value: '%s'.", charText));
