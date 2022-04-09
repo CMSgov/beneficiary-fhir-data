@@ -582,7 +582,7 @@ checkJavaFormat
 										builds.</message>
 									<banTimestamps>false</banTimestamps>
 									<!-- Allow SNAPSHOT version of this plugin since we build it in our own project rather than pulling from a repository. -->
-									<unCheckedPluginList>gov.cms.bfd:bfd-model-rda-codegen-plugin</unCheckedPluginList>
+									<unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin</unCheckedPluginList>
 								</requirePluginVersions>
 							</rules>
 						</configuration>

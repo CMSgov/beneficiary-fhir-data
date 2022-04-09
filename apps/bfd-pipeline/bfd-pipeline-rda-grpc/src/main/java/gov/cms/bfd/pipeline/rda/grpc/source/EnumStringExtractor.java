@@ -28,7 +28,7 @@ import java.util.function.Predicate;
  * @param <TEnum> the protobuf field's enum class
  */
 public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum>
-    implements gov.cms.model.rda.codegen.library.EnumStringExtractor<TRecord, TEnum> {
+    implements gov.cms.model.dsl.codegen.library.EnumStringExtractor<TRecord, TEnum> {
   private final Predicate<TRecord> hasEnumValue;
   private final Function<TRecord, ProtocolMessageEnum> getEnumValue;
   private final Predicate<TRecord> hasUnrecognizedValue;

@@ -3,7 +3,7 @@ mappings:
   entityClassName: gov.cms.bfd.model.rif.DMEClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   sourceType: RifCsv
   nullableFieldAccessorType: Optional
   minStringLength: 0

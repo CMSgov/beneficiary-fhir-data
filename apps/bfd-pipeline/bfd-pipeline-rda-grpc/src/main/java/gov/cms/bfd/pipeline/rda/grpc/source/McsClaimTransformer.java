@@ -4,7 +4,7 @@ import gov.cms.bfd.model.rda.MbiUtil;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
-import gov.cms.model.rda.codegen.library.DataTransformer;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;

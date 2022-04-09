@@ -41,7 +41,7 @@
         <dependency>
             <!-- Pulls in library of classes that are used for actual data copying so that plugin can reference them when generating code that calls them. -->
             <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rda-codegen-library</artifactId>
+            <artifactId>bfd-model-dsl-codegen-library</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -210,7 +210,7 @@
             </plugin>
             <plugin>
                 <groupId>gov.cms.bfd</groupId>
-                <artifactId>bfd-model-rda-codegen-plugin</artifactId>
+                <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
                     <mappingFile>${mapping.directory}/mappings</mappingFile>

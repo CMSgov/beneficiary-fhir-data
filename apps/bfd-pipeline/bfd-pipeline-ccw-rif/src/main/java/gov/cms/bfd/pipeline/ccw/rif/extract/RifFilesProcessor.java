@@ -37,7 +37,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.CsvRecordGroupingIterator.ColumnValu
 import gov.cms.bfd.pipeline.ccw.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.UnsupportedRifFileTypeException;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import gov.cms.model.rda.codegen.library.RifObjectWrapper;
+import gov.cms.model.dsl.codegen.library.RifObjectWrapper;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;

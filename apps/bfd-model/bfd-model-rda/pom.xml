@@ -69,7 +69,7 @@
         <plugins>
             <plugin>
                 <groupId>gov.cms.bfd</groupId>
-                <artifactId>bfd-model-rda-codegen-plugin</artifactId>
+                <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
                     <mappingFile>${project.basedir}/mappings</mappingFile>
