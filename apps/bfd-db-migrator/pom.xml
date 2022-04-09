@@ -14,7 +14,7 @@
 	<description>An application integrated with Flyway and Hibernate responsible for executing database migrations and validations against BFD datastores.</description>
 
 	<properties>
-		<flyway.version>7.8.1</flyway.version>
+		<flyway.version>8.5.5</flyway.version>
 		<reflections.version>0.10.2</reflections.version>
 	</properties>
 

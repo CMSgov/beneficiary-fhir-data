@@ -316,8 +316,9 @@ public final class MigratorAppIT {
     while (enumeration.hasMoreElements()) {
       ZipEntry entry = enumeration.nextElement();
 
-      // Check for sql migration scripts
-      if (entry.getName().startsWith("db/migration/") && entry.getName().endsWith(".sql")) {
+      // Check for versioned flyway scripts - a regex matcher would look like:
+      // ^db/migration/V[0-9]+[a-zA-Z_]+.sql$
+      if (entry.getName().startsWith("db/migration/V") && entry.getName().endsWith(".sql")) {
         fileCount++;
       }
     }
