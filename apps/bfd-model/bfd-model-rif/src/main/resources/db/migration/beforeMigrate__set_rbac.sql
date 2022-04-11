@@ -1,6 +1,6 @@
 /*
   This callback runs once, just before flyway executes any pending migrations, and ensures each of our schemas have the
-  appropriate roles assigned.
+  appropriate read, write, and migrator roles.
 */
 
 ${logic.psql-only} DO $$
