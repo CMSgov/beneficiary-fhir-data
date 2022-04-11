@@ -139,7 +139,7 @@ public final class RifParsingUtils {
 
   /**
    * @param shortText the number string to parse
-   * @return the specified text parsed into an {@link Long}
+   * @return the specified text parsed into an {@link short}
    */
   public static short parseShort(String shortText) {
     try {
@@ -189,7 +189,7 @@ public final class RifParsingUtils {
    */
   public static BigDecimal parseDecimal(String decimalText) {
     if (decimalText.isEmpty()) {
-      return BigDecimal.valueOf(0);
+      return BigDecimal.ZERO;
     } else {
       try {
         return new BigDecimal(decimalText);

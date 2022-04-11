@@ -1911,7 +1911,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         continue;
       }
       if (additionalDatabaseField.contentEquals("BENE_ID_NUMERIC")) {
-        RifField lastUpdated =
+        RifField beneIdNumeric =
             new RifField(
                 "BENE_ID_NUMERIC",
                 RifColumnType.BIGINT,
@@ -1921,7 +1921,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 null,
                 "BENE_ID_NUMERIC",
                 "beneficiaryIdNumeric");
-        addlDatabaseFields.add(lastUpdated);
+        addlDatabaseFields.add(beneIdNumeric);
         continue;
       }
     }
@@ -2229,6 +2229,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
    *     decimal point
+   * @return a Java poet {@link TypeName} that will be applied to the entity column; the use of the
+   *     {@link boolean} isColumnOptional determines if the type can be a primitive (i.e., long) or
+   *     in fact needs to be a Java class type (i.e., Long)
    */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
@@ -2241,14 +2244,25 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       } else {
         return ClassName.get(String.class);
       }
-    } else if (type == RifColumnType.DATE) return ClassName.get(LocalDate.class);
-    else if (type == RifColumnType.TIMESTAMP) return ClassName.get(Instant.class);
-    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0)
+    } else if (type == RifColumnType.DATE) {
+      return ClassName.get(LocalDate.class);
+    } else if (type == RifColumnType.TIMESTAMP) {
+      return ClassName.get(Instant.class);
+    }
+    // handle an inherited hack from the Excel spreadsheet in which a row entry
+    // was defined as a NUM and had an associated scale; for example (12,2) denotes
+    // a numeric data types of up to 12 digits, with two digits of scale (i.e., 55.45).
+    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0) {
       return ClassName.get(BigDecimal.class);
+    }
+    // some entries in Excel spreadsheet defined as NUM with a zero scale that are
+    // not optional should be defined as a primitive integer.
+    //
     else if (type == RifColumnType.NUM
         && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && !isColumnOptional) return TypeName.INT;
-    else if (type == RifColumnType.SMALLINT) {
+        && !isColumnOptional) {
+      return TypeName.INT;
+    } else if (type == RifColumnType.SMALLINT) {
       return isColumnOptional ? ClassName.get(Short.class) : TypeName.SHORT;
     } else if (type == RifColumnType.BIGINT) {
       return isColumnOptional ? ClassName.get(Long.class) : TypeName.LONG;
