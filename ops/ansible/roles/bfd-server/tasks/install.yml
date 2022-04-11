@@ -1,12 +1,8 @@
 ---
-
 - name: Install Pre-requisites
   yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    # Needed to supply `keytool` and also to run the app server.
-    - java-11-openjdk-devel
+    pkg:
+      - java-11-openjdk-devel
   become: true
 
 - name: Create Server User
@@ -24,8 +20,9 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
-# Create the temp directory iff it's missing. (Don't want to accidentally
-# change the permissions on /tmp.)
+
+# Create the temp directory if and only if it's missing. (Don't want to
+# accidentally change the permissions on /tmp.)
 - name: Check for Custom Temp Directory
   stat:
     path: "{{ data_server_tmp_dir }}"
@@ -57,20 +54,6 @@
     dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
   become: true
 
-# FIXME: Switch to the maven_artifact module after we move to the CCS.
-# see ../defaults/main.yml for version
-- name: Download New Relic Java Agent Bundle
-  get_url:
-    url: 'https://search.maven.org/remotecontent?filepath=com/newrelic/agent/java/newrelic-java/{{new_relic_agent_version}}/newrelic-java-{{new_relic_agent_version}}.zip'
-    dest: /tmp/newrelic-java.zip
-
-- name: Unzip New Relic Java Agent Bundle
-  unarchive:
-    src: /tmp/newrelic-java.zip
-    dest: /tmp
-    creates: /tmp/newrelic
-    remote_src: true
-
 - name: Create New Relic Directories
   file:
     path: "{{ item }}"
@@ -83,14 +66,22 @@
     - "{{ data_server_dir }}/newrelic"
     - "{{ data_server_dir }}/newrelic/extensions"
 
+- name: Find New Relic Agent
+  find:
+    paths: "{{ data_server_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+    pattern: newrelic-agent*.jar
+  register: find_nra
+
 - name: Copy New Relic Java Agent
   copy:
-    src: /tmp/newrelic/newrelic.jar
+    src: "{{ item.path }}"
     dest: "{{ data_server_dir }}/newrelic/newrelic.jar"
     remote_src: true
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
+  with_items:
+    - "{{ find_nra.files }}"
   become: true
 
 - name: Copy New Relic Java Agent Config
