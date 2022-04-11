@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-bfdDBMigratorAppJar="$(echo ${scriptDirectory}/bfd-db-migrator*.jar)"
-classpath="${bfdDBMigratorAppJar}:${scriptDirectory}/lib/*"
-mainClass="gov.cms.bfd.migrator.app.MigratorApp"
-[ -n "$JAVA_HOME" ] && "javaExecutable=${JAVA_HOME}/bin/java" || javaExecutable=java
+APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_JAR="${APP_DIR}/$(basename "$APP_DIR").jar"
+CLASS_PATH="${APP_JAR}:${APP_DIR}/lib/*"
+MAIN_CLASS="gov.cms.bfd.migrator.app.MigratorApp"
+JAVA_BIN=$( command -v "${JAVA_HOME}/bin/java" || command -v java )
 
-exec "$javaExecutable" -cp "$classpath" "$@" "$mainClass"
+exec "$JAVA_BIN" -cp "$CLASS_PATH" "$@" "$MAIN_CLASS"
