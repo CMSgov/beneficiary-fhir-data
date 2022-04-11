@@ -6,6 +6,8 @@ package gov.cms.bfd.sharedutils.config;
  * string.
  */
 public class ConfigException extends RuntimeException {
+
+  /** The configuration value that triggered this exception. */
   private final String name;
 
   /**

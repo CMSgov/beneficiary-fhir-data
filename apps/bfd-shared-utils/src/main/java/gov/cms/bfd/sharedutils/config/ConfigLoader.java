@@ -26,9 +26,17 @@ import java.util.function.Function;
  * default values but allow environment variables to override anything in the Map.
  */
 public class ConfigLoader {
+
+  /**
+   * The data source to load data from. A lambda function or method reference can be used as the
+   * source of data (e.g. System::getenv or myMap::get).
+   */
   private final Function<String, Collection<String>> source;
 
+  /** Error message for invalid integer. */
   private static final String NOT_VALID_INTEGER = "not a valid integer";
+
+  /** Error message for invalid float. */
   private static final String NOT_VALID_FLOAT = "not a valid float";
 
   /**
@@ -415,6 +423,11 @@ public class ConfigLoader {
    * that calls can be chained.
    */
   public static class Builder {
+
+    /**
+     * The data source to load data from. A lambda function or method reference can be used as the
+     * source of data (e.g. System::getenv or myMap::get).
+     */
     private Function<String, Collection<String>> source = ignored -> null;
 
     /**
