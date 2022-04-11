@@ -64,6 +64,12 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "3"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "15444"
+        }
       } ],
       "identifier" : [ {
         "type" : {
@@ -395,6 +401,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -403,6 +410,14 @@
         "sequence" : 25,
         "careTeamSequence" : [ 4 ],
         "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
             "code" : "1"
@@ -1109,6 +1124,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -1415,7 +1431,7 @@
             } ]
           },
           "amount" : {
-            "value" : 130.45,
+            "value" : 129.45,
             "currency" : "USD"
           }
         }, {
@@ -1599,6 +1615,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "2"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "15999"
         }
       } ],
       "identifier" : [ {
@@ -1924,6 +1946,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -1932,6 +1955,14 @@
         "sequence" : 1,
         "careTeamSequence" : [ 2 ],
         "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
             "code" : "0023",
@@ -2160,6 +2191,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "1"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "8299"
         }
       } ],
       "identifier" : [ {
@@ -2750,6 +2787,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -3164,6 +3202,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "1"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "11111"
         }
       } ],
       "identifier" : [ {
@@ -3674,6 +3718,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -4024,6 +4069,12 @@
           "value" : "CMS"
         }
       },
+      "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+      },
       "facility" : {
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd",
@@ -4177,26 +4228,6 @@
             "display" : "Information"
           }, {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
-            "display" : "Drug Coverage Status Code"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
-            "code" : "C",
-            "display" : "Covered"
-          } ]
-        }
-      }, {
-        "sequence" : 8,
-        "category" : {
-          "coding" : [ {
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code" : "info",
-            "display" : "Information"
-          }, {
-            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/adjstmt_dltn_cd",
             "display" : "Adjustment Deletion Code"
           } ]
@@ -4209,7 +4240,7 @@
           } ]
         }
       }, {
-        "sequence" : 9,
+        "sequence" : 8,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4229,7 +4260,7 @@
           } ]
         }
       }, {
-        "sequence" : 10,
+        "sequence" : 9,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4249,7 +4280,7 @@
           } ]
         }
       }, {
-        "sequence" : 11,
+        "sequence" : 10,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4269,7 +4300,7 @@
           } ]
         }
       }, {
-        "sequence" : 12,
+        "sequence" : 11,
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4285,7 +4316,7 @@
           } ]
         }
       }, {
-        "sequence" : 13,
+        "sequence" : 12,
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4301,7 +4332,7 @@
           } ]
         }
       }, {
-        "sequence" : 14,
+        "sequence" : 13,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4321,7 +4352,7 @@
           } ]
         }
       }, {
-        "sequence" : 15,
+        "sequence" : 14,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4342,6 +4373,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id",
@@ -4929,6 +4961,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -4944,6 +4977,13 @@
           "valueCoding" : {
             "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
             "code" : "3"
+          }
+        }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            "code" : "3",
+            "display" : "Services"
           }
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
@@ -5193,7 +5233,7 @@
             } ]
           },
           "amount" : {
-            "value" : 75.0,
+            "value" : 47.84,
             "currency" : "USD"
           }
         } ]
@@ -5345,6 +5385,17 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
           "code" : "1"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "code" : "6666"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+        "valueQuantity" : {
+          "value" : 2
         }
       } ],
       "identifier" : [ {
@@ -5636,6 +5687,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }

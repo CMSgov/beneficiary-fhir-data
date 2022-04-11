@@ -3,10 +3,12 @@ package gov.cms.bfd.pipeline.ccw.rif.load;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
@@ -14,14 +16,25 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
+import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
+import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
+import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -30,26 +43,34 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.sql.DataSource;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link RifLoader}. */
 public final class RifLoaderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIT.class);
+  private static final boolean USE_INSERT_IDEMPOTENT_STRATEGY = true;
+  private static final boolean USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY = false;
 
   /** Ensures that each test case here starts with a clean/empty database, with the right schema. */
   @BeforeEach
@@ -66,9 +87,47 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
   public void loadSampleA() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data for an <code>
+   * UPDATE</code> {@link Beneficiary} record that there hasn't been a previous <code>INSERT</code>
+   * on, to verify that this fails as expected.
+   */
+  @Test
+  public void failOnUpdateBeneficiaryBeforeInsert() {
+    // Tweak the SAMPLE_A beneficiary to be an UPDATE.
+    Stream<RifFile> samplesStream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.BENEFICIARY,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
+        rifRecordEvent -> {
+          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          List<String> beneCsvValues =
+              StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
+          beneCsvValues.set(0, "UPDATE");
+          return List.of(beneCsvValues);
+        };
+    Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
+    Stream<RifFile> editedSample = editSamples(samplesStream, fileEditor);
+
+    // Load the edited sample to verify that it fails, as expected.
+    AssertionFailedError thrown =
+        assertThrows(
+            AssertionFailedError.class,
+            () -> {
+              loadSample(
+                  "SAMPLE_A, bene only, UPDATE",
+                  CcwRifLoadTestUtils.getLoadOptions(),
+                  editedSample);
+            });
+
+    assertTrue(thrown.getMessage().contains("Load errors encountered"));
   }
 
   @Test
@@ -77,7 +136,7 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Verify that LoadedFile entity
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               assertTrue(loadedFiles.size() > 1, "Expected to have many loaded files in SAMPLE A");
@@ -103,7 +162,7 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Verify that a loaded files exsits
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> beforeLoadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               assertTrue(beforeLoadedFiles.size() > 0, "Expected to have at least one file");
@@ -111,7 +170,7 @@ public final class RifLoaderIT {
               LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
 
               PipelineTestUtils.get().pauseMillis(10);
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
               // Verify that the loaded list was updated properly
               final List<LoadedFile> afterLoadedFiles =
@@ -137,7 +196,7 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Setup a loaded file with an old date
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               final EntityTransaction txn = entityManager.getTransaction();
@@ -155,7 +214,7 @@ public final class RifLoaderIT {
                   "Expect to have old files");
 
               // Load another set that will cause the old file to be trimmed
-              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
               // Verify that old file was trimmed
               final List<LoadedFile> afterFiles =
@@ -172,8 +231,7 @@ public final class RifLoaderIT {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
-              loadSample(
-                  dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
+              loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
               // Verify that a loaded files exsits
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
@@ -188,10 +246,11 @@ public final class RifLoaderIT {
   @Test
   @Disabled
   public void loadSampleU() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -275,19 +334,18 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
   public void loadSampleUUnchanged() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // this should insert a new beneficiary history record
     /*
      * FIXME Why is this called "_UNCHANGED" if it will result in a new bene history record? Is the
      * name off, or are we still creating some unnecessary history records?
      */
-    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+    loadSample(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     long start = System.currentTimeMillis();
     // this should bypass inserting a new beneficiary history record because it already exists
-    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+    loadSample(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -307,7 +365,7 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        assertEquals("567834", beneHistory.getBeneficiaryId());
+        assertEquals(567834L, beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
         assertTrue(beneHistory.getLastUpdated().isPresent(), "Expected a lastUpdated field");
         long end = System.currentTimeMillis();
@@ -337,10 +395,8 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount12() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads sample A Data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {
@@ -370,12 +426,10 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount24() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads first year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
@@ -397,15 +451,12 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads first year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     // Loads  second year of data with only 8 months
     loadSample(
-        dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
     EntityManagerFactory entityManagerFactory =
@@ -428,13 +479,10 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Load first year of data
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Load 8 months of data in year two
     loadSample(
-        dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
     EntityManagerFactory entityManagerFactory =
@@ -467,7 +515,6 @@ public final class RifLoaderIT {
     }
     // Load 9 months of data in year two with some data updated in july
     loadSample(
-        dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS.getResources()));
 
     entityManager = null;
@@ -513,15 +560,6 @@ public final class RifLoaderIT {
     }
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_B} data. */
-  @Disabled
-  @Test
-  public void loadSampleB() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
-  }
-
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHETIC_DATA} data.
    *
@@ -535,50 +573,554 @@ public final class RifLoaderIT {
         "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
         Runtime.getRuntime().maxMemory()),
     Runtime.getRuntime().maxMemory() >= 4500000000L); */
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-  }
-
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_MCT} data. */
-  @Test
-  public void loadSampleMctData() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
+    List<StaticRifResource> samples =
+        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources());
+    loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
+    verifyRecordPrimaryKeysPresent(samples);
   }
 
   @Disabled
   @Test
   public void loadSyntheaData() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources()));
+    List<StaticRifResource> samples =
+        Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources());
+    loadSample(samples);
+    verifyRecordPrimaryKeysPresent(samples);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
+   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   */
+  @Test
+  public void loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+    loadSampleABeneWithEnrollmentRefYear(
+        "2022",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
+   * non-2022 enrollment date and filter on expect the record is successfully loaded. A log message
+   * will be printed in this case.
+   */
+  @Test
+  public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+
+    loadSampleABeneWithEnrollmentRefYear(
+        "2021",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
+   * LoadStrategy.INSERT_IDEMPOTENT is used and 2022 enrollment date and filter on expect the data
+   * is loaded to the regular database tables.
+   */
+  @Test
+  public void
+      loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+    loadSampleABeneWithEnrollmentRefYear(
+        "2022",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
+   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2022 enrollment date and filter on expect the
+   * data is loaded to the regular database tables. A log message will be printed.
+   */
+  @Test
+  public void
+      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+
+    loadSampleABeneWithEnrollmentRefYear(
+        "2021",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY));
+
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
+   * LoadStrategy.INSERT_IDEMPOTENT is used with a {@code null} enrollment date and filter on expect
+   * the data is loaded to the regular database tables. A log message will be printed.
+   */
+  @Test
+  public void
+      loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+
+    loadSampleABeneWithEnrollmentRefYear(
+        null,
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY),
+        false);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
+   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    loadSampleABeneWithEnrollmentRefYear(
+        "2022",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        true);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Verifies that {@link RifLoader} skips {@link Beneficiary} records, as expected, for <code>
+   * UPDATE</code>s of a non-2022 {@link Beneficiary}, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is enabled.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAndNon2022EnrollmentDateAndFilterOnExpectRecordSkipped() {
+
+    /* First, load a bene that SHOULD be filtered out (when filtering is turned on) normally. */
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    /* Re-load that bene again as an UPDATE with filtering turned on, and verify that it was skipped. */
+    loadDefaultSampleABeneData(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        true);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 1);
+  }
+
+  /**
+   * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
+   * UPDATE</code>s of a {@code null} {@link Beneficiary} enrollment year, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is enabled.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAndNullEnrollmentDateAndFilterOnExpectRecordLoaded() {
+
+    /* First, load a bene normally. */
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
+    loadSampleABeneWithEnrollmentRefYear(
+        null,
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        true);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
+   * UPDATE</code>s of a 2022 {@link Beneficiary}, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is disabled.
+   *
+   * <p>If the filter is off, we take no special action to filter records.
+   */
+  @Test
+  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOffExpectRecordLoaded() {
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    loadSampleABeneWithEnrollmentRefYear("2022", CcwRifLoadTestUtils.getLoadOptions(), true);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is on, and the LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type,
+   * expect the data is loaded normally.
+   */
+  @Test
+  public void
+      loadNonBeneficiaryWhenInsertAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_IDEMPOTENT_STRATEGY),
+        stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is on, and a non-Beneficiary type, expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenInsertAndFilterOnExpectRecordLoaded() {
+
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
+   * filter is off, and the LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type,
+   * expect the data is loaded normally.
+   */
+  @Test
+  public void
+      loadNonBeneficiaryWhenInsertAndFilterOffAndIdempotentInsertStrategyExpectRecordLoaded() {
+
+    boolean FILTER_MODE_DISABLED = false;
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    Stream<RifFile> stream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.INPATIENT,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY, FILTER_MODE_DISABLED),
+        stream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE,
+   * filter setting is on, and a non-Beneficiary type expect the data is loaded normally.
+   */
+  @Test
+  public void loadNonBeneficiaryWhenUpdateAndFilterOnExpectRecordLoaded() {
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+    loadSample(
+        "non-Bene sample",
+        CcwRifLoadTestUtils.getLoadOptions(),
+        getStreamForFileType(RifFileType.INPATIENT));
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+    // Load again to test UPDATE
+    Stream<RifFile> updateStream =
+        editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
+    loadSample(
+        "non-Bene sample update",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        updateStream);
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Gets the stream for the specified file type from the SAMPLE_A data.
+   *
+   * @param fileType the file type to get from the SAMPLE_A data
+   * @return the stream for file type
+   */
+  private Stream<RifFile> getStreamForFileType(RifFileType fileType) {
+    return filterSamples(
+        r -> r.getFileType() == fileType, StaticRifResourceGroup.SAMPLE_A.getResources());
+  }
+
+  /**
+   * Loads the default SAMPLE_A bene data, useful for testing updates. Assumes this load is an
+   * INSERT.
+   *
+   * @param loadAppOptions the load app options for controlling filtering setting
+   */
+  private void loadDefaultSampleABeneData(LoadAppOptions loadAppOptions) {
+    loadDefaultSampleABeneData(loadAppOptions, false);
+  }
+
+  /**
+   * Loads the default SAMPLE_A bene data, useful for testing updates.
+   *
+   * @param loadAppOptions the load app options for controlling filtering setting
+   * @param isUpdate if the load should be an update
+   */
+  private void loadDefaultSampleABeneData(LoadAppOptions loadAppOptions, boolean isUpdate) {
+    Stream<RifFile> sampleABene;
+    if (isUpdate) {
+      sampleABene = getSampleABeneAsUpdate();
+    } else {
+      sampleABene =
+          filterSamples(
+              r -> r.getFileType() == RifFileType.BENEFICIARY,
+              StaticRifResourceGroup.SAMPLE_A.getResources());
+    }
+    loadSample("SAMPLE_A, bene only, default ref year", loadAppOptions, sampleABene);
+  }
+
+  /**
+   * Gathers the SAMPLE_A data, modifies the enrollment reference year to the input date, and
+   * returns the stream of data for further use. Assumes this load is an INSERT.
+   *
+   * @param refYear the ref year
+   * @param loadAppOptions the load app options, for controlling filtering setting
+   */
+  private void loadSampleABeneWithEnrollmentRefYear(String refYear, LoadAppOptions loadAppOptions) {
+    loadSampleABeneWithEnrollmentRefYear(refYear, loadAppOptions, false);
+  }
+
+  /**
+   * Gathers the SAMPLE_A data, modifies the enrollment reference year to the input date, and
+   * returns the stream of data for further use.
+   *
+   * @param refYear the ref year
+   * @param loadAppOptions the load app options, for controlling filtering setting
+   * @param isUpdate if this load should be an update
+   */
+  private void loadSampleABeneWithEnrollmentRefYear(
+      String refYear, LoadAppOptions loadAppOptions, boolean isUpdate) {
+    Stream<RifFile> samplesStream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.BENEFICIARY,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
+        rifRecordEvent -> {
+          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          List<String> beneCsvValues =
+              StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
+          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal() + 1, refYear);
+          if (isUpdate) {
+            beneCsvValues.set(0, "UPDATE");
+          }
+          return List.of(beneCsvValues);
+        };
+    Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
+    Stream<RifFile> updatedSampleAStream = editSamples(samplesStream, fileEditor);
+
+    loadSample("SAMPLE_A, updates to 2022 ref year", loadAppOptions, updatedSampleAStream);
+  }
+
+  /**
+   * Gathers the SAMPLE_A data, modifies the enrollment reference year to the input date, and
+   * returns the stream of data for further use.
+   *
+   * @return the rif file stream with the modified data
+   */
+  private Stream<RifFile> getSampleABeneAsUpdate() {
+    Stream<RifFile> samplesStream =
+        filterSamples(
+            r -> r.getFileType() == RifFileType.BENEFICIARY,
+            StaticRifResourceGroup.SAMPLE_A.getResources());
+    return editStreamToBeUpdate(samplesStream);
+  }
+
+  /**
+   * Edit the given stream to be an UPDATE by editing the csv data.
+   *
+   * @param samplesStream the samples stream
+   * @return the edited stream
+   */
+  private Stream<RifFile> editStreamToBeUpdate(Stream<RifFile> samplesStream) {
+    Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
+        rifRecordEvent -> {
+          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          List<String> beneCsvValues =
+              StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
+          beneCsvValues.set(0, "UPDATE");
+          return List.of(beneCsvValues);
+        };
+    Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
+    return editSamples(samplesStream, fileEditor);
+  }
+
+  /**
+   * Validates the database load went as expected for the normal data table and the skipped table.
+   *
+   * @param expectedBeneCount the expected records in normal table
+   * @param expectedSkippedCount the expected records in skipped table
+   */
+  private void validateBeneficiaryAndSkippedCountsInDatabase(
+      int expectedBeneCount, int expectedSkippedCount) {
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+      // Count and verify the number of bene records in the DB.
+      CriteriaQuery<Long> beneCountQuery = criteriaBuilder.createQuery(Long.class);
+      beneCountQuery.select(criteriaBuilder.count(beneCountQuery.from(Beneficiary.class)));
+      Long beneCount = entityManager.createQuery(beneCountQuery).getSingleResult();
+      assertEquals(expectedBeneCount, beneCount, "Unexpected number of beneficiary records.");
+
+      // Count and verify the number of bene records in the DB.
+      CriteriaQuery<Long> skippedCountQuery = criteriaBuilder.createQuery(Long.class);
+      skippedCountQuery.select(
+          criteriaBuilder.count(skippedCountQuery.from(SkippedRifRecord.class)));
+      Long skippedCount = entityManager.createQuery(skippedCountQuery).getSingleResult();
+      assertEquals(expectedSkippedCount, skippedCount, "Unexpected number of skipped records.");
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
+   * @param filter a {@link Predicate} that should return <code>true</code> for only those {@link
+   *     StaticRifResource}s that should be included in the result
+   * @param samples the {@link StaticRifResource}s to be filtered
+   * @return a {@link Stream} of the {@link RifFile}s from the specified {@link StaticRifResource}s
+   *     that matched the specified filter
+   */
+  private Stream<RifFile> filterSamples(Predicate<RifFile> filter, StaticRifResource... samples) {
+    return Arrays.stream(samples).map(sample -> sample.toRifFile()).filter(filter);
+  }
+
+  /**
+   * @param samples the {@link Stream} of {@link RifFile}s to return an edited copy of (note that
+   *     this input {@link Stream} will be consumed)
+   * @param editor a {@link Function} that, given an input {@link RifFile}, produces an
+   *     edited/output {@link RifFile}
+   * @return a new {@link Stream} of {@link RifFile}s, as edited by the specified {@link Function}
+   */
+  private Stream<RifFile> editSamples(Stream<RifFile> samples, Function<RifFile, RifFile> editor) {
+    Stream<RifFile> editedRifFiles = samples.map(sampleFile -> editor.apply(sampleFile));
+    return editedRifFiles;
+  }
+
+  /**
+   * @param inputFile the {@link RifFile} to return an edited copy of
+   * @param editor a {@link Function} that, given an input {@link RifRecordEvent}, produces an
+   *     edited/output copy of it, represented as a nested {@link List} of {@link List}s of {@link
+   *     String}s (where each {@link String} is a CSV cell, each {@link List} of {@link String}s is
+   *     a CSV row), and the outer {@link List} represents the CSV rows that comprised the {@link
+   *     RifRecordEvent})
+   * @return a new {@link RifFile}, with its records edited by the specified {@link Function}
+   */
+  private RifFile editSampleRecords(
+      RifFile inputFile, Function<RifRecordEvent<?>, List<List<String>>> editor) {
+    try {
+      Path editedTempFile = Files.createTempFile("edited-sample-rif", ".rif");
+      RifFilesProcessor rifProcessor = new RifFilesProcessor();
+      RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), inputFile);
+      RifFileEvent rifFileEvent = rifFilesEvent.getFileEvents().get(0);
+      RifFileRecords records = rifProcessor.produceRecords(rifFileEvent);
+
+      /*
+       * Each List<String> represents a single CSV row's cell values. Each List<List<String>>
+       * represents a single RIF "record group", because claims are often composed of multiple CSV
+       * rows. Thus, each List<List<List<String>>> is a collection of multiple RIF record groups,
+       * e.g. multiple claims or beneficiaries.
+       */
+      List<List<List<String>>> editedRifRecords =
+          records.getRecords().map(editor).collect(Collectors.toList());
+
+      // Build a CSVFormat with the specific header needed for the RIF file type.
+      String[] csvHeader =
+          Stream.concat(
+                  Stream.of("DML_IND"),
+                  Arrays.stream(rifFileEvent.getFile().getFileType().getColumns())
+                      .map(e -> e.name()))
+              .toArray(String[]::new);
+      CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader(csvHeader);
+
+      /*
+       * Write the RIF records back out to a new RIF temp file. Worth noting that, because we aren't
+       * RAII'ing this, we have no way to reliably clean up the temp files that this creates. They
+       * _shouldn't_ be large enough for that to be a major problem, but it's still not great.
+       */
+      try (FileWriter fileWriter = new FileWriter(editedTempFile.toFile());
+          CSVPrinter csvPrinter = new CSVPrinter(fileWriter, csvFormat); ) {
+        LOGGER.debug("Writing out temp RIF/CSV file: '{}'", editedTempFile);
+
+        // Then, print out each row of RIF/CSV.
+        for (List<List<String>> rifRecordGroup : editedRifRecords) {
+          for (List<String> csvRow : rifRecordGroup) {
+            LOGGER.debug("Printing RIF/CSV row: '{}'", csvRow);
+            csvPrinter.printRecord(csvRow);
+          }
+        }
+      }
+
+      LocalRifFile editedRifFile = new LocalRifFile(editedTempFile, inputFile.getFileType());
+      return editedRifFile;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  /**
+   * Runs {@link RifLoader} against the specified {@link RifFile}s.
+   *
+   * @param sampleName a human-friendly name that will be logged to identify the data load being
+   *     kicked off here
+   * @param options the {@link LoadAppOptions} to use
+   * @param filesToLoad the {@link RifFile}s to load
+   */
+  private void loadSample(String sampleName, LoadAppOptions options, Stream<RifFile> filesToLoad) {
+    RifFilesEvent rifFilesEvent =
+        new RifFilesEvent(Instant.now(), filesToLoad.collect(Collectors.toList()));
+    loadSample(sampleName, options, rifFilesEvent);
   }
 
   /**
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
-   * @param dataSource a {@link DataSource} for the test DB to use
    * @param sampleResources the {@link StaticRifResourceGroup} to load
    */
-  private void loadSample(DataSource dataSource, List<StaticRifResource> sampleResources) {
-    LOGGER.info("Loading RIF file from {}...", sampleResources.get(0).getResourceUrl().toString());
-
+  private void loadSample(List<StaticRifResource> sampleResources) {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
+    int loadCount = loadSample(sampleResources.get(0).getResourceUrl().toString(), rifFilesEvent);
+
+    // Verify that the expected number of records were run successfully.
+    assertEquals(
+        sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
+        loadCount,
+        "Unexpected number of loaded records.");
+  }
+
+  /**
+   * Runs {@link RifLoader} with the default options (see {@link
+   * CcwRifLoadTestUtils#getLoadOptions()}) against the specified {@link StaticRifResourceGroup}.
+   *
+   * @param sampleName a human-friendly name that will be logged to identify the data load being
+   *     kicked off here
+   * @param rifFilesEvent the {@link RifFilesEvent} to load
+   * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
+   */
+  private int loadSample(String sampleName, RifFilesEvent rifFilesEvent) {
+    return loadSample(sampleName, CcwRifLoadTestUtils.getLoadOptions(), rifFilesEvent);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
+   *
+   * @param sampleName a human-friendly name that will be logged to identify the data load being
+   *     kicked off here
+   * @param options the {@link LoadAppOptions} to use
+   * @param rifFilesEvent the {@link RifFilesEvent} to load
+   * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
+   */
+  private int loadSample(String sampleName, LoadAppOptions options, RifFilesEvent rifFilesEvent) {
+    LOGGER.info("Loading RIF files: '{}'...", sampleName);
 
     // Create the processors that will handle each stage of the pipeline.
     RifFilesProcessor processor = new RifFilesProcessor();
-    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
     RifLoader loader =
         new RifLoader(options, PipelineTestUtils.get().getPipelineApplicationState());
 
@@ -599,25 +1141,37 @@ public final class RifLoaderIT {
           });
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }
-    LOGGER.info("Loaded RIF records: '{}'.", loadCount.get());
+    LOGGER.info("Loaded RIF files: '{}', record count: '{}'.", sampleName, loadCount.get());
     Slf4jReporter.forRegistry(PipelineTestUtils.get().getPipelineApplicationState().getMetrics())
         .outputTo(LOGGER)
         .build()
         .report();
 
     // Verify that the expected number of records were run successfully.
-    assertEquals(0, failureCount.get());
-    assertEquals(
-        sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
-        loadCount.get(),
-        "Unexpected number of loaded records.");
+    assertEquals(0, failureCount.get(), "Load errors encountered.");
+
+    return loadCount.get();
+  }
+
+  /**
+   * Runs the {@link RifFilesProcessor} to extract RIF records from the specified {@link
+   * StaticRifResource}s, and then calls {@link #assertAreInDatabase(LoadAppOptions,
+   * EntityManagerFactory, Stream)} on each record to verify that it's present in the database.
+   * Basically: this is a decent smoke test to verify that {@link RifLoader} did what it should have
+   * -- not thorough, but something.
+   *
+   * @param sampleResources the {@link StaticRifResource}s to go check for in the DB
+   */
+  private void verifyRecordPrimaryKeysPresent(List<StaticRifResource> sampleResources) {
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    RifFilesProcessor processor = new RifFilesProcessor();
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
 
     /*
      * Run the extraction an extra time and verify that each record can now
      * be found in the database.
      */
-    EntityManagerFactory entityManagerFactory =
-        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     for (StaticRifResource rifResource : sampleResources) {
       /*
        * This is too slow to run against larger data sets: for instance,
@@ -693,7 +1247,7 @@ public final class RifLoaderIT {
               .where(
                   criteriaBuilder.equal(
                       from.get(BeneficiaryHistory_.beneficiaryId),
-                      beneficiaryHistoryToFind.getBeneficiaryId()),
+                      String.valueOf(beneficiaryHistoryToFind.getBeneficiaryId())),
                   criteriaBuilder.equal(
                       from.get(BeneficiaryHistory_.birthDate),
                       beneficiaryHistoryToFind.getBirthDate()),

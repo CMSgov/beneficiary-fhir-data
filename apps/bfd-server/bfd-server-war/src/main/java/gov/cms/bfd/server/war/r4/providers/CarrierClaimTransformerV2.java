@@ -137,7 +137,6 @@ public class CarrierClaimTransformerV2 {
     // CARR_CLM_CNTL_NUM              => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupCarrierDME(
         eob,
-        claimGroup.getBeneficiaryId(),
         claimGroup.getCarrierNumber(),
         claimGroup.getClinicalTrialNumber(),
         claimGroup.getBeneficiaryPartBDeductAmount(),
@@ -307,6 +306,14 @@ public class CarrierClaimTransformerV2 {
                   item.addExtension(
                       TransformerUtilsV2.createExtensionCoding(
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
+
+      // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
+      line.getMtusCode()
+          .ifPresent(
+              code ->
+                  item.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, code)));
 
       // Common item level fields between Carrier and DME
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity

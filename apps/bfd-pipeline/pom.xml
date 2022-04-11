@@ -21,7 +21,6 @@
 		<module>bfd-pipeline-rda-grpc-server</module>
 		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-app</module>
-		<module>bfd-pipeline-benchmarks</module>
 		<module>bfd-pipeline-rda-bridge</module>
 	</modules>
 

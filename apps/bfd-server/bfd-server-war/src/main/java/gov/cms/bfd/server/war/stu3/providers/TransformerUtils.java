@@ -689,6 +689,9 @@ public final class TransformerUtils {
   }
 
   /**
+   * TODO: BFD-1583 Remove this method and the calling unit test when fully converted to BigInt
+   * claim IDs.
+   *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
@@ -697,6 +700,17 @@ public final class TransformerUtils {
    */
   public static String buildEobId(ClaimType claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimType claimType, Long claimId) {
+    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
@@ -742,8 +756,8 @@ public final class TransformerUtils {
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
    *     Beneficiary}
    */
-  public static IdDt buildPatientId(String beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
+  public static IdDt buildPatientId(Long beneficiaryId) {
+    return new IdDt(Patient.class.getSimpleName(), beneficiaryId.toString());
   }
 
   /**
@@ -756,6 +770,21 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
+   *     Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Long beneficiaryId) {
+    return new IdDt(
+        Coverage.class.getSimpleName(),
+        String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * TODO: BFD-1583 Remove this method and anything that references it once beneficiaryId datatype
+   * conversion to Long is complete.
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
    *     Coverage#getId()} for
@@ -1359,7 +1388,7 @@ public final class TransformerUtils {
    * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
    *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
    */
-  static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
+  static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
     return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
@@ -1369,8 +1398,8 @@ public final class TransformerUtils {
    * @return a {@link Reference} to the {@link Patient} resource that matches the specified
    *     parameters
    */
-  static Reference referencePatient(String patientId) {
-    return new Reference(String.format("Patient/%s", patientId));
+  static Reference referencePatient(Long patientId) {
+    return new Reference(String.format("Patient/%d", patientId));
   }
 
   /**
@@ -1651,9 +1680,11 @@ public final class TransformerUtils {
        * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
        * field so if this is updated you'll need to update that as well.
        */
+      int maxSequence = eob.getDiagnosis().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
       eob.addDiagnosis()
           .setPackageCode(
-              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd));
+              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd))
+          .setSequence(maxSequence + 1);
     }
   }
 
@@ -1746,8 +1777,8 @@ public final class TransformerUtils {
    */
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
+      Long claimId,
+      Long beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -1759,8 +1790,8 @@ public final class TransformerUtils {
     eob.setId(buildEobId(claimType, claimId));
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
+    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
 
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
@@ -1818,7 +1849,7 @@ public final class TransformerUtils {
    */
   static void mapEobCommonGroupCarrierDME(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
+      Long beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,
@@ -1922,7 +1953,7 @@ public final class TransformerUtils {
       ItemComponent item,
       ExplanationOfBenefit eob,
       Optional<Boolean> includeTaxNumbers,
-      String claimId,
+      Long claimId,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,

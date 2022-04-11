@@ -113,11 +113,18 @@ public final class EndpointJsonResponseComparatorIT {
             "patientByIdentifier",
             (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier),
         arguments(
+            "patientByIdentifierWithoutReferenceYear",
+            (Supplier<String>)
+                EndpointJsonResponseComparatorIT::patientByIdentifierWithoutReferenceYear),
+        arguments(
             "patientByIdentifierWithIncludeIdentifiers",
             (Supplier<String>)
                 EndpointJsonResponseComparatorIT::patientByIdentifierWithIncludeIdentifiers),
         arguments(
             "coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead),
+        arguments(
+            "coverageReadWithoutReferenceYear",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::coverageReadWithoutReferenceYear),
         arguments(
             "coverageSearchByPatientId",
             (Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId),
@@ -496,7 +503,10 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(Patient.class)
-        .where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+        .where(
+            Patient.RES_ID
+                .exactly()
+                .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return sortPatientIdentifiers(jsonInterceptor.getResponse());
@@ -533,7 +543,10 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(Patient.class)
-        .where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+        .where(
+            Patient.RES_ID
+                .exactly()
+                .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return sortPatientIdentifiers(jsonInterceptor.getResponse());
@@ -554,6 +567,39 @@ public final class EndpointJsonResponseComparatorIT {
             .findFirst()
             .get();
 
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Patient.class)
+        .where(
+            Patient.IDENTIFIER
+                .exactly()
+                .systemAndIdentifier(
+                    TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+        .returnBundle(Bundle.class)
+        .execute();
+    return sortPatientIdentifiers(jsonInterceptor.getResponse());
+  }
+
+  /**
+   * @return the results of the {@link
+   *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   */
+  public static String patientByIdentifierWithoutReferenceYear() {
+
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -704,6 +750,33 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
+   *     CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   */
+  public static String coverageReadWithoutReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .read()
+        .resource(Coverage.class)
+        .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
    *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
    *     operation
    */
@@ -718,6 +791,37 @@ public final class EndpointJsonResponseComparatorIT {
             .findFirst()
             .get();
 
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Coverage.class)
+        .where(
+            Coverage.BENEFICIARY.hasId(
+                TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+        .returnBundle(Bundle.class)
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
+   *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
+   *     operation
+   */
+  public static String coverageSearchByPatientIdWithNullReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
