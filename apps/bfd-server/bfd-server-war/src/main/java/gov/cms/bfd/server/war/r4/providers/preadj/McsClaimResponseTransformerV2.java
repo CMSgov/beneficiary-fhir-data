@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -14,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -112,17 +109,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    FhirContext ctx = FhirContext.forR4();
-    IParser parser = ctx.newJsonParser();
-
-    String claimContent = parser.encodeResourceToString(claim);
-
-    String resourceHash = DigestUtils.sha1Hex(claimContent);
-
-    claim.setMeta(
-        new Meta()
-            .setLastUpdated(Date.from(claimGroup.getLastUpdated()))
-            .setVersionId("m-" + claimGroup.getIdrClmHdIcn() + "-" + resourceHash));
+    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
 
     return claim;

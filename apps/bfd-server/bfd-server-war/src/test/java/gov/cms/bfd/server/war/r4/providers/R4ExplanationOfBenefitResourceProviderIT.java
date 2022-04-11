@@ -175,7 +175,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, 1234L))
               .execute();
         });
   }
@@ -266,7 +266,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, 1234L))
               .execute();
         });
   }
@@ -323,7 +323,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, 1234L))
               .execute();
         });
   }
@@ -379,7 +379,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, 1234L))
               .execute();
         });
   }
@@ -435,7 +435,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, 1234L))
               .execute();
         });
   }
@@ -496,7 +496,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, 1234L))
               .execute();
         });
   }
@@ -552,7 +552,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, 1234L))
               .execute();
         });
   }
@@ -575,7 +575,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, "-1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, -1234L))
               .execute();
         });
   }
@@ -654,7 +654,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           fhirClient
               .read()
               .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, "1234"))
+              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, 1234L))
               .execute();
         });
   }
@@ -1099,7 +1099,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
+    carrierRifRecord =
+        entityManager.find(CarrierClaim.class, String.valueOf(carrierRifRecord.getClaimId()));
     carrierRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1124,7 +1125,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
+    inpatientRifRecord =
+        entityManager.find(InpatientClaim.class, String.valueOf(inpatientRifRecord.getClaimId()));
     inpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1150,7 +1152,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     entityManager.getTransaction().begin();
     outpatientRifRecord =
-        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
+        entityManager.find(OutpatientClaim.class, String.valueOf(outpatientRifRecord.getClaimId()));
     outpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1175,7 +1177,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
+    hhaRifRecord = entityManager.find(HHAClaim.class, String.valueOf(hhaRifRecord.getClaimId()));
     hhaRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1200,7 +1202,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+    snfRifRecord = entityManager.find(SNFClaim.class, String.valueOf(snfRifRecord.getClaimId()));
     snfRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1225,7 +1227,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
+    hospiceRifRecord =
+        entityManager.find(HospiceClaim.class, String.valueOf(hospiceRifRecord.getClaimId()));
     hospiceRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1250,7 +1253,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
+    dmeRifRecord = entityManager.find(DMEClaim.class, String.valueOf(dmeRifRecord.getClaimId()));
     dmeRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1554,12 +1557,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
             "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
 
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 8);
+    testLastUpdatedUrls(fhirClient, String.valueOf(beneficiary.getBeneficiaryId()), allUrls, 8);
 
     // Empty searches
     List<String> emptyUrls =
         Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
+    testLastUpdatedUrls(fhirClient, String.valueOf(beneficiary.getBeneficiaryId()), emptyUrls, 0);
   }
 
   /**
@@ -1666,7 +1669,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    String claimId =
+    Long claimId =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
             .map(r -> (CarrierClaim) r)
@@ -1674,14 +1677,14 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get()
             .getClaimId();
 
-    String beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
+    Long beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
 
     // Clear lastupdated in the database
     ServerTestUtils.get()
         .doTransaction(
             (em) -> {
               em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")
-                  .setParameter("claimId", claimId)
+                  .setParameter("claimId", String.valueOf(claimId))
                   .executeUpdate();
             });
 
@@ -2206,8 +2209,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param serviceEndParam the service end param
    * @return the bundle
    */
-  private Bundle fetchWithServiceDate(
-      IGenericClient fhirClient, String id, String serviceEndParam) {
+  private Bundle fetchWithServiceDate(IGenericClient fhirClient, Long id, String serviceEndParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"
             + id

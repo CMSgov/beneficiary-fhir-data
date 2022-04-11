@@ -1,140 +1,23 @@
 name: 'CI - Ansible'
-on: pull_request
+on:
+  workflow_call:
+    inputs:
+      role:
+        required: true
+        type: string
+      image_tag:
+        required: false
+        type: string
+
 jobs:
-  ansible-role-bfd-pipeline:
+  test-ansible-role:
     runs-on: ubuntu-latest
+    env:
+      image_tag: ${{ inputs.image_tag }}
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
-
-      # The test will SSH into a Docker container, so first we need an SSH key to be available.
-      - name: Create SSH Key and Add it to SSH Agent
+      - name: 'Run Tests for ${{ inputs.role }} Role'
         run: |
-          ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N '' -q
-          eval `ssh-agent`
-          ssh-add ~/.ssh/id_ed25519
-          export SSH_AUTH_SOCK
-          export SSH_AGENT_PID
-
-      # Make sure Maven is installed, as the tests use it to download stuff.
-      - name: 'Setup JDK'
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8.0.292
-
-      # GH Registry doesn't allow unauthenticated read access to packages, as of 2021-08-20.
-      - name: 'Generate Maven Config'
-        run: |
-          cat << EOF > ~/.m2/settings.xml
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                                http://maven.apache.org/xsd/settings-1.0.0.xsd">
-          
-            <activeProfiles>
-              <activeProfile>github</activeProfile>
-            </activeProfiles>
-          
-            <profiles>
-              <profile>
-                <id>github</id>
-                <repositories>
-                  <repository>
-                    <id>central</id>
-                    <url>https://repo1.maven.org/maven2</url>
-                  </repository>
-                  <repository>
-                    <id>github</id>
-                    <url>https://maven.pkg.github.com/CMSgov/*</url>
-                    <snapshots>
-                      <enabled>true</enabled>
-                    </snapshots>
-                  </repository>
-                </repositories>
-              </profile>
-            </profiles>
-          
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${{ secrets.GH_REGISTRY_USER }}</username>
-                <password>${{ secrets.GH_REGISTRY_TOKEN }}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
-      # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
-      # images that we're building and using for the tests. See here for a project to copy from:
-      # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
-      - name: 'Run Tests for bfd-pipeline Role'
-        run: ops/ansible/roles/bfd-pipeline/test/run-tests.sh
-
-  ansible-role-bfd-server:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout repo'
-        uses: actions/checkout@v2
-
-      # The test will SSH into a Docker container, so first we need an SSH key to be available.
-      - name: Create SSH Key and Add it to SSH Agent
-        run: |
-          ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N '' -q
-          eval `ssh-agent`
-          ssh-add ~/.ssh/id_ed25519
-          export SSH_AUTH_SOCK
-          export SSH_AGENT_PID
-
-      # Make sure Maven is installed, as the tests use it to download stuff.
-      - name: 'Setup JDK'
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8.0.292
-
-      # GH Registry doesn't allow unauthenticated read access to packages, as of 2021-08-20.
-      - name: 'Generate Maven Config'
-        run: |
-          cat << EOF > ~/.m2/settings.xml
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                                http://maven.apache.org/xsd/settings-1.0.0.xsd">
-          
-            <activeProfiles>
-              <activeProfile>github</activeProfile>
-            </activeProfiles>
-          
-            <profiles>
-              <profile>
-                <id>github</id>
-                <repositories>
-                  <repository>
-                    <id>central</id>
-                    <url>https://repo1.maven.org/maven2</url>
-                  </repository>
-                  <repository>
-                    <id>github</id>
-                    <url>https://maven.pkg.github.com/CMSgov/*</url>
-                    <snapshots>
-                      <enabled>true</enabled>
-                    </snapshots>
-                  </repository>
-                </repositories>
-              </profile>
-            </profiles>
-          
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${{ secrets.GH_REGISTRY_USER }}</username>
-                <password>${{ secrets.GH_REGISTRY_TOKEN }}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
-      # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
-      # images that we're building and using for the tests. See here for a project to copy from:
-      # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
-      - name: 'Run Tests for bfd-server Role'
-        run: ops/ansible/roles/bfd-server/test/run-tests.sh
+          export IMAGE_TAG="${image_tag:-$(git rev-parse --short HEAD)}"
+          ops/ansible/roles/${{ inputs.role }}/test/run-tests.sh "$IMAGE_TAG"

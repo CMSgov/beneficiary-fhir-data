@@ -311,6 +311,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
@@ -617,7 +618,7 @@
         } ]
       },
       "amount" : {
-        "value" : 130.45,
+        "value" : 129.45,
         "currency" : "USD"
       }
     }, {

@@ -16,11 +16,13 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -68,6 +70,7 @@ public final class BeneficiaryTransformerV2Test {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
+    beneficiary.getSkippedRifRecords().add(new SkippedRifRecord());
 
     beneficiary.setLastUpdated(Instant.now());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
@@ -77,7 +80,7 @@ public final class BeneficiaryTransformerV2Test {
         parsedRecords.stream()
             .filter(r -> r instanceof BeneficiaryHistory)
             .map(r -> (BeneficiaryHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId()))
+            .filter(r -> beneficiary.getBeneficiaryId() == r.getBeneficiaryId())
             .collect(Collectors.toSet());
 
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
@@ -87,7 +90,11 @@ public final class BeneficiaryTransformerV2Test {
         parsedRecords.stream()
             .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
             .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
+            .filter(
+                r ->
+                    (r.getBeneficiaryId().isPresent()
+                        && r.getBeneficiaryId().get().longValue()
+                            == beneficiary.getBeneficiaryId()))
             .collect(Collectors.toSet());
     beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
     assertThat(beneficiary, is(notNullValue()));
@@ -117,6 +124,19 @@ public final class BeneficiaryTransformerV2Test {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
     assertNotNull(patient);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+  }
+
+  /**
+   * Verify that {@link TransformerConstants#CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT} is
+   * populated, as expected (it's hardcoded into the test data used by this class).
+   */
+  @Test
+  public void shouldHaveDelayedBackdatedEnrollmentTag() {
+    assertEquals(1, patient.getMeta().getTag().size());
+    TransformerTestUtilsV2.assertCodingEquals(
+        TransformerConstants.CODING_SYSTEM_BFD_TAGS,
+        TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
+        patient.getMeta().getTag().get(0));
   }
 
   /** Common top level Patient values */
@@ -366,6 +386,44 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a reference year field not found.
+   */
+  @Test
+  public void shouldNotHaveReferenceYearExtension() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
+    Beneficiary newBeneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    newBeneficiary.setLastUpdated(Instant.now());
+    newBeneficiary.setMbiHash(Optional.of("someMBIhash"));
+    newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+
+    Patient genPatient =
+        BeneficiaryTransformerV2.transform(
+            new MetricRegistry(), newBeneficiary, RequestHeaders.getHeaderWrapper());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genPatient);
+    Patient newPatient = parser.parseResource(Patient.class, json);
+
+    String url = "https://bluebutton.cms.gov/resources/variables/rfrnc_yr";
+    Optional<Extension> ex =
+        newPatient.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    assertEquals(false, ex.isPresent());
+    assertEquals(true, ex.isEmpty());
+  }
+
+  /**
    * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} sets a
    * valid extension date.
    */
@@ -374,12 +432,11 @@ public final class BeneficiaryTransformerV2Test {
 
     IBaseDatatype ex =
         TransformerUtilsV2.createExtensionDate(
-                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear())
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear().get())
             .getValue();
 
     IBaseDatatype compare =
-        TransformerUtilsV2.createExtensionDate(
-                CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
+        TransformerUtilsV2.createExtensionDate(CcwCodebookVariable.RFRNC_YR, new BigDecimal(3))
             .getValue();
 
     assertEquals(ex.toString().length(), compare.toString().length());
