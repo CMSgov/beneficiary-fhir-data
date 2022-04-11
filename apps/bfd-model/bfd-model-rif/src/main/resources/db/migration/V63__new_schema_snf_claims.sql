@@ -1,9 +1,37 @@
 -- NEW_SCHEMA_SNF_CLAIMS.SQL
 -- flyway migration for SNF_CLAIMS and SNF_CLAIM_LINES tables into
 -- a new schema structure that:
---   1) changes data type of CLM_ID, CLM_GROUP_ID, BENE_ID to BIGINT.
---   2) organizes parent claim table (SNF_CLAIMS) such that common
+--   1) changes data type of CLM_ID, BENE_ID from varchar to BIGINT.
+--   2) change data type of CLM_GROUP_ID from numeric to BIGINT
+--   3) organizes parent claim table (SNF_CLAIMS) such that common
 --      claims data columns are organized at top of table structure.
+--   4) replace previously defined numeric types that can only hold integer
+--      values (i.e, no decimal point) as either smallint or integer.
+--
+--      Per Postgres documentaion:
+--      ==========================
+--      The type integer is the usual choice, as it offers the best balance between
+--      range, storage size, and performance. The smallint type is used if disk
+--      space is at a premium; bigint type should only be used if the integer
+--      range is not sufficient.
+--
+--      smallint was used where appropriate because saving 2 bytes of storage space
+--      per reord column * (in some cases) hundreds of millions rows, can result in
+--      both efficiency (smaller index sizes) as well as storage space savings.
+--
+--      numeric vs. integer (or smallint):
+--
+--      The type numeric can store numbers with up to 1000 digits of precision and
+--      perform calculations exactly. It is especially recommended for storing monetary
+--      amounts and other quantities where exactness or fractional values are required.
+--      However, arithmetic on numeric values is very slow compared to the integer types.
+--
+--      The following db columns were redefined from NUMERIC to more appropriate integral
+--      data type(s):
+--
+--      nch_blood_pnts_frnshd_qty
+--      clm_line_num
+--      rev_cntr_ndc_qty
 --
 -- Once current table data is migrated to new table name/strucutre,
 -- a subsequent PR will be deployed that changes the ORM model(s)
