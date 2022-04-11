@@ -47,7 +47,7 @@ public final class DatabaseTestUtils {
    * <p>PUBLIC for hsql and public for postgres since they differ in caps sensitivity.
    */
   public static final ImmutableList<String> FLYWAY_CLEAN_SCHEMAS =
-      ImmutableList.of("public", "rda", "pre_adj");
+      ImmutableList.of("public", "PUBLIC", "pre_adj");
 
   private static final String HSQL_SERVER_USERNAME = "test";
   private static final String HSQL_SERVER_PASSWORD = "test";
