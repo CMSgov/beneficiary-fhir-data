@@ -47,6 +47,7 @@ public class RifObjectWrapper {
    * Returns a (possibly empty) value for {@code label}.
    *
    * @param label the column label for the field to be checked
+   * @param defaultValue the default value
    * @return the String at the given enum String
    */
   public String getValue(final String label, String defaultValue) {
