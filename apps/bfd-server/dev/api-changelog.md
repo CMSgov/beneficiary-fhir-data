@@ -1,5 +1,16 @@
 # API Changelog
 
+## BFD-1664 Upgrade HAPI-FHIR to version 5.7.2
+
+The hapi-fhir dependencies that BFD relies on to serve FHIR responses has been upgraded from version 4.1.0 to version 5.7.2. There are no changes to the responses to resource requests with this upgrade. The metadata response has changed as follows:
+
+ * 'searchInclude' and 'searchRevInclude' are now included in the metadata output for all resources.
+ * 'fhirVersion' has been updated from 4.0.0 to 4.0.1
+ * The 'StructureDefinition' resource is no longer available. For more information please see the [hapi changelog entry](https://hapifhir.io/hapi-fhir/docs/introduction/changelog_2020.html).
+ * Various minor fixes including removal of duplicate elements.
+
+For more information see the [HAPI FHIR Release Notes](https://github.com/hapifhir/hapi-fhir/releases)
+
 ## BFD-1461 Implement Handling for Null Enrollment Reference Years
 
  * Following FHIR mapping changes were made:
