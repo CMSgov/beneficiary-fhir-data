@@ -315,7 +315,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void shouldHaveLineItemExtension() {
     assertNotNull(eob.getItemFirstRep().getExtension());
-    assertEquals(10, eob.getItemFirstRep().getExtension().size());
+    assertEquals(9, eob.getItemFirstRep().getExtension().size());
 
     Extension ex1 =
         TransformerTestUtilsV2.findExtensionByUrl(
