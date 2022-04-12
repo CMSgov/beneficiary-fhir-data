@@ -123,7 +123,7 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveIdentifiers() {
-    assertEquals(3, eob.getIdentifier().size());
+    assertEquals(2, eob.getIdentifier().size());
 
     Identifier clmGrp1 =
         TransformerTestUtilsV2.findIdentifierBySystem(

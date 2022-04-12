@@ -51,6 +51,12 @@
       "currency" : "USD"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "28486613848"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -71,9 +77,6 @@
     }
   } ],
   "identifier" : [ {
-    "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-    "value": "28486613848"
-  }, {
     "type" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
@@ -125,7 +128,7 @@
     "start" : "2016-01-15",
     "end" : "2016-01-27"
   },
-  "created" : "IGNORED_FIELD",
+  "created" : "2022-04-12T15:02:25+00:00",
   "insurer" : {
     "identifier" : {
       "value" : "CMS"

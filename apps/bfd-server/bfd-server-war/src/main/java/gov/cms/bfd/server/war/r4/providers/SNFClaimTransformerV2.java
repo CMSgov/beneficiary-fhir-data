@@ -60,7 +60,6 @@ public class SNFClaimTransformerV2 {
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.identifier
     // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage
     // BENE_ID                  => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION             => ExplanationOfBenefit.status
@@ -77,7 +76,6 @@ public class SNFClaimTransformerV2 {
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
-        claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
@@ -253,6 +251,7 @@ public class SNFClaimTransformerV2 {
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -265,7 +264,8 @@ public class SNFClaimTransformerV2 {
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        claimGroup.getFiDocumentClaimControlNumber());
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept

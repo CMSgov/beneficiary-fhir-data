@@ -132,6 +132,7 @@ public class TransformerUtilsV2Test {
         BigDecimal.ZERO,
         BigDecimal.ZERO,
         Optional.of(fiNum),
+        Optional.empty(),
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -167,6 +168,7 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         BigDecimal.ZERO,
         BigDecimal.ZERO,
+        Optional.empty(),
         Optional.empty(),
         Optional.empty());
 

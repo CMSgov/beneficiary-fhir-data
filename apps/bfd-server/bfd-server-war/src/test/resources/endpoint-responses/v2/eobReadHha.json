@@ -39,6 +39,12 @@
       "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "08683096577486"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -59,9 +65,6 @@
     }
   } ],
   "identifier" : [ {
-    "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-    "value": "08683096577486"
-  }, {
     "type" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",

@@ -39,6 +39,12 @@
       "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
     }
   }, {
+    "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier": {
+      "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value": "23443453453"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -59,9 +65,6 @@
     }
   } ],
   "identifier" : [ {
-    "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-    "value": "23443453453"
-  }, {
     "type" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",

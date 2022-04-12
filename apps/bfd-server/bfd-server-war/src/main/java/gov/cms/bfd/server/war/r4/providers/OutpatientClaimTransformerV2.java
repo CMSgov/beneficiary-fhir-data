@@ -81,7 +81,6 @@ public class OutpatientClaimTransformerV2 {
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
-        claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
@@ -178,6 +177,7 @@ public class OutpatientClaimTransformerV2 {
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
+    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -190,7 +190,8 @@ public class OutpatientClaimTransformerV2 {
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        claimGroup.getFiDocumentClaimControlNumber());
 
     // Handle Diagnosis
     // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept

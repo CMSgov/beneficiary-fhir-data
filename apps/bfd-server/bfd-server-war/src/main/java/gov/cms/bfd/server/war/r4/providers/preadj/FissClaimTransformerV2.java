@@ -3,11 +3,13 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
@@ -115,7 +117,9 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                         C4BBClaimIdentifierType.UC.getSystem(),
                         C4BBClaimIdentifierType.UC.toCode(),
                         C4BBClaimIdentifierType.UC.getDisplay())))
-            .setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM)
+            .setSystem(
+                CCWUtils.calculateVariableReferenceUrl(
+                    CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM))
             .setValue(claimGroup.getDcn()));
   }
 

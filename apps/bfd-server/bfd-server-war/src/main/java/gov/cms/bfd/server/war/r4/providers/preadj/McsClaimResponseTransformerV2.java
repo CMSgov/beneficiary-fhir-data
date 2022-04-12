@@ -3,8 +3,10 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -193,7 +195,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
                         C4BBIdentifierType.UC.getSystem(),
                         C4BBIdentifierType.UC.toCode(),
                         C4BBIdentifierType.UC.getDisplay())))
-            .setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM)
+            .setSystem(
+                CCWUtils.calculateVariableReferenceUrl(
+                    CcwCodebookMissingVariable.CARR_CLM_CNTL_NUM))
             .setValue(claimGroup.getIdrClmHdIcn()));
   }
 

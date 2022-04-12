@@ -14,7 +14,6 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
-import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
@@ -1805,7 +1804,6 @@ public final class TransformerUtilsV2 {
       Optional<LocalDate> dateFrom,
       Optional<LocalDate> dateThrough,
       Optional<BigDecimal> paymentAmount,
-      Optional<String> partiallyAdjudicatedClaimId,
       char finalAction) {
 
     // Claim Type + Claim ID => ExplanationOfBenefit.id
@@ -1816,15 +1814,6 @@ public final class TransformerUtilsV2 {
 
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);
-
-    partiallyAdjudicatedClaimId.ifPresent(
-        id -> {
-          if (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.DME) {
-            eob.addIdentifier().setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM).setValue(id);
-          } else {
-            eob.addIdentifier().setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM).setValue(id);
-          }
-        });
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
@@ -3014,7 +3003,14 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
-      Optional<Instant> lastUpdated) {
+      Optional<Instant> lastUpdated,
+      Optional<String> fiDocClmControlNum) {
+    // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
+    fiDocClmControlNum.ifPresent(
+        cntlNum ->
+            eob.addExtension(
+                createExtensionIdentifier(
+                    CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, cntlNum)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);

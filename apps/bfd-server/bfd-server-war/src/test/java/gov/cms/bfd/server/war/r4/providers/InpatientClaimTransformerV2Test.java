@@ -540,7 +540,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(6, eob.getExtension().size());
+    assertEquals(7, eob.getExtension().size());
   }
 
   @Test
@@ -631,7 +631,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Identifiers */
   @Test
   public void shouldHaveKnownIdentifiers() {
-    assertEquals(3, eob.getIdentifier().size());
+    assertEquals(2, eob.getIdentifier().size());
   }
 
   @Test
