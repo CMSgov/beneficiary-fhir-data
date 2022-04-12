@@ -239,12 +239,7 @@
       "grouping" : {
         "subGroup" : "Medicare",
         "subPlan" : "Part A"
-      },
-      "contract" : [ {
-        "id" : "ptc-contract1"
-      }, {
-        "reference" : "Coverage/part-a-contract1 reference"
-      } ]
+      }
     }
   }, {
     "resource" : {

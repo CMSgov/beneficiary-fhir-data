@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -116,6 +115,10 @@ public final class EndpointJsonResponseComparatorV2IT {
             "patientByIdentifier",
             (Supplier<String>) EndpointJsonResponseComparatorV2IT::patientByIdentifier),
         arguments(
+            "patientByIdentifierWithoutReferenceYear",
+            (Supplier<String>)
+                EndpointJsonResponseComparatorV2IT::patientByIdentifierWithoutReferenceYear),
+        arguments(
             "patientByIdentifierWithIncludeIdentifiers",
             (Supplier<String>)
                 EndpointJsonResponseComparatorV2IT::patientByIdentifierWithIncludeIdentifiers),
@@ -124,6 +127,10 @@ public final class EndpointJsonResponseComparatorV2IT {
         arguments(
             "coverageSearchByPatientId",
             (Supplier<String>) EndpointJsonResponseComparatorV2IT::coverageSearchByPatientId),
+        arguments(
+            "coverageSearchByPatientIdWithoutReferenceYear",
+            (Supplier<String>)
+                EndpointJsonResponseComparatorV2IT::coverageSearchByPatientIdWithoutReferenceYear),
         arguments(
             "eobByPatientIdAll",
             (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobByPatientIdAll),
@@ -589,6 +596,38 @@ public final class EndpointJsonResponseComparatorV2IT {
   /**
    * @return the results of the {@link
    *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   */
+  public static String patientByIdentifierWithoutReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Patient.class)
+        .where(
+            Patient.IDENTIFIER
+                .exactly()
+                .systemAndIdentifier(
+                    TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+        .returnBundle(Bundle.class)
+        .execute();
+    return sortPatientIdentifiers(jsonInterceptor.getResponse());
+  }
+
+  /**
+   * @return the results of the {@link
+   *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
    *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
    *     "hicn,mbi"
    */
@@ -720,6 +759,31 @@ public final class EndpointJsonResponseComparatorV2IT {
 
   /**
    * @return the results of the {@link
+   *     CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   */
+  public static String coverageReadWithNullReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .read()
+        .resource(Coverage.class)
+        .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+  /**
+   * @return the results of the {@link
    *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
    *     operation
    */
@@ -734,6 +798,37 @@ public final class EndpointJsonResponseComparatorV2IT {
             .findFirst()
             .get();
 
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Coverage.class)
+        .where(
+            Coverage.BENEFICIARY.hasId(
+                TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+        .returnBundle(Bundle.class)
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
+   *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
+   *     operation
+   */
+  public static String coverageSearchByPatientIdWithoutReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 

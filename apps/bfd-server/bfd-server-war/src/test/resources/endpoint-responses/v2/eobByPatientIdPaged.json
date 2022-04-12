@@ -1737,7 +1737,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "30",
+            "display" : "Still patient."
           } ]
         }
       }, {
@@ -2479,7 +2480,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "51",
+            "display" : "Discharged/transferred to a Hospice – medical facility."
           } ]
         }
       }, {
@@ -4882,17 +4884,17 @@
             "value" : 1
           }
         }, {
-            "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-            "valueCoding" : {
-              "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-              "code" : "3"
-            }
-          }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            "code" : "3"
+          }
+        }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
           "valueCoding" : {
             "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
             "code" : "3",
-            "display":"Services"
+            "display" : "Services"
           }
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
@@ -5510,7 +5512,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "30",
+            "display" : "Still patient."
           } ]
         }
       }, {

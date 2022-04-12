@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -13,7 +12,6 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,11 +22,9 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Contract;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
 final class CoverageTransformerV2 {
@@ -93,21 +89,6 @@ final class CoverageTransformerV2 {
         .getMedicareCoverageStartDate()
         .ifPresent(value -> TransformerUtilsV2.setPeriodStart(coverage.getPeriod(), value));
 
-    // deh start
-    coverage.addContract().setId("contract1");
-
-    Contract newContract = new Contract();
-    newContract
-        .addIdentifier(new Identifier().setSystem("part C System").setValue("contract 5555"))
-        .setApplies(
-            (new Period()
-                .setStart(
-                    (TransformerUtilsV2.convertToDate(LocalDate.now())),
-                    TemporalPrecisionEnum.DAY)));
-    coverage.addContained(newContract);
-
-    coverage.addContract(TransformerUtilsV2.referenceCoverage("contract1", MedicareSegment.PART_A));
-
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
     setTypeAndIssuer(coverage);
@@ -132,14 +113,16 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.ESRD_IND, beneficiary.getEndStageRenalDiseaseCode());
     addCoverageCodeExtension(
         coverage, CcwCodebookVariable.A_TRM_CD, beneficiary.getPartATerminationCode());
-    addCoverageDecimalExtension(
-        coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    transformEntitlementDualEligibility(coverage, beneficiary);
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      addCoverageDecimalExtension(
+          coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
+      // Monthly Medicare-Medicaid dual eligibility codes
+      transformEntitlementDualEligibility(coverage, beneficiary);
 
-    // Medicare Entitlement Buy In Indicator
-    transformEntitlementBuyInIndicators(coverage, beneficiary);
+      // Medicare Entitlement Buy In Indicator
+      transformEntitlementBuyInIndicators(coverage, beneficiary);
+    }
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -186,14 +169,15 @@ final class CoverageTransformerV2 {
     addCoverageCodeExtension(
         coverage, CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode());
 
-    addCoverageDecimalExtension(
-        coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      addCoverageDecimalExtension(
+          coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
+      // Monthly Medicare-Medicaid dual eligibility codes
+      transformEntitlementDualEligibility(coverage, beneficiary);
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    transformEntitlementDualEligibility(coverage, beneficiary);
-
-    // Medicare Entitlement Buy In Indicator
-    transformEntitlementBuyInIndicators(coverage, beneficiary);
+      // Medicare Entitlement Buy In Indicator
+      transformEntitlementBuyInIndicators(coverage, beneficiary);
+    }
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -231,116 +215,22 @@ final class CoverageTransformerV2 {
 
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
-    // Contract Number
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_01, beneficiary.getPartCContractNumberJanId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_02, beneficiary.getPartCContractNumberFebId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_03, beneficiary.getPartCContractNumberMarId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_04, beneficiary.getPartCContractNumberAprId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_05, beneficiary.getPartCContractNumberMayId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_06, beneficiary.getPartCContractNumberJunId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_07, beneficiary.getPartCContractNumberJulId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_08, beneficiary.getPartCContractNumberAugId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_09, beneficiary.getPartCContractNumberSeptId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_10, beneficiary.getPartCContractNumberOctId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_11, beneficiary.getPartCContractNumberNovId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_12, beneficiary.getPartCContractNumberDecId());
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      transformPartCContractNumber(coverage, beneficiary);
 
-    // PBP
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_01, beneficiary.getPartCPbpNumberJanId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_02, beneficiary.getPartCPbpNumberFebId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_03, beneficiary.getPartCPbpNumberMarId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_04, beneficiary.getPartCPbpNumberAprId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_05, beneficiary.getPartCPbpNumberMayId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_06, beneficiary.getPartCPbpNumberJunId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_07, beneficiary.getPartCPbpNumberJulId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_08, beneficiary.getPartCPbpNumberAugId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_09, beneficiary.getPartCPbpNumberSeptId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_10, beneficiary.getPartCPbpNumberOctId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_11, beneficiary.getPartCPbpNumberNovId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PBP_ID_12, beneficiary.getPartCPbpNumberDecId());
+      tranformsPartCPbpNumber(coverage, beneficiary);
 
-    // Plan Type
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_01, beneficiary.getPartCPlanTypeJanCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_02, beneficiary.getPartCPlanTypeFebCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_03, beneficiary.getPartCPlanTypeMarCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_04, beneficiary.getPartCPlanTypeAprCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_05, beneficiary.getPartCPlanTypeMayCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_06, beneficiary.getPartCPlanTypeJunCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_07, beneficiary.getPartCPlanTypeJulCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_08, beneficiary.getPartCPlanTypeAugCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_09, beneficiary.getPartCPlanTypeSeptCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_10, beneficiary.getPartCPlanTypeOctCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_11, beneficiary.getPartCPlanTypeNovCode());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_12, beneficiary.getPartCPlanTypeDecCode());
+      transformPartCPlanType(coverage, beneficiary);
 
-    // Monthly Medicare Advantage (MA) enrollment indicators:
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_01, beneficiary.getHmoIndicatorJanInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_02, beneficiary.getHmoIndicatorFebInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_03, beneficiary.getHmoIndicatorMarInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_04, beneficiary.getHmoIndicatorAprInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_05, beneficiary.getHmoIndicatorMayInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_06, beneficiary.getHmoIndicatorJunInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_07, beneficiary.getHmoIndicatorJulInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_08, beneficiary.getHmoIndicatorAugInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_09, beneficiary.getHmoIndicatorSeptInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_10, beneficiary.getHmoIndicatorOctInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_11, beneficiary.getHmoIndicatorNovInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd());
+      transformHMOIndicator(coverage, beneficiary);
 
-    // The reference year of the enrollment data
-    addCoverageDecimalExtension(
-        coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
+      // The reference year of the enrollment data
+      addCoverageDecimalExtension(
+          coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    transformEntitlementDualEligibility(coverage, beneficiary);
+      // Monthly Medicare-Medicaid dual eligibility codes
+      transformEntitlementDualEligibility(coverage, beneficiary);
+    }
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -382,216 +272,203 @@ final class CoverageTransformerV2 {
     addCoverageExtension(
         coverage, CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode());
 
-    // Contract Number
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT01, beneficiary.getPartDContractNumberJanId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT02, beneficiary.getPartDContractNumberFebId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT03, beneficiary.getPartDContractNumberMarId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT04, beneficiary.getPartDContractNumberAprId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT05, beneficiary.getPartDContractNumberMayId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT06, beneficiary.getPartDContractNumberJunId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT07, beneficiary.getPartDContractNumberJulId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT08, beneficiary.getPartDContractNumberAugId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT09, beneficiary.getPartDContractNumberSeptId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT10, beneficiary.getPartDContractNumberOctId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT11, beneficiary.getPartDContractNumberNovId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDCNTRCT12, beneficiary.getPartDContractNumberDecId());
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
 
-    // Beneficiary Monthly Data
-    beneficiary
-        .getBeneficiaryMonthlys()
-        .forEach(
-            beneMonthly -> {
-              int month = beneMonthly.getYearMonth().getMonthValue();
-              String yearMonth =
-                  String.format(
-                      "%s-%s",
-                      String.valueOf(beneMonthly.getYearMonth().getYear()), String.valueOf(month));
+      transformPartDContractNumber(coverage, beneficiary);
 
-              Map<Integer, CcwCodebookVariable> mapOfMonth =
-                  new HashMap<Integer, CcwCodebookVariable>() {
-                    {
-                      put(1, CcwCodebookVariable.PTDCNTRCT01);
-                      put(2, CcwCodebookVariable.PTDCNTRCT02);
-                      put(3, CcwCodebookVariable.PTDCNTRCT03);
-                      put(4, CcwCodebookVariable.PTDCNTRCT04);
-                      put(5, CcwCodebookVariable.PTDCNTRCT05);
-                      put(6, CcwCodebookVariable.PTDCNTRCT06);
-                      put(7, CcwCodebookVariable.PTDCNTRCT07);
-                      put(8, CcwCodebookVariable.PTDCNTRCT08);
-                      put(9, CcwCodebookVariable.PTDCNTRCT09);
-                      put(10, CcwCodebookVariable.PTDCNTRCT10);
-                      put(11, CcwCodebookVariable.PTDCNTRCT11);
-                      put(12, CcwCodebookVariable.PTDCNTRCT12);
-                    }
-                  };
+      // Beneficiary Monthly Data
+      beneficiary
+          .getBeneficiaryMonthlys()
+          .forEach(
+              beneMonthly -> {
+                int month = beneMonthly.getYearMonth().getMonthValue();
+                String yearMonth =
+                    String.format(
+                        "%s-%s",
+                        String.valueOf(beneMonthly.getYearMonth().getYear()),
+                        String.valueOf(month));
 
-              if (mapOfMonth.containsKey(month)) {
-                if (!beneMonthly.getPartDContractNumberId().isPresent()
-                    || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
-                  beneMonthly.setPartDContractNumberId(Optional.of("0"));
+                Map<Integer, CcwCodebookVariable> mapOfMonth =
+                    new HashMap<Integer, CcwCodebookVariable>() {
+                      {
+                        put(1, CcwCodebookVariable.PTDCNTRCT01);
+                        put(2, CcwCodebookVariable.PTDCNTRCT02);
+                        put(3, CcwCodebookVariable.PTDCNTRCT03);
+                        put(4, CcwCodebookVariable.PTDCNTRCT04);
+                        put(5, CcwCodebookVariable.PTDCNTRCT05);
+                        put(6, CcwCodebookVariable.PTDCNTRCT06);
+                        put(7, CcwCodebookVariable.PTDCNTRCT07);
+                        put(8, CcwCodebookVariable.PTDCNTRCT08);
+                        put(9, CcwCodebookVariable.PTDCNTRCT09);
+                        put(10, CcwCodebookVariable.PTDCNTRCT10);
+                        put(11, CcwCodebookVariable.PTDCNTRCT11);
+                        put(12, CcwCodebookVariable.PTDCNTRCT12);
+                      }
+                    };
+
+                if (mapOfMonth.containsKey(month)) {
+                  if (!beneMonthly.getPartDContractNumberId().isPresent()
+                      || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
+                    beneMonthly.setPartDContractNumberId(Optional.of("0"));
+                  }
+
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          mapOfMonth.get(month),
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
                 }
+              });
 
-                coverage.addExtension(
-                    TransformerUtilsV2.createExtensionCoding(
-                        coverage,
-                        mapOfMonth.get(month),
-                        yearMonth,
-                        beneMonthly.getPartDContractNumberId()));
-              }
-            });
+      transformPartDPbpNumber(coverage, beneficiary);
 
-    // PBP
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID01, beneficiary.getPartDPbpNumberJanId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID02, beneficiary.getPartDPbpNumberFebId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID03, beneficiary.getPartDPbpNumberMarId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID04, beneficiary.getPartDPbpNumberAprId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID05, beneficiary.getPartDPbpNumberMayId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID06, beneficiary.getPartDPbpNumberJunId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID07, beneficiary.getPartDPbpNumberJulId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID08, beneficiary.getPartDPbpNumberAugId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID09, beneficiary.getPartDPbpNumberSeptId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID10, beneficiary.getPartDPbpNumberOctId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID11, beneficiary.getPartDPbpNumberNovId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId());
+      transformPartDSegmentNumber(coverage, beneficiary);
 
-    // Segment Number
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID01, beneficiary.getPartDSegmentNumberJanId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID02, beneficiary.getPartDSegmentNumberFebId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID03, beneficiary.getPartDSegmentNumberMarId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID04, beneficiary.getPartDSegmentNumberAprId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID05, beneficiary.getPartDSegmentNumberMayId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID06, beneficiary.getPartDSegmentNumberJunId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID07, beneficiary.getPartDSegmentNumberJulId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID08, beneficiary.getPartDSegmentNumberAugId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID09, beneficiary.getPartDSegmentNumberSeptId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID10, beneficiary.getPartDSegmentNumberOctId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID11, beneficiary.getPartDSegmentNumberNovId());
-    addCoverageExtension(
-        coverage, CcwCodebookVariable.SGMTID12, beneficiary.getPartDSegmentNumberDecId());
+      transformPartDLowIncomeCostShareGroup(coverage, beneficiary);
 
-    // Monthly cost sharing group
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR01,
-        beneficiary.getPartDLowIncomeCostShareGroupJanCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR02,
-        beneficiary.getPartDLowIncomeCostShareGroupFebCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR03,
-        beneficiary.getPartDLowIncomeCostShareGroupMarCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR04,
-        beneficiary.getPartDLowIncomeCostShareGroupAprCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR05,
-        beneficiary.getPartDLowIncomeCostShareGroupMayCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR06,
-        beneficiary.getPartDLowIncomeCostShareGroupJunCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR07,
-        beneficiary.getPartDLowIncomeCostShareGroupJulCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR08,
-        beneficiary.getPartDLowIncomeCostShareGroupAugCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR09,
-        beneficiary.getPartDLowIncomeCostShareGroupSeptCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR10,
-        beneficiary.getPartDLowIncomeCostShareGroupOctCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR11,
-        beneficiary.getPartDLowIncomeCostShareGroupNovCode());
-    addCoverageExtension(
-        coverage,
-        CcwCodebookVariable.CSTSHR12,
-        beneficiary.getPartDLowIncomeCostShareGroupDecCode());
+      transformPartDRetireeDrugSubsidy(coverage, beneficiary);
 
-    // Monthly Part D Retiree Drug Subsidy Indicators
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND01, beneficiary.getPartDRetireeDrugSubsidyJanInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND02, beneficiary.getPartDRetireeDrugSubsidyFebInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND03, beneficiary.getPartDRetireeDrugSubsidyMarInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND04, beneficiary.getPartDRetireeDrugSubsidyAprInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND05, beneficiary.getPartDRetireeDrugSubsidyMayInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND06, beneficiary.getPartDRetireeDrugSubsidyJunInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND07, beneficiary.getPartDRetireeDrugSubsidyJulInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND08, beneficiary.getPartDRetireeDrugSubsidyAugInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND09, beneficiary.getPartDRetireeDrugSubsidySeptInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND10, beneficiary.getPartDRetireeDrugSubsidyOctInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND11, beneficiary.getPartDRetireeDrugSubsidyNovInd());
-    addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.RDSIND12, beneficiary.getPartDRetireeDrugSubsidyDecInd());
+      // The reference year of the enrollment data
+      addCoverageDecimalExtension(
+          coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
 
-    // The reference year of the enrollment data
-    addCoverageDecimalExtension(
-        coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
-
-    // Monthly Medicare-Medicaid dual eligibility codes
-    transformEntitlementDualEligibility(coverage, beneficiary);
+      // Monthly Medicare-Medicaid dual eligibility codes
+      transformEntitlementDualEligibility(coverage, beneficiary);
+    }
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformHMOIndicator(Coverage coverage, Beneficiary beneficiary) {
+    // Monthly Medicare Advantage (MA) enrollment indicators:
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_01, beneficiary.getHmoIndicatorJanInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_02, beneficiary.getHmoIndicatorFebInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_03, beneficiary.getHmoIndicatorMarInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_04, beneficiary.getHmoIndicatorAprInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_05, beneficiary.getHmoIndicatorMayInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_06, beneficiary.getHmoIndicatorJunInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_07, beneficiary.getHmoIndicatorJulInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_08, beneficiary.getHmoIndicatorAugInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_09, beneficiary.getHmoIndicatorSeptInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_10, beneficiary.getHmoIndicatorOctInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_11, beneficiary.getHmoIndicatorNovInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
+    // Plan Type
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_01, beneficiary.getPartCPlanTypeJanCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_02, beneficiary.getPartCPlanTypeFebCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_03, beneficiary.getPartCPlanTypeMarCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_04, beneficiary.getPartCPlanTypeAprCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_05, beneficiary.getPartCPlanTypeMayCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_06, beneficiary.getPartCPlanTypeJunCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_07, beneficiary.getPartCPlanTypeJulCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_08, beneficiary.getPartCPlanTypeAugCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_09, beneficiary.getPartCPlanTypeSeptCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_10, beneficiary.getPartCPlanTypeOctCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_11, beneficiary.getPartCPlanTypeNovCode());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_12, beneficiary.getPartCPlanTypeDecCode());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void tranformsPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+    // PBP
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_01, beneficiary.getPartCPbpNumberJanId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_02, beneficiary.getPartCPbpNumberFebId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_03, beneficiary.getPartCPbpNumberMarId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_04, beneficiary.getPartCPbpNumberAprId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_05, beneficiary.getPartCPbpNumberMayId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_06, beneficiary.getPartCPbpNumberJunId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_07, beneficiary.getPartCPbpNumberJulId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_08, beneficiary.getPartCPbpNumberAugId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_09, beneficiary.getPartCPbpNumberSeptId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_10, beneficiary.getPartCPbpNumberOctId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_11, beneficiary.getPartCPbpNumberNovId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_PBP_ID_12, beneficiary.getPartCPbpNumberDecId());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_01, beneficiary.getPartCContractNumberJanId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_02, beneficiary.getPartCContractNumberFebId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_03, beneficiary.getPartCContractNumberMarId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_04, beneficiary.getPartCContractNumberAprId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_05, beneficiary.getPartCContractNumberMayId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_06, beneficiary.getPartCContractNumberJunId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_07, beneficiary.getPartCContractNumberJulId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_08, beneficiary.getPartCContractNumberAugId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_09, beneficiary.getPartCContractNumberSeptId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_10, beneficiary.getPartCContractNumberOctId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_11, beneficiary.getPartCContractNumberNovId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTC_CNTRCT_ID_12, beneficiary.getPartCContractNumberDecId());
   }
 
   /**
@@ -662,6 +539,190 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.DUAL_12, beneficiary.getMedicaidDualEligibilityDecCode());
   }
 
+  /**
+   * @param coverage the {@link Coverage} to generate
+   * @param beneficiary the {@link Beneficiary} to generate Coverage for
+   */
+  private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
+    // Monthly Part D Retiree Drug Subsidy Indicators
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND01, beneficiary.getPartDRetireeDrugSubsidyJanInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND02, beneficiary.getPartDRetireeDrugSubsidyFebInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND03, beneficiary.getPartDRetireeDrugSubsidyMarInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND04, beneficiary.getPartDRetireeDrugSubsidyAprInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND05, beneficiary.getPartDRetireeDrugSubsidyMayInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND06, beneficiary.getPartDRetireeDrugSubsidyJunInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND07, beneficiary.getPartDRetireeDrugSubsidyJulInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND08, beneficiary.getPartDRetireeDrugSubsidyAugInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND09, beneficiary.getPartDRetireeDrugSubsidySeptInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND10, beneficiary.getPartDRetireeDrugSubsidyOctInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND11, beneficiary.getPartDRetireeDrugSubsidyNovInd());
+    addCoverageCodeExtension(
+        coverage, CcwCodebookVariable.RDSIND12, beneficiary.getPartDRetireeDrugSubsidyDecInd());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformPartDLowIncomeCostShareGroup(
+      Coverage coverage, Beneficiary beneficiary) {
+    // Monthly cost sharing group
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR01,
+        beneficiary.getPartDLowIncomeCostShareGroupJanCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR02,
+        beneficiary.getPartDLowIncomeCostShareGroupFebCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR03,
+        beneficiary.getPartDLowIncomeCostShareGroupMarCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR04,
+        beneficiary.getPartDLowIncomeCostShareGroupAprCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR05,
+        beneficiary.getPartDLowIncomeCostShareGroupMayCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR06,
+        beneficiary.getPartDLowIncomeCostShareGroupJunCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR07,
+        beneficiary.getPartDLowIncomeCostShareGroupJulCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR08,
+        beneficiary.getPartDLowIncomeCostShareGroupAugCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR09,
+        beneficiary.getPartDLowIncomeCostShareGroupSeptCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR10,
+        beneficiary.getPartDLowIncomeCostShareGroupOctCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR11,
+        beneficiary.getPartDLowIncomeCostShareGroupNovCode());
+    addCoverageExtension(
+        coverage,
+        CcwCodebookVariable.CSTSHR12,
+        beneficiary.getPartDLowIncomeCostShareGroupDecCode());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
+    // Segment Number
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID01, beneficiary.getPartDSegmentNumberJanId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID02, beneficiary.getPartDSegmentNumberFebId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID03, beneficiary.getPartDSegmentNumberMarId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID04, beneficiary.getPartDSegmentNumberAprId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID05, beneficiary.getPartDSegmentNumberMayId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID06, beneficiary.getPartDSegmentNumberJunId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID07, beneficiary.getPartDSegmentNumberJulId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID08, beneficiary.getPartDSegmentNumberAugId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID09, beneficiary.getPartDSegmentNumberSeptId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID10, beneficiary.getPartDSegmentNumberOctId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID11, beneficiary.getPartDSegmentNumberNovId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.SGMTID12, beneficiary.getPartDSegmentNumberDecId());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+    // PBP
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID01, beneficiary.getPartDPbpNumberJanId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID02, beneficiary.getPartDPbpNumberFebId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID03, beneficiary.getPartDPbpNumberMarId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID04, beneficiary.getPartDPbpNumberAprId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID05, beneficiary.getPartDPbpNumberMayId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID06, beneficiary.getPartDPbpNumberJunId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID07, beneficiary.getPartDPbpNumberJulId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID08, beneficiary.getPartDPbpNumberAugId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID09, beneficiary.getPartDPbpNumberSeptId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID10, beneficiary.getPartDPbpNumberOctId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID11, beneficiary.getPartDPbpNumberNovId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId());
+  }
+
+  /**
+   * @param coverage the FHIR {@link Coverage} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
+    // Contract Number
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT01, beneficiary.getPartDContractNumberJanId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT02, beneficiary.getPartDContractNumberFebId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT03, beneficiary.getPartDContractNumberMarId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT04, beneficiary.getPartDContractNumberAprId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT05, beneficiary.getPartDContractNumberMayId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT06, beneficiary.getPartDContractNumberJunId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT07, beneficiary.getPartDContractNumberJulId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT08, beneficiary.getPartDContractNumberAugId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT09, beneficiary.getPartDContractNumberSeptId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT10, beneficiary.getPartDContractNumberOctId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT11, beneficiary.getPartDContractNumberNovId());
+    addCoverageExtension(
+        coverage, CcwCodebookVariable.PTDCNTRCT12, beneficiary.getPartDContractNumberDecId());
+  }
   /**
    * Sets the Coverage.status Looks up or adds a contained {@link Identifier} object to the current
    * {@link Patient}. This is used to store Identifier slices related to the Provider organization.
@@ -797,7 +858,10 @@ final class CoverageTransformerV2 {
    */
   static void addCoverageDecimalExtension(
       Coverage coverage, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
-    coverage.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal));
+    optVal.ifPresent(
+        value ->
+            coverage.addExtension(
+                TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get())));
   }
 
   /**
