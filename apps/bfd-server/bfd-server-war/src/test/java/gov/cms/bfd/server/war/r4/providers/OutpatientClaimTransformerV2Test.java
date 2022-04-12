@@ -11,7 +11,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -77,7 +77,7 @@ public final class OutpatientClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         OutpatientClaimTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1306,7 +1306,7 @@ public final class OutpatientClaimTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         OutpatientClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugTestUtils());
+            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugUtils(true));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

@@ -8,7 +8,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -69,7 +69,7 @@ public final class PartDEventTransformerV2Test {
     claim = generateClaim();
     eob =
         PartDEventTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -883,7 +883,7 @@ public final class PartDEventTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         PartDEventTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugTestUtils());
+            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugUtils(true));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

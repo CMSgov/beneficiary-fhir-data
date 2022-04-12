@@ -8,7 +8,7 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -47,7 +47,7 @@ public final class InpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         InpatientClaimTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
     assertMatches(claim, eob);
   }
 

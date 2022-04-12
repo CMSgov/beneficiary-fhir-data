@@ -30,7 +30,7 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -2023,7 +2023,7 @@ final class TransformerTestUtils {
   /** @throws IOException */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
-    IDrugCodeProvider drugCodeProvider = new FDADrugTestUtils();
+    IDrugCodeProvider drugCodeProvider = new FDADrugUtils(true);
     String nationalDrugCodeDisplayValueActual =
         drugCodeProvider.retrieveFDADrugCodeDisplay(nationalDrugCode);
     assertEquals(

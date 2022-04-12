@@ -8,7 +8,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -45,7 +45,7 @@ public final class SNFClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         SNFClaimTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
     assertMatches(claim, eob);
   }
 

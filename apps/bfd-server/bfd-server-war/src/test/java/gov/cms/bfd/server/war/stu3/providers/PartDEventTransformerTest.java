@@ -7,7 +7,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
@@ -39,7 +39,7 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         PartDEventTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
     assertMatches(claim, eob);
   }
 
@@ -90,7 +90,7 @@ public final class PartDEventTransformerTest {
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
         PartDEventTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugTestUtils());
+            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -146,7 +146,7 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-    IDrugCodeProvider drugCodeProvider = new FDADrugTestUtils();
+    IDrugCodeProvider drugCodeProvider = new FDADrugUtils(true);
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,

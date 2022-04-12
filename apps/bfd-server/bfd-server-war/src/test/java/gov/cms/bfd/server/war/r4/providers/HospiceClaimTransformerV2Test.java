@@ -12,7 +12,7 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugTestUtils;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -79,7 +79,7 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB(Optional<Boolean> includeTaxNumber) {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(), claim, includeTaxNumber, new FDADrugTestUtils());
+            new MetricRegistry(), claim, includeTaxNumber, new FDADrugUtils(true));
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -110,7 +110,7 @@ public final class HospiceClaimTransformerV2Test {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.of(false), new FDADrugTestUtils()));
+            new MetricRegistry(), claim, Optional.of(false), new FDADrugUtils(true)));
   }
 
   /** Common top level ExplanationOfBenefit values */
