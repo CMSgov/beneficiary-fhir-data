@@ -193,6 +193,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
+	"-DbfdServer.include.fake.drug.code=true" \
 	>"${serverLog}" 2>&1 \
 	&
 

@@ -22,6 +22,12 @@ public class FDADrugUtils implements IDrugCodeProvider {
   /** Tracks the national drug codes that have already had code lookup failures. */
   public static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
+  private final boolean includeFakeDrugCode;
+
+  public FDADrugUtils(boolean includeFakeDrugCode) {
+    this.includeFakeDrugCode = includeFakeDrugCode;
+  }
+
   /**
    * Retrieves the PRODUCTNDC and SUBSTANCENAME from the FDA NDC Products file which was downloaded
    * during the build process
@@ -116,7 +122,9 @@ public class FDADrugUtils implements IDrugCodeProvider {
           continue;
         }
 
-        getFDATestCode(ndcProductHashMap);
+        if (includeFakeDrugCode) {
+          appendFDATestCode(ndcProductHashMap);
+        }
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
@@ -124,7 +132,7 @@ public class FDADrugUtils implements IDrugCodeProvider {
     return ndcProductHashMap;
   }
 
-  private void getFDATestCode(Map<String, String> ndcProductHashMap) {
+  private void appendFDATestCode(Map<String, String> ndcProductHashMap) {
     String line =
         "0000-0000_000000zz-0zz0-0z00-zzz0-0z00zzz00000\t0000-0000\tFAKE DRUG\tFake Diluent\t\tfake\tFAKE SOLUTION\tFake\t0\t\tFAK\tFAK000000\tFake Company\tWATER\t1\tmL/mL\t\t\tN\t00000000";
     String ndcProductColumns[] = line.split("\t");

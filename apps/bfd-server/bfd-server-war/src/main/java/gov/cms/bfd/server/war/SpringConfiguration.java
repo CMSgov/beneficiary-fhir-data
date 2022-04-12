@@ -64,6 +64,7 @@ public class SpringConfiguration {
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
+  public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
   public static final int TRANSACTION_TIMEOUT = 30;
 
   /**
@@ -462,7 +463,9 @@ public class SpringConfiguration {
   }
 
   @Bean
-  public IDrugCodeProvider drugCodeProvider() {
-    return new FDADrugTestUtils();
+  public IDrugCodeProvider drugCodeProvider(
+      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") String includeFakeDrugCodeText) {
+    boolean includeFakeDrugCode = Boolean.parseBoolean(includeFakeDrugCodeText);
+    return new FDADrugUtils(includeFakeDrugCode);
   }
 }
