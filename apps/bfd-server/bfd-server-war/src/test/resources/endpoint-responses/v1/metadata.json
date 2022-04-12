@@ -14,7 +14,7 @@
   },
   "fhirVersion" : "3.0.2",
   "acceptUnknown" : "extensions",
-  "format" : [ "application/fhir+xml", "application/fhir+json" ],
+  "format" : [ "application/fhir+xml", "application/fhir+json", "json", "xml" ],
   "rest" : [ {
     "mode" : "server",
     "resource" : [ {
@@ -129,16 +129,6 @@
         "name" : "startIndex",
         "type" : "string",
         "documentation" : "The offset used for result pagination"
-      } ]
-    }, {
-      "type" : "StructureDefinition",
-      "profile" : {
-        "reference" : "http://hl7.org/fhir/Profile/StructureDefinition"
-      },
-      "interaction" : [ {
-        "code" : "read"
-      }, {
-        "code" : "search-type"
       } ]
     } ]
   } ]

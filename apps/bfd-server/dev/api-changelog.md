@@ -1,5 +1,55 @@
 # API Changelog
 
+## BFD-1403 Update patient discharge status code mapping
+
+Update mapping for patient discharge status coding for HHA, Inpatient and Hospice. Previously, the patient discharge status code in the EOB FHIR response was incorrectly being populated by the claim frequency code data field. The value for the patient discharge status code is now correctly being populated by the patient discharge status code data field.
+For Inpatient:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "51",
+        "display" : "Discharged/transferred to a Hospice – medical facility."
+      } ]
+    }
+```
+
+For Hospice:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+```
+
+For HHA:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+ ```
+
+## BFD-1664 Upgrade HAPI-FHIR to version 5.7.2
+
+The hapi-fhir dependencies that BFD relies on to serve FHIR responses has been upgraded from version 4.1.0 to version 5.7.2. There are no changes to the responses to resource requests with this upgrade. The metadata response has changed as follows:
+
+ * 'searchInclude' and 'searchRevInclude' are now included in the metadata output for all resources.
+ * 'fhirVersion' has been updated from 4.0.0 to 4.0.1
+ * The 'StructureDefinition' resource is no longer available. For more information please see the [hapi changelog entry](https://hapifhir.io/hapi-fhir/docs/introduction/changelog_2020.html).
+ * Various minor fixes including removal of duplicate elements.
+
+For more information see the [HAPI FHIR Release Notes](https://github.com/hapifhir/hapi-fhir/releases)
+
 ## BFD-1461 Implement Handling for Null Enrollment Reference Years
 
  * Following FHIR mapping changes were made:

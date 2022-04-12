@@ -69,6 +69,13 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>${hapi-fhir.version}</version>
+			<exclusions>
+				<!-- Need the newer but compatible version from com.newrelic.telemetry -->
+				<exclusion>
+					<groupId>com.squareup.okhttp3</groupId>
+					<artifactId>okhttp</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		
 		<dependency>
@@ -80,6 +87,11 @@
 				<exclusion>
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
+				</exclusion>
+				<!-- Need the newer but compatible version from com.newrelic.telemetry -->
+				<exclusion>
+					<groupId>com.squareup.okhttp3</groupId>
+					<artifactId>okhttp</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -96,7 +108,13 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
-		
+		<dependency>
+			<!-- This dependency includes the base HAPI-FHIR classes -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${hapi-fhir.version}</version>
+		</dependency>
+
 		<dependency>
 			<!-- Needed for comparing JSON files to obtain the diff. See
 				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
