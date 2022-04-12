@@ -14,6 +14,159 @@ Removed duplicate primary payer code from API output for DME claims:
 }
 ```
 
+## BFD-1403 Update patient discharge status code mapping
+
+Update mapping for patient discharge status coding for HHA, Inpatient and Hospice. Previously, the patient discharge status code in the EOB FHIR response was incorrectly being populated by the claim frequency code data field. The value for the patient discharge status code is now correctly being populated by the patient discharge status code data field.
+For Inpatient:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "51",
+        "display" : "Discharged/transferred to a Hospice – medical facility."
+      } ]
+    }
+```
+
+For Hospice:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+```
+
+For HHA:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+ ```
+
+## BFD-1664 Upgrade HAPI-FHIR to version 5.7.2
+
+The hapi-fhir dependencies that BFD relies on to serve FHIR responses has been upgraded from version 4.1.0 to version 5.7.2. There are no changes to the responses to resource requests with this upgrade. The metadata response has changed as follows:
+
+ * 'searchInclude' and 'searchRevInclude' are now included in the metadata output for all resources.
+ * 'fhirVersion' has been updated from 4.0.0 to 4.0.1
+ * The 'StructureDefinition' resource is no longer available. For more information please see the [hapi changelog entry](https://hapifhir.io/hapi-fhir/docs/introduction/changelog_2020.html).
+ * Various minor fixes including removal of duplicate elements.
+
+For more information see the [HAPI FHIR Release Notes](https://github.com/hapifhir/hapi-fhir/releases)
+
+## BFD-1461 Implement Handling for Null Enrollment Reference Years
+
+ * Following FHIR mapping changes were made:
+
+  * For V1 and V2, if there is a reference year, return data normally.  For V1 and V2, if there is a NULL reference year, do NOT return data that is associated with that specific reference year. All other data is returned as expected.  If there is a null reference year the following fields will not be present.
+
+```
+  {
+     "url":"https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+     "valueDate":"2018"
+  },
+  {
+     "url":"https://bluebutton.cms.gov/resources/variables/dual_01...12",
+     "valueCoding":{
+        "system":"https://bluebutton.cms.gov/resources/variables/dual_01...12",
+        "code":"**",
+        "display":"Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+     }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/buyin01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/buyin01...12",
+         "code":"C",
+         "display":"Part A and Part B state buy-in"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/ptdcntrct01/yyyy-1...yyy-12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/ptdcntrct01...12",
+         "code":"S4607"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/ptdpbpid01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/ptdpbpid01...12",
+         "code":"003"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/sgmtid01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/sgmtid01...12",
+         "code":"000"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/cstshr01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/cstshr01...12",
+         "code":"00",
+         "display":"Not Medicare enrolled for the month"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/rdsind01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/rdsind01...12",
+         "code":"Y",
+         "display":"Employer subsidized for the retired beneficiary"
+      }
+   }
+  ```
+  
+## BFD-874 Fix diagnosis.sequence in V1 and V2
+
+* The Following FHIR mapping changes were made:
+
+For both V1 and V2 eob.diagnosis.sequence is now correctly populated. This can now be utilized whenever a DRG is reported.
+
+```
+  "diagnosis" : [ {
+    "sequence" : 1,
+    ...,
+  }]
+ ```
+  
+## BFD-1582 Remove spurious coverage contracts
+
+Removed hardcoded coverage contracts that were inadvertantly introduced in V1 and V2 during testing.
+
+The contract that was removed in V1:
+
+```
+"contract" : [ {
+        "id" : "ptc-contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1 reference"
+      } ]
+```
+
+The contract that was removed in V2:
+
+```
+"contract" : [ {
+        "id" : "contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1"
+      } ]
+```
+
 ## BFD-1423 Remove Duplicate Drug Status Code
 
 Removed duplicate drug status coding from API output for PDE claims:
@@ -99,9 +252,9 @@ The new coding:
 
 ## BFD-1446: Added focal field to v2
 
-For V2, set eob.insurance.focal to 'true' for all hard coded eob.insurance.coverage elements
+For V2, set eob.insurance.focal to 'true' for all eob.insurance.coverage elements
 
-This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim. If this is the case then the focal should always be set to true.  This is only for PDE claims, since it appears this is the only claim type that sets any values within the eob.insurance[N]. This is also ONLY A FIX FOR V2.
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim at this time. This fix applies to V2 only.
 
 ````
  "insurance" : [ {

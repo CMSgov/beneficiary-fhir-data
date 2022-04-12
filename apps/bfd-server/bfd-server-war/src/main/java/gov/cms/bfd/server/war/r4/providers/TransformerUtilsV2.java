@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -410,21 +409,16 @@ public final class TransformerUtilsV2 {
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
-  static Extension createExtensionDate(
-      CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
-
+  static Extension createExtensionDate(CcwCodebookInterface ccwVariable, BigDecimal dateYear) {
     Extension extension = null;
-    if (!dateYear.isPresent()) {
-      throw new NoSuchElementException();
-    }
     try {
-      String stringDate = String.format("%04d", dateYear.get().intValue());
+      String stringDate = String.format("%04d", dateYear.intValue());
       DateType dateYearValue = new DateType(stringDate);
       String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
     } catch (DataFormatException e) {
       throw new InvalidRifValueException(
-          String.format("Unable to create DateType with reference year: '%s'.", dateYear.get()), e);
+          String.format("Unable to create DateType with reference year: '%s'.", dateYear), e);
     }
     return extension;
   }
@@ -1694,19 +1688,6 @@ public final class TransformerUtilsV2 {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
-  }
-
-  /**
-   * TODO: Remove this method when the calling method has been removed as per BFD-1582
-   *
-   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
-   *     value for the {@link Coverage#getBeneficiary()} value to match
-   * @param coverageType the {@link MedicareSegment} value to match
-   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
-   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
-   */
-  static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
-    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
   /**
@@ -3054,7 +3035,7 @@ public final class TransformerUtilsV2 {
           C4BBSupportingInfoType.DISCHARGE_STATUS,
           CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
           CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
-          claimFrequencyCode);
+          patientDischargeStatusCode);
     }
 
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
