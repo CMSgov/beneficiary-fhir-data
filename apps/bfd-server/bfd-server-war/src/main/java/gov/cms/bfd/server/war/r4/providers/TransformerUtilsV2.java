@@ -3057,7 +3057,7 @@ public final class TransformerUtilsV2 {
           C4BBSupportingInfoType.DISCHARGE_STATUS,
           CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
           CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
-          claimFrequencyCode);
+          patientDischargeStatusCode);
     }
 
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
