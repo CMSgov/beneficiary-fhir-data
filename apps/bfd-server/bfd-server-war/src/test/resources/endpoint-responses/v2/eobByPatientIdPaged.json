@@ -1737,7 +1737,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "30",
+            "display" : "Still patient."
           } ]
         }
       }, {
@@ -2479,7 +2480,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "51",
+            "display" : "Discharged/transferred to a Hospice – medical facility."
           } ]
         }
       }, {
@@ -5510,7 +5512,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "30",
+            "display" : "Still patient."
           } ]
         }
       }, {
