@@ -393,6 +393,9 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds a {@link Diagnosis} to the provided {@link ExplanationOfBenefit} and modifies the {@link
+   * ItemComponent} with a sequence number identifier.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the specified {@link ItemComponent} is a child
    *     of
    * @param item the {@link ItemComponent} to add an {@link ItemComponent#getDiagnosisLinkId()}
