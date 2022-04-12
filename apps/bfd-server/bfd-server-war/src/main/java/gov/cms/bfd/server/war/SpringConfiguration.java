@@ -460,4 +460,9 @@ public class SpringConfiguration {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
   }
+
+  @Bean
+  public IDrugCodeProvider drugCodeProvider() {
+    return new FDADrugTestUtils();
+  }
 }

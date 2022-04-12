@@ -12,9 +12,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class FDADrugUtils implements IDrugCodeProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FDADrugUtils.class);
