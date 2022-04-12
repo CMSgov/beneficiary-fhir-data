@@ -146,7 +146,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageStatusPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    assertEquals("cancelled", coverage.getStatus().toCode());
+    verifyCoverageStatus("cancelled");
   }
 
   @Test
