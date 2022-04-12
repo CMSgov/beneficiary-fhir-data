@@ -159,9 +159,7 @@ public final class MappingSpec {
    *     used to store and refer to the child {@link #getLineEntity()} {@link Entity}s, if any
    */
   public String getHeaderEntityLinesField() {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     return "lines";
   }
 
@@ -206,9 +204,7 @@ public final class MappingSpec {
 
   /** @return the index of the first line field in {@link #getRifLayout()} */
   public int calculateFirstLineFieldIndex() {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
 
     for (int fieldIndex = 0; fieldIndex < rifLayout.getRifFields().size(); fieldIndex++) {
       RifField field = rifLayout.getRifFields().get(fieldIndex);
@@ -216,6 +212,7 @@ public final class MappingSpec {
         return fieldIndex;
       }
     }
+
     throw new IllegalStateException();
   }
 
@@ -224,9 +221,7 @@ public final class MappingSpec {
    *     layout for the line fields, if any
    */
   public ClassName getLineEntity() {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     return ClassName.get(packageName, headerEntity + "Line");
   }
 
@@ -235,9 +230,7 @@ public final class MappingSpec {
    *     layout for the line fields, if any
    */
   public ClassName getBeneficiaryMonthlyEntity() {
-    if (!isBeneficiaryEntity) {
-      throw new IllegalStateException();
-    }
+    if (!isBeneficiaryEntity) throw new IllegalStateException();
     return ClassName.get(packageName, "BeneficiaryMonthly");
   }
 
@@ -246,9 +239,7 @@ public final class MappingSpec {
    *     in, if any
    */
   public String getLineTable() {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     return lineTable;
   }
 
@@ -259,9 +250,7 @@ public final class MappingSpec {
    * @return this {@link MappingSpec} instance, for call-chaining purposes
    */
   public MappingSpec setLineTable(String lineTable) {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     this.lineTable = lineTable;
     return this;
   }
@@ -271,9 +260,7 @@ public final class MappingSpec {
    *     Entity}, if any
    */
   public ClassName getLineEntityIdClass() {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     return getLineEntity().nestedClass("LineId");
   }
 
@@ -282,9 +269,7 @@ public final class MappingSpec {
    *     used to store and refer to the child {@link #getLineEntity()} {@link Entity}s, if any
    */
   public String getLineEntityParentField() {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     return "parentClaim";
   }
 
@@ -294,9 +279,7 @@ public final class MappingSpec {
    *     #getBeneficiaryMonthlyEntityParentField()} {@link Entity}s, if any
    */
   public String getBeneficiaryMonthlyEntityParentField() {
-    if (!isBeneficiaryEntity) {
-      throw new IllegalStateException();
-    }
+    if (!isBeneficiaryEntity) throw new IllegalStateException();
     return "parentBeneficiary";
   }
 
@@ -308,9 +291,7 @@ public final class MappingSpec {
    * @return this {@link MappingSpec} instance, for call-chaining purposes
    */
   public MappingSpec setLineEntityLineNumberField(String lineEntityLineNumberField) {
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     this.lineEntityLineNumberField = lineEntityLineNumberField;
     return this;
   }
@@ -321,9 +302,7 @@ public final class MappingSpec {
    */
   public String getLineEntityLineNumberField() {
     // use Java field name since there is no uniformity among column names for line #
-    if (!hasLines) {
-      throw new IllegalStateException();
-    }
+    if (!hasLines) throw new IllegalStateException();
     return lineEntityLineNumberField;
   }
 
@@ -332,9 +311,7 @@ public final class MappingSpec {
    *     that should be used for the identifying yearMonth, if any
    */
   public String getEntityBeneficiaryMonthlyField() {
-    if (!isBeneficiaryEntity) {
-      throw new IllegalStateException();
-    }
+    if (!isBeneficiaryEntity) throw new IllegalStateException();
     return "YEAR_MONTH";
   }
 
