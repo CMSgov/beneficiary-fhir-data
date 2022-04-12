@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -182,6 +183,36 @@ public final class CoverageTransformerV2Test {
   public void verifyCoverageClassPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyCoverageClass("Part A");
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.CoverageTransformerV2#transform(Coverage)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Coverage} with a
+   * reference year field not found.
+   */
+  @Test
+  public void verifyPartAWithoutReferenceYear() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
+    Beneficiary newBeneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    Calendar calen = Calendar.getInstance();
+    calen.set(2021, 3, 17);
+    newBeneficiary.setLastUpdated(calen.getTime().toInstant());
+    newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+
+    Coverage newCoverage =
+        CoverageTransformerV2.transform(
+            new MetricRegistry(), MedicareSegment.PART_A, newBeneficiary);
+    checkForNoYearlyDate(newBeneficiary, newCoverage);
   }
 
   // ==================
@@ -742,5 +773,56 @@ public final class CoverageTransformerV2Test {
     verifySubscriber();
     verifyRelationship();
     verifyPayor();
+  }
+
+  private static void verifyCodedExtensionDoestNotExist(Coverage inCoverage, String url) {
+    Optional<Extension> ex =
+        inCoverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    assertEquals(true, ex.isEmpty());
+  }
+
+  private static void checkForNoYearlyDate(Beneficiary inBeneficiary, Coverage inCoverage) {
+    // dual_01 thru dual_12
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/dual_%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
+
+    // buyin01 thru buyin12
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/buyin%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
+
+    // ptdcntrct01 thru ptdcntrct12
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdcntrct%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
+
+    // ptdpbpid01 thru ptdpbpid11
+    for (int i = 1; i < 12; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdpbpid%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
+
+    // sgmtid01 thru sgmtid11
+    for (int i = 1; i < 12; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/sgmtid%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
+
+    // cstshr01 thru cstshr12
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/cstshr%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
+
+    // rdsind01 thru rdsind12
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/rdsind%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
   }
 }
