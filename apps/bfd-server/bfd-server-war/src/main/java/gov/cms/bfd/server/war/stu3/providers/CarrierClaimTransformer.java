@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -37,7 +37,7 @@ final class CarrierClaimTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
@@ -57,9 +57,7 @@ final class CarrierClaimTransformer {
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup,
-      Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -226,7 +224,7 @@ final class CarrierClaimTransformer {
 
       String drugCodeName = null;
       if (claimLine.getNationalDrugCode().isPresent()) {
-        drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode().get());
+        drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode());
       }
 
       // Common item level fields between Carrier and DME

@@ -34,7 +34,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -326,7 +326,7 @@ public final class TransformerUtils {
     // If no match was found, add one to the EOB.
     if (careTeamEntry == null) {
       careTeamEntry = eob.addCareTeam();
-      careTeamEntry.setSequence(eob.getCareTeam().size());
+      careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
       careTeamEntry.setProvider(
           createIdentifierReference(practitionerIdSystem, practitionerIdValue));
 
@@ -3017,13 +3017,15 @@ public final class TransformerUtils {
     }
 
     // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    /*  if (!drugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
-      drugCodeProvider.drugCodeLookupMissingFailures.add(icdCode);
+    /*
+     if (!drugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
+      //drugCodeProvider.drugCodeLookupMissingFailures.add(icdCode);
       LOGGER.info(
           "No ICD code display value match found for ICD code {} in resource {}.",
           icdCode,
           "DGNS_CD.txt");
-    } */
+    }
+    */
 
     return null;
   }
@@ -3224,7 +3226,7 @@ public final class TransformerUtils {
       MetricRegistry metricRegistry,
       Object rifRecord,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType

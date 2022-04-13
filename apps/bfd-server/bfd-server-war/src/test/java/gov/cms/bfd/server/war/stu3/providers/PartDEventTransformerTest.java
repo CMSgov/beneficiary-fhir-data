@@ -8,7 +8,6 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.FDADrugUtils;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -146,11 +145,11 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-    IDrugCodeProvider drugCodeProvider = new FDADrugUtils(true);
+    FDADrugUtils drugCodeProvider = new FDADrugUtils(true);
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        drugCodeProvider.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
+        drugCodeProvider.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 

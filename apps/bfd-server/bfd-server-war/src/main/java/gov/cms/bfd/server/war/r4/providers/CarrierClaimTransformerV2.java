@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -38,7 +38,7 @@ public class CarrierClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -62,9 +62,7 @@ public class CarrierClaimTransformerV2 {
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup,
-      Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -281,11 +279,7 @@ public class CarrierClaimTransformerV2 {
                       TransformerUtilsV2.createExtensionCoding(
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
 
-      String drugCode = null;
-
-      if (line.getNationalDrugCode().isPresent()) {
-        drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode().get());
-      }
+      String drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode());
       // Common item level fields between Carrier and DME
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
       // LINE_CMS_TYPE_SRVC_CD    => ExplanationOfBenefit.item.category

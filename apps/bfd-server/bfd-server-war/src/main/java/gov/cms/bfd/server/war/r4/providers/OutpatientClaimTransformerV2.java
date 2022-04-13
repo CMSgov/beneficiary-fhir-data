@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -39,7 +39,7 @@ public class OutpatientClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -63,7 +63,7 @@ public class OutpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      OutpatientClaim claimGroup, IDrugCodeProvider drugCodeProvider) {
+      OutpatientClaim claimGroup, FDADrugUtils drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -392,7 +392,7 @@ public class OutpatientClaimTransformerV2 {
 
       String drugCode = null;
       if (line.getNationalDrugCode().isPresent()) {
-        drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode().get());
+        drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode());
       }
       // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.productOrService.extension
       TransformerUtilsV2.addNationalDrugCode(item, line.getNationalDrugCode(), drugCode);

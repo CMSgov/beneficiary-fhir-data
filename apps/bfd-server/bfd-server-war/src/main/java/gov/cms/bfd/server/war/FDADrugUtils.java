@@ -8,12 +8,13 @@ import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FDADrugUtils implements IDrugCodeProvider {
+public class FDADrugUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FDADrugUtils.class);
   /** Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file. */
@@ -35,13 +36,13 @@ public class FDADrugUtils implements IDrugCodeProvider {
    * @param claimDrugCode - NDC value in claim records
    * @return the fda drug code display string
    */
-  public String retrieveFDADrugCodeDisplay(String claimDrugCode) {
+  public String retrieveFDADrugCodeDisplay(Optional<String> claimDrugCode) {
 
     /*
      * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
      * characters
      */
-    if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) {
+    if (!claimDrugCode.isPresent() || claimDrugCode.isEmpty() || claimDrugCode.get().length() < 9) {
       return null;
     }
 
@@ -57,7 +58,8 @@ public class FDADrugUtils implements IDrugCodeProvider {
 
     String claimDrugCodeReformatted = null;
 
-    claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
+    claimDrugCodeReformatted =
+        claimDrugCode.get().substring(0, 5) + "-" + claimDrugCode.get().substring(5, 9);
 
     if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
       String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
@@ -65,12 +67,12 @@ public class FDADrugUtils implements IDrugCodeProvider {
     }
 
     // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
-      drugCodeLookupMissingFailures.add(claimDrugCode);
+    if (!drugCodeLookupMissingFailures.contains(claimDrugCode.get())) {
+      drugCodeLookupMissingFailures.add(claimDrugCode.get());
       LOGGER.info(
           "No national drug code value (PRODUCTNDC column) match found for drug code {} in"
               + " resource {}.",
-          claimDrugCode,
+          claimDrugCode.get(),
           "fda_products_utf8.tsv");
     }
 
@@ -135,6 +137,7 @@ public class FDADrugUtils implements IDrugCodeProvider {
   private void appendFDATestCode(Map<String, String> ndcProductHashMap) {
     String line =
         "0000-0000_000000zz-0zz0-0z00-zzz0-0z00zzz00000\t0000-0000\tFAKE DRUG\tFake Diluent\t\tfake\tFAKE SOLUTION\tFake\t0\t\tFAK\tFAK000000\tFake Company\tWATER\t1\tmL/mL\t\t\tN\t00000000";
+
     String ndcProductColumns[] = line.split("\t");
     String nationalDrugCodeManufacturer =
         StringUtils.leftPad(
@@ -147,6 +150,6 @@ public class FDADrugUtils implements IDrugCodeProvider {
             '0');
     ndcProductHashMap.put(
         String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-        ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        "Fake Diluent - WATER");
   }
 }

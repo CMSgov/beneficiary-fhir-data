@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -25,7 +25,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Quantity;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
-public final class DMEClaimTransformerV2 {
+final class DMEClaimTransformerV2 {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
@@ -38,7 +38,7 @@ public final class DMEClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -60,9 +60,7 @@ public final class DMEClaimTransformerV2 {
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup,
-      Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -173,7 +171,7 @@ public final class DMEClaimTransformerV2 {
       DMEClaim claimGroup,
       ExplanationOfBenefit eob,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -317,12 +315,7 @@ public final class DMEClaimTransformerV2 {
                           CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD,
                           line.getSupplierTypeCode())));
 
-      String drugCode = null;
-
-      if (line.getNationalDrugCode().isPresent()) {
-        drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode().get());
-      }
-
+      String drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode());
       // Common item level fields between Carrier and DME
       // LINE_NUM                 => ExplanationOfBenefit.item.sequence
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity

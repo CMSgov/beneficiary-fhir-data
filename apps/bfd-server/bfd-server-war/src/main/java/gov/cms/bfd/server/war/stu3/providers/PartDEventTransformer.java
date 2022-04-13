@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.IDrugCodeProvider;
+import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -39,7 +39,7 @@ final class PartDEventTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      IDrugCodeProvider drugCodeProvider) {
+      FDADrugUtils drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
@@ -58,7 +58,7 @@ final class PartDEventTransformer {
    *     PartDEvent}
    */
   private static ExplanationOfBenefit transformClaim(
-      PartDEvent claimGroup, IDrugCodeProvider drugCodeProvider) {
+      PartDEvent claimGroup, FDADrugUtils drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -239,7 +239,8 @@ final class PartDEventTransformer {
         TransformerUtils.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            drugCodeProvider.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            drugCodeProvider.retrieveFDADrugCodeDisplay(
+                Optional.of(claimGroup.getNationalDrugCode())),
             claimGroup.getNationalDrugCode()));
 
     SimpleQuantity quantityDispensed = new SimpleQuantity();

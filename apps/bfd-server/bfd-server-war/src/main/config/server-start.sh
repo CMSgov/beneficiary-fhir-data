@@ -193,6 +193,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
+	#This parameter is to use the fake drug code implementation in test
 	"-DbfdServer.include.fake.drug.code=true" \
 	>"${serverLog}" 2>&1 \
 	&

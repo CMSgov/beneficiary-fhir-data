@@ -282,12 +282,6 @@
 			<artifactId>spark-sketch_2.12</artifactId>
 			<version>2.4.7</version>
 		</dependency>
-	
-   <dependency>
-     <groupId>io.sprucehill</groupId>
-     <artifactId>spring-cors-filter</artifactId>
-     <version>1.0.0</version>
-   </dependency>
  </dependencies>
 
 	<build>
