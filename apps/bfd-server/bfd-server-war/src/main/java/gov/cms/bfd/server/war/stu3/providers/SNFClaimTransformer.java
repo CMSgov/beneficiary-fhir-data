@@ -59,7 +59,7 @@ final class SNFClaimTransformer {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimType.SNF,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -102,7 +102,7 @@ final class SNFClaimTransformer {
         eob,
         claimGroup.getClaimAdmissionDate(),
         claimGroup.getBeneficiaryDischargeDate(),
-        Optional.of(claimGroup.getUtilizationDayCount()));
+        Optional.of(BigDecimal.valueOf(claimGroup.getUtilizationDayCount())));
 
     /*
      * add field values to the benefit balances that are common between the
@@ -110,11 +110,11 @@ final class SNFClaimTransformer {
      */
     TransformerUtils.addCommonGroupInpatientSNF(
         eob,
-        claimGroup.getCoinsuranceDayCount(),
-        claimGroup.getNonUtilizationDayCount(),
+        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
+        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        claimGroup.getBloodPintsFurnishedQty(),
+        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -329,7 +329,7 @@ final class SNFClaimTransformer {
 
     for (SNFClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
-      item.setSequence(claimLine.getLineNumber().intValue());
+      item.setSequence(claimLine.getLineNumber());
 
       item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
@@ -337,6 +337,12 @@ final class SNFClaimTransformer {
           eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());
 
       // Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
+      Optional<BigDecimal> ndcQuantity =
+          claimLine.getNationalDrugCodeQuantity().isPresent()
+              ? Optional.of(
+                  BigDecimal.valueOf(claimLine.getNationalDrugCodeQuantity().get().longValue()))
+              : Optional.empty();
+
       TransformerUtils.mapEobCommonItemRevenue(
           item,
           eob,
@@ -345,7 +351,7 @@ final class SNFClaimTransformer {
           claimLine.getTotalChargeAmount(),
           claimLine.getNonCoveredChargeAmount(),
           BigDecimal.valueOf(claimLine.getUnitCount()),
-          claimLine.getNationalDrugCodeQuantity(),
+          ndcQuantity,
           claimLine.getNationalDrugCodeQualifierCode(),
           claimLine.getRevenueCenterRenderingPhysicianNPI());
 

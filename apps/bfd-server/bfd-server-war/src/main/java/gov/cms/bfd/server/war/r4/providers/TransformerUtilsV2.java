@@ -164,7 +164,7 @@ public final class TransformerUtilsV2 {
    *     Beneficiary}
    */
   public static IdDt buildPatientId(Long beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId.toString());
+    return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
   }
 
   /**
@@ -383,6 +383,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Helper function to create the {@link Identifier} for the specified {@link CodeableConcept}.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -398,6 +400,26 @@ public final class TransformerUtilsV2 {
         new Identifier()
             .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
+            .setType(createC4BBClaimCodeableConcept());
+
+    return identifier;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createClaimIdentifier(CcwCodebookInterface ccwVariable, Long identifierValue) {
+    if (identifierValue == null) {
+      throw new IllegalArgumentException();
+    }
+
+    Identifier identifier =
+        new Identifier()
+            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
+            .setValue(identifierValue.toString())
             .setType(createC4BBClaimCodeableConcept());
 
     return identifier;

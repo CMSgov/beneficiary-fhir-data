@@ -188,7 +188,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("BENE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
+                      Arrays.asList(
+                          "HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED", "BENE_ID_NUMERIC")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -327,15 +328,17 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("snf_claims")
+              .setHeaderTable("snf_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("snf_claim_lines")
+              .setLineTable("snf_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
     } finally {
-      if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
+      if (spreadsheetWorkbook != null) {
+        spreadsheetWorkbook.close();
+      }
     }
     logNote(annotatedPackage, "Generated mapping specification: '%s'", mappingSpecs);
 
@@ -727,8 +730,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyEntity.addMethod(parentBeneficiarySetter.build());
 
     // These aren't "real" RifFields, as they're not in the spreadsheet; representing them here as
-    // such, to make
-    // it easier to add them into the spreadsheet in the future.
+    // such, to make it easier to add them into the spreadsheet in the future.
     RifField rifField =
         new RifField(
             "YEAR_MONTH",
@@ -1301,8 +1303,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "hospice_claims",
             "inpatient_claims",
             "outpatient_claims",
-            "partd_events",
-            "snf_claims");
+            "partd_events");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());
@@ -1408,31 +1409,48 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
-      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+      if (rifField.getRifColumnType() == RifColumnType.CHAR) {
+
+        if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+          parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
+
+        } else if (rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
+          // Handle a String field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
+        } else {
+          // Handle a Character field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
+        }
+
+      } else if (rifField.getRifColumnType() == RifColumnType.BIGINT) {
+        // Handle an BigInteger field.
         parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
-      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
-          && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
-        // Handle a String field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
-      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
-          && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1) {
-        // Handle a Character field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
-      } else if (rifField.getRifColumnType() == RifColumnType.NUM
-          && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
+
+      } else if (rifField.getRifColumnType() == RifColumnType.SMALLINT) {
+        // Handle an Short field.
+        parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalShort" : "parseShort";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.INTEGER) {
         // Handle an Integer field.
         parseUtilsMethodName =
             rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
-      } else if (rifField.getRifColumnType() == RifColumnType.NUM
-          && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0) {
-        // Handle a Decimal field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.NUM) {
+        if (rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
+          // Handle an Integer field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
+
+        } else {
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+        }
       } else if (rifField.getRifColumnType() == RifColumnType.DATE) {
         // Handle a LocalDate field.
         parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDate" : "parseDate";
+
       } else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP) {
         // Handle an Instant field.
         parseUtilsMethodName =
@@ -1892,6 +1910,20 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         addlDatabaseFields.add(lastUpdated);
         continue;
       }
+      if (additionalDatabaseField.contentEquals("BENE_ID_NUMERIC")) {
+        RifField beneIdNumeric =
+            new RifField(
+                "BENE_ID_NUMERIC",
+                RifColumnType.BIGINT,
+                Optional.of(8),
+                Optional.of(0),
+                Boolean.FALSE,
+                null,
+                "BENE_ID_NUMERIC",
+                "beneficiaryIdNumeric");
+        addlDatabaseFields.add(beneIdNumeric);
+        continue;
+      }
     }
     return addlDatabaseFields;
   }
@@ -2197,32 +2229,47 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
    *     decimal point
+   * @return a Java poet {@link TypeName} that will be applied to the entity column; the use of the
+   *     {@link boolean} isColumnOptional determines if the type can be a primitive (i.e., long) or
+   *     in fact needs to be a Java class type (i.e., Long)
    */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
       boolean isColumnOptional,
       Optional<Integer> columnLength,
       Optional<Integer> columnScale) {
-    if (type == RifColumnType.CHAR
-        && columnLength.orElse(Integer.MAX_VALUE) == 1
-        && !isColumnOptional) return TypeName.CHAR;
-    else if (type == RifColumnType.CHAR
-        && columnLength.orElse(Integer.MAX_VALUE) == 1
-        && isColumnOptional) return ClassName.get(Character.class);
-    else if (type == RifColumnType.CHAR) return ClassName.get(String.class);
-    else if (type == RifColumnType.DATE && columnLength.orElse(0) == 8)
+    if (type == RifColumnType.CHAR) {
+      if (columnLength.orElse(Integer.MAX_VALUE) == 1) {
+        return isColumnOptional ? ClassName.get(Character.class) : TypeName.CHAR;
+      } else {
+        return ClassName.get(String.class);
+      }
+    } else if (type == RifColumnType.DATE) {
       return ClassName.get(LocalDate.class);
-    else if (type == RifColumnType.TIMESTAMP && columnLength.orElse(0) == 20)
+    } else if (type == RifColumnType.TIMESTAMP) {
       return ClassName.get(Instant.class);
-    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0)
+    }
+    // handle an inherited hack from the Excel spreadsheet in which a row entry
+    // was defined as a NUM and had an associated scale; for example (12,2) denotes
+    // a numeric data types of up to 12 digits, with two digits of scale (i.e., 55.45).
+    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0) {
       return ClassName.get(BigDecimal.class);
+    }
+    // some entries in Excel spreadsheet defined as NUM with a zero scale that are
+    // not optional should be defined as a primitive integer.
+    //
     else if (type == RifColumnType.NUM
         && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && !isColumnOptional) return TypeName.INT;
-    else if (type == RifColumnType.NUM
-        && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && isColumnOptional) return ClassName.get(Integer.class);
-    else throw new IllegalArgumentException("Unhandled field type: " + type.name());
+        && !isColumnOptional) {
+      return TypeName.INT;
+    } else if (type == RifColumnType.SMALLINT) {
+      return isColumnOptional ? ClassName.get(Short.class) : TypeName.SHORT;
+    } else if (type == RifColumnType.BIGINT) {
+      return isColumnOptional ? ClassName.get(Long.class) : TypeName.LONG;
+    } else if (type == RifColumnType.INTEGER || type == RifColumnType.NUM) {
+      return isColumnOptional ? ClassName.get(Integer.class) : TypeName.INT;
+    }
+    throw new IllegalArgumentException("Unhandled field type: " + type.name());
   }
 
   /**

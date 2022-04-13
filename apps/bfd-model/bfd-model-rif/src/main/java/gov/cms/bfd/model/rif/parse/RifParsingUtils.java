@@ -114,10 +114,6 @@ public final class RifParsingUtils {
    * @return the specified text parsed into an {@link Integer}
    */
   public static Integer parseInteger(String intText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
     try {
       return Integer.parseInt(intText);
     } catch (NumberFormatException e) {
@@ -142,6 +138,19 @@ public final class RifParsingUtils {
   }
 
   /**
+   * @param shortText the number string to parse
+   * @return the specified text parsed into an {@link short}
+   */
+  public static short parseShort(String shortText) {
+    try {
+      return Short.parseShort(shortText);
+    } catch (NumberFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to parse short value: '%s'.", shortText), e);
+    }
+  }
+
+  /**
    * Parse a {@link Optional} {@link Integer} from a {@link String}
    *
    * @param intText the number string to parse
@@ -149,11 +158,7 @@ public final class RifParsingUtils {
    *     empty Optional if not
    */
   public static Optional<Integer> parseOptionalInteger(String intText) {
-    if (intText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseInteger(intText));
-    }
+    return intText.isEmpty() ? Optional.empty() : Optional.of(parseInteger(intText));
   }
 
   /**
@@ -164,11 +169,16 @@ public final class RifParsingUtils {
    *     Optional if not
    */
   public static Optional<Long> parseOptionalLong(String longText) {
-    if (longText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseLong(longText));
-    }
+    return longText.isEmpty() ? Optional.empty() : Optional.of(parseLong(longText));
+  }
+
+  /**
+   * @param shortText the number string to parse
+   * @return an {@link Optional} populated with an {@link Short} if the input has data, or an empty
+   *     Optional if not
+   */
+  public static Optional<Short> parseOptionalShort(String shortText) {
+    return shortText.isEmpty() ? Optional.empty() : Optional.of(parseShort(shortText));
   }
 
   /**
@@ -178,12 +188,8 @@ public final class RifParsingUtils {
    * @return the specified text parsed into a {@link BigDecimal}
    */
   public static BigDecimal parseDecimal(String decimalText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
     if (decimalText.isEmpty()) {
-      return new BigDecimal(0);
+      return BigDecimal.ZERO;
     } else {
       try {
         return new BigDecimal(decimalText);
@@ -202,11 +208,7 @@ public final class RifParsingUtils {
    *     empty Optional if it is empty
    */
   public static Optional<BigDecimal> parseOptionalDecimal(String decimalText) {
-    if (decimalText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseDecimal(decimalText));
-    }
+    return decimalText.isEmpty() ? Optional.empty() : Optional.of(parseDecimal(decimalText));
   }
 
   /**
@@ -216,11 +218,6 @@ public final class RifParsingUtils {
    * @return the specified text as a {@link LocalDate}
    */
   public static LocalDate parseDate(String dateText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
-
     DateTimeFormatter rifDateFormatter;
     /*
      * Incoming dates usually are in the format of dd-MMM-yyyy (01-MAR-2019). There
@@ -242,8 +239,7 @@ public final class RifParsingUtils {
     }
 
     try {
-      LocalDate dateFrom = LocalDate.parse(dateText, rifDateFormatter);
-      return dateFrom;
+      return LocalDate.parse(dateText, rifDateFormatter);
     } catch (DateTimeParseException e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse date value: '%s'.", dateText), e);
@@ -257,15 +253,9 @@ public final class RifParsingUtils {
    * @return the specified text as a {@link Instant}, parsed using {@link #RIF_TIMESTAMP_FORMATTER}
    */
   public static Instant parseTimestamp(String timestampText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier to
-     * read, and ensures that this parsing is standardized.
-     */
-
     try {
       LocalDateTime localDateTime = LocalDateTime.parse(timestampText, RIF_TIMESTAMP_FORMATTER);
-      Instant instantFormatted = localDateTime.toInstant(ZoneOffset.UTC);
-      return instantFormatted;
+      return localDateTime.toInstant(ZoneOffset.UTC);
     } catch (DateTimeParseException e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse timestamp value: '%s'.", timestampText), e);
@@ -280,11 +270,7 @@ public final class RifParsingUtils {
    *     empty Optional if not
    */
   public static Optional<LocalDate> parseOptionalDate(String dateText) {
-    if (dateText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseDate(dateText));
-    }
+    return dateText.isEmpty() ? Optional.empty() : Optional.of(parseDate(dateText));
   }
 
   /**
@@ -295,11 +281,7 @@ public final class RifParsingUtils {
    *     Optional if not
    */
   public static Optional<Instant> parseOptionalTimestamp(String timestampText) {
-    if (timestampText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseTimestamp(timestampText));
-    }
+    return timestampText.isEmpty() ? Optional.empty() : Optional.of(parseTimestamp(timestampText));
   }
 
   /**
@@ -309,15 +291,10 @@ public final class RifParsingUtils {
    * @return the specified text as a {@link Character} (first character only),
    */
   public static Character parseCharacter(String charText) {
-    /*
-     * Might seem silly to pull this out, but it makes the code a bit easier
-     * to read, and ensures that this parsing is standardized.
-     */
-
-    if (charText.length() != 1)
+    if (charText.length() != 1) {
       throw new InvalidRifValueException(
           String.format("Unable to parse character value: '%s'.", charText));
-
+    }
     return charText.charAt(0);
   }
 
@@ -329,10 +306,6 @@ public final class RifParsingUtils {
    *     empty Optional if not
    */
   public static Optional<Character> parseOptionalCharacter(String charText) {
-    if (charText.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(parseCharacter(charText));
-    }
+    return charText.isEmpty() ? Optional.empty() : Optional.of(parseCharacter(charText));
   }
 }
