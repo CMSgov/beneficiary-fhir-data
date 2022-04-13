@@ -73,7 +73,10 @@ public final class PartDEventTransformerV2Test {
     claim = generateClaim();
     eob =
         PartDEventTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -909,7 +912,7 @@ public final class PartDEventTransformerV2Test {
             new MetricRegistry(),
             generateClaim(),
             Optional.of(false),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

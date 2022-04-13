@@ -38,7 +38,10 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         PartDEventTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertMatches(claim, eob);
   }
 
@@ -89,7 +92,10 @@ public final class PartDEventTransformerTest {
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
         PartDEventTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -145,7 +151,8 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-    FdaDrugCodeDisplayLookup drugCodeProvider = new FdaDrugCodeDisplayLookup(true);
+    FdaDrugCodeDisplayLookup drugCodeProvider =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,

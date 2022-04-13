@@ -47,7 +47,10 @@ public final class DMEClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         DMEClaimTransformer.transform(
-            new MetricRegistry(), claim, Optional.of(true), new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            Optional.of(true),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertMatches(claim, eob, Optional.of(true));
   }
 

@@ -406,7 +406,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             claim,
             Optional.of(false),
-            new FdaDrugCodeDisplayLookup(true)),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
         eob);
   }
 
@@ -1459,7 +1459,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             partDEvent,
             Optional.of(false),
-            new FdaDrugCodeDisplayLookup(true)),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -2061,7 +2061,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 claim,
                 Optional.of(false),
-                new FdaDrugCodeDisplayLookup(true)),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
         searchResults);
   }
 

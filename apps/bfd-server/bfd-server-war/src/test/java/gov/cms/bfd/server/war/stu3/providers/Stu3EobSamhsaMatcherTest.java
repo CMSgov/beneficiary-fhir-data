@@ -131,7 +131,7 @@ public final class Stu3EobSamhsaMatcherTest {
                         new MetricRegistry(),
                         r,
                         Optional.empty(),
-                        new FdaDrugCodeDisplayLookup(true));
+                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -810,7 +810,7 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               sampleRifRecordForClaimType,
               Optional.empty(),
-              new FdaDrugCodeDisplayLookup(true));
+              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
 
       return sampleEobForClaimType;
     }

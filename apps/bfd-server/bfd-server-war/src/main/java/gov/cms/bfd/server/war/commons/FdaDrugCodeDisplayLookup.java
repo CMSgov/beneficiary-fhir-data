@@ -15,30 +15,76 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Provides an FDA Drug Code to FDA Drug Code Display lookup */
 public class FdaDrugCodeDisplayLookup {
   private static final Logger LOGGER = LoggerFactory.getLogger(FdaDrugCodeDisplayLookup.class);
 
-  /** Stores a map of PRODUCTNDC to SUBSTANCENAME derived from the downloaded NDC file. */
-  private Map<String, String> ndcProductMap = null;
+  /**
+   * Stores a map from Drug Code (PRODUCTNDC) to Drug Code Display (SUBSTANCENAME) derived from the
+   * downloaded NDC file.
+   */
+  private final Map<String, String> ndcProductHashMap = new HashMap<>();
 
-  /** Whether to include the fake testing drug code or not */
-  private final boolean includeFakeDrugCode;
+  /** Tracks the national drug codes that have already had code lookup failures. */
+  private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
-  public FdaDrugCodeDisplayLookup(boolean includeFakeDrugCode) {
-    this.includeFakeDrugCode = includeFakeDrugCode;
+  /**
+   * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't have to construct it
+   * over and over in the unit tests
+   */
+  private static FdaDrugCodeDisplayLookup drugCodeLookupForTesting;
+
+  /**
+   * Cached copy of the production version of the {@link FdaDrugCodeDisplayLookup} so that we don't have to construct it
+   * over and over in the unit tests
+   */
+  private static FdaDrugCodeDisplayLookup drugCodeLookupForProduction;
+
+  /**
+   * Factory method for creating a {@link FdaDrugCodeDisplayLookup} for testing that includes the
+   * fake drug code.
+   *
+   * @return the {@link FdaDrugCodeDisplayLookup}
+   */
+  public static FdaDrugCodeDisplayLookup createDrugCodeLookupForTesting() {
+    if (drugCodeLookupForTesting == null) {
+      drugCodeLookupForTesting = new FdaDrugCodeDisplayLookup(true);
+    }
+
+    return drugCodeLookupForTesting;
   }
 
   /**
-   * Retrieves the PRODUCTNDC and SUBSTANCENAME from the FDA NDC Products file which was downloaded
-   * during the build process
+   * Factory method for creating a {@link FdaDrugCodeDisplayLookup} for production that does not
+   * include the fake drug code.
+   *
+   * @return the {@link FdaDrugCodeDisplayLookup}
+   */
+  public static FdaDrugCodeDisplayLookup createDrugCodeLookupForProduction() {
+    if (drugCodeLookupForProduction == null) {
+      drugCodeLookupForProduction = new FdaDrugCodeDisplayLookup(false);
+    }
+
+    return drugCodeLookupForProduction;
+  }
+
+  /**
+   * Constructs an {@link FdaDrugCodeDisplayLookup}
+   *
+   * @param includeFakeDrugCode whether to include the fake testing drug code or not
+   */
+  private FdaDrugCodeDisplayLookup(boolean includeFakeDrugCode) {
+    readFDADrugCodeFile(includeFakeDrugCode);
+  }
+
+  /**
+   * Retrieves the Drug Code Display (SUBSTANCENAME) for the given Drug Code (PRODUCTNDC) using the
+   * drug code file downloaded during the build.
    *
    * @param claimDrugCode - NDC value in claim records
    * @return the fda drug code display string
    */
   public String retrieveFDADrugCodeDisplay(Optional<String> claimDrugCode) {
-    /** Tracks the national drug codes that have already had code lookup failures. */
-    final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
-
     /*
      * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
      * characters
@@ -47,23 +93,13 @@ public class FdaDrugCodeDisplayLookup {
       return null;
     }
 
-    /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire NDC file the first time and put in a Map
-    if (ndcProductMap == null) {
-      ndcProductMap = readFDADrugCodeFile();
-    }
-
     String claimDrugCodeReformatted = null;
 
     claimDrugCodeReformatted =
         claimDrugCode.get().substring(0, 5) + "-" + claimDrugCode.get().substring(5, 9);
 
-    if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
-      String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
+    if (ndcProductHashMap.containsKey(claimDrugCodeReformatted)) {
+      String ndcSubstanceName = ndcProductHashMap.get(claimDrugCodeReformatted);
       return ndcSubstanceName;
     }
 
@@ -87,9 +123,9 @@ public class FdaDrugCodeDisplayLookup {
    * <p>See {@link gov.cms.bfd.server.war.FDADrugDataUtilityApp} for details.
    *
    * @return a map with drug codes and fields
+   * @param includeFakeDrugCode
    */
-  Map<String, String> readFDADrugCodeFile() {
-    Map<String, String> ndcProductHashMap = new HashMap<String, String>();
+  private Map<String, String> readFDADrugCodeFile(boolean includeFakeDrugCode) {
     try (final InputStream ndcProductStream =
             Thread.currentThread()
                 .getContextClassLoader()
@@ -126,21 +162,12 @@ public class FdaDrugCodeDisplayLookup {
         }
 
         if (includeFakeDrugCode) {
-          appendFDATestCode(ndcProductHashMap);
+          ndcProductHashMap.put("00000-0000", "Fake Diluent - WATER");
         }
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
     }
     return ndcProductHashMap;
-  }
-
-  /**
-   * Append the fake drug code used for testing to the provided map.
-   *
-   * @param ndcProductHashMap The code to display name hash map
-   */
-  private void appendFDATestCode(Map<String, String> ndcProductHashMap) {
-    ndcProductHashMap.put("00000-0000", "Fake Diluent - WATER");
   }
 }

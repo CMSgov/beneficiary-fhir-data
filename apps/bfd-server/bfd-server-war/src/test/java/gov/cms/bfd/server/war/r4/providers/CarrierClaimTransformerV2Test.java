@@ -73,7 +73,10 @@ public class CarrierClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         CarrierClaimTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -94,7 +97,10 @@ public class CarrierClaimTransformerV2Test {
     assertMatches(
         claim,
         CarrierClaimTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.of(false), new FdaDrugCodeDisplayLookup(true)));
+            new MetricRegistry(),
+            claim,
+            Optional.of(false),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -112,7 +118,7 @@ public class CarrierClaimTransformerV2Test {
             new MetricRegistry(),
             generateClaim(),
             Optional.of(false),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 

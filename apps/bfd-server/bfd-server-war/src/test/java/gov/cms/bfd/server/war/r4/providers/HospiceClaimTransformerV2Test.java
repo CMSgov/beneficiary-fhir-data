@@ -79,7 +79,10 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB(Optional<Boolean> includeTaxNumber) {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(), claim, includeTaxNumber, new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            includeTaxNumber,
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -110,7 +113,10 @@ public final class HospiceClaimTransformerV2Test {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.of(false), new FdaDrugCodeDisplayLookup(true)));
+            new MetricRegistry(),
+            claim,
+            Optional.of(false),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
   }
 
   /** Common top level ExplanationOfBenefit values */

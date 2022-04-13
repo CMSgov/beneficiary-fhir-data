@@ -483,6 +483,10 @@ public class SpringConfiguration {
   @Bean
   public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
       @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeDrugCode) {
-    return new FdaDrugCodeDisplayLookup(includeFakeDrugCode);
+    if (includeFakeDrugCode) {
+      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    } else {
+      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    }
   }
 }

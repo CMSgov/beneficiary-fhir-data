@@ -77,7 +77,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(InpatientClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     ExplanationOfBenefit outpatientEob =
@@ -85,7 +85,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(OutpatientClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
     ExplanationOfBenefit dmeEob =
@@ -93,7 +93,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(DMEClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
     ExplanationOfBenefit hhaEob =
@@ -101,7 +101,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(HHAClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     ExplanationOfBenefit hospiceEob =
@@ -109,7 +109,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(HospiceClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
     ExplanationOfBenefit snfEob =
@@ -117,7 +117,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(SNFClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     ExplanationOfBenefit carrierEob =
@@ -125,7 +125,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(CarrierClaim.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
     ExplanationOfBenefit pdeEob =
@@ -133,7 +133,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new MetricRegistry(),
             getClaim(PartDEvent.class),
             Optional.empty(),
-            new FdaDrugCodeDisplayLookup(true));
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
 
     // Load the claim types into the test data that will be run against each test

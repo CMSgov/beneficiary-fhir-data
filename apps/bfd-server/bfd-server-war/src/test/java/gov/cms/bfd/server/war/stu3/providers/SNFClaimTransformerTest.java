@@ -45,7 +45,10 @@ public final class SNFClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         SNFClaimTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertMatches(claim, eob);
   }
 
