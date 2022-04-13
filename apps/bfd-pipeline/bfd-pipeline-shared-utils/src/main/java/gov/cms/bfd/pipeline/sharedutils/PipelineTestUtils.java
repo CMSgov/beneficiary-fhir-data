@@ -172,7 +172,7 @@ public final class PipelineTestUtils {
           throw new BadCodeMonkeyException(
               "Unable to determine table name for entity: " + entityType.getCanonicalName());
         }
-        String tableNameSpecifier = normalizeSchemaName(entityTableAnnotation.get().name());
+        String tableNameSpecifier = normalizeTableName(entityTableAnnotation.get().name());
 
         // Then, switch to the appropriate schema.
         if (entityTableAnnotation.get().schema() != null
@@ -204,22 +204,30 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Schemas that use mixed case use quotes and have their original case preserved but those without
-   * quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
-   *
-   * <p>Note: This may need to be quoted on PostgreSQL. If so, since HSQL DB blows up if we quote
-   * them, this code may have to first check the DB platform. TBD.
+   * For compatibility with HSQLDB and Postgresql, all schema names must have case preserved but any
+   * quotes in the name must be removed.
    *
    * @param schemaNameSpecifier name of a schema from a hibernate annotation
    * @return value compatible with call to {@link Connection#setSchema(String)}
    */
   private String normalizeSchemaName(String schemaNameSpecifier) {
-    if (schemaNameSpecifier.startsWith("`")) {
-      schemaNameSpecifier = schemaNameSpecifier.replaceAll("`", "");
+    return schemaNameSpecifier.replaceAll("`", "");
+  }
+
+  /**
+   * Table names that use mixed case use quotes and have their original case preserved but those
+   * without quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
+   *
+   * @param tableNameSpecifier name of a table from a hibernate annotation
+   * @return value compatible with call to {@link java.sql.Statement#execute(String)}
+   */
+  private String normalizeTableName(String tableNameSpecifier) {
+    if (tableNameSpecifier.startsWith("`")) {
+      tableNameSpecifier = tableNameSpecifier.replaceAll("`", "");
     } else {
-      schemaNameSpecifier = schemaNameSpecifier.toUpperCase();
+      tableNameSpecifier = tableNameSpecifier.toUpperCase();
     }
-    return schemaNameSpecifier;
+    return tableNameSpecifier;
   }
 
   /**
