@@ -846,15 +846,3 @@ ALTER TABLE IF EXISTS public.snf_claim_lines_new
 -- create an index of the BENE_ID in parent claims table
 CREATE INDEX IF NOT EXISTS snf_claims_new_bene_id_idx
 	ON public.snf_claims_new (bene_id);
-
--- create an updateable db view on SNF_CLAIMS_NEW table
-${logic.hsql-only} CREATE VIEW
-${logic.psql-only} CREATE OR REPLACE VIEW
-	public.snf_claims_v as
-    	select * from public.snf_claims_new;
-
--- create an updateable db view on SNF_CLAIM_LINES_NEW table
-${logic.hsql-only} CREATE VIEW
-${logic.psql-only} CREATE OR REPLACE VIEW
-	public.snf_claim_lines_v as
-    	select * from public.snf_claim_lines_new;
