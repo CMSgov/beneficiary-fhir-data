@@ -282,8 +282,7 @@
 			<artifactId>spark-sketch_2.12</artifactId>
 			<version>2.4.7</version>
 		</dependency>
-		
- </dependencies>
+    </dependencies>
 
 	<build>
 		<pluginManagement>
