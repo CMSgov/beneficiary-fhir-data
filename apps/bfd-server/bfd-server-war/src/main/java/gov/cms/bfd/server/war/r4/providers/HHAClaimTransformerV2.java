@@ -32,7 +32,7 @@ public class HHAClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))

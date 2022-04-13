@@ -38,7 +38,7 @@ final class DMEClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -48,7 +48,7 @@ final class DMEClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob =
-        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeProvider);
+        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
@@ -62,7 +62,7 @@ final class DMEClaimTransformerV2 {
   private static ExplanationOfBenefit transformClaim(
       DMEClaim claimGroup,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -164,7 +164,7 @@ final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob, includeTaxNumbers, drugCodeProvider);
+    handleClaimLines(claimGroup, eob, includeTaxNumbers, drugCodeDisplayLookup);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
@@ -173,7 +173,7 @@ final class DMEClaimTransformerV2 {
       DMEClaim claimGroup,
       ExplanationOfBenefit eob,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -368,7 +368,7 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

@@ -39,7 +39,7 @@ public class OutpatientClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -51,7 +51,7 @@ public class OutpatientClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim, drugCodeProvider);
+    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
@@ -63,7 +63,7 @@ public class OutpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      OutpatientClaim claimGroup, FdaDrugCodeDisplayLookup drugCodeProvider) {
+      OutpatientClaim claimGroup, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -394,7 +394,7 @@ public class OutpatientClaimTransformerV2 {
       TransformerUtilsV2.addNationalDrugCode(
           item,
           line.getNationalDrugCode(),
-          drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

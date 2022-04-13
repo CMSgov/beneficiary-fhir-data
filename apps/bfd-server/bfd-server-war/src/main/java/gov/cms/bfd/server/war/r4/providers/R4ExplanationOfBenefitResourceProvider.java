@@ -86,7 +86,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   private MetricRegistry metricRegistry;
   private R4EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
-  private FdaDrugCodeDisplayLookup drugCodeProvider;
+  private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -112,10 +112,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @param drugCodeProvider the {@link FdaDrugCodeDisplayLookup} to use */
+  /** @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use */
   @Inject
-  public void setDrugCodeProvider(FdaDrugCodeDisplayLookup drugCodeProvider) {
-    this.drugCodeProvider = drugCodeProvider;
+  public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
   /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
@@ -191,7 +191,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             .get()
             .getTransformer()
             .transform(
-                metricRegistry, claimEntity, Optional.of(includeTaxNumbers), drugCodeProvider);
+                metricRegistry, claimEntity, Optional.of(includeTaxNumbers), drugCodeDisplayLookup);
     return eob;
   }
 
@@ -290,7 +290,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.CARRIER,
               findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.DME)) {
@@ -299,7 +299,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
@@ -308,7 +308,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.HHA,
               findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
@@ -317,7 +317,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.HOSPICE,
               findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
@@ -327,7 +327,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               findClaimTypeByPatient(
                   ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
@@ -337,7 +337,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               findClaimTypeByPatient(
                   ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.PDE)) {
@@ -346,7 +346,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.PDE,
               findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.SNF)) {
@@ -355,7 +355,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.SNF,
               findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeProvider));
+              drugCodeDisplayLookup));
     }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
@@ -491,13 +491,13 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       ClaimTypeV2 claimType,
       List<?> claims,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     return claims.stream()
         .map(
             c ->
                 claimType
                     .getTransformer()
-                    .transform(metricRegistry, c, includeTaxNumbers, drugCodeProvider))
+                    .transform(metricRegistry, c, includeTaxNumbers, drugCodeDisplayLookup))
         .collect(Collectors.toList());
   }
 

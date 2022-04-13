@@ -37,7 +37,7 @@ final class CarrierClaimTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
@@ -45,7 +45,7 @@ final class CarrierClaimTransformer {
 
     if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
     ExplanationOfBenefit eob =
-        transformClaim((CarrierClaim) claim, includeTaxNumbers, drugCodeProvider);
+        transformClaim((CarrierClaim) claim, includeTaxNumbers, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
@@ -59,7 +59,7 @@ final class CarrierClaimTransformer {
   private static ExplanationOfBenefit transformClaim(
       CarrierClaim claimGroup,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -252,7 +252,7 @@ final class CarrierClaimTransformer {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (claimLine.getProviderStateCode().isPresent()) {
         item.getLocation()

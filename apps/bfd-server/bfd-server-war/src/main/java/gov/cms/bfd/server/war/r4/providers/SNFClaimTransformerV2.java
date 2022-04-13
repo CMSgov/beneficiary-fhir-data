@@ -35,7 +35,7 @@ public class SNFClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))

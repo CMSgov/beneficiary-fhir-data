@@ -38,7 +38,7 @@ final class PartDEventTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
@@ -48,7 +48,7 @@ final class PartDEventTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim, drugCodeProvider);
+    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
@@ -60,7 +60,7 @@ final class PartDEventTransformerV2 {
    *     PartDEvent}
    */
   private static ExplanationOfBenefit transformClaim(
-      PartDEvent claimGroup, FdaDrugCodeDisplayLookup drugCodeProvider) {
+      PartDEvent claimGroup, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
@@ -287,7 +287,7 @@ final class PartDEventTransformerV2 {
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            drugCodeProvider.retrieveFDADrugCodeDisplay(
+            drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(
                 Optional.of(claimGroup.getNationalDrugCode())),
             claimGroup.getNationalDrugCode()));
 

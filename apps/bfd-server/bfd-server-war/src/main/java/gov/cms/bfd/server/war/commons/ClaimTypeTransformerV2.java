@@ -21,12 +21,12 @@ public interface ClaimTypeTransformerV2 {
    *     transformed
    * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
    *     CommonHeaders#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>false</code>)
-   * @param drugCodeProvider the {@link MetricRegistry} to use
+   * @param drugCodeDisplayLookup the {@link MetricRegistry} to use
    * @return a new FHIR {@link ExplanationOfBenefit} resource
    */
   ExplanationOfBenefit transform(
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider);
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup);
 }

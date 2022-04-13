@@ -38,7 +38,7 @@ public class CarrierClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -50,7 +50,7 @@ public class CarrierClaimTransformerV2 {
     }
 
     ExplanationOfBenefit eob =
-        transformClaim((CarrierClaim) claim, includeTaxNumbers, drugCodeProvider);
+        transformClaim((CarrierClaim) claim, includeTaxNumbers, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
@@ -64,7 +64,7 @@ public class CarrierClaimTransformerV2 {
   private static ExplanationOfBenefit transformClaim(
       CarrierClaim claimGroup,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -337,7 +337,7 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

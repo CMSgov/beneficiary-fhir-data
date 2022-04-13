@@ -594,7 +594,9 @@ public final class PartDEventTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding(
-                        "http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER")));
+                        "http://hl7.org/fhir/sid/ndc",
+                        "000000000",
+                        FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY)));
 
     assertTrue(compare.equalsDeep(pos));
   }

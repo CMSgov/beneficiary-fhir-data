@@ -525,7 +525,10 @@ public final class DMEClaimTransformerV2Test {
     Extension compare =
         new Extension(
             "http://hl7.org/fhir/sid/ndc",
-            new Coding("http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER"));
+            new Coding(
+                "http://hl7.org/fhir/sid/ndc",
+                "000000000",
+                FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY));
 
     assertTrue(compare.equalsDeep(ex));
   }

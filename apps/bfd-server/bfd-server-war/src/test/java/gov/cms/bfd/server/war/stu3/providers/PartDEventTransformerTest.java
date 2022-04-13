@@ -151,12 +151,12 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-    FdaDrugCodeDisplayLookup drugCodeProvider =
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        drugCodeProvider.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 
@@ -297,7 +297,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "Fake Diluent - WATER");
+          claim.getNationalDrugCode(), FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

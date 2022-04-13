@@ -19,6 +19,12 @@ import org.slf4j.LoggerFactory;
 public class FdaDrugCodeDisplayLookup {
   private static final Logger LOGGER = LoggerFactory.getLogger(FdaDrugCodeDisplayLookup.class);
 
+  /** A fake drug code used for testing */
+  public static final String FAKE_DRUG_CODE = "00000-0000";
+
+  /** A fake drug code display that is associated with the FAKE_DRUG_CODE */
+  public static final String FAKE_DRUG_CODE_DISPLAY = "Fake Diluent - WATER";
+
   /**
    * Stores a map from Drug Code (PRODUCTNDC) to Drug Code Display (SUBSTANCENAME) derived from the
    * downloaded NDC file.
@@ -29,14 +35,14 @@ public class FdaDrugCodeDisplayLookup {
   private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
   /**
-   * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't have to construct it
-   * over and over in the unit tests
+   * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't
+   * have to construct it over and over in the unit tests
    */
   private static FdaDrugCodeDisplayLookup drugCodeLookupForTesting;
 
   /**
-   * Cached copy of the production version of the {@link FdaDrugCodeDisplayLookup} so that we don't have to construct it
-   * over and over in the unit tests
+   * Cached copy of the production version of the {@link FdaDrugCodeDisplayLookup} so that we don't
+   * have to construct it over and over in the unit tests
    */
   private static FdaDrugCodeDisplayLookup drugCodeLookupForProduction;
 
@@ -162,7 +168,7 @@ public class FdaDrugCodeDisplayLookup {
         }
 
         if (includeFakeDrugCode) {
-          ndcProductHashMap.put("00000-0000", "Fake Diluent - WATER");
+          ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
         }
       }
     } catch (IOException e) {

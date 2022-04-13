@@ -37,7 +37,7 @@ final class DMEClaimTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
@@ -45,7 +45,7 @@ final class DMEClaimTransformer {
 
     if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
     ExplanationOfBenefit eob =
-        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeProvider);
+        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
@@ -61,7 +61,7 @@ final class DMEClaimTransformer {
   private static ExplanationOfBenefit transformClaim(
       DMEClaim claimGroup,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -276,7 +276,7 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

@@ -27,7 +27,7 @@ public class FDADrugUtilsTest {
   public void shouldReturnFakeDrugCodeDisplayWhenConstructorSetToTrue() {
     FdaDrugCodeDisplayLookup drugUtils = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     String drugCodeDisplay = drugUtils.retrieveFDADrugCodeDisplay(Optional.of("000000000"));
-    assertEquals("Fake Diluent - WATER", drugCodeDisplay);
+    assertEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 
   @Test
@@ -35,6 +35,6 @@ public class FDADrugUtilsTest {
     FdaDrugCodeDisplayLookup drugUtils =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
     String drugCodeDisplay = drugUtils.retrieveFDADrugCodeDisplay(Optional.of("000000000"));
-    assertNotEquals("Fake Diluent - WATER", drugCodeDisplay);
+    assertNotEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 }

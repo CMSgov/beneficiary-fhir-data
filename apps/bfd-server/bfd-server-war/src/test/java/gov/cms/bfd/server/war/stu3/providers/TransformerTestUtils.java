@@ -2043,10 +2043,10 @@ final class TransformerTestUtils {
   /** @throws IOException */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
-    FdaDrugCodeDisplayLookup drugCodeProvider =
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     String nationalDrugCodeDisplayValueActual =
-        drugCodeProvider.retrieveFDADrugCodeDisplay(Optional.of(nationalDrugCode));
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(nationalDrugCode));
     assertEquals(
         nationalDrugCodeDisplayValue,
         nationalDrugCodeDisplayValueActual,

@@ -3216,12 +3216,12 @@ public final class TransformerUtils {
       MetricRegistry metricRegistry,
       Object rifRecord,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType
             .getTransformer()
-            .transform(metricRegistry, rifRecord, includeTaxNumbers, drugCodeProvider);
+            .transform(metricRegistry, rifRecord, includeTaxNumbers, drugCodeDisplayLookup);
       }
     }
 
