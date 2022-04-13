@@ -135,21 +135,6 @@ public class FDADrugUtils {
   }
 
   private void appendFDATestCode(Map<String, String> ndcProductHashMap) {
-    String line =
-        "0000-0000_000000zz-0zz0-0z00-zzz0-0z00zzz00000\t0000-0000\tFAKE DRUG\tFake Diluent\t\tfake\tFAKE SOLUTION\tFake\t0\t\tFAK\tFAK000000\tFake Company\tWATER\t1\tmL/mL\t\t\tN\t00000000";
-
-    String ndcProductColumns[] = line.split("\t");
-    String nationalDrugCodeManufacturer =
-        StringUtils.leftPad(
-            ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-    String nationalDrugCodeIngredient =
-        StringUtils.leftPad(
-            ndcProductColumns[1].substring(
-                ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-            4,
-            '0');
-    ndcProductHashMap.put(
-        String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-        "Fake Diluent - WATER");
+    ndcProductHashMap.put("00000-0000", "Fake Diluent - WATER");
   }
 }
