@@ -401,6 +401,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -1082,6 +1083,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -1145,13 +1147,6 @@
             "system" : "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
             "code" : "0",
             "display" : "Service Subject to Deductible"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-            "code" : "E",
-            "display" : "Workers' compensation"
           }
         } ],
         "sequence" : 1,
@@ -1729,7 +1724,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "30",
+            "display" : "Still patient."
           } ]
         }
       }, {
@@ -1903,6 +1899,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -2470,7 +2467,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "51",
+            "display" : "Discharged/transferred to a Hospice – medical facility."
           } ]
         }
       }, {
@@ -2743,6 +2741,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -3673,6 +3672,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
@@ -4023,6 +4023,12 @@
           "value" : "CMS"
         }
       },
+      "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+      },
       "facility" : {
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd",
@@ -4176,26 +4182,6 @@
             "display" : "Information"
           }, {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
-            "display" : "Drug Coverage Status Code"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
-            "code" : "C",
-            "display" : "Covered"
-          } ]
-        }
-      }, {
-        "sequence" : 8,
-        "category" : {
-          "coding" : [ {
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code" : "info",
-            "display" : "Information"
-          }, {
-            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/adjstmt_dltn_cd",
             "display" : "Adjustment Deletion Code"
           } ]
@@ -4208,7 +4194,7 @@
           } ]
         }
       }, {
-        "sequence" : 9,
+        "sequence" : 8,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4228,7 +4214,7 @@
           } ]
         }
       }, {
-        "sequence" : 10,
+        "sequence" : 9,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4248,7 +4234,7 @@
           } ]
         }
       }, {
-        "sequence" : 11,
+        "sequence" : 10,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4268,7 +4254,7 @@
           } ]
         }
       }, {
-        "sequence" : 12,
+        "sequence" : 11,
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4284,7 +4270,7 @@
           } ]
         }
       }, {
-        "sequence" : 13,
+        "sequence" : 12,
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4300,7 +4286,7 @@
           } ]
         }
       }, {
-        "sequence" : 14,
+        "sequence" : 13,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4320,7 +4306,7 @@
           } ]
         }
       }, {
-        "sequence" : 15,
+        "sequence" : 14,
         "category" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -4341,6 +4327,7 @@
         }
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id",
@@ -4872,6 +4859,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
@@ -4887,6 +4875,13 @@
           "valueCoding" : {
             "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
             "code" : "3"
+          }
+        }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            "code" : "3",
+            "display" : "Services"
           }
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
@@ -5504,7 +5499,8 @@
         "code" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-            "code" : "1"
+            "code" : "30",
+            "display" : "Still patient."
           } ]
         }
       }, {
@@ -5590,6 +5586,7 @@
         } ]
       } ],
       "insurance" : [ {
+        "focal" : true,
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }

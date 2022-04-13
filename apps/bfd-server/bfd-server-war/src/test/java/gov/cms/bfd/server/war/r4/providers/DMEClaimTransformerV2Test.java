@@ -294,13 +294,16 @@ public final class DMEClaimTransformerV2Test {
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object
+    // Only one insurance object if there is more than we need to fix the focal set to point to the
+    // correct insurance
+    assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
 
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
     assertTrue(compare.equalsDeep(insurance));
@@ -315,7 +318,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void shouldHaveLineItemExtension() {
     assertNotNull(eob.getItemFirstRep().getExtension());
-    assertEquals(10, eob.getItemFirstRep().getExtension().size());
+    assertEquals(9, eob.getItemFirstRep().getExtension().size());
 
     Extension ex1 =
         TransformerTestUtilsV2.findExtensionByUrl(

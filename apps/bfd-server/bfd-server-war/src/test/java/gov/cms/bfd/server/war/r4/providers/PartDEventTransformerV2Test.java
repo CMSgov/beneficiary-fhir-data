@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -31,8 +33,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.PaymentComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -168,7 +172,7 @@ public final class PartDEventTransformerV2Test {
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    assertEquals(15, eob.getSupportingInfo().size());
+    assertEquals(14, eob.getSupportingInfo().size());
   }
 
   @Test
@@ -871,6 +875,25 @@ public final class PartDEventTransformerV2Test {
         new PaymentComponent().setDate(new SimpleDateFormat("yyy-MM-dd").parse("2015-05-27"));
 
     assertTrue(compare.equalsDeep(eob.getPayment()));
+  }
+
+  /**
+   * Verifies that {@link
+   * PartDEventTransformer has a provider set otherwise it throws an exception
+   *
+   * @throws Exception (indicates test failure)
+   */
+  @Test
+  public void shouldHaveProvider() throws Exception {
+    Reference compare =
+        new Reference()
+            .setIdentifier(
+                new Identifier()
+                    .setSystem(
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRVDR_NUM))
+                    .setValue("1023011079"));
+
+    assertTrue(compare.equalsDeep(eob.getProvider()));
   }
 
   /**
