@@ -577,17 +577,7 @@ public final class CoverageTransformerV2Test {
   }
 
   private static void verifyCoverageStatus(String status) {
-    if (status != null && !"".equals(status)) {
-      if ("active".equals(status)) {
-        assertEquals(status, coverage.getStatus().toCode());
-      } else if ("cancelled".equals(status)) {
-        assertEquals(status, coverage.getStatus().toCode());
-      } else if ("draft".equals(status)) {
-        assertEquals(status, coverage.getStatus().toCode());
-      } else if ("entered-in-error".equals(status)) {
-        assertEquals(status, coverage.getStatus().toCode());
-      }
-    }
+    assertEquals(status, coverage.getStatus().toCode());
   }
 
   private static void verifyType() {
