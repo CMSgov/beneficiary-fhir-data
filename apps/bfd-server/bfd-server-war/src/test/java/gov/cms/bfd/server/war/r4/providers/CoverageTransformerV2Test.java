@@ -577,7 +577,9 @@ public final class CoverageTransformerV2Test {
   }
 
   private static void verifyCoverageStatus(String status) {
-    assertEquals(status, coverage.getStatus().toCode());
+    if (status != null && status.length() > 0) {
+      assertEquals(status, coverage.getStatus().toCode());
+    }
   }
 
   private static void verifyType() {
