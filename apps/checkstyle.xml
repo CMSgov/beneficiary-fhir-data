@@ -32,9 +32,5 @@
         <module name="JavadocVariable"/>
 
         <!-- Style Rules -->
-        <!-- Good Practice rule for avoiding importing more than is required from a library -->
-        <module name="AvoidStarImport">
-            <property name="severity" value="warning"/>
-        </module>
     </module>
 </module>
