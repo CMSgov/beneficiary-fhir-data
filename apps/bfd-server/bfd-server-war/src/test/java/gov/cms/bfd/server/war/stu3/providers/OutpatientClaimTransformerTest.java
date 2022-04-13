@@ -10,9 +10,9 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -54,7 +54,7 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         OutpatientClaimTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
+            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
     assertMatches(claim, eob);
   }
 
@@ -82,7 +82,7 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         OutpatientClaimTransformer.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
+            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
     assertMatches(claim, eob);
   }
 
@@ -117,7 +117,10 @@ public final class OutpatientClaimTransformerTest {
                   claim.getClaimId());
               ExplanationOfBenefit eob =
                   OutpatientClaimTransformer.transform(
-                      new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
+                      new MetricRegistry(),
+                      claim,
+                      Optional.empty(),
+                      new FdaDrugCodeDisplayLookup(true));
               assertMatches(claim, eob);
             });
   }

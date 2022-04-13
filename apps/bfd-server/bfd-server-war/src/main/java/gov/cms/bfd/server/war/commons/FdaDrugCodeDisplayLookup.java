@@ -1,5 +1,6 @@
-package gov.cms.bfd.server.war;
+package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,18 +15,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FDADrugUtils {
+public class FdaDrugCodeDisplayLookup {
+  private static final Logger LOGGER = LoggerFactory.getLogger(FdaDrugCodeDisplayLookup.class);
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(FDADrugUtils.class);
-  /** Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file. */
-  private static Map<String, String> ndcProductMap = null;
+  /** Stores a map of PRODUCTNDC to SUBSTANCENAME derived from the downloaded NDC file. */
+  private Map<String, String> ndcProductMap = null;
 
-  /** Tracks the national drug codes that have already had code lookup failures. */
-  public static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
-
+  /** Whether to include the fake testing drug code or not */
   private final boolean includeFakeDrugCode;
 
-  public FDADrugUtils(boolean includeFakeDrugCode) {
+  public FdaDrugCodeDisplayLookup(boolean includeFakeDrugCode) {
     this.includeFakeDrugCode = includeFakeDrugCode;
   }
 
@@ -37,6 +36,8 @@ public class FDADrugUtils {
    * @return the fda drug code display string
    */
   public String retrieveFDADrugCodeDisplay(Optional<String> claimDrugCode) {
+    /** Tracks the national drug codes that have already had code lookup failures. */
+    final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
     /*
      * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
@@ -87,7 +88,7 @@ public class FDADrugUtils {
    *
    * @return a map with drug codes and fields
    */
-  public Map<String, String> readFDADrugCodeFile() {
+  Map<String, String> readFDADrugCodeFile() {
     Map<String, String> ndcProductHashMap = new HashMap<String, String>();
     try (final InputStream ndcProductStream =
             Thread.currentThread()
@@ -134,6 +135,11 @@ public class FDADrugUtils {
     return ndcProductHashMap;
   }
 
+  /**
+   * Append the fake drug code used for testing to the provided map.
+   *
+   * @param ndcProductHashMap The code to display name hash map
+   */
   private void appendFDATestCode(Map<String, String> ndcProductHashMap) {
     ndcProductHashMap.put("00000-0000", "Fake Diluent - WATER");
   }

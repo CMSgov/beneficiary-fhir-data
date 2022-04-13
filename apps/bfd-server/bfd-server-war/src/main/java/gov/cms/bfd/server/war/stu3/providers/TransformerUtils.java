@@ -34,11 +34,11 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -145,6 +145,9 @@ public final class TransformerUtils {
    * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
    */
   private static final Set<CcwCodebookInterface> codebookLookupDuplicateFailures = new HashSet<>();
+
+  /** Tracks the icd codes that have already had code lookup failures. */
+  private static final Set<String> icdCodeLookupMissingFailures = new HashSet<>();
 
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
@@ -3005,6 +3008,15 @@ public final class TransformerUtils {
       return icdCodeDisplay;
     }
 
+    // log which ICD codes we couldn't find a match for in our downloaded ICD file
+    if (!icdCodeLookupMissingFailures.contains(icdCode)) {
+      icdCodeLookupMissingFailures.add(icdCode);
+      LOGGER.info(
+          "No ICD code display value match found for ICD code {} in resource {}.",
+          icdCode,
+          "DGNS_CD.txt");
+    }
+
     return null;
   }
 
@@ -3204,7 +3216,7 @@ public final class TransformerUtils {
       MetricRegistry metricRegistry,
       Object rifRecord,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType

@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -38,7 +38,7 @@ final class PartDEventTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
@@ -60,7 +60,7 @@ final class PartDEventTransformerV2 {
    *     PartDEvent}
    */
   private static ExplanationOfBenefit transformClaim(
-      PartDEvent claimGroup, FDADrugUtils drugCodeProvider) {
+      PartDEvent claimGroup, FdaDrugCodeDisplayLookup drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);

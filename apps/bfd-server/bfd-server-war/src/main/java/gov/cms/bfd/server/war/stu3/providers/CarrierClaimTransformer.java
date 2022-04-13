@@ -6,8 +6,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -37,7 +37,7 @@ final class CarrierClaimTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
@@ -57,7 +57,9 @@ final class CarrierClaimTransformer {
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
+      CarrierClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -222,9 +224,6 @@ final class CarrierClaimTransformer {
                 CcwCodebookVariable.CARR_LINE_MTUS_CNT, claimLine.getMtusCount()));
       }
 
-      String drugCodeName =
-          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode());
-
       // Common item level fields between Carrier and DME
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
@@ -253,7 +252,7 @@ final class CarrierClaimTransformer {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          drugCodeName);
+          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (claimLine.getProviderStateCode().isPresent()) {
         item.getLocation()

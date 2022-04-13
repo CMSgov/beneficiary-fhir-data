@@ -10,8 +10,8 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.text.SimpleDateFormat;
@@ -79,7 +79,7 @@ public final class InpatientClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         InpatientClaimTransformerV2.transform(
-            new MetricRegistry(), claim, Optional.empty(), new FDADrugUtils(true));
+            new MetricRegistry(), claim, Optional.empty(), new FdaDrugCodeDisplayLookup(true));
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1691,7 +1691,10 @@ public final class InpatientClaimTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         InpatientClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false), new FDADrugUtils(true));
+            new MetricRegistry(),
+            generateClaim(),
+            Optional.of(false),
+            new FdaDrugCodeDisplayLookup(true));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

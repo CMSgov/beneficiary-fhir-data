@@ -14,6 +14,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -69,8 +70,8 @@ public class SpringConfiguration {
    * that is used for integration testing. When this property is set to the string 'true', this fake
    * drug code will be appended to the drug code lookup map to avoid test failures that result from
    * unexpected changes to the external drug code file in {@link
-   * FDADrugUtils#retrieveFDADrugCodeDisplay} This property defaults to false and should only be set
-   * to true when the server is under test in a local environment.
+   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}. This property defaults to false and
+   * should only be set to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
 
@@ -472,18 +473,16 @@ public class SpringConfiguration {
   }
 
   /**
-   * This bean sets whether to use the fake drug code provider or not. This should only be set to
-   * true when using tests and not in prod. This will create a new instance of the FDADrugUtils
-   * depending on the option provided in the constructor. If its true, it will add the fake drug
-   * code, and if its false it will not. The default is always false.
+   * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
+   * drug codes.
    *
-   * @param includeFakeDrugCode the {@link String} to use
-   * @return the {@link FDADrugUtils} for the application, uses the current prod implementation or
-   *     the fake drug code for test.
+   * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a fake
+   *     drug code for testing purposes.
+   * @return the {@link FdaDrugCodeDisplayLookup} for the application.
    */
   @Bean
-  public FDADrugUtils drugCodeProvider(
+  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
       @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeDrugCode) {
-    return new FDADrugUtils(includeFakeDrugCode);
+    return new FdaDrugCodeDisplayLookup(includeFakeDrugCode);
   }
 }

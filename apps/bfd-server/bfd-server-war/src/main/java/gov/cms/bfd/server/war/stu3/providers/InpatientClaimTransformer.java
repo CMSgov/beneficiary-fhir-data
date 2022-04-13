@@ -6,10 +6,10 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
@@ -39,7 +39,7 @@ final class InpatientClaimTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(

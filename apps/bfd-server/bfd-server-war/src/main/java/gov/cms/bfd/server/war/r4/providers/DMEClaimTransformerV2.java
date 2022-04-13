@@ -6,9 +6,9 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -38,7 +38,7 @@ final class DMEClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -60,7 +60,9 @@ final class DMEClaimTransformerV2 {
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
+      DMEClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -171,7 +173,7 @@ final class DMEClaimTransformerV2 {
       DMEClaim claimGroup,
       ExplanationOfBenefit eob,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 

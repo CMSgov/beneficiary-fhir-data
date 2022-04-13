@@ -6,9 +6,9 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -38,7 +38,7 @@ public class CarrierClaimTransformerV2 {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -62,7 +62,9 @@ public class CarrierClaimTransformerV2 {
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
+      CarrierClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped

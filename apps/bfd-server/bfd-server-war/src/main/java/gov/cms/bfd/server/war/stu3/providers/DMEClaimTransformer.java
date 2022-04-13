@@ -6,8 +6,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -37,7 +37,7 @@ final class DMEClaimTransformer {
       MetricRegistry metricRegistry,
       Object claim,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
@@ -59,7 +59,9 @@ final class DMEClaimTransformer {
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers, FDADrugUtils drugCodeProvider) {
+      DMEClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -246,9 +248,6 @@ final class DMEClaimTransformer {
             CcwCodebookVariable.DMERC_LINE_MTUS_CD, claimLine.getMtusCode(), eob, mtusQuantity);
       }
 
-      String drugCodeName =
-          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode());
-
       // Common item level fields between Carrier and DME
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
@@ -277,7 +276,7 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          drugCodeName);
+          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

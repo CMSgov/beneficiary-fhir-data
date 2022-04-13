@@ -21,8 +21,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -86,7 +86,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   private MetricRegistry metricRegistry;
   private R4EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
-  private FDADrugUtils drugCodeProvider;
+  private FdaDrugCodeDisplayLookup drugCodeProvider;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -112,9 +112,9 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @param drugCodeProvider the {@link FDADrugUtils} to use */
+  /** @param drugCodeProvider the {@link FdaDrugCodeDisplayLookup} to use */
   @Inject
-  public void setDrugCodeProvider(FDADrugUtils drugCodeProvider) {
+  public void setDrugCodeProvider(FdaDrugCodeDisplayLookup drugCodeProvider) {
     this.drugCodeProvider = drugCodeProvider;
   }
 
@@ -491,7 +491,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       ClaimTypeV2 claimType,
       List<?> claims,
       Optional<Boolean> includeTaxNumbers,
-      FDADrugUtils drugCodeProvider) {
+      FdaDrugCodeDisplayLookup drugCodeProvider) {
     return claims.stream()
         .map(
             c ->

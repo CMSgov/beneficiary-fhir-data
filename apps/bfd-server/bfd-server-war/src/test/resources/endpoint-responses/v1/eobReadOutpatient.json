@@ -226,7 +226,7 @@
     }
   } ],
   "careTeam" : [ {
-    "sequence" : 1,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -241,7 +241,7 @@
       } ]
     }
   }, {
-    "sequence" : 2,
+    "sequence" : 3,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -256,7 +256,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 4,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -271,7 +271,7 @@
       } ]
     }
   }, {
-    "sequence" : 4,
+    "sequence" : 5,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -380,7 +380,7 @@
       }
     } ],
     "sequence" : 25,
-    "careTeamLinkId" : [ 4 ],
+    "careTeamLinkId" : [ 5 ],
     "revenue" : {
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",

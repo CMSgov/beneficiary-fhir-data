@@ -30,9 +30,9 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
-import gov.cms.bfd.server.war.FDADrugUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -406,7 +406,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             claim,
             Optional.of(false),
-            new FDADrugUtils(true)),
+            new FdaDrugCodeDisplayLookup(true)),
         eob);
   }
 
@@ -1459,7 +1459,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             partDEvent,
             Optional.of(false),
-            new FDADrugUtils(true)),
+            new FdaDrugCodeDisplayLookup(true)),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -2061,7 +2061,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 claim,
                 Optional.of(false),
-                new FDADrugUtils(true)),
+                new FdaDrugCodeDisplayLookup(true)),
         searchResults);
   }
 

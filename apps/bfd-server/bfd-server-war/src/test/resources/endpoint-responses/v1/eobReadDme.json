@@ -170,7 +170,7 @@
         "display" : "Participating"
       }
     } ],
-    "sequence" : 1,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -279,11 +279,12 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "000000000"
+        "code" : "000000000",
+        "display" : "Fake Diluent - WATER"
       }
     } ],
     "sequence" : 1,
-    "careTeamLinkId" : [ 1 ],
+    "careTeamLinkId" : [ 2 ],
     "diagnosisLinkId" : [ 3 ],
     "category" : {
       "coding" : [ {
