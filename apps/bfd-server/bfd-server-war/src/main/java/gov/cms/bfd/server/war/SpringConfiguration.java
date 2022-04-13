@@ -64,7 +64,14 @@ public class SpringConfiguration {
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
-  /** The {@link String} for the parameter to use the fake drug code implementation */
+  /**
+   * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
+   * that is used for integration testing. When this property is set to the string 'true', this fake
+   * drug code will be appended to the drug code lookup map to avoid test failures that result from
+   * unexpected changes to the external drug code file in {@link
+   * FDADrugUtils#retrieveFDADrugCodeDisplay} This property defaults to false and should only be set
+   * to true when the server is under test in a local environment.
+   */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
 
   public static final int TRANSACTION_TIMEOUT = 30;
@@ -465,14 +472,18 @@ public class SpringConfiguration {
   }
 
   /**
-   * @param includeFakeDrugCodeText the {@link String} to use
+   * This bean sets whether to use the fake drug code provider or not. This should only be set to
+   * true when using tests and not in prod. This will create a new instance of the FDADrugUtils
+   * depending on the option provided in the constructor. If its true, it will add the fake drug
+   * code, and if its false it will not. The default is always false.
+   *
+   * @param includeFakeDrugCode the {@link String} to use
    * @return the {@link FDADrugUtils} for the application, uses the current prod implementation or
    *     the fake drug code for test.
    */
   @Bean
   public FDADrugUtils drugCodeProvider(
-      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") String includeFakeDrugCodeText) {
-    boolean includeFakeDrugCode = Boolean.parseBoolean(includeFakeDrugCodeText);
+      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeDrugCode) {
     return new FDADrugUtils(includeFakeDrugCode);
   }
 }

@@ -279,8 +279,6 @@ public class CarrierClaimTransformerV2 {
                       TransformerUtilsV2.createExtensionCoding(
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
 
-      String drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode());
-
       // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
       line.getMtusCode()
           .ifPresent(
@@ -288,7 +286,6 @@ public class CarrierClaimTransformerV2 {
                   item.addExtension(
                       TransformerUtilsV2.createExtensionCoding(
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, code)));
-
 
       // Common item level fields between Carrier and DME
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
@@ -338,7 +335,7 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          drugCode);
+          drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

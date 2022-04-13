@@ -1465,68 +1465,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with filtering by claim
-   * type.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void searchForEobsByExistingPatientAndTypeWithDrugCodeThatIsNotInProd()
-      throws FHIRException {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(ExplanationOfBenefit.class)
-            .where(
-                ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
-            .where(new TokenClientParam("type").exactly().code(ClaimTypeV2.PDE.name()))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-
-    /*
-     * Verify the bundle contains a key for total and that the value matches the
-     * number of entries in the bundle
-     */
-    assertEquals(
-        loadedRecords.stream()
-            .filter(r -> (r instanceof PartDEvent))
-            .filter(r -> !(r instanceof BeneficiaryHistory))
-            .count(),
-        searchResults.getTotal());
-
-    PartDEvent partDEvent =
-        loadedRecords.stream()
-            .filter(r -> r instanceof PartDEvent)
-            .map(r -> (PartDEvent) r)
-            .findFirst()
-            .get();
-
-    // Compare result to transformed EOB
-    assertEobEquals(
-        PartDEventTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            partDEvent,
-            Optional.of(false),
-            new FDADrugUtils(false)),
-        filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
-  }
-
-  /**
-   * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
    * as with a lastUpdated parameter after yesterday.
    *

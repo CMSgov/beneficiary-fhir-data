@@ -315,7 +315,6 @@ final class DMEClaimTransformerV2 {
                           CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD,
                           line.getSupplierTypeCode())));
 
-      String drugCode = drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode());
       // Common item level fields between Carrier and DME
       // LINE_NUM                 => ExplanationOfBenefit.item.sequence
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
@@ -367,7 +366,7 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          drugCode);
+          drugCodeProvider.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
