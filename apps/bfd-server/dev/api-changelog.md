@@ -3,7 +3,7 @@
 ## BFD-1529: Populate Part B Termination Code Correctly
 
 Previously the Part B coverage termination code was always the same as the Part A coverage termination code.
-The data will now reflect the proper Part B termination code
+The data will now reflect the proper Part B termination code.
 
 ## BFD-1422 Remove Duplicate Primary Payer Codes
 
