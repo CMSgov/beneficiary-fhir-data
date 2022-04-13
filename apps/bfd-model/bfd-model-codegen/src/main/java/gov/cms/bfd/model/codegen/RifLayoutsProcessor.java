@@ -256,10 +256,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
               .setHeaderEntity("CarrierClaim")
-              .setHeaderTable("carrier_claims")
+              .setHeaderTable("carrier_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("carrier_claim_lines")
+              .setLineTable("carrier_claim_lines_new")
               .setLineEntityLineNumberField("LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1304,7 +1304,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "beneficiaries",
             "beneficiaries_history",
             "medicare_beneficiaryid_history",
-            "carrier_claims",
             "dme_claims",
             "hha_claims",
             "hospice_claims",
@@ -2236,14 +2235,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     this represents the total number of digits that can be stored
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
-   *     decimal point
-<<<<<<< HEAD
-   * @return the java field type
-=======
+   *     decimal point <<<<<<< HEAD
+   * @return the java field type =======
    * @return a Java poet {@link TypeName} that will be applied to the entity column; the use of the
    *     {@link boolean} isColumnOptional determines if the type can be a primitive (i.e., long) or
-   *     in fact needs to be a Java class type (i.e., Long)
->>>>>>> 0bcc2b4361e45956e92acb710ad4f0119500e77a
+   *     in fact needs to be a Java class type (i.e., Long) >>>>>>>
+   *     0bcc2b4361e45956e92acb710ad4f0119500e77a
    */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
