@@ -3016,17 +3016,6 @@ public final class TransformerUtils {
       return icdCodeDisplay;
     }
 
-    // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    /*
-     if (!drugCodeProvider.drugCodeLookupMissingFailures.contains(icdCode)) {
-      //drugCodeProvider.drugCodeLookupMissingFailures.add(icdCode);
-      LOGGER.info(
-          "No ICD code display value match found for ICD code {} in resource {}.",
-          icdCode,
-          "DGNS_CD.txt");
-    }
-    */
-
     return null;
   }
 

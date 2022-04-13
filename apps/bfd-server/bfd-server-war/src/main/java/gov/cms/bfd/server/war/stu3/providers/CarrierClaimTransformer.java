@@ -222,10 +222,8 @@ final class CarrierClaimTransformer {
                 CcwCodebookVariable.CARR_LINE_MTUS_CNT, claimLine.getMtusCount()));
       }
 
-      String drugCodeName = null;
-      if (claimLine.getNationalDrugCode().isPresent()) {
-        drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode());
-      }
+      String drugCodeName =
+          drugCodeProvider.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode());
 
       // Common item level fields between Carrier and DME
       TransformerUtils.mapEobCommonItemCarrierDME(
