@@ -272,7 +272,8 @@
     "code" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-        "code" : "1"
+        "code" : "30",
+        "display" : "Still patient."
       } ]
     }
   }, {

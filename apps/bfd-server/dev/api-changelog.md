@@ -1,5 +1,58 @@
 # API Changelog
 
+## BFD-1422 Remove Duplicate Primary Payer Codes
+
+Removed duplicate primary payer code from API output for DME claims:
+```
+{
+          "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            "code" : "E",
+            "display" : "Workers' compensation"
+          }
+}
+```
+
+## BFD-1403 Update patient discharge status code mapping
+
+Update mapping for patient discharge status coding for HHA, Inpatient and Hospice. Previously, the patient discharge status code in the EOB FHIR response was incorrectly being populated by the claim frequency code data field. The value for the patient discharge status code is now correctly being populated by the patient discharge status code data field.
+For Inpatient:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "51",
+        "display" : "Discharged/transferred to a Hospice – medical facility."
+      } ]
+    }
+```
+
+For Hospice:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+```
+
+For HHA:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+ ```
+
 ## BFD-1664 Upgrade HAPI-FHIR to version 5.7.2
 
 The hapi-fhir dependencies that BFD relies on to serve FHIR responses has been upgraded from version 4.1.0 to version 5.7.2. There are no changes to the responses to resource requests with this upgrade. The metadata response has changed as follows:
@@ -151,8 +204,8 @@ There will only be one of these:
           "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
           "value" : "1023011079"
         }
-      },
-  ```
+   },
+ ```
 
 ## BFD-1424 Fix mtus code
 
