@@ -344,6 +344,8 @@ final class PartDEventTransformerV2 {
             TransformerUtilsV2.createIdentifierReference(
                 identifierType, claimGroup.getServiceProviderId()));
       }
+
+      TransformerUtilsV2.setProviderNumber(eob, claimGroup.getServiceProviderId());
     }
 
     /*
@@ -372,13 +374,6 @@ final class PartDEventTransformerV2 {
           CcwCodebookVariable.DSPNSNG_STUS_CD,
           claimGroup.getDispensingStatusCode());
     }
-
-    // DRUG_CVRG_STUS_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.DRUG_CVRG_STUS_CD,
-        CcwCodebookVariable.DRUG_CVRG_STUS_CD,
-        claimGroup.getDrugCoverageStatusCode());
 
     // ADJSTMT_DLTN_CD => => ExplanationOfBenefit.supportingInfo.code
     if (claimGroup.getAdjustmentDeletionCode().isPresent()) {

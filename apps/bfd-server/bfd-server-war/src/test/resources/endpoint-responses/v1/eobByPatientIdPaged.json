@@ -2034,6 +2034,7 @@
         }
       } ],
       "diagnosis" : [ {
+        "sequence" : 1,
         "packageCode" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
@@ -2809,6 +2810,7 @@
         }
       } ],
       "diagnosis" : [ {
+        "sequence" : 1,
         "packageCode" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",

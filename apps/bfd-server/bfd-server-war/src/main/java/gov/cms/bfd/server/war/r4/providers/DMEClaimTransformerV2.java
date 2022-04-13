@@ -334,7 +334,6 @@ final class DMEClaimTransformerV2 {
       // LINE_COINSRNC_AMT        => ExplanationOfBenefit.item.adjudication
       // LINE_SBMTD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // LINE_ALOWD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
       // LINE_SERVICE_DEDUCTIBLE  => ExplanationOfBenefit.item.extension
       // LINE_HCT_HGB_TYPE_CD     => Observation.code
       // LINE_HCT_HGB_RSLT_NUM    => Observation.value
@@ -386,17 +385,6 @@ final class DMEClaimTransformerV2 {
                 TransformerUtilsV2.createExtensionCoding(
                     eob, CcwCodebookVariable.PRVDR_STATE_CD, line.getProviderStateCode()));
       }
-
-      // LINE_BENE_PRMRY_PYR_CD
-      // claimLine.getPrimaryPayerCode()) => ExplanationOfBenefit.item.extension
-      line.getPrimaryPayerCode()
-          .ifPresent(
-              c ->
-                  item.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          eob,
-                          CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD,
-                          line.getPrimaryPayerCode())));
 
       // LINE_BENE_PMT_AMT
       // claimLine.getBeneficiaryPaymentAmount() => ExplanationOfBenefit.item.adjudication.value
@@ -464,6 +452,8 @@ final class DMEClaimTransformerV2 {
    */
   static void addDecimalExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
-    eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal));
+    if (optVal.isPresent()) {
+      eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get()));
+    }
   }
 }

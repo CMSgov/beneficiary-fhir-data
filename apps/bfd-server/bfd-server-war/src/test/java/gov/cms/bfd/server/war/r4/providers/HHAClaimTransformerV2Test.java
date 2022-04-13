@@ -276,7 +276,9 @@ public class HHAClaimTransformerV2Test {
                     "Discharge Status")),
             // Code
             new Coding(
-                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd", "1", null));
+                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+                "30",
+                "Still patient."));
 
     assertTrue(compare.equalsDeep(sic));
   }
@@ -531,13 +533,16 @@ public class HHAClaimTransformerV2Test {
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object
+    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // to the correct insurance
+    assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
 
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-b-567834"));
 
     assertTrue(compare.equalsDeep(insurance));

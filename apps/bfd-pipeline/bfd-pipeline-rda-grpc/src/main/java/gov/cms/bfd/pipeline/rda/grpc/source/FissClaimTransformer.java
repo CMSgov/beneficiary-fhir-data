@@ -498,7 +498,8 @@ public class FissClaimTransformer {
     if (errors.size() > 0) {
       String message =
           String.format(
-              "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
+              "failed with %d errors: seq=%d dcn=%s errors=%s",
+              errors.size(), change.getSeq(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
     return new RdaChange<>(

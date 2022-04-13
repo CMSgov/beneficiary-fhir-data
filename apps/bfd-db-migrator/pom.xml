@@ -15,9 +15,28 @@
 
 	<properties>
 		<flyway.version>7.8.1</flyway.version>
+		<reflections.version>0.10.2</reflections.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<!-- contains the JPA entities for writing to the database -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rda</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the Blue Button API
+                backend's data in the database. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>${reflections.version}</version>
+		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
 				 Java. -->
@@ -105,6 +124,12 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-jvm</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
 		<dependency>
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 			<groupId>org.postgresql</groupId>
@@ -130,6 +155,12 @@
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
