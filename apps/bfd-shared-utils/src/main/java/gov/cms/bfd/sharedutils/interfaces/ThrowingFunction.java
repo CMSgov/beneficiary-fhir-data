@@ -9,5 +9,12 @@ package gov.cms.bfd.sharedutils.interfaces;
  */
 @FunctionalInterface
 public interface ThrowingFunction<R, T, E extends Throwable> {
+  /**
+   * Prototype lambda method to do a function.
+   *
+   * @param value the input value
+   * @return the return value
+   * @throws E the thrown exception type
+   */
   R apply(T value) throws E;
 }
