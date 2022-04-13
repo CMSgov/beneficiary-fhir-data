@@ -165,8 +165,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
   private static Period getBillablePeriod(PreAdjFissClaim claimGroup) {
     return new Period()
-        .setStart(localDateToDate(claimGroup.getStmtCovToDate()))
-        .setEnd(localDateToDate(claimGroup.getStmtCovFromDate()));
+        .setStart(localDateToDate(claimGroup.getStmtCovFromDate()))
+        .setEnd(localDateToDate(claimGroup.getStmtCovToDate()));
   }
 
   private static CodeableConcept getPriority() {
