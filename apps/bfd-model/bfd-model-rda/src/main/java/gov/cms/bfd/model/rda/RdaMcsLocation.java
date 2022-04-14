@@ -2,6 +2,7 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsDiagnosisCodes table */
+/** JPA class for the McsLocations table */
 @Entity
 @Getter
 @Setter
@@ -25,29 +26,35 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsDiagnosisCode.PK.class)
-@Table(name = "`McsDiagnosisCodes`", schema = "`pre_adj`")
-public class PreAdjMcsDiagnosisCode {
+@IdClass(RdaMcsLocation.PK.class)
+@Table(name = "mcs_locations", schema = "rda")
+public class RdaMcsLocation {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "idr_clm_hd_icn", length = 15, nullable = false)
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`idrDiagIcdType`", length = 1)
-  private String idrDiagIcdType;
-
-  @Column(name = "`idrDiagCode`", length = 7, nullable = false)
-  private String idrDiagCode;
-
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  /** PK class for the McsDiagnosisCodes table */
+  @Column(name = "idr_loc_clerk", length = 4)
+  private String idrLocClerk;
+
+  @Column(name = "idr_loc_code", length = 3)
+  private String idrLocCode;
+
+  @Column(name = "idr_loc_date")
+  private LocalDate idrLocDate;
+
+  @Column(name = "idr_loc_actv_code", length = 1)
+  private String idrLocActvCode;
+
+  /** PK class for the McsLocations table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor

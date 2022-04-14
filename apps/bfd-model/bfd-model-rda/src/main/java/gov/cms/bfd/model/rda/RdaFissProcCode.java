@@ -26,29 +26,29 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissProcCode.PK.class)
-@Table(name = "`FissProcCodes`", schema = "`pre_adj`")
-public class PreAdjFissProcCode {
+@IdClass(RdaFissProcCode.PK.class)
+@Table(name = "fiss_proc_codes", schema = "rda")
+public class RdaFissProcCode {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
+  @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
   private String dcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`procCode`", length = 10, nullable = false)
+  @Column(name = "proc_code", length = 10, nullable = false)
   private String procCode;
 
-  @Column(name = "`procFlag`", length = 4)
+  @Column(name = "proc_flag", length = 4)
   private String procFlag;
 
-  @Column(name = "`procDate`")
+  @Column(name = "proc_date")
   private LocalDate procDate;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
   /** PK class for the FissProcCodes table */
