@@ -128,7 +128,7 @@
     "start" : "2016-01-15",
     "end" : "2016-01-27"
   },
-  "created" : "2022-04-12T15:02:25+00:00",
+  "created" : "IGNORED_FIELD",
   "insurer" : {
     "identifier" : {
       "value" : "CMS"
