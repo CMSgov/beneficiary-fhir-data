@@ -1,0 +1,10 @@
+white_list:
+  global_filter:
+    error_patterns:
+      - ".*Unknown Code System '.*/C4BBIdentifierType'"
+      - ".*is not valid in the system http://hl7.org/fhir/sid/icd-10.*"
+  file_filter:
+    - file_pattern: .*/claim.*.json
+      error_patterns:
+        - ".*Claim\\.insurance: minimum required = 1, but only found 0.*"
+        - ".*Claim\\.insurance\\.coverage: minimum required = 1, but only found 0.*"

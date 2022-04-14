@@ -129,7 +129,7 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
       - name: 'Create local branch references'
-        run: git fetch && git checkout master && git checkout $GITHUB_HEAD_REF
+        run: git fetch && git checkout master
       - name: 'Remove prior validation comment'
         uses: actions/github-script@v6
         with:

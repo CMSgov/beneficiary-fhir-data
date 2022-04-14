@@ -4,7 +4,7 @@ failedValidations=()
 
 ENDPOINT_DIR=apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2
 
-RECENT_FILES=$(git diff --name-only $GITHUB_BASE_REF... | grep $ENDPOINT_DIR | sort | uniq)
+RECENT_FILES=$(git diff --name-only master... | grep $ENDPOINT_DIR | sort | uniq)
 
 if [[ $1 == *-r* ]]; then
   for file in $RECENT_FILES; do
