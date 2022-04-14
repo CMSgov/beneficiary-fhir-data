@@ -21,6 +21,7 @@ def run_with_params(argv):
     configData.testRunTime = "1m"
     configData.testNumTotalClients = "100"
     configData.testCreatedClientsPerSecond = "5"
+    configData.resetStatsAfterClientSpawn = False
     workerThreads = "1"
 
     helpString = ('runtests.py \n--homePath="<path/to/home/directory>" (Required) '
@@ -32,12 +33,14 @@ def run_with_params(argv):
      '\n--testRunTime="<Test run time, ex. 30s, 1m, 2d 1h>" (Optional, Default 1m)'
      '\n--maxClients="<Max number of clients to create at once, int>" (Optional, Default 100)'
      '\n--clientsPerSecond="<Clients to create per second until maxClients is reached, int>" (Optional, Default 5)'
-     '\n--workerThreads="<If >1 the test is run as distributed, and expects this many worker processes to start, int>" (Optional, Default 1 - non distributed mode)')
+     '\n--workerThreads="<If >1 the test is run as distributed, and expects this many worker processes to start, int>" (Optional, Default 1 - non distributed mode)'
+     '\n--resetStats (Optional)'
+     )
 
     try:
         opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseUri=",
         "testHost=", "serverPublicKey=", "testRunTime=", "maxClients=", "clientsPerSecond=",
-        "testFile=","workerThreads="])
+        "testFile=","workerThreads=","resetStats"])
     except getopt.GetoptError:
         print(helpString)
         sys.exit(2)
@@ -66,6 +69,8 @@ def run_with_params(argv):
             testFile = arg
         elif opt == "--workerThreads":
             workerThreads = arg
+        elif opt == "--resetStats":
+            configData.resetStatsAfterClientSpawn = True
         else:
             print(helpString)
             sys.exit()
