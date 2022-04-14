@@ -119,7 +119,7 @@ public final class CoverageTransformerV2Test {
 
     // a_trm_cd
     verifyCodedExtension(
-        "https://bluebutton.cms.gov/resources/variables/a_trm_cd", "0", "Not Terminated");
+        "https://bluebutton.cms.gov/resources/variables/a_trm_cd", "9", "Other Termination");
 
     // orec
     verifyCodedExtension(
@@ -146,7 +146,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageStatusPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyCoverageStatus();
+    verifyCoverageStatus("cancelled");
   }
 
   @Test
@@ -258,7 +258,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageStatusPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
-    verifyCoverageStatus();
+    verifyCoverageStatus("active");
   }
 
   @Test
@@ -365,7 +365,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageStatusPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
-    verifyCoverageStatus();
+    verifyCoverageStatus("active");
   }
 
   @Test
@@ -491,7 +491,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageStatusPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
-    verifyCoverageStatus();
+    verifyCoverageStatus("active");
   }
 
   @Test
@@ -576,8 +576,8 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  private static void verifyCoverageStatus() {
-    assertEquals("active", coverage.getStatus().toCode());
+  private static void verifyCoverageStatus(String status) {
+    assertEquals(status, coverage.getStatus().toCode());
   }
 
   private static void verifyType() {
@@ -719,7 +719,7 @@ public final class CoverageTransformerV2Test {
     verifyCoverageClass("Part A");
     verifyMeta();
     verifyExtensionsPartA();
-    verifyCoverageStatus();
+    verifyCoverageStatus("cancelled");
     verifyType();
     verifySubscriber();
     verifyRelationship();
@@ -737,7 +737,7 @@ public final class CoverageTransformerV2Test {
 
     verifyMeta();
     verifyExtensionsPartB();
-    verifyCoverageStatus();
+    verifyCoverageStatus("active");
     verifyType();
     verifySubscriber();
     verifyRelationship();
@@ -753,7 +753,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(beneficiary);
     verifyCoverageClass("Part C");
     verifyExtensionsPartC();
-    verifyCoverageStatus();
+    verifyCoverageStatus("active");
     verifyType();
     verifySubscriber();
     verifyRelationship();
@@ -768,7 +768,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(beneficiary);
     verifyCoverageClass("Part D");
     verifyExtensionsPartD(84);
-    verifyCoverageStatus();
+    verifyCoverageStatus("active");
     verifyType();
     verifySubscriber();
     verifyRelationship();

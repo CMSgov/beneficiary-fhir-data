@@ -167,7 +167,7 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode());
 
     addCoverageCodeExtension(
-        coverage, CcwCodebookVariable.B_TRM_CD, beneficiary.getPartATerminationCode());
+        coverage, CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode());
 
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       addCoverageDecimalExtension(
