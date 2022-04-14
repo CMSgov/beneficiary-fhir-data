@@ -30,6 +30,8 @@ final class PartDEventTransformerV2 {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link PartDEvent} to transform
+   * @param includeTaxNumbers boolean to return tax numbers or not
+   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
@@ -56,6 +58,7 @@ final class PartDEventTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link PartDEvent} to transform
+   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
