@@ -100,7 +100,6 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. Note that this option does *not* reset the test run time, so you should extend the run time by however long it will take to spawn all clients. (Example: the default 100 clients at 5 clients per second will take 20 seconds to spawn, so you should adjust the test run time from 1m to 1m20s). **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
-
 ### Data setup for contract tests
 
 There is one special type of test that requires a data setup script to be run beforehand; this is the coverage contract test. This test runs through every list of pages for a set of contracts, but the urls for hitting all the pages of whatever contracts need to be set up before the test runs. This can be done by calling the data setup script common/write_contract_cursors.py similar to this:

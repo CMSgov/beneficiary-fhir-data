@@ -34,8 +34,7 @@ def run_with_params(argv):
      '\n--maxClients="<Max number of clients to create at once, int>" (Optional, Default 100)'
      '\n--clientsPerSecond="<Clients to create per second until maxClients is reached, int>" (Optional, Default 5)'
      '\n--workerThreads="<If >1 the test is run as distributed, and expects this many worker processes to start, int>" (Optional, Default 1 - non distributed mode)'
-     '\n--resetStats (Optional)'
-     )
+     '\n--resetStats (Optional)')
 
     try:
         opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseUri=",
