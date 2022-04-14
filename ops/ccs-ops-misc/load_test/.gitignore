@@ -1,4 +1,7 @@
+# Config file created by these load tests, depending on command line options
 config.yml
+
+# Python cache files
 common/__pycache__
 v1/__pycache__
 v2/__pycache__
