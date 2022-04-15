@@ -26,8 +26,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
-  private static final int MAX_DIAGNOSIS_CODES = 12;
-
   private final Map<String, BeneficiaryData> mbiMap;
 
   /**
@@ -193,10 +191,9 @@ public class McsTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
-    for (int i = 1; i <= MAX_DIAGNOSIS_CODES; ++i) {
-      final int INDEX = i;
-
-      data.get(Mcs.ICD_DGNS_CD + i)
+    for (int i = 1; i <= Mcs.MAX_DIAGNOSIS_CODES; ++i) {
+      final int INDEX = i - 1;
+      data.get(Mcs.ICD_DGNS_CD.get(INDEX))
           .ifPresent(
               diagnosisCode ->
                   claimBuilder.addMcsDiagnosisCodes(
@@ -204,7 +201,7 @@ public class McsTransformer extends AbstractTransformer {
                           .setIdrClmHdIcn(icn)
                           .setIdrDiagCode(diagnosisCode)
                           .setIdrDiagIcdTypeEnum(
-                              data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
+                              data.get(Mcs.ICD_DGNS_VRSN_CD.get(INDEX))
                                   .map(this::mapVersionCode)
                                   .orElse(McsDiagnosisIcdType.UNRECOGNIZED))
                           .build()));

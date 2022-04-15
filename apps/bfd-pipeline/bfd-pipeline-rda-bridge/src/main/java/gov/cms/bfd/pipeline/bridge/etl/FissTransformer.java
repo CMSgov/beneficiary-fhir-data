@@ -27,9 +27,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
-  private static final int MAX_PROC_CODES = 25;
-  private static final int MAX_DIAG_CODES = 25;
-
   private final Map<String, BeneficiaryData> mbiMap;
 
   /**
@@ -217,18 +214,18 @@ public class FissTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addDiagCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
-    for (int i = 1; i <= MAX_DIAG_CODES; ++i) {
-      final int INDEX = i;
+    for (int i = 1; i <= Fiss.MAX_DIAG_CODES; ++i) {
+      final int INDEX = i - 1;
 
       // HHA and Hospice do not include procedure codes
-      data.get(Fiss.ICD_DGNS_CD + i)
+      data.get(Fiss.ICD_DGNS_CD.get(INDEX))
           .ifPresent(
               value -> {
                 FissDiagnosisCode.Builder diagBuilder =
                     FissDiagnosisCode.newBuilder().setDiagCd2(value);
 
                 consumeIf(
-                    data.get(Fiss.CLM_POA_IND_SW + INDEX).orElse(null),
+                    data.get(Fiss.CLM_POA_IND_SW.get(INDEX)).orElse(null),
                     NumberUtils::isDigits,
                     poa -> diagBuilder.setDiagPoaIndEnumValue(Integer.parseInt(poa)));
 
@@ -245,18 +242,18 @@ public class FissTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addProcCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
-    for (int i = 1; i <= MAX_PROC_CODES; ++i) {
-      final int INDEX = i;
+    for (int i = 1; i <= Fiss.MAX_PROC_CODES; ++i) {
+      final int INDEX = i - 1;
 
       // HHA and Hospice do not include procedure codes
-      data.get(Fiss.ICD_PRCDR_CD + i)
+      data.get(Fiss.ICD_PRCDR_CD.get(INDEX))
           .ifPresent(
               value ->
                   claimBuilder.addFissProcCodes(
                       FissProcedureCode.newBuilder()
                           .setProcCd(value)
                           .setProcDt(
-                              data.getFromType(Fiss.PRCDR_DT + INDEX, Parser.Data.Type.DATE)
+                              data.getFromType(Fiss.PRCDR_DT.get(INDEX), Parser.Data.Type.DATE)
                                   .orElse(""))
                           .build()));
     }
