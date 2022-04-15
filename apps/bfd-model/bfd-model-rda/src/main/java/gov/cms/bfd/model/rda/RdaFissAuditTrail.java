@@ -2,6 +2,7 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissDiagnosisCodes table */
+/** JPA class for the FissAuditTrails table */
 @Entity
 @Getter
 @Setter
@@ -25,32 +26,38 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissDiagnosisCode.PK.class)
-@Table(name = "`FissDiagnosisCodes`", schema = "`pre_adj`")
-public class PreAdjFissDiagnosisCode {
+@IdClass(RdaFissAuditTrail.PK.class)
+@Table(name = "fiss_audit_trails", schema = "rda")
+public class RdaFissAuditTrail {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
+  @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
   private String dcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`diagCd2`", length = 7, nullable = false)
-  private String diagCd2;
+  @Column(name = "badt_status", length = 1)
+  private String badtStatus;
 
-  @Column(name = "`diagPoaInd`", length = 1)
-  private String diagPoaInd;
+  @Column(name = "badt_loc", length = 5)
+  private String badtLoc;
 
-  @Column(name = "`bitFlags`", length = 4)
-  private String bitFlags;
+  @Column(name = "badt_oper_id", length = 9)
+  private String badtOperId;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "badt_reas", length = 5)
+  private String badtReas;
+
+  @Column(name = "badt_curr_date")
+  private LocalDate badtCurrDate;
+
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  /** PK class for the FissDiagnosisCodes table */
+  /** PK class for the FissAuditTrails table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
