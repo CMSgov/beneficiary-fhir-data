@@ -919,17 +919,23 @@ public final class TransformerUtils {
    */
   static Extension createExtensionQuantity(
       CcwCodebookInterface ccwVariable, Optional<? extends Number> quantityValue) {
-    if (!quantityValue.isPresent()) throw new IllegalArgumentException();
+    if (!quantityValue.isPresent()) {
+      throw new IllegalArgumentException();
+    }
 
     Quantity quantity;
-    if (quantityValue.get() instanceof BigDecimal)
+    if (quantityValue.get() instanceof BigDecimal) {
       quantity = new Quantity().setValue((BigDecimal) quantityValue.get());
-    else throw new BadCodeMonkeyException();
-
+    } else if (quantityValue.get() instanceof Short) {
+      quantity = new Quantity().setValue(BigDecimal.valueOf(quantityValue.get().longValue()));
+    } else {
+      LOGGER.warn(
+          "createExtensionQuantity, unsupported data type: {}",
+          quantityValue.get().getClass().getName());
+      throw new BadCodeMonkeyException();
+    }
     String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-    Extension extension = new Extension(extensionUrl, quantity);
-
-    return extension;
+    return new Extension(extensionUrl, quantity);
   }
 
   /**

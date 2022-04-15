@@ -101,7 +101,7 @@ public final class CarrierClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.CARRIER,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -131,7 +131,7 @@ public final class CarrierClaimTransformerTest {
 
     CarrierClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     TransformerTestUtils.assertCareTeamEquals(
         claimLine1.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY, eob);
@@ -194,7 +194,7 @@ public final class CarrierClaimTransformerTest {
         claim.getHcpcsYearCode(),
         0 /* index */);
 
-    if (claimLine1.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
+    if (claimLine1.getAnesthesiaUnitCount() > 0) {
       TransformerTestUtils.assertExtensionQuantityEquals(
           CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT,
           claimLine1.getAnesthesiaUnitCount(),
@@ -205,7 +205,9 @@ public final class CarrierClaimTransformerTest {
         CcwCodebookVariable.CARR_LINE_MTUS_CD, claimLine1.getMtusCode(), eobItem0);
 
     TransformerTestUtils.assertExtensionQuantityEquals(
-        CcwCodebookVariable.CARR_LINE_MTUS_CNT, claimLine1.getMtusCount(), eobItem0);
+        CcwCodebookVariable.CARR_LINE_MTUS_CNT,
+        BigDecimal.valueOf(claimLine1.getMtusCount()),
+        eobItem0);
 
     TransformerTestUtils.assertAdjudicationReasonEquals(
         CcwCodebookVariable.CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
@@ -231,7 +233,7 @@ public final class CarrierClaimTransformerTest {
     TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(
         eobItem0,
         eob,
-        claimLine1.getServiceCount(),
+        BigDecimal.valueOf(claimLine1.getServiceCount()),
         claimLine1.getPlaceOfServiceCode(),
         claimLine1.getFirstExpenseDate(),
         claimLine1.getLastExpenseDate(),

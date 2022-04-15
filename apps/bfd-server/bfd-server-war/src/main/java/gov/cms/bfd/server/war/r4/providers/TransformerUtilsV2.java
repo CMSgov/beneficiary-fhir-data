@@ -461,14 +461,16 @@ public final class TransformerUtilsV2 {
     Quantity quantity;
     if (quantityValue.get() instanceof BigDecimal) {
       quantity = new Quantity().setValue((BigDecimal) quantityValue.get());
+    } else if (quantityValue.get() instanceof Short) {
+      quantity = new Quantity().setValue(BigDecimal.valueOf(quantityValue.get().longValue()));
     } else {
+      LOGGER.warn(
+          "createExtensionQuantity, unsupported data type: {}",
+          quantityValue.get().getClass().getName());
       throw new BadCodeMonkeyException();
     }
-
     String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-    Extension extension = new Extension(extensionUrl, quantity);
-
-    return extension;
+    return new Extension(extensionUrl, quantity);
   }
 
   /**

@@ -1028,8 +1028,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    carrierRifRecord =
-        entityManager.find(CarrierClaim.class, String.valueOf(carrierRifRecord.getClaimId()));
+    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
     carrierRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1613,7 +1612,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         .doTransaction(
             (em) -> {
               em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")
-                  .setParameter("claimId", String.valueOf(claimId))
+                  .setParameter("claimId", claimId)
                   .executeUpdate();
             });
 

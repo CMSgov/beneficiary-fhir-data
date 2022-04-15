@@ -81,7 +81,7 @@ public class CarrierClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.CARRIER,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -172,7 +172,7 @@ public class CarrierClaimTransformerV2 {
     for (CarrierClaimLine line : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       // LINE_NUM => ExplanationOfBenefit.item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRF_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       Optional<CareTeamComponent> performing =
@@ -252,17 +252,18 @@ public class CarrierClaimTransformerV2 {
       }
 
       // CARR_LINE_ANSTHSA_UNIT_CNT => ExplanationOfBenefit.item.extension
-      if (line.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
+      if (line.getAnesthesiaUnitCount() > 0) {
         item.addExtension(
             TransformerUtilsV2.createExtensionQuantity(
-                CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT, line.getAnesthesiaUnitCount()));
+                CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT,
+                Short.valueOf(line.getAnesthesiaUnitCount())));
       }
 
       // CARR_LINE_MTUS_CNT => ExplanationOfBenefit.item.extension
-      if (!line.getMtusCount().equals(BigDecimal.ZERO)) {
+      if (line.getMtusCount() != 0) {
         item.addExtension(
             TransformerUtilsV2.createExtensionQuantity(
-                CcwCodebookVariable.CARR_LINE_MTUS_CNT, line.getMtusCount()));
+                CcwCodebookVariable.CARR_LINE_MTUS_CNT, Short.valueOf(line.getMtusCount())));
       }
 
       // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
@@ -308,7 +309,7 @@ public class CarrierClaimTransformerV2 {
           eob,
           claimGroup.getClaimId(),
           item.getSequence(),
-          line.getServiceCount(),
+          BigDecimal.valueOf(line.getServiceCount()),
           line.getPlaceOfServiceCode(),
           line.getFirstExpenseDate(),
           line.getLastExpenseDate(),

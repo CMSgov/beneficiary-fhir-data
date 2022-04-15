@@ -361,9 +361,11 @@ final class TransformerTestUtils {
    */
   static void assertQuantityEquals(Number expectedValue, Quantity actual) {
     assertNotNull(actual);
-
-    if (expectedValue instanceof BigDecimal) assertEquals(expectedValue, actual.getValue());
-    else throw new BadCodeMonkeyException();
+    if (expectedValue instanceof BigDecimal || expectedValue instanceof Short) {
+      assertEquals(expectedValue, actual.getValue());
+    } else {
+      throw new BadCodeMonkeyException();
+    }
   }
 
   /**
@@ -533,8 +535,9 @@ final class TransformerTestUtils {
             .findFirst();
 
     assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
-    if (expectedValue.isPresent())
+    if (expectedValue.isPresent()) {
       assertQuantityEquals(expectedValue.get(), (Quantity) extensionForUrl.get().getValue());
+    }
   }
 
   /**

@@ -188,15 +188,11 @@ public final class RifParsingUtils {
    * @return the specified text parsed into a {@link BigDecimal}
    */
   public static BigDecimal parseDecimal(String decimalText) {
-    if (decimalText.isEmpty()) {
-      return BigDecimal.ZERO;
-    } else {
-      try {
-        return new BigDecimal(decimalText);
-      } catch (NumberFormatException e) {
-        throw new InvalidRifValueException(
-            String.format("Unable to parse decimal value: '%s'.", decimalText), e);
-      }
+    try {
+      return decimalText.isEmpty() ? BigDecimal.ZERO : new BigDecimal(decimalText);
+    } catch (NumberFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to parse decimal value: '%s'.", decimalText), e);
     }
   }
 
