@@ -6,8 +6,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
@@ -96,9 +96,9 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
               JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
-          List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
+          List<RdaFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
-          for (PreAdjFissClaim resultClaim : claims) {
+          for (RdaFissClaim resultClaim : claims) {
             FissClaim expected = findMatchingFissClaim(expectedClaims, resultClaim);
             assertNotNull(expected);
             assertEquals(expected.getHicNo(), resultClaim.getHicNo());
@@ -144,7 +144,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getMessage().contains("invalid length"));
                     }
                   });
-          List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
+          List<RdaFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -188,9 +188,9 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
               JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
-          List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          List<RdaMcsClaim> claims = getPreAdjMcsClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
-          for (PreAdjMcsClaim resultClaim : claims) {
+          for (RdaMcsClaim resultClaim : claims) {
             McsClaim expected = findMatchingMcsClaim(expectedClaims, resultClaim);
             assertNotNull(expected);
             assertEquals(expected.getIdrHic(), Strings.nullToEmpty(resultClaim.getIdrHic()));
@@ -238,14 +238,14 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                     }
                   });
-          List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          List<RdaMcsClaim> claims = getPreAdjMcsClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
 
   @Nullable
   private FissClaim findMatchingFissClaim(
-      ImmutableList<FissClaimChange> expectedClaims, PreAdjFissClaim resultClaim) {
+      ImmutableList<FissClaimChange> expectedClaims, RdaFissClaim resultClaim) {
     return expectedClaims.stream()
         .map(FissClaimChange::getClaim)
         .filter(claim -> claim.getDcn().equals(resultClaim.getDcn()))
@@ -255,7 +255,7 @@ public class RdaLoadJobIT {
 
   @Nullable
   private McsClaim findMatchingMcsClaim(
-      ImmutableList<McsClaimChange> expectedClaims, PreAdjMcsClaim resultClaim) {
+      ImmutableList<McsClaimChange> expectedClaims, RdaMcsClaim resultClaim) {
     return expectedClaims.stream()
         .map(McsClaimChange::getClaim)
         .filter(claim -> claim.getIdrClmHdIcn().equals(resultClaim.getIdrClmHdIcn()))
@@ -268,15 +268,15 @@ public class RdaLoadJobIT {
     assertEquals(0, getPreAdjMcsClaims(entityManager).size());
   }
 
-  private List<PreAdjMcsClaim> getPreAdjMcsClaims(EntityManager entityManager) {
+  private List<RdaMcsClaim> getPreAdjMcsClaims(EntityManager entityManager) {
     return entityManager
-        .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
+        .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
         .getResultList();
   }
 
-  private List<PreAdjFissClaim> getPreAdjFissClaims(EntityManager entityManager) {
+  private List<RdaFissClaim> getPreAdjFissClaims(EntityManager entityManager) {
     return entityManager
-        .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+        .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
         .getResultList();
   }
 

@@ -2,7 +2,6 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsLocations table */
+/** JPA class for the FissDiagnosisCodes table */
 @Entity
 @Getter
 @Setter
@@ -26,40 +25,37 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsLocation.PK.class)
-@Table(name = "`McsLocations`", schema = "`pre_adj`")
-public class PreAdjMcsLocation {
+@IdClass(RdaFissDiagnosisCode.PK.class)
+@Table(name = "fiss_diagnosis_codes", schema = "rda")
+public class RdaFissDiagnosisCode {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "dcn", length = 23, nullable = false)
   @EqualsAndHashCode.Include
-  private String idrClmHdIcn;
+  private String dcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
+  @Column(name = "priority", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`lastUpdated`")
+  @Column(name = "diag_cd2", length = 7, nullable = false)
+  private String diagCd2;
+
+  @Column(name = "diag_poa_ind", length = 1)
+  private String diagPoaInd;
+
+  @Column(name = "bit_flags", length = 4)
+  private String bitFlags;
+
+  @Column(name = "last_updated")
   private Instant lastUpdated;
 
-  @Column(name = "`idrLocClerk`", length = 4)
-  private String idrLocClerk;
-
-  @Column(name = "`idrLocCode`", length = 3)
-  private String idrLocCode;
-
-  @Column(name = "`idrLocDate`")
-  private LocalDate idrLocDate;
-
-  @Column(name = "`idrLocActvCode`", length = 1)
-  private String idrLocActvCode;
-
-  /** PK class for the McsLocations table */
+  /** PK class for the FissDiagnosisCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
-    private String idrClmHdIcn;
+    private String dcn;
 
     private short priority;
   }

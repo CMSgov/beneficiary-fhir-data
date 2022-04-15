@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.util.Optional;
@@ -16,17 +16,17 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  */
 public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   F(
-      PreAdjFissClaim.class,
-      PreAdjFissClaim.Fields.mbiRecord,
-      PreAdjFissClaim.Fields.dcn,
-      PreAdjFissClaim.Fields.stmtCovToDate,
+      RdaFissClaim.class,
+      RdaFissClaim.Fields.mbiRecord,
+      RdaFissClaim.Fields.dcn,
+      RdaFissClaim.Fields.stmtCovToDate,
       FissClaimTransformerV2::transform),
 
   M(
-      PreAdjMcsClaim.class,
-      PreAdjMcsClaim.Fields.mbiRecord,
-      PreAdjMcsClaim.Fields.idrClmHdIcn,
-      PreAdjMcsClaim.Fields.idrHdrToDateOfSvc,
+      RdaMcsClaim.class,
+      RdaMcsClaim.Fields.mbiRecord,
+      RdaMcsClaim.Fields.idrClmHdIcn,
+      RdaMcsClaim.Fields.idrHdrToDateOfSvc,
       McsClaimTransformerV2::transform);
 
   private final Class<?> entityClass;

@@ -127,7 +127,7 @@ public final class CoverageTransformerTest {
         coverage.getIdElement().getIdPart());
     assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
     assertEquals(TransformerConstants.COVERAGE_PLAN_PART_A, coverage.getGrouping().getSubPlan());
-    assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    assertEquals(CoverageStatus.CANCELLED, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent())
