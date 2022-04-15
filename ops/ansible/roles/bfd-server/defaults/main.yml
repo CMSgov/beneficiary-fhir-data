@@ -31,6 +31,3 @@ data_server_v2_enabled: false
 
 # Whether or not pre-adjudicated claims data resources are enabled.
 pre_adj_resources_enabled: false
-
-# new relic
-new_relic_agent_version: '7.5.0'

@@ -315,11 +315,16 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         Preconditions.checkArgument(
             !Strings.isNullOrEmpty(inProcessServerName), "inProcessServerName is required");
       }
-      this.authenticationToken =
-          Strings.isNullOrEmpty(authenticationToken) ? null : authenticationToken;
+
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
 
-      expirationDate = parseJWTExpirationDate(this.authenticationToken);
+      if (!Strings.isNullOrEmpty(authenticationToken)) {
+        this.authenticationToken = authenticationToken;
+        this.expirationDate = parseJWTExpirationDate(this.authenticationToken);
+      } else {
+        this.authenticationToken = null;
+        this.expirationDate = null;
+      }
     }
 
     private ManagedChannel createChannel() {

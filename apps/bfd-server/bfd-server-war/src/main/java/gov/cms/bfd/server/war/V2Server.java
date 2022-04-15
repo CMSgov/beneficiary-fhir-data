@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Properties;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -66,7 +66,7 @@ public class V2Server extends RestfulServer {
 
     // Lightly customize the capability provider to set publisher name.
     ServerCapabilityStatementProvider capabilityStatementProvider =
-        new ServerCapabilityStatementProvider();
+        new ServerCapabilityStatementProvider(this);
     capabilityStatementProvider.setPublisher(CAPABILITIES_PUBLISHER);
     setServerConformanceProvider(capabilityStatementProvider);
   }

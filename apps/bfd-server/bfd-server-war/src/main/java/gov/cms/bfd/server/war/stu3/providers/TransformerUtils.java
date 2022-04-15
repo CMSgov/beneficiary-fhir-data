@@ -1278,19 +1278,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: Remove this method when the calling method has been removed as per BFD-1582
-   *
-   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
-   *     value for the {@link Coverage#getBeneficiary()} value to match
-   * @param coverageType the {@link MedicareSegment} value to match
-   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
-   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
-   */
-  static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
-    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
-  }
-
-  /**
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
    * @param coverageType the {@link MedicareSegment} value to match
@@ -1589,9 +1576,11 @@ public final class TransformerUtils {
        * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
        * field so if this is updated you'll need to update that as well.
        */
+      int maxSequence = eob.getDiagnosis().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
       eob.addDiagnosis()
           .setPackageCode(
-              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd));
+              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd))
+          .setSequence(maxSequence + 1);
     }
   }
 

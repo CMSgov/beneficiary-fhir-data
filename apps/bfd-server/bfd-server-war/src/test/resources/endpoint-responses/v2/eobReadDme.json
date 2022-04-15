@@ -335,13 +335,6 @@
         "code" : "0",
         "display" : "Service Subject to Deductible"
       }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "code" : "E",
-        "display" : "Workers' compensation"
-      }
     } ],
     "sequence" : 1,
     "careTeamSequence" : [ 2 ],

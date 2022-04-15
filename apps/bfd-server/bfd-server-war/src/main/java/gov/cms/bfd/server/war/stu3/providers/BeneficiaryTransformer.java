@@ -272,8 +272,29 @@ final class BeneficiaryTransformer {
       patient.addExtension(
           TransformerUtils.createExtensionDate(
               CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+
+      addMedicaidDualEligibility(patient, beneficiary);
     }
 
+    return patient;
+  }
+
+  /**
+   * @param patient the FHIR {@link Patient} resource to add the {@link Identifier} to
+   * @param value the value for {@link Identifier#getValue()}
+   * @param system the value for {@link Identifier#getSystem()}
+   * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
+   */
+  private static void addUnhashedIdentifier(
+      Patient patient, String value, String system, Extension identifierCurrencyExtension) {
+    patient
+        .addIdentifier()
+        .setSystem(system)
+        .setValue(value)
+        .addExtension(identifierCurrencyExtension);
+  }
+
+  private static void addMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
       patient.addExtension(
@@ -359,23 +380,6 @@ final class BeneficiaryTransformer {
               CcwCodebookVariable.DUAL_12,
               beneficiary.getMedicaidDualEligibilityDecCode()));
     }
-
-    return patient;
-  }
-
-  /**
-   * @param patient the FHIR {@link Patient} resource to add the {@link Identifier} to
-   * @param value the value for {@link Identifier#getValue()}
-   * @param system the value for {@link Identifier#getSystem()}
-   * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
-   */
-  private static void addUnhashedIdentifier(
-      Patient patient, String value, String system, Extension identifierCurrencyExtension) {
-    patient
-        .addIdentifier()
-        .setSystem(system)
-        .setValue(value)
-        .addExtension(identifierCurrencyExtension);
   }
 
   /** Enumerates the options for the currency of an {@link Identifier}. */

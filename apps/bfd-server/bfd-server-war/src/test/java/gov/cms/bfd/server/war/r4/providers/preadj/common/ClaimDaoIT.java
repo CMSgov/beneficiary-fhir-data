@@ -3,7 +3,7 @@ package gov.cms.bfd.server.war.r4.providers.preadj.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
@@ -95,25 +95,25 @@ public class ClaimDaoIT {
     assertEquals(0, claims.size());
   }
 
-  private List<PreAdjFissClaim> runFissMbiQuery(ClaimDao claimDao, String mbi) {
+  private List<RdaFissClaim> runFissMbiQuery(ClaimDao claimDao, String mbi) {
     return claimDao.findAllByMbiAttribute(
-        PreAdjFissClaim.class,
-        PreAdjFissClaim.Fields.mbiRecord,
+        RdaFissClaim.class,
+        RdaFissClaim.Fields.mbiRecord,
         mbi,
         false,
         null,
         null,
-        PreAdjFissClaim.Fields.stmtCovToDate);
+        RdaFissClaim.Fields.stmtCovToDate);
   }
 
-  private List<PreAdjFissClaim> runFissMbiHashQuery(ClaimDao claimDao, String mbiHash) {
+  private List<RdaFissClaim> runFissMbiHashQuery(ClaimDao claimDao, String mbiHash) {
     return claimDao.findAllByMbiAttribute(
-        PreAdjFissClaim.class,
-        PreAdjFissClaim.Fields.mbiRecord,
+        RdaFissClaim.class,
+        RdaFissClaim.Fields.mbiRecord,
         mbiHash,
         true,
         null,
         null,
-        PreAdjFissClaim.Fields.stmtCovToDate);
+        RdaFissClaim.Fields.stmtCovToDate);
   }
 }
