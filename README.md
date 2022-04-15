@@ -124,7 +124,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
     This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with:
     ```
-    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "beneficiaryId" FROM "Beneficiaries" LIMIT 1;'
+    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "bene_id" FROM "beneficiaries" LIMIT 1;'
     ```
 1. Run `export BFD_PORT=6500`. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later. This can be set in your shell profile but note that when running the integration tests through maven, the BFD_PORT needs to be unset from the environment.
 1. Now it's time to start the server up. Change to `apps/bfd-server` and run:
