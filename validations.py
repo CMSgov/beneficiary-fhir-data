@@ -41,7 +41,9 @@ def get_file_filter(white_list, file_path):
 
 def validate_resource(white_list, file_path):
     file_filters = get_file_filter(white_list, file_path)
-    output = subprocess.run(['bash', 'mock_validator.sh', file_path, '-version 4.0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    output = subprocess.run(
+        ['bash', 'mock_validator.sh', file_path, '-version 4.0'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8')
     output_lines = output.split('\n')
     errors = []
 
@@ -83,7 +85,8 @@ def main():
     invalid_resources = validate_resources(white_list['white_list'], args.recent)
 
     if invalid_resources:
-        print('There were {} invalid resources'.format(len(invalid_resources)))
+        total_errors = sum(len(invalid_resources[key]) for key in invalid_resources)
+        print('There were {} invalid resources ({} total errors)'.format(len(invalid_resources), total_errors))
         for file_name in invalid_resources:
             print(f'  - {file_name}')
             for error in invalid_resources[file_name]:
