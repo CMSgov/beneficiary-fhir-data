@@ -35,8 +35,8 @@
     "url" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
-      "code" : "0",
-      "display" : "Not Terminated"
+      "code" : "9",
+      "display" : "Other Termination"
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
@@ -210,7 +210,7 @@
       "display" : "Part A and Part B state buy-in"
     }
   } ],
-  "status" : "active",
+  "status" : "cancelled",
   "type" : {
     "coding" : [ {
       "system" : "Medicare",
