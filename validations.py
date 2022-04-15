@@ -28,9 +28,14 @@ def filter_errors(global_error_patterns, file_error_patterns, errors):
 
 def get_file_filter(white_list, file_path):
     filters = []
-    for file_filter in white_list['file_filter']:
-        if re.search(file_filter['file_pattern'], file_path):
-            filters = file_filter['error_patterns']
+
+    if type(white_list) is dict:
+        if 'file_filter' in white_list and white_list['file_filter'] is not None:
+            for file_filter in white_list['file_filter']:
+                if re.search(file_filter['file_pattern'], file_path):
+                    if 'error_patterns' in file_filter and type(file_filter['error_patterns']) is list:
+                        filters = file_filter['error_patterns']
+
     return filters
 
 
@@ -39,11 +44,22 @@ def validate_resource(white_list, file_path):
     output = subprocess.run(['bash', 'mock_validator.sh', file_path, '-version 4.0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
     output_lines = output.split('\n')
     errors = []
+
     for line in output_lines:
         stripped_line = line.strip()
         if stripped_line.lower().startswith('error @'):
             errors.append(stripped_line)
-    return filter_errors(white_list['global_filter']['error_patterns'], file_filters, errors)
+
+    global_filters = []
+
+    if type(white_list) is dict:
+        if 'global_filter' in white_list and type(white_list['global_filter']) is dict:
+            global_filter = white_list['global_filter']
+
+            if 'error_patterns' in global_filter and type(global_filter['error_patterns']) is list:
+                global_filters = global_filter['error_patterns']
+
+    return filter_errors(global_filters, file_filters, errors)
 
 
 def validate_resources(white_list, recently_changed):

@@ -3,6 +3,7 @@ white_list:
     error_patterns:
       - ".*Unknown Code System '.*/C4BBIdentifierType'"
       - ".*is not valid in the system http://hl7.org/fhir/sid/icd-10.*"
+      - ".*codings provided are in the value set.*"
   file_filter:
     - file_pattern: .*/claim.*.json
       error_patterns:
