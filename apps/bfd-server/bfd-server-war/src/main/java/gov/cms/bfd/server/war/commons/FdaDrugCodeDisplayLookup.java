@@ -95,7 +95,7 @@ public class FdaDrugCodeDisplayLookup {
      * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
      * characters
      */
-    if (!claimDrugCode.isPresent() || claimDrugCode.isEmpty() || claimDrugCode.get().length() < 9) {
+    if (!claimDrugCode.isPresent() || claimDrugCode.get().length() < 9) {
       return null;
     }
 
@@ -112,7 +112,7 @@ public class FdaDrugCodeDisplayLookup {
     // log which NDC codes we couldn't find a match for in our downloaded NDC file
     if (!drugCodeLookupMissingFailures.contains(claimDrugCode.get())) {
       drugCodeLookupMissingFailures.add(claimDrugCode.get());
-      LOGGER.info(
+      LOGGER.debug(
           "No national drug code value (PRODUCTNDC column) match found for drug code {} in"
               + " resource {}.",
           claimDrugCode.get(),
