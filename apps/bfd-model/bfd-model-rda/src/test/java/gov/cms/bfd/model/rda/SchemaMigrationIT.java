@@ -68,8 +68,8 @@ public class SchemaMigrationIT {
    */
   @Test
   public void fissClaimEntities() {
-    final PreAdjFissClaim claim =
-        PreAdjFissClaim.builder()
+    final RdaFissClaim claim =
+        RdaFissClaim.builder()
             .dcn("1")
             .hicNo("h1")
             .currStatus('1')
@@ -79,8 +79,8 @@ public class SchemaMigrationIT {
             .sequenceNumber(3L)
             .build();
 
-    final PreAdjFissProcCode procCode0 =
-        PreAdjFissProcCode.builder()
+    final RdaFissProcCode procCode0 =
+        RdaFissProcCode.builder()
             .dcn(claim.getDcn())
             .priority((short) 0)
             .procCode("P")
@@ -90,8 +90,8 @@ public class SchemaMigrationIT {
             .build();
     claim.getProcCodes().add(procCode0);
 
-    final PreAdjFissProcCode procCode1 =
-        PreAdjFissProcCode.builder()
+    final RdaFissProcCode procCode1 =
+        RdaFissProcCode.builder()
             .dcn(claim.getDcn())
             .priority((short) 1)
             .procCode("P")
@@ -101,8 +101,8 @@ public class SchemaMigrationIT {
             .build();
     claim.getProcCodes().add(procCode1);
 
-    final PreAdjFissDiagnosisCode diagCode0 =
-        PreAdjFissDiagnosisCode.builder()
+    final RdaFissDiagnosisCode diagCode0 =
+        RdaFissDiagnosisCode.builder()
             .dcn(claim.getDcn())
             .priority((short) 0)
             .diagCd2("cd2")
@@ -110,8 +110,8 @@ public class SchemaMigrationIT {
             .build();
     claim.getDiagCodes().add(diagCode0);
 
-    final PreAdjFissDiagnosisCode diagCode1 =
-        PreAdjFissDiagnosisCode.builder()
+    final RdaFissDiagnosisCode diagCode1 =
+        RdaFissDiagnosisCode.builder()
             .dcn(claim.getDcn())
             .priority((short) 1)
             .diagCd2("cd2")
@@ -119,20 +119,20 @@ public class SchemaMigrationIT {
             .build();
     claim.getDiagCodes().add(diagCode1);
 
-    final PreAdjFissPayer payer0 =
-        PreAdjFissPayer.builder()
+    final RdaFissPayer payer0 =
+        RdaFissPayer.builder()
             .dcn(claim.getDcn())
             .priority((short) 0)
-            .payerType(PreAdjFissPayer.PayerType.BeneZ)
+            .payerType(RdaFissPayer.PayerType.BeneZ)
             .estAmtDue(new BigDecimal("1.23"))
             .build();
     claim.getPayers().add(payer0);
 
-    final PreAdjFissPayer payer1 =
-        PreAdjFissPayer.builder()
+    final RdaFissPayer payer1 =
+        RdaFissPayer.builder()
             .dcn(claim.getDcn())
             .priority((short) 1)
-            .payerType(PreAdjFissPayer.PayerType.Insured)
+            .payerType(RdaFissPayer.PayerType.Insured)
             .estAmtDue(new BigDecimal("4.56"))
             .build();
     claim.getPayers().add(payer1);
@@ -143,13 +143,13 @@ public class SchemaMigrationIT {
     entityManager.persist(claim);
     entityManager.getTransaction().commit();
 
-    List<PreAdjFissClaim> claims =
+    List<RdaFissClaim> claims =
         entityManager
-            .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+            .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
             .getResultList();
     assertEquals(1, claims.size());
 
-    PreAdjFissClaim resultClaim = claims.get(0);
+    RdaFissClaim resultClaim = claims.get(0);
     assertEquals("h1", resultClaim.getHicNo());
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
@@ -171,7 +171,7 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().commit();
     resultClaim =
         entityManager
-            .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+            .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
             .getResultList()
             .get(0);
     assertEquals("0:H", summarizeFissProcCodes(resultClaim));
@@ -185,8 +185,8 @@ public class SchemaMigrationIT {
    */
   @Test
   public void mcsClaimEntities() {
-    final PreAdjMcsClaim claim =
-        PreAdjMcsClaim.builder()
+    final RdaMcsClaim claim =
+        RdaMcsClaim.builder()
             .idrClmHdIcn("3")
             .idrContrId("c1")
             .idrHic("hc")
@@ -195,15 +195,15 @@ public class SchemaMigrationIT {
             .build();
 
     claim.getDetails().add(quickMcsDetail(claim, 0, "P"));
-    PreAdjMcsDetail detail1 = quickMcsDetail(claim, 1, "Q");
+    RdaMcsDetail detail1 = quickMcsDetail(claim, 1, "Q");
     claim.getDetails().add(detail1);
-    PreAdjMcsDetail detail2 = quickMcsDetail(claim, 2, "R");
+    RdaMcsDetail detail2 = quickMcsDetail(claim, 2, "R");
     claim.getDetails().add(detail2);
 
-    PreAdjMcsDiagnosisCode diag0 = quickMcsDiagCode(claim, 0, "T");
+    RdaMcsDiagnosisCode diag0 = quickMcsDiagCode(claim, 0, "T");
     claim.getDiagCodes().add(diag0);
     claim.getDiagCodes().add(quickMcsDiagCode(claim, 1, "U"));
-    PreAdjMcsDiagnosisCode diag2 = quickMcsDiagCode(claim, 2, "V");
+    RdaMcsDiagnosisCode diag2 = quickMcsDiagCode(claim, 2, "V");
     claim.getDiagCodes().add(diag2);
 
     // Insert a record and read it back to verify some columns and that the detail records were
@@ -212,12 +212,10 @@ public class SchemaMigrationIT {
     entityManager.persist(claim);
     entityManager.getTransaction().commit();
 
-    List<PreAdjMcsClaim> resultClaims =
-        entityManager
-            .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
-            .getResultList();
+    List<RdaMcsClaim> resultClaims =
+        entityManager.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
     assertEquals(1, resultClaims.size());
-    PreAdjMcsClaim resultClaim = resultClaims.get(0);
+    RdaMcsClaim resultClaim = resultClaims.get(0);
     assertEquals("0:P,1:Q,2:R", summarizeMcsDetails(resultClaim));
     assertEquals("0:T:0,1:U:1,2:V:2", summarizeMcsDiagCodes(resultClaim));
 
@@ -233,9 +231,7 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().commit();
 
     resultClaims =
-        entityManager
-            .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
-            .getResultList();
+        entityManager.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
     assertEquals(1, resultClaims.size());
     resultClaim = resultClaims.get(0);
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
@@ -255,8 +251,8 @@ public class SchemaMigrationIT {
       entityManager.getTransaction().begin();
       Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
-        final PreAdjFissClaim claim =
-            PreAdjFissClaim.builder()
+        final RdaFissClaim claim =
+            RdaFissClaim.builder()
                 .dcn(mbi + "d" + claimNumber)
                 .hicNo(mbi + "h" + claimNumber)
                 .currStatus('1')
@@ -288,15 +284,15 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().begin();
     for (String mbi : mbis) {
       CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-      CriteriaQuery<PreAdjFissClaim> criteria = builder.createQuery(PreAdjFissClaim.class);
-      Root<PreAdjFissClaim> root = criteria.from(PreAdjFissClaim.class);
+      CriteriaQuery<RdaFissClaim> criteria = builder.createQuery(RdaFissClaim.class);
+      Root<RdaFissClaim> root = criteria.from(RdaFissClaim.class);
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
+              root.get(RdaFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
       var claims = entityManager.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
-      for (PreAdjFissClaim claim : claims) {
+      for (RdaFissClaim claim : claims) {
         assertEquals(mbi, claim.getDcn().substring(0, mbi.length()));
       }
     }
@@ -315,8 +311,8 @@ public class SchemaMigrationIT {
       entityManager.getTransaction().begin();
       Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
-        final PreAdjMcsClaim claim =
-            PreAdjMcsClaim.builder()
+        final RdaMcsClaim claim =
+            RdaMcsClaim.builder()
                 .sequenceNumber(7L)
                 .idrClmHdIcn(mbi + "i" + claimNumber)
                 .idrContrId("c1")
@@ -348,15 +344,15 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().begin();
     for (String mbi : mbis) {
       CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-      CriteriaQuery<PreAdjMcsClaim> criteria = builder.createQuery(PreAdjMcsClaim.class);
-      Root<PreAdjMcsClaim> root = criteria.from(PreAdjMcsClaim.class);
+      CriteriaQuery<RdaMcsClaim> criteria = builder.createQuery(RdaMcsClaim.class);
+      Root<RdaMcsClaim> root = criteria.from(RdaMcsClaim.class);
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
+              root.get(RdaFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
       var claims = entityManager.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
-      for (PreAdjMcsClaim claim : claims) {
+      for (RdaMcsClaim claim : claims) {
         assertEquals(mbi, claim.getIdrClmHdIcn().substring(0, mbi.length()));
       }
     }
@@ -390,17 +386,16 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().commit();
   }
 
-  private PreAdjMcsDetail quickMcsDetail(PreAdjMcsClaim claim, int priority, String dtlStatus) {
-    return PreAdjMcsDetail.builder()
+  private RdaMcsDetail quickMcsDetail(RdaMcsClaim claim, int priority, String dtlStatus) {
+    return RdaMcsDetail.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
         .priority((short) priority)
         .idrDtlStatus(dtlStatus)
         .build();
   }
 
-  private PreAdjMcsDiagnosisCode quickMcsDiagCode(
-      PreAdjMcsClaim claim, int priority, String icdType) {
-    return PreAdjMcsDiagnosisCode.builder()
+  private RdaMcsDiagnosisCode quickMcsDiagCode(RdaMcsClaim claim, int priority, String icdType) {
+    return RdaMcsDiagnosisCode.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
         .priority((short) priority)
         .idrDiagIcdType(icdType)
@@ -408,31 +403,31 @@ public class SchemaMigrationIT {
         .build();
   }
 
-  private String summarizeFissProcCodes(PreAdjFissClaim resultClaim) {
+  private String summarizeFissProcCodes(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getProcCodes().stream(),
         d -> format("%d:%s", d.getPriority(), d.getProcFlag()));
   }
 
-  private String summarizeFissDiagCodes(PreAdjFissClaim resultClaim) {
+  private String summarizeFissDiagCodes(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
         d -> format("%d:%s", d.getPriority(), d.getDiagPoaInd()));
   }
 
-  private String summarizeFissPayers(PreAdjFissClaim resultClaim) {
+  private String summarizeFissPayers(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getPayers().stream(),
         d -> format("%d:%s:%s", d.getPriority(), d.getPayerType(), d.getEstAmtDue()));
   }
 
-  private String summarizeMcsDetails(PreAdjMcsClaim resultClaim) {
+  private String summarizeMcsDetails(RdaMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDetails().stream(),
         d -> format("%d:%s", d.getPriority(), d.getIdrDtlStatus()));
   }
 
-  private String summarizeMcsDiagCodes(PreAdjMcsClaim resultClaim) {
+  private String summarizeMcsDiagCodes(RdaMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
         d -> format("%d:%s:%s", d.getPriority(), d.getIdrDiagIcdType(), d.getIdrDiagCode()));

@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
@@ -87,16 +87,16 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void mergeSuccessful() throws Exception {
-    final List<RdaChange<PreAdjFissClaim>> batch =
+    final List<RdaChange<RdaFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
     final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
-    for (RdaChange<PreAdjFissClaim> change : batch) {
+    for (RdaChange<RdaFissClaim> change : batch) {
       verify(entityManager).merge(change.getClaim());
     }
-    for (RdaChange<PreAdjFissClaim> change : batch) {
+    for (RdaChange<RdaFissClaim> change : batch) {
       verify(entityManager).persist(sink.createMetaData(change));
     }
     // the merge transaction will be committed
@@ -116,7 +116,7 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void mergeFatalError() {
-    final List<RdaChange<PreAdjFissClaim>> batch =
+    final List<RdaChange<RdaFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new RuntimeException("oops")).when(entityManager).merge(batch.get(1).getClaim());
 
@@ -185,9 +185,9 @@ public class FissClaimRdaSinkTest {
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
   }
 
-  private List<FissClaimChange> messagesForBatch(List<RdaChange<PreAdjFissClaim>> batch) {
+  private List<FissClaimChange> messagesForBatch(List<RdaChange<RdaFissClaim>> batch) {
     final var messages = ImmutableList.<FissClaimChange>builder();
-    for (RdaChange<PreAdjFissClaim> change : batch) {
+    for (RdaChange<RdaFissClaim> change : batch) {
       var message =
           FissClaimChange.newBuilder()
               .setDcn(change.getClaim().getDcn())
@@ -199,8 +199,8 @@ public class FissClaimRdaSinkTest {
     return messages.build();
   }
 
-  private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
-    PreAdjFissClaim claim = new PreAdjFissClaim();
+  private RdaChange<RdaFissClaim> createClaim(String dcn) {
+    RdaFissClaim claim = new RdaFissClaim();
     claim.setDcn(dcn);
     claim.setApiSource(VERSION);
     return new RdaChange<>(
