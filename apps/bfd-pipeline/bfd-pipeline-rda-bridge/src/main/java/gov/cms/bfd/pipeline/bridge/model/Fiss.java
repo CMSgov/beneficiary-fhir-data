@@ -46,7 +46,7 @@ public class Fiss {
   public static final int MAX_DIAG_CODES = Math.max(ICD_DGNS_CD.size(), CLM_POA_IND_SW.size());
 
   /**
-   * The maximum number of diagnosis column names available for {@link ICD_DGNS_CD} and {@link
+   * The maximum number of procedure column names available for {@link ICD_DGNS_CD} and {@link
    * PRCDR_DT}. Used when looping over both sets of fields.
    */
   public static final int MAX_PROC_CODES = Math.max(ICD_PRCDR_CD.size(), PRCDR_DT.size());
