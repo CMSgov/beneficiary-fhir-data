@@ -3,8 +3,8 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissPayer;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissPayer;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
@@ -48,26 +48,26 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claimEntity the FISS {@link PreAdjFissClaim} to transform
+   * @param claimEntity the FISS {@link RdaFissClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjFissClaim)) {
+    if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjFissClaim) claimEntity);
+      return transformClaim((RdaFissClaim) claimEntity);
     }
   }
 
   /**
-   * @param claimGroup the {@link PreAdjFissClaim} to transform
+   * @param claimGroup the {@link RdaFissClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
-   *     PreAdjFissClaim}
+   *     RdaFissClaim}
    */
-  private static ClaimResponse transformClaim(PreAdjFissClaim claimGroup) {
+  private static ClaimResponse transformClaim(RdaFissClaim claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getDcn());
@@ -88,16 +88,16 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
-  private static Resource getContainedPatient(PreAdjFissClaim claimGroup) {
-    Optional<PreAdjFissPayer> optional =
+  private static Resource getContainedPatient(RdaFissClaim claimGroup) {
+    Optional<RdaFissPayer> optional =
         claimGroup.getPayers().stream()
-            .filter(p -> p.getPayerType() == PreAdjFissPayer.PayerType.BeneZ)
+            .filter(p -> p.getPayerType() == RdaFissPayer.PayerType.BeneZ)
             .findFirst();
 
     Patient patient;
 
     if (optional.isPresent()) {
-      PreAdjFissPayer benePayer = optional.get();
+      RdaFissPayer benePayer = optional.get();
 
       patient =
           getContainedPatient(
@@ -115,7 +115,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return patient;
   }
 
-  private static List<Extension> getExtension(PreAdjFissClaim claimGroup) {
+  private static List<Extension> getExtension(RdaFissClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
     extensions.add(
         new Extension(BBCodingSystems.FISS.CURR_STATUS)
@@ -136,7 +136,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return List.copyOf(extensions);
   }
 
-  private static List<Identifier> getIdentifier(PreAdjFissClaim claimGroup) {
+  private static List<Identifier> getIdentifier(RdaFissClaim claimGroup) {
     return List.of(
         new Identifier()
             .setType(
