@@ -177,8 +177,13 @@ jobs:
         # Checks if there are any modified resources in the v2 endpoint responses
         # grep returns non-zero exit code when no matches are found, so only skip if the condition fails
         run: |
-          can_skip=$(if [[ $(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2) ]]; then echo "false"; else echo "true"; fi)
+          can_skip=$(if [[ $(git diff --name-only master... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2) ]]; then echo "false"; else echo "true"; fi)
           echo ::set-output name=skip::can_skip
+      - name: 'Set up Python'
+        if: steps.run_check.outputs.skip == 'false'
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8.10'
       - name: 'Set up JDK'
         if: steps.run_check.outputs.skip == 'false'
         uses: actions/setup-java@v1
@@ -193,10 +198,10 @@ jobs:
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'
         run: |
-          output=$(./validations.sh -r)
+          output=$(python ./validations.py -r)
           printf "$output\n"
-          echo ::set-output name=valid::$(if [[ $output == '0 resources'* ]]; then echo "true"; else echo "false"; fi)
-          echo ::set-output name=output::$([[ $output =~ [[:digit:]]+[[:space:]]resources[[:space:]]failed.* ]] && printf "${BASH_REMATCH[0]}")
+          echo ::set-output name=valid::$(if [[ $output == *'All resources validated'* ]]; then echo "true"; else echo "false"; fi)
+          echo ::set-output name=output::$([[ $output =~ (There[[:space:]]were[[:space:]][[:digit:]]+[[:space:]]invalid[[:space:]]resources[[:space:]]\([[:digit:]]+[[:space:]]total[[:space:]]errors\))* ]] && printf "${BASH_REMATCH[1]}")
       - name: 'Commenting on found issues'
         if: steps.run_check.outputs.skip == 'false' && steps.validate_fhir.outputs.valid == 'false'
         uses: actions/github-script@v6

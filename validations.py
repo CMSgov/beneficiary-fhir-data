@@ -47,10 +47,17 @@ def validate_resource(white_list, file_path):
     file_filters = get_file_filter(white_list, file_path)
     java_call = subprocess.run(
         ['java', '-jar', 'validator_cli.jar', file_path, '-version', '4.0'],
-        stdout=subprocess.PIPE)
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
     output = java_call.stdout.decode('utf-8')
-    if output == '' and java_call.returncode != 0:
-        print('Validation of \'{}\' failed, but no output was generated.'.format(file_path))
+    error_output = java_call.stderr.decode('utf-8')
+    if java_call.returncode != 0:
+        if output == '':
+            print('Validation of \'{}\' failed, but no output was generated.'.format(file_path))
+        elif error_output != '':
+            print(error_output)
+            print('There was an issue processing the request.')
+            exit(1)
     output_lines = output.split('\n')
     errors = []
 
@@ -74,7 +81,8 @@ def validate_resource(white_list, file_path):
 def validate_resources(white_list, recently_changed):
     files = get_fhir_resource_files(recently_changed)
     files.sort()
-    print('Validating {} resources...'.format(len(files)))
+    file_count = len(files)
+    print('Validating {} resources (This should take about {} minutes)...'.format(file_count, file_count))
     invalid_resources = {}
     for file_path in files:
         errors = validate_resource(white_list, file_path)
@@ -99,6 +107,7 @@ def main():
             print(f'  - {file_name}')
             for error in invalid_resources[file_name]:
                 print(f'    {error}')
+        exit(1)
     else:
         print('All resources validated.')
 
