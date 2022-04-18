@@ -14,6 +14,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -64,6 +65,16 @@ public class SpringConfiguration {
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
+  /**
+   * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
+   * that is used for integration testing. When this property is set to the string 'true', this fake
+   * drug code will be appended to the drug code lookup map to avoid test failures that result from
+   * unexpected changes to the external drug code file in {@link
+   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}. This property defaults to false and
+   * should only be set to true when the server is under test in a local environment.
+   */
+  public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+
   public static final int TRANSACTION_TIMEOUT = 30;
 
   /**
@@ -459,5 +470,23 @@ public class SpringConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
+  }
+
+  /**
+   * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
+   * drug codes.
+   *
+   * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a fake
+   *     drug code for testing purposes.
+   * @return the {@link FdaDrugCodeDisplayLookup} for the application.
+   */
+  @Bean
+  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
+      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeDrugCode) {
+    if (includeFakeDrugCode) {
+      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    } else {
+      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    }
   }
 }

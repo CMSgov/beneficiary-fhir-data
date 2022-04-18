@@ -12,6 +12,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -76,7 +77,11 @@ public class SNFClaimTransformerV2Test {
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        SNFClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+        SNFClaimTransformerV2.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1410,7 +1415,11 @@ public class SNFClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        SNFClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
+        SNFClaimTransformerV2.transform(
+            new MetricRegistry(),
+            generateClaim(),
+            Optional.of(false),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

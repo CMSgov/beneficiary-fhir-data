@@ -173,6 +173,10 @@ else
 	visualVmArgs=""
 fi
 
+# For testing purposes, we start the server with the property that causes a fake drug code to be available which
+# makes the ITs more stable.
+includeFakeDrugCode="true"
+
 # To enable JVM debugging, uncomment and add this line to the server start command below.
 #	"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 
@@ -193,6 +197,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
+	"-DbfdServer.include.fake.drug.code=${includeFakeDrugCode}" \
 	>"${serverLog}" 2>&1 \
 	&
 
