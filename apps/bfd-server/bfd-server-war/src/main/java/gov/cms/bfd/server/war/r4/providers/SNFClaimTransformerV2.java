@@ -15,6 +15,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -79,7 +80,7 @@ public class SNFClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.SNF,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -150,7 +151,9 @@ public class SNFClaimTransformerV2 {
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
+        eob,
+        CcwCodebookVariable.CLM_UTLZTN_DAY_CNT,
+        BigDecimal.valueOf(claimGroup.getUtilizationDayCount()));
 
     // This is messy but appears to be specific to SNF.  Maybe revisit and clean in the future
     // NCH_QLFYD_STAY_FROM_DT => ExplanationOfBenefit.supportingInfo
@@ -209,11 +212,11 @@ public class SNFClaimTransformerV2 {
     // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT   => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addCommonGroupInpatientSNF(
         eob,
-        claimGroup.getCoinsuranceDayCount(),
-        claimGroup.getNonUtilizationDayCount(),
+        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
+        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        claimGroup.getBloodPintsFurnishedQty(),
+        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -304,7 +307,7 @@ public class SNFClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
@@ -326,7 +329,10 @@ public class SNFClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getNationalDrugCodeQuantity(),
+          line.getNationalDrugCodeQuantity().isPresent()
+              ? Optional.of(
+                  BigDecimal.valueOf(line.getNationalDrugCodeQuantity().get().longValue()))
+              : Optional.empty(),
           line.getNationalDrugCodeQualifierCode());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
