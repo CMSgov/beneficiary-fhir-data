@@ -22,6 +22,7 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -85,6 +86,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   private MetricRegistry metricRegistry;
   private R4EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
+  private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -108,6 +110,12 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
+  }
+
+  /** @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use */
+  @Inject
+  public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
   /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
@@ -182,7 +190,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
         eobIdType
             .get()
             .getTransformer()
-            .transform(metricRegistry, claimEntity, Optional.of(includeTaxNumbers));
+            .transform(
+                metricRegistry, claimEntity, Optional.of(includeTaxNumbers), drugCodeDisplayLookup);
     return eob;
   }
 
@@ -280,7 +289,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.CARRIER,
               findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.DME)) {
@@ -288,7 +298,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
@@ -296,7 +307,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.HHA,
               findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
@@ -304,7 +316,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.HOSPICE,
               findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
@@ -313,7 +326,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.INPATIENT,
               findClaimTypeByPatient(
                   ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
@@ -322,7 +336,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.OUTPATIENT,
               findClaimTypeByPatient(
                   ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.PDE)) {
@@ -330,7 +345,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.PDE,
               findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.SNF)) {
@@ -338,7 +354,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.SNF,
               findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup));
     }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
@@ -471,9 +488,16 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    */
   @Trace
   private List<ExplanationOfBenefit> transformToEobs(
-      ClaimTypeV2 claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
+      ClaimTypeV2 claimType,
+      List<?> claims,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     return claims.stream()
-        .map(c -> claimType.getTransformer().transform(metricRegistry, c, includeTaxNumbers))
+        .map(
+            c ->
+                claimType
+                    .getTransformer()
+                    .transform(metricRegistry, c, includeTaxNumbers, drugCodeDisplayLookup))
         .collect(Collectors.toList());
   }
 

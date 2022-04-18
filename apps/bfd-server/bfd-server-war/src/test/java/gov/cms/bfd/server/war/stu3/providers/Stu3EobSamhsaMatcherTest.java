@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.Arrays;
@@ -127,7 +128,10 @@ public final class Stu3EobSamhsaMatcherTest {
                     else if (r instanceof MedicareBeneficiaryIdHistory) return null;
 
                     return TransformerUtils.transformRifRecordToEob(
-                        new MetricRegistry(), r, Optional.empty());
+                        new MetricRegistry(),
+                        r,
+                        Optional.empty(),
+                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -803,7 +807,10 @@ public final class Stu3EobSamhsaMatcherTest {
               .get();
       ExplanationOfBenefit sampleEobForClaimType =
           TransformerUtils.transformRifRecordToEob(
-              new MetricRegistry(), sampleRifRecordForClaimType, Optional.empty());
+              new MetricRegistry(),
+              sampleRifRecordForClaimType,
+              Optional.empty(),
+              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
 
       return sampleEobForClaimType;
     }
