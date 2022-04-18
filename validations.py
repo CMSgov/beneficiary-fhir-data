@@ -9,7 +9,11 @@ import yaml
 def get_fhir_resource_files(recently_changed):
     target_directory = 'apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2'
     if recently_changed is True:
-        return os.popen(f'git diff --name-only master... | grep {target_directory} | sort | uniq')
+        git_call = subprocess.run(['git', 'diff', '--name-only', 'master...'], check=True, capture_output=True)
+        grep_call = subprocess.run(['grep', target_directory], input=git_call.stdout, capture_output=True)
+        unique_call = subprocess.run(['uniq'], input=grep_call.stdout, capture_output=True)
+        output = unique_call.stdout.decode('utf-8')
+        return output.strip().split('\n')
     else:
         return glob.glob(f'{target_directory}/*.json')
 
@@ -41,9 +45,12 @@ def get_file_filter(white_list, file_path):
 
 def validate_resource(white_list, file_path):
     file_filters = get_file_filter(white_list, file_path)
-    output = subprocess.run(
-        ['bash', 'mock_validator.sh', file_path, '-version 4.0'],
-        stdout=subprocess.PIPE).stdout.decode('utf-8')
+    java_call = subprocess.run(
+        ['java', '-jar', 'validator_cli.jar', file_path, '-version', '4.0'],
+        stdout=subprocess.PIPE)
+    output = java_call.stdout.decode('utf-8')
+    if output == '' and java_call.returncode != 0:
+        print('Validation of \'{}\' failed, but no output was generated.'.format(file_path))
     output_lines = output.split('\n')
     errors = []
 
@@ -67,6 +74,7 @@ def validate_resource(white_list, file_path):
 def validate_resources(white_list, recently_changed):
     files = get_fhir_resource_files(recently_changed)
     files.sort()
+    print('Validating {} resources...'.format(len(files)))
     invalid_resources = {}
     for file_path in files:
         errors = validate_resource(white_list, file_path)
@@ -91,6 +99,8 @@ def main():
             print(f'  - {file_name}')
             for error in invalid_resources[file_name]:
                 print(f'    {error}')
+    else:
+        print('All resources validated.')
 
 
 if __name__ == "__main__":
