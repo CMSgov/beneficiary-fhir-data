@@ -74,7 +74,7 @@ public enum StaticRifResource {
   SAMPLE_A_MULTIPLE_ROWS_SAME_BENE(
       resourceUrl("rif-static-samples/sample-a-multiple-entries-same-bene.txt"),
       RifFileType.BENEFICIARY,
-      5),
+      6),
 
   SAMPLE_U_BENES(
       resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),

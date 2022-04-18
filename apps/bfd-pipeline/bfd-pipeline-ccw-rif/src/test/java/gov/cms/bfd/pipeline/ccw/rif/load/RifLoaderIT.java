@@ -102,8 +102,16 @@ public final class RifLoaderIT {
    */
   @Test
   public void multipleReferenceYearsInSingleFileForSameBeneExpectBeneMonthlyPopulated() {
+    // load the file so it exists
     loadSample(
-        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()));
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+
+    // Set the batch to 10 so all 5 records are in the same batch
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(10);
+
+    loadSample(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()),
+        options);
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
     // Validate bene monthly
@@ -113,17 +121,17 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 5 records
-      // loaded (5x12)
-      assertEquals(60, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
+      // loaded (6x12)
+      assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       // Checks every month in the beneficiary monthly table for each of the years loaded
       assertBeneficiaryMonthly(beneficiaryFromDb, 1990);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2000);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2001);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2003);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2019);
-      // Set the batch to 10 so all 5 records are in the same batch
-      LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(10);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2022);
+
       // Validate HICN and MBI
       String expectedMbiHash =
           RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
@@ -149,8 +157,15 @@ public final class RifLoaderIT {
   @Test
   public void
       multipleReferenceYearsInSingleFileForSameBeneInMultipleBatchesExpectBeneMonthlyPopulated() {
+    // load the file initially so it exists
     loadSample(
-        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()));
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+
+    // Set the batch to 2 so this is split into multiple batches
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(2);
+    loadSample(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()),
+        options);
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
     // Validate bene monthly
@@ -160,18 +175,17 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 5 records
-      // loaded (5x12)
-      assertEquals(60, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
+      // loaded (6x12)
+      assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       // Checks every month in the beneficiary monthly table for each of the years loaded
       assertBeneficiaryMonthly(beneficiaryFromDb, 1990);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2000);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2001);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2003);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2019);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2022);
 
-      // Set the batch to 10 so all 5 records are in the same batch
-      LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(10);
       // Validate HICN and MBI
       String expectedMbiHash =
           RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
@@ -1173,13 +1187,16 @@ public final class RifLoaderIT {
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
    * @param sampleResources the {@link StaticRifResourceGroup} to load
+   * @param loadAppOptions the load app options
    */
-  private void loadSample(List<StaticRifResource> sampleResources) {
+  private void loadSample(List<StaticRifResource> sampleResources, LoadAppOptions loadAppOptions) {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
-    int loadCount = loadSample(sampleResources.get(0).getResourceUrl().toString(), rifFilesEvent);
+    int loadCount =
+        loadSample(
+            sampleResources.get(0).getResourceUrl().toString(), loadAppOptions, rifFilesEvent);
 
     // Verify that the expected number of records were run successfully.
     assertEquals(
@@ -1189,16 +1206,12 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Runs {@link RifLoader} with the default options (see {@link
-   * CcwRifLoadTestUtils#getLoadOptions()}) against the specified {@link StaticRifResourceGroup}.
+   * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
-   * @param sampleName a human-friendly name that will be logged to identify the data load being
-   *     kicked off here
-   * @param rifFilesEvent the {@link RifFilesEvent} to load
-   * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
+   * @param sampleResources the {@link StaticRifResourceGroup} to load
    */
-  private int loadSample(String sampleName, RifFilesEvent rifFilesEvent) {
-    return loadSample(sampleName, CcwRifLoadTestUtils.getLoadOptions(), rifFilesEvent);
+  private void loadSample(List<StaticRifResource> sampleResources) {
+    loadSample(sampleResources, CcwRifLoadTestUtils.getLoadOptions());
   }
 
   /**
