@@ -106,7 +106,7 @@ public final class RifLoaderIT {
     loadSample(
         Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
 
-    // Set the batch to 10 so all 5 records are in the same batch
+    // Set the batch to 10 so all records are in the same batch
     LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(10);
 
     loadSample(
