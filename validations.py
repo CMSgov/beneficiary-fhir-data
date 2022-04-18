@@ -45,7 +45,7 @@ def get_file_filter(white_list, file_path):
 def validate_resource(white_list, file_path):
     file_filters = get_file_filter(white_list, file_path)
     java_call = subprocess.run(
-        ['java', '-Xmx3G', '-Xms2G', '-jar', 'validator_cli.jar', '', file_path, '-version', '4.0'],
+        ['java', '-Xmx3G', '-Xms2G', '-jar', 'validator_cli.jar', file_path, '-version', '4.0'],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     output = java_call.stdout.decode('utf-8')
