@@ -304,6 +304,12 @@ public final class RifLayout {
 
     NUM,
 
-    TIMESTAMP;
+    TIMESTAMP,
+
+    BIGINT,
+
+    SMALLINT,
+
+    INTEGER;
   }
 }

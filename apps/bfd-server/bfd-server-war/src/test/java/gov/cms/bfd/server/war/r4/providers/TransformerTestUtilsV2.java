@@ -81,11 +81,10 @@ public final class TransformerTestUtilsV2 {
 
     assertEquals(TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
-    if (claimType.equals(ClaimTypeV2.PDE)) {
-      assertHasIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId), eob.getIdentifier());
-    } else {
-      assertHasIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId), eob.getIdentifier());
-    }
+    assertHasIdentifier(
+        claimType.equals(ClaimTypeV2.PDE) ? CcwCodebookVariable.PDE_ID : CcwCodebookVariable.CLM_ID,
+        String.valueOf(claimId),
+        eob.getIdentifier());
 
     assertIdentifierExists(
         TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID,
