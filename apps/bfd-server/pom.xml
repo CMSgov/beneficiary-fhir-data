@@ -17,6 +17,7 @@
 
 	<properties>
 		<hapi-fhir.version>5.7.2</hapi-fhir.version>
+		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
 
 	<modules>

@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -77,26 +77,25 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claimEntity the MCS {@link PreAdjMcsClaim} to transform
+   * @param claimEntity the MCS {@link RdaMcsClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjMcsClaim)) {
+    if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjMcsClaim) claimEntity);
+      return transformClaim((RdaMcsClaim) claimEntity);
     }
   }
 
   /**
-   * @param claimGroup the {@link PreAdjMcsClaim} to transform
-   * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
-   *     PreAdjMcsClaim}
+   * @param claimGroup the {@link RdaMcsClaim} to transform
+   * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link RdaMcsClaim}
    */
-  private static ClaimResponse transformClaim(PreAdjMcsClaim claimGroup) {
+  private static ClaimResponse transformClaim(RdaMcsClaim claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -117,7 +116,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
-  private static ClaimResponse.ClaimResponseStatus getStatus(PreAdjMcsClaim claimGroup) {
+  private static ClaimResponse.ClaimResponseStatus getStatus(RdaMcsClaim claimGroup) {
     ClaimResponse.ClaimResponseStatus status;
 
     if (claimGroup.getIdrStatusCode() == null) {
@@ -133,7 +132,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return status;
   }
 
-  private static ClaimResponse.RemittanceOutcome getOutcome(PreAdjMcsClaim claimGroup) {
+  private static ClaimResponse.RemittanceOutcome getOutcome(RdaMcsClaim claimGroup) {
     ClaimResponse.RemittanceOutcome outcome;
 
     if (claimGroup.getIdrStatusCode() == null) {
@@ -148,7 +147,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return outcome;
   }
 
-  private static Resource getContainedPatient(PreAdjMcsClaim claimGroup) {
+  private static Resource getContainedPatient(RdaMcsClaim claimGroup) {
     PatientInfo patientInfo =
         new PatientInfo(
             ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
@@ -160,7 +159,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
 
-  private static List<Extension> getExtension(PreAdjMcsClaim claimGroup) {
+  private static List<Extension> getExtension(RdaMcsClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
 
     if (claimGroup.getIdrStatusCode() != null) {
@@ -186,7 +185,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return List.copyOf(extensions);
   }
 
-  private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
+  private static List<Identifier> getIdentifier(RdaMcsClaim claimGroup) {
     return List.of(
         new Identifier()
             .setType(

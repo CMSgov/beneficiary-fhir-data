@@ -3,15 +3,14 @@ package gov.cms.bfd.sharedutils.database;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/** Utility class for database functions */
+/** Utility class for database functions. */
 public final class DatabaseUtils {
 
-  private DatabaseUtils() {
-    // No construction. Utility class only.
-  }
+  /** Private constructor to prevent instantiation of utility class. */
+  private DatabaseUtils() {}
 
   /**
-   * Returns true if the connection is to an HSQL database @param connection the connection
+   * Returns true if the connection is to an HSQL database @param connection the connection.
    *
    * @param connection the connection
    * @return if the connection is to an HSQL database
@@ -22,7 +21,7 @@ public final class DatabaseUtils {
   }
 
   /**
-   * Returns true if the connection is to a Postgres database @param connection the connection
+   * Returns true if the connection is to a Postgres database @param connection the connection.
    *
    * @param connection the connection
    * @return if the connection is to a Postgres database
@@ -33,7 +32,7 @@ public final class DatabaseUtils {
   }
 
   /**
-   * Returns the vendor name for the connection @param connection the connection
+   * Returns the vendor name for the connection @param connection the connection.
    *
    * @param connection the connection
    * @return the vendor name for the connection
