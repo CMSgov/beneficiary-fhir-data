@@ -20,6 +20,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -57,6 +58,14 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
+  /**
+   * Minimum amount of idle time before a dropped connection is considered to be normal behavior by
+   * the RDA API server and thus not requiring an ERROR log entry.
+   */
+  private static final long MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP =
+      Duration.ofSeconds(2).toMillis();
+
+  private final Clock clock;
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
@@ -81,6 +90,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       String claimType,
       Optional<Long> startingSequenceNumber) {
     this(
+        Clock.systemUTC(),
         config.createChannel(),
         caller,
         config::createCallOptions,
@@ -101,12 +111,14 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    */
   @VisibleForTesting
   GrpcRdaSource(
+      Clock clock,
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
+    this.clock = clock;
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
     this.callOptionsFactory = callOptionsFactory;
@@ -131,6 +143,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     boolean interrupted = false;
     Exception error = null;
     int processed = 0;
+    long lastProcessedTime = clock.millis();
     try {
       setUptimeToRunning();
       final long startingSequenceNumber = getStartingSequenceNumber(sink);
@@ -156,11 +169,19 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         if (batch.size() > 0) {
           processed += submitBatchToSink(apiVersion, sink, batch);
         }
+        lastProcessedTime = clock.millis();
       } catch (GrpcResponseStream.StreamInterruptedException ex) {
         // If our thread is interrupted we cancel the stream so the server knows we're done
         // and then shut down normally.
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
+      } catch (GrpcResponseStream.DroppedConnectionException ex) {
+        if (idleTimeForExpectedServerConnectionDropHasElapsed(lastProcessedTime)) {
+          LOGGER.info(
+              "RDA API server dropped connection during idle time: message={}", ex.getMessage());
+        } else {
+          throw ex;
+        }
       }
       sink.shutdown(Duration.ofMinutes(5));
       processed += sink.getProcessedCount();
@@ -186,6 +207,19 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     }
     metrics.successes.mark();
     return processed;
+  }
+
+  /**
+   * The RDA API server drops open connections abruptly when it has no data to transmit for some
+   * period of time. These closures are not clean at the protocol level so they appear as errors to
+   * gRPC but we don't want to trigger alerts when they happen since they are non unexpected. This
+   * method determines if we have been idle long enough that such a drop is possible.
+   *
+   * @param lastProcessedTime time in millis that we finished processing the most recent message
+   * @return true if the idle time is long enough that the connection drop is possible
+   */
+  private boolean idleTimeForExpectedServerConnectionDropHasElapsed(long lastProcessedTime) {
+    return clock.millis() - lastProcessedTime < MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP;
   }
 
   /**

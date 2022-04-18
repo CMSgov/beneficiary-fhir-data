@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ public class GrpcRdaSourceTest {
   private static final Integer CLAIM_5 = 105;
   public static final String VERSION = "version";
   private MetricRegistry appMetrics;
+  @Mock private Clock clock;
   @Mock private GrpcStreamCaller<Integer> caller;
   @Mock private ManagedChannel channel;
   @Mock private RdaSink<Integer, Integer> sink;
@@ -55,10 +57,17 @@ public class GrpcRdaSourceTest {
     source =
         spy(
             new GrpcRdaSource<>(
-                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.empty()));
     doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
     doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
+    doReturn(1000L).when(clock).millis();
   }
 
   @Test
@@ -105,7 +114,13 @@ public class GrpcRdaSourceTest {
     source =
         spy(
             new GrpcRdaSource<>(
-                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.of(18L)));
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.of(18L)));
     doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
     doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
 
@@ -170,7 +185,13 @@ public class GrpcRdaSourceTest {
     source =
         spy(
             new GrpcRdaSource<>(
-                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.empty()));
 
     try {
       source.retrieveAndProcessObjects(2, sink);

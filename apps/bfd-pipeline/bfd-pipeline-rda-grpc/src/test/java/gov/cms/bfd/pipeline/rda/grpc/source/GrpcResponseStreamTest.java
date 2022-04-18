@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
 import io.grpc.ClientCall;
 import io.grpc.Status;
@@ -50,7 +51,7 @@ public class GrpcResponseStreamTest {
   }
 
   @Test
-  public void hasNextWrapsInterrupts() {
+  public void hasNextWrapsInterrupts() throws DroppedConnectionException {
     StatusRuntimeException status =
         Status.CANCELLED.withCause(new InterruptedException()).asRuntimeException();
     doThrow(status).when(iterator).hasNext();
@@ -63,7 +64,7 @@ public class GrpcResponseStreamTest {
   }
 
   @Test
-  public void nextWrapsInterrupts() {
+  public void nextWrapsInterrupts() throws DroppedConnectionException {
     StatusRuntimeException status =
         Status.CANCELLED.withCause(new InterruptedException()).asRuntimeException();
     doThrow(status).when(iterator).next();
