@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -36,7 +37,11 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        PartDEventTransformer.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertMatches(claim, eob);
   }
 
@@ -86,7 +91,11 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        PartDEventTransformer.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -142,10 +151,12 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        TransformerUtils.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 
@@ -286,8 +297,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(),
-          "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE");
+          claim.getNationalDrugCode(), FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

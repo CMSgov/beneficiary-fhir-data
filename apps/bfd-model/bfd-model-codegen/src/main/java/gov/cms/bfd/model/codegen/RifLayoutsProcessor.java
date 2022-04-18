@@ -622,6 +622,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return lineEntityFinal;
   }
 
+  /**
+   * Generate beneficiary monthly entity.
+   *
+   * @param mappingSpec the mapping spec
+   * @return the type spec generated
+   * @throws IOException the io exception
+   */
   private TypeSpec generateBeneficiaryMonthlyEntity(MappingSpec mappingSpec) throws IOException {
 
     // Create the Entity class.
@@ -1696,8 +1703,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Used in {@link #calculateCsvColumns(List<FieldSpec>, MappingSpec)} and generates the
-   * field-to-CSV-value header.
+   * Generates the field-to-CSV-value header.
    *
    * @param fields {@link List<FieldSpec>} to process
    * @param mappingSpec the {@link MappingSpec} of the field to generate conversion code for
@@ -1858,10 +1864,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * @param List<String> the {@link RifField} to create an additional Annotated database field for
+   * Creates details for additional annotated database fields.
+   *
+   * @param additionalDatabaseFields the {@link RifField} to create an additional Annotated database
+   *     field for
    * @return an ordered {@link List} of {@link RifField}s representing the additional fields that
    *     need to be stored to the database via JPA
-   * @throws MalformedURLException
+   * @throws MalformedURLException if there is an issue creating the field url
    */
   private static List<RifField> createDetailsForAdditionalDatabaseFields(
       List<String> additionalDatabaseFields) throws MalformedURLException {
@@ -2011,7 +2020,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * @param rifField <code>true</code> if the property is an {@link Optional} one, <code>false
+   * @param optional <code>true</code> if the property is an {@link Optional} one, <code>false
    *     </code> otherwise
    * @param entityField the {@link FieldSpec} for the field being wrapped by the "setter"
    * @param entitySetter the "setter" method to generate the statement in
@@ -2085,8 +2094,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   /**
    * Reports the specified log message.
    *
-   * @param associatedElement the Java AST {@link Element} that the log entry should be associated
-   *     with, or <code>null</code>
    * @param messageFormat the log message format {@link String}
    * @param messageArguments the log message format arguments
    */
@@ -2118,7 +2125,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Creates the fields for the BeneficiaryMonthly class in the model rif
+   * Creates the fields for the BeneficiaryMonthly class in the model rif.
    *
    * @param lineEntity helps build the entity {@link TypeSpec.Builder}
    * @param isId determines if the field is an id field
@@ -2159,10 +2166,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Creates the fields for the BeneficiaryMonthly annotations in the model rif
+   * Creates the fields for the BeneficiaryMonthly annotations in the model rif.
    *
    * @param isId determines if the field is an id field
    * @param rifField {@link RifField} to create
+   * @return the created annotation specs
    */
   private static List<AnnotationSpec> createBeneficiaryMonthlyAnnotations(
       boolean isId, RifField rifField) {
@@ -2220,7 +2228,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Selects the java field type
+   * Selects the java field type.
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
@@ -2273,7 +2281,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Selects the java property type
+   * Selects the java property type.
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
@@ -2282,6 +2290,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
    *     decimal point
+   * @return the java field type
    */
   private static TypeName selectJavaPropertyType(
       RifColumnType type,

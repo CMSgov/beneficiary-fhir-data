@@ -7,6 +7,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -21,39 +22,49 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformer {
+
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
    * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
    *     false</code>)
+   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
   static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object claim,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        transformClaim((DMEClaim) claim, includeTaxNumbers, drugCodeDisplayLookup);
 
     timer.stop();
     return eob;
   }
 
   /**
+   * @param claimGroup the {@DMEClaim } to use
    * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
    *     false</code>)
+   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      DMEClaim claimGroup,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -267,7 +278,8 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestTypeCode(),
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          claimLine.getNationalDrugCode(),
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

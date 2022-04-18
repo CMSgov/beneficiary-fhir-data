@@ -2,8 +2,8 @@ package gov.cms.bfd.pipeline.sharedutils;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
@@ -143,8 +143,8 @@ public final class PipelineTestUtils {
             Beneficiary.class,
             LoadedBatch.class,
             LoadedFile.class,
-            PreAdjFissClaim.class,
-            PreAdjFissProcCode.class,
+            RdaFissClaim.class,
+            RdaFissProcCode.class,
             SkippedRifRecord.class);
 
     try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection(); ) {
@@ -172,21 +172,13 @@ public final class PipelineTestUtils {
           throw new BadCodeMonkeyException(
               "Unable to determine table name for entity: " + entityType.getCanonicalName());
         }
-        String tableNameSpecifier;
-        if (entityTableAnnotation.get().name().startsWith("`")) {
-          tableNameSpecifier = entityTableAnnotation.get().name().replaceAll("`", "\"");
-        } else {
-          tableNameSpecifier = entityTableAnnotation.get().name();
-        }
+        String tableNameSpecifier = normalizeTableName(entityTableAnnotation.get().name());
 
         // Then, switch to the appropriate schema.
         if (entityTableAnnotation.get().schema() != null
             && !entityTableAnnotation.get().schema().isEmpty()) {
-          /*
-           * Note: This may need to be quoted on PostgreSQL. If so, since HSQL DB blows up if we
-           * quote them, this code may have to first check the DB platform. TBD.
-           */
-          String schemaNameSpecifier = entityTableAnnotation.get().schema().replaceAll("`", "");
+          String schemaNameSpecifier =
+              normalizeSchemaName(connection, entityTableAnnotation.get().schema());
           connection.setSchema(schemaNameSpecifier);
         } else {
           connection.setSchema(defaultSchemaName.get());
@@ -210,6 +202,50 @@ public final class PipelineTestUtils {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * For compatibility with HSQLDB and Postgresql, all schema names must have case preserved but any
+   * quotes in the name must be removed.
+   *
+   * @param schemaNameSpecifier name of a schema from a hibernate annotation
+   * @return value compatible with call to {@link Connection#setSchema(String)}
+   */
+  private String normalizeSchemaName(Connection connection, String schemaNameSpecifier)
+      throws SQLException {
+    String sql = schemaNameSpecifier.replaceAll("`", "");
+    if (isSchemaNameUppercaseRequired(connection)) {
+      sql = sql.toUpperCase();
+    }
+    return sql;
+  }
+
+  /**
+   * Table names that use mixed case use quotes and have their original case preserved but those
+   * without quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
+   *
+   * @param tableNameSpecifier name of a table from a hibernate annotation
+   * @return value compatible with call to {@link java.sql.Statement#execute(String)}
+   */
+  private String normalizeTableName(String tableNameSpecifier) {
+    if (tableNameSpecifier.startsWith("`")) {
+      tableNameSpecifier = tableNameSpecifier.replaceAll("`", "");
+    } else {
+      tableNameSpecifier = tableNameSpecifier.toUpperCase();
+    }
+    return tableNameSpecifier;
+  }
+
+  /**
+   * We're stuck in a painful situation where postgresql only recognizes the schema in its original
+   * case but HSQLDB only recognizes the schema in all uppercase.
+   *
+   * @param connection database connection used to make the decision
+   * @return true if the schema name should be converted to upper case
+   * @throws SQLException in case of failure
+   */
+  private boolean isSchemaNameUppercaseRequired(Connection connection) throws SQLException {
+    return DatabaseUtils.isHsqlConnection(connection);
   }
 
   /**

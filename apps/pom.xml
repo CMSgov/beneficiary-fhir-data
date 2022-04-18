@@ -88,6 +88,9 @@
 		<jackson.version>2.13.1</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
 		<newrelicAgent.version>7.5.0</newrelicAgent.version>
+		<checkstyle.version>10.1</checkstyle.version>
+		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
+
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -567,6 +570,21 @@ checkJavaFormat
 						<localCheckout>true</localCheckout>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<configuration>
+						<configLocation>checkstyle.xml</configLocation>
+					</configuration>
+					<version>${checkstyle.plugin.version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${checkstyle.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -652,8 +670,7 @@ checkJavaFormat
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<doclint>all</doclint>
-					<failOnWarnings>true</failOnWarnings>
+					<failOnWarnings>false</failOnWarnings>
 					<detectJavaApiLink>false</detectJavaApiLink>
 					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
 					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
@@ -666,6 +683,19 @@ checkJavaFormat
 						<id>attach-javadocs</id>
 						<goals>
 							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>verify</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>
