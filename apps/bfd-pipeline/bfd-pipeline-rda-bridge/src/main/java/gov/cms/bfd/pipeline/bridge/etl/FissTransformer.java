@@ -214,8 +214,9 @@ public class FissTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addDiagCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
-    for (int i = 1; i <= Fiss.MAX_DIAG_CODES; ++i) {
-      final int INDEX = i - 1;
+    for (int i = 0; i < Fiss.MAX_DIAG_CODES; ++i) {
+      // We can't use the loop index directly because value must be final in the lambda expression
+      final int INDEX = i;
 
       // HHA and Hospice do not include procedure codes
       data.get(Fiss.ICD_DGNS_CD.get(INDEX))
@@ -242,8 +243,9 @@ public class FissTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addProcCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
-    for (int i = 1; i <= Fiss.MAX_PROC_CODES; ++i) {
-      final int INDEX = i - 1;
+    for (int i = 0; i < Fiss.MAX_PROC_CODES; ++i) {
+      // We can't use the loop index directly because value must be final in the lambda expression
+      final int INDEX = i;
 
       // HHA and Hospice do not include procedure codes
       data.get(Fiss.ICD_PRCDR_CD.get(INDEX))

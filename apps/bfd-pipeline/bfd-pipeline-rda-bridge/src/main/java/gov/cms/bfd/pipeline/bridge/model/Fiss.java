@@ -43,13 +43,13 @@ public class Fiss {
    * The maximum number of diagnosis column names available for {@link ICD_DGNS_CD} and {@link
    * CLM_POA_IND_SW}. Used when looping over both sets of fields at the same time.
    */
-  public static final int MAX_DIAG_CODES = Math.max(ICD_DGNS_CD.size(), CLM_POA_IND_SW.size());
+  public static final int MAX_DIAG_CODES = Math.min(ICD_DGNS_CD.size(), CLM_POA_IND_SW.size());
 
   /**
    * The maximum number of procedure column names available for {@link ICD_DGNS_CD} and {@link
    * PRCDR_DT}. Used when looping over both sets of fields.
    */
-  public static final int MAX_PROC_CODES = Math.max(ICD_PRCDR_CD.size(), PRCDR_DT.size());
+  public static final int MAX_PROC_CODES = Math.min(ICD_PRCDR_CD.size(), PRCDR_DT.size());
 
   private Fiss() {}
 }

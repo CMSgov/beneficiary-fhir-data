@@ -191,8 +191,10 @@ public class McsTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
-    for (int i = 1; i <= Mcs.MAX_DIAGNOSIS_CODES; ++i) {
-      final int INDEX = i - 1;
+    for (int i = 0; i < Mcs.MAX_DIAGNOSIS_CODES; ++i) {
+      // We can't use the loop index directly because value must be final in the lambda expression
+      final int INDEX = i;
+
       data.get(Mcs.ICD_DGNS_CD.get(INDEX))
           .ifPresent(
               diagnosisCode ->
