@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
-import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -139,7 +138,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
-    ExplanationOfBenefit pdeEob =
+    /*     ExplanationOfBenefit pdeEob =
         CarrierClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
@@ -147,14 +146,17 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
 
-    String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();
+    String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString(); */
 
     // Load the claim types into the test data that will be run against each test
     return Stream.of(
-        arguments(inpatientClaimType, inpatientEob), arguments(outpatientClaimType, outpatientEob),
-        arguments(dmeClaimType, dmeEob), arguments(hhaClaimType, hhaEob),
-        arguments(hospiceClaimType, hospiceEob), arguments(snfClaimType, snfEob),
-        arguments(carrierClaimType, carrierEob), arguments(pdeClaimType, pdeEob));
+        arguments(inpatientClaimType, inpatientEob),
+        arguments(outpatientClaimType, outpatientEob),
+        arguments(dmeClaimType, dmeEob),
+        arguments(hhaClaimType, hhaEob),
+        arguments(hospiceClaimType, hospiceEob),
+        arguments(snfClaimType, snfEob),
+        arguments(carrierClaimType, carrierEob));
   }
 
   /**
