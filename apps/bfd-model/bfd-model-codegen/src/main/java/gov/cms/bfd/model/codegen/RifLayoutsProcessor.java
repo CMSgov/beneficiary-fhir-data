@@ -2235,12 +2235,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     this represents the total number of digits that can be stored
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
-   *     decimal point <<<<<<< HEAD
-   * @return the java field type =======
+   *     decimal point
    * @return a Java poet {@link TypeName} that will be applied to the entity column; the use of the
    *     {@link boolean} isColumnOptional determines if the type can be a primitive (i.e., long) or
-   *     in fact needs to be a Java class type (i.e., Long) >>>>>>>
-   *     0bcc2b4361e45956e92acb710ad4f0119500e77a
+   *     in fact needs to be a Java class type (i.e., Long)
    */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
