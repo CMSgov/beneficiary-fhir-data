@@ -27,6 +27,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -191,7 +192,11 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             .get()
             .getTransformer()
             .transform(
-                metricRegistry, claimEntity, Optional.of(includeTaxNumbers), drugCodeDisplayLookup);
+                new TransformerContext(
+                    metricRegistry,
+                    claimEntity,
+                    Optional.of(includeTaxNumbers),
+                    drugCodeDisplayLookup));
     return eob;
   }
 
@@ -497,7 +502,9 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             c ->
                 claimType
                     .getTransformer()
-                    .transform(metricRegistry, c, includeTaxNumbers, drugCodeDisplayLookup))
+                    .transform(
+                        new TransformerContext(
+                            metricRegistry, c, includeTaxNumbers, drugCodeDisplayLookup)))
         .collect(Collectors.toList());
   }
 

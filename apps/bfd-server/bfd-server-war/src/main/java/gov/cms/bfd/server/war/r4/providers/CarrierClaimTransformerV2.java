@@ -11,6 +11,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -28,33 +29,28 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 public class CarrierClaimTransformerV2 {
 
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link CarrierClaim} to transform
-   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     R4ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the {@link TransformerContext} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry,
-      Object claim,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .metricRegistry
             .timer(
                 MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(claim instanceof CarrierClaim)) {
+    if (!(transformerContext.claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     ExplanationOfBenefit eob =
-        transformClaim((CarrierClaim) claim, includeTaxNumbers, drugCodeDisplayLookup);
+        transformClaim(
+            (CarrierClaim) transformerContext.claim,
+            transformerContext.includeTaxNumbers,
+            transformerContext.drugCodeDisplayLookup);
 
     timer.stop();
     return eob;

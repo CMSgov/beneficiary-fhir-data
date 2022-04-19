@@ -12,6 +12,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -45,10 +46,11 @@ public final class SNFClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         SNFClaimTransformer.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                claim,
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
     assertMatches(claim, eob);
   }
 
