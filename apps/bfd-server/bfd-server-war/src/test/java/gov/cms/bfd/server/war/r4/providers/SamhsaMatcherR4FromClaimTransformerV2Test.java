@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -156,7 +157,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         arguments(hhaClaimType, hhaEob),
         arguments(hospiceClaimType, hospiceEob),
         arguments(snfClaimType, snfEob),
-        arguments(carrierClaimType, carrierEob));
+        arguments(carrierClaimType, carrierEob),
+        arguments(pdeClaimType, pdeEob));
   }
 
   /**
