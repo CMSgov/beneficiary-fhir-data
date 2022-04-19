@@ -11,6 +11,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.text.SimpleDateFormat;
@@ -77,7 +78,11 @@ public final class InpatientClaimTransformerV2Test {
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+        InpatientClaimTransformerV2.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -470,7 +475,9 @@ public final class InpatientClaimTransformerV2Test {
                     "Discharge Status")),
             // Code
             new Coding(
-                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd", "1", null));
+                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+                "51",
+                "Discharged/transferred to a Hospice – medical facility."));
 
     assertTrue(compare.equalsDeep(sic));
   }
@@ -891,13 +898,16 @@ public final class InpatientClaimTransformerV2Test {
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object
+    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // to the correct insurance
+    assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
 
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
     assertTrue(compare.equalsDeep(insurance));
@@ -1684,7 +1694,10 @@ public final class InpatientClaimTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         InpatientClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new MetricRegistry(),
+            generateClaim(),
+            Optional.of(false),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

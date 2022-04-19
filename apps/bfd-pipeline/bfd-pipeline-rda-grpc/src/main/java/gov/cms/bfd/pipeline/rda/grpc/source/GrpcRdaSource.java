@@ -6,9 +6,12 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -18,15 +21,19 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -46,6 +53,9 @@ import org.slf4j.LoggerFactory;
  */
 public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
+
+  /** Holds the underlying value of our uptime gauges. */
+  private static final NumericGauges GAUGES = new NumericGauges();
 
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
@@ -241,9 +251,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   private int submitBatchToSink(
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
-    LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
     final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
-    LOGGER.info(
+    LOGGER.debug(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,
         batch.size(),
@@ -271,6 +280,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final String inProcessServerName;
     /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /** Authorization token expiration date, in epoch seconds */
+    private final Long expirationDate;
     /** The token to pass to the RDA API server to authenticate the client. */
     @Nullable private final String authenticationToken;
 
@@ -304,9 +315,16 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         Preconditions.checkArgument(
             !Strings.isNullOrEmpty(inProcessServerName), "inProcessServerName is required");
       }
-      this.authenticationToken =
-          Strings.isNullOrEmpty(authenticationToken) ? null : authenticationToken;
+
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
+
+      if (!Strings.isNullOrEmpty(authenticationToken)) {
+        this.authenticationToken = authenticationToken;
+        this.expirationDate = parseJWTExpirationDate(this.authenticationToken);
+      } else {
+        this.authenticationToken = null;
+        this.expirationDate = null;
+      }
     }
 
     private ManagedChannel createChannel() {
@@ -333,6 +351,29 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     public CallOptions createCallOptions() {
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
+        /**
+         * The RDA API uses a JWT token for authentication, by design this is set to expire X days
+         * after being issued. This check will alert the team of a token that is close to expiring
+         * so we can coordinate having a new one issued by the RDA API team before authentication
+         * fails.
+         */
+        if (expirationDate != null) {
+          long daysToExpire =
+              Instant.now().until(Instant.ofEpochMilli(expirationDate * 1000), ChronoUnit.DAYS);
+
+          if (daysToExpire < 0) {
+            LOGGER.error("JWT is expired!");
+          } else if (daysToExpire < 31) {
+            String logMessage = String.format("JWT will expire in %d days", daysToExpire);
+
+            if (daysToExpire < 14) {
+              LOGGER.error(logMessage);
+            } else {
+              LOGGER.warn(logMessage);
+            }
+          }
+        }
+
         answer = answer.withCallCredentials(new BearerToken(authenticationToken));
       } else {
         LOGGER.warn("authenticationToken has not been set - calling server with no token");
@@ -363,6 +404,37 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private ManagedChannelBuilder<?> createInProcessChannelBuilder() {
       return InProcessChannelBuilder.forName(inProcessServerName);
     }
+
+    /**
+     * Parses the given auth token as a JWT, extracting the commonly used `exp` claim to get the
+     * token's expiration date.
+     *
+     * @param token The token to parse
+     * @return The expiration date of the token, in epoch seconds.
+     */
+    private Long parseJWTExpirationDate(String token) {
+      try {
+        String[] jwtBits = token.split("\\.");
+        String claimsString = new String(Base64.getDecoder().decode(jwtBits[1]));
+        JWTClaims claims =
+            new ObjectMapper()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .readValue(claimsString, JWTClaims.class);
+        if (claims.exp == null) throw new NullPointerException();
+        return claims.exp;
+      } catch (NullPointerException e) {
+        LOGGER.warn("Could not find expiration claim", e);
+      } catch (Exception e) {
+        LOGGER.warn("Could not parse Authorization token as JWT", e);
+      }
+
+      return null;
+    }
+  }
+
+  @Data
+  private static class JWTClaims {
+    private Long exp;
   }
 
   /**
@@ -396,7 +468,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final Gauge<?> uptime;
 
     /** Holds the value that is reported in the update gauge. */
-    private final AtomicInteger uptimeValue = new AtomicInteger();
+    private final AtomicLong uptimeValue;
 
     private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
@@ -406,7 +478,9 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
       batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
-      uptime = appMetrics.gauge(MetricRegistry.name(base, "uptime"), () -> uptimeValue::get);
+      final String uptimeGaugeName = MetricRegistry.name(base, "uptime");
+      uptime = GAUGES.getGaugeForName(appMetrics, uptimeGaugeName);
+      uptimeValue = GAUGES.getValueForName(uptimeGaugeName);
     }
   }
 }

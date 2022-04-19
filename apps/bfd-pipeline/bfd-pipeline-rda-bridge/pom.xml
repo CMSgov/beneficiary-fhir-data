@@ -72,6 +72,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- Needed for comparing JSON files to obtain the diff. See
                  https://github.com/flipkart-incubator/zjsonpatch for details. -->
             <groupId>com.flipkart.zjsonpatch</groupId>

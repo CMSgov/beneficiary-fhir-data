@@ -4,10 +4,10 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
-import gov.cms.bfd.model.rda.PreAdjFissPayer;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.RdaFissPayer;
+import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -57,25 +57,25 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claimEntity the FISS {@link PreAdjFissClaim} to transform
+   * @param claimEntity the FISS {@link RdaFissClaim} to transform
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
   static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjFissClaim)) {
+    if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjFissClaim) claimEntity);
+      return transformClaim((RdaFissClaim) claimEntity);
     }
   }
 
   /**
-   * @param claimGroup the {@link PreAdjFissClaim} to transform
-   * @return a FHIR {@link Claim} resource that represents the specified {@link PreAdjFissClaim}
+   * @param claimGroup the {@link RdaFissClaim} to transform
+   * @return a FHIR {@link Claim} resource that represents the specified {@link RdaFissClaim}
    */
-  private static Claim transformClaim(PreAdjFissClaim claimGroup) {
+  private static Claim transformClaim(RdaFissClaim claimGroup) {
     Claim claim = new Claim();
 
     boolean isIcd9 =
@@ -106,7 +106,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
-  private static List<Identifier> getIdentifier(PreAdjFissClaim claimGroup) {
+  private static List<Identifier> getIdentifier(RdaFissClaim claimGroup) {
     return Collections.singletonList(
         new Identifier()
             .setType(
@@ -119,7 +119,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             .setValue(claimGroup.getDcn()));
   }
 
-  private static List<Extension> getExtension(PreAdjFissClaim claimGroup) {
+  private static List<Extension> getExtension(RdaFissClaim claimGroup) {
     return claimGroup.getServTypeCd() == null
         ? null
         : List.of(
@@ -140,7 +140,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   }
 
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
-      PreAdjFissClaim claimGroup) {
+      RdaFissClaim claimGroup) {
     return claimGroup.getFreqCd() == null
         ? null
         : List.of(
@@ -157,10 +157,10 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                 .setSequence(1));
   }
 
-  private static Period getBillablePeriod(PreAdjFissClaim claimGroup) {
+  private static Period getBillablePeriod(RdaFissClaim claimGroup) {
     return new Period()
-        .setStart(localDateToDate(claimGroup.getStmtCovToDate()), TemporalPrecisionEnum.DAY)
-        .setEnd(localDateToDate(claimGroup.getStmtCovFromDate()), TemporalPrecisionEnum.DAY);
+        .setStart(localDateToDate(claimGroup.getStmtCovFromDate()), TemporalPrecisionEnum.DAY)
+        .setEnd(localDateToDate(claimGroup.getStmtCovToDate()), TemporalPrecisionEnum.DAY);
   }
 
   private static CodeableConcept getPriority() {
@@ -171,7 +171,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             ProcessPriority.NORMAL.getDisplay()));
   }
 
-  private static Money getTotal(PreAdjFissClaim claimGroup) {
+  private static Money getTotal(RdaFissClaim claimGroup) {
     Money total;
 
     if (claimGroup.getTotalChargeAmount() != null) {
@@ -186,16 +186,16 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     return total;
   }
 
-  private static Resource getContainedPatient(PreAdjFissClaim claimGroup) {
-    Optional<PreAdjFissPayer> optional =
+  private static Resource getContainedPatient(RdaFissClaim claimGroup) {
+    Optional<RdaFissPayer> optional =
         claimGroup.getPayers().stream()
-            .filter(p -> p.getPayerType() == PreAdjFissPayer.PayerType.BeneZ)
+            .filter(p -> p.getPayerType() == RdaFissPayer.PayerType.BeneZ)
             .findFirst();
 
     Patient patient;
 
     if (optional.isPresent()) {
-      PreAdjFissPayer benePayer = optional.get();
+      RdaFissPayer benePayer = optional.get();
 
       patient =
           getContainedPatient(
@@ -216,7 +216,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     return patient;
   }
 
-  private static Resource getContainedProvider(PreAdjFissClaim claimGroup) {
+  private static Resource getContainedProvider(RdaFissClaim claimGroup) {
     Organization organization = new Organization();
 
     if (claimGroup.getMedaProv_6() != null) {
@@ -269,7 +269,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     return organization;
   }
 
-  private static Reference getFacility(PreAdjFissClaim claimGroup) {
+  private static Reference getFacility(RdaFissClaim claimGroup) {
     if (claimGroup.getLobCd() != null || claimGroup.getNpiNumber() != null) {
       Reference reference = new Reference();
 
@@ -288,10 +288,10 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   }
 
   private static List<Claim.DiagnosisComponent> getDiagnosis(
-      PreAdjFissClaim claimGroup, boolean isIcd9) {
+      RdaFissClaim claimGroup, boolean isIcd9) {
     final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10;
 
-    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<PreAdjFissDiagnosisCode>of())
+    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaFissDiagnosisCode>of())
         .stream()
         .map(
             diagnosisCode -> {
@@ -333,11 +333,10 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   }
 
   private static List<Claim.ProcedureComponent> getProcedure(
-      PreAdjFissClaim claimGroup, boolean isIcd9) {
+      RdaFissClaim claimGroup, boolean isIcd9) {
     final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10;
 
-    return ObjectUtils.defaultIfNull(claimGroup.getProcCodes(), List.<PreAdjFissProcCode>of())
-        .stream()
+    return ObjectUtils.defaultIfNull(claimGroup.getProcCodes(), List.<RdaFissProcCode>of()).stream()
         .map(
             procCode ->
                 new Claim.ProcedureComponent()
@@ -354,8 +353,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
         .collect(Collectors.toList());
   }
 
-  private static List<Claim.InsuranceComponent> getInsurance(PreAdjFissClaim claimGroup) {
-    return ObjectUtils.defaultIfNull(claimGroup.getPayers(), List.<PreAdjFissPayer>of()).stream()
+  private static List<Claim.InsuranceComponent> getInsurance(RdaFissClaim claimGroup) {
+    return ObjectUtils.defaultIfNull(claimGroup.getPayers(), List.<RdaFissPayer>of()).stream()
         .map(
             payer -> {
               Claim.InsuranceComponent component =

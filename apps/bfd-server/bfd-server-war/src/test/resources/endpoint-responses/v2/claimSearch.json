@@ -123,7 +123,7 @@
           "reference": "#patient"
         },
         "billablePeriod": {
-          "start": "1970-07-20",
+          "start": "1970-07-10",
           "end": "1970-07-20"
         },
         "created": "2021-12-09T00:19:25+00:00",
@@ -420,7 +420,7 @@
           "reference": "#patient"
         },
         "billablePeriod": {
-          "start": "1970-07-20",
+          "start": "1970-07-18",
           "end": "1970-07-20"
         },
         "created": "2022-01-27T18:26:54+00:00",

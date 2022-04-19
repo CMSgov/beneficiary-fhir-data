@@ -18,6 +18,7 @@ import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.util.AttributionBuilder;
 import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
+import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.FileNotFoundException;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -277,18 +279,37 @@ public class RDABridge {
 
         AbstractTransformer transformer = createTransformer(sourceType, mbiMap);
 
+        WrappedMessage wrappedMessage = new WrappedMessage();
+
         while (parser.hasData()) {
-          MessageOrBuilder message =
-              transformer.transform(sequenceCounter, parser.read(), mbiSampler, sampleId);
+          // When new claims are parsed, the previous claim is returned and the new one is stored in
+          // wrappedMessage
+          Parser.Data<String> data = parser.read();
 
-          if (message != null) {
-            sink.write(message);
+          try {
+            Optional<MessageOrBuilder> message =
+                transformer.transform(wrappedMessage, sequenceCounter, data, mbiSampler, sampleId);
+
+            // If a message was returned, it has no more line items, and can be written.
+            if (message.isPresent()) {
+              sink.write(message.get());
+              ++claimsWritten;
+            }
+          } catch (IllegalStateException e) {
+            throw new IllegalStateException("Failed to parse entry #" + data.getEntryNumber());
           }
+        }
 
+        // The last claim to be processed wouldn't get returned, so print it from storage.
+        if (wrappedMessage.getMessage() != null) {
+          sink.write(wrappedMessage.getMessage());
           ++claimsWritten;
         }
 
         log.info("Wrote {} {} claims", claimsWritten, sourceName);
+      } catch (IllegalStateException e) {
+        throw new IllegalStateException(
+            "Failed to parse file: " + file.getFileName().toString(), e);
       }
     } else {
       throw new IllegalArgumentException("No support for parsing files of type '" + fileType + "'");

@@ -10,6 +10,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -72,8 +73,13 @@ public final class DMEClaimTransformerV2Test {
   @BeforeEach
   public void before() {
     claim = generateClaim();
+    DMEClaimTransformerV2 DMEClaimTransformerV2 = new DMEClaimTransformerV2();
     ExplanationOfBenefit genEob =
-        DMEClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+        DMEClaimTransformerV2.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -291,13 +297,16 @@ public final class DMEClaimTransformerV2Test {
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object
+    // Only one insurance object if there is more than we need to fix the focal set to point to the
+    // correct insurance
+    assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
 
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
     assertTrue(compare.equalsDeep(insurance));
@@ -312,7 +321,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void shouldHaveLineItemExtension() {
     assertNotNull(eob.getItemFirstRep().getExtension());
-    assertEquals(10, eob.getItemFirstRep().getExtension().size());
+    assertEquals(9, eob.getItemFirstRep().getExtension().size());
 
     Extension ex1 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -518,8 +527,8 @@ public final class DMEClaimTransformerV2Test {
             "http://hl7.org/fhir/sid/ndc",
             new Coding(
                 "http://hl7.org/fhir/sid/ndc",
-                "500904610",
-                "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"));
+                "000000000",
+                FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY));
 
     assertTrue(compare.equalsDeep(ex));
   }
@@ -909,7 +918,7 @@ public final class DMEClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt",
                                 "Line Allowed Charge Amount"))))
             .setAmount(
-                new Money().setValue(130.45).setCurrency(TransformerConstants.CODED_MONEY_USD));
+                new Money().setValue(129.45).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }
@@ -1162,7 +1171,11 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
+        DMEClaimTransformerV2.transform(
+            new MetricRegistry(),
+            generateClaim(),
+            Optional.of(false),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
