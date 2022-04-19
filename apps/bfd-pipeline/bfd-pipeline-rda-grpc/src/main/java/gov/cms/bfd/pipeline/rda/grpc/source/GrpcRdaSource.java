@@ -58,18 +58,14 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  /**
-   * Minimum amount of idle time before a dropped connection is considered to be normal behavior by
-   * the RDA API server and thus not requiring an ERROR log entry.
-   */
-  @VisibleForTesting
-  static final long MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP = Duration.ofMinutes(2).toMillis();
-
   private final Clock clock;
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
   private final Supplier<CallOptions> callOptionsFactory;
+  /** Expected time before RDA API server drops its connection when it has nothing to send. */
+  private final long minIdleMillisBeforeConnectionDrop;
+
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -96,7 +92,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         config::createCallOptions,
         appMetrics,
         claimType,
-        startingSequenceNumber);
+        startingSequenceNumber,
+        config.getMinIdleMillisBeforeConnectionDrop());
   }
 
   /**
@@ -117,13 +114,15 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
-      Optional<Long> startingSequenceNumber) {
+      Optional<Long> startingSequenceNumber,
+      long minIdleMillisBeforeConnectionDrop) {
     this.clock = clock;
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
     this.callOptionsFactory = callOptionsFactory;
     this.channel = Preconditions.checkNotNull(channel);
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
+    this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
     metrics = new Metrics(appMetrics, claimType);
   }
 
@@ -218,11 +217,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * gRPC but we don't want to trigger alerts when they happen since they are non unexpected. This
    * method determines if we have been idle long enough that such a drop is possible.
    *
-   * @param lastProcessedTime time in millis that we finished processing the most recent message
+   * @param idleMillis time in millis since we began waiting for a message
    * @return true if the idle time is long enough that the connection drop is possible
    */
   private boolean idleTimeForExpectedServerConnectionDropHasElapsed(long idleMillis) {
-    return idleMillis >= MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP;
+    return idleMillis >= minIdleMillisBeforeConnectionDrop;
   }
 
   /**
@@ -317,6 +316,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final String inProcessServerName;
     /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /**
+     * Minimum amount of idle time before a dropped connection is considered to be normal behavior
+     * by the RDA API server and thus not requiring an ERROR log entry.
+     */
+    private final Duration minIdleTimeBeforeConnectionDrop;
     /** Authorization token expiration date, in epoch seconds */
     private final Long expirationDate;
     /** The token to pass to the RDA API server to authenticate the client. */
@@ -339,12 +343,17 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         int port,
         String inProcessServerName,
         Duration maxIdle,
-        String authenticationToken) {
+        @Nullable Duration minIdleTimeBeforeConnectionDrop,
+        @Nullable String authenticationToken) {
       this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
       this.host = host;
       this.port = port;
       this.inProcessServerName = inProcessServerName;
       this.maxIdle = maxIdle;
+      this.minIdleTimeBeforeConnectionDrop =
+          minIdleTimeBeforeConnectionDrop == null
+              ? Duration.ofMinutes(4)
+              : minIdleTimeBeforeConnectionDrop;
       if (serverType == ServerType.Remote) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(host), "host name is required");
         Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
@@ -466,6 +475,10 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       }
 
       return null;
+    }
+
+    private long getMinIdleMillisBeforeConnectionDrop() {
+      return minIdleTimeBeforeConnectionDrop.toMillis();
     }
   }
 

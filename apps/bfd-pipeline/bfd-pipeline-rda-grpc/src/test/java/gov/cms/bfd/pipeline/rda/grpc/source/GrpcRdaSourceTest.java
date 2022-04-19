@@ -58,6 +58,12 @@ public class GrpcRdaSourceTest {
    */
   private static final Instant BASE_TIME_FOR_TEST =
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
+  /**
+   * Configuration setting for {@link
+   * GrpcRdaSource.Config#minIdleTimeBeforeExpectedServerConnectionDrop}.
+   */
+  private static final long MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP =
+      Duration.ofMinutes(2).toMillis();
 
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_1 = 101;
@@ -69,8 +75,10 @@ public class GrpcRdaSourceTest {
   private static final Integer CLAIM_4 = 104;
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_5 = 105;
+
   /** String used as a RDA API "version" in the unit tests. */
   public static final String VERSION = "version";
+
   /** A MetricRegistry used to verify metrics. */
   private MetricRegistry appMetrics;
   /** A mock clock used to when testing the idle time for dropped connection exceptions. */
@@ -112,7 +120,8 @@ public class GrpcRdaSourceTest {
                 () -> CallOptions.DEFAULT,
                 appMetrics,
                 "ints",
-                Optional.empty()));
+                Optional.empty(),
+                MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP));
     doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
     doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
@@ -182,7 +191,8 @@ public class GrpcRdaSourceTest {
                 () -> CallOptions.DEFAULT,
                 appMetrics,
                 "ints",
-                Optional.of(18L)));
+                Optional.of(18L),
+                MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP));
     doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
     doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
 
@@ -265,7 +275,8 @@ public class GrpcRdaSourceTest {
                 () -> CallOptions.DEFAULT,
                 appMetrics,
                 "ints",
-                Optional.empty()));
+                Optional.empty(),
+                MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -411,9 +422,7 @@ public class GrpcRdaSourceTest {
     doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 1)
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 2)
-        .doReturn(
-            BASE_TIME_FOR_TEST.toEpochMilli()
-                + GrpcRdaSource.MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP)
         .when(clock)
         .millis();
 
@@ -467,9 +476,7 @@ public class GrpcRdaSourceTest {
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 1)
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 2)
         .doReturn(
-            BASE_TIME_FOR_TEST.toEpochMilli()
-                + 3
-                + GrpcRdaSource.MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP)
+            BASE_TIME_FOR_TEST.toEpochMilli() + 3 + MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP)
         .when(clock)
         .millis();
 
