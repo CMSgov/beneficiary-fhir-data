@@ -73,12 +73,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
-    if (claimGroup.getIdrStatusCode() != null) {
-      claim.setStatus(
-          CANCELED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
-              ? Claim.ClaimStatus.CANCELLED
-              : Claim.ClaimStatus.ACTIVE);
-    }
+    claim.setStatus(getStatus(claimGroup));
     claim.setType(getType());
     claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
@@ -193,6 +188,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                     CCWUtils.calculateVariableReferenceUrl(
                         CcwCodebookMissingVariable.CARR_CLM_CNTL_NUM))
                 .setValue(claimGroup.getIdrClmHdIcn()));
+  }
+
+  private static Claim.ClaimStatus getStatus(RdaMcsClaim claimGroup) {
+    return claimGroup.getIdrStatusCode() == null
+            || !CANCELED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
+        ? Claim.ClaimStatus.ACTIVE
+        : Claim.ClaimStatus.CANCELLED;
   }
 
   private static CodeableConcept getType() {
