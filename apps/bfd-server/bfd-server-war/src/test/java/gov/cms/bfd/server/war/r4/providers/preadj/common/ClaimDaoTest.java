@@ -111,6 +111,7 @@ public class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
     final String mbiValueAttributeName = Mbi.Fields.mbi;
+    final String idAttribute = "idAttribute";
     final String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
@@ -173,6 +174,7 @@ public class ClaimDaoTest {
             isMbiSearchValueHashed,
             null,
             null,
+            idAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
@@ -188,6 +190,7 @@ public class ClaimDaoTest {
     final boolean isMbiSearchValueHashed = true;
     final String mbiHashAttributeName = Mbi.Fields.hash;
     final String oldMbiHashAttributeName = Mbi.Fields.oldHash;
+    final String idAttribute = "idAttribute";
     final String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
@@ -262,6 +265,7 @@ public class ClaimDaoTest {
             isMbiSearchValueHashed,
             null,
             null,
+            idAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
@@ -276,6 +280,7 @@ public class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = true;
     final String mbiValueAttributeName = Mbi.Fields.hash;
+    final String idAttribute = "idAttribute";
     final String endAttribute = "endAttribute";
     final DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
     final DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);
@@ -363,6 +368,7 @@ public class ClaimDaoTest {
             isMbiSearchValueHashed,
             mockLastUpdatedParam,
             mockServiceDateParam,
+            idAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);

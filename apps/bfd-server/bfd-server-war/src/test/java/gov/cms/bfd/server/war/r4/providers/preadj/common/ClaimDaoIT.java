@@ -103,6 +103,7 @@ public class ClaimDaoIT {
         false,
         null,
         null,
+        RdaFissClaim.Fields.dcn,
         RdaFissClaim.Fields.stmtCovToDate);
   }
 
@@ -114,6 +115,7 @@ public class ClaimDaoIT {
         true,
         null,
         null,
+        RdaFissClaim.Fields.dcn,
         RdaFissClaim.Fields.stmtCovToDate);
   }
 }

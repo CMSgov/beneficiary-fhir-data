@@ -95,6 +95,7 @@ public class ClaimDao {
    * @param isMbiSearchValueHashed True iff the mbiSearchValue is a hashed MBI.
    * @param lastUpdated The range of lastUpdated values to search on.
    * @param serviceDate Date range of the desired service date to search on.
+   * @param idAttributeName The name of the entity attribute denoting its ID
    * @param endDateAttributeName The name of the entity attribute denoting service end date.
    * @param <T> The entity type being retrieved.
    * @return A list of entities of type T retrieved matching the given parameters.
@@ -106,6 +107,7 @@ public class ClaimDao {
       boolean isMbiSearchValueHashed,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
+      String idAttributeName,
       String endDateAttributeName) {
     List<T> claimEntities = null;
 
@@ -128,6 +130,7 @@ public class ClaimDao {
             serviceDate == null
                 ? builder.and()
                 : serviceDateRangePredicate(root, serviceDate, builder, endDateAttributeName)));
+    criteria.orderBy(builder.asc(root.get(idAttributeName)));
 
     Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
     try {

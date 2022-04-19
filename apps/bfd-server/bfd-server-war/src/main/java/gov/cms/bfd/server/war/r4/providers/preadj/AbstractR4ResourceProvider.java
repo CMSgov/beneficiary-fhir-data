@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -20,6 +21,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.SpringConfiguration;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
@@ -218,13 +220,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       @OptionalParam(name = "type")
           @Description(shortDefinition = "A list of claim types to include")
           TokenAndListParam types,
+      @OptionalParam(name = "startIndex")
+          @Description(shortDefinition = "The offset used for result pagination")
+          String startIndex,
       @OptionalParam(name = "isHashed")
           @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
           String hashed,
       @OptionalParam(name = "excludeSAMHSA")
           @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
           String samhsa,
-      @OptionalParam(name = "_lastUpdated")
+      @OptionalParam(name = Constants.PARAM_LASTUPDATED)
           @Description(shortDefinition = "Include resources last updated in the given range")
           DateRangeParam lastUpdated,
       @OptionalParam(name = "service-date")
@@ -239,6 +244,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
       boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
 
+      OffsetLinkBuilder paging =
+          new OffsetLinkBuilder(
+              requestDetails, String.format("/%s?", resourceType.getSimpleName()));
+
       if (isHashed) {
         TransformerUtilsV2.logMbiHashToMdc(mbiString);
       }
@@ -251,11 +260,18 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                 isHashed,
                 excludeSamhsa,
                 lastUpdated,
-                serviceDate);
+                serviceDate,
+                paging);
       } else {
         bundleResource =
             createBundleFor(
-                getResourceTypes(), mbiString, isHashed, excludeSamhsa, lastUpdated, serviceDate);
+                getResourceTypes(),
+                mbiString,
+                isHashed,
+                excludeSamhsa,
+                lastUpdated,
+                serviceDate,
+                paging);
       }
 
       return bundleResource;
@@ -272,6 +288,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param isHashed Denotes if the given mbi is hashed.
    * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
    * @param serviceDate Date range of the desired service date to retrieve data for.
+   * @param paging Pagination details for the bundle
    * @return A Bundle with data found using the provided parameters.
    */
   @VisibleForTesting
@@ -281,7 +298,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       boolean isHashed,
       boolean excludeSamhsa,
       DateRangeParam lastUpdated,
-      DateRangeParam serviceDate) {
+      DateRangeParam serviceDate,
+      OffsetLinkBuilder paging) {
     List<T> resources = new ArrayList<>();
 
     for (ResourceTypeV2<T> type : resourceTypes) {
@@ -295,6 +313,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               isHashed,
               lastUpdated,
               serviceDate,
+              type.getEntityIdAttribute(),
               type.getEntityEndDateAttribute());
 
       resources.addAll(
@@ -302,6 +321,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
               .map(e -> type.getTransformer().transform(metricRegistry, e))
               .collect(Collectors.toList()));
+    }
+
+    if (paging.isPagingRequested()) {
+      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+      resources = resources.subList(paging.getStartIndex(), endIndex);
     }
 
     Bundle bundle = new Bundle();
