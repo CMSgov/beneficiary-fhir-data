@@ -138,15 +138,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
-    /*     ExplanationOfBenefit pdeEob =
-        CarrierClaimTransformerV2.transform(
+    ExplanationOfBenefit pdeEob =
+        PartDEventTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 getClaim(PartDEvent.class),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
 
-    String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString(); */
+    String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();
 
     // Load the claim types into the test data that will be run against each test
     return Stream.of(
