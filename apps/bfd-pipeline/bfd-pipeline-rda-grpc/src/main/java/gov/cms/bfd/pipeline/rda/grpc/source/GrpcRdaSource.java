@@ -178,9 +178,9 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         final long idleMillis = clock.millis() - lastProcessedTime;
         if (idleTimeForExpectedServerConnectionDropHasElapsed(idleMillis)) {
           LOGGER.info(
-              "RDA API server dropped connection during idle time: message={} idleMillis=",
-              ex.getMessage(),
-              idleMillis);
+              "RDA API server dropped connection after idle time: idleMillis={} message='{}'",
+              idleMillis,
+              ex.getMessage());
         } else {
           throw ex;
         }
@@ -214,7 +214,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   /**
    * The RDA API server drops open connections abruptly when it has no data to transmit for some
    * period of time. These closures are not clean at the protocol level so they appear as errors to
-   * gRPC but we don't want to trigger alerts when they happen since they are non unexpected. This
+   * gRPC but we don't want to trigger alerts when they happen since they are not unexpected. This
    * method determines if we have been idle long enough that such a drop is possible.
    *
    * @param idleMillis time in millis since we began waiting for a message

@@ -58,11 +58,8 @@ public class GrpcRdaSourceTest {
    */
   private static final Instant BASE_TIME_FOR_TEST =
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
-  /**
-   * Configuration setting for {@link
-   * GrpcRdaSource.Config#minIdleTimeBeforeExpectedServerConnectionDrop}.
-   */
-  private static final long MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP =
+  /** Configuration setting for {@link GrpcRdaSource.Config#minIdleTimeBeforeConnectionDrop}. */
+  private static final long MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP =
       Duration.ofMinutes(2).toMillis();
 
   /** Integer used as a "claim" in the unit tests. */
@@ -121,7 +118,7 @@ public class GrpcRdaSourceTest {
                 appMetrics,
                 "ints",
                 Optional.empty(),
-                MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP));
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
     doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
@@ -192,7 +189,7 @@ public class GrpcRdaSourceTest {
                 appMetrics,
                 "ints",
                 Optional.of(18L),
-                MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP));
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
     doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
 
@@ -276,7 +273,7 @@ public class GrpcRdaSourceTest {
                 appMetrics,
                 "ints",
                 Optional.empty(),
-                MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP));
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -422,7 +419,7 @@ public class GrpcRdaSourceTest {
     doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 1)
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 2)
-        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP)
         .when(clock)
         .millis();
 
@@ -475,8 +472,7 @@ public class GrpcRdaSourceTest {
     doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 1)
         .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 2)
-        .doReturn(
-            BASE_TIME_FOR_TEST.toEpochMilli() + 3 + MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 3 + MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP)
         .when(clock)
         .millis();
 
