@@ -2916,7 +2916,14 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
-      Optional<Instant> lastUpdated) {
+      Optional<Instant> lastUpdated,
+      Optional<String> fiDocClmControlNum) {
+    // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
+    fiDocClmControlNum.ifPresent(
+        cntlNum ->
+            eob.addExtension(
+                createExtensionIdentifier(
+                    CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, cntlNum)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);

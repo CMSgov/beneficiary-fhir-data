@@ -58,6 +58,12 @@
           "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value" : "32490593716374487"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -1562,6 +1568,12 @@
           "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value" : "08683096577486"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -2137,6 +2149,12 @@
         "valueMoney" : {
           "value" : 25.0,
           "currency" : "USD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value" : "28486613848"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -3149,6 +3167,12 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
           "code" : "V",
           "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value" : "23443453453"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -5276,6 +5300,12 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
           "code" : "V",
           "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+        }
+      }, {
+        "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier": {
+          "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value": "2718813985998"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
