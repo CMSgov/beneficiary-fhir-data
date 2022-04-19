@@ -14,6 +14,8 @@ public interface ClaimTypeTransformer {
    * Transforms the specified (e.g. {@link CarrierClaim}, {@link DMEClaim}, etc.) into a new FHIR
    * {@link ExplanationOfBenefit} resource.
    *
+   * <p><<<<<<< HEAD
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @return a new FHIR {@link FdaDrugCodeDisplayLookup} resource
    */

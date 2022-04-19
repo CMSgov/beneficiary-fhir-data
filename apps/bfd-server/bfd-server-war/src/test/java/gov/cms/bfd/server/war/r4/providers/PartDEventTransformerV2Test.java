@@ -918,6 +918,7 @@ public final class PartDEventTransformerV2Test {
                 generateClaim(),
                 Optional.of(false),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

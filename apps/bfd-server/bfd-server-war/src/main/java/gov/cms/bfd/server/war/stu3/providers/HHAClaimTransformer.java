@@ -28,6 +28,7 @@ final class HHAClaimTransformer {
    */
   @Trace
   static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+
     Timer.Context timer =
         transformerContext
             .metricRegistry

@@ -1179,6 +1179,7 @@ public final class DMEClaimTransformerV2Test {
                 generateClaim(),
                 Optional.of(false),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
