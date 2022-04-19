@@ -103,7 +103,7 @@
           }
         ]
       },
-      "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+      "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
       "value": "654321"
     }
   ],
