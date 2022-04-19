@@ -62,8 +62,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * Minimum amount of idle time before a dropped connection is considered to be normal behavior by
    * the RDA API server and thus not requiring an ERROR log entry.
    */
-  private static final long MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP =
-      Duration.ofSeconds(2).toMillis();
+  @VisibleForTesting
+  static final long MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP = Duration.ofMinutes(2).toMillis();
 
   private final Clock clock;
   private final GrpcStreamCaller<TMessage> caller;
@@ -165,20 +165,23 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(apiVersion, sink, batch);
           }
+          lastProcessedTime = clock.millis();
         }
         if (batch.size() > 0) {
           processed += submitBatchToSink(apiVersion, sink, batch);
         }
-        lastProcessedTime = clock.millis();
       } catch (GrpcResponseStream.StreamInterruptedException ex) {
         // If our thread is interrupted we cancel the stream so the server knows we're done
         // and then shut down normally.
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
       } catch (GrpcResponseStream.DroppedConnectionException ex) {
-        if (idleTimeForExpectedServerConnectionDropHasElapsed(lastProcessedTime)) {
+        final long idleMillis = clock.millis() - lastProcessedTime;
+        if (idleTimeForExpectedServerConnectionDropHasElapsed(idleMillis)) {
           LOGGER.info(
-              "RDA API server dropped connection during idle time: message={}", ex.getMessage());
+              "RDA API server dropped connection during idle time: message={} idleMillis=",
+              ex.getMessage(),
+              idleMillis);
         } else {
           throw ex;
         }
@@ -218,8 +221,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * @param lastProcessedTime time in millis that we finished processing the most recent message
    * @return true if the idle time is long enough that the connection drop is possible
    */
-  private boolean idleTimeForExpectedServerConnectionDropHasElapsed(long lastProcessedTime) {
-    return clock.millis() - lastProcessedTime < MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP;
+  private boolean idleTimeForExpectedServerConnectionDropHasElapsed(long idleMillis) {
+    return idleMillis >= MIN_IDLE_MILLIS_FOR_EXPECTED_CONNECTION_DROP;
   }
 
   /**
