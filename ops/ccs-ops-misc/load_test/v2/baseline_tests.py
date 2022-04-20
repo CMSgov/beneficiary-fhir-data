@@ -1,4 +1,5 @@
 import random
+from typing import Dict
 import urllib3
 import common.config as config
 import common.data as data
@@ -26,13 +27,13 @@ class BFDUser(HttpUser):
         random.shuffle(copied_ids)
         self.eob_ids = copied_ids
 
-    def get_eob(self):
+    def get_eob(self) -> int:
       if len(self.eob_ids) == 0:
             errors.no_data_stop_test(self)
 
       return self.eob_ids.pop()
 
-    def get(self, base_path: str, params: dict[str, str], name: str, headers: dict[str, str] = {}):
+    def get(self, base_path: str, params: Dict[str, str], name: str, headers: Dict[str, str] = {}):
       self.client.get(create_url_path(base_path, params), 
                       cert=client_cert, 
                       verify=server_public_key, 
