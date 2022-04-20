@@ -13,6 +13,7 @@ def save(fileData):
     configFile.write("testRunTime: \"%s\"\n" % fileData.testRunTime)
     configFile.write("testNumTotalClients: \"%s\"\n" % fileData.testNumTotalClients)
     configFile.write("testCreatedClientsPerSecond: \"%s\"\n" % fileData.testCreatedClientsPerSecond)
+    configFile.write("resetStatsAfterClientSpawn: \"%s\"" % fileData.resetStatsAfterClientSpawn)
     configFile.close()
 
 '''
@@ -33,6 +34,7 @@ def create():
     fileData.testRunTime = input("Input desired test run time (eg. 30s, 1m): ")
     fileData.testNumTotalClients = input("Input total number of clients to create: ")
     fileData.testCreatedClientsPerSecond = input("Input number of clients to create per second (ramp-up speed): ")
+    fileData.resetStatsAfterClientSpawn = (input("Reset statistics after spawning clients? [y/N]: ").lower == 'y')
     save(fileData)
 
     ## Attempt to read the new file
