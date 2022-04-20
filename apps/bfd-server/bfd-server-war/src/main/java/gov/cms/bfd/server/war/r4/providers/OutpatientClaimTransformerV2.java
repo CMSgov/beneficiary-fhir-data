@@ -31,26 +31,26 @@ public class OutpatientClaimTransformerV2 {
 
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(
                     OutpatientClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof OutpatientClaim)) {
+    if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     ExplanationOfBenefit eob =
-        transformClaim(
-            (OutpatientClaim) transformerContext.claim, transformerContext.drugCodeDisplayLookup);
+        transformClaim((OutpatientClaim) claim, transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;

@@ -57,9 +57,9 @@ public final class OutpatientClaimTransformerTest {
         OutpatientClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 
@@ -89,9 +89,9 @@ public final class OutpatientClaimTransformerTest {
         OutpatientClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 
@@ -128,9 +128,9 @@ public final class OutpatientClaimTransformerTest {
                   OutpatientClaimTransformer.transform(
                       new TransformerContext(
                           new MetricRegistry(),
-                          claim,
                           Optional.empty(),
-                          FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                          FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                      claim);
               assertMatches(claim, eob);
             });
   }

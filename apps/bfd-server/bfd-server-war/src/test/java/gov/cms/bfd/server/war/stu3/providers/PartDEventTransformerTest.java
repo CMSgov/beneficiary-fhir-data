@@ -41,9 +41,9 @@ public final class PartDEventTransformerTest {
         PartDEventTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 
@@ -96,9 +96,9 @@ public final class PartDEventTransformerTest {
         PartDEventTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(

@@ -26,23 +26,24 @@ final class DMEClaimTransformer {
 
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
+    if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
     ExplanationOfBenefit eob =
         transformClaim(
-            (DMEClaim) transformerContext.claim,
-            transformerContext.includeTaxNumbers,
-            transformerContext.drugCodeDisplayLookup);
+            (DMEClaim) claim,
+            transformerContext.getIncludeTaxNumbers(),
+            transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;

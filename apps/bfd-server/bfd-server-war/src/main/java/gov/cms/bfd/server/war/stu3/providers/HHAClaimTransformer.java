@@ -23,20 +23,21 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 final class HHAClaimTransformer {
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
 
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof HHAClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) transformerContext.claim);
+    if (!(claim instanceof HHAClaim)) throw new BadCodeMonkeyException();
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
 
     timer.stop();
     return eob;

@@ -79,9 +79,9 @@ public final class DMEClaimTransformerV2Test {
         DMEClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1176,9 +1176,9 @@ public final class DMEClaimTransformerV2Test {
         DMEClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                generateClaim(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            generateClaim());
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

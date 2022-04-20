@@ -15,7 +15,8 @@ public interface ClaimTypeTransformer {
    * {@link ExplanationOfBenefit} resource.
    *
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a new FHIR {@link FdaDrugCodeDisplayLookup} resource
    */
-  ExplanationOfBenefit transform(TransformerContext transformerContext);
+  ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim);
 }

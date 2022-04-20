@@ -23,21 +23,22 @@ import org.hl7.fhir.r4.model.Quantity;
 public class HHAClaimTransformerV2 {
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof HHAClaim)) {
+    if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) transformerContext.claim);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
 
     timer.stop();
     return eob;

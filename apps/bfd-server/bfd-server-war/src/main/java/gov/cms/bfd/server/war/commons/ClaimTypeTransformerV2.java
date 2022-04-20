@@ -15,7 +15,8 @@ public interface ClaimTypeTransformerV2 {
    * {@link ExplanationOfBenefit} resource.
    *
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a new FHIR {@link ExplanationOfBenefit} resource
    */
-  ExplanationOfBenefit transform(TransformerContext transformerContext);
+  ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim);
 }

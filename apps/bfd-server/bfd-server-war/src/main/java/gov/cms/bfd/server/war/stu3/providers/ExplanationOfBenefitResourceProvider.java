@@ -190,10 +190,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
             .getTransformer()
             .transform(
                 new TransformerContext(
-                    metricRegistry,
-                    claimEntity,
-                    Optional.of(includeTaxNumbers),
-                    drugCodeDisplayLookup));
+                    metricRegistry, Optional.of(includeTaxNumbers), drugCodeDisplayLookup),
+                claimEntity);
     return eob;
   }
 
@@ -492,7 +490,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
                     .getTransformer()
                     .transform(
                         new TransformerContext(
-                            metricRegistry, c, includeTaxNumbers, drugCodeDisplayLookup)))
+                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
+                        c))
         .collect(Collectors.toList());
   }
 

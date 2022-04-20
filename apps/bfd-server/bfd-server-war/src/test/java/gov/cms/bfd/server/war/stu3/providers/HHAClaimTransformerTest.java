@@ -46,9 +46,9 @@ public final class HHAClaimTransformerTest {
         HHAClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 

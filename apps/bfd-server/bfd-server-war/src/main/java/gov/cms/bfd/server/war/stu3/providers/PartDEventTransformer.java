@@ -28,21 +28,21 @@ final class PartDEventTransformer {
 
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof PartDEvent)) throw new BadCodeMonkeyException();
+    if (!(claim instanceof PartDEvent)) throw new BadCodeMonkeyException();
     ExplanationOfBenefit eob =
-        transformClaim(
-            (PartDEvent) transformerContext.claim, transformerContext.drugCodeDisplayLookup);
+        transformClaim((PartDEvent) claim, transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;

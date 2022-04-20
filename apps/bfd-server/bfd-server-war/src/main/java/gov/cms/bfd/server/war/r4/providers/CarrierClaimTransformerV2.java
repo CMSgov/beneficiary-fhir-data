@@ -30,27 +30,28 @@ public class CarrierClaimTransformerV2 {
 
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof CarrierClaim)) {
+    if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     ExplanationOfBenefit eob =
         transformClaim(
-            (CarrierClaim) transformerContext.claim,
-            transformerContext.includeTaxNumbers,
-            transformerContext.drugCodeDisplayLookup);
+            (CarrierClaim) claim,
+            transformerContext.getIncludeTaxNumbers(),
+            transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;

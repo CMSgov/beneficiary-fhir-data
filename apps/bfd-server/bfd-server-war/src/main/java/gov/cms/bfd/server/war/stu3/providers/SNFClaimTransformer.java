@@ -25,21 +25,22 @@ import org.hl7.fhir.dstu3.model.Period;
 final class SNFClaimTransformer {
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof SNFClaim)) throw new BadCodeMonkeyException();
+    if (!(claim instanceof SNFClaim)) throw new BadCodeMonkeyException();
 
     timer.stop();
-    return transformClaim((SNFClaim) transformerContext.claim);
+    return transformClaim((SNFClaim) claim);
   }
 
   /**

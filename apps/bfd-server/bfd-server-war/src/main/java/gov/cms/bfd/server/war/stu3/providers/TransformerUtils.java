@@ -3226,8 +3226,8 @@ public final class TransformerUtils {
         return claimType
             .getTransformer()
             .transform(
-                new TransformerContext(
-                    metricRegistry, rifRecord, includeTaxNumbers, drugCodeDisplayLookup));
+                new TransformerContext(metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
+                rifRecord);
       }
     }
 

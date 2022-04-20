@@ -406,9 +406,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         OutpatientClaimTransformerV2.transform(
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                claim,
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting())),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim),
         eob);
   }
 
@@ -1460,9 +1460,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         PartDEventTransformerV2.transform(
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                partDEvent,
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting())),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -2063,9 +2063,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .transform(
                 new TransformerContext(
                     PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                    claim,
                     Optional.of(false),
-                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting())),
+                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                claim),
         searchResults);
   }
 

@@ -46,9 +46,9 @@ public final class HospiceClaimTransformerTest {
         HospiceClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 

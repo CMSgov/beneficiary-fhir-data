@@ -82,9 +82,9 @@ public final class HospiceClaimTransformerV2Test {
         HospiceClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 includeTaxNumber,
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -117,9 +117,9 @@ public final class HospiceClaimTransformerV2Test {
         HospiceClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
-                claim,
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting())));
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim));
   }
 
   /** Common top level ExplanationOfBenefit values */

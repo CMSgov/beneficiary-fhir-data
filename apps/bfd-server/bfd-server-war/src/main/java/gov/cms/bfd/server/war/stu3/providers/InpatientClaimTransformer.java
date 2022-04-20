@@ -27,20 +27,21 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 final class InpatientClaimTransformer {
   /**
    * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
         transformerContext
-            .metricRegistry
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(InpatientClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(transformerContext.claim instanceof InpatientClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) transformerContext.claim);
+    if (!(claim instanceof InpatientClaim)) throw new BadCodeMonkeyException();
+    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
 
     timer.stop();
     return eob;
