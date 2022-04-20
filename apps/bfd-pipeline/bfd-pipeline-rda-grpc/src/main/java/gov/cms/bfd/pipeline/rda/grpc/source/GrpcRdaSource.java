@@ -15,6 +15,7 @@ import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -174,16 +175,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         // and then shut down normally.
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
-      } catch (GrpcResponseStream.DroppedConnectionException ex) {
-        final long idleMillis = clock.millis() - lastProcessedTime;
-        if (idleTimeForExpectedServerConnectionDropHasElapsed(idleMillis)) {
-          LOGGER.info(
-              "RDA API server dropped connection after idle time: idleMillis={} message='{}'",
-              idleMillis,
-              ex.getMessage());
-        } else {
-          throw ex;
-        }
+      } catch (DroppedConnectionException ex) {
+        logOrRethrowDroppedConnectionException(lastProcessedTime, ex);
       }
       sink.shutdown(Duration.ofMinutes(5));
       processed += sink.getProcessedCount();
@@ -214,14 +207,28 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   /**
    * The RDA API server drops open connections abruptly when it has no data to transmit for some
    * period of time. These closures are not clean at the protocol level so they appear as errors to
-   * gRPC but we don't want to trigger alerts when they happen since they are not unexpected. This
-   * method determines if we have been idle long enough that such a drop is possible.
+   * gRPC but we don't want to trigger alerts when they happen since they are not unexpected.
    *
-   * @param idleMillis time in millis since we began waiting for a message
-   * @return true if the idle time is long enough that the connection drop is possible
+   * <p>This method determines if we have been idle long enough that such a drop is possible. If the
+   * drop is expected it simply logs the event but if the drop is not expected it rethrows the
+   * exception so that normal error logic can be applied to it.
+   *
+   * @param lastProcessedTime time in millis when we last processed a message from the server
+   * @param exception the exception to evaluate
+   * @throws DroppedConnectionException if not an expected drop
    */
-  private boolean idleTimeForExpectedServerConnectionDropHasElapsed(long idleMillis) {
-    return idleMillis >= minIdleMillisBeforeConnectionDrop;
+  private void logOrRethrowDroppedConnectionException(
+      long lastProcessedTime, DroppedConnectionException exception)
+      throws DroppedConnectionException {
+    final long idleMillis = clock.millis() - lastProcessedTime;
+    if (idleMillis >= minIdleMillisBeforeConnectionDrop) {
+      LOGGER.info(
+          "RDA API server dropped connection after idle time: idleMillis={} message='{}'",
+          idleMillis,
+          exception.getMessage());
+    } else {
+      throw exception;
+    }
   }
 
   /**
