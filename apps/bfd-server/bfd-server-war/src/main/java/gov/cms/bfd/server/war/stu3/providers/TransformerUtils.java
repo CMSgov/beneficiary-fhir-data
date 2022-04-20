@@ -44,6 +44,7 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
@@ -3224,7 +3225,9 @@ public final class TransformerUtils {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType
             .getTransformer()
-            .transform(metricRegistry, rifRecord, includeTaxNumbers, drugCodeDisplayLookup);
+            .transform(
+                new TransformerContext(metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
+                rifRecord);
       }
     }
 

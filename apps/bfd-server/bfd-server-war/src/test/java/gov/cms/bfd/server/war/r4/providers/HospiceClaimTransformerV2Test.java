@@ -17,6 +17,7 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -79,10 +80,11 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB(Optional<Boolean> includeTaxNumber) {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(),
-            claim,
-            includeTaxNumber,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                includeTaxNumber,
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -113,10 +115,11 @@ public final class HospiceClaimTransformerV2Test {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(false),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim));
   }
 
   /** Common top level ExplanationOfBenefit values */
