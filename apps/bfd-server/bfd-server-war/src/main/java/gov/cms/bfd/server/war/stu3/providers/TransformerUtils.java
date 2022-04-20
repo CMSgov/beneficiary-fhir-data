@@ -34,11 +34,11 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -74,7 +74,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -147,11 +146,8 @@ public final class TransformerUtils {
    */
   private static final Set<CcwCodebookInterface> codebookLookupDuplicateFailures = new HashSet<>();
 
-  /** Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file. */
-  private static Map<String, String> ndcProductMap = null;
-
-  /** Tracks the national drug codes that have already had code lookup failures. */
-  private static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
+  /** Tracks the icd codes that have already had code lookup failures. */
+  private static final Set<String> icdCodeLookupMissingFailures = new HashSet<>();
 
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
@@ -393,6 +389,9 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds a {@link Diagnosis} to the provided {@link ExplanationOfBenefit} and modifies the {@link
+   * ItemComponent} with a sequence number identifier.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the specified {@link ItemComponent} is a child
    *     of
    * @param item the {@link ItemComponent} to add an {@link ItemComponent#getDiagnosisLinkId()}
@@ -1278,19 +1277,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: Remove this method when the calling method has been removed as per BFD-1582
-   *
-   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
-   *     value for the {@link Coverage#getBeneficiary()} value to match
-   * @param coverageType the {@link MedicareSegment} value to match
-   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
-   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
-   */
-  static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
-    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
-  }
-
-  /**
    * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
    *     value for the {@link Coverage#getBeneficiary()} value to match
    * @param coverageType the {@link MedicareSegment} value to match
@@ -1589,9 +1575,11 @@ public final class TransformerUtils {
        * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
        * field so if this is updated you'll need to update that as well.
        */
+      int maxSequence = eob.getDiagnosis().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
       eob.addDiagnosis()
           .setPackageCode(
-              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd));
+              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd))
+          .setSequence(maxSequence + 1);
     }
   }
 
@@ -1882,7 +1870,8 @@ public final class TransformerUtils {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode) {
+      Optional<String> nationalDrugCode,
+      String drugCodeName) {
 
     SimpleQuantity serviceCnt = new SimpleQuantity();
     serviceCnt.setValue(serviceCount);
@@ -1982,7 +1971,7 @@ public final class TransformerUtils {
           item,
           TransformerConstants.CODING_NDC,
           TransformerConstants.CODING_NDC,
-          TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode.get()),
+          drugCodeName,
           nationalDrugCode.get());
     }
 
@@ -3022,9 +3011,9 @@ public final class TransformerUtils {
       return icdCodeDisplay;
     }
 
-    // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeLookupMissingFailures.contains(icdCode)) {
-      drugCodeLookupMissingFailures.add(icdCode);
+    // log which ICD codes we couldn't find a match for in our downloaded ICD file
+    if (!icdCodeLookupMissingFailures.contains(icdCode)) {
+      icdCodeLookupMissingFailures.add(icdCode);
       LOGGER.info(
           "No ICD code display value match found for ICD code {} in resource {}.",
           icdCode,
@@ -3219,103 +3208,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Retrieves the PRODUCTNDC and SUBSTANCENAME from the FDA NDC Products file which was downloaded
-   * during the build process
-   *
-   * @param claimDrugCode - NDC value in claim records
-   * @return the fda drug code display string
-   */
-  public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
-
-    /*
-     * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
-     * characters
-     */
-    if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) return null;
-
-    /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire NDC file the first time and put in a Map
-    if (ndcProductMap == null) {
-      ndcProductMap = readFDADrugCodeFile();
-    }
-
-    String claimDrugCodeReformatted = null;
-
-    claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
-
-    if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
-      String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
-      return ndcSubstanceName;
-    }
-
-    // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
-      drugCodeLookupMissingFailures.add(claimDrugCode);
-      LOGGER.info(
-          "No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
-          claimDrugCode,
-          "fda_products_utf8.tsv");
-    }
-
-    return null;
-  }
-
-  /**
-   * Reads all the <code>PRODUCTNDC</code> and <code>SUBSTANCENAME</code> fields from the FDA NDC
-   * Products file which was downloaded during the build process.
-   *
-   * <p>See {@link FDADrugDataUtilityApp} for details.
-   *
-   * @return the map of drug codes and names
-   */
-  public static Map<String, String> readFDADrugCodeFile() {
-    Map<String, String> ndcProductHashMap = new HashMap<String, String>();
-    try (final InputStream ndcProductStream =
-            Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
-        final BufferedReader ndcProductsIn =
-            new BufferedReader(new InputStreamReader(ndcProductStream))) {
-      /*
-       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
-       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
-       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
-       * SUBSTANCENAME
-       */
-      String line = "";
-      ndcProductsIn.readLine();
-      while ((line = ndcProductsIn.readLine()) != null) {
-        String ndcProductColumns[] = line.split("\t");
-        try {
-          String nationalDrugCodeManufacturer =
-              StringUtils.leftPad(
-                  ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-          String nationalDrugCodeIngredient =
-              StringUtils.leftPad(
-                  ndcProductColumns[1].substring(
-                      ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                  4,
-                  '0');
-          // ndcProductColumns[3] - Proprietary Name
-          // ndcProductColumns[13] - Substance Name
-          ndcProductHashMap.put(
-              String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-              ndcProductColumns[3] + " - " + ndcProductColumns[13]);
-        } catch (StringIndexOutOfBoundsException e) {
-          continue;
-        }
-      }
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NDC code data.", e);
-    }
-    return ndcProductHashMap;
-  }
-
-  /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
    *     includeTaxNumbers whether or not to include tax numbers in the result (see {@link
@@ -3324,10 +3216,15 @@ public final class TransformerUtils {
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      MetricRegistry metricRegistry, Object rifRecord, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object rifRecord,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
-        return claimType.getTransformer().transform(metricRegistry, rifRecord, includeTaxNumbers);
+        return claimType
+            .getTransformer()
+            .transform(metricRegistry, rifRecord, includeTaxNumbers, drugCodeDisplayLookup);
       }
     }
 

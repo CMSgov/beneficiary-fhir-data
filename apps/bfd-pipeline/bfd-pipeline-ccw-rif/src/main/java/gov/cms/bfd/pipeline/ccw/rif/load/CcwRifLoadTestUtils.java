@@ -19,6 +19,9 @@ public final class CcwRifLoadTestUtils {
   /** The value to use for {@link LoadAppOptions#isIdempotencyRequired()}. */
   public static final boolean IDEMPOTENCY_REQUIRED = true;
 
+  /** The default batch size to use for testing. */
+  public static final int DEFAULT_LOAD_BATCH_SIZE = 100;
+
   /**
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
    *     to the database server that tests should be run against
@@ -28,7 +31,8 @@ public final class CcwRifLoadTestUtils {
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED,
-        false);
+        false,
+        DEFAULT_LOAD_BATCH_SIZE);
   }
 
   /**
@@ -60,6 +64,22 @@ public final class CcwRifLoadTestUtils {
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         idempotencyRequired,
-        filterNon2022benes);
+        filterNon2022benes,
+        DEFAULT_LOAD_BATCH_SIZE);
+  }
+
+  /**
+   * Gets the load options with the specified batch size.
+   *
+   * @param batchSize the batch size
+   * @return the load options with batch size, and other options defaulted to the test defaults
+   */
+  public static LoadAppOptions getLoadOptionsWithBatchSize(int batchSize) {
+    return new LoadAppOptions(
+        new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
+        LoadAppOptions.DEFAULT_LOADER_THREADS,
+        IDEMPOTENCY_REQUIRED,
+        false,
+        batchSize);
   }
 }

@@ -39,6 +39,12 @@
       "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "08683096577486"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -207,7 +213,8 @@
     "code" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-        "code" : "1"
+        "code" : "30",
+        "display" : "Still patient."
       } ]
     }
   }, {
@@ -381,6 +388,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-b-567834"
     }

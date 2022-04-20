@@ -531,3 +531,24 @@ exporter.bfd.partd_contract_count = 10
 
 Ran the synthea utility with the following command:
     ./run_synthea -s 0 -cs 0 -r 20210808 -p 10000 --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10 --generate.only_alive_patients=true -a 65-80
+
+01/18/2022 - Generated Synthea data set covering nationwide beneficiaries from the following properities file that is located at: `[./synthea/synthea.properities-01182022](./synthea/synthea.properities-01182022)`.
+
+exporter.bfd.export = false
+exporter.bfd.require_code_maps = true
+exporter.bfd.bene_id_start = -10000000010000
+exporter.bfd.clm_id_start = -10000003175478
+exporter.bfd.clm_grp_id_start = -103422538
+exporter.bfd.pde_id_start = -10000247060
+exporter.bfd.fi_doc_cntl_num_start = -100000000
+exporter.bfd.carr_clm_cntl_num_start = -100000000
+exporter.bfd.mbi_start = 1S00-E00-GA00
+exporter.bfd.hicn_start = T01020000A
+exporter.bfd.partd_contract_start = Z1000
+exporter.bfd.partd_contract_count = 10
+exporter.bfd.clia_labs_start = 00A0000000
+
+Ran the synthea utility with the following command:
+    ./national.sh 10000
+
+To determine the parameters in synthea.properties for the next synthea release look at the end state properties file located at `[./synthea/synthea.properities-01182022](./synthea/synthea.properities-01182022)` and run the queries located in `[./bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql](./bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql).

@@ -7,6 +7,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -41,6 +42,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   protected final Logger logger;
   protected final RdaApiProgress.ClaimType claimType;
   protected final boolean autoUpdateLastSeq;
+
+  /** Holds the underlying value of our sequence number gauges. */
+  private static final NumericGauges GAUGES = new NumericGauges();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either
@@ -148,8 +152,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       updateLatencyMetric(claims);
       mergeBatch(maxSeq, claims);
       metrics.objectsMerged.mark(claims.size());
-      metrics.setLatestSequenceNumber(maxSeq);
-      logger.info("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
+      logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
           "writeBatch failed: size={} maxSeq={} error={}",
@@ -207,7 +210,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
             .lastUpdated(clock.instant())
             .build();
     entityManager.merge(progress);
-    logger.info("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
+    metrics.setLatestSequenceNumber(lastSequenceNumber);
+    logger.debug("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
   private List<RdaChange<TClaim>> transformMessages(
@@ -322,7 +326,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     /** Latest sequnce number from writing a batch. * */
     private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
-    private final AtomicLong latestSequenceNumberValue = new AtomicLong(0L);
+    private final AtomicLong latestSequenceNumberValue;
 
     private Metrics(Class<?> klass, MetricRegistry appMetrics) {
       final String base = klass.getSimpleName();
@@ -336,12 +340,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
-      latestSequenceNumber =
-          appMetrics.gauge(
-              MetricRegistry.name(base, "lastSeq"), () -> latestSequenceNumberValue::longValue);
+      String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
+      latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
+      latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
     }
 
-    private void setLatestSequenceNumber(long value) {
+    @VisibleForTesting
+    void setLatestSequenceNumber(long value) {
       latestSequenceNumberValue.set(value);
     }
   }

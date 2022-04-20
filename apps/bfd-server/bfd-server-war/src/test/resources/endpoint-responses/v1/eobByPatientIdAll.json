@@ -928,8 +928,8 @@
           "url" : "http://hl7.org/fhir/sid/ndc",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "500904610",
-            "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
+            "code" : "000000000",
+            "display" : "Fake Diluent - WATER"
           }
         } ],
         "sequence" : 1,
@@ -2029,6 +2029,7 @@
         }
       } ],
       "diagnosis" : [ {
+        "sequence" : 1,
         "packageCode" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
@@ -2804,6 +2805,7 @@
         }
       } ],
       "diagnosis" : [ {
+        "sequence" : 1,
         "packageCode" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
@@ -3322,8 +3324,8 @@
         "service" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "500904610",
-            "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
+            "code" : "000000000",
+            "display" : "Fake Diluent - WATER"
           } ]
         },
         "servicedDate" : "2015-05-12",
