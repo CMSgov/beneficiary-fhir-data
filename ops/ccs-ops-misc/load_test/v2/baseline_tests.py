@@ -9,13 +9,6 @@ from locust import HttpUser, task, events, tag
 server_public_key = setup.loadServerPublicKey()
 setup.disable_no_cert_warnings(server_public_key, urllib3)
 
-'''
-If there is no server cert, the warnings are disabled because thousands will
-appear in the logs and make it difficult to see anything else.
-'''
-if not server_public_key:
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 # mbis = data.load_mbis()
 eob_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
