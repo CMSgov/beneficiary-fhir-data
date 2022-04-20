@@ -219,7 +219,9 @@ jobs:
               repo: context.repo.repo,
               issue_number: ${{github.event.number}},
               body: "${{steps.validate_fhir.outputs.output}}"
-            })
+            });
+            
+            core.setFailed("${{steps.validate_fhir.outputs.output}}");
 
   # ansible system testing
   ansible-role-bfd-pipeline:
