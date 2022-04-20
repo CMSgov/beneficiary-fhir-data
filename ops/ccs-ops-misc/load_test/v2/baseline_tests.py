@@ -26,9 +26,8 @@ cursor_list = data.load_cursors("v2")
 setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
-    def __init__(self, *args, **kwargs):
+    def on_start(self):
         self.eob_ids = eob_ids.copy()
-        super().__init__(*args, **kwargs)
 
     @task
     def coverage_test_id_count(self):
