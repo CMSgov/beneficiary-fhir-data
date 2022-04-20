@@ -169,7 +169,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used to create mock objects for unit tests. -->
+            <!-- Configures mockito to allow mocking of final classes and other features. -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
             <version>${mockito.version}</version>
