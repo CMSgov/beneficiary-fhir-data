@@ -137,13 +137,16 @@ try {
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
+					// Unset any pre-existing session variables
 					// Set global AWS environment variables from role assumption
-					withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-						awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
-						env.AWS_DEFAULT_REGION = 'us-east-1'
-						env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-						env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-						env.AWS_SESSION_TOKEN = awsCredentials[3]
+					withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
+						withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
+							awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
+							env.AWS_DEFAULT_REGION = 'us-east-1'
+							env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+							env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+							env.AWS_SESSION_TOKEN = awsCredentials[3]
+						}
 					}
 
 					// Find the most current AMI IDs (if any).
@@ -219,13 +222,16 @@ try {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
+						// Unset any pre-existing session variables
 						// Assume new role session for each deploy to prevent timeout
-						withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-							awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
-							env.AWS_DEFAULT_REGION = 'us-east-1'
-							env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-							env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-							env.AWS_SESSION_TOKEN = awsCredentials[3]
+						withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
+							withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
+								awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
+								env.AWS_DEFAULT_REGION = 'us-east-1'
+								env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+								env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+								env.AWS_SESSION_TOKEN = awsCredentials[3]
+							}
 						}
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 					}
@@ -265,13 +271,16 @@ try {
 						milestone(label: 'stage_deploy_prod_sbx_start')
 
 						container('bfd-cbc-build') {
+							// Unset any pre-existing session variables
 							// Assume new role session for each deploy to prevent timeout
-							withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-								awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
-								env.AWS_DEFAULT_REGION = 'us-east-1'
-								env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-								env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-								env.AWS_SESSION_TOKEN = awsCredentials[3]
+							withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
+								withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
+									awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
+									env.AWS_DEFAULT_REGION = 'us-east-1'
+									env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+									env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+									env.AWS_SESSION_TOKEN = awsCredentials[3]
+								}
 							}
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
 						}
@@ -288,13 +297,16 @@ try {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
+							// Unset any pre-existing session variables
 							// Assume new role session for each deploy to prevent timeout
-							withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-								awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
-								env.AWS_DEFAULT_REGION = 'us-east-1'
-								env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-								env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-								env.AWS_SESSION_TOKEN = awsCredentials[3]
+							withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
+								withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
+									awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
+									env.AWS_DEFAULT_REGION = 'us-east-1'
+									env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+									env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+									env.AWS_SESSION_TOKEN = awsCredentials[3]
+								}
 							}
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 						}
