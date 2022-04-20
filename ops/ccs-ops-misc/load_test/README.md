@@ -90,13 +90,15 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--serverPublicKey** : (Optional) : To allow the tests to trust the server responses, you can add the path to the public certificate here. This is not required to run the tests successfully, and may not be needed as a parameter at all. If not provided, defaults to an empty string (does not cause test issues.)
 
-**--testRunTime** : (Optional) : How long the test will run for. This uses values such as 1m, 30s, 1h, or combinations of these such as 1m 30s. If not provided, defaults to 1m.
+**--testRunTime** : (Optional) : How long the test will run. This uses values such as 1m, 30s, 1h, or combinations of these such as 1m 30s. If not provided, defaults to 1m. **Note**: We automatically adjust the run time so that the test runs for the specified amount of time *after* spawning all clients (see `--maxClients` and `--clientsPerSecond` below). For example, with the defaults of a one-minute test, 100 clients, and a spawn rate of 5 clients per second, then the script will spend twenty seconds ramping up its clients and *then* run for the one minute specified. It is optional whether or not to use the `--resetStats` flag to drop the statistics covering this ramp-up period.
 
 **--maxClients** : (Optional) : The maximum number of clients that will be spawned to hit the test host at the same time. If not provided, defaults to 100.
 
 **--clientsPerSecond** : (Optional) : The number of clients to spawn per second, until maxClients is reached. If not provided, defaults to 5.
 
 **--workerThreads** : (Optional) : Controls running in distributed mode; If this is set to >1, will spawn that many worker threads to run the tests across multiple cores. If not provided, defaults to 1. See section on running in distributed mode for more info.
+
+**--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
 ### Data setup for contract tests
 
