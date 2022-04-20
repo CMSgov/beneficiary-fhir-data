@@ -37,7 +37,7 @@ class BFDUser(HttpUser):
       self.client.get(create_url_path(base_path, params), 
                       cert=client_cert, 
                       verify=server_public_key, 
-                      headers=headers | {'Cache-Control': 'no-store, no-cache'}, 
+                      headers={**headers, 'Cache-Control': 'no-store, no-cache'}, 
                       name=name)
 
     @task
