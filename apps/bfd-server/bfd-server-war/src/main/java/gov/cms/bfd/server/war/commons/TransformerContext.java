@@ -27,17 +27,17 @@ public class TransformerContext {
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
-  /** @return the short identifier for this {@link MetricRegistry} */
+  /** @return the {@link MetricRegistry} */
   public MetricRegistry getMetricRegistry() {
     return metricRegistry;
   }
 
-  /** @return the short identifier for this {@link Optional} populated with an {@link Boolean} */
+  /** @return the {@link Optional} populated with an {@link Boolean} */
   public Optional<Boolean> getIncludeTaxNumbers() {
     return includeTaxNumbers;
   }
 
-  /** @return the short identifier for this {@link FdaDrugCodeDisplayLookup} */
+  /** @return the {@link FdaDrugCodeDisplayLookup} */
   public FdaDrugCodeDisplayLookup getDrugCodeDisplayLookup() {
     return drugCodeDisplayLookup;
   }
