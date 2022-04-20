@@ -3,6 +3,7 @@ import common.config as config
 import common.data as data
 import common.errors as errors
 import common.test_setup as setup
+from common.url_path import create_url_path
 import common.validation as validation
 from locust import HttpUser, task, events, tag
 
@@ -21,6 +22,9 @@ setup.set_locust_env(config.load())
 class BFDUser(HttpUser):
     def on_start(self):
         self.eob_ids = eob_ids.copy()
+
+    def get(self, base_path: str, params: dict[str, str], name: str, headers: dict[str, str] = None):
+      self.client.get(create_url_path(base_path, params), cert=client_cert, verify=server_public_key, headers=headers, name=name)
 
     @task
     def coverage_test_id_count(self):
