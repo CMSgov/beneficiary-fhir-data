@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.utils.AssertUtils;
@@ -71,9 +72,10 @@ public class R4ClaimResourceProviderIT {
             .forResource(Claim.class)
             .where(
                 Map.of(
-                    "mbi", List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
+                    "mbi",
+                    List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
                     "service-date",
-                        List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
+                    List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -81,6 +83,40 @@ public class R4ClaimResourceProviderIT {
     claimResult.getEntry().sort(Comparator.comparing(a -> a.getResource().getId()));
 
     String expected = testUtils.expectedResponseFor("claimSearch");
+    String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
+
+    Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
+    ignorePatterns.add("\"/id\"");
+    ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
+
+    AssertUtils.assertJsonEquals(expected, actual, ignorePatterns);
+  }
+
+  @Test
+  public void shouldGetCorrectClaimResourcesByMbiHashWithPagination() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Bundle claimResult =
+        fhirClient
+            .search()
+            .forResource(Claim.class)
+            .where(
+                Map.of(
+                    "mbi",
+                    List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
+                    "service-date",
+                    List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30")),
+                    "_count",
+                    List.of(new NumberParam("5")),
+                    "startIndex",
+                    List.of(new NumberParam("1"))))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    // Sort entries for consistent testing results
+    claimResult.getEntry().sort(Comparator.comparing(a -> a.getResource().getId()));
+
+    String expected = testUtils.expectedResponseFor("claimSearchPaginated");
     String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
 
     Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);

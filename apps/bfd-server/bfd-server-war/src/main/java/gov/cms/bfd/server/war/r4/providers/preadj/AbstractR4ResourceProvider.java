@@ -28,6 +28,7 @@ import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -323,12 +324,15 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               .collect(Collectors.toList()));
     }
 
+    resources.sort(Comparator.comparing(r -> r.getIdElement().getIdPart()));
+
+    Bundle bundle = new Bundle();
+    bundle.setTotal(resources.size());
+
     if (paging.isPagingRequested()) {
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       resources = resources.subList(paging.getStartIndex(), endIndex);
     }
-
-    Bundle bundle = new Bundle();
 
     resources.forEach(
         c -> {
