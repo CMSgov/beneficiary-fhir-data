@@ -38,6 +38,10 @@ public class R4ClaimResourceProviderIT {
     testUtils.destroy();
   }
 
+  /**
+   * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
+   * specific ID
+   */
   @Test
   public void shouldGetCorrectFissClaimResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
@@ -50,6 +54,10 @@ public class R4ClaimResourceProviderIT {
     AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
   }
 
+  /**
+   * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
+   * specific ID
+   */
   @Test
   public void shouldGetCorrectMcsClaimResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
@@ -62,6 +70,10 @@ public class R4ClaimResourceProviderIT {
     AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
   }
 
+  /**
+   * Tests to see if the correct response is given when a search is done for {@link Claim}s using
+   * given mbi and service-date range
+   */
   @Test
   public void shouldGetCorrectClaimResourcesByMbiHash() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
@@ -92,6 +104,10 @@ public class R4ClaimResourceProviderIT {
     AssertUtils.assertJsonEquals(expected, actual, ignorePatterns);
   }
 
+  /**
+   * Tests to see if the correct paginated response is given when a search is done for {@link
+   * Claim}s using given mbi and service-date range
+   */
   @Test
   public void shouldGetCorrectClaimResourcesByMbiHashWithPagination() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
