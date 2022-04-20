@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import io.grpc.ClientCall;
 import io.grpc.Status;
@@ -104,9 +105,11 @@ public class GrpcResponseStream<TResponse> {
    * @param exception a {@link StatusRuntimeException} caught while reading from the gRPC connection
    * @return true if the error represents a dropped connection
    */
-  public boolean isStreamResetException(StatusRuntimeException exception) {
-    return exception.getStatus().getCode() == Status.Code.INTERNAL
-        && STREAM_RESET_ERROR_MESSAGE.equals(exception.getStatus().getDescription());
+  @VisibleForTesting
+  static boolean isStreamResetException(StatusRuntimeException exception) {
+    return exception.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED
+        || (exception.getStatus().getCode() == Status.Code.INTERNAL
+            && STREAM_RESET_ERROR_MESSAGE.equals(exception.getStatus().getDescription()));
   }
 
   /**
