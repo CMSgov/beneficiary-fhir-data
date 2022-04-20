@@ -240,7 +240,12 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    assertEquals(5, expected.size());
+    assertEquals(6, expected.size());
+
+    assertNotNull(
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+            eob.getExtension()));
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -270,13 +275,18 @@ public final class HospiceClaimTransformerV2Test {
     hospiceCountExtension.setValue(new Quantity(2));
 
     List<Extension> compare =
-        Arrays.asList(
+        List.of(
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
                 new Coding(
                     "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
                     "V",
                     "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])")),
+            new Extension(
+                "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+                new Identifier()
+                    .setSystem("https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num")
+                    .setValue("2718813985998")),
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
                 new Coding(
