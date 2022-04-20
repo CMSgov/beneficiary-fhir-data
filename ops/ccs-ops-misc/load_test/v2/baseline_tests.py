@@ -1,3 +1,4 @@
+import random
 import urllib3
 import common.config as config
 import common.data as data
@@ -21,7 +22,9 @@ setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     def on_start(self):
-        self.eob_ids = eob_ids.copy()
+        copied_ids = eob_ids.copy()
+        random.shuffle(copied_ids)
+        self.eob_ids = copied_ids
 
     def get_eob(self):
       if len(self.eob_ids) == 0:
@@ -29,8 +32,12 @@ class BFDUser(HttpUser):
 
       return self.eob_ids.pop()
 
-    def get(self, base_path: str, params: dict[str, str], name: str, headers: dict[str, str] = None):
-      self.client.get(create_url_path(base_path, params), cert=client_cert, verify=server_public_key, headers=headers, name=name)
+    def get(self, base_path: str, params: dict[str, str], name: str, headers: dict[str, str] = {}):
+      self.client.get(create_url_path(base_path, params), 
+                      cert=client_cert, 
+                      verify=server_public_key, 
+                      headers=headers | {'Cache-Control': 'no-store, no-cache'}, 
+                      name=name)
 
     @task
     def coverage_test_id_count(self):
