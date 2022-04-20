@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import gov.cms.bfd.model.rif.InpatientClaimColumn;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for {@link Fiss} class. */
 public class FissTest {
   /** Verifies that all lists of numbered enum names appear in the proper sequence. */
   @Test

@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rif.InpatientClaimColumn;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for {@link ModelUtil} class. */
 public class ModelUtilTest {
   /**
    * Extracts the names of a numbered enum and verifies that the names all fit the same base name

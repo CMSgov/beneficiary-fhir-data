@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for {@link Mcs} class. */
 public class McsTest {
   /** Verifies that all lists of numbered enum names appear in the proper sequence. */
   @Test

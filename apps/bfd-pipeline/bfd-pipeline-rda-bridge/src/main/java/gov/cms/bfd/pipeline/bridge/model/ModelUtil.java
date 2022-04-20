@@ -12,8 +12,8 @@ class ModelUtil {
    *
    * @param enumValues expected to be the result of a call to {@link Enum#values}
    * @param baseValue a template enum value to extract the base name from
-   * @return unmodifiable {@link List} of names of all numbered enums with same base name
    * @param <E> a RIF column enum class containing our enum values
+   * @return unmodifiable {@link List} of names of all numbered enums with same base name
    */
   static <E extends Enum<?>> List<String> listNumberedEnumNames(E[] enumValues, E baseValue) {
     final String baseName = baseValue.name().replaceAll("\\d+$", "");
