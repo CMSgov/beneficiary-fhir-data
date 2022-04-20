@@ -9,8 +9,13 @@ import java.util.Optional;
  */
 public class TransformerContext {
 
+  /** The {@link Metricregistry} for the overall application */
   private final MetricRegistry metricRegistry;
+  /**
+   * the {@link Optional} populated with an {@link Boolean} to wheteher return tax numbers or not
+   */
   private final Optional<Boolean> includeTaxNumbers;
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
   /**
