@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -81,7 +81,7 @@ public class FissClaimStreamCallerIT {
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertTrue(results.hasNext());
 
-              PreAdjFissClaim claim = transform(results.next());
+              RdaFissClaim claim = transform(results.next());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertTrue(results.hasNext());
@@ -115,7 +115,7 @@ public class FissClaimStreamCallerIT {
             });
   }
 
-  private PreAdjFissClaim transform(FissClaimChange change) {
+  private RdaFissClaim transform(FissClaimChange change) {
     return transformer.transformClaim(change).getClaim();
   }
 }

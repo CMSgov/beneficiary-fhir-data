@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
 
@@ -27,24 +28,34 @@ public final class LoadAppOptions implements Serializable {
   private final boolean filteringNonNullAndNon2022Benes;
 
   /**
+   * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
+   * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
+   * simultaneously.
+   */
+  private final int recordBatchSize;
+
+  /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
    * @param idHasherConfig the value to use for {@link #getIdHasherConfig()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
    * @param filterNon2022Benes the filter non 2022 benes
+   * @param recordBatchSize the load batch size
    */
   public LoadAppOptions(
       IdHasher.Config idHasherConfig,
       int loaderThreads,
       boolean idempotencyRequired,
-      boolean filterNon2022Benes) {
+      boolean filterNon2022Benes,
+      int recordBatchSize) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
     this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
     this.filteringNonNullAndNon2022Benes = filterNon2022Benes;
+    this.recordBatchSize = recordBatchSize;
   }
 
   /** @return the configuration settings used when hashing beneficiary HICNs */
@@ -58,6 +69,15 @@ public final class LoadAppOptions implements Serializable {
    */
   public int getLoaderThreads() {
     return loaderThreads;
+  }
+
+  /**
+   * Gets the number of {@link RifRecordEvent}s that will be included in each processing batch.
+   *
+   * @return the batch size
+   */
+  public int getRecordBatchSize() {
+    return recordBatchSize;
   }
 
   /**

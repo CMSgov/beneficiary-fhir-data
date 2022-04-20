@@ -103,7 +103,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
             "value": "123456"
           }
         ],
@@ -126,7 +126,7 @@
           "reference": "#patient"
         },
         "billablePeriod": {
-          "start": "1970-07-20T00:00:00+00:00",
+          "start": "1970-07-10T00:00:00+00:00",
           "end": "1970-07-20T00:00:00+00:00"
         },
         "created": "2021-12-09T00:19:25+00:00",
@@ -417,7 +417,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
             "value": "654323"
           }
         ],
@@ -435,7 +435,7 @@
           "reference": "#patient"
         },
         "billablePeriod": {
-          "start": "1970-07-20T00:00:00+00:00",
+          "start": "1970-07-18T00:00:00+00:00",
           "end": "1970-07-20T00:00:00+00:00"
         },
         "created": "2022-01-27T18:26:54+00:00",

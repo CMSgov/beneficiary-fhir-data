@@ -3,7 +3,6 @@ package gov.cms.bfd.migrator.app;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.migrator.util.DatabaseTestUtils;
 import gov.cms.bfd.migrator.util.DatabaseTestUtils.DataSourceComponents;
@@ -11,8 +10,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -31,7 +33,8 @@ public final class MigratorAppIT {
   private enum TestDirectory {
     REAL(""),
     BAD_SQL("/bad-sql"),
-    DUPLICATE_VERSION("/duplicate-version");
+    DUPLICATE_VERSION("/duplicate-version"),
+    VALIDATION_FAILURE("/validation-failure");
 
     private final String path;
 
@@ -89,7 +92,10 @@ public final class MigratorAppIT {
           .until(() -> !appProcess.isAlive());
 
       // Verify results
-      assertEquals(0, appProcess.exitValue());
+      assertEquals(
+          0,
+          appProcess.exitValue(),
+          "Did not get expected error code, \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
 
       // Test the migrations occurred by checking the log output
       boolean hasExpectedMigrationLine =
@@ -106,6 +112,44 @@ public final class MigratorAppIT {
       assertTrue(
           hasLogLine(appRunConsumer, String.format("now at version v%s", expectedVersion)),
           "Did not find log entry for expected final version (v" + expectedVersion + ")");
+    } catch (ConditionTimeoutException e) {
+      throw new RuntimeException(
+          "Migration application failed to start within timeout, STDOUT:\n"
+              + appRunConsumer.getStdoutContents(),
+          e);
+    }
+  }
+
+  /**
+   * Test when the migration app runs and the schema is not in the state the models imply, the exit
+   * code is 3 (hibernate validation failure).
+   *
+   * @throws IOException if there is an issue starting the app
+   */
+  @Test
+  public void testMigrationRunWhenSchemaDoesntMatchTablesExpectValidationError()
+      throws IOException {
+    // Setup
+    ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.VALIDATION_FAILURE);
+    appRunBuilder.redirectErrorStream(true);
+    Process appProcess = appRunBuilder.start();
+
+    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+    Thread appRunConsumerThread = new Thread(appRunConsumer);
+    appRunConsumerThread.start();
+
+    // Await start/finish of application
+    try {
+      Awaitility.await()
+          .atMost(new Duration(60, TimeUnit.SECONDS))
+          .until(() -> !appProcess.isAlive());
+
+      // Verify results
+      assertEquals(
+          3,
+          appProcess.exitValue(),
+          "Did not get expected error code for validation failure., \nSTDOUT:\n"
+              + appRunConsumer.getStdoutContents());
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(
           "Migration application failed to start within timeout, STDOUT:\n"
@@ -176,7 +220,10 @@ public final class MigratorAppIT {
           hasLogLine(appRunConsumer, "Skipping filesystem location"),
           "Could not find path to test files");
 
-      assertEquals(2, appProcess.exitValue());
+      assertEquals(
+          2,
+          appProcess.exitValue(),
+          "Exited with the wrong exit code. STDOUT:\n" + appRunConsumer.getStdoutContents());
 
       // Test flyway threw an exception by checking the log output
       boolean hasExceptionLogLine = hasLogLine(appRunConsumer, "FlywayMigrateException");
@@ -242,21 +289,39 @@ public final class MigratorAppIT {
   }
 
   /**
-   * Gets the number of migration scripts by checking the directory they are located in.
+   * Gets the number of migration scripts by checking the directory they are located in and counting
+   * the files.
    *
    * @return the number migration scripts
    */
-  public int getNumMigrationScripts() {
-    String migrationPath = "src/main/resources/db/migration";
+  public int getNumMigrationScripts() throws IOException {
 
-    long fileCount = 0;
-    try (Stream<Path> files = Files.list(Paths.get(migrationPath))) {
-      fileCount = files.count();
-    } catch (IOException io) {
-      fail("Could not find file path for migration scripts at: " + migrationPath);
+    int MAX_SEARCH_DEPTH = 5;
+    Path jarFilePath =
+        Files.find(
+                Path.of("target/db-migrator/"),
+                MAX_SEARCH_DEPTH,
+                (path, basicFileAttributes) ->
+                    path.toFile().getName().matches("bfd-model-rif-.*.\\.jar"))
+            .findFirst()
+            .orElse(null);
+    if (jarFilePath == null) {
+      throw new IOException("Could not find jar file for testing num migrations");
     }
 
-    return (int) fileCount;
+    JarFile migrationJar = new JarFile(jarFilePath.toFile());
+    Enumeration<? extends JarEntry> enumeration = migrationJar.entries();
+
+    int fileCount = 0;
+    while (enumeration.hasMoreElements()) {
+      ZipEntry entry = enumeration.nextElement();
+
+      // Check for sql migration scripts
+      if (entry.getName().startsWith("db/migration/") && entry.getName().endsWith(".sql")) {
+        fileCount++;
+      }
+    }
+    return fileCount;
   }
 
   /**

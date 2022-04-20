@@ -10,6 +10,7 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +31,27 @@ public final class MigratorApp {
   /** This {@link System#exit(int)} value should be used when the migrations fail for any reason. */
   static final int EXIT_CODE_FAILED_MIGRATION = 2;
 
+  /**
+   * This {@link System#exit(int)} value should be used when hibernate validations fail for any
+   * reason.
+   */
+  static final int EXIT_CODE_FAILED_HIBERNATE_VALIDATION = 3;
+
   static final int EXIT_CODE_SUCCESS = 0;
 
   /**
-   * This method is called when the application is launched from the command line. Currently, this
-   * is a notional placeholder application that produces NDJSON-formatted log output.
+   * The list of packages to scan when doing hibernate validation; these packages should contain the
+   * database models that hibernate should attempt to validate. These are allowed to be from
+   * external packages. This may be better served coming from an application configuration.
+   */
+  static final List<String> hibernateValidationModelPackages =
+      List.of("gov.cms.bfd.model.rda", "gov.cms.bfd.model.rif");
+
+  /**
+   * This method is called when the application is launched from the command line.
    *
-   * @param args (should be empty. Application <strong>will</strong> accept configuration via
-   *     environment variables)
+   * @param args generally, should be empty. Application <strong>will</strong> accept configuration
+   *     via environment variables.
    */
   public static void main(String[] args) {
     LOGGER.info("Successfully started");
@@ -47,7 +61,7 @@ public final class MigratorApp {
       appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (AppConfigurationException e) {
-      LOGGER.error("Invalid app configuration.", e);
+      LOGGER.error("Invalid app configuration, shutting down.", e);
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
@@ -61,10 +75,25 @@ public final class MigratorApp {
     boolean migrationSuccess =
         DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource, appConfig);
 
-    LOGGER.info("Shutting down");
     if (!migrationSuccess) {
+      LOGGER.error("Migration failed, shutting down");
       System.exit(EXIT_CODE_FAILED_MIGRATION);
     }
+
+    // Hibernate suggests not reusing data sources for validations
+    pooledDataSource = createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+
+    // Run hibernate validation after the migrations have succeeded
+    HibernateValidator validator =
+        new HibernateValidator(pooledDataSource, hibernateValidationModelPackages);
+    boolean validationSuccess = validator.runHibernateValidation();
+
+    if (!validationSuccess) {
+      LOGGER.error("Validation failed, shutting down");
+      System.exit(EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
+    }
+
+    LOGGER.info("Migration and validation passed, shutting down");
     System.exit(EXIT_CODE_SUCCESS);
   }
 

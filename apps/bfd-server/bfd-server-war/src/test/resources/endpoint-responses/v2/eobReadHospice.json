@@ -39,6 +39,12 @@
       "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
     }
   }, {
+    "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier": {
+      "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value": "2718813985998"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -266,7 +272,8 @@
     "code" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-        "code" : "1"
+        "code" : "30",
+        "display" : "Still patient."
       } ]
     }
   }, {
@@ -352,6 +359,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }

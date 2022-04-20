@@ -270,6 +270,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
@@ -334,13 +335,6 @@
         "code" : "0",
         "display" : "Service Subject to Deductible"
       }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "code" : "E",
-        "display" : "Workers' compensation"
-      }
     } ],
     "sequence" : 1,
     "careTeamSequence" : [ 2 ],
@@ -358,8 +352,8 @@
         "url" : "http://hl7.org/fhir/sid/ndc",
         "valueCoding" : {
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "500904610",
-          "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
+          "code" : "000000000",
+          "display" : "Fake Diluent - WATER"
         }
       } ],
       "coding" : [ {

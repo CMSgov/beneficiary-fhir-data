@@ -10,6 +10,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -43,7 +44,11 @@ public final class SNFClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        SNFClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        SNFClaimTransformer.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertMatches(claim, eob);
   }
 
@@ -63,7 +68,7 @@ public final class SNFClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.SNF,
-        claim.getClaimGroupId().toPlainString(),
+        Long.toString(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -76,11 +81,11 @@ public final class SNFClaimTransformerTest {
     // test common benefit components between SNF and Inpatient claims are set as expected
     TransformerTestUtils.assertCommonGroupInpatientSNF(
         eob,
-        claim.getCoinsuranceDayCount(),
-        claim.getNonUtilizationDayCount(),
+        BigDecimal.valueOf(claim.getCoinsuranceDayCount()),
+        BigDecimal.valueOf(claim.getNonUtilizationDayCount()),
         claim.getDeductibleAmount(),
         claim.getPartACoinsuranceLiabilityAmount(),
-        claim.getBloodPintsFurnishedQty(),
+        BigDecimal.valueOf(claim.getBloodPintsFurnishedQty()),
         claim.getNoncoveredCharge(),
         claim.getTotalDeductionAmount(),
         claim.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -120,7 +125,7 @@ public final class SNFClaimTransformerTest {
         eob,
         claim.getClaimAdmissionDate(),
         claim.getBeneficiaryDischargeDate(),
-        Optional.of(claim.getUtilizationDayCount()));
+        Optional.of(BigDecimal.valueOf(claim.getUtilizationDayCount())));
 
     // Test to ensure common group fields between Inpatient, Outpatient and SNF
     TransformerTestUtils.assertEobCommonGroupInpOutSNFEquals(
@@ -165,8 +170,7 @@ public final class SNFClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     SNFClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
-
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHasCoding(
@@ -196,7 +200,10 @@ public final class SNFClaimTransformerTest {
         claimLine1.getNonCoveredChargeAmount(),
         BigDecimal.valueOf(claimLine1.getUnitCount()),
         claimControlNumber,
-        claimLine1.getNationalDrugCodeQuantity(),
+        claimLine1.getNationalDrugCodeQuantity().isPresent()
+            ? Optional.of(
+                BigDecimal.valueOf(claimLine1.getNationalDrugCodeQuantity().get().longValue()))
+            : Optional.empty(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
         1 /* index */);

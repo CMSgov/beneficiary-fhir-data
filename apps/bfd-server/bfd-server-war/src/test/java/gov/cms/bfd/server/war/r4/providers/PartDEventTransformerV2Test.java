@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -30,8 +33,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.PaymentComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -66,7 +71,12 @@ public final class PartDEventTransformerV2Test {
   @BeforeEach
   public void before() {
     claim = generateClaim();
-    eob = PartDEventTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    eob =
+        PartDEventTransformerV2.transform(
+            new MetricRegistry(),
+            claim,
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -165,7 +175,7 @@ public final class PartDEventTransformerV2Test {
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    assertEquals(15, eob.getSupportingInfo().size());
+    assertEquals(14, eob.getSupportingInfo().size());
   }
 
   @Test
@@ -585,8 +595,8 @@ public final class PartDEventTransformerV2Test {
                 Arrays.asList(
                     new Coding(
                         "http://hl7.org/fhir/sid/ndc",
-                        "500904610",
-                        "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE")));
+                        "000000000",
+                        FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY)));
 
     assertTrue(compare.equalsDeep(pos));
   }
@@ -873,6 +883,25 @@ public final class PartDEventTransformerV2Test {
   }
 
   /**
+   * Verifies that {@link
+   * PartDEventTransformer has a provider set otherwise it throws an exception
+   *
+   * @throws Exception (indicates test failure)
+   */
+  @Test
+  public void shouldHaveProvider() throws Exception {
+    Reference compare =
+        new Reference()
+            .setIdentifier(
+                new Identifier()
+                    .setSystem(
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRVDR_NUM))
+                    .setValue("1023011079"));
+
+    assertTrue(compare.equalsDeep(eob.getProvider()));
+  }
+
+  /**
    * Serializes the EOB and prints to the command line
    *
    * @throws FHIRException
@@ -882,7 +911,10 @@ public final class PartDEventTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         PartDEventTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new MetricRegistry(),
+            generateClaim(),
+            Optional.of(false),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

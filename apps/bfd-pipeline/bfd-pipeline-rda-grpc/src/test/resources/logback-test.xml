@@ -4,7 +4,6 @@
       <pattern>%msg%n</pattern>
     </encoder>
   </appender>
-  <root level="OFF">
-    <appender-ref ref="CONSOLE"/>
+  <root level="INFO">
   </root>
 </configuration>
