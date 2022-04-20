@@ -330,6 +330,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     bundle.setTotal(resources.size());
 
     if (paging.isPagingRequested()) {
+      paging.setTotal(resources.size()).addLinks(bundle);
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       resources = resources.subList(paging.getStartIndex(), endIndex);
     }
