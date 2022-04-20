@@ -1,5 +1,22 @@
 # API Changelog
 
+## BFD-1672: Add FI_DOC_CLM_CNTL_NUM extension to v2 adjudicated institutional claims
+
+This extension was not previously available in the v2 claims for institutional based ExplanationOfBenefit resources.  This
+extension is now available in the extensions for Inpatient, Outpatient, HHA, Hospice, and SNF claims.
+```json
+  "extension" : [ {
+    //...
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "1234567890123"
+    }
+  },
+  //...
+```
+
 ## BFD-1529: Populate Part B Termination Code Correctly
 
 Previously the Part B coverage termination code was always the same as the Part A coverage termination code.

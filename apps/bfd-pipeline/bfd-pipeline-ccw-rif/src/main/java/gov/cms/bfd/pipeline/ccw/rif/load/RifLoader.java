@@ -79,12 +79,6 @@ import org.slf4j.LoggerFactory;
  * database.
  */
 public final class RifLoader {
-  /**
-   * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
-   * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
-   * simultaneously.
-   */
-  private static final int RECORD_BATCH_SIZE = 100;
 
   private static final Period MAX_FILE_AGE_DAYS = Period.ofDays(40);
 
@@ -137,7 +131,7 @@ public final class RifLoader {
         "Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
         options.getLoaderThreads(),
         taskQueueSize,
-        RECORD_BATCH_SIZE);
+        options.getRecordBatchSize());
 
     /*
      * I feel like a hipster using "found" code like
@@ -290,8 +284,8 @@ public final class RifLoader {
           };
 
       // Collect records into batches and submit each to batchProcessor.
-      if (RECORD_BATCH_SIZE > 1)
-        BatchSpliterator.batches(dataToLoad.getRecords(), RECORD_BATCH_SIZE)
+      if (options.getRecordBatchSize() > 1)
+        BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
             .forEach(batchProcessor);
       else
         dataToLoad
