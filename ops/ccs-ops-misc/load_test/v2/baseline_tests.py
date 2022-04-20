@@ -34,68 +34,32 @@ class BFDUser(HttpUser):
 
     @task
     def coverage_test_id_count(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v2/fhir/Coverage?beneficiary={id}&_count=10',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_eob(), '_count': '10'},
                 name='/v2/fhir/Coverage search by id / count=10')
 
     @task
     def coverage_test_id_lastUpdated(self):
-        if len(eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/Coverage?_lastUpdated=gt{last_updated}&beneficiary={id}',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/Coverage', params={'_lastUpdated': f'gt{last_updated}', 'beneficiary': self.get_eob()},
                 name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks)')
     
     @task
     def coverage_test_id(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v2/fhir/Coverage?beneficiary={id}',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_eob()},
                 name='/v2/fhir/Coverage search by id')
 
     @task
     def eob_test_id_count(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_count=10&_format=application%2Ffhir%2Bjson',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_count': '10', '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id / count=10')
     
     @task
     def eob_test_id_includeTaxNumber(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v1/fhir/ExplanationOfBenefit?_lastUpdated=gt{last_updated}&patient={id}&_IncludeTaxNumbers=true&_format=json',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v1/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_eob(), '_IncludeTaxNumbers': 'true', '_format': 'json'},
                 name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
 
     @task
     def eob_test_id(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_format=application%2Ffhir%2Bjson',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id')
   
     # @task
@@ -105,7 +69,7 @@ class BFDUser(HttpUser):
 
     #     cursor_url = cursor_list.pop()
 
-    #     response = self.client.get(cursor_url,
+    #     response = self.get(cursor_url,
     #             cert=client_cert,
     #             verify=server_public_key,
     #             headers={"IncludeIdentifiers": "mbi"},
@@ -117,31 +81,19 @@ class BFDUser(HttpUser):
     #         errors.no_data_stop_test(self)
 
     #     hashed_mbi = mbis.pop()
-    #     self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C{hashed_mbi}&_IncludeIdentifiers=mbi',
+    #     self.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C{hashed_mbi}&_IncludeIdentifiers=mbi',
     #             cert=client_cert,
     #             verify=server_public_key,
     #             name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
 
     @task
     def patient_test_id_lastUpdated(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v2/fhir/Patient?_id={id}&_format=application%2Ffhir%2Bjson&_IncludeIdentifiers=mbi&_lastUpdated=gt{last_updated}',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/Patient', params={'_id': self.get_eob(), '_format': 'application/fhir+json', '_IncludeIdentifiers': 'mbi', '_lastUpdated': f'gt{last_updated}'},
                 name='/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / last updated (2 weeks)')
 
     @task
     def patient_test_id(self):
-        if len(self.eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = self.eob_ids.pop()
-        self.client.get(f'/v2/fhir/Patient?_id={id}&_format=application%2Ffhir%2Bjson',
-                cert=client_cert,
-                verify=server_public_key,
+        self.get('/v2/fhir/Patient', params={'_id': self.get_eob(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/Patient search by id')
 
 '''
