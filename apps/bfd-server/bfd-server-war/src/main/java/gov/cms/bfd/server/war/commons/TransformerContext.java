@@ -4,8 +4,8 @@ import com.codahale.metrics.MetricRegistry;
 import java.util.Optional;
 
 /**
- * Contains all of the boolean logic used to transform include tax numbers and which drug code
- * display to use based on the environment
+ * Contains contextual information needed for transformation including configuration, metrics
+ * registry and drug code display lookup.
  */
 public class TransformerContext {
 
