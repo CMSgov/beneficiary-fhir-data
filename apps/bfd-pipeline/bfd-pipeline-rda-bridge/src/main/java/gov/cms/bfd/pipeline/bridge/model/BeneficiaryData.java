@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.bridge.model;
 
+import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.pipeline.bridge.etl.Parser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,15 +12,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BeneficiaryData {
 
-  public static final String MBI_NUM = "MBI_NUM";
-  public static final String BENE_ID = "BENE_ID";
-  public static final String BENE_CRNT_HIC_NUM = "BENE_CRNT_HIC_NUM";
+  public static final String MBI_NUM = BeneficiaryColumn.MBI_NUM.name();
+  public static final String BENE_ID = BeneficiaryColumn.BENE_ID.name();
+  public static final String BENE_CRNT_HIC_NUM = BeneficiaryColumn.BENE_CRNT_HIC_NUM.name();
 
-  public static final String BENE_SRNM_NAME = "BENE_SRNM_NAME";
-  public static final String BENE_GVN_NAME = "BENE_GVN_NAME";
-  public static final String BENE_MDL_NAME = "BENE_MDL_NAME";
-  public static final String BENE_BIRTH_DT = "BENE_BIRTH_DT";
-  public static final String BENE_SEX_IDENT_CD = "BENE_SEX_IDENT_CD";
+  public static final String BENE_SRNM_NAME = BeneficiaryColumn.BENE_SRNM_NAME.name();
+  public static final String BENE_GVN_NAME = BeneficiaryColumn.BENE_GVN_NAME.name();
+  public static final String BENE_MDL_NAME = BeneficiaryColumn.BENE_MDL_NAME.name();
+  public static final String BENE_BIRTH_DT = BeneficiaryColumn.BENE_BIRTH_DT.name();
+  public static final String BENE_SEX_IDENT_CD = BeneficiaryColumn.BENE_SEX_IDENT_CD.name();
 
   private final String beneId;
   private final String mbi;
