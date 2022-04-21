@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -43,10 +44,11 @@ public final class HospiceClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         HospiceClaimTransformer.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 
