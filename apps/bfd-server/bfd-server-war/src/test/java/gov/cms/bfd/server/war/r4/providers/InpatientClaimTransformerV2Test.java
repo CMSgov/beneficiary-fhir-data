@@ -11,8 +11,10 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -77,7 +79,12 @@ public final class InpatientClaimTransformerV2Test {
   public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+        InpatientClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -542,7 +549,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(6, eob.getExtension().size());
+    assertEquals(7, eob.getExtension().size());
   }
 
   @Test
@@ -1689,7 +1696,11 @@ public final class InpatientClaimTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         InpatientClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

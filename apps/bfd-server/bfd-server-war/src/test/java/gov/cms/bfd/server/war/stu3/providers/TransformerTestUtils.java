@@ -32,6 +32,7 @@ import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -2045,8 +2046,10 @@ final class TransformerTestUtils {
   /** @throws IOException */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     String nationalDrugCodeDisplayValueActual =
-        TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(nationalDrugCode));
     assertEquals(
         nationalDrugCodeDisplayValue,
         nationalDrugCodeDisplayValueActual,

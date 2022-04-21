@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -25,24 +26,25 @@ import org.hl7.fhir.r4.model.Quantity;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformerV2 {
+
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link DMEClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob = transformClaim(transformerContext, (DMEClaim) claim);
 
     timer.stop();
     return eob;
@@ -50,11 +52,12 @@ final class DMEClaimTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link DMEClaim} to transform
+   * @param transformerContext the CCW {@link TransformerContext} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      TransformerContext transformerContext, DMEClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -156,13 +159,13 @@ final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob, includeTaxNumbers);
+    handleClaimLines(claimGroup, eob, transformerContext);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 
   private static void handleClaimLines(
-      DMEClaim claimGroup, ExplanationOfBenefit eob, Optional<Boolean> includeTaxNumbers) {
+      DMEClaim claimGroup, ExplanationOfBenefit eob, TransformerContext transformerContext) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -231,7 +234,7 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
 
-      if (includeTaxNumbers.orElse(false)) {
+      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
@@ -356,7 +359,10 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode());
+          line.getNationalDrugCode(),
+          transformerContext
+              .getDrugCodeDisplayLookup()
+              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

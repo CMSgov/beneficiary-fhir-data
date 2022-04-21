@@ -11,7 +11,9 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -45,7 +47,12 @@ public final class InpatientClaimTransformerTest {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit eob =
-        InpatientClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        InpatientClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 

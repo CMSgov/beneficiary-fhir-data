@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -25,17 +26,18 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 public class CarrierClaimTransformerV2 {
+
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link CarrierClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
@@ -44,7 +46,7 @@ public class CarrierClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob = transformClaim(transformerContext, (CarrierClaim) claim);
 
     timer.stop();
     return eob;
@@ -52,11 +54,12 @@ public class CarrierClaimTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link CarrierClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      TransformerContext transformerContext, CarrierClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -245,7 +248,7 @@ public class CarrierClaimTransformerV2 {
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
       // tax num should be as a extension
-      if (includeTaxNumbers.orElse(false)) {
+      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
@@ -329,7 +332,10 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode());
+          line.getNationalDrugCode(),
+          transformerContext
+              .getDrugCodeDisplayLookup()
+              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

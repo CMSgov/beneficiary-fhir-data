@@ -32,8 +32,10 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import java.time.Instant;
@@ -402,9 +404,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     // Compare result to transformed EOB
     assertEobEquals(
         OutpatientClaimTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            claim,
-            Optional.of(false)),
+            new TransformerContext(
+                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim),
         eob);
   }
 
@@ -1453,9 +1457,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     // Compare result to transformed EOB
     assertEobEquals(
         PartDEventTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            partDEvent,
-            Optional.of(false)),
+            new TransformerContext(
+                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -2054,9 +2060,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         claimType
             .getTransformer()
             .transform(
-                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                claim,
-                Optional.of(false)),
+                new TransformerContext(
+                    PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                    Optional.of(false),
+                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                claim),
         searchResults);
   }
 
