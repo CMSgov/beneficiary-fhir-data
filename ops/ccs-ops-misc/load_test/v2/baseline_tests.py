@@ -62,8 +62,8 @@ class BFDUser(HttpUser):
     
     @task
     def eob_test_id_includeTaxNumber(self):
-        self.get('/v1/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_eob(), '_IncludeTaxNumbers': 'true', '_format': 'json'},
-                name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_eob(), '_IncludeTaxNumbers': 'true', '_format': 'application/fhir+json'},
+                name='/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
 
     @task
     def eob_test_id(self):
