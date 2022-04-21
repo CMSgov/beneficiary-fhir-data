@@ -17,6 +17,7 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -79,10 +80,11 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB(Optional<Boolean> includeTaxNumber) {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(),
-            claim,
-            includeTaxNumber,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                includeTaxNumber,
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -113,10 +115,11 @@ public final class HospiceClaimTransformerV2Test {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(false),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim));
   }
 
   /** Common top level ExplanationOfBenefit values */
@@ -240,7 +243,12 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    assertEquals(5, expected.size());
+    assertEquals(6, expected.size());
+
+    assertNotNull(
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+            eob.getExtension()));
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -270,13 +278,18 @@ public final class HospiceClaimTransformerV2Test {
     hospiceCountExtension.setValue(new Quantity(2));
 
     List<Extension> compare =
-        Arrays.asList(
+        List.of(
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
                 new Coding(
                     "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
                     "V",
                     "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])")),
+            new Extension(
+                "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+                new Identifier()
+                    .setSystem("https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num")
+                    .setValue("2718813985998")),
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
                 new Coding(

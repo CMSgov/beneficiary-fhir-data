@@ -34,6 +34,7 @@ def set_locust_env(configFile):
     os.environ['LOCUST_USERS'] = configFile["testNumTotalClients"]
     os.environ['LOCUST_SPAWN_RATE'] = configFile["testCreatedClientsPerSecond"]
     os.environ['LOCUST_LOGLEVEL'] = "INFO"
+    os.environ['LOCUST_RESET_STATS'] = configFile["resetStatsAfterClientSpawn"]
     ## set the runtime if not running distributed or if test master
     if not is_distributed() or is_master_thread():
         os.environ['LOCUST_RUN_TIME'] = configFile["testRunTime"]
