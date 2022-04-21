@@ -12,7 +12,7 @@ from locust import HttpUser, task, events, tag
 server_public_key = setup.loadServerPublicKey()
 setup.disable_no_cert_warnings(server_public_key, urllib3)
 
-# mbis = data.load_mbis()
+mbis = data.load_mbis()
 eob_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
 server_public_key = setup.loadServerPublicKey()
@@ -83,16 +83,14 @@ class BFDUser(HttpUser):
     #             headers={"IncludeIdentifiers": "mbi"},
     #             name='/v2/fhir/Patient search by coverage contract (all pages)')
     
-    # @task
-    # def patient_test_hashedMbi(self):
-    #     if len(mbis) == 0:
-    #         errors.no_data_stop_test(self)
+    @task
+    def patient_test_hashedMbi(self):
+        if len(mbis) == 0:
+            errors.no_data_stop_test(self)
 
-    #     hashed_mbi = mbis.pop()
-    #     self.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C{hashed_mbi}&_IncludeIdentifiers=mbi',
-    #             cert=client_cert,
-    #             verify=server_public_key,
-    #             name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
+        hashed_mbi = mbis.pop()
+        self.get('/v2/fhir/Patient', params={'identifier': f'https://bluebutton.cms.gov/resources/identifier/mbi-hash|{hashed_mbi}', '_IncludeIdentifiers': 'mbi'},
+                name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
 
     @task
     def patient_test_id_lastUpdated(self):
