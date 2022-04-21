@@ -142,70 +142,13 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
     ```
 
-### Docker Setup
+### Certificates
 
-Requirements: Docker
-
-Let's begin!
-
-The instructions from here on should be run from the `contributing` directory located at /
-
-To simply run tests or execute other tasks in the BFD bring up the docker containers.
-Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory. A sample file in the `contributing` directory has been added to serve as a starting point.
-
-```
-cp .env.sample .env
-```
-
-- (defaults to `..`) `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
-- (defaults to `9954`) `BFD_PORT` specifies the host port to use when running the API locally
-- (defaults to `/app`) `BFD_MOUNT_POINT` the path within the service container where the beneficiary-fhir-data directory will be mounted.
-- (defaults to `./synthetic-data`) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
-- (defaults to `/synthetic-data`) `SYNTHETIC_DATA_MOUNT_POINT` specifies the folder in the bfd container where the data will be mounted
-
-```
-make up
-```
-
-This brings services up in the background and displays the logs from the `bfd` container. Once the logs show that that the system is started (this can take a minute or so depending on your machine) the logs can be exited with Ctrl+C.
-
-Now the system can be interacted with. Here's an example of running tests for the `bfd-server` module.
-
-```
-docker-compose exec bfd bash
-cd /app/apps/bfd-server
-mvn verify
-```
-
-#### Serving the BFD
-
-Run `make up` if no docker containers are running or `make restart` if they're already running.
-
-The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
+The FHIR server should now be reachable from the browser at https://localhost:6500. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
 
 In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one.
+
 Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application.
-
-#### Loading data to work with
-
-First you'll want some synthetic data to load and work with. To fetch the synthetic data from a public S3 bucket:
-```
-make synthetic-data/*.rif
-```
-
-Tip: This will download to a folder within the contributing folder within the repo. Consider moving this synthetic data outside the repo and updating your .env file to point to this new location. It will save you some steps in the future.
-
-To load some data for the BFD to return first apply the patches that allow the system to load local data:
-
-Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes.
-
-```make loadable```
-Then load the data
-```make load```
-This can take as long as an hour depending on your system.
-
-Once loaded going to a URL like [https://localhost:1337/v1/fhir/Patient/-19990000000001?_format=json](https://localhost:1337/v1/fhir/Patient/-19990000000001?_format=json) in your browser should show you some data.
-
 
 #### Integration with a downstream system
 
