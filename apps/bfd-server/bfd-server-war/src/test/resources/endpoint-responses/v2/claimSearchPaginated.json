@@ -7,8 +7,20 @@
   "type": "searchset",
   "link": [
     {
+      "relation": "first",
+      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+    },
+    {
+      "relation": "previous",
+      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+    },
+    {
+      "relation": "last",
+      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+    },
+    {
       "relation": "self",
-      "url": "https://localhost:9970/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "total": 2,
