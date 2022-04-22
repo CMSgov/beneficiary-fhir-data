@@ -33,7 +33,7 @@ class BFDUser(HttpUser):
 
       return self.eob_ids.pop()
 
-    def get(self, base_path: str, params: Dict[str, str], name: str, headers: Dict[str, str] = {}):
+    def get(self, base_path: str, params: Dict[str, str] = {}, name: str = '', headers: Dict[str, str] = {}):
       self.client.get(create_url_path(base_path, params), 
                       cert=client_cert, 
                       verify=server_public_key, 
