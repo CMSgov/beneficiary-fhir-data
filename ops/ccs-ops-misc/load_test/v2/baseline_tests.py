@@ -9,23 +9,30 @@ from common.url_path import create_url_path
 import common.validation as validation
 from locust import HttpUser, task, events, tag
 
+client_cert = setup.getClientCert()
 server_public_key = setup.loadServerPublicKey()
 setup.disable_no_cert_warnings(server_public_key, urllib3)
+setup.set_locust_env(config.load())
 
 mbis = data.load_mbis()
 eob_ids = data.load_bene_ids()
-client_cert = setup.getClientCert()
-server_public_key = setup.loadServerPublicKey()
 last_updated = data.get_last_updated()
 cursor_list = data.load_cursors("v2")
 
-setup.set_locust_env(config.load())
-
 class BFDUser(HttpUser):
     def on_start(self):
-        copied_ids = eob_ids.copy()
-        random.shuffle(copied_ids)
-        self.eob_ids = copied_ids
+        copied_eob_ids = eob_ids.copy()
+        random.shuffle(copied_eob_ids)
+
+        copied_mbis = mbis.copy()
+        random.shuffle(copied_mbis)
+
+        copied_cursor_list = cursor_list.copy()
+        random.shuffle(copied_cursor_list)
+
+        self.eob_ids = copied_eob_ids
+        self.mbis = copied_mbis
+        self.cursor_list = copied_cursor_list
 
     def get_eob(self) -> int:
       if len(self.eob_ids) == 0:
@@ -33,11 +40,23 @@ class BFDUser(HttpUser):
 
       return self.eob_ids.pop()
 
-    def get(self, base_path: str, params: Dict[str, str] = {}, name: str = '', headers: Dict[str, str] = {}):
-      self.client.get(create_url_path(base_path, params), 
-                      cert=client_cert, 
-                      verify=server_public_key, 
-                      headers={**headers, 'Cache-Control': 'no-store, no-cache'}, 
+    def get_mbi(self) -> int:
+      if len(self.mbis) == 0:
+            errors.no_data_stop_test(self)
+
+      return self.mbis.pop()
+
+    def get_cursor_path(self) -> str:
+      if len(self.cursor_list) == 0:
+        errors.no_data_stop_test(self)
+
+      return self.cursor_list.pop()
+
+    def get(self, base_path: str, params: Dict[str, str] = {}, headers: Dict[str, str] = {}, name: str = ''):
+      self.client.get(create_url_path(base_path, params),
+                      cert=client_cert,
+                      verify=server_public_key,
+                      headers={**headers, 'Cache-Control': 'no-store, no-cache'},
                       name=name)
 
     @task
@@ -49,7 +68,7 @@ class BFDUser(HttpUser):
     def coverage_test_id_lastUpdated(self):
         self.get('/v2/fhir/Coverage', params={'_lastUpdated': f'gt{last_updated}', 'beneficiary': self.get_eob()},
                 name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks)')
-    
+
     @task
     def coverage_test_id(self):
         self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_eob()},
@@ -59,7 +78,7 @@ class BFDUser(HttpUser):
     def eob_test_id_count(self):
         self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_count': '10', '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id / count=10')
-    
+
     @task
     def eob_test_id_includeTaxNumber(self):
         self.get('/v2/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_eob(), '_IncludeTaxNumbers': 'true', '_format': 'application/fhir+json'},
@@ -69,24 +88,15 @@ class BFDUser(HttpUser):
     def eob_test_id(self):
         self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id')
-  
+
     @task
     def patient_test_coverageContract(self):
-        if len(cursor_list) == 0:
-            errors.no_data_stop_test(self)
-
-        cursor_url = cursor_list.pop()
-
-        self.get(cursor_url, headers={"IncludeIdentifiers": "mbi"},
+        self.get(self.get_cursor_path(), headers={"IncludeIdentifiers": "mbi"},
                 name='/v2/fhir/Patient search by coverage contract (all pages)')
-    
+
     @task
     def patient_test_hashedMbi(self):
-        if len(mbis) == 0:
-            errors.no_data_stop_test(self)
-
-        hashed_mbi = mbis.pop()
-        self.get('/v2/fhir/Patient', params={'identifier': f'https://bluebutton.cms.gov/resources/identifier/mbi-hash|{hashed_mbi}', '_IncludeIdentifiers': 'mbi'},
+        self.get('/v2/fhir/Patient', params={'identifier': f'https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.get_mbi()}', '_IncludeIdentifiers': 'mbi'},
                 name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
 
     @task
