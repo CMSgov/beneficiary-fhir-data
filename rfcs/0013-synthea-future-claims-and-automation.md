@@ -42,9 +42,12 @@ For those unfamiliar with Mitre's Synthea application for generating synthetic b
 Mitre Synthea:
 
 * [Synthea](https://github.com/synthetichealth/Synthea) -- for generating synthetic beneficiary and claim data to load into BFD DB.
+  * How To Differentiate Synthea And Real Data:
+    - Synthetic beneficiary IDs are a negative number.
+    - Synthetic MBIs have the character 'S' in a certain position.
 
 Generating & Loading Synthea Data: 
-- BFD clones the latest version of the Synthea codebase, and generates the RIF files via the `run_Synthea` command, where the batch size and geography can be set, as well as a Synthea.properties file, which is important, for defining numeric ranges of key claim and beneficiary properties i.e. beneficiary ID, claim group ID, claim date, etc.
+- BFD clones the master branch of the Synthea codebase, and generates the RIF files via the `run_Synthea` command, where the batch size and geography can be set, as well as a Synthea.properties file, which is important, for defining numeric ranges of key claim and beneficiary properties i.e. beneficiary ID, claim group ID, claim date, etc.
 - The RIF files are copied into the BFD Server codebase, and loaded into the local database. 
 - If there are no errors loading locally, the RIF files are uploaded to AWS S3 and loaded into TEST, PROD SBX, PROD databses via the same ETL process with CCW RIF files. 
 - Synthetic data is now available to BFD users.
@@ -53,53 +56,62 @@ Generating & Loading Synthea Data:
   * [Synthea Test Plan](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-model/bfd-model-rif-samples/dev/Synthea-test-plan.md) 
 
 Motivation:
-As previous synthetic data releases were separated by 3 months, and only 20,000 synthetic beneficiaries released, data became quickly outdated, and the amount of data being released doesn't justify the usecase of synthetic data. Additionally, there is inefficiency involved with producing and releasing synthetic data when done without automation. Manual process are prone to human error, and can cause incidents, such as accidental overlap of beneficiary IDs between different synthetic data batches. There are more than enough reasons to look into streamlining and scaling up synthetic data production to maximize the benefit to users and partners. 
+As previous synthetic data releases were separated by 3 months, and only 20,000 synthetic beneficiaries released, data became quickly outdated, and the amount of data being released doesn't justify the usecase of synthetic data. Additionally, there is inefficiency involved with producing and releasing synthetic data when done without automation. Manual process are prone to human error, and can cause incidents, such as accidental overlap of beneficiary IDs between different synthetic data batches. There are more than enough reasons to look into streamlining and scaling up synthetic data production to maximize the benefit to users and partners. This involves automated recurring Synthea data generation, automated recurring loading, large Synthea data generation, and potential required changes to the BFD server and pipeline application.
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-The proposed solution is to automate the generation of synthetic data with a set batch size on a weekly basis using the latest version of the Synthea codebase.
-Each quarter, the expectation is to have significant changes to the synthetic data properties from Mitre's code. So the communications to users and partners on a quarterly basis will be more in depth compared to that of on a weekly basis. The goal is to primarly generate data on a regular basis to increase the benefit and quality of the data to the user at a given point in time. 
+Automated Recurring Generation: 
+To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is weekly and quarterly. 
 
-On a weekly basis, synthetic data with a future claim date will also be generated. This data will be staged until it can be loaded properly with the claim date. 
+  - Weekly - Synthetic data will be generated with a set batch size using the master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
 
-Additionally, for this data to be ingested on a weekly basis, the BFD ingestion pipeline will need to work with Synthea data as it does with CCW data, for which back-dated beneficiary filtering will be turned off for Synthea data. 
+  - Quarterly - The main difference in the process of generating Synthea data each quarter will be using the most recent version of the master branch of the Synthea codebase. This should introduce contrast in beneficiary and claim data properites between quarterly and weekly generated data, as Mitre regularly makes changes to the output of Synthea data generated over time. 
 
-When producing and loading a large set of synthetic data and performance testing:
-    - Size and shape of the data will reflect production.
-    - Will be available for on-demand performance and load testing.
-    - Will not be released. Specifically, not released to PROD.
-    - Will be isolated from other released synthetic data. 
-    - Will have the capability to be re-generated with future versions of Synthea.
-    - Synthetic beneficiaries for load and performance testing will not overlap with any beneficiaries used by end users.
+  - Future Claim Data - For both quarterly and weekly, a batch of similar size for claim data with a future date will also be generated in a similar fashion. 
 
-For Part D contract IDs, the value will not need to change on a regular basis unless there is a specific customer use case presented.
+  - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D Event ID (PDE ID). Despite monotonically increasing other parameters i.e. bene ID, claim group ID, the value of PDE ID will not need to change on a regular basis, unless there is a specific customer use case presented
+
+Automated Recurring Loading: 
+  - Once the synthetic data is generated, within the same hosted cloud instance, the latest version of the BFD application from github, and dockerized database, will have been installed prior, and will be used to run the BFD pipeline integration test (IT), to load the new batch of synthetic data, ensuring that the newly generated data can be inserted properly.
+
+  - Additionally, the RIF files from the previous weekly/quarterly batch of Synthea data will be pulled from AWS S3, and loaded into the database with the new batch of synthea data.  
+
+  - Once the automated load testing on the instance is complete, a script will run that modifies the new batch's generated manifest file, and uploads the RIF files, end-state properties, and manifest files to S3 via command line file transfer. This will trigger the BFD ingestion pipeline in PROD SBX or TEST so that the data is stored in the database.
+
+  - The separate RIF files associated with future claim data for the given release will be put uploaded in a specially designated folder in S3 for staging until loading in the future. 
+
+  - Additional testing - As of 04/21/2022, there is a plan in place to remve tens of thousands of old synthetic beneficiary data prior to Synthea data being stored in the database, which is largely responsible for the database collisions that have taken place in the past, when loading new Synthea data. Once this data is permenantly removed, it will likely take many years for there to be enough data to cause overlap. So after making sure the data generated does not collide with the previous batch of Synthea data, it should be safe to load.  
+
+Large Synthetic Data Generation:
+  - Each PI (Program Increment), approximately every 8 weeks, 60 million Synthea beneficiaries will be generated and available for on-demand performance and load testing on TEST and PROD SBX databases. The number of beneficiaries in the dataset size is meant to reflect the size and shape of production. The process will be similar to that of automated recurring generation, however the memory and computational power of the AWS instance will be larger for time and cost effectiveness. 
+  
+  - Using a m5a.24xlarge EC2 instance, it took 6 hours to generate 1 million synthetic beneficiaries. If one extrapolates from this benchmark, it would take 60 hours or a little under 3 days to generate 10 million, and 360 hours, or 15 days to generate 60 million beneficiaries.
+
+Required BFD Application Changes:
+When CCW data is ingested by the BFD pipeline, the application has filter logic for beneficiary UPDATEs with reference years prior to the current year by default. However, Synthea data must be able to UPDATE prior years. For both Synthea and CCW data to be ingested by the pipeline application, For both CCW and Synthea data to be ingested, the back-dated beneficiary filtering will have to be turned off for Synthea data. 
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
-Weekly Generation Plan:
-
-* On a weekly basis a cron job within Jenkins will be set up to run scripts that:
-  - Clone latest version of Mitre Synthea code.
+Automated Generation & Load Plan:
+* On a weekly basis a cron job within Jenkins will be set up to start up and SSH into a provisioned AWS EC2 instance that will be turned off when not used, to run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
   - Run currently manual steps in the `Synthea Test Plan` such as accessing and comparing the latest Synthea end-properties file, running queries in PROD SBX to determine database ranges for beneficiary and claim properities, and ensuring the next batch of data will not overlap with existing data ranges.
-  - Generate a batch of synthetic data and load into AWS S3 to trigger the BFD pipeline to transform and load synthetic data into database for TEST, PROD SBX, and PROD.
+  - Generate batches of both synthetic current and future data
+  - Load into AWS S3, and when applicable, trigger the BFD pipeline to transform and load synthetic data into database for TEST, PROD SBX, and PROD.
 
-* A new database table 'synthetic-future-claims' will be created for staging future claims in TEST to be loaded at a later time.
+* On a quarterly basis a cron job within Jenkins will be set up to do what the weekly plan does, but will also clone the latest version of Mitre Synthea codebase.
 
-* Synthea data will be compatible with the ETL ingestion pipeline by modifying the manifest to inform that a load with back-dated data should be loaded.
-
-Load and Performance Testing Plan:
-- Resources: The BFD TEST and/or PROD SBX servers will be more utilized for on-demand performance and load testing.
-
-- Scalability: Size and shape of the data will reflect production i.e. 1 million+ beneficiaries. This could take several days, however from previous load testing, it is possible to extrapolate how much time different load sizes will approximately take. 
-
-- Availability: Data will not be released to PROD without further approval. New data will be isolated from previously released synthetic data by a dynamic range of benficiary IDs, which also prevents overlap. 
-
-- Repeatability: Several delete SQL queries will be executed after load tests are completed, which will allow for beneficiary and claim data to be re-generated with future versions of Synthea.
+Large Synthetic Data Generation:
+  - Every PI, a m5a.24xlarge, or more powerful instance will be spun up to generate 60 million beneficiaries. 
+  - In order to distiguish load test data when stored in TEST or PROD SBX, the beneficiary ID range will start 1 million less than the smallest released Synthea beneficary ID 
+  - After the load tests are complete, and data is reported, several delete SQL queries will be executed after load tests are completed, which will allow for beneficiary and claim data to be re-generated with future versions of Synthea.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
+What data is meant to be collected and analyzed from large data load tests?
+
+What in the manifest and pipeline application exactly need to be updated? 
 
 What exactly will vary between weekly and quarterly communications to partners?
 
@@ -108,7 +120,7 @@ What exactly will vary between weekly and quarterly communications to partners?
 
 The need for regular TEST, PROD SBX, and PROD backups will be imperative in case issues arise with loading and removing data to prevent overlap.
 
-Larger load sizes will require possibly an algorithm to optimize database constraint ranges for beneficiary and claim parameters, so they do not overlap. This in addition to longer load times will put emphasis on testing and efficiency to not create bottlenecks or delays on weekly data releases. 
+Larger load sizes over time will require possibly an algorithm to optimize database constraint ranges for beneficiary and claim parameters, so they do not overlap. This in addition to longer load times will put emphasis on testing and efficiency to not create bottlenecks or delays on weekly data releases. 
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
