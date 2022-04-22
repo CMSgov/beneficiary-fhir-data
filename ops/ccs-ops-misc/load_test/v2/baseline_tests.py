@@ -70,18 +70,15 @@ class BFDUser(HttpUser):
         self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id')
   
-    # @task
-    # def patient_test_coverageContract(self):
-    #     if len(cursor_list) == 0:
-    #         errors.no_data_stop_test(self)
+    @task
+    def patient_test_coverageContract(self):
+        if len(cursor_list) == 0:
+            errors.no_data_stop_test(self)
 
-    #     cursor_url = cursor_list.pop()
+        cursor_url = cursor_list.pop()
 
-    #     response = self.get(cursor_url,
-    #             cert=client_cert,
-    #             verify=server_public_key,
-    #             headers={"IncludeIdentifiers": "mbi"},
-    #             name='/v2/fhir/Patient search by coverage contract (all pages)')
+        self.get(cursor_url, headers={"IncludeIdentifiers": "mbi"},
+                name='/v2/fhir/Patient search by coverage contract (all pages)')
     
     @task
     def patient_test_hashedMbi(self):
