@@ -59,6 +59,7 @@ def run_with_params(argv):
     class configData: pass
 
     ## Optional Params with defaults
+    configData.configPath = 'config.yml'
     configData.serverPublicKey = ''
     configData.testRunTime = "1m"
     configData.testNumTotalClients = "100"
@@ -71,6 +72,7 @@ def run_with_params(argv):
      '\n--databaseUri="postgres://<username:password>@<database-aws-node>.rds.amazonaws.com:port/<dbname>" (Required)'
      '\n--testHost="https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)'
      '\n--testFile="/<v1/v2>/test_to_run.py" (Required)'
+     '\n--configPath="<path to config.*.yml, used to read optional values>" (Optional, Default: "./config.yml")'
      '\n--serverPublicKey="<server public key>" (Optional, Default: "")'
      '\n--testRunTime="<Test run time, ex. 30s, 1m, 2d 1h>" (Optional, Default 1m)'
      '\n--maxClients="<Max number of clients to create at once, int>" (Optional, Default 100)'
@@ -80,8 +82,8 @@ def run_with_params(argv):
 
     try:
         opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseUri=",
-        "testHost=", "serverPublicKey=", "testRunTime=", "maxClients=", "clientsPerSecond=",
-        "testFile=","workerThreads=","resetStats"])
+        "testHost=", "serverPublicKey=", "configPath=", "testRunTime=", "maxClients=",
+        "clientsPerSecond=", "testFile=", "workerThreads=", "resetStats"])
     except getopt.GetoptError:
         print(helpString)
         sys.exit(2)
@@ -98,6 +100,8 @@ def run_with_params(argv):
             configData.dbUri = arg
         elif opt == "--testHost":
             configData.testHost = arg
+        elif opt == "--configPath":
+            configData.configPath = arg
         elif opt == "--serverPublicKey":
             configData.serverPublicKey = arg
         elif opt == "--testRunTime":
@@ -133,6 +137,7 @@ def run_with_params(argv):
         sys.exit(2)
 
     ## write out config file
+    config.set_config_path(configData.configPath)
     config.save(configData)
     setup.set_locust_test_name(testFile)
 
