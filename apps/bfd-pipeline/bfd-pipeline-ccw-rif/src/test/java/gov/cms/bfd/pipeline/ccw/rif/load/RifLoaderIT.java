@@ -965,7 +965,7 @@ public final class RifLoaderIT {
       assertEquals(
           567834L,
           beneficiaryFromDb.getBeneficiaryIdNumeric(),
-          "Beneficiary has incorrect bene_id_numeric afert INSERT");
+          "Beneficiary has incorrect bene_id_numeric after INSERT");
 
       /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
       loadSampleABeneWithEnrollmentRefYear(
@@ -975,13 +975,27 @@ public final class RifLoaderIT {
           true);
       validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
-      Beneficiary beneficiary2FromDb = entityManager.find(Beneficiary.class, "567834");
-
       // verify that the pre-update trigger populated the bene_id_numeric
+      Beneficiary beneficiary2FromDb = entityManager.find(Beneficiary.class, "567834");
       assertEquals(
           beneficiaryFromDb.getBeneficiaryIdNumeric(),
           beneficiary2FromDb.getBeneficiaryIdNumeric(),
           "Beneficiary has incorrect bene_id_numeric after UPDATE");
+
+      // brute force trying to break the bene_id_numeric by explicitly setting to zero; this
+      // actually mimics a RIF load UPDATE as the RIF columns-to-entity setters will not know about
+      // bene_id_numeric.
+      beneficiary2FromDb.setBeneficiaryIdNumeric(0L);
+      entityManager.persist(beneficiary2FromDb);
+      // secret sauce for verifying that our Hibernate object actually was
+      // refreshed with what is in the database.
+      entityManager.refresh(beneficiary2FromDb);
+
+      // verify that the update trigger still did its thing
+      assertEquals(
+          567834L,
+          beneficiary2FromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric afer explicit UPDATE");
 
     } finally {
       if (entityManager != null) {

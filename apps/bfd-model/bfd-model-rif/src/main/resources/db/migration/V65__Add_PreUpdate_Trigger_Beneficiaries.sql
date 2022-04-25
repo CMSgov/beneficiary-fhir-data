@@ -14,7 +14,7 @@
 -- HSQL always gets created/initialized from scratch so no need to drop trigger
 -- Unfortunately HSQL doesn't support 'insert or update' directive so we have to
 -- have a separate trigger for the update.
-${logic.hsql-only} CREATE TRIGGER beneficiaries_update_trigger BEFORE UPDATE ON public.beneficiaries
+${logic.hsql-only} CREATE TRIGGER beneficiaries_pre_update_trigger BEFORE UPDATE ON public.beneficiaries
 ${logic.hsql-only}    REFERENCING NEW as newrow FOR EACH ROW
 ${logic.hsql-only}       BEGIN ATOMIC
 ${logic.hsql-only}            SET newrow.bene_id_numeric = convert(newrow.bene_id, SQL_BIGINT);
