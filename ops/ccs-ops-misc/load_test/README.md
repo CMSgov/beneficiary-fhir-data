@@ -75,13 +75,13 @@ A single-line test will look like this (placeholders to replace in brackets):
 If you have existing configuration in `./config.yml`, you can also run the tests via:
 
 ```
-python3 runtests.py
+python3 runtests.py --testFile="<your-test-file>"
 ```
 
 Or, if you have some YAML configuration in a different file (note that these values will be saved to the root `./config.yml`, so subsequent runs can omit the `configPath` if you are not changing anything):
 
 ```
-python3 runtests.py --configPath="config/<your-config-here>.yml" <other-cli-args-here>...
+python3 runtests.py --configPath="config/<your-config-here>.yml" --testFile="<your-test-file>" <other-cli-args-here>...
 ```
 
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
