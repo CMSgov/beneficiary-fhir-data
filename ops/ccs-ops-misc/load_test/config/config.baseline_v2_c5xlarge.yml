@@ -1,0 +1,12 @@
+# This configuration was created for targeting a c5xlarge instance with the V2 baseline tests
+# in v2/baseline_tests.py. It was determined that 3 concurrent users puts approximately
+# 50% - 60% load on a machine of that size.
+
+homePath: ""
+dbHost: ""
+dbUsername: ""
+dbPassword: ""
+testHost: ""
+testRunTime: "3m"
+testNumTotalClients: "3"
+testCreatedClientsPerSecond: "3"
