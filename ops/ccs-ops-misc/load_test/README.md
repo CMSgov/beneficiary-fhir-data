@@ -114,6 +114,12 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 There is one special type of test that requires a data setup script to be run beforehand; this is the coverage contract test. This test runs through every list of pages for a set of contracts, but the urls for hitting all the pages of whatever contracts need to be set up before the test runs. This can be done by calling the data setup script common/write_contract_cursors.py similar to this:
 
+> **Note:** You _must_ generate the contract URLs via the below script if you are running any of the following test suites:
+> * `v1/patient_test_coverageContract.py`
+> * `v1/baseline_tests.py`
+> * `v2/patient_test_coverageContract.py`
+> * `v2/baseline_tests.py`
+
     python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"
 
 The script will write out the results to homePath specified in the config (and expect them there during runtime.)
