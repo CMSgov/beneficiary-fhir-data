@@ -2,23 +2,10 @@ import os
 import yaml
 
 '''
-Sets the path to the configuration file for the current test run by setting
-an environment variable (LOAD_TEST_CONFIG_PATH).
-'''
-def set_config_path(path: str):
-    os.environ['LOAD_TEST_CONFIG_PATH'] = path
-
-'''
-Gets the path to the current configuration file from the environment.
-'''
-def get_config_path() -> str:
-    return os.environ['LOAD_TEST_CONFIG_PATH']
-
-'''
 Saves a config file using the input file data.
 '''
 def save(fileData):
-    configFile = open(get_config_path(), 'w')
+    configFile = open('config.yml', 'w')
     configFile.write("homePath: \"%s\"\n" % fileData["homePath"])
     configFile.write("clientCertPath: \"%s\"\n" % fileData["clientCertPath"])
     configFile.write("serverPublicKey: \"%s\"\n" % fileData["serverPublicKey"])
@@ -53,7 +40,7 @@ def create():
 
     ## Attempt to read the new file
     try:
-        config = yaml.safe_load(open(get_config_path()))
+        config = yaml.safe_load(open('config.yml'))
         return config
     except yaml.YAMLError as err:
         print("Unable to parse YAML configuration file; please check/create the file manually from the sample file.")
@@ -61,13 +48,23 @@ def create():
         print("Could not read the new file; please try again.")
 
 '''
-Loads a config from the config file; if no file exists, will attempt to create one via user prompts.
+Loads a config from the default config file (./config.yml); if no file exists, will attempt 
+to create one via user prompts.
 
 Returns the loaded config, or None if nothing could be loaded or an error occurred.
 '''
 def load():
+    return load_from_path('config.yml')
+
+'''
+Loads a config from the specified config file path; if no file exists, will attempt to 
+create one via user prompts.
+
+Returns the loaded config, or None if nothing could be loaded or an error occurred.
+'''
+def load_from_path(path: str):
     try:
-        return yaml.safe_load(open(get_config_path()))
+        return yaml.safe_load(open(path))
     except yaml.YAMLError as err:
         print("Unable to parse YAML configuration file; please ensure the format matches the example file.")
         return
