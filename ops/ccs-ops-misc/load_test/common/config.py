@@ -1,10 +1,24 @@
+import os
 import yaml
+
+'''
+Sets the path to the configuration file for the current test run by setting
+an environment variable (LOAD_TEST_CONFIG_PATH).
+'''
+def set_config_path(path: str):
+    os.environ['LOAD_TEST_CONFIG_PATH'] = path
+
+'''
+Gets the path to the current configuration file from the environment.
+'''
+def get_config_path() -> str:
+    return os.environ['LOAD_TEST_CONFIG_PATH']
 
 '''
 Saves a config file using the input file data.
 '''
 def save(fileData):
-    configFile = open("config.yml", 'w')
+    configFile = open(get_config_path(), 'w')
     configFile.write("homePath: \"%s\"\n" % fileData.homePath)
     configFile.write("clientCertPath: \"%s\"\n" % fileData.clientCertPath)
     configFile.write("serverPublicKey: \"%s\"\n" % fileData.serverPublicKey)
@@ -39,7 +53,7 @@ def create():
 
     ## Attempt to read the new file
     try:
-        config = yaml.safe_load(open("config.yml"))
+        config = yaml.safe_load(open(get_config_path()))
         return config
     except yaml.YAMLError as err:
         print("Unable to parse YAML configuration file; please check/create the file manually from the sample file.")
@@ -53,7 +67,7 @@ Returns the loaded config, or None if nothing could be loaded or an error occurr
 '''
 def load():
     try:
-        return yaml.safe_load(open("config.yml"))
+        return yaml.safe_load(open(get_config_path()))
     except yaml.YAMLError as err:
         print("Unable to parse YAML configuration file; please ensure the format matches the example file.")
         return
