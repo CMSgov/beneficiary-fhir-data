@@ -70,7 +70,7 @@ The tests are run with parameters that specify all the test params and test file
 
 A single-line test will look like this (placeholders to replace in brackets):
 
-    python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="<AWS_DB_host>" --databaseUsername="<db_username_from_keybase>" --databasePassword="<db_password_from_keybase>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
+    python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseUri="postgres://<db-username>:<db-password>@<db-host>:<port>/<db-name>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
 
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
 
@@ -78,11 +78,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--clientCertPath** : (Required) : The path to the PEM file we copied/modified earlier. Should be located in your home directory like this: ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 
-**--databaseHost** : (Required) : The database host, used to pull data. Get this from the database endpoint we noted in the earlier step "Getting The Database Instance"
-
-**--databaseUsername** : (Required) : The username for connecting to the database, can be found in Keybase. Make sure to use the correct one for the environment you're connecting to.
-
-**--databasePassword** : (Required) : The password for connecting to the database, can be found in Keybase. Make sure to use the correct one for the environment you're connecting to.
+**--databaseUri** : (Required) : The URI used for connecting to the database server. Needs to include username, password (both can be found in Keybase, make sure to use the correct one for the environment you're connecting to), hostname and port.
 
 **--testHost** : (Required) : The load balancer or single node to run the tests against. The environment used here should match the same environment (test, prod-sbx, prod) as the database, so we pull the appropriate data for the environment tested against. Note that when using a single node, you should specity the Ip AND the port for the application.
 
