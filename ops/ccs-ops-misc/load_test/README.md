@@ -88,6 +88,8 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--testFile** : (Required) : The path to the test file we want to run.
 
+**--configPath** : (Optional) : The path to a YAML configuration file that will be read from (but not _written_ to) for the values specified here. The values in this configuration file will be merged with values from the CLI, with the CLI values taking priority. The resulting merged values will then be written to the root `config.yml` file. If not provided, defaults to `config.yml` (the root YAML configuration file). 
+
 **--serverPublicKey** : (Optional) : To allow the tests to trust the server responses, you can add the path to the public certificate here. This is not required to run the tests successfully, and may not be needed as a parameter at all. If not provided, defaults to an empty string (does not cause test issues.)
 
 **--testRunTime** : (Optional) : How long the test will run. This uses values such as 1m, 30s, 1h, or combinations of these such as 1m 30s. If not provided, defaults to 1m. **Note**: We automatically adjust the run time so that the test runs for the specified amount of time *after* spawning all clients (see `--maxClients` and `--clientsPerSecond` below). For example, with the defaults of a one-minute test, 100 clients, and a spawn rate of 5 clients per second, then the script will spend twenty seconds ramping up its clients and *then* run for the one minute specified. It is optional whether or not to use the `--resetStats` flag to drop the statistics covering this ramp-up period.
