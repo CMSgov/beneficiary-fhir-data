@@ -115,7 +115,7 @@ database, we bail out and stop hitting the server.
 '''
 @events.init.add_listener
 def on_locust_init(environment, **_kwargs):
-    validation.setup_failsafe_event(environment, validation.SLA_COVERAGE)
+    validation.setup_failsafe_event(environment, validation.SLA_V2_BASELINE)
 
 '''
 Adds a listener that will run when the test ends which checks the various
@@ -123,4 +123,4 @@ response time percentiles against the SLA for this endpoint.
 '''
 @events.test_stop.add_listener
 def on_locust_quit(environment, **_kwargs):
-    validation.check_sla_validation(environment, validation.SLA_COVERAGE)
+    validation.check_sla_validation(environment, validation.SLA_V2_BASELINE)
