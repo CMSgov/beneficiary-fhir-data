@@ -72,6 +72,18 @@ A single-line test will look like this (placeholders to replace in brackets):
 
     python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseUri="postgres://<db-username>:<db-password>@<db-host>:<port>/<db-name>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
 
+If you have existing configuration in `./config.yml`, you can also run the tests via:
+
+```
+python3 runtests.py
+```
+
+Or, if you have some YAML configuration in a different file (note that these values will be saved to the root `./config.yml`, so subsequent runs can omit the `configPath` if you are not changing anything):
+
+```
+python3 runtests.py --configPath="config/<your-config-here>.yml" <other-cli-args-here>...
+```
+
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
 
 **--homePath** : (Required) : The path to your home directory on the local box, such as /home/logan.mitchell/
