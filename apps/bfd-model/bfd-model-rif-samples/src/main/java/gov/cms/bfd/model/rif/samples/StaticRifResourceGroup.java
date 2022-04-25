@@ -33,6 +33,8 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SAMPLE_A_SNF,
       StaticRifResource.SAMPLE_A_DME),
 
+  SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE(StaticRifResource.SAMPLE_A_MULTIPLE_ROWS_SAME_BENE),
+
   SAMPLE_U(StaticRifResource.SAMPLE_U_BENES, StaticRifResource.SAMPLE_U_CARRIER),
 
   SAMPLE_U_BENES_UNCHANGED(

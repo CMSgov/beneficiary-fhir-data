@@ -4,6 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -312,6 +313,13 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
+  /**
+   * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
+   * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
+   * simultaneously.
+   */
+  private static final int RECORD_BATCH_SIZE = 100;
+
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
@@ -446,7 +454,8 @@ public final class AppConfiguration implements Serializable {
                 .build(),
             loaderThreads,
             idempotencyRequired,
-            filteringNonNullAndNon2022Benes);
+            filteringNonNullAndNon2022Benes,
+            RECORD_BATCH_SIZE);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);

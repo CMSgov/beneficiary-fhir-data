@@ -1,0 +1,36 @@
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<!-- Checkstyle for BFD, see https://checkstyle.sourceforge.io/checks.html for full documentation of checks and options -->
+<module name="Checker">
+    <module name="TreeWalker">
+        <!-- Javadoc Rules -->
+        <!-- Ensures docs exist for all methods/constructors -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="private"/>
+        </module>
+        <!-- Ensues docs exist for classes, enums, interfaces -->
+        <module name="MissingJavadocType">
+            <property name="scope" value="private"/>
+        </module>
+        <!-- Ensures methods/constructors have proper param tags, return tags -->
+        <module name="JavadocMethod"/>
+        <!-- Ensures javadocs are placed in the right location -->
+        <module name="InvalidJavadocPosition"/>
+        <!-- Ensures @tags have descriptions of the tag, i.e. are not empty -->
+        <module name="NonEmptyAtclauseDescription"/>
+        <!-- Ensures javadocs are formatted consistently. This includes checks for:
+             First sentence has a period (affects javadoc functionality)
+             Html tags are properly escaped
+             Only allowed html tags exist
+        -->
+        <module name="JavadocStyle"/>
+        <!-- Ensures non-local variables have docs.
+             Note that ignoreNamePattern can be used to ignore patterns of names
+             via RegEx if we want to avoid documenting certain variable names.
+        -->
+        <module name="JavadocVariable"/>
+
+        <!-- Style Rules -->
+    </module>
+</module>

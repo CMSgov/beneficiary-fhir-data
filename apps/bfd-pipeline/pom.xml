@@ -24,6 +24,10 @@
 		<module>bfd-pipeline-rda-bridge</module>
 	</modules>
 
+	<properties>
+		<checkstyle.skip>true</checkstyle.skip>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

@@ -11,8 +11,10 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -70,7 +72,13 @@ public final class PartDEventTransformerV2Test {
   @BeforeEach
   public void before() {
     claim = generateClaim();
-    eob = PartDEventTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    eob =
+        PartDEventTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -589,8 +597,8 @@ public final class PartDEventTransformerV2Test {
                 Arrays.asList(
                     new Coding(
                         "http://hl7.org/fhir/sid/ndc",
-                        "500904610",
-                        "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE")));
+                        "000000000",
+                        FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY)));
 
     assertTrue(compare.equalsDeep(pos));
   }
@@ -905,7 +913,12 @@ public final class PartDEventTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         PartDEventTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            generateClaim());
+
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

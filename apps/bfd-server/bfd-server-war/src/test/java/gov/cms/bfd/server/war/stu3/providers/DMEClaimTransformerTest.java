@@ -11,8 +11,10 @@ import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +47,12 @@ public final class DMEClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        DMEClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+        DMEClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob, Optional.of(true));
   }
 

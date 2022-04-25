@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -33,7 +33,7 @@ public class FissClaimRdaSinkIT {
           final LocalDate today = LocalDate.of(2022, 1, 3);
           final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
-          final PreAdjFissClaim claim = new PreAdjFissClaim();
+          final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
           claim.setDcn("1");
           claim.setHicNo("h1");
@@ -43,7 +43,7 @@ public class FissClaimRdaSinkIT {
           claim.setPracLocCity("city name can be very long indeed");
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
-          final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
+          final RdaFissProcCode procCode0 = new RdaFissProcCode();
           procCode0.setDcn(claim.getDcn());
           procCode0.setPriority((short) 0);
           procCode0.setProcCode("P");
@@ -51,7 +51,7 @@ public class FissClaimRdaSinkIT {
           procCode0.setProcDate(today);
           claim.getProcCodes().add(procCode0);
 
-          final PreAdjFissDiagnosisCode diagCode0 = new PreAdjFissDiagnosisCode();
+          final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
           diagCode0.setDcn(claim.getDcn());
           diagCode0.setPriority((short) 0);
           diagCode0.setDiagCd2("cd2");
@@ -102,12 +102,12 @@ public class FissClaimRdaSinkIT {
           int count = sink.writeMessage("version", message);
           assertEquals(1, count);
 
-          List<PreAdjFissClaim> claims =
+          List<RdaFissClaim> claims =
               entityManager
-                  .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+                  .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
                   .getResultList();
           assertEquals(1, claims.size());
-          PreAdjFissClaim resultClaim = claims.get(0);
+          RdaFissClaim resultClaim = claims.get(0);
           assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
           assertEquals(claim.getHicNo(), resultClaim.getHicNo());
           assertEquals(claim.getPracLocCity(), resultClaim.getPracLocCity());
