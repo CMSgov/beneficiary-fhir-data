@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/** Creates a {@link Source} that reads data from a RIF file. */
 public class RifSource implements Source<String> {
 
   private final BufferedReader reader;

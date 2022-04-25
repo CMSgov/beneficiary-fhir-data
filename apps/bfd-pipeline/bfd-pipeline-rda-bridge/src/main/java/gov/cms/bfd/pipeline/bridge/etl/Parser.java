@@ -52,6 +52,15 @@ public interface Parser<T> extends Closeable {
     }
 
     /**
+     * Returns the entry number of the current {@link Data} object.
+     *
+     * <p>This could be something like the row number of the CSV file the data was pulled from.
+     *
+     * @return The entry number for the data.
+     */
+    public abstract long getEntryNumber();
+
+    /**
      * Get data from the parsed {@link Data} object that is associated with the gtiven fieldName.
      *
      * @param fieldName The name associated w"ith the data being retrieved.

@@ -382,7 +382,9 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -426,7 +428,9 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -477,7 +481,9 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -527,7 +533,9 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+                Patient.RES_ID
+                    .exactly()
+                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
@@ -710,7 +718,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "567834",
+        567834L,
         "543217066U",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -725,7 +733,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "123456NULLREFYR",
+        -123456L,
         "543217066N",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -742,7 +750,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "BENE1234",
+        1234L,
         "SAMEHICN",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -760,7 +768,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "55555",
+        55555L,
         "HISTHICN",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -777,7 +785,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "66666",
+        66666L,
         "DUPHISTHIC",
         useHicnFromBeneficiaryTable,
         "hicn",
@@ -937,7 +945,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -975,7 +984,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1013,7 +1023,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1197,7 +1208,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "567834",
+        567834L,
         "3456789",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1213,7 +1224,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "123456NULLREFYR",
+        -123456L,
         "3456789N",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1233,7 +1244,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "BENE1234",
+        1234L,
         "SAMEMBI",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1250,7 +1261,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "55555",
+        55555L,
         "HISTMBI",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1267,7 +1278,7 @@ public final class PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "66666",
+        66666L,
         "DUPHISTMBI",
         useMbiFromBeneficiaryTable,
         "mbi",
@@ -1314,7 +1325,7 @@ public final class PatientResourceProviderIT {
       IGenericClient fhirClient,
       List<Beneficiary> beneficiariesList,
       List<BeneficiaryHistory> beneficiariesHistoryList,
-      String beneficiaryId,
+      Long beneficiaryId,
       String unhashedValue,
       Boolean useFromBeneficiaryTable,
       String hashType,
@@ -1552,7 +1563,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1591,7 +1603,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1630,7 +1643,8 @@ public final class PatientResourceProviderIT {
               Patient patientFromSearchResult =
                   (Patient) searchResults.getEntry().get(0).getResource();
               assertEquals(
-                  h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+                  String.valueOf(h.getBeneficiaryId()),
+                  patientFromSearchResult.getIdElement().getIdPart());
             });
   }
 
@@ -1702,7 +1716,8 @@ public final class PatientResourceProviderIT {
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
     assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+        String.valueOf(expectedBene.getBeneficiaryId()),
+        patientFromSearchResult.getIdElement().getIdPart());
 
     /*
      * Verify that the unhashed MBIs are present, as expected. Note that checking for more than just
@@ -1789,7 +1804,8 @@ public final class PatientResourceProviderIT {
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
     assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+        String.valueOf(expectedBene.getBeneficiaryId()),
+        patientFromSearchResult.getIdElement().getIdPart());
   }
 
   /**
@@ -1940,7 +1956,7 @@ public final class PatientResourceProviderIT {
    * @param expectedValue number of matches
    */
   private void testLastUpdatedUrls(
-      IGenericClient fhirClient, String id, List<String> urls, int expectedValue) {
+      IGenericClient fhirClient, Long id, List<String> urls, int expectedValue) {
     String baseResourceUrl = "Patient?_id=" + id + "&_format=application%2Fjson%2Bfhir";
 
     // Search for each lastUpdated value

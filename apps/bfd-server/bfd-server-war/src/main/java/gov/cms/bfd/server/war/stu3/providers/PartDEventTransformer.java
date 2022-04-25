@@ -6,9 +6,11 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -23,25 +25,24 @@ import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformer {
+
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link PartDEvent} to transform
-   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof PartDEvent)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
+    ExplanationOfBenefit eob =
+        transformClaim((PartDEvent) claim, transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;
@@ -49,10 +50,12 @@ final class PartDEventTransformer {
 
   /**
    * @param claimGroup the CCW {@link PartDEvent} to transform
+   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
-  private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      PartDEvent claimGroup, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -233,7 +236,8 @@ final class PartDEventTransformer {
         TransformerUtils.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            TransformerUtils.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(
+                Optional.of(claimGroup.getNationalDrugCode())),
             claimGroup.getNationalDrugCode()));
 
     SimpleQuantity quantityDispensed = new SimpleQuantity();

@@ -22,7 +22,7 @@ spec:
         SEND_NOTIFICATIONS="true"
         WARN_WHEN="30:45"
         ALERT_WHEN="15:30"
-        PAGE_WHEN="1:15"
+        PAGE_WHEN="15"
         WARN_SLACK_WEBHOOK_URL=credentials('cert-warn-slack-webhook')
         WARN_SLACK_CHAN="#bfd-notices"
         ALERT_SLACK_WEBHOOK_URL=credentials('cert-alert-slack-webhook')

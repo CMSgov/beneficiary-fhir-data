@@ -70,7 +70,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Adds java-8 types to jackson. -->
@@ -118,6 +117,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- provides DatabaseSchemaManager to apply flyway migrations -->
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-model-rif</artifactId>
@@ -161,6 +165,15 @@
             <!-- Used to create mock objects for unit tests. -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Configures mockito to use the inline implementation, which allows mocking
+            of final classes, etc.  Without this, the fallback implementation results in
+            illegal reflection access (JDK9+) in certain circumstances -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>

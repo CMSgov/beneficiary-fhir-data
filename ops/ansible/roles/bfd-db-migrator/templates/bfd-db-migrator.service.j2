@@ -1,0 +1,14 @@
+[Unit]
+Description=Blue Button DB Migrator Service
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory={{ db_migrator_dir }}
+ExecStart={{ db_migrator_dir }}/bfd-db-migrator-service.sh
+User={{ db_migrator_user }}
+
+[Install]
+WantedBy=multi-user.target

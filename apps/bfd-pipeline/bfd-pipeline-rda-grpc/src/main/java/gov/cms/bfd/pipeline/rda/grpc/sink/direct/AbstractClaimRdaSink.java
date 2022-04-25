@@ -5,19 +5,22 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -39,6 +42,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   protected final Logger logger;
   protected final RdaApiProgress.ClaimType claimType;
   protected final boolean autoUpdateLastSeq;
+
+  /** Holds the underlying value of our sequence number gauges. */
+  private static final NumericGauges GAUGES = new NumericGauges();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either
@@ -146,8 +152,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       updateLatencyMetric(claims);
       mergeBatch(maxSeq, claims);
       metrics.objectsMerged.mark(claims.size());
-      metrics.setLatestSequenceNumber(maxSeq);
-      logger.info("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
+      logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
           "writeBatch failed: size={} maxSeq={} error={}",
@@ -188,6 +193,15 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     return metrics;
   }
 
+  /**
+   * Apply implementation specific logic to produce a populated {@link RdaApiClaimMessageMetaData}
+   * object suitable for insertion into the database to track this update.
+   *
+   * @param change an incoming RdaChange object from which to extract meta data
+   * @return an object ready for insertion into the database
+   */
+  abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
@@ -196,14 +210,24 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
             .lastUpdated(clock.instant())
             .build();
     entityManager.merge(progress);
-    logger.info("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
+    metrics.setLatestSequenceNumber(lastSequenceNumber);
+    logger.debug("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
   private List<RdaChange<TClaim>> transformMessages(
-      String apiVersion, Collection<TMessage> messages) {
-    return messages.stream()
-        .map(message -> transformMessage(apiVersion, message))
-        .collect(Collectors.toList());
+      String apiVersion, Collection<TMessage> messages) throws ProcessingException {
+    var claims = new ArrayList<RdaChange<TClaim>>();
+    for (TMessage message : messages) {
+      try {
+        var change = transformMessage(apiVersion, message);
+        metrics.transformSuccesses.mark();
+        claims.add(change);
+      } catch (DataTransformer.TransformationException error) {
+        metrics.transformFailures.mark();
+        throw new ProcessingException(error, 0);
+      }
+    }
+    return claims;
   }
 
   private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
@@ -212,6 +236,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
+          var metaData = createMetaData(change);
+          entityManager.persist(metaData);
           entityManager.merge(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
@@ -291,12 +317,16 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter objectsPersisted;
     /** Number of objects stored using <code>merge()</code> */
     private final Meter objectsMerged;
+    /** Number of objects successfully transformed. */
+    private final Meter transformSuccesses;
+    /** Number of objects which failed to be transformed. */
+    private final Meter transformFailures;
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
     /** Latest sequnce number from writing a batch. * */
     private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
-    private final AtomicLong latestSequenceNumberValue = new AtomicLong(0L);
+    private final AtomicLong latestSequenceNumberValue;
 
     private Metrics(Class<?> klass, MetricRegistry appMetrics) {
       final String base = klass.getSimpleName();
@@ -306,14 +336,17 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       objectsWritten = appMetrics.meter(MetricRegistry.name(base, "writes", "total"));
       objectsPersisted = appMetrics.meter(MetricRegistry.name(base, "writes", "persisted"));
       objectsMerged = appMetrics.meter(MetricRegistry.name(base, "writes", "merged"));
+      transformSuccesses = appMetrics.meter(MetricRegistry.name(base, "transform", "successes"));
+      transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
-      latestSequenceNumber =
-          appMetrics.gauge(
-              MetricRegistry.name(base, "lastSeq"), () -> latestSequenceNumberValue::longValue);
+      String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
+      latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
+      latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
     }
 
-    private void setLatestSequenceNumber(long value) {
+    @VisibleForTesting
+    void setLatestSequenceNumber(long value) {
       latestSequenceNumberValue.set(value);
     }
   }

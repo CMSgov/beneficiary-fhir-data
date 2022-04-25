@@ -64,9 +64,18 @@ import org.apache.maven.project.MavenProject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-/** A Maven Mojo that generates code for RIF JPA entities. */
+/**
+ * This <code>maven</code> plugin {@link AbstractMojo} reads in an Excel file that details a RIF
+ * field layout, and then generates the Java code required to work with that layout.
+ */
 @Mojo(name = "rif-layouts", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class RifLayoutsMojo extends AbstractMojo {
+  /**
+   * Both Maven and Eclipse hide compiler messages, so setting this constant to <code>true</code>
+   * will also log messages out to a new source file.
+   */
+  private static final boolean DEBUG = true;
+
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
 
@@ -220,7 +229,8 @@ public class RifLayoutsMojo extends AbstractMojo {
               .setHeaderEntityIdField("BENE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
+                      Arrays.asList(
+                          "HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED", "BENE_ID_NUMERIC")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -357,15 +367,17 @@ public class RifLayoutsMojo extends AbstractMojo {
           new MappingSpec(packageName)
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, snfSheet))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("snf_claims")
+              .setHeaderTable("snf_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("snf_claim_lines")
+              .setLineTable("snf_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
     } finally {
-      if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
+      if (spreadsheetWorkbook != null) {
+        spreadsheetWorkbook.close();
+      }
     }
     log("Generated mapping specification: '%s'", mappingSpecs);
 
@@ -649,6 +661,13 @@ public class RifLayoutsMojo extends AbstractMojo {
     return lineEntityFinal;
   }
 
+  /**
+   * Generate beneficiary monthly entity.
+   *
+   * @param mappingSpec the mapping spec
+   * @return the type spec generated
+   * @throws IOException the io exception
+   */
   private TypeSpec generateBeneficiaryMonthlyEntity(MappingSpec mappingSpec) throws IOException {
 
     // Create the Entity class.
@@ -695,8 +714,8 @@ public class RifLayoutsMojo extends AbstractMojo {
 
     MethodSpec.Builder parentGetter =
         MethodSpec.methodBuilder("getParentBeneficiary")
-            .addStatement("return $N", PARENT_BENEFICIARY)
-            .returns(parentBeneficiaryIdFieldType);
+            .addStatement("return Long.parseLong($N)", PARENT_BENEFICIARY)
+            .returns(TypeName.LONG);
     beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
     MethodSpec.Builder yearMonthGetter =
         MethodSpec.methodBuilder("getYearMonth")
@@ -757,8 +776,7 @@ public class RifLayoutsMojo extends AbstractMojo {
     beneficiaryMonthlyEntity.addMethod(parentBeneficiarySetter.build());
 
     // These aren't "real" RifFields, as they're not in the spreadsheet; representing them here as
-    // such, to make
-    // it easier to add them into the spreadsheet in the future.
+    // such, to make it easier to add them into the spreadsheet in the future.
     RifField rifField =
         new RifField(
             "YEAR_MONTH",
@@ -1028,30 +1046,74 @@ public class RifLayoutsMojo extends AbstractMojo {
               .build();
       headerEntityClass.addField(headerField);
 
-      MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField))
-              .addModifiers(Modifier.PUBLIC)
-              .returns(
-                  selectJavaPropertyType(
-                      rifField.getRifColumnType(),
-                      rifField.isRifColumnOptional(),
-                      rifField.getRifColumnLength(),
-                      rifField.getRifColumnScale()));
-      addGetterStatement(rifField, headerField, headerFieldGetter);
+      MethodSpec.Builder headerFieldGetter;
+
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        if (rifField.isRifColumnOptional()) {
+          headerFieldGetter =
+              MethodSpec.methodBuilder(calculateGetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .addStatement("return Optional.of(Long.parseLong($N))", headerField.name)
+                  .returns(
+                      ParameterizedTypeName.get(
+                          ClassName.get(Optional.class), ClassName.get(Long.class)));
+        } else {
+          headerFieldGetter =
+              MethodSpec.methodBuilder(calculateGetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .addStatement("return Long.parseLong($N)", headerField.name)
+                  .returns(TypeName.LONG);
+        }
+      } else {
+        headerFieldGetter =
+            MethodSpec.methodBuilder(calculateGetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(
+                    selectJavaPropertyType(
+                        rifField.getRifColumnType(),
+                        rifField.isRifColumnOptional(),
+                        rifField.getRifColumnLength(),
+                        rifField.getRifColumnScale()));
+        addGetterStatement(rifField, headerField, headerFieldGetter);
+      }
       headerEntityClass.addMethod(headerFieldGetter.build());
 
-      MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField))
-              .addModifiers(Modifier.PUBLIC)
-              .returns(void.class)
-              .addParameter(
-                  selectJavaPropertyType(
-                      rifField.getRifColumnType(),
-                      rifField.isRifColumnOptional(),
-                      rifField.getRifColumnLength(),
-                      rifField.getRifColumnScale()),
-                  headerField.name);
-      addSetterStatement(rifField, headerField, headerFieldSetter);
+      MethodSpec.Builder headerFieldSetter;
+      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+        if (rifField.isRifColumnOptional()) {
+          headerFieldSetter =
+              MethodSpec.methodBuilder(calculateSetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .returns(void.class)
+                  .addParameter(
+                      ParameterizedTypeName.get(
+                          ClassName.get(Optional.class), ClassName.get(Long.class)),
+                      headerField.name);
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N.orElse(null))", headerField.name, headerField.name);
+        } else {
+          headerFieldSetter =
+              MethodSpec.methodBuilder(calculateSetterName(headerField))
+                  .addModifiers(Modifier.PUBLIC)
+                  .returns(void.class)
+                  .addParameter(TypeName.LONG, headerField.name);
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N)", headerField.name, headerField.name);
+        }
+      } else {
+        headerFieldSetter =
+            MethodSpec.methodBuilder(calculateSetterName(headerField))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(void.class)
+                .addParameter(
+                    selectJavaPropertyType(
+                        rifField.getRifColumnType(),
+                        rifField.isRifColumnOptional(),
+                        rifField.getRifColumnLength(),
+                        rifField.getRifColumnScale()),
+                    headerField.name);
+        addSetterStatement(rifField, headerField, headerFieldSetter);
+      }
       headerEntityClass.addMethod(headerFieldSetter.build());
     }
 
@@ -1257,6 +1319,41 @@ public class RifLayoutsMojo extends AbstractMojo {
 
     return headerEntityFinal;
   }
+  /**
+   * Support method for the varchar to bigint transition that identifies the columns that are
+   * planned to be converted.
+   *
+   * <p>TODO: BFD-1583 This is a temporary method that should be removed along with all code blocks
+   * that are conditional on this method once all beneficiary and claim tables IDs have completed
+   * the transition from varchar to bigint.
+   *
+   * @param tableName the table name
+   * @param rifField the field model
+   * @return true if the field specified is one that will be converted to a bigint in the near
+   *     future
+   */
+  private boolean isFutureBigint(String tableName, RifField rifField) {
+    /*
+     * Remove elements from these arrays as they are converted. When everything is removed, remove
+     * the method and all blocks that are conditional on this method.
+     */
+    final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
+    final List<String> futureBigIntTables =
+        Arrays.asList(
+            "beneficiaries",
+            "beneficiaries_history",
+            "medicare_beneficiaryid_history",
+            "carrier_claims",
+            "dme_claims",
+            "hha_claims",
+            "hospice_claims",
+            "inpatient_claims",
+            "outpatient_claims",
+            "partd_events");
+
+    return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
+        && futureBigIntTables.contains(tableName.toLowerCase());
+  }
 
   /**
    * Generates a Java class that can handle RIF-to-Entity parsing.
@@ -1358,29 +1455,48 @@ public class RifLayoutsMojo extends AbstractMojo {
 
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
-      if (rifField.getRifColumnType() == RifColumnType.CHAR
-          && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
-        // Handle a String field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
-      } else if (rifField.getRifColumnType() == RifColumnType.CHAR
-          && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1) {
-        // Handle a Character field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
-      } else if (rifField.getRifColumnType() == RifColumnType.NUM
-          && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
+      if (rifField.getRifColumnType() == RifColumnType.CHAR) {
+
+        if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
+          parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
+
+        } else if (rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
+          // Handle a String field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
+        } else {
+          // Handle a Character field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
+        }
+
+      } else if (rifField.getRifColumnType() == RifColumnType.BIGINT) {
+        // Handle an BigInteger field.
+        parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.SMALLINT) {
+        // Handle an Short field.
+        parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalShort" : "parseShort";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.INTEGER) {
         // Handle an Integer field.
         parseUtilsMethodName =
             rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
-      } else if (rifField.getRifColumnType() == RifColumnType.NUM
-          && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0) {
-        // Handle a Decimal field.
-        parseUtilsMethodName =
-            rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+
+      } else if (rifField.getRifColumnType() == RifColumnType.NUM) {
+        if (rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
+          // Handle an Integer field.
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
+
+        } else {
+          parseUtilsMethodName =
+              rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+        }
       } else if (rifField.getRifColumnType() == RifColumnType.DATE) {
         // Handle a LocalDate field.
         parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDate" : "parseDate";
+
       } else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP) {
         // Handle an Instant field.
         parseUtilsMethodName =
@@ -1626,8 +1742,7 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * Used in {@link #calculateCsvColumns(List<FieldSpec>, MappingSpec)} and generates the
-   * field-to-CSV-value header.
+   * Generates the field-to-CSV-value header.
    *
    * @param fields {@link List<FieldSpec>} to process
    * @param mappingSpec the {@link MappingSpec} of the field to generate conversion code for
@@ -1788,10 +1903,13 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * @param List<String> the {@link RifField} to create an additional Annotated database field for
+   * Creates details for additional annotated database fields.
+   *
+   * @param additionalDatabaseFields the {@link RifField} to create an additional Annotated database
+   *     field for
    * @return an ordered {@link List} of {@link RifField}s representing the additional fields that
    *     need to be stored to the database via JPA
-   * @throws MalformedURLException
+   * @throws MalformedURLException if there is an issue creating the field url
    */
   private static List<RifField> createDetailsForAdditionalDatabaseFields(
       List<String> additionalDatabaseFields) throws MalformedURLException {
@@ -1838,6 +1956,20 @@ public class RifLayoutsMojo extends AbstractMojo {
                 "LAST_UPDATED",
                 "lastUpdated");
         addlDatabaseFields.add(lastUpdated);
+        continue;
+      }
+      if (additionalDatabaseField.contentEquals("BENE_ID_NUMERIC")) {
+        RifField beneIdNumeric =
+            new RifField(
+                "BENE_ID_NUMERIC",
+                RifColumnType.BIGINT,
+                Optional.of(8),
+                Optional.of(0),
+                Boolean.FALSE,
+                null,
+                "BENE_ID_NUMERIC",
+                "beneficiaryIdNumeric");
+        addlDatabaseFields.add(beneIdNumeric);
         continue;
       }
     }
@@ -1927,7 +2059,7 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * @param rifField <code>true</code> if the property is an {@link Optional} one, <code>false
+   * @param optional <code>true</code> if the property is an {@link Optional} one, <code>false
    *     </code> otherwise
    * @param entityField the {@link FieldSpec} for the field being wrapped by the "setter"
    * @param entitySetter the "setter" method to generate the statement in
@@ -1950,7 +2082,7 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * Creates the fields for the BeneficiaryMonthly class in the model rif
+   * Creates the fields for the BeneficiaryMonthly class in the model rif.
    *
    * @param lineEntity helps build the entity {@link TypeSpec.Builder}
    * @param isId determines if the field is an id field
@@ -1991,10 +2123,11 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * Creates the fields for the BeneficiaryMonthly annotations in the model rif
+   * Creates the fields for the BeneficiaryMonthly annotations in the model rif.
    *
    * @param isId determines if the field is an id field
    * @param rifField {@link RifField} to create
+   * @return the created annotation specs
    */
   private static List<AnnotationSpec> createBeneficiaryMonthlyAnnotations(
       boolean isId, RifField rifField) {
@@ -2052,7 +2185,7 @@ public class RifLayoutsMojo extends AbstractMojo {
   }
 
   /**
-   * Selects the java field type
+   * Selects the java field type.
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
@@ -2061,36 +2194,51 @@ public class RifLayoutsMojo extends AbstractMojo {
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
    *     decimal point
+   * @return a Java poet {@link TypeName} that will be applied to the entity column; the use of the
+   *     {@link boolean} isColumnOptional determines if the type can be a primitive (i.e., long) or
+   *     in fact needs to be a Java class type (i.e., Long)
    */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
       boolean isColumnOptional,
       Optional<Integer> columnLength,
       Optional<Integer> columnScale) {
-    if (type == RifColumnType.CHAR
-        && columnLength.orElse(Integer.MAX_VALUE) == 1
-        && !isColumnOptional) return TypeName.CHAR;
-    else if (type == RifColumnType.CHAR
-        && columnLength.orElse(Integer.MAX_VALUE) == 1
-        && isColumnOptional) return ClassName.get(Character.class);
-    else if (type == RifColumnType.CHAR) return ClassName.get(String.class);
-    else if (type == RifColumnType.DATE && columnLength.orElse(0) == 8)
+    if (type == RifColumnType.CHAR) {
+      if (columnLength.orElse(Integer.MAX_VALUE) == 1) {
+        return isColumnOptional ? ClassName.get(Character.class) : TypeName.CHAR;
+      } else {
+        return ClassName.get(String.class);
+      }
+    } else if (type == RifColumnType.DATE) {
       return ClassName.get(LocalDate.class);
-    else if (type == RifColumnType.TIMESTAMP && columnLength.orElse(0) == 20)
+    } else if (type == RifColumnType.TIMESTAMP) {
       return ClassName.get(Instant.class);
-    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0)
+    }
+    // handle an inherited hack from the Excel spreadsheet in which a row entry
+    // was defined as a NUM and had an associated scale; for example (12,2) denotes
+    // a numeric data types of up to 12 digits, with two digits of scale (i.e., 55.45).
+    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0) {
       return ClassName.get(BigDecimal.class);
+    }
+    // some entries in Excel spreadsheet defined as NUM with a zero scale that are
+    // not optional should be defined as a primitive integer.
+    //
     else if (type == RifColumnType.NUM
         && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && !isColumnOptional) return TypeName.INT;
-    else if (type == RifColumnType.NUM
-        && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && isColumnOptional) return ClassName.get(Integer.class);
-    else throw new IllegalArgumentException("Unhandled field type: " + type.name());
+        && !isColumnOptional) {
+      return TypeName.INT;
+    } else if (type == RifColumnType.SMALLINT) {
+      return isColumnOptional ? ClassName.get(Short.class) : TypeName.SHORT;
+    } else if (type == RifColumnType.BIGINT) {
+      return isColumnOptional ? ClassName.get(Long.class) : TypeName.LONG;
+    } else if (type == RifColumnType.INTEGER || type == RifColumnType.NUM) {
+      return isColumnOptional ? ClassName.get(Integer.class) : TypeName.INT;
+    }
+    throw new IllegalArgumentException("Unhandled field type: " + type.name());
   }
 
   /**
-   * Selects the java property type
+   * Selects the java property type.
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
@@ -2099,6 +2247,7 @@ public class RifLayoutsMojo extends AbstractMojo {
    * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
    *     represents how many of the total digits (see `columnLength`) are to the right of the
    *     decimal point
+   * @return the java field type
    */
   private static TypeName selectJavaPropertyType(
       RifColumnType type,

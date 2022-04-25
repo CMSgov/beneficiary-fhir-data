@@ -137,6 +137,10 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     oneOf(
         () -> claim.setCurrLoc2Enum(randomEnum(FissCurrentLocation2Enums)),
         () -> claim.setCurrLoc2Unrecognized(randomLetter(1, 5)));
+    optional(() -> claim.setProvStateCd(randomAlphaNumeric(2, 2)));
+    optional(() -> claim.setProvTypFacilCd(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setProvEmerInd(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setProvDeptId(randomAlphaNumeric(3, 3)));
     optional(() -> claim.setMedaProvId(randomAlphaNumeric(13, 13)));
     optional(() -> claim.setTotalChargeAmount(randomAmount()));
     optional(() -> claim.setRecdDtCymd(randomDate()));

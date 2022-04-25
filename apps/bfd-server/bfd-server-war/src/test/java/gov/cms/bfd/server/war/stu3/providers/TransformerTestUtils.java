@@ -32,6 +32,7 @@ import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -747,6 +748,25 @@ final class TransformerTestUtils {
   }
 
   /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedCode the expected {@link Coding#getCode()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionCodingDoesNotExist(
+      CcwCodebookInterface ccwVariable,
+      Optional<?> expectedCode,
+      IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    assertEquals(false, extensionForUrl.isPresent());
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()} value
    * @param actualIdentifiers the actual {@link Identifier}s to verify a match can be found within
@@ -1444,6 +1464,8 @@ final class TransformerTestUtils {
         CcwCodebookVariable.CLM_DRG_CD,
         diagnosisRelatedGroupCd,
         eob.getDiagnosisFirstRep().getPackageCode());
+
+    assertEquals(1, eob.getDiagnosisFirstRep().getSequence());
   }
 
   /**
@@ -1462,8 +1484,8 @@ final class TransformerTestUtils {
    */
   static void assertEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
+      Long claimId,
+      Long beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -1476,9 +1498,10 @@ final class TransformerTestUtils {
 
     assertEquals(TransformerUtils.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
-    if (claimType.equals(ClaimType.PDE))
-      assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId, eob.getIdentifier());
-    else assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
+    assertHasIdentifier(
+        claimType.equals(ClaimType.PDE) ? CcwCodebookVariable.PDE_ID : CcwCodebookVariable.CLM_ID,
+        String.valueOf(claimId),
+        eob.getIdentifier());
 
     assertIdentifierExists(
         TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID,
@@ -1533,7 +1556,7 @@ final class TransformerTestUtils {
    */
   static void assertEobCommonGroupCarrierDMEEquals(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
+      Long beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,
@@ -2020,8 +2043,10 @@ final class TransformerTestUtils {
   /** @throws IOException */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     String nationalDrugCodeDisplayValueActual =
-        TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(nationalDrugCode));
     assertEquals(
         nationalDrugCodeDisplayValue,
         nationalDrugCodeDisplayValueActual,

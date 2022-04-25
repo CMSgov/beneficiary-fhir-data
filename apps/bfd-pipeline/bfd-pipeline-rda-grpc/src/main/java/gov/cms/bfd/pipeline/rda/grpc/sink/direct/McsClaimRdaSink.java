@@ -1,7 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -9,7 +10,7 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
-public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, PreAdjMcsClaim> {
+public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcsClaim> {
   private final McsClaimTransformer transformer;
 
   public McsClaimRdaSink(
@@ -33,9 +34,22 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, PreAdj
 
   @Nonnull
   @Override
-  public RdaChange<PreAdjMcsClaim> transformMessage(String apiVersion, McsClaimChange message) {
+  public RdaChange<RdaMcsClaim> transformMessage(String apiVersion, McsClaimChange message) {
     var change = transformer.transformClaim(message);
     change.getClaim().setApiSource(apiVersion);
     return change;
+  }
+
+  @Override
+  RdaApiClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
+    final RdaMcsClaim claim = change.getClaim();
+    return RdaApiClaimMessageMetaData.builder()
+        .sequenceNumber(change.getSequenceNumber())
+        .claimType(RdaApiProgress.ClaimType.MCS)
+        .claimId(claim.getIdrClmHdIcn())
+        .mbiRecord(claim.getMbiRecord())
+        .claimState(claim.getIdrStatusCode())
+        .receivedDate(claim.getLastUpdated())
+        .build();
   }
 }
