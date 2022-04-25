@@ -52,13 +52,12 @@ def adjusted_run_time(runTime, maxClients, clientsPerSecond):
 Runs a specified test via the input args.
 '''
 def run_with_params(argv):
-
-    ## Dictionary to hold data that will be stored in a config.*.yml file
-    configData = {
-        'homePath': None,
-        'clientCertPath': None,
-        'databaseUri': None,
-        'testHost': None,
+    ## Dictionary that holds the default values of each config value
+    defaultConfigData = {
+        'homePath': '',
+        'clientCertPath': '',
+        'databaseUri': '',
+        'testHost': '',
         'configPath': 'config.yml',
         'serverPublicKey': '',
         'testRunTime': "1m",
@@ -66,6 +65,10 @@ def run_with_params(argv):
         'testCreatedClientsPerSecond': "5",
         'resetStatsAfterClientSpawn': False
     }
+
+    ## Dictionary to hold data passed in via the CLI that will be stored 
+    ## in the root config.yml file
+    configData = {}
 
     testFile = ''
     workerThreads = "1"
@@ -75,7 +78,7 @@ def run_with_params(argv):
      '\n--databaseUri="postgres://<username:password>@<database-aws-node>.rds.amazonaws.com:port/<dbname>" (Required)'
      '\n--testHost="https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)'
      '\n--testFile="/<v1/v2>/test_to_run.py" (Required)'
-     '\n--configPath="<path to config.*.yml, used to read optional values>" (Optional, Default: "./config.yml")'
+     '\n--configPath="<path to a YAML configuration that will be read for CLI values but _not_ written to>" (Optional, Default: "./config.yml")'
      '\n--serverPublicKey="<server public key>" (Optional, Default: "")'
      '\n--testRunTime="<Test run time, ex. 30s, 1m, 2d 1h>" (Optional, Default 1m)'
      '\n--maxClients="<Max number of clients to create at once, int>" (Optional, Default 100)'
@@ -123,9 +126,15 @@ def run_with_params(argv):
             print(helpString)
             sys.exit()
 
-    ## Load the config and merge the CLI args with the values in the config,
-    ## taking the CLI values first
-
+    ## Read the specified configuration file and discard any falsey key
+    storedConfigData = {k: v for k, v in config.load_from_path(configData["configPath"]).items() if v}
+    ## Merge the stored data with data passed in via the CLI, with the
+    ## CLI data taking priority
+    configData = {**storedConfigData, **configData}
+    ## Finally, merge the merged configuration values with the defaults,
+    ## in case any optional arguments were not set via the CLI or the specified
+    ## YAML configuration file
+    configData = {**defaultConfigData, **configData}
 
     ## Add on extra time to the run-time to account for ramp-up of clients.
     adjusted_time = adjusted_run_time(configData["testRunTime"],
@@ -143,8 +152,7 @@ def run_with_params(argv):
         print("Missing required arg (See -h for help on params)")
         sys.exit(2)
 
-    ## write out config file
-    config.set_config_path(configData["configPath"])
+    ## write out to repository root config file (_NOT_ the file specified by "configPath")
     config.save(configData)
     setup.set_locust_test_name(testFile)
 
