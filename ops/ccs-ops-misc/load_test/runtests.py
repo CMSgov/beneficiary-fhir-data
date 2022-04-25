@@ -53,18 +53,21 @@ Runs a specified test via the input args.
 '''
 def run_with_params(argv):
 
+    ## Dictionary to hold data that will be stored in a config.*.yml file
+    configData = {
+        'homePath': None,
+        'clientCertPath': None,
+        'databaseUri': None,
+        'testHost': None,
+        'configPath': 'config.yml',
+        'serverPublicKey': '',
+        'testRunTime': "1m",
+        'testNumTotalClients': "100",
+        'testCreatedClientsPerSecond': "5",
+        'resetStatsAfterClientSpawn': False
+    }
+
     testFile = ''
-
-    ## container to hold config data
-    class configData: pass
-
-    ## Optional Params with defaults
-    configData.configPath = 'config.yml'
-    configData.serverPublicKey = ''
-    configData.testRunTime = "1m"
-    configData.testNumTotalClients = "100"
-    configData.testCreatedClientsPerSecond = "5"
-    configData.resetStatsAfterClientSpawn = False
     workerThreads = "1"
 
     helpString = ('runtests.py \n--homePath="<path/to/home/directory>" (Required) '
@@ -93,51 +96,55 @@ def run_with_params(argv):
             print(helpString)
             sys.exit()
         elif opt == "--homePath":
-            configData.homePath = arg
+            configData["homePath"] = arg
         elif opt == "--clientCertPath":
-            configData.clientCertPath = arg
+            configData["clientCertPath"] = arg
         elif opt == "--databaseUri":
-            configData.dbUri = arg
+            configData["dbUri"] = arg
         elif opt == "--testHost":
-            configData.testHost = arg
+            configData["testHost"] = arg
         elif opt == "--configPath":
-            configData.configPath = arg
+            configData["configPath"] = arg
         elif opt == "--serverPublicKey":
-            configData.serverPublicKey = arg
+            configData["serverPublicKey"] = arg
         elif opt == "--testRunTime":
-            configData.testRunTime = arg
+            configData["testRunTime"] = arg
         elif opt == "--maxClients":
-            configData.testNumTotalClients = arg
+            configData["testNumTotalClients"] = arg
         elif opt == "--clientsPerSecond":
-            configData.testCreatedClientsPerSecond = arg
+            configData["testCreatedClientsPerSecond"] = arg
         elif opt == "--testFile":
             testFile = arg
         elif opt == "--workerThreads":
             workerThreads = arg
         elif opt == "--resetStats":
-            configData.resetStatsAfterClientSpawn = True
+            configData["resetStatsAfterClientSpawn"] = True
         else:
             print(helpString)
             sys.exit()
 
+    ## Load the config and merge the CLI args with the values in the config,
+    ## taking the CLI values first
+
+
     ## Add on extra time to the run-time to account for ramp-up of clients.
-    adjusted_time = adjusted_run_time(configData.testRunTime,
-        configData.testNumTotalClients, configData.testCreatedClientsPerSecond)
+    adjusted_time = adjusted_run_time(configData["testRunTime"],
+        configData["testNumTotalClients"], configData["testCreatedClientsPerSecond"])
     if adjusted_time is None:
         print("Could not determine adjusted run time. Please use a format " +
             "like \"1m 30s\" for the --testRunTime option")
         sys.exit(1)
-    configData.testRunTime = f"{adjusted_time}s"
+    configData["testRunTime"] = f"{adjusted_time}s"
     print('Run time adjusted to account for ramp-up time. New run time: %s' %
         timedelta(seconds=adjusted_time))
 
     ## Check if all required params are set
-    if not all([configData.homePath, configData.clientCertPath, configData.dbUri, configData.testHost, testFile]):
+    if not all([configData["homePath"], configData["clientCertPath"], configData["dbUri"], configData["testHost"], testFile]):
         print("Missing required arg (See -h for help on params)")
         sys.exit(2)
 
     ## write out config file
-    config.set_config_path(configData.configPath)
+    config.set_config_path(configData["configPath"])
     config.save(configData)
     setup.set_locust_test_name(testFile)
 
