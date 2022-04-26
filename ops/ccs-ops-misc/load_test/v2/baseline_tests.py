@@ -15,14 +15,14 @@ setup.disable_no_cert_warnings(server_public_key, urllib3)
 setup.set_locust_env(config.load())
 
 mbis = data.load_mbis()
-eob_ids = data.load_bene_ids()
+bene_ids = data.load_bene_ids()
 last_updated = data.get_last_updated()
 cursor_list = data.load_cursors("v2")
 
 class BFDUser(HttpUser):
     def on_start(self):
-        copied_eob_ids = eob_ids.copy()
-        random.shuffle(copied_eob_ids)
+        copied_bene_ids = bene_ids.copy()
+        random.shuffle(copied_bene_ids)
 
         copied_mbis = mbis.copy()
         random.shuffle(copied_mbis)
@@ -30,15 +30,15 @@ class BFDUser(HttpUser):
         copied_cursor_list = cursor_list.copy()
         random.shuffle(copied_cursor_list)
 
-        self.eob_ids = copied_eob_ids
+        self.bene_ids = copied_bene_ids
         self.mbis = copied_mbis
         self.cursor_list = copied_cursor_list
 
-    def get_eob(self) -> int:
-      if len(self.eob_ids) == 0:
+    def get_bene_ids(self) -> int:
+      if len(self.bene_ids) == 0:
             errors.no_data_stop_test(self)
 
-      return self.eob_ids.pop()
+      return self.bene_ids.pop()
 
     def get_mbi(self) -> int:
       if len(self.mbis) == 0:
@@ -61,32 +61,32 @@ class BFDUser(HttpUser):
 
     @task
     def coverage_test_id_count(self):
-        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_eob(), '_count': '10'},
+        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_bene_ids(), '_count': '10'},
                 name='/v2/fhir/Coverage search by id / count=10')
 
     @task
     def coverage_test_id_lastUpdated(self):
-        self.get('/v2/fhir/Coverage', params={'_lastUpdated': f'gt{last_updated}', 'beneficiary': self.get_eob()},
+        self.get('/v2/fhir/Coverage', params={'_lastUpdated': f'gt{last_updated}', 'beneficiary': self.get_bene_ids()},
                 name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks)')
 
     @task
     def coverage_test_id(self):
-        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_eob()},
+        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_bene_ids()},
                 name='/v2/fhir/Coverage search by id')
 
     @task
     def eob_test_id_count(self):
-        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_count': '10', '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_bene_ids(), '_count': '10', '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id / count=10')
 
     @task
     def eob_test_id_includeTaxNumber(self):
-        self.get('/v2/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_eob(), '_IncludeTaxNumbers': 'true', '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_bene_ids(), '_IncludeTaxNumbers': 'true', '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
 
     @task
     def eob_test_id(self):
-        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_eob(), '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_bene_ids(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id')
 
     @task
@@ -101,12 +101,12 @@ class BFDUser(HttpUser):
 
     @task
     def patient_test_id_lastUpdated(self):
-        self.get('/v2/fhir/Patient', params={'_id': self.get_eob(), '_format': 'application/fhir+json', '_IncludeIdentifiers': 'mbi', '_lastUpdated': f'gt{last_updated}'},
+        self.get('/v2/fhir/Patient', params={'_id': self.get_bene_ids(), '_format': 'application/fhir+json', '_IncludeIdentifiers': 'mbi', '_lastUpdated': f'gt{last_updated}'},
                 name='/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / last updated (2 weeks)')
 
     @task
     def patient_test_id(self):
-        self.get('/v2/fhir/Patient', params={'_id': self.get_eob(), '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/Patient', params={'_id': self.get_bene_ids(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/Patient search by id')
 
 '''
