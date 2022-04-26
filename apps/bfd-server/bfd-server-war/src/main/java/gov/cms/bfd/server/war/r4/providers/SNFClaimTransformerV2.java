@@ -144,9 +144,7 @@ public class SNFClaimTransformerV2 {
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob,
-        CcwCodebookVariable.CLM_UTLZTN_DAY_CNT,
-        BigDecimal.valueOf(claimGroup.getUtilizationDayCount()));
+        eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
 
     // This is messy but appears to be specific to SNF.  Maybe revisit and clean in the future
     // NCH_QLFYD_STAY_FROM_DT => ExplanationOfBenefit.supportingInfo
@@ -205,11 +203,11 @@ public class SNFClaimTransformerV2 {
     // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT   => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
+        claimGroup.getCoinsuranceDayCount(),
+        claimGroup.getNonUtilizationDayCount(),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
+        claimGroup.getBloodPintsFurnishedQty(),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -302,7 +300,7 @@ public class SNFClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber());
+      item.setSequence(line.getLineNumber().intValue());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
