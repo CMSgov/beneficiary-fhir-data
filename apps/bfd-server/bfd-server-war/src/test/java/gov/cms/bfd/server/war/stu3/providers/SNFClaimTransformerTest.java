@@ -70,7 +70,7 @@ public final class SNFClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.SNF,
-        Long.toString(claim.getClaimGroupId()),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -83,11 +83,11 @@ public final class SNFClaimTransformerTest {
     // test common benefit components between SNF and Inpatient claims are set as expected
     TransformerTestUtils.assertCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claim.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claim.getNonUtilizationDayCount()),
+        claim.getCoinsuranceDayCount(),
+        claim.getNonUtilizationDayCount(),
         claim.getDeductibleAmount(),
         claim.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claim.getBloodPintsFurnishedQty()),
+        claim.getBloodPintsFurnishedQty(),
         claim.getNoncoveredCharge(),
         claim.getTotalDeductionAmount(),
         claim.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -127,7 +127,7 @@ public final class SNFClaimTransformerTest {
         eob,
         claim.getClaimAdmissionDate(),
         claim.getBeneficiaryDischargeDate(),
-        Optional.of(BigDecimal.valueOf(claim.getUtilizationDayCount())));
+        Optional.of(claim.getUtilizationDayCount()));
 
     // Test to ensure common group fields between Inpatient, Outpatient and SNF
     TransformerTestUtils.assertEobCommonGroupInpOutSNFEquals(
@@ -172,7 +172,7 @@ public final class SNFClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     SNFClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
+    assertEquals(claimLine1.getLineNumber().intValue(), eobItem0.getSequence());
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHasCoding(
