@@ -13,6 +13,7 @@ SLA_V1_BASELINE = "SLA_V1_BASELINE"
 SLA_V2_BASELINE = "SLA_V2_BASELINE"
 
 ## Values are for 50%, 95%, 99%, and the failsafe limit in order, in milliseconds
+## TODO: Pull these values from production metrics (i.e. New Relic) 
 slas = {
     SLA_COVERAGE : [10, 100, 250, 500],
     SLA_PATIENT : [1000, 3000, 5000, 8000],
