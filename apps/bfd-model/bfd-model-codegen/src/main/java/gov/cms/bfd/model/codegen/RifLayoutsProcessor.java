@@ -1058,17 +1058,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   .addModifiers(Modifier.PUBLIC)
                   .returns(void.class)
                   .addParameter(TypeName.LONG, headerField.name);
-          // setBeneficiaryId in the "beneficiaries" table we'll also populate
-          // the bene_id_numeric as part of the setter
-          StringBuilder sb = new StringBuilder("this.$N = String.valueOf($N)");
-          if (mappingSpec.getHeaderTable().equalsIgnoreCase("beneficiaries")
-              && headerField.name.equalsIgnoreCase("beneficiaryId")) {
-            sb.append("; beneficiaryIdNumeric = $N");
-            headerFieldSetter.addStatement(
-                sb.toString(), headerField.name, headerField.name, headerField.name);
-          } else {
-            headerFieldSetter.addStatement(sb.toString(), headerField.name, headerField.name);
-          }
+          headerFieldSetter.addStatement(
+              "this.$N = String.valueOf($N)", headerField.name, headerField.name);
         }
       } else {
         headerFieldSetter =
