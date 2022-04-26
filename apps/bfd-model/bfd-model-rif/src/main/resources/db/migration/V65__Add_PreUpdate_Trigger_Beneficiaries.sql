@@ -1,5 +1,5 @@
 -- Add a pre-update trigger to the beneficiaries table to populate
--- bene_id_numeric on a record update. Therei is currently a
+-- bene_id_numeric on a record update. There is currently a
 -- pre-insert trigger, but we also need a pre-update trigger since
 -- the Beneficiary.java ORM object will initialize the native data
 -- type to 0 (zero) when the object is instantiated.
