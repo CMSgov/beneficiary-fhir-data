@@ -3,9 +3,13 @@ package gov.cms.bfd.migrator.app;
 /** The user-configurable options that specify how to access the application's database. */
 public final class DatabaseOptions {
 
+  /** The JDBC URL of the database to load into. */
   private final String databaseUrl;
+  /** The database username to connect as when loading data. */
   private final String databaseUsername;
+  /** The database password to connect with when loading data. */
   private final String databasePassword;
+  /** The maximum size of the DB connection pool that the application will create. */
   private final int maxPoolSize;
 
   /**

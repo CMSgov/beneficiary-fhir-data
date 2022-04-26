@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
  */
 public final class DatabaseSchemaManager {
+  /** Outputs information to the log file. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
 
   /**
@@ -67,6 +68,8 @@ public final class DatabaseSchemaManager {
    * Create flyway using the specified parameters.
    *
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
+   * @param appConfiguration the app configuration to use, for gathering flyway specific
+   *     configuration
    * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
   private static Flyway createFlyway(DataSource dataSource, AppConfiguration appConfiguration) {

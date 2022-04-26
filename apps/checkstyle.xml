@@ -23,8 +23,11 @@
              First sentence has a period (affects javadoc functionality)
              Html tags are properly escaped
              Only allowed html tags exist
+             Javadoc descriptions are not empty
         -->
-        <module name="JavadocStyle"/>
+        <module name="JavadocStyle">
+            <property name="checkEmptyJavadoc" value="true"/>
+        </module>
         <!-- Ensures non-local variables have docs.
              Note that ignoreNamePattern can be used to ignore patterns of names
              via RegEx if we want to avoid documenting certain variable names.

@@ -18,7 +18,11 @@ import java.util.function.Predicate;
  * <p>TODO: BFD-1558 Move to a common location for pipeline and this app
  */
 public final class ProcessOutputConsumer implements Runnable {
+
+  /** Reads the stream from stdout. */
   private final BufferedReader stdoutReader;
+
+  /** Holds the stdout contents. */
   private final List<String> stdoutContents;
 
   /**

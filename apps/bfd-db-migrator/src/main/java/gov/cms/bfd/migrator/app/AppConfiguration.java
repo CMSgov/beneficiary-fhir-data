@@ -70,12 +70,17 @@ public final class AppConfiguration {
    */
   public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
 
+  /** Contains options for metrics capturing. */
   private final MetricOptions metricOptions;
+
+  /** Contains options for database related configuration. */
   private final DatabaseOptions databaseOptions;
-  /*
-   * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway will use it's default location
-   * <code>src/main/resources/db/migration</code>. This is primarily for the integration tests, so we can run test migrations
-   * under an arbitrary directory full of scripts.
+
+  /**
+   * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
+   * will use it's default location <code>src/main/resources/db/migration</code>. This is primarily
+   * for the integration tests, so we can run test migrations under an arbitrary directory full of
+   * scripts.
    */
   private final String flywayScriptLocationOverride;
 

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
  * MigratorApp#main(String[])}.
  */
 public final class MigratorApp {
+  /** Outputs information to the log file. */
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
 
   /**
@@ -37,6 +38,7 @@ public final class MigratorApp {
    */
   static final int EXIT_CODE_FAILED_HIBERNATE_VALIDATION = 3;
 
+  /** This {@link System#exit(int)} value should be used when the application exits successfully. */
   static final int EXIT_CODE_SUCCESS = 0;
 
   /**

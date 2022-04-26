@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 /** Class for containing logic related to Hibernate validation. */
 public class HibernateValidator {
-
+  /** Outputs information to the log file. */
   private final Logger LOGGER = LoggerFactory.getLogger(HibernateValidator.class);
 
   /**
@@ -32,12 +32,16 @@ public class HibernateValidator {
    */
   private final boolean HIBERNATE_DETAILED_LOGGING = false;
 
+  /** The configured data source for hibernate. */
   private final HikariDataSource dataSource;
 
+  /** Validates the schema. */
   private SchemaValidator schemaValidator;
 
+  /** Holds the configuration data for hibernate. */
   private Configuration hibernateConfiguration;
 
+  /** A list of model packages to scan, which will be validated using Hibernate. */
   private final List<String> modelPackagesToScan;
 
   /**

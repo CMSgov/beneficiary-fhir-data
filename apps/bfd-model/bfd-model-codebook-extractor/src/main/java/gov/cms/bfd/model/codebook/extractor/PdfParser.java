@@ -28,18 +28,29 @@ import org.slf4j.LoggerFactory;
  * Warehouse (CCW) data dictionary</a> codebook into a JAX-B model {@link Codebook} instance.
  */
 public final class PdfParser {
+  /** Outputs information to the log file. */
   private static final Logger LOGGER = LoggerFactory.getLogger(PdfParser.class);
-
+  /** Primary prefix for various header field names. */
   public static final String FIELD_NAME_LABEL = "LABEL";
+  /** Secondary prefix for various header field names. */
   private static final String FIELD_NAME_LABEL_ALT1 = "NAME";
+  /** The 'description' header field name. */
   public static final String FIELD_NAME_DESCRIPTION = "DESCRIPTION";
+  /** The 'short name' header field name. */
   public static final String FIELD_NAME_SHORT_NAME = "SHORT NAME";
+  /** The 'long name' header field name. */
   public static final String FIELD_NAME_LONG_NAME = "LONG NAME";
+  /** The 'type' header field name. */
   public static final String FIELD_NAME_TYPE = "TYPE";
+  /** The 'length' header field name. */
   private static final String FIELD_NAME_LENGTH = "LENGTH";
+  /** The 'source' header field name. */
   private static final String FIELD_NAME_SOURCE = "SOURCE";
+  /** The 'values' header field name. */
   private static final String FIELD_NAME_VALUES = "VALUES";
+  /** The 'code' values header field name. */
   private static final String FIELD_NAME_VALUES_ALT1 = "CODE VALUES";
+  /** The 'comment' header field name. */
   private static final String FIELD_NAME_COMMENT = "COMMENT";
 
   /**
@@ -50,6 +61,8 @@ public final class PdfParser {
       Pattern.compile("^(\\S+)\\s+=\\s*(.*)$");
 
   /**
+   * Parses a pdf codebook and returns the result.
+   *
    * @param codebookSource the codebook to be converted
    * @return a {@link Codebook} instance representing the data from the parsed codebook PDF
    */
@@ -79,6 +92,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses a codebook variable from a text section.
+   *
    * @param codebook the {@link Codebook} that is being parsed
    * @param variableSection the text section representing a single {@link Variable} to be parsed
    * @return the {@link Variable} that was parsed from the specified text section
@@ -102,6 +117,8 @@ public final class PdfParser {
   }
 
   /**
+   * Extracts text lines from a stream representing a pdf.
+   *
    * @param pdfStream the {@link InputStream} for the PDF to extract the text lines of
    * @return the trimmed lines of text contained in the specified PDF {@link InputStream}
    */
@@ -143,17 +160,18 @@ public final class PdfParser {
   }
 
   /**
+   * Checks if the given text line contains text from known problematic parsing, such as
+   * superscript.
+   *
+   * <p>These lines appear when superscript text is parsed from a PDF, e.g. "1st" with the "st"
+   * superscript. The superscript portion will be parsed out as a separate line, directly above the
+   * line that it should appear in. It screws up the grammar a bit, but we leave it out anyways.
+   *
    * @param lineFromPage the line of text parsed from a PDF to be checked
    * @return <code>true</code> if the specified line appears to be "junk" caused by problems with
    *     extracting text from a PDF, <code>false</code> if not
    */
   private static boolean isTextLinePdfParsingJunk(String lineFromPage) {
-    /*
-     * These lines appear when superscript text is parsed from a PDF, e.g. "1st"
-     * with the "st" superscript. The superscript portion will be parsed out as a
-     * separate line, directly above the line that it should appear in. It screws up
-     * the grammar a bit, but we leave it out anyways.
-     */
     if (lineFromPage.equals("st")
         || lineFromPage.equals("nd")
         || lineFromPage.equals("rd")
@@ -163,6 +181,9 @@ public final class PdfParser {
   }
 
   /**
+   * Finds variable sections by parsing them from a list of codebook text lines with specific
+   * delimiters.
+   *
    * @param codebookTextLines the lines of codebook text to process
    * @return a {@link List} of {@link List}s, where each inner {@link List} contains the text lines
    *     for a single variable
@@ -215,6 +236,8 @@ public final class PdfParser {
   }
 
   /**
+   * Finds the first variables section line.
+   *
    * @param codebookTextLines the {@link List} of codebook lines to search
    * @return the index of the first line of the first variable definition in the specified codebook
    *     lines {@link List}
@@ -243,6 +266,8 @@ public final class PdfParser {
   }
 
   /**
+   * Finds the last variables section line.
+   *
    * @param codebookTextLines the {@link List} of codebook lines to search
    * @return the index of the last line of the last variable definition in the specified codebook
    *     lines {@link List}
@@ -256,6 +281,8 @@ public final class PdfParser {
   }
 
   /**
+   * Determines if the given line is representing metadata.
+   *
    * @param line the codebook PDF text line to check
    * @return <code>true</code> if the line represents document metadata that should be left out of
    *     the parsing (e.g. page footers), <code>false</code> otherwise
@@ -285,6 +312,8 @@ public final class PdfParser {
   }
 
   /**
+   * Determines if the line is a label field.
+   *
    * @param line the codebook text line to check
    * @return <code>true</code> if the specified line appears to be the "LABEL:" field in a variable
    *     section, <code>false</code> otherwise
@@ -299,6 +328,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the id from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getId()} value from the specified {@link Variable} raw text section
    */
@@ -308,6 +339,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the label from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getLabel()} value from the specified {@link Variable} raw text
    *     section
@@ -332,6 +365,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the descsription from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getDescription()} value from the specified {@link Variable} raw
    *     text section
@@ -344,6 +379,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the short name from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getShortName()} value from the specified {@link Variable} raw text
    *     section, or <code>null</code> if none was specified
@@ -363,6 +400,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the long name from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getLongName()} value from the specified {@link Variable} raw text
    *     section
@@ -378,6 +417,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the type from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getType()} value from the specified {@link Variable} raw text
    *     section
@@ -394,6 +435,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the length from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getLength()} value from the specified {@link Variable} raw text
    *     section
@@ -409,6 +452,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the source from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getSource()} value from the specified {@link Variable} raw text
    *     section, or <code>null</code> if none was present
@@ -427,6 +472,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the value format from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getValueFormat()} value from the specified {@link Variable} raw
    *     text section, or <code>null</code> if it was not present
@@ -472,6 +519,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the value groups from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getValueGroups()} value from the specified {@link Variable} raw
    *     text section, or <code>null</code> if it was not present
@@ -568,6 +617,9 @@ public final class PdfParser {
   }
 
   /**
+   * Determines if a specific line within a list of lines is part of a {@link
+   * ValueGroup#getDescription()}.
+   *
    * @param variableId the {@link Variable#getId()} of the {@link Variable} being parsed
    * @param fieldLines the {@link Variable#getValueGroups()} text being parsed
    * @param fieldLineIndex the index of the specific {@link Variable#getValueGroups()} text line to
@@ -638,6 +690,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses a {@link Value} from a list of value lines.
+   *
    * @param valueLines the lines of text representing a {@link Value} to be parsed
    * @return the {@link Value} parsed from those lines
    */
@@ -672,6 +726,8 @@ public final class PdfParser {
   }
 
   /**
+   * Parses the comment from the given variable section.
+   *
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getComment()} value from the specified {@link Variable} raw text
    *     section, or <code>null</code> if none was present
@@ -698,6 +754,9 @@ public final class PdfParser {
   }
 
   /**
+   * Extracts the lines of text between the specified variable section field name and the next field
+   * (exclusive).
+   *
    * @param variableSection the variable section to extract the field content from
    * @param fieldNames the possible names of the variable section field to extract the content for
    * @return the lines of text between the specified variable section field name and the next field,
@@ -796,6 +855,8 @@ public final class PdfParser {
   }
 
   /**
+   * Extract paragraphs from a list of pdf text.
+   *
    * @param text the text to extract paragraphs from
    * @return a new {@link List} of {@link String}s, with one entry per paragraph that was found in
    *     the original list of word-wrapped {@link String}s

@@ -17,6 +17,12 @@
         Provides shared helpers and model classes related to the RDA stream data.
     </description>
 
+    <properties>
+        <!-- These models will be generated automatically in the near future;
+        ignore this project since effort here will be wasted. -->
+        <checkstyle.skip>true</checkstyle.skip>
+    </properties>
+
     <dependencies>
         <!-- Hibernate / JPA -->
         <dependency>
