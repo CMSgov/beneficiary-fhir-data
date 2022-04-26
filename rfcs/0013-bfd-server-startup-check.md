@@ -12,7 +12,7 @@ This RFC proposes a minor change to existing bfd-server on-host health checking 
 ## Status
 [Status]: #status
 
-* Status: Proposed <!-- FIXME: adjust prior to merge -->
+* Status: Implemented
 * Implementation JIRA Ticket(s):
     * [BFD-1685](https://jira.cms.gov/browse/BFD-1685)
 
