@@ -1,3 +1,4 @@
+${logic.psql-only} $$ LANGUAGE plpgsql;
 ${logic.psql-only} DO $$
 ${logic.psql-only} DECLARE
 ${logic.psql-only} 	t record;
@@ -103,8 +104,5 @@ ${logic.psql-only}
 ${logic.psql-only}   -- ensure the current user is a migrator (membership will be audited/hardened out-of-band post migration)
 ${logic.psql-only}   GRANT api_migrator_svcs TO CURRENT_USER;
 ${logic.psql-only}
-${logic.psql-only}   -- Revoke "PUBLIC" role to prevent users from gaining access via inheritance
-${logic.psql-only}   REVOKE ALL ON SCHEMA public FROM PUBLIC;
-${logic.psql-only}   REVOKE ALL ON DATABASE fhirdb FROM PUBLIC;
 ${logic.psql-only} END 
 ${logic.psql-only} $$ LANGUAGE plpgsql;
