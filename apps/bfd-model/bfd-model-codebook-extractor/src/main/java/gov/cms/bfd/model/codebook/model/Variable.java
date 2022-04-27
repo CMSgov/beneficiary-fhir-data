@@ -16,40 +16,83 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class Variable {
+  /** The parent {@link Codebook} that this {@link Variable} is part of. */
   @XmlTransient private Codebook codebook;
 
+  /** The unique-within-a-{@link Codebook} identifier for this {@link Variable}. */
   @XmlAttribute(required = true)
   private String id;
 
+  /**
+   * A short description for this {@link Variable}, typically no more than a few (English) words
+   * long.
+   */
   @XmlAttribute(required = true)
   private String label;
 
+  /**
+   * A longer description for this {@link Variable}, typically one or more (English) paragraphs
+   * long, with one {@link List} entry per paragraph.
+   */
   @XmlElementWrapper(required = false)
   @XmlElement(name = "p")
   private List<String> description;
 
+  /**
+   * The "short" name for this {@link Variable}, which will be unique-within-this-{@link Codebook}
+   * and to identify it by some systems. Will be {@code null} if that information is unknown for
+   * this {@link Variable}.
+   */
   @XmlAttribute(required = false)
   private String shortName;
 
+  /**
+   * The "long" name for this {@link Variable}, which will be unique-within-this-{@link Codebook}
+   * and to identify it by some systems.
+   */
   @XmlAttribute(required = true)
   private String longName;
 
+  /**
+   * The {@link VariableType} that constrains values of this {@link Variable}. Will be {@code null}
+   * if that information is unknown for this {@link Variable}.
+   */
   @XmlAttribute(required = false)
   private VariableType type;
 
+  /** The maximum length that constrains values of this {@link Variable}. */
   @XmlAttribute(required = true)
   private Integer length;
 
+  /**
+   * The source system that this {@link Variable}'s data was extracted and/or derived from. Will be
+   * {@code null} if that information is unknown for this {@link Variable}.
+   */
   @XmlAttribute(required = false)
   private String source;
 
+  /**
+   * The descriptive text that details the format of the {@link Variable}'s values, e.g. "XXX.XX" or
+   * "The value in this field is between '00' through '12'.". Will be {@code null} if no such
+   * description is available.
+   */
   @XmlAttribute(required = false)
   private String valueFormat;
 
+  /**
+   * The {@link List} of {@link ValueGroup}s that constrains the allowed coded values of this {@link
+   * Variable}. Will be {@code null} if this {@link Variable}'s values aren't constrained in that
+   * way.
+   */
   @XmlElementWrapper(required = false)
   @XmlElement(name = "valueGroup")
   private List<ValueGroup> valueGroups;
 
+  /**
+   * A comment providing more detail on this {@link Variable}'s purpose and/or history, zero or more
+   * (English) paragraphs long, with one {@link List} entry per paragraph. Will be {@code null} if
+   * that information is unknown for this {@link Variable}.
+   */
   @XmlElementWrapper(required = false)
   @XmlElement(name = "p")
   private List<String> comment;
@@ -363,12 +406,16 @@ public final class Variable {
     return Optional.ofNullable(comment);
   }
 
-  /** @param comment the new value for {@link #getComment()} */
+  /**
+   * Sets the comment.
+   *
+   * @param comment the new value for {@link #getComment()}
+   */
   public void setComment(List<String> comment) {
     this.comment = comment;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
