@@ -97,13 +97,13 @@ Extending the `stop_service_if_failing` function to fully satisfy the requiremen
     - At the beginning of the `stop_service_if_failing` function, disallow external traffic on port 7443:
     
         ```bash
-        sudo iptables -A INPUT -p tcp -i eth0 --dport 7443 -j DROP
+        sudo iptables -A INPUT -p tcp -i eth0 --dport 7443 -j REJECT
         ```
 
     - Where the script currently produces the log message "Server started properly", allow external traffic on port 7443:
 
         ```bash
-        sudo iptables -D INPUT -p tcp -i eth0 --dport 7443 -j DROP
+        sudo iptables -D INPUT -p tcp -i eth0 --dport 7443 -j REJECT
         ```
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
