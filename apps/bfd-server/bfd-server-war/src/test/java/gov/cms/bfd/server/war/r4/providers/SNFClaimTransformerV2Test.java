@@ -857,7 +857,7 @@ public class SNFClaimTransformerV2Test {
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
 
-    Quantity compare = new Quantity(0);
+    Quantity compare = new Quantity().setValue(BigDecimal.ZERO);
 
     assertTrue(compare.equalsDeep(quantity));
   }
