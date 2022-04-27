@@ -203,25 +203,7 @@ jobs:
       - name: 'Verify FHIR resource'
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'
-        run: |
-          is_valid="false"
-          if output=$(python ./validations.py -r); then is_valid="true"; fi
-          printf "$output\n"
-          echo ::set-output name=valid::$is_valid
-          echo ::set-output name=output::$([[ $output =~ .*(There[[:space:]]were[[:space:]][[:digit:]]+[[:space:]]invalid[[:space:]]resources[[:space:]]\([[:digit:]]+[[:space:]]total[[:space:]]errors\)).* ]] && printf "${BASH_REMATCH[1]}")
-      - name: 'Commenting on found issues'
-        if: steps.run_check.outputs.skip == 'false' && steps.validate_fhir.outputs.valid == 'false'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: ${{github.event.number}},
-              body: "${{steps.validate_fhir.outputs.output}}"
-            });
-            
-            core.setFailed("${{steps.validate_fhir.outputs.output}}");
+        run: python ./validations.py -r
 
   # ansible system testing
   ansible-role-bfd-pipeline:
