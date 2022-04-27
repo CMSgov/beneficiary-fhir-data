@@ -155,7 +155,7 @@ N/A
 
 ### Deployments
 
-Improvements to the existing on-host health check to make it a more specific startup check will inspire confidence in the existing deployment process. What's more, a reliable startup check is a prerequisite to the development of alternative deployment strategies, such as [blue-green deployments](https://en.wikipedia.org/wiki/Blue-green_deployment) and [feature toggle deployments](https://en.wikipedia.org/wiki/Feature_toggle). The adoption of these or other deployment strategies may dramatically decrease deployment risk and toil while further increasing deployment confidence, reliability, and frequency.
+Improvements to the existing on-host health check to make it a more specific startup check and will inspire confidence in the existing deployment process. What's more, a reliable startup check is a prerequisite to the development of alternative deployment strategies, such as [blue-green deployments](https://en.wikipedia.org/wiki/Blue-green_deployment) and [feature toggle deployments](https://en.wikipedia.org/wiki/Feature_toggle). The adoption of these or other deployment strategies may dramatically decrease deployment risk and toil while further increasing deployment confidence, reliability, and frequency.
 
 ### Readiness Checking
 
