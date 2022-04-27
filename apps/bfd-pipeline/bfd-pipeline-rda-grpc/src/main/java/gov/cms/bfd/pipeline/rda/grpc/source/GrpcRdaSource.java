@@ -102,6 +102,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * used internally by the primary constructor but is also used by unit tests to allow a mock
    * channel to be provided.
    *
+   * @param clock used to access current time
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
@@ -128,8 +129,9 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   }
 
   /**
-   * Calls the service through the specific implementation of GrpcStreamCaller provided to our
-   * constructor. Cancels the response stream if reading from the stream is interrupted.
+   * {@inheritDoc} Calls the service through the specific implementation of GrpcStreamCaller
+   * provided to our constructor. Cancels the response stream if reading from the stream is
+   * interrupted.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
    * @param sink to receive batches of objects
@@ -359,7 +361,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       this.maxIdle = maxIdle;
       this.minIdleTimeBeforeConnectionDrop =
           minIdleTimeBeforeConnectionDrop == null
-              ? Duration.ofMinutes(4)
+              ? Duration.ofMillis(Long.MAX_VALUE)
               : minIdleTimeBeforeConnectionDrop;
       if (serverType == ServerType.Remote) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(host), "host name is required");
@@ -484,6 +486,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       return null;
     }
 
+    /**
+     * Gets value of {@code minIdleTimeBeforeConnectionDrop} in milliseconds.
+     *
+     * @return value of {@code minIdleTimeBeforeConnectionDrop} in milliseconds.
+     */
     private long getMinIdleMillisBeforeConnectionDrop() {
       return minIdleTimeBeforeConnectionDrop.toMillis();
     }
