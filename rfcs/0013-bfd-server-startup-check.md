@@ -112,10 +112,10 @@ Extending the `stop_service_if_failing` function to fully satisfy the requiremen
   The arguments against alternative solutions may be a little weaker upon further investigation. The _institutional memory_ surrounding the original implementation of the `stop_service_if_failing` suggests that it was not necessarily intended to avoid cold-start issues. If it does avoid these issues, it might be considered a happy accident.
 * [x] What is the recommended firewall on amazon linux 2 in 2022? Is `iptables` still auspicious?
   `iptables` continues to be an obvious, acceptable solution.
-  - `ufw` is a frontend for `iptables`
+  - `ufw` can be used as a frontend for utilities like `iptables`
   - `ufw` **is** available via epel which in turn is available via `amazon-linux-extras`
-  - `epel` is not enabled in the CMS base images by default
-  - `iptables` seems to be installed in base CMS images
+  - `epel` does not appear to be enabled in the CMS base images by default
+  - `iptables` appeasrs to be installed in base CMS images
   - `iptables` is also part of `@amzn2-core` and easily installable if missing
 
 ### Proposed Solution: Drawbacks
