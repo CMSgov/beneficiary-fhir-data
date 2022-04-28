@@ -51,7 +51,7 @@ class BFDUser(HttpUser):
         self.mbis = copied_mbis
         self.cursor_list = copied_cursor_list
 
-    def get_bene_ids(self) -> int:
+    def get_bene_id(self) -> int:
       """Returns the next beneficiary ID in this BFDUser's list of IDs.
 
       This method pops (that is, takes the topmost item) the next beneficiary
@@ -108,32 +108,32 @@ class BFDUser(HttpUser):
 
     @task
     def coverage_test_id_count(self):
-        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_bene_ids(), '_count': '10'},
+        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_bene_id(), '_count': '10'},
                 name='/v2/fhir/Coverage search by id / count=10')
 
     @task
     def coverage_test_id_lastUpdated(self):
-        self.get('/v2/fhir/Coverage', params={'_lastUpdated': f'gt{last_updated}', 'beneficiary': self.get_bene_ids()},
+        self.get('/v2/fhir/Coverage', params={'_lastUpdated': f'gt{last_updated}', 'beneficiary': self.get_bene_id()},
                 name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks)')
 
     @task
     def coverage_test_id(self):
-        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_bene_ids()},
+        self.get('/v2/fhir/Coverage', params={'beneficiary': self.get_bene_id()},
                 name='/v2/fhir/Coverage search by id')
 
     @task
     def eob_test_id_count(self):
-        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_bene_ids(), '_count': '10', '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_bene_id(), '_count': '10', '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id / count=10')
 
     @task
     def eob_test_id_includeTaxNumber(self):
-        self.get('/v2/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_bene_ids(), '_IncludeTaxNumbers': 'true', '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'_lastUpdated': f'gt{last_updated}', 'patient': self.get_bene_id(), '_IncludeTaxNumbers': 'true', '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
 
     @task
     def eob_test_id(self):
-        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_bene_ids(), '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/ExplanationOfBenefit', params={'patient': self.get_bene_id(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/ExplanationOfBenefit search by id')
 
     @task
@@ -148,12 +148,12 @@ class BFDUser(HttpUser):
 
     @task
     def patient_test_id_lastUpdated(self):
-        self.get('/v2/fhir/Patient', params={'_id': self.get_bene_ids(), '_format': 'application/fhir+json', '_IncludeIdentifiers': 'mbi', '_lastUpdated': f'gt{last_updated}'},
+        self.get('/v2/fhir/Patient', params={'_id': self.get_bene_id(), '_format': 'application/fhir+json', '_IncludeIdentifiers': 'mbi', '_lastUpdated': f'gt{last_updated}'},
                 name='/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / last updated (2 weeks)')
 
     @task
     def patient_test_id(self):
-        self.get('/v2/fhir/Patient', params={'_id': self.get_bene_ids(), '_format': 'application/fhir+json'},
+        self.get('/v2/fhir/Patient', params={'_id': self.get_bene_id(), '_format': 'application/fhir+json'},
                 name='/v2/fhir/Patient search by id')
 
 '''
