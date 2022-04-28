@@ -11,7 +11,7 @@ class BFDUser(BFDUserBase):
     def coverage_test_id_count(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/Coverage', {
-                'beneficiary': instance.eob_ids.pop(),
+                'beneficiary': instance.bene_ids.pop(),
                 '_count': '10'
             })
 

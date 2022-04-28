@@ -26,7 +26,7 @@ class BFDUser(BFDUserBase):
     def coverage_test_id_count(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/Coverage', {
-                'beneficiary': instance.eob_ids.pop(),
+                'beneficiary': instance.bene_ids.pop(),
                 '_count': '10'
             })
 
@@ -37,7 +37,7 @@ class BFDUser(BFDUserBase):
         def make_url(instance):
             return create_url_path('/v2/fhir/Coverage', {
                 '_lastUpdated': f'gt{instance.last_updated}',
-                'beneficiary': instance.eob_ids.pop(),
+                'beneficiary': instance.bene_ids.pop(),
             })
 
         self.run_task(name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks)', url_callback=make_url)
@@ -46,7 +46,7 @@ class BFDUser(BFDUserBase):
     def coverage_test_id(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/Coverage', {
-                'beneficiary': instance.eob_ids.pop(),
+                'beneficiary': instance.bene_ids.pop(),
             })
 
         self.run_task(name='/v2/fhir/Coverage search by id', url_callback=make_url)
@@ -55,7 +55,7 @@ class BFDUser(BFDUserBase):
     def eob_test_id_count(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/ExplanationOfBenefit', {
-                'patient': instance.eob_ids.pop(),
+                'patient': instance.bene_ids.pop(),
                 '_count': '10',
                 '_format': 'application/fhir+json'
             })
@@ -68,7 +68,7 @@ class BFDUser(BFDUserBase):
         def make_url(instance):
             return create_url_path('/v2/fhir/ExplanationOfBenefit', {
                 '_lastUpdated': f'gt{instance.last_updated}',
-                'patient': instance.eob_ids.pop(),
+                'patient': instance.bene_ids.pop(),
                 '_IncludeTaxNumbers': 'true',
                 '_format': 'application/fhir+json'
             })
@@ -79,7 +79,7 @@ class BFDUser(BFDUserBase):
     def eob_test_id(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/ExplanationOfBenefit', {
-                'patient': instance.eob_ids.pop(),
+                'patient': instance.bene_ids.pop(),
                 '_format': 'application/fhir+json'
             })
 
@@ -113,7 +113,7 @@ class BFDUser(BFDUserBase):
     def patient_test_id_lastUpdated(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/Patient', {
-                '_id': instance.eob_ids.pop(),
+                '_id': instance.bene_ids.pop(),
                 '_format': 'application/fhir+json',
                 '_IncludeIdentifiers': 'mbi',
                 '_lastUpdated': f'gt{instance.last_updated}'
@@ -125,7 +125,7 @@ class BFDUser(BFDUserBase):
     def patient_test_id(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/Patient', {
-                '_id': instance.eob_ids.pop(),
+                '_id': instance.bene_ids.pop(),
                 '_format': 'application/fhir+json'
             })
 

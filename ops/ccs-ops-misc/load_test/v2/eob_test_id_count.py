@@ -11,7 +11,7 @@ class BFDUser(BFDUserBase):
     def eob_test_id_count(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/ExplanationOfBenefit', {
-                'patient': instance.eob_ids.pop(),
+                'patient': instance.bene_ids.pop(),
                 '_count': '10',
                 '_format': 'application/fhir+json'
             })

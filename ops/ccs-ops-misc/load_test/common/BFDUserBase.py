@@ -56,7 +56,7 @@ class BFDUserBase(HttpUser):
         self.last_updated = data.get_last_updated()
 
         # Pre-load data needed for creating URLs
-        self.eob_ids = self.load_data('BENE_IDS', db.get_bene_ids)
+        self.bene_ids = self.load_data('BENE_IDS', db.get_bene_ids)
         self.mbis = self.load_data('MBIS', db.get_hashed_mbis)
         self.contract_ids = self.load_data('CONTRACT_IDS', db.get_contract_ids)
 

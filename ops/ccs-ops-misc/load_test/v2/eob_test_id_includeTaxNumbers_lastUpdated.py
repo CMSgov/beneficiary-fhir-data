@@ -13,7 +13,7 @@ class BFDUser(BFDUserBase):
         def make_url(instance):
             return create_url_path('/v2/fhir/ExplanationOfBenefit', {
                 '_lastUpdated': f'gt{instance.last_updated}',
-                'patient': instance.eob_ids.pop(),
+                'patient': instance.bene_ids.pop(),
                 '_IncludeTaxNumbers': 'true',
                 '_format': 'application/fhir+json'
             })

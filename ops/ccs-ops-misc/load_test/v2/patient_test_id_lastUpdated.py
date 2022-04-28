@@ -12,7 +12,7 @@ class BFDUser(BFDUserBase):
     def patient_test_id_lastUpdated(self):
         def make_url(instance):
             return create_url_path('/v2/fhir/Patient', {
-                '_id': instance.eob_ids.pop(),
+                '_id': instance.bene_ids.pop(),
                 '_format': 'application/fhir+json',
                 '_IncludeIdentifiers': 'mbi',
                 '_lastUpdated': f'gt{instance.last_updated}'
