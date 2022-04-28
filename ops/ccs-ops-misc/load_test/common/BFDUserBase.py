@@ -11,11 +11,13 @@ import urllib3
 
 setup.set_locust_env(config.load())
 
-'''
-Base Class for Locust tests against BFD. This class should automatically handle
-most of the common tasks that our load tests require.
-'''
+
 class BFDUserBase(HttpUser):
+    """
+    Base Class for Locust tests against BFD. This class should automatically handle
+    most of the common tasks that our load tests require.
+    """
+
 
     '''
     If a child class is going to use a set of data during the test, such as 
@@ -36,10 +38,17 @@ class BFDUserBase(HttpUser):
     '''
     SLA_BASELINE = None
 
-    '''
-    Run setup tasks prior to the tests being counted.
-    '''
+
     def on_start(self):
+        """
+        Run once when a BFDUser is initialized by Locust.
+        
+        This method copies the necessary test data (lists of MBIs, beneficiary
+        IDs, and contract cursor URLs) as members of this particular BFDUser
+        instance. We then shuffle these copied lists such that concurrent 
+        BFDUsers are not querying the same data at the same time.
+        """
+
         # Load configuration needed for making requests to the FHIR server
         self.client_cert = setup.getClientCert()
         self.server_public_key = setup.loadServerPublicKey()
@@ -60,10 +69,13 @@ class BFDUserBase(HttpUser):
             validation.setup_failsafe_event(self.environment, self.SLA_BASELINE)
 
 
-    '''
-    Run tear-down tasks after the tests have completed.
-    '''
     def on_stop(self):
+        """
+        Run tear-down tasks after the tests have completed.
+
+        The only tear-down task right now is to check if the tests were within
+        the SLAs.
+        """
         # Report the various response time percentiles against the SLA
         if hasattr(self, 'SLA_BASELINE') and self.SLA_BASELINE:
             validation.check_sla_validation(self.environment, self.SLA_BASELINE)
@@ -72,7 +84,20 @@ class BFDUserBase(HttpUser):
     '''
     Send one request to the FHIR server and parse the response for pagination
     '''
-    def get_by_url(self, url: str, headers: Dict[str, str] = {}, name: str = ''):
+    def get_by_url(self, url: str, headers: Dict[str, str] = {},
+            name: str = ''):
+        """
+        Sends a GET request to the endpoint at base_path with the various
+        query string parameters and headers specified.
+
+        This method extends Locust's HttpUser::client.get() method to make
+        creating the requests nicer. Specifically, the query string parameters
+        are specified as a separate dictionary opposed to part of the path, the
+        cert and verify arguments (which will never change) are already set,
+        and Cache-Control headers are automatically set to ensure caching is
+        disabled.
+        """
+
         with self.client.get(url,
                 cert=self.client_cert,
                 verify=self.server_public_key,
@@ -90,11 +115,13 @@ class BFDUserBase(HttpUser):
                 self.url_pools[name].append(next_url)
     
 
-    '''
-    Figure out which URL we should query next and then query the server using 
-    get_by_url()
-    '''
-    def run_task(self, url_callback: Callable, headers: Dict[str, str] = {}, name: str = ''):
+    def run_task(self, url_callback: Callable, headers: Dict[str, str] = {},
+            name: str = ''):
+        """
+        Figure out which URL we should query next and then query the server using 
+        get_by_url()
+        """
+
         # First, see if we can generate a URL using the callback
         try:
             url = url_callback(self)
@@ -109,15 +136,17 @@ class BFDUserBase(HttpUser):
         if url is not None:
             # Run the test using the URL we found
             self.get_by_url(url=url, headers=headers, name=name)
+        # If no URL is found, then this test isn't counted in statistics
 
 
     # Helper Functions
 
-    '''
-    Check if the given DATA_REQUIRED flag exists on this class, and if it does,
-    pre-load the data from the database.
-    '''
+
     def load_data(self, flag_name: str, load_function: Callable, *args) -> List:
+        """
+        Check if the given DATA_REQUIRED flag exists on this class, and if it does,
+        pre-load the data from the database.
+        """
         if hasattr(self, 'DATA_REQUIRED') and flag_name in self.DATA_REQUIRED:
             data_list = data.load_data_segment(load_function, *args).copy()
             random.shuffle(data_list)
@@ -125,10 +154,10 @@ class BFDUserBase(HttpUser):
         else:
             return []
 
-    '''
-    Parse the JSON response and return the "next" URL if it exists
-    '''
     def get_next_url(self, payload: str) -> str:
+        """
+        Parse the JSON response and return the "next" URL if it exists
+        """
         parsed_payload = json.loads(payload)
         for link in parsed_payload.get("link", {}):
             if "relation" in link and link["relation"] == "next":
