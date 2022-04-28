@@ -4,6 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -241,6 +242,20 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMinIdleTimeBeforeConnectionDrop()} value.
+   * This variable value should be in seconds.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
+      "RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP";
+  /**
+   * The default value for {@link
+   * AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP}.
+   */
+  public static final int DEFAULT_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
+      (int) Duration.ofMinutes(4).toSeconds();
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getAuthenticationToken()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
@@ -311,6 +326,13 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
+
+  /**
+   * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
+   * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
+   * simultaneously.
+   */
+  private static final int RECORD_BATCH_SIZE = 100;
 
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
@@ -446,7 +468,8 @@ public final class AppConfiguration implements Serializable {
                 .build(),
             loaderThreads,
             idempotencyRequired,
-            filteringNonNullAndNon2022Benes);
+            filteringNonNullAndNon2022Benes,
+            RECORD_BATCH_SIZE);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
@@ -553,6 +576,11 @@ public final class AppConfiguration implements Serializable {
                 Duration.ofSeconds(
                     readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
                         .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)))
+            .minIdleTimeBeforeConnectionDrop(
+                Duration.ofSeconds(
+                    readEnvParsedOptional(
+                            ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP, Integer::parseInt)
+                        .orElse(DEFAULT_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
             .authenticationToken(
                 readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN)
                     .orElse(DEFAULT_RDA_GRPC_AUTH_TOKEN))

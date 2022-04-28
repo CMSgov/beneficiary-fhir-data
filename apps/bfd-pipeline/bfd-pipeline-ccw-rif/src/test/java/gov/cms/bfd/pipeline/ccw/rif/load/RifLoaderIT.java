@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -91,6 +92,113 @@ public final class RifLoaderIT {
     verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Ensure no records were skipped
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the modified {@link StaticRifResourceGroup#SAMPLE_A} data for an
+   * <code>UPDATE</code> on a {@link Beneficiary} record that has a single file with multiple
+   * reference years for the same bene id. The beneMonthly data should be populated for the bene in
+   * the beneMonthly table for each ref year, and HICN and MBIs are also populated.
+   */
+  @Test
+  public void multipleReferenceYearsInSingleFileForSameBeneExpectBeneMonthlyPopulated() {
+    // load the file so it exists
+    loadSample(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+
+    // Set the batch to 10 so all records are in the same batch
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(10);
+
+    loadSample(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()),
+        options);
+
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    // Validate bene monthly
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
+      // loaded (6x12)
+      assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      // Checks every month in the beneficiary monthly table for each of the years loaded
+      assertBeneficiaryMonthly(beneficiaryFromDb, 1990);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2000);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2001);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2003);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2019);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2022);
+
+      // Validate HICN and MBI
+      String expectedMbiHash =
+          RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
+      String expectedHicn =
+          RifLoader.computeHicnHash(new IdHasher(options.getIdHasherConfig()), "543217066U");
+      assertEquals(
+          expectedMbiHash,
+          beneficiaryFromDb.getMbiHash().orElse(null),
+          "Beneficiary has incorrect mbiHash");
+      assertEquals(expectedHicn, beneficiaryFromDb.getHicn(), "Beneficiary has incorrect HICN");
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
+  /**
+   * Runs {@link RifLoader} against the modified {@link StaticRifResourceGroup#SAMPLE_A} data for an
+   * <code>UPDATE</code> on a {@link Beneficiary} record that has a single file with multiple
+   * reference years for the same bene id, and does not fit in a single batch. The beneMonthly data
+   * should be populated for the bene in the beneMonthly table for each ref year, and HICN and MBIs
+   * are also populated.
+   */
+  @Test
+  public void
+      multipleReferenceYearsInSingleFileForSameBeneInMultipleBatchesExpectBeneMonthlyPopulated() {
+    // load the file initially so it exists
+    loadSample(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+
+    // Set the batch to 2 so this is split into multiple batches
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptionsWithBatchSize(2);
+    loadSample(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()),
+        options);
+
+    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    // Validate bene monthly
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
+      // loaded (6x12)
+      assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      // Checks every month in the beneficiary monthly table for each of the years loaded
+      assertBeneficiaryMonthly(beneficiaryFromDb, 1990);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2000);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2001);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2003);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2019);
+      assertBeneficiaryMonthly(beneficiaryFromDb, 2022);
+
+      // Validate HICN and MBI
+      String expectedMbiHash =
+          RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
+      String expectedHicn =
+          RifLoader.computeHicnHash(new IdHasher(options.getIdHasherConfig()), "543217066U");
+      assertEquals(
+          expectedMbiHash,
+          beneficiaryFromDb.getMbiHash().orElse(null),
+          "Beneficiary has incorrect mbiHash");
+      assertEquals(expectedHicn, beneficiaryFromDb.getHicn(), "Beneficiary has incorrect HICN");
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
   }
 
   /**
@@ -829,6 +937,74 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Runs {@link RifLoader} against the modified {@link StaticRifResourceGroup#SAMPLE_A} data for an
+   * <code>UPDATE</code> on a {@link Beneficiary} record that has a single file with multiple update
+   * records. The Beneficiary object will have been initialized by the pipeline causing the
+   * bene_id_numeric (native long) to be initialized to 0 (zero). However, the beneficiaries table
+   * has a pre-insert / pre-update trigger that populates the bene_id_numeric at the time the data
+   * is persisted to the table. This check verifies that both the insert and the update trigger has
+   * fired and successully populated the bene_id_numeric column.
+   *
+   * <p>NOTE: This test will be removed when the new schema migration has been completed; at that
+   * time the bene_id_numeric will no longer be needed and the trigger will be removed.
+   */
+  @Test
+  public void verifyBeneficiaryEntityHasPopulatedBeneIdNumeric() {
+    // persist a record into Beneficiary table
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+
+      // verify that the pre-insert trigger populated the bene_id_numeric
+      assertEquals(
+          567834L,
+          beneficiaryFromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric after INSERT");
+
+      /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
+      loadSampleABeneWithEnrollmentRefYear(
+          null,
+          CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+              USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+          true);
+      validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+      // verify that the pre-update trigger populated the bene_id_numeric
+      Beneficiary beneficiary2FromDb = entityManager.find(Beneficiary.class, "567834");
+      assertEquals(
+          beneficiaryFromDb.getBeneficiaryIdNumeric(),
+          beneficiary2FromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric after UPDATE");
+
+      // brute force trying to break the bene_id_numeric by explicitly setting to zero; this
+      // actually mimics a RIF load UPDATE as the RIF columns-to-entity setters will not know about
+      // bene_id_numeric.
+      beneficiary2FromDb.setBeneficiaryIdNumeric(0L);
+      entityManager.persist(beneficiary2FromDb);
+      // secret sauce for verifying that our Hibernate object actually was
+      // refreshed with what is in the database.
+      entityManager.refresh(beneficiary2FromDb);
+
+      // verify that the update trigger still did its thing
+      assertEquals(
+          567834L,
+          beneficiary2FromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric afer explicit UPDATE");
+
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
    * Gets the stream for the specified file type from the SAMPLE_A data.
    *
    * @param fileType the file type to get from the SAMPLE_A data
@@ -1079,13 +1255,16 @@ public final class RifLoaderIT {
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
    * @param sampleResources the {@link StaticRifResourceGroup} to load
+   * @param loadAppOptions the load app options
    */
-  private void loadSample(List<StaticRifResource> sampleResources) {
+  private void loadSample(List<StaticRifResource> sampleResources, LoadAppOptions loadAppOptions) {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
-    int loadCount = loadSample(sampleResources.get(0).getResourceUrl().toString(), rifFilesEvent);
+    int loadCount =
+        loadSample(
+            sampleResources.get(0).getResourceUrl().toString(), loadAppOptions, rifFilesEvent);
 
     // Verify that the expected number of records were run successfully.
     assertEquals(
@@ -1095,16 +1274,12 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Runs {@link RifLoader} with the default options (see {@link
-   * CcwRifLoadTestUtils#getLoadOptions()}) against the specified {@link StaticRifResourceGroup}.
+   * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
-   * @param sampleName a human-friendly name that will be logged to identify the data load being
-   *     kicked off here
-   * @param rifFilesEvent the {@link RifFilesEvent} to load
-   * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
+   * @param sampleResources the {@link StaticRifResourceGroup} to load
    */
-  private int loadSample(String sampleName, RifFilesEvent rifFilesEvent) {
-    return loadSample(sampleName, CcwRifLoadTestUtils.getLoadOptions(), rifFilesEvent);
+  private void loadSample(List<StaticRifResource> sampleResources) {
+    loadSample(sampleResources, CcwRifLoadTestUtils.getLoadOptions());
   }
 
   /**
@@ -1274,13 +1449,43 @@ public final class RifLoaderIT {
     }
   }
 
+  /**
+   * Assert the beneficiary monthly table has entries for every month for the provided beneficiary
+   * for that beneficiaries' last recorded enrollment year.
+   *
+   * @param beneficiaryFromDb the beneficiary from db
+   */
   public static void assertBeneficiaryMonthly(Beneficiary beneficiaryFromDb) {
-    List<BeneficiaryMonthly> beneficiaryMonthly = beneficiaryFromDb.getBeneficiaryMonthlys();
+    if (beneficiaryFromDb.getBeneEnrollmentReferenceYear().isEmpty()) {
+      fail("Bene in db had no enrollment reference year to check for in bene monthly table.");
+    }
+
+    assertBeneficiaryMonthly(
+        beneficiaryFromDb, beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue());
+  }
+
+  /**
+   * Assert the beneficiary monthly table has entries for every month for the provided beneficiary,
+   * for the provided enrollment year.
+   *
+   * @param beneficiaryFromDb the beneficiary from db
+   * @param yearToCheckFor the year to check for
+   */
+  public static void assertBeneficiaryMonthly(Beneficiary beneficiaryFromDb, int yearToCheckFor) {
+    List<BeneficiaryMonthly> beneficiaryMonthlyList = beneficiaryFromDb.getBeneficiaryMonthlys();
+    List<BeneficiaryMonthly> beneficiaryMonthliesForYear =
+        beneficiaryMonthlyList.stream()
+            .filter(bene -> bene.getYearMonth().getYear() == yearToCheckFor)
+            .collect(Collectors.toList());
+
+    if (beneficiaryMonthliesForYear.isEmpty()) {
+      fail("Expected year " + yearToCheckFor + " not found in bene monthly table");
+    }
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         1,
-        beneficiaryMonthly.get(0),
+        beneficiaryMonthliesForYear.get(0),
         beneficiaryFromDb.getEntitlementBuyInJanInd(),
         beneficiaryFromDb.getFipsStateCntyJanCode(),
         beneficiaryFromDb.getHmoIndicatorJanInd(),
@@ -1296,9 +1501,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberJanId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         2,
-        beneficiaryMonthly.get(1),
+        beneficiaryMonthliesForYear.get(1),
         beneficiaryFromDb.getEntitlementBuyInFebInd(),
         beneficiaryFromDb.getFipsStateCntyFebCode(),
         beneficiaryFromDb.getHmoIndicatorFebInd(),
@@ -1314,9 +1519,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberFebId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         3,
-        beneficiaryMonthly.get(2),
+        beneficiaryMonthliesForYear.get(2),
         beneficiaryFromDb.getEntitlementBuyInMarInd(),
         beneficiaryFromDb.getFipsStateCntyMarCode(),
         beneficiaryFromDb.getHmoIndicatorMarInd(),
@@ -1332,9 +1537,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberMarId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         4,
-        beneficiaryMonthly.get(3),
+        beneficiaryMonthliesForYear.get(3),
         beneficiaryFromDb.getEntitlementBuyInAprInd(),
         beneficiaryFromDb.getFipsStateCntyAprCode(),
         beneficiaryFromDb.getHmoIndicatorAprInd(),
@@ -1350,9 +1555,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberAprId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         5,
-        beneficiaryMonthly.get(4),
+        beneficiaryMonthliesForYear.get(4),
         beneficiaryFromDb.getEntitlementBuyInMayInd(),
         beneficiaryFromDb.getFipsStateCntyMayCode(),
         beneficiaryFromDb.getHmoIndicatorMayInd(),
@@ -1368,9 +1573,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberMayId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         6,
-        beneficiaryMonthly.get(5),
+        beneficiaryMonthliesForYear.get(5),
         beneficiaryFromDb.getEntitlementBuyInJunInd(),
         beneficiaryFromDb.getFipsStateCntyJunCode(),
         beneficiaryFromDb.getHmoIndicatorJunInd(),
@@ -1386,9 +1591,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberJunId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         7,
-        beneficiaryMonthly.get(6),
+        beneficiaryMonthliesForYear.get(6),
         beneficiaryFromDb.getEntitlementBuyInJulInd(),
         beneficiaryFromDb.getFipsStateCntyJulCode(),
         beneficiaryFromDb.getHmoIndicatorJulInd(),
@@ -1404,9 +1609,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberJulId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         8,
-        beneficiaryMonthly.get(7),
+        beneficiaryMonthliesForYear.get(7),
         beneficiaryFromDb.getEntitlementBuyInAugInd(),
         beneficiaryFromDb.getFipsStateCntyAugCode(),
         beneficiaryFromDb.getHmoIndicatorAugInd(),
@@ -1422,9 +1627,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberAugId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         9,
-        beneficiaryMonthly.get(8),
+        beneficiaryMonthliesForYear.get(8),
         beneficiaryFromDb.getEntitlementBuyInSeptInd(),
         beneficiaryFromDb.getFipsStateCntySeptCode(),
         beneficiaryFromDb.getHmoIndicatorSeptInd(),
@@ -1440,9 +1645,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberSeptId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         10,
-        beneficiaryMonthly.get(9),
+        beneficiaryMonthliesForYear.get(9),
         beneficiaryFromDb.getEntitlementBuyInOctInd(),
         beneficiaryFromDb.getFipsStateCntyOctCode(),
         beneficiaryFromDb.getHmoIndicatorOctInd(),
@@ -1458,9 +1663,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberOctId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         11,
-        beneficiaryMonthly.get(10),
+        beneficiaryMonthliesForYear.get(10),
         beneficiaryFromDb.getEntitlementBuyInNovInd(),
         beneficiaryFromDb.getFipsStateCntyNovCode(),
         beneficiaryFromDb.getHmoIndicatorNovInd(),
@@ -1476,9 +1681,9 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberNovId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        yearToCheckFor,
         12,
-        beneficiaryMonthly.get(11),
+        beneficiaryMonthliesForYear.get(11),
         beneficiaryFromDb.getEntitlementBuyInDecInd(),
         beneficiaryFromDb.getFipsStateCntyDecCode(),
         beneficiaryFromDb.getHmoIndicatorDecInd(),
