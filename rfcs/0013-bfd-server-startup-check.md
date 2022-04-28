@@ -110,13 +110,13 @@ Extending the `stop_service_if_failing` function to fully satisfy the requiremen
 
 * [x] Arguments for and against certain solutions hinge in part on the notion that lazily loaded application data sources could have a negative impact on the performance. However, the evidence is unclear. Do the initial requests executed in the on-host health check ward off a cold-start or similar?
   The arguments against alternative solutions may be a little weaker upon further investigation. The _institutional memory_ surrounding the original implementation of the `stop_service_if_failing` suggests that it was not necessarily intended to avoid cold-start issues. If it does avoid these issues, it might be considered a happy accident.
-* [x] What is the recommended firewall on amazon linux 2 in 2022? Is `iptables` still auspicious?
+* [x] What is the recommended firewall on amazon Linux 2 in 2022? Is `iptables` still auspicious?
   `iptables` continues to be an obvious, acceptable solution.
   - `ufw` can be used as a frontend for utilities like `iptables`
   - `ufw` **is** available via epel which in turn is available via `amazon-linux-extras`
   - `epel` does not appear to be enabled in the CMS base images by default
-  - `iptables` appeasrs to be installed in base CMS images
-  - `iptables` is also part of `@amzn2-core` and easily installable if missing
+  - `iptables` appears to be installed in base CMS images
+  - `iptables` is also part of `@amzn2-core` and easily added if missing
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
@@ -160,6 +160,10 @@ Improvements to the existing on-host health check to make it a more specific sta
 ### Readiness Checking
 
 What's missing from the proposal is the introduction of reliable readiness checks. This will require further consideration moving forward to ensure that the traffic is handled most effectively and that instances aren't suffering from periods of saturation as a result of mismanaged load balancing.
+
+### DevSecOps
+
+This proposal is _very_ simplistic and the initial feedback to this proposal included concern over the targeted privilege escalation for `iptables`, which could be avoided by re-imagining aspects of the startup script as cooperative systemd units, discretely responsible for health checking and port management. There could be other benefits from such a solution, however, they may be considered out of scope for this specific proposal.
 
 ## Addendums
 [Addendums]: #addendums
