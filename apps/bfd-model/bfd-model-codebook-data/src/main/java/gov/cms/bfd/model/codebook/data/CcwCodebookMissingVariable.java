@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** The enum CcwCodebookMissingVariable. */
+/** Represents missing CCW Codebook variables. */
 public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   /**
    * The {@code MBI_EFFCTV_DT}
@@ -139,7 +139,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   FI_ORIG_CLM_CNTL_NUM;
 
-  /** The Variables mapped by id. */
+  /** The variables mapped by id. */
   private Map<String, Variable> VARIABLES_BY_ID = buildVariablesMappedById();
 
   /**

@@ -48,7 +48,7 @@ public final class PdfParser {
   private static final String FIELD_NAME_SOURCE = "SOURCE";
   /** The 'values' header field name. */
   private static final String FIELD_NAME_VALUES = "VALUES";
-  /** The 'code' values header field name. */
+  /** The 'code values' header field name. */
   private static final String FIELD_NAME_VALUES_ALT1 = "CODE VALUES";
   /** The 'comment' header field name. */
   private static final String FIELD_NAME_COMMENT = "COMMENT";

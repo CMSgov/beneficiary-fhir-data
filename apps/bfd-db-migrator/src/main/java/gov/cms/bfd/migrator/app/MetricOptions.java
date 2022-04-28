@@ -50,7 +50,7 @@ public final class MetricOptions implements Serializable {
   }
 
   /**
-   * See {@link #hostname}.
+   * Gets the {@link #hostname}.
    *
    * @return the hostname that will send metrics to New Relic
    */
@@ -59,7 +59,7 @@ public final class MetricOptions implements Serializable {
   }
 
   /**
-   * See {@link #newRelicMetricPeriod}.
+   * Gets the {@link #newRelicMetricPeriod}.
    *
    * @return the interval between when each batch of metrics is sent to New Relic
    */
@@ -68,7 +68,7 @@ public final class MetricOptions implements Serializable {
   }
 
   /**
-   * See {@link #newRelicMetricPath}.
+   * Gets the {@link #newRelicMetricPath}.
    *
    * @return the relative path of the New Relic Metric API where telemetry will be sent
    */
@@ -77,7 +77,7 @@ public final class MetricOptions implements Serializable {
   }
 
   /**
-   * See {@link #newRelicMetricHost}.
+   * Gets the {@link #newRelicMetricHost}.
    *
    * @return the host of the New Relic Metric API where telemetry will be sent
    */
@@ -86,7 +86,7 @@ public final class MetricOptions implements Serializable {
   }
 
   /**
-   * See {@link #newRelicAppName}.
+   * Gets the {@link #newRelicAppName}.
    *
    * @return the name of the app with which metrics are tagged in New Relic
    */
@@ -95,7 +95,7 @@ public final class MetricOptions implements Serializable {
   }
 
   /**
-   * See {@link #newRelicMetricKey}.
+   * Gets the {@link #newRelicMetricKey}.
    *
    * @return the secret key granting access to the New Relic Metric API
    */

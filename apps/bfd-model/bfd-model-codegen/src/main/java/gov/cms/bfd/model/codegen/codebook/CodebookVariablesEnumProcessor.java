@@ -59,7 +59,7 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
    */
   private static final boolean DEBUG = true;
 
-  /** he list of log messages to write out. */
+  /** The list of log messages to write out. */
   private final List<String> logMessages = new LinkedList<>();
 
   /**
