@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/** The enum CcwCodebookMissingVariable. */
 public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   /**
    * The {@code MBI_EFFCTV_DT}
@@ -138,8 +139,14 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   FI_ORIG_CLM_CNTL_NUM;
 
+  /** The Variables mapped by id. */
   private Map<String, Variable> VARIABLES_BY_ID = buildVariablesMappedById();
 
+  /**
+   * Build variables mapped by id.
+   *
+   * @return a map of ids to {@link Variable}s.
+   */
   public static Map<String, Variable> buildVariablesMappedById() {
     Map<String, Variable> variablesMappedById = new LinkedHashMap<>();
 
@@ -223,12 +230,25 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
     return variablesMappedById;
   }
 
+  /**
+   * Creates a new list of strings and adds the specified string to it, then returns the list.
+   *
+   * @param addString the string to add to a new list
+   * @return the list
+   */
   public static List<String> getList(String addString) {
     List<String> listOfStrings = new ArrayList<String>();
     listOfStrings.add(addString);
     return listOfStrings;
   }
 
+  /**
+   * Gets the value group for this enum, based on its code and description.
+   *
+   * @param description the description
+   * @param code the code
+   * @return the value group
+   */
   public static List<ValueGroup> getValueGroup(String description, String code) {
     List<String> descriptionList = new ArrayList<String>();
     descriptionList.add(description);
@@ -242,6 +262,8 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   }
 
   /**
+   * Looks up and returns a variable by its enum name.
+   *
    * @return the {@link Variable} data (parsed from a codebook PDF) for this {@link
    *     CcwCodebookVariable} constant
    */

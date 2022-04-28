@@ -42,7 +42,7 @@ public final class ProcessOutputConsumer implements Runnable {
     this.stdoutContents = new ArrayList<>();
   }
 
-  /** @see java.lang.Runnable#run() */
+  /** {@inheritDoc} */
   @Override
   public void run() {
     /*
@@ -61,7 +61,11 @@ public final class ProcessOutputConsumer implements Runnable {
     }
   }
 
-  /** @return a {@link String} that contains the <code>STDOUT</code> contents so far */
+  /**
+   * Gets a {@link String} that contains the <code>STDOUT</code> contents so far.
+   *
+   * @return the stdout contents
+   */
   public synchronized String getStdoutContents() {
     return String.join("\n", stdoutContents);
   }

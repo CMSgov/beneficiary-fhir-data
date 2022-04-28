@@ -28,27 +28,43 @@ public final class DatabaseOptions {
     this.maxPoolSize = maxPoolSize;
   }
 
-  /** @return the JDBC URL of the database to load into */
+  /**
+   * Gets the {@link #databaseUrl}.
+   *
+   * @return the JDBC URL of the database to load into
+   */
   public String getDatabaseUrl() {
     return databaseUrl;
   }
 
-  /** @return the database username to connect as when loading data */
+  /**
+   * Gets the {@link #databaseUsername}.
+   *
+   * @return the database username to connect as when loading data
+   */
   public String getDatabaseUsername() {
     return databaseUsername;
   }
 
-  /** @return the database password to connect with when loading data */
+  /**
+   * Gets the {@link #databasePassword}.
+   *
+   * @return the database password to connect with when loading data
+   */
   public String getDatabasePassword() {
     return databasePassword;
   }
 
-  /** @return the maximum size of the DB connection pool that the application will create */
+  /**
+   * Gets the {@link #maxPoolSize}.
+   *
+   * @return the maximum size of the DB connection pool that the application will create
+   */
   public int getMaxPoolSize() {
     return maxPoolSize;
   }
 
-  /** @see Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

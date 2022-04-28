@@ -97,6 +97,8 @@ public final class DatabaseSchemaManager {
   }
 
   /**
+   * Creates the script placeholders map.
+   *
    * @param dataSource the {@link DataSource} that the replacements will be used for
    * @return the {@link Map} of key-value replacements to use for {@link
    *     FluentConfiguration#placeholders(Map)}

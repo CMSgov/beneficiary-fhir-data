@@ -59,21 +59,28 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
    */
   private static final boolean DEBUG = true;
 
+  /** he list of log messages to write out. */
   private final List<String> logMessages = new LinkedList<>();
 
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes() */
+  /**
+   * {@inheritDoc} @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes()
+   */
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return ImmutableSet.of(CodebookVariableEnumGeneration.class.getName());
   }
 
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion() */
+  /**
+   * {@inheritDoc} @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion()
+   */
   @Override
   public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latestSupported();
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see javax.annotation.processing.AbstractProcessor#process(java.util.Set,
    *     javax.annotation.processing.RoundEnvironment)
    */
@@ -116,6 +123,8 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
   }
 
   /**
+   * Generates source files from the specified annotated package.
+   *
    * @param annotatedPackage the {@link PackageElement} to process that has been annotated with
    *     {@link CodebookVariableEnumGeneration}
    * @throws IOException An {@link IOException} may be thrown if errors are encountered trying to
@@ -272,8 +281,6 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
   /**
    * Reports the specified log message.
    *
-   * @param associatedElement the Java AST {@link Element} that the log entry should be associated
-   *     with, or <code>null</code>
    * @param messageFormat the log message format {@link String}
    * @param messageArguments the log message format arguments
    */
