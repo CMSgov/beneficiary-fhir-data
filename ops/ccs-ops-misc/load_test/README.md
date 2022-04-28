@@ -116,9 +116,9 @@ There is one special type of test that requires a data setup script to be run be
 
 > **Note:** You _must_ generate the contract URLs via the below script if you are running any of the following test suites:
 > * `v1/patient_test_coverageContract.py`
-> * `v1/baseline_tests.py`
+> * `v1/regression_suite.py`
 > * `v2/patient_test_coverageContract.py`
-> * `v2/baseline_tests.py`
+> * `v2/regression_suite.py`
 
     python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"
 
