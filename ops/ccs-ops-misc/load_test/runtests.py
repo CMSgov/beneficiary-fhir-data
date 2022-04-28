@@ -126,11 +126,11 @@ def run_with_params(argv):
             print(helpString)
             sys.exit()
 
-    ## Read the specified configuration file and discard any falsey key
-    storedConfigData = {k: v for k, v in config.load_from_path(configData["configPath"]).items() if v}
+    ## Read the specified configuration file
+    yamlConfig = config.load_from_path(configData.get("configPath", defaultConfigData["configPath"]))
     ## Merge the stored data with data passed in via the CLI, with the
     ## CLI data taking priority
-    configData = {**storedConfigData, **configData}
+    configData = {**yamlConfig, **configData}
     ## Finally, merge the merged configuration values with the defaults,
     ## in case any optional arguments were not set via the CLI or the specified
     ## YAML configuration file

@@ -1,3 +1,11 @@
+"""Regression test suite for V1 BFD Server endpoints.
+
+The tests within this Locust test suite hit various endpoints that were
+determined to be representative of typical V1 endpoint loads. When running
+this test suite, all tests in this suite will be run in parallel, with
+equal weighting being applied to each.
+"""
+
 import random
 from typing import Dict
 import urllib3
@@ -15,14 +23,23 @@ setup.disable_no_cert_warnings(server_public_key, urllib3)
 setup.set_locust_env(config.load())
 
 mbis = data.load_mbis()
-eob_ids = data.load_bene_ids()
+bene_ids = data.load_bene_ids()
 last_updated = data.get_last_updated()
 cursor_list = data.load_cursors("v1")
 
 class BFDUser(HttpUser):
     def on_start(self):
-        copied_eob_ids = eob_ids.copy()
-        random.shuffle(copied_eob_ids)
+        """Run once when a BFDUser is initialized by Locust.
+        
+        This method copies the necessary test data (lists of 
+        MBIs, beneficiary IDs, and contract cursor URLs) as
+        members of this particular BFDUser instance. We then
+        shuffle these copied lists such that concurrent BFDUsers
+        are not querying the same data at the same time.
+        """
+
+        copied_bene_ids = bene_ids.copy()
+        random.shuffle(copied_bene_ids)
 
         copied_mbis = mbis.copy()
         random.shuffle(copied_mbis)
@@ -30,29 +47,59 @@ class BFDUser(HttpUser):
         copied_cursor_list = cursor_list.copy()
         random.shuffle(copied_cursor_list)
 
-        self.eob_ids = copied_eob_ids
+        self.bene_ids = copied_bene_ids
         self.mbis = copied_mbis
         self.cursor_list = copied_cursor_list
 
-    def get_eob(self) -> int:
-      if len(self.eob_ids) == 0:
+    def get_bene_id(self) -> int:
+      """Returns the next beneficiary ID in this BFDUser's list of IDs.
+
+      This method pops (that is, takes the topmost item) the next beneficiary
+      ID in this instance's list of beneficiary IDs and returns it. If no
+      more IDs are available, this method will stop the test run. 
+      """
+      
+      if len(self.bene_ids) == 0:
             errors.no_data_stop_test(self)
 
-      return self.eob_ids.pop()
+      return self.bene_ids.pop()
 
     def get_mbi(self) -> int:
+      """Returns the next MBI in this BFDUser's list of MBIs.
+
+      This method pops (that is, takes the topmost item) the next MBI 
+      in this instance's list of MBIs and returns it. If no
+      more MBIs are available, this method will stop the test run. 
+      """
+      
       if len(self.mbis) == 0:
             errors.no_data_stop_test(self)
 
       return self.mbis.pop()
 
     def get_cursor_path(self) -> str:
+      """Returns the next cursor path in this BFDUser's list of URL paths.
+
+      This method pops (that is, takes the topmost item) the next contract cursor 
+      URL path in this instance's list of contract paths and returns it. If no
+      more paths are available, this method will stop the test run. 
+      """
+
       if len(self.cursor_list) == 0:
         errors.no_data_stop_test(self)
 
       return self.cursor_list.pop()
 
     def get(self, base_path: str, params: Dict[str, str] = {}, headers: Dict[str, str] = {}, name: str = ''):
+      """Sends a GET request to the endpoint at base_path with the various query string parameters and headers specified.
+
+      This method extends Locust's HttpUser::client.get() method to make creating the requests 
+      nicer. Specifically, the query string parameters are specified as a separate dictionary
+      opposed to part of the path, the cert and verify arguments (which will never change)
+      are already set, and Cache-Control headers are automatically set to ensure caching is
+      disabled.
+      """
+
       self.client.get(create_url_path(base_path, params),
                       cert=client_cert,
                       verify=server_public_key,
@@ -61,47 +108,47 @@ class BFDUser(HttpUser):
 
     @task
     def coverage_test_id_count(self):
-        self.get(f'/v1/fhir/Coverage', params={'beneficiary': f'{self.get_eob()}', '_count':'10'},
+        self.get(f'/v1/fhir/Coverage', params={'beneficiary': f'{self.get_bene_id()}', '_count':'10'},
                 name='/v1/fhir/Coverage search by id / count=10')
 
     @task
     def coverage_test_id_lastUpdated(self):
-        self.get(f'/v1/fhir/Coverage', params={'beneficiary': f'{self.get_eob()}', '_lastUpdated': f'gt{last_updated}'},
+        self.get(f'/v1/fhir/Coverage', params={'beneficiary': f'{self.get_bene_id()}', '_lastUpdated': f'gt{last_updated}'},
                 name='/v1/fhir/Coverage search by id / lastUpdated (2 weeks)')
     
     @task
     def eob_test_id(self):
-        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_eob()}', '_format': 'json'},
+        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_bene_id()}', '_format': 'json'},
                 name='/v1/fhir/ExplanationOfBenefit search by id')
 
     @task
     def eob_test_id_count_typePDE(self):
-        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_eob()}', '_format': 'json', '_count': '50', '_types': 'PDE'},
+        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_bene_id()}', '_format': 'json', '_count': '50', '_types': 'PDE'},
                 name='/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50')
 
     @task
     def eob_test_id_lastUpdated_count(self):
-        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_eob()}', '_format': 'json', '_count': '100', '_lastUpdated': f'gt{last_updated}',},
+        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_bene_id()}', '_format': 'json', '_count': '100', '_lastUpdated': f'gt{last_updated}',},
                 name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100')
 
     @task
     def eob_test_id_lastUpdated_includeTaxNumbers(self):
-        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_eob()}', '_format': 'json', '_lastUpdated': f'gt{last_updated}', '_IncludeTaxNumbers': 'true'},
+        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_bene_id()}', '_format': 'json', '_lastUpdated': f'gt{last_updated}', '_IncludeTaxNumbers': 'true'},
                 name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
 
     @task
     def eob_test_id_lastUpdated(self):
-        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_eob()}', '_format': 'json', '_lastUpdated': f'gt{last_updated}'},
+        self.get(f'/v1/fhir/ExplanationOfBenefit', params={'patient': f'{self.get_bene_id()}', '_format': 'json', '_lastUpdated': f'gt{last_updated}'},
                 name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated')
 
     @task
     def patient_test_id(self):
-        self.get(f'/v1/fhir/Patient/{self.get_eob()}',
+        self.get(f'/v1/fhir/Patient/{self.get_bene_id()}',
                 name='/v1/fhir/Patient/id')
 
     @task
     def patient_test_id_lastUpdated_includeMbi_includeAddress(self):
-        self.get(f'/v1/fhir/Patient', params={'_id': f'{self.get_eob()}', '_lastUpdated': f'gt{last_updated}', '_IncludeIdentifiers': 'mbi', '_IncludeTaxNumbers': 'true'},
+        self.get(f'/v1/fhir/Patient', params={'_id': f'{self.get_bene_id()}', '_lastUpdated': f'gt{last_updated}', '_IncludeIdentifiers': 'mbi', '_IncludeTaxNumbers': 'true'},
                 name='/v1/fhir/Patient/id search by id / lastUpdated (2 weeks) / includeTaxNumbers = true / includeIdentifiers = mbi')
 
     @task
