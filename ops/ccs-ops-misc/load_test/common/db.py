@@ -60,19 +60,29 @@ def get_hashed_mbis(uri):
 
     return [str(r[0]) for r in _execute(uri, beneQuery)]
 
+
 def get_contract_ids(uri):
     """
     Return a list of contract id / reference year pairs from the beneficiary
     table
     """
-    contractIdQuery = (
-        'SELECT DISTINCT "ptd_cntrct_jan_id", "rfrnc_yr" '
-        'FROM "beneficiaries" '
-        'WHERE "rfrnc_yr" IS NOT NULL '
-        f'LIMIT {LIMIT}'
-    )
+    contract_data = []
+    months = { '01': 'jan', '02': 'feb', '03': 'mar', '04': 'apr', '05': 'may',
+        '06': 'jun', '07': 'jul', '08': 'aug', '09': 'sept', '10': 'oct',
+        '11': 'nov', '12': 'dec' }
+    for month_numeric, month_text in months.items():
+        contractIdQuery = (
+            f'SELECT DISTINCT "ptd_cntrct_{month_text}_id", "rfrnc_yr" '
+            'FROM "beneficiaries" '
+            'WHERE "rfrnc_yr" IS NOT NULL '
+            f'LIMIT {LIMIT}'
+        )
 
-    return [{ 'id': str(r[0]), 'year': str(r[1]) } for r in _execute(uri, contractIdQuery)]
+        results = _execute(uri, contractIdQuery)
+        for r in results:
+            contract_data.append({ 'id': str(r[0]), 'year': str(r[1]), 'month': month_numeric })
+
+    return contract_data
 
 
 def get_partially_adj_hashed_mbis(uri):
