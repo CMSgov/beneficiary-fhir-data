@@ -4,7 +4,7 @@ from common.validation import SLA_V2_BASELINE
 from locust import task
 
 class BFDUser(BFDUserBase):
-    DATA_REQUIRED = [ 'BENE_IDS', 'MBIS', 'CURSORS_V2' ]
+    DATA_REQUIRED = [ 'BENE_IDS', 'MBIS', 'CONTRACT_IDS' ]
     SLA_BASELINE = SLA_V2_BASELINE
 
     @task
@@ -73,7 +73,13 @@ class BFDUser(BFDUserBase):
     @task
     def patient_test_coverageContract(self):
         def make_url(instance):
-            return instance.cursor_list_v2.pop()
+            contract_data = instance.contract_ids.pop()
+            return create_url_path('/v2/fhir/Patient', {
+                '_has:Coverage.extension': f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract_data["id"]}',
+                '_has:Coverage.rfrncyr': f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract_data["year"]}',
+                '_count': 25,
+                '_format': 'json'
+            })
 
         self.run_task(name='/v2/fhir/Patient search by coverage contract (all pages)', headers={"IncludeIdentifiers": "mbi"},
                 url_callback=make_url)

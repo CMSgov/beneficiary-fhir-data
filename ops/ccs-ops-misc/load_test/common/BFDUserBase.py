@@ -1,12 +1,13 @@
-import random
-from typing import Callable, Dict
-import urllib3
 import common.config as config
 import common.data as data
+import common.db as db
 import common.test_setup as setup
 import common.validation as validation
 from locust import HttpUser
 import json
+import random
+from typing import Callable, Dict, List
+import urllib3
 
 setup.set_locust_env(config.load())
 
@@ -24,8 +25,7 @@ class BFDUserBase(HttpUser):
     DATA_REQUIRED = [
         # 'BENE_IDS',
         # 'MBIS',
-        # 'CURSORS_V1',
-        # 'CURSORS_V2',
+        # 'CONTRACT_IDS'
     ]
 
     '''
@@ -47,19 +47,16 @@ class BFDUserBase(HttpUser):
         self.last_updated = data.get_last_updated()
 
         # Pre-load data needed for creating URLs
-        self.eob_ids = self.load_data('BENE_IDS', data.load_bene_ids)
-        self.mbis = self.load_data('MBIS', data.load_mbis)
-        self.cursor_list_v1 = self.load_data('CURSORS_V1', data.load_cursors,
-                "v1")
-        self.cursor_list_v2 = self.load_data('CURSORS_V2', data.load_cursors,
-                "v2")
+        self.eob_ids = self.load_data('BENE_IDS', db.get_bene_ids)
+        self.mbis = self.load_data('MBIS', db.get_hashed_mbis)
+        self.contract_ids = self.load_data('CONTRACT_IDS', db.get_contract_ids)
 
         # Create the pools for storing paginated URLs
         self.url_pools = {}
 
         # Adds a global failsafe check to ensure that if this test overwhelms 
         # the database, we bail out and stop hitting the server
-        if hasattr(self, 'SLA_BASELINE'):
+        if hasattr(self, 'SLA_BASELINE') and self.SLA_BASELINE:
             validation.setup_failsafe_event(self.environment, self.SLA_BASELINE)
 
 
@@ -68,7 +65,7 @@ class BFDUserBase(HttpUser):
     '''
     def on_stop(self):
         # Report the various response time percentiles against the SLA
-        if hasattr(self, 'SLA_BASELINE'):
+        if hasattr(self, 'SLA_BASELINE') and self.SLA_BASELINE:
             validation.check_sla_validation(self.environment, self.SLA_BASELINE)
 
 
@@ -120,9 +117,9 @@ class BFDUserBase(HttpUser):
     Check if the given DATA_REQUIRED flag exists on this class, and if it does,
     pre-load the data from the database.
     '''
-    def load_data(self, flag_name: str, load_function: Callable, *args):
+    def load_data(self, flag_name: str, load_function: Callable, *args) -> List:
         if hasattr(self, 'DATA_REQUIRED') and flag_name in self.DATA_REQUIRED:
-            data_list = load_function(*args).copy()
+            data_list = data.load_data_segment(load_function, *args).copy()
             random.shuffle(data_list)
             return data_list
         else:
@@ -131,12 +128,9 @@ class BFDUserBase(HttpUser):
     '''
     Parse the JSON response and return the "next" URL if it exists
     '''
-    def get_next_url(self, payload):
+    def get_next_url(self, payload: str) -> str:
         parsed_payload = json.loads(payload)
-        if "link" not in parsed_payload:
-            return None
-        links = parsed_payload["link"]
-        for link in links:
+        for link in parsed_payload.get("link", {}):
             if "relation" in link and link["relation"] == "next":
-                return link["url"]
+                return link.get("url", None)
         return None

@@ -3,6 +3,7 @@
 
 Utility module for executing database queries
 """
+import logging
 import psycopg2
 
 
@@ -13,7 +14,8 @@ def _execute(uri, query):
     """
     Execute a PSQL select statement and return its results
     """
-    print('Collecting test data...')
+    logger = logging.getLogger()
+    logger.info('Collecting test data...')
 
     conn = None
 
@@ -22,7 +24,7 @@ def _execute(uri, query):
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 results = cursor.fetchall()
-                print(f'Returned {len(results)} results from the database for the test.')
+                logger.info(f'Returned {len(results)} results from the database for the test.')
     finally:
         conn.close()
 
@@ -57,6 +59,20 @@ def get_hashed_mbis(uri):
     )
 
     return [str(r[0]) for r in _execute(uri, beneQuery)]
+
+def get_contract_ids(uri):
+    """
+    Return a list of contract id / reference year pairs from the beneficiary
+    table
+    """
+    contractIdQuery = (
+        'SELECT DISTINCT "ptd_cntrct_jan_id", "rfrnc_yr" '
+        'FROM "beneficiaries" '
+        'WHERE "rfrnc_yr" IS NOT NULL '
+        f'LIMIT {LIMIT}'
+    )
+
+    return [{ 'id': str(r[0]), 'year': str(r[1]) } for r in _execute(uri, contractIdQuery)]
 
 
 def get_partially_adj_hashed_mbis(uri):
