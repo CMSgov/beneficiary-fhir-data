@@ -7,13 +7,6 @@ equal weighting being applied to each.
 """
 
 from common.BFDUserBase import BFDUserBase
-import random
-from typing import Dict
-import urllib3
-import common.config as config
-import common.data as data
-import common.errors as errors
-import common.test_setup as setup
 from common.url_path import create_url_path
 from common.validation import SLA_V1_BASELINE
 from locust import task

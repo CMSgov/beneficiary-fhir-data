@@ -1,45 +1,21 @@
-import urllib3
-import common.config as config
-import common.data as data
-import common.errors as errors
-import common.test_setup as setup
-import common.validation as validation
-from locust import HttpUser, task, events
+from common.BFDUserBase import BFDUserBase
+from common.url_path import create_url_path
+from common.validation import SLA_EOB_WITHOUT_SINCE
+from locust import task
 
-server_public_key = setup.loadServerPublicKey()
-setup.disable_no_cert_warnings(server_public_key, urllib3)
+class BFDUser(BFDUserBase):
+    DATA_REQUIRED = [ 'BENE_IDS' ]
+    SLA_BASELINE = SLA_EOB_WITHOUT_SINCE
 
-eob_ids = data.load_bene_ids()
-client_cert = setup.getClientCert()
-setup.set_locust_env(config.load())
-last_updated = data.get_last_updated()
 
-class BFDUser(HttpUser):
     @task
-    def explanation_of_benefit(self):
-        if len(eob_ids) == 0:
-            errors.no_data_stop_test(self)
+    def eob_test_id_lastUpdated_count(self):
+        def make_url(instance):
+            return create_url_path('/v1/fhir/ExplanationOfBenefit', {
+                'patient': instance.bene_ids.pop(),
+                '_format': 'json',
+                '_count': '100',
+                '_lastUpdated': f'gt{instance.last_updated}'
+            })
 
-        id = eob_ids.pop()
-        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?_lastUpdated=gt{last_updated}&patient={id}&_count=100&_format=json',
-                cert=client_cert,
-                verify=server_public_key,
-                name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100')
-
-'''
-Adds a global failsafe check to ensure that if this test overwhelms the
-database, we bail out and stop hitting the server.
-'''
-@events.init.add_listener
-def on_locust_init(environment, **_kwargs):
-    validation.setup_failsafe_event(environment, validation.SLA_EOB_WITHOUT_SINCE)
-
-'''
-Adds a listener that will run when the test ends which checks the various
-response time percentiles against the SLA for this endpoint.
-'''
-@events.test_stop.add_listener
-def on_locust_quit(environment, **_kwargs):
-    validation.check_sla_validation(environment, validation.SLA_EOB_WITHOUT_SINCE)
-    
-
+        self.run_task(name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100', url_callback=make_url)
