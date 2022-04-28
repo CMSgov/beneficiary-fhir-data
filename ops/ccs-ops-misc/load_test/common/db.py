@@ -61,25 +61,53 @@ def get_hashed_mbis(uri):
 
 def get_partially_adj_hashed_mbis(uri):
     """
-    Return a list of unique hashed MBIs from the partially adjudicated
-    FISS and MCS tables
+    Return a list of unique hashed MBIs that represent a diverse set of FISS and MCS
+    claims over a range of claim statuses.
     """
+    per_status_max = int(LIMIT / 40)    # Assuming ~40 distinct status values between FISS/MCS
+    per_status_limit = min(50, per_status_max)
+    per_claim_max = int(LIMIT / 10)     # Arbitrary
+    per_claim_limit = min(1000, per_claim_max)
+
     beneQuery = (
-        'SELECT DISTINCT f."mbiHash" AS hash '
-        'FROM "pre_adj"."FissClaims" f '
-        'WHERE f."mbi" IS NOT NULL '
-        'UNION '
-        'SELECT DISTINCT m."idrClaimMbiHash" AS hash '
-        'FROM "pre_adj"."McsClaims" m '
-        'WHERE m."idrClaimMbi" IS NOT NULL '
-        'AND m."idrClaimMbi" NOT IN ( '
-        '   SELECT DISTINCT "idrClaimMbi" '
-        '   FROM "pre_adj"."McsClaims" '
-        '   WHERE "idrStatusCode" IS NULL '
-        '   AND "idrClaimMbi" IS NOT NULL '
+        # Get up to N distinct MBI hashes
+        'select distinct mbi.hash '
+        'from rda.mbi_cache as mbi '
+        'where mbi.mbi_id in ( '
+        # Subquery sorts by source to weight 'filler' MBIs last
+        '	select union_select.mbi_id '
+        '	from ( '
+        # Select up to 50 claims for each distinct MCS status value
+        '		select src.mbi_id, 1 as source_order '
+        '		from ('
+        '			select mcs.*, ROW_NUMBER() over (partition by mcs.idr_status_code order by mcs.mbi_id) '
+        '           from rda.mcs_claims as mcs '
+        '			) src '
+        f'		where src.row_number <= {per_status_limit} '
+        '		union '
+        # Select up to 50 claims for each distinct FISS status value
+        '		select src.mbi_id, 2 as source_order '
+        '		from ( '
+        '			select fiss.*, ROW_NUMBER() over (partition by fiss.curr_status order by fiss.mbi_id) '
+        '           from rda.fiss_claims as fiss '
+        '			) src '
+        f'		where src.row_number <= {per_status_limit} '
+        '		union '
+        # Select up to 1000 whatever claims from MCS
+        '		select src.mbi_id, 3 as source_order '
+        f'		from (select mcs.* from rda.mcs_claims as mcs limit {per_claim_limit}) as src '
+        '		union '
+        # Select all the FISS claims as filler
+        '		select src.mbi_id, 4 as source_order '
+        f'		from (select fiss.* from rda.fiss_claims as fiss limit {per_claim_limit}) as src '
+        '		union '
+        # Select whatever MBIs as filler
+        '		select mbi.mbi_id, 5 as source_order '
+        f'		from rda.mbi_cache as mbi limit {LIMIT}'
+        '	) as union_select '
+        '	order by union_select.source_order '
         ') '
-        'ORDER BY hash '
-        f'LIMIT {LIMIT}'
+        f'limit {LIMIT}'
     )
 
     return [str(r[0]) for r in _execute(uri, beneQuery)]
