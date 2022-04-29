@@ -202,10 +202,7 @@ public final class SNFClaimTransformerTest {
         claimLine1.getNonCoveredChargeAmount(),
         BigDecimal.valueOf(claimLine1.getUnitCount()),
         claimControlNumber,
-        claimLine1.getNationalDrugCodeQuantity().isPresent()
-            ? Optional.of(
-                BigDecimal.valueOf(claimLine1.getNationalDrugCodeQuantity().get().longValue()))
-            : Optional.empty(),
+        claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
         1 /* index */);
