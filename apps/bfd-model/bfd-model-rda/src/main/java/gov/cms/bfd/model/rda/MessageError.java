@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -59,8 +60,17 @@ public class MessageError {
   @Column(name = "received_date")
   private Instant receivedDate;
 
+  @Column(name = "errors")
+  @Lob
+  private String errors;
+
   /** The original message that was received, represented as a json string */
   @Column(name = "message")
   @Lob
   private String message;
+
+  @PrePersist
+  protected void onCreate() {
+    receivedDate = Instant.now();
+  }
 }

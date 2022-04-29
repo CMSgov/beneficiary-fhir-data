@@ -4,7 +4,15 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
@@ -13,6 +21,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,6 +54,16 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
 
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
+
+  protected final ObjectMapper mapper =
+      JsonMapper.builder()
+          .enable(SerializationFeature.INDENT_OUTPUT)
+          .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+          .addModule(new Jdk8Module())
+          .addModule(new JavaTimeModule())
+          .serializationInclusion(JsonInclude.Include.NON_NULL)
+          .build();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either
@@ -202,6 +221,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
+  abstract MessageError createMessageError(
+      TMessage change, List<DataTransformer.ErrorMessage> errors) throws IOException;
+
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
@@ -222,9 +244,15 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         var change = transformMessage(apiVersion, message);
         metrics.transformSuccesses.mark();
         claims.add(change);
-      } catch (DataTransformer.TransformationException error) {
+      } catch (DataTransformer.TransformationException transformationException) {
         metrics.transformFailures.mark();
-        throw new ProcessingException(error, 0);
+        try {
+          entityManager.persist(createMessageError(message, transformationException.getErrors()));
+        } catch (IOException e) {
+          e.addSuppressed(transformationException);
+          throw new ProcessingException(e, 0);
+        }
+        throw new ProcessingException(transformationException, 0);
       }
     }
     return claims;
