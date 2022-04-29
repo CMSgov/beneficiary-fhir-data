@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * Warehouse (CCW) data dictionary</a> codebook into a JAX-B model {@link Codebook} instance.
  */
 public final class PdfParser {
-  /** Outputs information to the log file. */
   private static final Logger LOGGER = LoggerFactory.getLogger(PdfParser.class);
   /** Primary prefix for various header field names. */
   public static final String FIELD_NAME_LABEL = "LABEL";

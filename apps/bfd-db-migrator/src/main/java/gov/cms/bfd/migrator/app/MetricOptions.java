@@ -8,7 +8,6 @@ import java.util.Optional;
  * class into a common location to be used here and pipeline
  */
 public final class MetricOptions implements Serializable {
-  /** The serialization key. */
   private static final long serialVersionUID = 1L;
 
   /** The secret key granting access to the New Relic Metric API. */

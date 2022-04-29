@@ -34,6 +34,18 @@
         -->
         <module name="JavadocVariable"/>
 
+        <!-- Suppression for javadoc rules under certain conditions -->
+
+        <!-- Don't bother with javadocs on loggers and serialVersionUID -->
+        <module name="SuppressionXpathSingleFilter">
+            <property name="checks" value="JavadocVariable"/>
+            <property name="query" value="//VARIABLE_DEF[./IDENT[@text='LOGGER']]"/>
+        </module>
+        <module name="SuppressionXpathSingleFilter">
+            <property name="checks" value="JavadocVariable"/>
+            <property name="query" value="//VARIABLE_DEF[./IDENT[@text='serialVersionUID']]"/>
+        </module>
+
         <!-- Style Rules -->
     </module>
 </module>
