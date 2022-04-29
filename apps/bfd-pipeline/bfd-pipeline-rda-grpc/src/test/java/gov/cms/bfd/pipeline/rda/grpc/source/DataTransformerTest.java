@@ -25,35 +25,42 @@ public class DataTransformerTest {
   /** Tests the {@link DataTransformer#validateAtLeastOneIsPresent} method. */
   @Test
   public void testValidateAtLeastOneIsPresent() {
-    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok1-1", "1", "ok1-2", ""));
-    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok2-1", "", "ok2-2", "2"));
-    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok3-1", "1", "ok3-2", null));
-    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok4-1", null, "ok4-2", "2"));
-    assertEquals(true, transformer.validateAtLeastOneIsPresent("both-1", "a", "both-2", "b"));
-    assertEquals(0, transformer.getErrors().size());
-
     assertEquals(
-        false, transformer.validateAtLeastOneIsPresent("neither1-1", "", "neither1-2", ""));
+        true, transformer.validateAtLeastOneIsPresent("ok-first-1", "1", "ok-second-1", ""));
     assertEquals(
-        false, transformer.validateAtLeastOneIsPresent("neither2-1", null, "neither2-2", ""));
+        true, transformer.validateAtLeastOneIsPresent("ok-first-2", "", "ok-second-2", "2"));
     assertEquals(
-        false, transformer.validateAtLeastOneIsPresent("neither3-1", "", "neither3-2", null));
+        true, transformer.validateAtLeastOneIsPresent("ok-first-3", "1", "ok-second-3", null));
     assertEquals(
-        false, transformer.validateAtLeastOneIsPresent("neither4-1", null, "neither4-2", null));
+        true, transformer.validateAtLeastOneIsPresent("ok-first-4", null, "ok-second-4", "2"));
+    assertEquals(
+        true, transformer.validateAtLeastOneIsPresent("ok-first-5", "a", "ok-second-5", "b"));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-1", "", "neither-second-1", ""));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-2", null, "neither-second-2", ""));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-3", "", "neither-second-3", null));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-4", null, "neither-second-4", null));
     assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage(
-                "neither1-1",
-                "expected either neither1-1 or neither1-2 to have value but neither did"),
+                "neither-first-1",
+                "expected either neither-first-1 or neither-second-1 to have value but neither did"),
             new DataTransformer.ErrorMessage(
-                "neither2-1",
-                "expected either neither2-1 or neither2-2 to have value but neither did"),
+                "neither-first-2",
+                "expected either neither-first-2 or neither-second-2 to have value but neither did"),
             new DataTransformer.ErrorMessage(
-                "neither3-1",
-                "expected either neither3-1 or neither3-2 to have value but neither did"),
+                "neither-first-3",
+                "expected either neither-first-3 or neither-second-3 to have value but neither did"),
             new DataTransformer.ErrorMessage(
-                "neither4-1",
-                "expected either neither4-1 or neither4-2 to have value but neither did")),
+                "neither-first-4",
+                "expected either neither-first-4 or neither-second-4 to have value but neither did")),
         transformer.getErrors());
   }
 
