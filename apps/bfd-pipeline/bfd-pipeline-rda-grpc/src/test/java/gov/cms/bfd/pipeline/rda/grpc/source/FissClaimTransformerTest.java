@@ -4,8 +4,10 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
 import gov.cms.bfd.model.rda.RdaFissClaim;
@@ -1316,6 +1318,50 @@ public class FissClaimTransformerTest {
             RdaFissDiagnosisCode::getBitFlags,
             RdaFissDiagnosisCode.Fields.bitFlags,
             4);
+  }
+
+  /**
+   * Ensures that a {@link }FissDiagnosisCode} with either {@code diagCd2} or {@code bitFlags}
+   * defined transforms without error but one with neither has an appropriate error.
+   */
+  @Test
+  public void testEitherDiagCd2OrBitFlagsRequired() {
+    final var claimTransformer =
+        new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
+
+    // neither defined generates an error
+    var fissDiagnosisCode = FissDiagnosisCode.newBuilder().build();
+    var dataTransformer = new DataTransformer();
+    var rdaFissDiagnosisCode =
+        claimTransformer.transformMessageImpl(
+            fissDiagnosisCode, dataTransformer, clock.instant(), "");
+    assertNotNull(rdaFissDiagnosisCode);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage(
+                RdaFissDiagnosisCode.Fields.diagCd2,
+                String.format(
+                    "expected either %s or %s to have value but neither did",
+                    RdaFissDiagnosisCode.Fields.diagCd2, RdaFissDiagnosisCode.Fields.bitFlags))),
+        dataTransformer.getErrors());
+
+    // only diagCd2 defined is ok
+    fissDiagnosisCode = FissDiagnosisCode.newBuilder().setDiagCd2("x").build();
+    dataTransformer = new DataTransformer();
+    rdaFissDiagnosisCode =
+        claimTransformer.transformMessageImpl(
+            fissDiagnosisCode, dataTransformer, clock.instant(), "");
+    assertNotNull(rdaFissDiagnosisCode);
+    assertEquals(ImmutableList.of(), dataTransformer.getErrors());
+
+    // only bitFlags defined is ok
+    fissDiagnosisCode = FissDiagnosisCode.newBuilder().setBitFlags("x").build();
+    dataTransformer = new DataTransformer();
+    rdaFissDiagnosisCode =
+        claimTransformer.transformMessageImpl(
+            fissDiagnosisCode, dataTransformer, clock.instant(), "");
+    assertNotNull(rdaFissDiagnosisCode);
+    assertEquals(ImmutableList.of(), dataTransformer.getErrors());
   }
 
   // endregion ProcCode tests

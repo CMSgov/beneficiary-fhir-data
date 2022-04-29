@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
 import gov.cms.bfd.model.rda.RdaFissClaim;
@@ -1093,7 +1094,8 @@ public class FissClaimTransformer {
    * @param namePrefix added to field names in error message to disambiguate messages
    * @return the populated object
    */
-  private RdaFissDiagnosisCode transformMessageImpl(
+  @VisibleForTesting
+  RdaFissDiagnosisCode transformMessageImpl(
       FissDiagnosisCode from, DataTransformer transformer, Instant now, String namePrefix) {
     final RdaFissDiagnosisCode to = new RdaFissDiagnosisCode();
     transformer.copyString(
