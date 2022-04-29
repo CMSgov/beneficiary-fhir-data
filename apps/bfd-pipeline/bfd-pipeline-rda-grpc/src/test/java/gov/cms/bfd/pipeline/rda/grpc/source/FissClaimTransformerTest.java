@@ -250,7 +250,7 @@ public class FissClaimTransformerTest {
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
-                .setDiagCd2("code-1")
+                .setDiagCd2("")
                 .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED)
@@ -262,7 +262,6 @@ public class FissClaimTransformerTest {
                 .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO)
-                .setBitFlags("4321")
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
@@ -273,7 +272,7 @@ public class FissClaimTransformerTest {
     RdaFissDiagnosisCode code = new RdaFissDiagnosisCode();
     code.setDcn("dcn");
     code.setPriority((short) 0);
-    code.setDiagCd2("code-1");
+    code.setDiagCd2("");
     code.setDiagPoaInd("W");
     code.setBitFlags("1234");
     code.setLastUpdated(claim.getLastUpdated());
@@ -283,7 +282,6 @@ public class FissClaimTransformerTest {
     code.setPriority((short) 1);
     code.setDiagCd2("code-2");
     code.setDiagPoaInd("N");
-    code.setBitFlags("4321");
     code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     changeBuilder
@@ -1283,6 +1281,44 @@ public class FissClaimTransformerTest {
   }
 
   // endregion Claim tests
+  // region DiagnosisCode tests
+
+  @Test
+  public void testDiagnosisCodeDiagCd2() {
+    new DiagnosisCodeFieldTester(false)
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            FissDiagnosisCode.Builder::setDiagCd2,
+            RdaFissDiagnosisCode::getDiagCd2,
+            RdaFissDiagnosisCode.Fields.diagCd2,
+            7);
+  }
+
+  @Test
+  public void testDiagnosisCodePoaInd() {
+    new DiagnosisCodeFieldTester(true)
+        .verifyEnumFieldStringValueExtractedCorrectly(
+            FissDiagnosisCode.Builder::setDiagPoaIndEnum,
+            RdaFissDiagnosisCode::getDiagPoaInd,
+            FissDiagnosisPresentOnAdmissionIndicator.DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_YES,
+            "Y")
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            FissDiagnosisCode.Builder::setDiagPoaIndUnrecognized,
+            RdaFissDiagnosisCode::getDiagPoaInd,
+            RdaFissDiagnosisCode.Fields.diagPoaInd,
+            1);
+  }
+
+  @Test
+  public void testDiagnosisCodeBitFlags() {
+    new DiagnosisCodeFieldTester(false)
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
+            FissDiagnosisCode.Builder::setBitFlags,
+            RdaFissDiagnosisCode::getBitFlags,
+            RdaFissDiagnosisCode.Fields.bitFlags,
+            4);
+  }
+
+  // endregion ProcCode tests
   // region ProcCode tests
 
   @Test
@@ -1313,7 +1349,6 @@ public class FissClaimTransformerTest {
             RdaFissProcCode::getProcDate,
             RdaFissProcCode.Fields.procDate);
   }
-
   // endregion ProcCode tests
   // region BeneZPayer tests
 
@@ -1869,6 +1904,15 @@ public class FissClaimTransformerTest {
 
   // region Field Tester Classes
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissClaim.Builder} instances and to trigger a transformation of a claim. Serves
+   * as a base class for specific field tester classes that share the same implementations of {@code
+   * createClaimBuilder()} and {@code transformClaim()}.
+   *
+   * @param <TBuilder> the claim builder class created by this adaptor
+   * @param <TEntity> the entity class created by this adaptor
+   */
   private abstract class AbstractFieldTester<TBuilder, TEntity>
       extends ClaimTransformerFieldTester<
           FissClaim.Builder, FissClaim, RdaFissClaim, TBuilder, TEntity> {
@@ -1898,6 +1942,11 @@ public class FissClaimTransformerTest {
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissClaim.Builder} instances and to trigger a transformation of a claim. Used for
+   * tests that operator on {@link FissClaim} and {@link RdaFissClaim} instances.
+   */
   class ClaimFieldTester extends AbstractFieldTester<FissClaim.Builder, RdaFissClaim> {
     @Override
     FissClaim.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
@@ -1910,6 +1959,11 @@ public class FissClaimTransformerTest {
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissAuditTrail.Builder} instances and to trigger a transformation of a claim.
+   * Used for tests that operator on {@link FissAuditTrail} and {@link RdaFissAuditTrail} instances.
+   */
   class AuditTrailFieldTester
       extends AbstractFieldTester<FissAuditTrail.Builder, RdaFissAuditTrail> {
     @Override
@@ -1935,6 +1989,11 @@ public class FissClaimTransformerTest {
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissBeneZPayer.Builder} instances and to trigger a transformation of a claim.
+   * Used for tests that operator on {@link FissBeneZPayer} and {@link RdaFissPayer} instances.
+   */
   class BeneZPayerFieldTester extends AbstractFieldTester<FissBeneZPayer.Builder, RdaFissPayer> {
     @Override
     FissBeneZPayer.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
@@ -1959,6 +2018,11 @@ public class FissClaimTransformerTest {
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissInsuredPayer.Builder} instances and to trigger a transformation of a claim.
+   * Used for tests that operator on {@link FissInsuredPayer} and {@link RdaFissPayer} instances.
+   */
   class InsuredPayerFieldTester
       extends AbstractFieldTester<FissInsuredPayer.Builder, RdaFissPayer> {
     @Override
@@ -1984,6 +2048,12 @@ public class FissClaimTransformerTest {
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissProcedureCode.Builder} instances and to trigger a transformation of a claim.
+   * Used for tests that operator on {@link FissProcedureCode} and {@link RdaFissProcCode}
+   * instances.
+   */
   class ProcCodeFieldTester
       extends AbstractFieldTester<FissProcedureCode.Builder, RdaFissProcCode> {
     @Override
@@ -2007,6 +2077,54 @@ public class FissClaimTransformerTest {
     @Override
     String getLabel(String basicLabel) {
       return "procCode-0-" + basicLabel;
+    }
+  }
+
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link FissDiagnosisCode.Builder} instances and to trigger a transformation of a claim.
+   * Used for tests that operator on {@link FissDiagnosisCode} and {@link RdaFissDiagnosisCode}
+   * instances.
+   */
+  class DiagnosisCodeFieldTester
+      extends AbstractFieldTester<FissDiagnosisCode.Builder, RdaFissDiagnosisCode> {
+
+    private boolean addDiagCode;
+
+    /**
+     * Either diagCd2 or bitFlags must have a value so when testing those fields we can't pre-define
+     * either. But tests for other fields will require that one of these has a value. Those tests
+     * can set {@code addDiagCode} true.
+     *
+     * @param addDiagCode when true causes new instances to have a non-empty diagCd2 value
+     */
+    private DiagnosisCodeFieldTester(boolean addDiagCode) {
+      this.addDiagCode = addDiagCode;
+    }
+
+    @Override
+    FissDiagnosisCode.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
+      if (claimBuilder.getFissDiagCodesBuilderList().isEmpty()) {
+        claimBuilder.addFissDiagCodesBuilder();
+        if (addDiagCode) {
+          claimBuilder.getFissDiagCodesBuilder(0).setDiagCd2("dc2");
+        }
+      }
+      return claimBuilder.getFissDiagCodesBuilder(0);
+    }
+
+    @Override
+    RdaFissDiagnosisCode getTestEntity(RdaFissClaim claim) {
+      assertEquals(1, claim.getDiagCodes().size());
+      RdaFissDiagnosisCode answer = claim.getDiagCodes().iterator().next();
+      assertEquals("dcn", answer.getDcn());
+      assertEquals((short) 0, answer.getPriority());
+      return answer;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "diagCode-0-" + basicLabel;
     }
   }
 

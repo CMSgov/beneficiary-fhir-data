@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
@@ -69,6 +70,31 @@ public class DataTransformer {
   public boolean validateString(
       String fieldName, boolean nullable, int minLength, int maxLength, String value) {
     return nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength);
+  }
+
+  /**
+   * Checks to ensure that at least one of the two fields has a non-empty string value. If neither
+   * does an error is added to the list of errors.
+   *
+   * @param fieldName1 name of the first field
+   * @param value1 value (possibly null) of the first field
+   * @param fieldName2 name of the second field
+   * @param value2 value (possibly null) of the second field
+   * @return true if at least one of the two fields has a non-null, non-empty string value
+   */
+  public boolean validateAtLeastOneIsPresent(
+      String fieldName1, String value1, String fieldName2, String value2) {
+    final var isPresent1 = !Strings.isNullOrEmpty(value1);
+    final var isPresent2 = !Strings.isNullOrEmpty(value2);
+    final var isValid = isPresent1 || isPresent2;
+    if (!isValid) {
+      addError(
+          fieldName1,
+          "expected either %s or %s to have value but neither did",
+          fieldName1,
+          fieldName2);
+    }
+    return isValid;
   }
 
   /**

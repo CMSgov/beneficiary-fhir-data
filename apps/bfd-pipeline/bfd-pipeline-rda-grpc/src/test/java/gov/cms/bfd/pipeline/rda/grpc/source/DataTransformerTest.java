@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Tests proper operation of the {@link DataTransformer} class. */
 public class DataTransformerTest {
   private DataTransformer transformer;
   private List<Object> copied;
@@ -21,8 +22,44 @@ public class DataTransformerTest {
     copied = new ArrayList<>();
   }
 
+  /** Tests the {@link DataTransformer#validateAtLeastOneIsPresent} method. */
   @Test
-  public void copyString() {
+  public void testValidateAtLeastOneIsPresent() {
+    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok1-1", "1", "ok1-2", ""));
+    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok2-1", "", "ok2-2", "2"));
+    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok3-1", "1", "ok3-2", null));
+    assertEquals(true, transformer.validateAtLeastOneIsPresent("ok4-1", null, "ok4-2", "2"));
+    assertEquals(true, transformer.validateAtLeastOneIsPresent("both-1", "a", "both-2", "b"));
+    assertEquals(0, transformer.getErrors().size());
+
+    assertEquals(
+        false, transformer.validateAtLeastOneIsPresent("neither1-1", "", "neither1-2", ""));
+    assertEquals(
+        false, transformer.validateAtLeastOneIsPresent("neither2-1", null, "neither2-2", ""));
+    assertEquals(
+        false, transformer.validateAtLeastOneIsPresent("neither3-1", "", "neither3-2", null));
+    assertEquals(
+        false, transformer.validateAtLeastOneIsPresent("neither4-1", null, "neither4-2", null));
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage(
+                "neither1-1",
+                "expected either neither1-1 or neither1-2 to have value but neither did"),
+            new DataTransformer.ErrorMessage(
+                "neither2-1",
+                "expected either neither2-1 or neither2-2 to have value but neither did"),
+            new DataTransformer.ErrorMessage(
+                "neither3-1",
+                "expected either neither3-1 or neither3-2 to have value but neither did"),
+            new DataTransformer.ErrorMessage(
+                "neither4-1",
+                "expected either neither4-1 or neither4-2 to have value but neither did")),
+        transformer.getErrors());
+  }
+
+  /** Tests the {@link DataTransformer#copyString} method. */
+  @Test
+  public void testCopyString() {
     transformer
         .copyString("length-one-ok", false, 1, 5, "1", copied::add)
         .copyString("length-five-ok", false, 1, 5, "12345", copied::add)
@@ -42,8 +79,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyCharacter} method. */
   @Test
-  public void copyCharacter() {
+  public void testCopyCharacter() {
     transformer
         .copyCharacter("length-one-ok", "1", copied::add)
         .copyCharacter("length-below-min", "", copied::add)
@@ -59,8 +97,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyDate} method. */
   @Test
-  public void copyDate() {
+  public void testCopyDate() {
     transformer
         .copyDate("valid-1", false, "2021-03-01", copied::add)
         .copyDate("invalid-1", true, "2021/03/01", copied::add)
@@ -77,8 +116,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyAmount} method. */
   @Test
-  public void copyAmount() {
+  public void testCopyAmount() {
     transformer
         .copyAmount("valid-1", false, "123.05", copied::add)
         .copyAmount("invalid-1", true, "not a number", copied::add)
@@ -98,8 +138,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyEnumAsCharacter} method. */
   @Test
-  public void copyEnumAsCharacter() {
+  public void testCopyEnumAsCharacter() {
     transformer
         .copyEnumAsCharacter(
             "no-value",
@@ -127,8 +168,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyEnumAsString} method. */
   @Test
-  public void copyEnumAsString() {
+  public void testCopyEnumAsString() {
     transformer
         .copyEnumAsString(
             "no-value",
@@ -170,8 +212,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyStringWithExpectedValue} method. */
   @Test
-  public void copyExpectedValue() {
+  public void testCopyStringWithExpectedValue() {
     transformer
         .copyStringWithExpectedValue("both-null", true, 1, 1, null, null, copied::add)
         .copyStringWithExpectedValue("both-same", true, 1, 10, "abcdef", "abcdef", copied::add)
