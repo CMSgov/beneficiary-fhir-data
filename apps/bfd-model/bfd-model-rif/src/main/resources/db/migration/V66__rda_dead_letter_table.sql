@@ -14,7 +14,7 @@ CREATE TABLE rda.message_error (
     claim_id        varchar(25)                 not null,
     claim_type      char                        not null,
     received_date   timestamp with time zone    not null,
-    message         text                        not null,
+    message         ${type.text}                not null,
 );
 
 create sequence rda.rda_api_claim_message_error_id_seq as bigint ${logic.sequence-start} 1 ${logic.sequence-increment} 25 no cycle;
