@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
  * MigratorApp#main(String[])}.
  */
 public final class MigratorApp {
-  /** Outputs information to the log file. */
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
 
   /**

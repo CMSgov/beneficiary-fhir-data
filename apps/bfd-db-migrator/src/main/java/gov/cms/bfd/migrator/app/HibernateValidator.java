@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 /** Class for containing logic related to Hibernate validation. */
 public class HibernateValidator {
-  /** Outputs information to the log file. */
   private final Logger LOGGER = LoggerFactory.getLogger(HibernateValidator.class);
 
   /**

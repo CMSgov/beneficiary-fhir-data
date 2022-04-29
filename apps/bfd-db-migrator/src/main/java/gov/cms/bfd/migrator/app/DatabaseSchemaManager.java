@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
  */
 public final class DatabaseSchemaManager {
-  /** Outputs information to the log file. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
 
   /**
