@@ -6,14 +6,7 @@ this test suite, all tests in this suite will be run in parallel, with
 equal weighting being applied to each.
 """
 
-from common.BFDUserBase import BFDUserBase
-import random
-from typing import Dict
-import urllib3
-import common.config as config
-import common.data as data
-import common.errors as errors
-import common.test_setup as setup
+from common.bfd_user_base import BFDUserBase
 from common.url_path import create_url_path
 from common.validation import SLA_V2_BASELINE
 from locust import task

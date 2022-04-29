@@ -35,8 +35,8 @@ class BFDUserBase(HttpUser):
     # completion.
     SLA_BASELINE = None
 
-    def __init__(self):
-        HttpUser.__init__(self)
+    def __init__(self, *args, **kwargs):
+        HttpUser.__init__(self, *args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
         self.client_cert = setup.getClientCert()
