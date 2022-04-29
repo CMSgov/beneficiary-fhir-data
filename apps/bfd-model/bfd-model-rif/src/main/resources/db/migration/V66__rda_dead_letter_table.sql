@@ -14,6 +14,7 @@ CREATE TABLE rda.message_error (
     claim_id        varchar(25)                 not null,
     claim_type      char                        not null,
     received_date   timestamp with time zone    not null,
+    errors          ${type.text}                not null,
     message         ${type.text}                not null,
 );
 
