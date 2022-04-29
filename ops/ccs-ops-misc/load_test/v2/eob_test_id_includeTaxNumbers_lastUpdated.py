@@ -1,4 +1,4 @@
-from common.BFDUserBase import BFDUserBase
+from common.bfd_user_base import BFDUserBase
 from common.url_path import create_url_path
 from common.validation import SLA_EOB_WITHOUT_SINCE
 from locust import task

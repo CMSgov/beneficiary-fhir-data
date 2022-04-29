@@ -123,7 +123,8 @@ class BFDUserBase(HttpUser):
         if url is None and name in self.url_pools and self.url_pools[name]:
             # We can't generate a URL from the callback, but there are still
             # URLs in the pool of paginated data. Use that.
-            url = self.url_pools[name].pop()
+            # url = self.url_pools[name].pop()
+            pass
 
         if url is not None:
             # Run the test using the URL we found
