@@ -93,7 +93,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   public void init() {
     claimDao =
         new ClaimDao(
-            entityManager, metricRegistry, SpringConfiguration.isPreAdjOldMbiHashEnabled());
+            entityManager,
+            metricRegistry,
+            SpringConfiguration.isPartiallyAdjudicatedOldMbiHashEnabled());
 
     setResourceType();
   }

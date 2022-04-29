@@ -355,25 +355,25 @@ public class SpringConfiguration {
   }
 
   /**
-   * Determines if the fhir resources related to pre adj claim data should be accessible via the
-   * fhir api service.
+   * Determines if the fhir resources related to partially adjudicated claim data should be
+   * accessible via the fhir api service.
    *
    * @return True if the resources should be available to consume, False otherwise.
    */
-  private static boolean isPreAdjResourcesEnabled() {
+  private static boolean isPartiallyAdjudicatedResourcesEnabled() {
     return Boolean.TRUE
         .toString()
         .equalsIgnoreCase(System.getProperty("bfdServer.preadj.enabled", "false"));
   }
 
   /**
-   * Determines if the fhir resources related to pre adj claim data will accept {@link
+   * Determines if the fhir resources related to partially adjudicated claim data will accept {@link
    * gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when enabled
    * will simplify rotation of hash values.
    *
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
-  public static boolean isPreAdjOldMbiHashEnabled() {
+  public static boolean isPartiallyAdjudicatedOldMbiHashEnabled() {
     return Boolean.TRUE
         .toString()
         .equalsIgnoreCase(System.getProperty("bfdServer.preadj.oldMbiHash.enabled", "false"));
@@ -401,7 +401,7 @@ public class SpringConfiguration {
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
-    if (isPreAdjResourcesEnabled()) {
+    if (isPartiallyAdjudicatedResourcesEnabled()) {
       r4ResourceProviders.add(r4ClaimResourceProvider);
       r4ResourceProviders.add(r4ClaimResponseResourceProvider);
     }
