@@ -15,25 +15,21 @@ setup.set_locust_env(config.load())
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
 
-    This class should automatically handle most of the common tasks that our
-    load tests require.
+    This class should automatically handle most of the common tasks that our load tests require.
     '''
 
-
-    # If a child class is going to use a set of data during the test, such as 
-    # Beneficiary IDs, MBI numbers, etc. then it has to be defined in this class
-    # field so that we can pre-load that data from the database.
+    # If a child class is going to use a set of data during the test, such as Beneficiary IDs, MBI
+    # numbers, etc. then it has to be defined in this class field so that we can pre-load that data
+    # from the database.
     DATA_REQUIRED = [
         # 'BENE_IDS',
         # 'MBIS',
         # 'CONTRACT_IDS'
     ]
 
-    # If a child class needs to set up a Failsafe event (highly recommended!) to
-    # stop the test if SLAs degrade past a certain point, then these are the SLAs
-    # to use for that. Also, these are the SLAs to compare against upon test
-    # completion.
-    SLA_BASELINE = None
+    # The goals against which to measure these results. Note that they also include the Failsafe
+    # cutoff, which will default to the V2 cutoff time if not set.
+    VALIDATION_GOALS = None
 
     def __init__(self, *args, **kwargs):
         HttpUser.__init__(self, *args, **kwargs)
@@ -54,10 +50,9 @@ class BFDUserBase(HttpUser):
     def on_start(self):
         '''Run once when a BFDUser is initialized by Locust.
 
-        This method copies the necessary test data (lists of MBIs, beneficiary
-        IDs, and contract cursor URLs) as members of this particular BFDUser
-        instance. We then shuffle these copied lists such that concurrent
-        BFDUsers are not querying the same data at the same time.
+        This method copies the necessary test data (lists of MBIs, beneficiary IDs, and contract
+        cursor URLs) as members of this particular BFDUser instance. We then shuffle these copied
+        lists such that concurrent BFDUsers are not querying the same data at the same time.
         '''
 
         # Pre-load data needed for creating URLs
@@ -67,28 +62,28 @@ class BFDUserBase(HttpUser):
 
         # Adds a global failsafe check to ensure that if this test overwhelms
         # the database, we bail out and stop hitting the server
-        if hasattr(self, 'SLA_BASELINE') and self.SLA_BASELINE:
-            validation.setup_failsafe_event(self.environment, self.SLA_BASELINE)
+        if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
+            validation.setup_failsafe_event(self.environment, self.VALIDATION_GOALS)
+        else:
+            validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
 
 
     def on_stop(self):
         '''Run tear-down tasks after the tests have completed.'''
 
         # Report the various response time percentiles against the SLA
-        if hasattr(self, 'SLA_BASELINE') and self.SLA_BASELINE:
-            validation.check_sla_validation(self.environment, self.SLA_BASELINE)
+        if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
+            validation.check_sla_validation(self.environment, self.VALIDATION_GOALS)
 
 
     def get_by_url(self, url: str, headers: Dict[str, str] = None,
             name: str = ''):
         '''Send one GET request and parse the response for pagination.
 
-        This method extends Locust's HttpUser::client.get() method to make
-        creating the requests nicer. Specifically, the query string parameters
-        are specified as a separate dictionary opposed to part of the path, the
-        cert and verify arguments (which will never change) are already set,
-        and Cache-Control headers are automatically set to ensure caching is
-        disabled.
+        This method extends Locust's HttpUser::client.get() method to make creating the requests
+        nicer. Specifically, the query string parameters are specified as a separate dictionary
+        opposed to part of the path, the cert and verify arguments (which will never change) are
+        already set, and Cache-Control headers are automatically set to ensure caching is disabled.
         '''
 
         safe_headers = {} if headers is None else headers
@@ -123,8 +118,7 @@ class BFDUserBase(HttpUser):
         if url is None and name in self.url_pools and self.url_pools[name]:
             # We can't generate a URL from the callback, but there are still
             # URLs in the pool of paginated data. Use that.
-            # url = self.url_pools[name].pop()
-            pass
+            url = self.url_pools[name].pop()
 
         if url is not None:
             # Run the test using the URL we found
@@ -142,8 +136,7 @@ class BFDUserBase(HttpUser):
             data_list = data.load_data_segment(load_function, *args).copy()
             random.shuffle(data_list)
             return data_list
-        else:
-            return []
+        return []
 
     @staticmethod
     def get_next_url(payload: str) -> str:
