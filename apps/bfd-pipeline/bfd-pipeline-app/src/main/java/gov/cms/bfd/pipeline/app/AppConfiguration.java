@@ -242,6 +242,20 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMinIdleTimeBeforeConnectionDrop()} value.
+   * This variable value should be in seconds.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
+      "RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP";
+  /**
+   * The default value for {@link
+   * AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP}.
+   */
+  public static final int DEFAULT_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
+      (int) Duration.ofMinutes(4).toSeconds();
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getAuthenticationToken()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
@@ -562,6 +576,11 @@ public final class AppConfiguration implements Serializable {
                 Duration.ofSeconds(
                     readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
                         .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)))
+            .minIdleTimeBeforeConnectionDrop(
+                Duration.ofSeconds(
+                    readEnvParsedOptional(
+                            ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP, Integer::parseInt)
+                        .orElse(DEFAULT_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
             .authenticationToken(
                 readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN)
                     .orElse(DEFAULT_RDA_GRPC_AUTH_TOKEN))

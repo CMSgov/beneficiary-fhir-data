@@ -42,11 +42,19 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
 
+  /**
+   * Map used to calculate {@link Claim.ClaimStatus} from {@link RdaMcsClaim#getIdrStatusCode()} Any
+   * item in this list is considered {@link Claim.ClaimStatus#CANCELLED}, every other value is
+   * considered {@link Claim.ClaimStatus#ACTIVE}.
+   */
   private static final List<String> CANCELED_STATUS_CODES = List.of("r", "z", "9");
 
   private McsClaimTransformerV2() {}
 
   /**
+   * Transforms a given {@link RdaMcsClaim} into a FHIR {@link Claim} object, recording metrics with
+   * the given {@link MetricRegistry}.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the MCS {@link RdaMcsClaim} to transform
    * @return a FHIR {@link Claim} resource that represents the specified claim
@@ -63,6 +71,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
+   * Transforms a given {@link RdaMcsClaim} into a FHIR {@link Claim} object.
+   *
    * @param claimGroup the {@link RdaMcsClaim} to transform
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaMcsClaim}
    */
@@ -73,12 +83,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
-    if (claimGroup.getIdrStatusCode() != null) {
-      claim.setStatus(
-          CANCELED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
-              ? Claim.ClaimStatus.CANCELLED
-              : Claim.ClaimStatus.ACTIVE);
-    }
+    claim.setStatus(getStatus(claimGroup));
     claim.setType(getType());
     claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
@@ -95,6 +100,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
+  /**
+   * Parses out patient data from the given {@link RdaMcsClaim} object, creating a generic {@link
+   * PatientInfo} object containing the patient data.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The generated {@link PatientInfo} object with the parsed patient data.
+   */
   private static Resource getContainedPatient(RdaMcsClaim claimGroup) {
     PatientInfo patientInfo =
         new PatientInfo(
@@ -107,6 +119,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
 
+  /**
+   * Parses out provider data from the given {@link RdaMcsClaim} object, creating a FHIR {@link
+   * Organization} object containing the provider data.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The generated {@link Organization} object with the parsed patient data.
+   */
   private static Resource getContainedProvider(RdaMcsClaim claimGroup) {
     Organization organization = new Organization();
 
@@ -169,6 +188,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return organization;
   }
 
+  /**
+   * Parses out extension data from the given {@link RdaMcsClaim} object, creating a list of {@link
+   * Extension} objects.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The generated list of {@link Extension} objects with the parsed extension data.
+   */
   private static List<Extension> getExtension(RdaMcsClaim claimGroup) {
     return claimGroup.getIdrClaimType() == null
         ? null
@@ -178,6 +204,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                     new Coding(BBCodingSystems.MCS.CLM_TYPE, claimGroup.getIdrClaimType(), null)));
   }
 
+  /**
+   * Parses out identifier data from the given {@link RdaMcsClaim} object, creating a list of {@link
+   * Identifier} objects.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The generated list of {@link Identifier} objects with the parsed identifier data.
+   */
   private static List<Identifier> getIdentifier(RdaMcsClaim claimGroup) {
     return claimGroup.getIdrClmHdIcn() == null
         ? null
@@ -195,6 +228,26 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                 .setValue(claimGroup.getIdrClmHdIcn()));
   }
 
+  /**
+   * Parses out the claim status from the given {@link RdaMcsClaim} object, mapping it to a
+   * corresponding {@link Claim.ClaimStatus} value.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The {@link Claim.ClaimStatus} that corresponds to the given {@link
+   *     RdaMcsClaim#getIdrStatusCode()}.
+   */
+  private static Claim.ClaimStatus getStatus(RdaMcsClaim claimGroup) {
+    return claimGroup.getIdrStatusCode() == null
+            || !CANCELED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
+        ? Claim.ClaimStatus.ACTIVE
+        : Claim.ClaimStatus.CANCELLED;
+  }
+
+  /**
+   * Creates a {@link CodeableConcept} containing the type data for this FHIR resource.
+   *
+   * @return A {@link CodeableConcept} object containing the type data.
+   */
   private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(
@@ -205,12 +258,24 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                     ClaimType.PROFESSIONAL.getDisplay())));
   }
 
+  /**
+   * Parses out the billable period from the given {@link RdaMcsClaim} object, creating a FHIR
+   * {@link Period} object.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The {@link Period} object containing the billable period data.
+   */
   private static Period getBillablePeriod(RdaMcsClaim claimGroup) {
     return new Period()
         .setStart(localDateToDate(claimGroup.getIdrHdrFromDateOfSvc()))
         .setEnd(localDateToDate(claimGroup.getIdrHdrToDateOfSvc()));
   }
 
+  /**
+   * Creates a {@link CodeableConcept} containing the priority data for this FHIR resource.
+   *
+   * @return A {@link CodeableConcept} object containing the priority data.
+   */
   private static CodeableConcept getPriority() {
     return new CodeableConcept(
         new Coding(
@@ -219,6 +284,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             ProcessPriority.NORMAL.getDisplay()));
   }
 
+  /**
+   * Parses out the claim total from the given {@link RdaMcsClaim} object, creating a FHIR {@link
+   * Money} object.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The {@link Money} object containing the claim total data.
+   */
   private static Money getTotal(RdaMcsClaim claimGroup) {
     Money total;
 
@@ -234,6 +306,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return total;
   }
 
+  /**
+   * Parses out the diagnosis data from the given {@link RdaMcsClaim} object, creating a list of
+   * FHIR {@link Claim.DiagnosisComponent} objects.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The list of {@link Claim.DiagnosisComponent} objects containing the diagnosis data.
+   */
   private static List<Claim.DiagnosisComponent> getDiagnosis(RdaMcsClaim claimGroup) {
     return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaMcsDiagnosisCode>of())
         .stream()
@@ -256,6 +335,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Parses out the line item data from the given {@link RdaMcsClaim} object, creating a list of
+   * FHIR {@link Claim.ItemComponent} objects.
+   *
+   * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @return The list of {@link Claim.ItemComponent} objects containing the line item data.
+   */
   private static List<Claim.ItemComponent> getItems(RdaMcsClaim claimGroup) {
     return ObjectUtils.defaultIfNull(claimGroup.getDetails(), List.<RdaMcsDetail>of()).stream()
         .map(
@@ -297,6 +383,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Parses out the modifier data from the given {@link RdaMcsDetail} object, creating a list of
+   * FHIR {@link CodeableConcept} objects.
+   *
+   * @param detail the {@link RdaMcsDetail} to parse.
+   * @return The list of {@link CodeableConcept} objects containing the modifier data.
+   */
   private static List<CodeableConcept> getModifiers(RdaMcsDetail detail) {
     List<Optional<String>> mods =
         List.of(

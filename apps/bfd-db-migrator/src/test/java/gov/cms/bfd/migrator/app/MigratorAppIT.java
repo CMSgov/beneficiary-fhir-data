@@ -317,7 +317,7 @@ public final class MigratorAppIT {
       ZipEntry entry = enumeration.nextElement();
 
       // Check for sql migration scripts
-      if (entry.getName().startsWith("db/migration/") && entry.getName().endsWith(".sql")) {
+      if (entry.getName().startsWith("db/migration/V") && entry.getName().endsWith(".sql")) {
         fileCount++;
       }
     }
