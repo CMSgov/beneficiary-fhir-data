@@ -1,4 +1,14 @@
-${logic.psql-only} $$ LANGUAGE plpgsql;
+/*
+  This migration implements role-based access controls and designates a fhirdb owner role and:
+    1. Adds read, write, and migrate roles for bfd and paca schemas (public and rda)
+    2. Adds bfd/paca analyst (read), data admin (write), and schema admin (migrate) user groups
+    3. Adds a fhirdb (bfd+paca) migrator role and admin group
+    4. Adds an rds_superuser group on local postgres installations to emulate RDS
+    5. Adds groups for managing fhir api, pipeline, and migrator service accounts
+    6. Assigns current reader/writers svc accounts to the appropriate groups
+    7. Creates and designates a role that will own all tables, views, seqs, and procs in fhirdb
+    8. Locks down  
+*/
 ${logic.psql-only} DO $$
 ${logic.psql-only} DECLARE
 ${logic.psql-only} 	t record;
@@ -75,33 +85,46 @@ ${logic.psql-only}   GRANT rds_superuser TO fhirdb_admin_group WITH ADMIN OPTION
 ${logic.psql-only}   GRANT fhirdb_migrator_role TO fhirdb_admin_group WITH ADMIN OPTION;
 ${logic.psql-only} 
 ${logic.psql-only}   -- add a group for managing fhir api service accounts (read only)
-${logic.psql-only}   PERFORM revoke_db_privs('fhirdb', 'api_reader_svcs');
 ${logic.psql-only}   PERFORM add_db_group_if_not_exists('fhirdb', 'api_reader_svcs');
+${logic.psql-only}   PERFORM revoke_db_privs('fhirdb', 'api_reader_svcs');
 ${logic.psql-only}   GRANT bfd_reader_role TO api_reader_svcs;
 ${logic.psql-only}   GRANT paca_reader_role TO api_reader_svcs;
 ${logic.psql-only}   
 ${logic.psql-only}   -- add a group for managing pipeline service accounts (read+write)
-${logic.psql-only}   PERFORM revoke_db_privs('fhirdb', 'api_pipeline_svcs');
 ${logic.psql-only}   PERFORM add_db_group_if_not_exists('fhirdb', 'api_pipeline_svcs');
+${logic.psql-only}   PERFORM revoke_db_privs('fhirdb', 'api_pipeline_svcs');
 ${logic.psql-only}   GRANT bfd_writer_role TO api_pipeline_svcs;
 ${logic.psql-only}   GRANT paca_writer_role TO api_pipeline_svcs;
 ${logic.psql-only}   
 ${logic.psql-only}   -- add a group for managing db migrator service accounts (read+write+ddl)
-${logic.psql-only}   PERFORM revoke_db_privs('fhirdb', 'api_migrator_svcs');
 ${logic.psql-only}   PERFORM add_db_group_if_not_exists('fhirdb', 'api_migrator_svcs');
+${logic.psql-only}   PERFORM revoke_db_privs('fhirdb', 'api_migrator_svcs');
 ${logic.psql-only}   ALTER ROLE api_migrator_svcs WITH CREATEDB CREATEROLE;
 ${logic.psql-only}   GRANT fhirdb_migrator_role TO api_migrator_svcs;
-${logic.psql-only}   GRANT fhirdb_migrator_role TO api_pipeline_svcs; -- will revoke when migrator and pipeline are split
 ${logic.psql-only}
-${logic.psql-only}   -- designate a fhirdb owner that will own all bfd/paca tables, views, sequences, and procedures
+${logic.psql-only}   -- designate a fhirdb owner that will own all tables, views, sequences, and procedures in fhirdb schemas
 ${logic.psql-only}   PERFORM create_role_if_not_exists('fhir');
 ${logic.psql-only}   PERFORM set_fhirdb_owner('fhir');
 ${logic.psql-only}
 ${logic.psql-only}   -- ensure our migrators can alter the things that fhir owns
 ${logic.psql-only}   GRANT fhir TO api_migrator_svcs;
 ${logic.psql-only}
-${logic.psql-only}   -- ensure the current user is an api migrator
+${logic.psql-only}   -- ensure the current user and original bfduser are migrators
 ${logic.psql-only}   GRANT api_migrator_svcs TO CURRENT_USER;
-${logic.psql-only}
+${logic.psql-only}   IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'bfdusr') THEN
+${logic.psql-only}     GRANT fhirdb_admin_group TO bfduser;
+${logic.psql-only}   END IF;
+${logic.psql-only}   -- add our current api/pipeline svc accounts to the appropriate groups
+${logic.psql-only}   FOR t IN
+${logic.psql-only}     SELECT usename FROM pg_catalog.pg_user WHERE usename LIKE 'svc_server_%'
+${logic.psql-only}   LOOP
+${logic.psql-only}     EXECUTE format('GRANT api_reader_svcs TO %I', t.usename);
+${logic.psql-only}   END LOOP;
+${logic.psql-only}   FOR t IN
+${logic.psql-only}     SELECT usename FROM pg_catalog.pg_user WHERE usename LIKE 'svc_pipeline_%'
+${logic.psql-only}   LOOP
+${logic.psql-only}   		EXECUTE format('GRANT api_pipeline_svcs TO %I', t.usename);
+${logic.psql-only}   		EXECUTE format('GRANT api_migrator_svcs TO %I', t.usename);
+${logic.psql-only}   END LOOP;
 ${logic.psql-only} END 
 ${logic.psql-only} $$ LANGUAGE plpgsql;
