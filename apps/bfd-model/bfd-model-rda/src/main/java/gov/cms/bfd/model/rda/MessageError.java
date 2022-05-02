@@ -1,17 +1,19 @@
 package gov.cms.bfd.model.rda;
 
+import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Lob;
 import javax.persistence.PrePersist;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,34 +29,32 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
+@IdClass(MessageError.PK.class)
 @Table(name = "message_error", schema = "rda")
 public class MessageError {
-  private static final String SequenceName = "rda_api_claim_message_errors_id_seq";
-
-  @Id
-  @Column(name = "id", nullable = false, updatable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SequenceName)
-  @SequenceGenerator(
-      name = SequenceName,
-      schema = "rda",
-      sequenceName = SequenceName,
-      allocationSize = 25)
-  @EqualsAndHashCode.Include
-  private Long id;
+  public enum ClaimType {
+    FISS,
+    MCS
+  }
 
   /** The message sequence number. */
+  @Id
   @Column(name = "sequence_number", nullable = false)
   @EqualsAndHashCode.Include
   private Long sequenceNumber;
 
   /** Either dcn (FISS) or idrClmHdIcn (MCS). */
+  @Id
   @Column(name = "claim_id", length = 25, nullable = false)
+  @EqualsAndHashCode.Include
   private String claimId;
 
   /** Either F (FISS) or M (MCS). */
-  @Column(name = "claim_type", nullable = false)
+  @Id
+  @Enumerated(EnumType.STRING)
+  @Column(name = "claim_type", length = 20, nullable = false)
   @EqualsAndHashCode.Include
-  private Character claimType;
+  private ClaimType claimType;
 
   /** Timestamp when we inserted the claim from this message into our database. */
   @Column(name = "received_date")
@@ -72,5 +72,15 @@ public class MessageError {
   @PrePersist
   protected void onCreate() {
     receivedDate = Instant.now();
+  }
+
+  /** PK class for the MessageError table */
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class PK implements Serializable {
+    private Long sequenceNumber;
+    private String claimId;
+    private RdaApiProgress.ClaimType claimType;
   }
 }

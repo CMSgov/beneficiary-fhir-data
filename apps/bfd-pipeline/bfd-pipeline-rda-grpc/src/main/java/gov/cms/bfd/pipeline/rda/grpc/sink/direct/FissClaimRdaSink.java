@@ -63,9 +63,9 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return MessageError.builder()
         .sequenceNumber(change.getSeq())
         .claimId(change.getClaim().getDcn())
-        .claimType('f')
+        .claimType(MessageError.ClaimType.FISS)
         .errors(mapper.writeValueAsString(errors))
-        .message(mapper.writeValueAsString(change))
+        .message(writer.print(change))
         .build();
   }
 }

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
@@ -55,7 +56,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  protected final ObjectMapper mapper =
+  protected static final JsonFormat.Printer writer =
+      JsonFormat.printer().omittingInsignificantWhitespace();
+  protected static final ObjectMapper mapper =
       JsonMapper.builder()
           .enable(SerializationFeature.INDENT_OUTPUT)
           .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)

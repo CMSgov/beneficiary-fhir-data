@@ -63,9 +63,9 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
     return MessageError.builder()
         .sequenceNumber(change.getSeq())
         .claimId(change.getClaim().getIdrClmHdIcn())
-        .claimType('m')
+        .claimType(MessageError.ClaimType.MCS)
         .errors(mapper.writeValueAsString(errors))
-        .message(mapper.writeValueAsString(change))
+        .message(writer.print(change))
         .build();
   }
 }
