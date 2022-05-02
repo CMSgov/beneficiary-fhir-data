@@ -130,6 +130,7 @@ public class ClaimDao {
             serviceDate == null
                 ? builder.and()
                 : serviceDateRangePredicate(root, serviceDate, builder, endDateAttributeName)));
+    // This sort will ensure predictable responses for any current/future testing needs
     criteria.orderBy(builder.asc(root.get(idAttributeName)));
 
     Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();

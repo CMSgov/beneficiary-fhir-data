@@ -324,6 +324,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               .collect(Collectors.toList()));
     }
 
+    // Enforces a specific sorting for pagination that parities the EOB resource sorting.
     resources.sort(Comparator.comparing(r -> r.getIdElement().getIdPart()));
 
     Bundle bundle = new Bundle();
