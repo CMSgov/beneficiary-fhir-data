@@ -12,23 +12,21 @@ import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 
-/**
- * GrpcStreamCaller implementation that calls the RDA FissClaim service. At this stage in RDA API
- * development there is no way to resume a stream from a given point in time so every time the
- * service is called it sends all of its values.
- */
+/** GrpcStreamCaller implementation that calls the RDA FissClaim service. */
 public class FissClaimStreamCaller extends GrpcStreamCaller<FissClaimChange> {
   public FissClaimStreamCaller() {
     super(LoggerFactory.getLogger(FissClaimStreamCaller.class));
   }
 
   /**
-   * Calls the getFissClaims RPC. The Iterator from the RPC call is wrapped with a transforming
-   * Iterator that converts the API FissClaim objects into database PreAdjFissClaim entity objects.
+   * Calls the getFissClaims RPC using the provided {@link ManagedChannel} and {@link CallOptions}
+   * and returns a {@link GrpcResponseStream} that can be used to receive the results in a blocking
+   * manner.
    *
    * @param channel an already open channel to the service being called
+   * @param callOptions additional {@link CallOptions} for the RPC call.
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
-   * @return a blocking GrpcResponseStream of PreAdjFissClaim entity objects
+   * @return a blocking GrpcResponseStream of {@link FissClaimChange} objects
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override
