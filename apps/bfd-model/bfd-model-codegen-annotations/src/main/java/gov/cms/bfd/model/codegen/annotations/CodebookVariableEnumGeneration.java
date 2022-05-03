@@ -12,6 +12,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.CLASS)
 public @interface CodebookVariableEnumGeneration {
-  /** @return the {@link Class#getSimpleName()} of the {@link Enum} to generate */
+  /**
+   * Gets the simple name of the enum.
+   *
+   * @return the {@link Class#getSimpleName()} of the {@link Enum} to generate
+   */
   String enumName() default "CcwCodebookVariable";
 }

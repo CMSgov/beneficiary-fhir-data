@@ -575,6 +575,10 @@ checkJavaFormat
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<configuration>
 						<configLocation>checkstyle.xml</configLocation>
+						<!-- Only look in source directories, basically ignores generated code -->
+						<sourceDirectories>
+							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+						</sourceDirectories>
 					</configuration>
 					<version>${checkstyle.plugin.version}</version>
 					<dependencies>
