@@ -1,20 +1,16 @@
 '''Single Locust test for BFD endpoint'''
 
-from common.bfd_user_base import BFDUserBase
+from common.bene_tests import BeneTestUser
 from common.validation import SLA_PATIENT
 from locust import task
 
-class BFDUser(BFDUserBase):
+class BFDUser(BeneTestUser):
     '''Single Locust test for BFD endpoint'''
 
-    DATA_REQUIRED = [ 'BENE_IDS' ]
     SLA_BASELINE = SLA_PATIENT
 
 
     @task
     def patient_test_id(self):
         '''Patient search by ID'''
-        self.run_task_by_parameters(base_path='/v2/fhir/Patient', params={
-                '_id': self.bene_ids,
-                '_format': 'application/fhir+json',
-        }, name='/v2/fhir/Patient search by id')
+        self._test_v2_patient_test_id()

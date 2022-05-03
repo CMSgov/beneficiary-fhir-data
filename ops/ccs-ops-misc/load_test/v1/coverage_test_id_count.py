@@ -1,19 +1,15 @@
 '''Single Locust test for BFD endpoint'''
 
-from common.bfd_user_base import BFDUserBase
+from common.bene_tests import BeneTestUser
 from common.validation import SLA_COVERAGE
 from locust import task
 
-class BFDUser(BFDUserBase):
+class BFDUser(BeneTestUser):
     '''Single Locust test for BFD endpoint'''
 
-    DATA_REQUIRED = [ 'BENE_IDS' ]
     SLA_BASELINE = SLA_COVERAGE
 
     @task
     def coverage_test_id_count(self):
         '''Coverage search by ID, Paginated'''
-        self.run_task_by_parameters(base_path='/v1/fhir/Coverage', params={
-                'beneficiary': self.bene_ids,
-                '_count': '10'
-            }, name='/v1/fhir/Coverage search by id / count=10')
+        self._test_v1_coverage_test_id_count()

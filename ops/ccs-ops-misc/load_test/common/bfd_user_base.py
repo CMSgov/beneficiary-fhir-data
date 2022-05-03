@@ -2,12 +2,12 @@
 '''
 
 import json
-import random
-from typing import Callable, Dict, List, Union
 
-from common import config, data, db, test_setup as setup, validation
+from typing import Callable, Dict, List, Union
+from common import config, data, test_setup as setup, validation
 from common.url_path import create_url_path
 from locust import HttpUser
+
 import urllib3
 
 setup.set_locust_env(config.load())
@@ -18,15 +18,6 @@ class BFDUserBase(HttpUser):
 
     This class should automatically handle most of the common tasks that our load tests require.
     '''
-
-    # If a child class is going to use a set of data during the test, such as Beneficiary IDs, MBI
-    # numbers, etc. then it has to be defined in this class field so that we can pre-load that data
-    # from the database.
-    DATA_REQUIRED = [
-        # 'BENE_IDS',
-        # 'MBIS',
-        # 'CONTRACT_IDS'
-    ]
 
     # The goals against which to measure these results. Note that they also include the Failsafe
     # cutoff, which will default to the V2 cutoff time if not set.
@@ -55,11 +46,6 @@ class BFDUserBase(HttpUser):
         cursor URLs) as members of this particular BFDUser instance. We then shuffle these copied
         lists such that concurrent BFDUsers are not querying the same data at the same time.
         '''
-
-        # Pre-load data needed for creating URLs
-        self.bene_ids = self.load_data('BENE_IDS', db.get_bene_ids)
-        self.mbis = self.load_data('MBIS', db.get_hashed_mbis)
-        self.contract_ids = self.load_data('CONTRACT_IDS', db.get_contract_ids)
 
         # Adds a global failsafe check to ensure that if this test overwhelms
         # the database, we bail out and stop hitting the server
@@ -148,16 +134,6 @@ class BFDUserBase(HttpUser):
 
 
     # Helper Functions
-
-
-    def load_data(self, flag_name: str, load_function: Callable, *args) -> List:
-        '''If the given DATA_REQUIRED flag exists on this class, pre-load the
-        data from the database.'''
-        if hasattr(self, 'DATA_REQUIRED') and flag_name in self.DATA_REQUIRED:
-            data_list = data.load_data_segment(load_function, *args).copy()
-            random.shuffle(data_list)
-            return data_list
-        return []
 
     @staticmethod
     def get_next_url(payload: str) -> str:

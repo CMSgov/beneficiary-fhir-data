@@ -24,7 +24,7 @@ def _execute(uri, query):
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 results = cursor.fetchall()
-                logger.info(f'Returned {len(results)} results from the database for the test.')
+                logger.info('Returned %s results from the database for the test.', len(results))
     finally:
         conn.close()
 
@@ -35,7 +35,7 @@ def get_bene_ids(uri):
     """
     Return a list of bene IDs from the adjudicated beneficiary table
     """
-    beneQuery = (
+    bene_query = (
         'SELECT "bene_id" '
         'FROM "beneficiaries" '
         # 'TABLESAMPLE SYSTEM (0.25) '  # when data is cleaned up, use this to access random benes
@@ -44,21 +44,21 @@ def get_bene_ids(uri):
         f'LIMIT {LIMIT}'
     )
 
-    return [str(r[0]) for r in _execute(uri, beneQuery)]
+    return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
 def get_hashed_mbis(uri):
     """
     Return a list of unique hashed MBIs from the adjudicated beneficiary table
     """
-    beneQuery = (
+    bene_query = (
         'SELECT "mbi_hash" '
         'FROM "beneficiaries" '
         'WHERE "mbi_hash" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
 
-    return [str(r[0]) for r in _execute(uri, beneQuery)]
+    return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
 def get_contract_ids(uri):
@@ -71,16 +71,20 @@ def get_contract_ids(uri):
         '06': 'jun', '07': 'jul', '08': 'aug', '09': 'sept', '10': 'oct',
         '11': 'nov', '12': 'dec' }
     for month_numeric, month_text in months.items():
-        contractIdQuery = (
+        contract_id_query = (
             f'SELECT DISTINCT "ptd_cntrct_{month_text}_id", "rfrnc_yr" '
             'FROM "beneficiaries" '
             'WHERE "rfrnc_yr" IS NOT NULL '
             f'LIMIT {LIMIT}'
         )
 
-        results = _execute(uri, contractIdQuery)
-        for r in results:
-            contract_data.append({ 'id': str(r[0]), 'year': str(r[1]), 'month': month_numeric })
+        results = _execute(uri, contract_id_query)
+        for result in results:
+            contract_data.append({
+                'id': str(result[0]),
+                'year': str(result[1]),
+                'month': month_numeric
+            })
 
     return contract_data
 
@@ -90,7 +94,7 @@ def get_partially_adj_hashed_mbis(uri):
     Return a list of unique hashed MBIs from the partially adjudicated
     FISS and MCS tables
     """
-    beneQuery = (
+    mbi_query = (
         'SELECT DISTINCT f."mbiHash" AS hash '
         'FROM "pre_adj"."FissClaims" f '
         'WHERE f."mbi" IS NOT NULL '
@@ -108,4 +112,4 @@ def get_partially_adj_hashed_mbis(uri):
         f'LIMIT {LIMIT}'
     )
 
-    return [str(r[0]) for r in _execute(uri, beneQuery)]
+    return [str(r[0]) for r in _execute(uri, mbi_query)]
