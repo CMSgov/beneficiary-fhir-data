@@ -3,9 +3,10 @@
 
 import json
 import random
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Union
 
 from common import config, data, db, test_setup as setup, validation
+from common.url_path import create_url_path
 from locust import HttpUser
 import urllib3
 
@@ -95,23 +96,30 @@ class BFDUserBase(HttpUser):
                 name=name,
                 catch_response=True
         ) as response:
-            # This is normally where you would validate a response, but we
-            # don't need to do that. Instead, we're checking it for valid
-            # "next" URLs that we can add to a URL pool.
-            next_url = BFDUserBase.get_next_url(response.text)
-            if next_url is not None:
-                if name not in self.url_pools:
-                    self.url_pools[name] = []
-                self.url_pools[name].append(next_url)
+            if response.status_code != 200:
+                response.failure(f'Status Code: {response.status_code}')
+            else:
+                # Check for valid "next" URLs that we can add to a URL pool.
+                next_url = BFDUserBase.get_next_url(response.text)
+                if next_url is not None:
+                    if name not in self.url_pools:
+                        self.url_pools[name] = []
+                    self.url_pools[name].append(next_url)
 
 
     def run_task(self, url_callback: Callable, headers: Dict[str, str] = None,
             name: str = ''):
-        '''Figure out which URL we should query next and query the server'''
+        '''Figure out which URL we should query next and query the server.
+
+        Note that the Data Pools (Bene ID, MBI, etc.) are limited and we don't want to grab a value
+        outside of the URL Callback. Doing so runs the risk of consuming an ID without using it,
+        especially if some future implementation does not always consume IDs before consuming the
+        paginated URL Pool.
+        '''
 
         # First, see if we can generate a URL using the callback
         try:
-            url = url_callback(self)
+            url = url_callback()
         except IndexError:
             url = None
 
@@ -124,6 +132,19 @@ class BFDUserBase(HttpUser):
             # Run the test using the URL we found
             self.get_by_url(url=url, headers=headers, name=name)
         # If no URL is found, then this test isn't counted in statistics
+
+
+    def run_task_by_parameters(self, base_path: str, params: Dict[str, Union[str, List]] = None,
+            headers: Dict[str, str] = None, name: str = ''):
+        '''Run a task using a base path and parameters'''
+
+        safe_params = {} if params is None else params
+        safe_headers = {} if headers is None else headers
+
+        def make_url():
+            return create_url_path(base_path, safe_params)
+
+        self.run_task(name=name, url_callback=make_url, headers=safe_headers)
 
 
     # Helper Functions

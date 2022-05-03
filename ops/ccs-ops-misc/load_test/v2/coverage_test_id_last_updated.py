@@ -11,9 +11,9 @@ class BFDUser(BFDUserBase):
     SLA_BASELINE = SLA_COVERAGE
 
     @task
-    def coverage_test_id_count(self):
-        '''Coverage search by ID, Paginated'''
-        self.run_task_by_parameters(base_path='/v1/fhir/Coverage', params={
+    def coverage_test_id_last_updated(self):
+        '''Coverage search by ID, Last Updated'''
+        self.run_task_by_parameters(base_path='/v2/fhir/Coverage', params={
+                '_lastUpdated': f'gt{self.last_updated}',
                 'beneficiary': self.bene_ids,
-                '_count': '10'
-            }, name='/v1/fhir/Coverage search by id / count=10')
+        }, name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks)')
