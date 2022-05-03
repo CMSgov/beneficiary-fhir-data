@@ -17,7 +17,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 /** Models the RIF field layout data. */
 public final class RifLayout {
+  /**
+   * The name of this {@link RifLayout} (i.e. the name of the sheet in the {@link Workbook} that
+   * defines it).
+   */
   private final String name;
+  /** The ordered {@link List} of {@link RifField}s that comprise this {@link RifLayout}. */
   private final List<RifField> rifFields;
 
   /**
@@ -32,14 +37,19 @@ public final class RifLayout {
   }
 
   /**
-   * @return the name of this {@link RifLayout} (i.e. the name of the sheet in the {@link Workbook}
-   *     that defines it)
+   * Gets the {@link #name}.
+   *
+   * @return the name of this {@link RifLayout}
    */
   public String getName() {
     return name;
   }
 
-  /** @return the ordered {@link List} of {@link RifField}s that comprise this {@link RifLayout} */
+  /**
+   * Gets the {@link #rifFields}.
+   *
+   * @return the ordered {@link List} of {@link RifField}s that comprise this {@link RifLayout}
+   */
   public List<RifField> getRifFields() {
     return rifFields;
   }
@@ -134,6 +144,8 @@ public final class RifLayout {
   }
 
   /**
+   * Parses a boolean value from the specified {@link Cell}.
+   *
    * @param cell the {@link Cell} to try and extract a <code>boolean</code> from
    * @return the <code>boolean</code> value that was in the specified {@link Cell}
    */
@@ -150,6 +162,8 @@ public final class RifLayout {
   }
 
   /**
+   * Parses a {@link URL} from the specified {@link Cell}.
+   *
    * @param cell the {@link Cell} to try and extract a {@link URL} from
    * @return the hyperlinked {@link URL} that was in the specified {@link Cell}, or <code>null
    *     </code>
@@ -167,13 +181,26 @@ public final class RifLayout {
 
   /** Models a specific field in a RIF layout. */
   public static final class RifField {
+    /** The name of the RIF column in RIF export data files. */
     private final String rifColumnName;
+    /** The type of the RIF column, as specified in the data dictionary. */
     private final RifColumnType rifColumnType;
+    /**
+     * The length (or, for <code>NUM</code> columns, the precision) of the RIF column, as specified
+     * in the data dictionary.
+     */
     private final Integer rifColumnLength;
+    /** The scale of the RIF column, as specified in the data dictionary. */
     private final Integer rifColumnScale;
+    /** If the rif column must be populated or not. */
     private final boolean rifColumnOptional;
+    /** The field's data dictionary entry; may be empty if no entry exists. */
     private final URL dataDictionaryEntry;
+    /**
+     * A brief label/description of the RIF column, which may be empty for some {@link RifField}s.
+     */
     private final String rifColumnLabel;
+    /** The java entity property name associated with the JPA <code>Entity</code>. */
     private final String javaFieldName;
 
     /**
@@ -228,17 +255,27 @@ public final class RifLayout {
       this.javaFieldName = javaFieldName;
     }
 
-    /** @return the name of the RIF column in RIF export data files */
+    /**
+     * Gets the {@link #rifColumnName}.
+     *
+     * @return the name of the RIF column in RIF export data files
+     */
     public String getRifColumnName() {
       return rifColumnName;
     }
 
-    /** @return the type of the RIF column, as specified in the data dictionary */
+    /**
+     * Gets the {@link #rifColumnType}.
+     *
+     * @return the type of the RIF column, as specified in the data dictionary
+     */
     public RifColumnType getRifColumnType() {
       return rifColumnType;
     }
 
     /**
+     * Gets the {@link #rifColumnLength}.
+     *
      * @return the length (or, for <code>NUM</code> columns, the precision) of the RIF column, as
      *     specified in the data dictionary, or {@link Optional#empty()} if none is defined
      */
@@ -247,6 +284,8 @@ public final class RifLayout {
     }
 
     /**
+     * Gets the {@link #rifColumnScale}.
+     *
      * @return the scale of the RIF column, as specified in the data dictionary, or {@link
      *     Optional#empty()} if none is defined
      */
@@ -255,19 +294,27 @@ public final class RifLayout {
     }
 
     /**
-     * @return <code>true</code> if the specified RIF column's value is sometimes blank, <code>false
-     *     </code> if it is always populated
+     * Returns if {@link #rifColumnOptional}.
+     *
+     * @return <code>true</code> if the specified RIF column's value is sometimes blank, <code>
+     *     false     </code> if it is always populated
      */
     public boolean isRifColumnOptional() {
       return rifColumnOptional;
     }
 
-    /** @return the field's data dictionary entry, if any */
+    /**
+     * Gets the {@link #dataDictionaryEntry}.
+     *
+     * @return the field's data dictionary entry, if any
+     */
     public Optional<URL> getDataDictionaryEntry() {
       return Optional.ofNullable(dataDictionaryEntry);
     }
 
     /**
+     * Gets the {@link #rifColumnLabel}.
+     *
      * @return a brief label/description of the RIF column, which may be empty for some {@link
      *     RifField}s
      */
@@ -275,12 +322,16 @@ public final class RifLayout {
       return rifColumnLabel;
     }
 
-    /** @return the java entity property name associated with the JPA <code>Entity</code> */
+    /**
+     * Gets the {@link #javaFieldName}.
+     *
+     * @return the java entity property name associated with the JPA <code>Entity</code>
+     */
     public String getJavaFieldName() {
       return javaFieldName;
     }
 
-    /** @return a String dumpt of the RifField */
+    /** {@inheritDoc} */
     public String toString() {
       StringBuilder sb = new StringBuilder("RifField: { ");
       sb.append("columnName=")
@@ -298,18 +349,19 @@ public final class RifLayout {
 
   /** Enumerates the various RIF column types. */
   public static enum RifColumnType {
+    /** Represents a character column. */
     CHAR,
-
+    /** Represents a date column. */
     DATE,
-
+    /** Represents a numeric column. */
     NUM,
-
+    /** Represents a timestamp column. */
     TIMESTAMP,
-
+    /** Represents a big integer column. */
     BIGINT,
-
+    /** Represents a small integer column. */
     SMALLINT,
-
+    /** Represents an integer column. */
     INTEGER;
   }
 }

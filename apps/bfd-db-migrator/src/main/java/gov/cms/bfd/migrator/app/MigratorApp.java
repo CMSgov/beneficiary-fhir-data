@@ -37,6 +37,7 @@ public final class MigratorApp {
    */
   static final int EXIT_CODE_FAILED_HIBERNATE_VALIDATION = 3;
 
+  /** This {@link System#exit(int)} value should be used when the application exits successfully. */
   static final int EXIT_CODE_SUCCESS = 0;
 
   /**

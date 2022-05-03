@@ -25,10 +25,6 @@
 		<module>bfd-model-rif-samples</module>
 	</modules>
 
-	<properties>
-		<checkstyle.skip>true</checkstyle.skip>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

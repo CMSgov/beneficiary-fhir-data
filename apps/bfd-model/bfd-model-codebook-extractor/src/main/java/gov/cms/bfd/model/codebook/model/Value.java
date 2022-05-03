@@ -14,7 +14,13 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public final class Value {
+
+  /**
+   * The coded value for this {@link Value}, representing one of the allowed values for its
+   * great-grandparent {@link Variable}.
+   */
   private String code;
+  /** A brief English human-readable description of this {@link Value}. */
   private String description;
 
   /** Constructs a new {@link Value} instance. */
@@ -74,7 +80,7 @@ public final class Value {
     this.description = description;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
