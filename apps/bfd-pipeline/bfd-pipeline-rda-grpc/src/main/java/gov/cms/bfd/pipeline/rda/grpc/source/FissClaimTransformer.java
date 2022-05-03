@@ -43,115 +43,112 @@ import java.util.List;
 import lombok.Getter;
 
 /**
- * Transforms a gRPC FissClaim object into a Hibernate PreAdjFissClaim object. Note that the gRPC
- * data objects are not proper java beans since their optional field getters should only be called
- * if their corresponding &quot;has&quot; methods return true. Optional fields are ignored when not
- * present. All other fields are validated and copied into a new PreAdjFissClaim object. A
- * lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed using an
- * IdHasher.
+ * Transforms a gRPC FissClaim object into a Hibernate {@link RdaFissClaim} object. Note that the
+ * gRPC data objects are not proper java beans since their optional field getters should only be
+ * called if their corresponding &quot;has&quot; methods return true. Optional fields are ignored
+ * when not present. All other fields are validated and copied into a new {@link RdaFissClaim}
+ * object. A lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed
+ * using an IdHasher.
  */
 public class FissClaimTransformer {
-  private final EnumStringExtractor<FissClaim, FissClaimStatus>
-      PreAdjFissClaim_currStatus_Extractor;
+  private final EnumStringExtractor<FissClaim, FissClaimStatus> RdaFissClaim_currStatus_Extractor;
 
-  private final EnumStringExtractor<FissClaim, FissProcessingType>
-      PreAdjFissClaim_currLoc1_Extractor;
+  private final EnumStringExtractor<FissClaim, FissProcessingType> RdaFissClaim_currLoc1_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissCurrentLocation2>
-      PreAdjFissClaim_currLoc2_Extractor;
+      RdaFissClaim_currLoc2_Extractor;
 
-  private final EnumStringExtractor<FissClaim, FissBillFacilityType>
-      PreAdjFissClaim_lobCd_Extractor;
+  private final EnumStringExtractor<FissClaim, FissBillFacilityType> RdaFissClaim_lobCd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissBillClassification>
-      PreAdjFissClaim_servTypeCd_Extractor;
+      RdaFissClaim_servTypeCd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissBillClassificationForClinics>
-      PreAdjFissClaim_servTypeCdForClinics_Extractor;
+      RdaFissClaim_servTypeCdForClinics_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissBillClassificationForSpecialFacilities>
-      PreAdjFissClaim_servTypeCdForSpecialFacilities_Extractor;
+      RdaFissClaim_servTypeCdForSpecialFacilities_Extractor;
 
-  private final EnumStringExtractor<FissClaim, FissBillFrequency> PreAdjFissClaim_freqCd_Extractor;
+  private final EnumStringExtractor<FissClaim, FissBillFrequency> RdaFissClaim_freqCd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissAdjustmentRequestorCode>
-      PreAdjFissClaim_adjReqCd_Extractor;
+      RdaFissClaim_adjReqCd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissCancelAdjustmentCode>
-      PreAdjFissClaim_cancAdjCd_Extractor;
+      RdaFissClaim_cancAdjCd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissSourceOfAdmission>
-      PreAdjFissClaim_admSource_Extractor;
+      RdaFissClaim_admSource_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissPayersCode>
-      PreAdjFissClaim_primaryPayerCode_Extractor;
+      RdaFissClaim_primaryPayerCode_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissPhysicianFlag>
-      PreAdjFissClaim_attendPhysFlag_Extractor;
+      RdaFissClaim_attendPhysFlag_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissPhysicianFlag>
-      PreAdjFissClaim_operPhysFlag_Extractor;
+      RdaFissClaim_operPhysFlag_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissPhysicianFlag>
-      PreAdjFissClaim_othPhysFlag_Extractor;
+      RdaFissClaim_othPhysFlag_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissProcessNewHealthInsuranceClaimNumberIndicator>
-      PreAdjFissClaim_procNewHicInd_Extractor;
+      RdaFissClaim_procNewHicInd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissRepositoryIndicator>
-      PreAdjFissClaim_reposInd_Extractor;
+      RdaFissClaim_reposInd_Extractor;
 
   private final EnumStringExtractor<
           FissClaim, FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier>
-      PreAdjFissClaim_mbiSubmBeneInd_Extractor;
+      RdaFissClaim_mbiSubmBeneInd_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissAdjustmentMedicareBeneficiaryIdentifierIndicator>
-      PreAdjFissClaim_adjMbiInd_Extractor;
+      RdaFissClaim_adjMbiInd_Extractor;
 
   private final EnumStringExtractor<FissDiagnosisCode, FissDiagnosisPresentOnAdmissionIndicator>
-      PreAdjFissDiagnosisCode_diagPoaInd_Extractor;
+      RdaFissDiagnosisCode_diagPoaInd_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissPayersCode>
-      PreAdjFissPayer_insuredPayer_payersId_Extractor;
+      RdaFissPayer_insuredPayer_payersId_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissReleaseOfInformation>
-      PreAdjFissPayer_insuredPayer_relInd_Extractor;
+      RdaFissPayer_insuredPayer_relInd_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissAssignmentOfBenefitsIndicator>
-      PreAdjFissPayer_insuredPayer_assignInd_Extractor;
+      RdaFissPayer_insuredPayer_assignInd_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissPatientRelationshipCode>
-      PreAdjFissPayer_insuredPayer_insuredRel_Extractor;
+      RdaFissPayer_insuredPayer_insuredRel_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissBeneficiarySex>
-      PreAdjFissPayer_insuredPayer_insuredSex_Extractor;
+      RdaFissPayer_insuredPayer_insuredSex_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissPatientRelationshipCode>
-      PreAdjFissPayer_insuredPayer_insuredRelX12_Extractor;
+      RdaFissPayer_insuredPayer_insuredRelX12_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissPayersCode>
-      PreAdjFissPayer_beneZPayer_payersId_Extractor;
+      RdaFissPayer_beneZPayer_payersId_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissAssignmentOfBenefitsIndicator>
-      PreAdjFissPayer_beneZPayer_relInd_Extractor;
+      RdaFissPayer_beneZPayer_relInd_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissAssignmentOfBenefitsIndicator>
-      PreAdjFissPayer_beneZPayer_assignInd_Extractor;
+      RdaFissPayer_beneZPayer_assignInd_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissPatientRelationshipCode>
-      PreAdjFissPayer_beneZPayer_beneRel_Extractor;
+      RdaFissPayer_beneZPayer_beneRel_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissBeneficiarySex>
-      PreAdjFissPayer_beneZPayer_beneSex_Extractor;
+      RdaFissPayer_beneZPayer_beneSex_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissBeneficiarySex>
-      PreAdjFissPayer_beneZPayer_insuredSex_Extractor;
+      RdaFissPayer_beneZPayer_insuredSex_Extractor;
 
   private final EnumStringExtractor<FissPayer, FissPatientRelationshipCode>
-      PreAdjFissPayer_beneZPayer_insuredRelX12_Extractor;
+      RdaFissPayer_beneZPayer_insuredRelX12_Extractor;
 
   private final EnumStringExtractor<FissAuditTrail, FissClaimStatus>
-      PreAdjFissAuditTrail_badtStatus_Extractor;
+      RdaFissAuditTrail_badtStatus_Extractor;
 
   private final Clock clock;
   @Getter private final MbiCache mbiCache;
@@ -159,7 +156,7 @@ public class FissClaimTransformer {
   public FissClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
-    PreAdjFissClaim_currStatus_Extractor =
+    RdaFissClaim_currStatus_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrStatusEnum,
             FissClaim::getCurrStatusEnum,
@@ -168,7 +165,7 @@ public class FissClaimTransformer {
             FissClaimStatus.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
-    PreAdjFissClaim_currLoc1_Extractor =
+    RdaFissClaim_currLoc1_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrLoc1Enum,
             FissClaim::getCurrLoc1Enum,
@@ -177,7 +174,7 @@ public class FissClaimTransformer {
             FissProcessingType.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_currLoc2_Extractor =
+    RdaFissClaim_currLoc2_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrLoc2Enum,
             FissClaim::getCurrLoc2Enum,
@@ -186,7 +183,7 @@ public class FissClaimTransformer {
             FissCurrentLocation2.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_lobCd_Extractor =
+    RdaFissClaim_lobCd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasLobCdEnum,
             FissClaim::getLobCdEnum,
@@ -195,7 +192,7 @@ public class FissClaimTransformer {
             FissBillFacilityType.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_servTypeCd_Extractor =
+    RdaFissClaim_servTypeCd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasServTypeCdEnum,
             FissClaim::getServTypeCdEnum,
@@ -204,7 +201,7 @@ public class FissClaimTransformer {
             FissBillClassification.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_servTypeCdForClinics_Extractor =
+    RdaFissClaim_servTypeCdForClinics_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasServTypeCdForClinicsEnum,
             FissClaim::getServTypeCdForClinicsEnum,
@@ -213,7 +210,7 @@ public class FissClaimTransformer {
             FissBillClassificationForClinics.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_servTypeCdForSpecialFacilities_Extractor =
+    RdaFissClaim_servTypeCdForSpecialFacilities_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasServTypeCdForSpecialFacilitiesEnum,
             FissClaim::getServTypeCdForSpecialFacilitiesEnum,
@@ -222,7 +219,7 @@ public class FissClaimTransformer {
             FissBillClassificationForSpecialFacilities.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_freqCd_Extractor =
+    RdaFissClaim_freqCd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasFreqCdEnum,
             FissClaim::getFreqCdEnum,
@@ -231,7 +228,7 @@ public class FissClaimTransformer {
             FissBillFrequency.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_adjReqCd_Extractor =
+    RdaFissClaim_adjReqCd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasAdjReqCdEnum,
             FissClaim::getAdjReqCdEnum,
@@ -240,7 +237,7 @@ public class FissClaimTransformer {
             FissAdjustmentRequestorCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_cancAdjCd_Extractor =
+    RdaFissClaim_cancAdjCd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCancAdjCdEnum,
             FissClaim::getCancAdjCdEnum,
@@ -249,7 +246,7 @@ public class FissClaimTransformer {
             FissCancelAdjustmentCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_admSource_Extractor =
+    RdaFissClaim_admSource_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasAdmSourceEnum,
             FissClaim::getAdmSourceEnum,
@@ -258,7 +255,7 @@ public class FissClaimTransformer {
             FissSourceOfAdmission.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_primaryPayerCode_Extractor =
+    RdaFissClaim_primaryPayerCode_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasPrimaryPayerCodeEnum,
             FissClaim::getPrimaryPayerCodeEnum,
@@ -267,7 +264,7 @@ public class FissClaimTransformer {
             FissPayersCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_attendPhysFlag_Extractor =
+    RdaFissClaim_attendPhysFlag_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasAttendPhysFlagEnum,
             FissClaim::getAttendPhysFlagEnum,
@@ -276,7 +273,7 @@ public class FissClaimTransformer {
             FissPhysicianFlag.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_operPhysFlag_Extractor =
+    RdaFissClaim_operPhysFlag_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasOperPhysFlagEnum,
             FissClaim::getOperPhysFlagEnum,
@@ -285,7 +282,7 @@ public class FissClaimTransformer {
             FissPhysicianFlag.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_othPhysFlag_Extractor =
+    RdaFissClaim_othPhysFlag_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasOthPhysFlagEnum,
             FissClaim::getOthPhysFlagEnum,
@@ -294,7 +291,7 @@ public class FissClaimTransformer {
             FissPhysicianFlag.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_procNewHicInd_Extractor =
+    RdaFissClaim_procNewHicInd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasProcNewHicIndEnum,
             FissClaim::getProcNewHicIndEnum,
@@ -303,7 +300,7 @@ public class FissClaimTransformer {
             FissProcessNewHealthInsuranceClaimNumberIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_reposInd_Extractor =
+    RdaFissClaim_reposInd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasReposIndEnum,
             FissClaim::getReposIndEnum,
@@ -312,7 +309,7 @@ public class FissClaimTransformer {
             FissRepositoryIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_mbiSubmBeneInd_Extractor =
+    RdaFissClaim_mbiSubmBeneInd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasMbiSubmBeneIndEnum,
             FissClaim::getMbiSubmBeneIndEnum,
@@ -321,7 +318,7 @@ public class FissClaimTransformer {
             FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissClaim_adjMbiInd_Extractor =
+    RdaFissClaim_adjMbiInd_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasAdjMbiIndEnum,
             FissClaim::getAdjMbiIndEnum,
@@ -330,7 +327,7 @@ public class FissClaimTransformer {
             FissAdjustmentMedicareBeneficiaryIdentifierIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissDiagnosisCode_diagPoaInd_Extractor =
+    RdaFissDiagnosisCode_diagPoaInd_Extractor =
         new EnumStringExtractor<>(
             FissDiagnosisCode::hasDiagPoaIndEnum,
             FissDiagnosisCode::getDiagPoaIndEnum,
@@ -339,7 +336,7 @@ public class FissClaimTransformer {
             FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_insuredPayer_payersId_Extractor =
+    RdaFissPayer_insuredPayer_payersId_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasInsuredPayer() && message.getInsuredPayer().hasPayersIdEnum(),
             message -> message.getInsuredPayer().getPayersIdEnum(),
@@ -349,7 +346,7 @@ public class FissClaimTransformer {
             FissPayersCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_insuredPayer_relInd_Extractor =
+    RdaFissPayer_insuredPayer_relInd_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasInsuredPayer() && message.getInsuredPayer().hasRelIndEnum(),
             message -> message.getInsuredPayer().getRelIndEnum(),
@@ -359,7 +356,7 @@ public class FissClaimTransformer {
             FissReleaseOfInformation.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_insuredPayer_assignInd_Extractor =
+    RdaFissPayer_insuredPayer_assignInd_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasInsuredPayer() && message.getInsuredPayer().hasAssignIndEnum(),
             message -> message.getInsuredPayer().getAssignIndEnum(),
@@ -369,7 +366,7 @@ public class FissClaimTransformer {
             FissAssignmentOfBenefitsIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_insuredPayer_insuredRel_Extractor =
+    RdaFissPayer_insuredPayer_insuredRel_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasInsuredPayer() && message.getInsuredPayer().hasInsuredRelEnum(),
             message -> message.getInsuredPayer().getInsuredRelEnum(),
@@ -379,7 +376,7 @@ public class FissClaimTransformer {
             FissPatientRelationshipCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_insuredPayer_insuredSex_Extractor =
+    RdaFissPayer_insuredPayer_insuredSex_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasInsuredPayer() && message.getInsuredPayer().hasInsuredSexEnum(),
             message -> message.getInsuredPayer().getInsuredSexEnum(),
@@ -389,7 +386,7 @@ public class FissClaimTransformer {
             FissBeneficiarySex.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_insuredPayer_insuredRelX12_Extractor =
+    RdaFissPayer_insuredPayer_insuredRelX12_Extractor =
         new EnumStringExtractor<>(
             message ->
                 message.hasInsuredPayer() && message.getInsuredPayer().hasInsuredRelX12Enum(),
@@ -401,7 +398,7 @@ public class FissClaimTransformer {
             FissPatientRelationshipCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_payersId_Extractor =
+    RdaFissPayer_beneZPayer_payersId_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasPayersIdEnum(),
             message -> message.getBeneZPayer().getPayersIdEnum(),
@@ -410,7 +407,7 @@ public class FissClaimTransformer {
             FissPayersCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_relInd_Extractor =
+    RdaFissPayer_beneZPayer_relInd_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasRelIndEnum(),
             message -> message.getBeneZPayer().getRelIndEnum(),
@@ -419,7 +416,7 @@ public class FissClaimTransformer {
             FissAssignmentOfBenefitsIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_assignInd_Extractor =
+    RdaFissPayer_beneZPayer_assignInd_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasAssignIndEnum(),
             message -> message.getBeneZPayer().getAssignIndEnum(),
@@ -429,7 +426,7 @@ public class FissClaimTransformer {
             FissAssignmentOfBenefitsIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_beneRel_Extractor =
+    RdaFissPayer_beneZPayer_beneRel_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasBeneRelEnum(),
             message -> message.getBeneZPayer().getBeneRelEnum(),
@@ -438,7 +435,7 @@ public class FissClaimTransformer {
             FissPatientRelationshipCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_beneSex_Extractor =
+    RdaFissPayer_beneZPayer_beneSex_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasBeneSexEnum(),
             message -> message.getBeneZPayer().getBeneSexEnum(),
@@ -447,7 +444,7 @@ public class FissClaimTransformer {
             FissBeneficiarySex.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_insuredSex_Extractor =
+    RdaFissPayer_beneZPayer_insuredSex_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasInsuredSexEnum(),
             message -> message.getBeneZPayer().getInsuredSexEnum(),
@@ -457,7 +454,7 @@ public class FissClaimTransformer {
             FissBeneficiarySex.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissPayer_beneZPayer_insuredRelX12_Extractor =
+    RdaFissPayer_beneZPayer_insuredRelX12_Extractor =
         new EnumStringExtractor<>(
             message -> message.hasBeneZPayer() && message.getBeneZPayer().hasInsuredRelX12Enum(),
             message -> message.getBeneZPayer().getInsuredRelX12Enum(),
@@ -467,7 +464,7 @@ public class FissClaimTransformer {
             FissPatientRelationshipCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjFissAuditTrail_badtStatus_Extractor =
+    RdaFissAuditTrail_badtStatus_Extractor =
         new EnumStringExtractor<>(
             FissAuditTrail::hasBadtStatusEnum,
             FissAuditTrail::getBadtStatusEnum,
@@ -538,17 +535,17 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.hicNo, false, 1, 12, from.getHicNo(), to::setHicNo);
     transformer.copyEnumAsCharacter(
         namePrefix + RdaFissClaim.Fields.currStatus,
-        PreAdjFissClaim_currStatus_Extractor.getEnumString(from),
+        RdaFissClaim_currStatus_Extractor.getEnumString(from),
         to::setCurrStatus);
     transformer.copyEnumAsCharacter(
         namePrefix + RdaFissClaim.Fields.currLoc1,
-        PreAdjFissClaim_currLoc1_Extractor.getEnumString(from),
+        RdaFissClaim_currLoc1_Extractor.getEnumString(from),
         to::setCurrLoc1);
     transformer.copyEnumAsString(
         namePrefix + RdaFissClaim.Fields.currLoc2,
         false,
         5,
-        PreAdjFissClaim_currLoc2_Extractor.getEnumString(from),
+        RdaFissClaim_currLoc2_Extractor.getEnumString(from),
         to::setCurrLoc2);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.medaProvId,
@@ -690,7 +687,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.lobCd,
         true,
         1,
-        PreAdjFissClaim_lobCd_Extractor.getEnumString(from),
+        RdaFissClaim_lobCd_Extractor.getEnumString(from),
         to::setLobCd);
     if (from.hasServTypeCdEnum()) {
       to.setServTypeCdMapping(RdaFissClaim.ServTypeCdMapping.Normal);
@@ -708,19 +705,19 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.servTypeCd,
         true,
         1,
-        PreAdjFissClaim_servTypeCd_Extractor.getEnumString(from),
+        RdaFissClaim_servTypeCd_Extractor.getEnumString(from),
         to::setServTypeCd);
     transformer.copyEnumAsString(
         namePrefix + RdaFissClaim.Fields.servTypeCd,
         true,
         1,
-        PreAdjFissClaim_servTypeCdForClinics_Extractor.getEnumString(from),
+        RdaFissClaim_servTypeCdForClinics_Extractor.getEnumString(from),
         to::setServTypeCd);
     transformer.copyEnumAsString(
         namePrefix + RdaFissClaim.Fields.servTypeCd,
         true,
         1,
-        PreAdjFissClaim_servTypeCdForSpecialFacilities_Extractor.getEnumString(from),
+        RdaFissClaim_servTypeCdForSpecialFacilities_Extractor.getEnumString(from),
         to::setServTypeCd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.servTypeCd,
@@ -733,7 +730,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.freqCd,
         true,
         1,
-        PreAdjFissClaim_freqCd_Extractor.getEnumString(from),
+        RdaFissClaim_freqCd_Extractor.getEnumString(from),
         to::setFreqCd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.billTypCd,
@@ -774,7 +771,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.adjReqCd,
         true,
         1,
-        PreAdjFissClaim_adjReqCd_Extractor.getEnumString(from),
+        RdaFissClaim_adjReqCd_Extractor.getEnumString(from),
         to::setAdjReqCd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.adjReasCd,
@@ -799,7 +796,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.cancAdjCd,
         true,
         1,
-        PreAdjFissClaim_cancAdjCd_Extractor.getEnumString(from),
+        RdaFissClaim_cancAdjCd_Extractor.getEnumString(from),
         to::setCancAdjCd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.originalXrefDcn,
@@ -822,13 +819,13 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.admSource,
         true,
         1,
-        PreAdjFissClaim_admSource_Extractor.getEnumString(from),
+        RdaFissClaim_admSource_Extractor.getEnumString(from),
         to::setAdmSource);
     transformer.copyEnumAsString(
         namePrefix + RdaFissClaim.Fields.primaryPayerCode,
         true,
         1,
-        PreAdjFissClaim_primaryPayerCode_Extractor.getEnumString(from),
+        RdaFissClaim_primaryPayerCode_Extractor.getEnumString(from),
         to::setPrimaryPayerCode);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.attendPhysId,
@@ -862,7 +859,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.attendPhysFlag,
         true,
         1,
-        PreAdjFissClaim_attendPhysFlag_Extractor.getEnumString(from),
+        RdaFissClaim_attendPhysFlag_Extractor.getEnumString(from),
         to::setAttendPhysFlag);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.operatingPhysId,
@@ -896,7 +893,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.operPhysFlag,
         true,
         1,
-        PreAdjFissClaim_operPhysFlag_Extractor.getEnumString(from),
+        RdaFissClaim_operPhysFlag_Extractor.getEnumString(from),
         to::setOperPhysFlag);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.othPhysId,
@@ -930,7 +927,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.othPhysFlag,
         true,
         1,
-        PreAdjFissClaim_othPhysFlag_Extractor.getEnumString(from),
+        RdaFissClaim_othPhysFlag_Extractor.getEnumString(from),
         to::setOthPhysFlag);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.xrefHicNbr,
@@ -943,7 +940,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.procNewHicInd,
         true,
         1,
-        PreAdjFissClaim_procNewHicInd_Extractor.getEnumString(from),
+        RdaFissClaim_procNewHicInd_Extractor.getEnumString(from),
         to::setProcNewHicInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.newHic,
@@ -956,7 +953,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.reposInd,
         true,
         1,
-        PreAdjFissClaim_reposInd_Extractor.getEnumString(from),
+        RdaFissClaim_reposInd_Extractor.getEnumString(from),
         to::setReposInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.reposHic,
@@ -969,13 +966,13 @@ public class FissClaimTransformer {
         namePrefix + RdaFissClaim.Fields.mbiSubmBeneInd,
         true,
         1,
-        PreAdjFissClaim_mbiSubmBeneInd_Extractor.getEnumString(from),
+        RdaFissClaim_mbiSubmBeneInd_Extractor.getEnumString(from),
         to::setMbiSubmBeneInd);
     transformer.copyEnumAsString(
         namePrefix + RdaFissClaim.Fields.adjMbiInd,
         true,
         1,
-        PreAdjFissClaim_adjMbiInd_Extractor.getEnumString(from),
+        RdaFissClaim_adjMbiInd_Extractor.getEnumString(from),
         to::setAdjMbiInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissClaim.Fields.adjMbi,
@@ -1109,7 +1106,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissDiagnosisCode.Fields.diagPoaInd,
         true,
         1,
-        PreAdjFissDiagnosisCode_diagPoaInd_Extractor.getEnumString(from),
+        RdaFissDiagnosisCode_diagPoaInd_Extractor.getEnumString(from),
         to::setDiagPoaInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissDiagnosisCode.Fields.bitFlags,
@@ -1150,7 +1147,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.payersId,
         true,
         1,
-        PreAdjFissPayer_insuredPayer_payersId_Extractor.getEnumString(from),
+        RdaFissPayer_insuredPayer_payersId_Extractor.getEnumString(from),
         to::setPayersId);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.payersName,
@@ -1163,13 +1160,13 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.relInd,
         true,
         1,
-        PreAdjFissPayer_insuredPayer_relInd_Extractor.getEnumString(from),
+        RdaFissPayer_insuredPayer_relInd_Extractor.getEnumString(from),
         to::setRelInd);
     transformer.copyEnumAsString(
         namePrefix + RdaFissPayer.Fields.assignInd,
         true,
         1,
-        PreAdjFissPayer_insuredPayer_assignInd_Extractor.getEnumString(from),
+        RdaFissPayer_insuredPayer_assignInd_Extractor.getEnumString(from),
         to::setAssignInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.providerNumber,
@@ -1199,7 +1196,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.insuredRel,
         true,
         2,
-        PreAdjFissPayer_insuredPayer_insuredRel_Extractor.getEnumString(from),
+        RdaFissPayer_insuredPayer_insuredRel_Extractor.getEnumString(from),
         to::setInsuredRel);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.insuredName,
@@ -1240,13 +1237,13 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.insuredSex,
         true,
         1,
-        PreAdjFissPayer_insuredPayer_insuredSex_Extractor.getEnumString(from),
+        RdaFissPayer_insuredPayer_insuredSex_Extractor.getEnumString(from),
         to::setInsuredSex);
     transformer.copyEnumAsString(
         namePrefix + RdaFissPayer.Fields.insuredRelX12,
         true,
         2,
-        PreAdjFissPayer_insuredPayer_insuredRelX12_Extractor.getEnumString(from),
+        RdaFissPayer_insuredPayer_insuredRelX12_Extractor.getEnumString(from),
         to::setInsuredRelX12);
     transformer.copyOptionalDate(
         namePrefix + RdaFissPayer.Fields.insuredDob,
@@ -1264,7 +1261,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.payersId,
         true,
         1,
-        PreAdjFissPayer_beneZPayer_payersId_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_payersId_Extractor.getEnumString(from),
         to::setPayersId);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.payersName,
@@ -1277,13 +1274,13 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.relInd,
         true,
         1,
-        PreAdjFissPayer_beneZPayer_relInd_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_relInd_Extractor.getEnumString(from),
         to::setRelInd);
     transformer.copyEnumAsString(
         namePrefix + RdaFissPayer.Fields.assignInd,
         true,
         1,
-        PreAdjFissPayer_beneZPayer_assignInd_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_assignInd_Extractor.getEnumString(from),
         to::setAssignInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.providerNumber,
@@ -1313,7 +1310,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.beneRel,
         true,
         2,
-        PreAdjFissPayer_beneZPayer_beneRel_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_beneRel_Extractor.getEnumString(from),
         to::setBeneRel);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.beneLastName,
@@ -1359,7 +1356,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.beneSex,
         true,
         1,
-        PreAdjFissPayer_beneZPayer_beneSex_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_beneSex_Extractor.getEnumString(from),
         to::setBeneSex);
     transformer.copyOptionalString(
         namePrefix + RdaFissPayer.Fields.treatAuthCd,
@@ -1372,13 +1369,13 @@ public class FissClaimTransformer {
         namePrefix + RdaFissPayer.Fields.insuredSex,
         true,
         1,
-        PreAdjFissPayer_beneZPayer_insuredSex_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_insuredSex_Extractor.getEnumString(from),
         to::setInsuredSex);
     transformer.copyEnumAsString(
         namePrefix + RdaFissPayer.Fields.insuredRelX12,
         true,
         2,
-        PreAdjFissPayer_beneZPayer_insuredRelX12_Extractor.getEnumString(from),
+        RdaFissPayer_beneZPayer_insuredRelX12_Extractor.getEnumString(from),
         to::setInsuredRelX12);
     to.setLastUpdated(now);
     return to;
@@ -1402,7 +1399,7 @@ public class FissClaimTransformer {
         namePrefix + RdaFissAuditTrail.Fields.badtStatus,
         true,
         1,
-        PreAdjFissAuditTrail_badtStatus_Extractor.getEnumString(from),
+        RdaFissAuditTrail_badtStatus_Extractor.getEnumString(from),
         to::setBadtStatus);
     transformer.copyOptionalString(
         namePrefix + RdaFissAuditTrail.Fields.badtLoc,
