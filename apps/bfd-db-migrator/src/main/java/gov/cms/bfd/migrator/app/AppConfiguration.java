@@ -70,12 +70,17 @@ public final class AppConfiguration {
    */
   public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
 
+  /** Contains options for metrics capturing. */
   private final MetricOptions metricOptions;
+
+  /** Contains options for database related configuration. */
   private final DatabaseOptions databaseOptions;
-  /*
-   * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway will use it's default location
-   * <code>src/main/resources/db/migration</code>. This is primarily for the integration tests, so we can run test migrations
-   * under an arbitrary directory full of scripts.
+
+  /**
+   * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
+   * will use it's default location <code>src/main/resources/db/migration</code>. This is primarily
+   * for the integration tests, so we can run test migrations under an arbitrary directory full of
+   * scripts.
    */
   private final String flywayScriptLocationOverride;
 
@@ -96,12 +101,20 @@ public final class AppConfiguration {
     this.flywayScriptLocationOverride = flywayScriptLocationOverride;
   }
 
-  /** @return the {@link MetricOptions} that the application will use */
+  /**
+   * Gets the {@link #metricOptions}.
+   *
+   * @return the {@link MetricOptions} that the application will use
+   */
   public MetricOptions getMetricOptions() {
     return metricOptions;
   }
 
-  /** @return the {@link DatabaseOptions} that the application will use */
+  /**
+   * Gets the {@link #databaseOptions}.
+   *
+   * @return the {@link DatabaseOptions} that the application will use
+   */
   public DatabaseOptions getDatabaseOptions() {
     return databaseOptions;
   }
@@ -115,7 +128,7 @@ public final class AppConfiguration {
     return flywayScriptLocationOverride;
   }
 
-  /** @see Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -182,6 +195,9 @@ public final class AppConfiguration {
   }
 
   /**
+   * Reads an optional {@link String} from the environment variables by name. If not set, returns an
+   * empty {@link Optional}.
+   *
    * @param environmentVariableName the name of the environment variable to get the value of
    * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
    *     not set
@@ -193,6 +209,9 @@ public final class AppConfiguration {
   }
 
   /**
+   * Reads a {@link String} from the environment variables by name which is expected to exist. If
+   * the environment variable does not exist, throws an {@link AppConfigurationException}.
+   *
    * @param environmentVariableName the name of the environment variable to get the value of
    * @return the value of the specified environment variable
    * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
@@ -217,6 +236,9 @@ public final class AppConfiguration {
   }
 
   /**
+   * Reads an optional {@link Integer} from the environment variables by name. If not set, returns
+   * an empty {@link Optional}.
+   *
    * @param environmentVariableName the name of the environment variable to get the value of
    * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
    *     not set
