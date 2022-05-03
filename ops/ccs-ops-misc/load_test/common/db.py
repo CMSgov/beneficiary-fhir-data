@@ -38,8 +38,7 @@ def get_bene_ids(uri):
     bene_query = (
         'SELECT "bene_id" '
         'FROM "beneficiaries" '
-        # 'TABLESAMPLE SYSTEM (0.25) '  # when data is cleaned up, use this to access random benes
-        # there are tons of benes with null ref year which return 404 if we use them
+        'TABLESAMPLE SYSTEM (0.25) '
         'WHERE "rfrnc_yr" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
@@ -54,6 +53,7 @@ def get_hashed_mbis(uri):
     bene_query = (
         'SELECT "mbi_hash" '
         'FROM "beneficiaries" '
+        'TABLESAMPLE SYSTEM (0.25) '
         'WHERE "mbi_hash" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
@@ -74,6 +74,7 @@ def get_contract_ids(uri):
         contract_id_query = (
             f'SELECT DISTINCT "ptd_cntrct_{month_text}_id", "rfrnc_yr" '
             'FROM "beneficiaries" '
+            'TABLESAMPLE SYSTEM (0.25) '
             'WHERE "rfrnc_yr" IS NOT NULL '
             f'LIMIT {LIMIT}'
         )
