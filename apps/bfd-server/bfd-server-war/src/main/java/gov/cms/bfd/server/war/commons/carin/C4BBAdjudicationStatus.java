@@ -67,9 +67,9 @@ public enum C4BBAdjudicationStatus {
   }
 
   /**
-   * Gets the display.
+   * Gets the display text related to this status.
    *
-   * @return the display
+   * @return the display text
    */
   public String getDisplay() {
     switch (this) {

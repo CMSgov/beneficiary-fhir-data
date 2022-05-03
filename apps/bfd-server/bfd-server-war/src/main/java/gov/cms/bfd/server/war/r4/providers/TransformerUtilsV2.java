@@ -1016,11 +1016,11 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Create total adjudication status amount slice.
+   * Optionally Creates an `adjudication status amount` {@link TotalComponent} slice.
    *
-   * @param code the code
-   * @param amount the amount
-   * @return the optional
+   * @param code The C4BBAdjudicationStatus code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link TotalComponent}
    */
   public static Optional<TotalComponent> createTotalAdjudicationStatusAmountSlice(
       C4BBAdjudicationStatus code, Optional<BigDecimal> amount) {
