@@ -1,15 +1,15 @@
 '''Single Locust test for BFD endpoint'''
 
 from common.contract_tests import ContractTestUser
-from common.url_path import create_url_path
 from common.validation import SLA_PATIENT
 from locust import task
 
 class BFDUser(ContractTestUser):
     '''Single Locust test for BFD endpoint'''
 
-    DATA_REQUIRED = [ 'CONTRACT_IDS' ]
-    SLA_BASELINE = SLA_PATIENT
+    # The goals against which to measure these results. Note that they also include the Failsafe
+    # cutoff, which will default to the V2 cutoff time if not set.
+    VALIDATION_GOALS = SLA_PATIENT
 
 
     @task

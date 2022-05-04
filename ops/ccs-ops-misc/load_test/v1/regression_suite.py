@@ -21,7 +21,12 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     equal weighting being applied to each.
     '''
 
-    SLA_BASELINE = SLA_V1_BASELINE
+    # The goals against which to measure these results. Note that they also include the Failsafe
+    # cutoff, which will default to the V2 cutoff time if not set.
+    VALIDATION_GOALS = SLA_V1_BASELINE
+
+    # Do we terminate the tests when a test runs out of data and paginated URLs?
+    END_ON_NO_DATA = False
 
 
     @task

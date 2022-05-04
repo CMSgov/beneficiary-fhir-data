@@ -2,6 +2,8 @@
 '''
 
 import json
+import logging
+import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
@@ -23,6 +25,9 @@ class BFDUserBase(HttpUser):
     # cutoff, which will default to the V2 cutoff time if not set.
     VALIDATION_GOALS = None
 
+    # Do we terminate the tests when a test runs out of data and paginated URLs?
+    END_ON_NO_DATA = True
+
     def __init__(self, *args, **kwargs):
         HttpUser.__init__(self, *args, **kwargs)
 
@@ -37,6 +42,9 @@ class BFDUserBase(HttpUser):
         self.mbis = []
         self.contract_ids = []
         self.url_pools = {}
+
+        self.logger = logging.getLogger()
+        self.has_reported_no_data = []
 
 
     def on_start(self):
@@ -86,7 +94,7 @@ class BFDUserBase(HttpUser):
                 response.failure(f'Status Code: {response.status_code}')
             else:
                 # Check for valid "next" URLs that we can add to a URL pool.
-                next_url = BFDUserBase.get_next_url(response.text)
+                next_url = BFDUserBase.__get_next_url(response.text)
                 if next_url is not None:
                     if name not in self.url_pools:
                         self.url_pools[name] = []
@@ -117,7 +125,26 @@ class BFDUserBase(HttpUser):
         if url is not None:
             # Run the test using the URL we found
             self.get_by_url(url=url, headers=headers, name=name)
-        # If no URL is found, then this test isn't counted in statistics
+        else:
+            # If no URL is found, then this test isn't counted in statistics
+
+            # Should we also terminate future tests?
+            worker_num = self.__get_worker_number()
+
+            if self.END_ON_NO_DATA:
+                if worker_num is None:
+                    self.logger.error("Ran out of data, stopping test...")
+                else:
+                    self.logger.error('Worker %s ran out of data and will terminate.', worker_num)
+
+                self.environment.runner.quit()
+            elif name not in self.has_reported_no_data:
+                self.has_reported_no_data.append(name)
+                if worker_num is None:
+                    self.logger.warning('Test "%s" has run out of data', name)
+                else:
+                    self.logger.warning('Test "%s" for worker %s has run out of data', name,
+                        worker_num)
 
 
     def run_task_by_parameters(self, base_path: str, params: Dict[str, Union[str, List]] = None,
@@ -136,10 +163,19 @@ class BFDUserBase(HttpUser):
     # Helper Functions
 
     @staticmethod
-    def get_next_url(payload: str) -> str:
+    def __get_next_url(payload: str) -> str:
         '''Parse the JSON response and return the "next" URL if it exists'''
+
         parsed_payload = json.loads(payload)
         for link in parsed_payload.get("link", {}):
             if "relation" in link and link["relation"] == "next":
                 return link.get("url", None)
+        return None
+
+
+    def __get_worker_number(self):
+        '''Find the number of the Locust worker for this instance.'''
+
+        if 'LOCUST_WORKER_NUM' in os.environ:
+            return str(os.environ['LOCUST_WORKER_NUM'])
         return None

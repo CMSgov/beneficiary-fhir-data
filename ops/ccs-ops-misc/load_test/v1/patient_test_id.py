@@ -7,7 +7,9 @@ from locust import task
 class BFDUser(BeneTestUser):
     '''Single Locust test for BFD endpoint'''
 
-    SLA_BASELINE = SLA_PATIENT
+    # The goals against which to measure these results. Note that they also include the Failsafe
+    # cutoff, which will default to the V2 cutoff time if not set.
+    VALIDATION_GOALS = SLA_PATIENT
 
 
     @task

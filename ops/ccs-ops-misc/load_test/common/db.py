@@ -3,19 +3,17 @@
 
 Utility module for executing database queries
 """
-import logging
 import psycopg2
 
 
-LIMIT = 100000  # global limit on the number of records to return
+LIMIT = 10000  # global limit on the number of records to return
 
 
 def _execute(uri, query):
     """
     Execute a PSQL select statement and return its results
     """
-    logger = logging.getLogger()
-    logger.info('Collecting test data...')
+    print('Collecting test data...')
 
     conn = None
 
@@ -24,7 +22,6 @@ def _execute(uri, query):
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 results = cursor.fetchall()
-                logger.info('Returned %s results from the database for the test.', len(results))
     finally:
         conn.close()
 
@@ -38,7 +35,7 @@ def get_bene_ids(uri):
     bene_query = (
         'SELECT "bene_id" '
         'FROM "beneficiaries" '
-        'TABLESAMPLE SYSTEM (0.25) '
+        # 'TABLESAMPLE SYSTEM (0.25) '
         'WHERE "rfrnc_yr" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
@@ -53,7 +50,7 @@ def get_hashed_mbis(uri):
     bene_query = (
         'SELECT "mbi_hash" '
         'FROM "beneficiaries" '
-        'TABLESAMPLE SYSTEM (0.25) '
+        # 'TABLESAMPLE SYSTEM (0.25) '
         'WHERE "mbi_hash" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
@@ -74,7 +71,6 @@ def get_contract_ids(uri):
         contract_id_query = (
             f'SELECT DISTINCT "ptd_cntrct_{month_text}_id", "rfrnc_yr" '
             'FROM "beneficiaries" '
-            'TABLESAMPLE SYSTEM (0.25) '
             'WHERE "rfrnc_yr" IS NOT NULL '
             f'LIMIT {LIMIT}'
         )
