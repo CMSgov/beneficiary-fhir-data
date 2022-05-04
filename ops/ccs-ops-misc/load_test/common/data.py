@@ -21,13 +21,13 @@ def load_data_segment(load_function: Callable, *args) -> List:
     if setup.is_worker_thread():
         worker_number = str(os.environ['LOCUST_WORKER_NUM'])
         num_workers = os.environ['LOCUST_NUM_WORKERS']
-        print("Worker %s starting...", worker_number)
+        print(f"Worker {worker_number} starting...")
         config_file = config.load()
         full_data_list = load_function(config_file['dbUri'], *args)
         data_per_user = len(full_data_list) // int(num_workers)
         start_index = int(worker_number) * data_per_user
         end_index = start_index + data_per_user - 1
-        print("Worker %s using data from indexes %s to %s", worker_number, start_index, end_index)
+        print(f"Worker {worker_number} using data from indexes {start_index} to {end_index}")
         return full_data_list[start_index:end_index]
 
     # This is neither master nor worker, so we must not be using multi-threading.
