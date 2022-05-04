@@ -100,7 +100,7 @@ final class SNFClaimTransformer {
         eob,
         claimGroup.getClaimAdmissionDate(),
         claimGroup.getBeneficiaryDischargeDate(),
-        Optional.of(BigDecimal.valueOf(claimGroup.getUtilizationDayCount())));
+        Optional.of(claimGroup.getUtilizationDayCount()));
 
     /*
      * add field values to the benefit balances that are common between the
@@ -108,11 +108,11 @@ final class SNFClaimTransformer {
      */
     TransformerUtils.addCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
+        claimGroup.getCoinsuranceDayCount(),
+        claimGroup.getNonUtilizationDayCount(),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
+        claimGroup.getBloodPintsFurnishedQty(),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),

@@ -2228,11 +2228,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Selects the java field type. The supported data types are specified in the excel spreadsheet;
-   * data types specified in the spreadsheet have been expanded to be more specific as to the Java
-   * type supported. Previously, logic specific to NUM (in spreadsheet) would apply logic for
-   * 'scale' to determine a BigDecimal vs. an Integer. Explicit types are now: NUM : BigDecimal INT
-   * : Integer (or int) SMALLINT : Short or short BIGINT : Long or long
+   * Selects the java field type.
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
@@ -2261,14 +2257,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     } else if (type == RifColumnType.TIMESTAMP) {
       return ClassName.get(Instant.class);
     } else if (type == RifColumnType.NUM) {
-      // handle an inherited hack from the Excel spreadsheet in which a row entry
-      // was defined as a NUM and had an associated scale; for example (12,2) denotes
-      // a numeric data types of up to 12 digits, with two digits of scale (i.e., 55.45).
       if (columnScale.orElse(Integer.MAX_VALUE) > 0) {
         return ClassName.get(BigDecimal.class);
       } else if (columnScale.orElse(Integer.MAX_VALUE) == 0) {
-        // some entries in Excel spreadsheet defined as NUM with a zero scale
-        // that are not optional should be defined as a primitive integer.
         return isColumnOptional ? ClassName.get(BigDecimal.class) : TypeName.INT;
       }
     } else if (type == RifColumnType.SMALLINT) {

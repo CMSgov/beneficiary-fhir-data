@@ -638,10 +638,10 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("5.00"), claimGroup.getClaimPPSCapitalExceptionAmount().get());
     assertEquals(
         new BigDecimal("4.00"), claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount().get());
-    assertEquals(17, claimGroup.getUtilizationDayCount());
-    assertEquals(17, claimGroup.getCoinsuranceDayCount());
-    assertEquals(0, claimGroup.getNonUtilizationDayCount());
-    assertEquals(19, claimGroup.getBloodPintsFurnishedQty());
+    assertEquals(BigDecimal.valueOf(17L), claimGroup.getUtilizationDayCount());
+    assertEquals(BigDecimal.valueOf(17L), claimGroup.getCoinsuranceDayCount());
+    assertEquals(BigDecimal.ZERO, claimGroup.getNonUtilizationDayCount());
+    assertEquals(BigDecimal.valueOf(19L), claimGroup.getBloodPintsFurnishedQty());
     assertEquals(LocalDate.of(2013, 9, 23), claimGroup.getQualifiedStayFromDate().get());
     assertEquals(LocalDate.of(2013, 11, 5), claimGroup.getQualifiedStayThroughDate().get());
     assertEquals(LocalDate.of(2002, 1, 11), claimGroup.getNoncoveredStayFromDate().get());
