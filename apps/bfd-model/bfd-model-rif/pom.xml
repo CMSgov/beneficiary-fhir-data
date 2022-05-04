@@ -16,6 +16,10 @@
 		file format.
 	</description>
 
+	<properties>
+		<checkstyle.skip>true</checkstyle.skip>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<!-- Provides an enum of all the CCW variables. -->

@@ -13,74 +13,93 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface RifLayoutsGenerator {
   /**
-   * @return the file name of the spreadsheet (in this package) that details the RIF layouts to
-   *     generate code for
+   * Gets the file name of the spreadsheet (in this package) that details the RIF layouts to
+   * generate code for.
+   *
+   * @return the file name
    */
   String spreadsheetResource();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for beneficiary
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for beneficiary data.
+   *
+   * @return the beneficiary sheet name
    */
   String beneficiarySheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for beneficiary
-   *     history data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for beneficiary
+   * history data.
+   *
+   * @return the beneficiary history sheet name
    */
   String beneficiaryHistorySheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for medicare
-   *     beneficiary id data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for medicare
+   * beneficiary id data.
+   *
+   * @return the medicare beneficiary sheet name
    */
   String medicareBeneficiaryIdSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for PDE claims
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for PDE claims data.
+   *
+   * @return the PDE claims data sheet name
    */
   String pdeSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for carrier claims
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for carrier claims
+   * data.
+   *
+   * @return the carrier claims data sheet name
    */
   String carrierSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for inpatient
-   *     claims data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for inpatient claims
+   * data.
+   *
+   * @return the inpatient claims data sheet name
    */
   String inpatientSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for outpatient
-   *     claims data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for outpatient claims
+   * data.
+   *
+   * @return the outpatient claims data sheet name
    */
   String outpatientSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for HHA claims
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for HHA claims data.
+   *
+   * @return the HHA claims data sheet name
    */
   String hhaSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for DME claims
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for DME claims data.
+   *
+   * @return the DME claims data sheet name
    */
   String dmeSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for hospice claims
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for hospice claims
+   * data.
+   *
+   * @return the hospice claims data sheet name
    */
   String hospiceSheet();
 
   /**
-   * @return the name of the sheet in the Excel file that contains the RIF layout for SNF claims
-   *     data
+   * Gets the name of the sheet in the Excel file that contains the RIF layout for SNF claims data.
+   *
+   * @return the SNF claims data sheet name
    */
   String snfSheet();
 }

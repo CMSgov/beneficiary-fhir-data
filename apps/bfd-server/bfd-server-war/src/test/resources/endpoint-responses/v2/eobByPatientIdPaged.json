@@ -4535,6 +4535,31 @@
           }
         } ]
       } ],
+      "total" : [ {
+        "category" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code" : "drugcost",
+            "display" : "Drug Cost"
+          } ]
+        },
+        "amount" : {
+          "value" : 550.0,
+          "currency" : "USD"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+            "code" : "other",
+            "display" : "Other"
+          } ]
+        },
+        "amount" : {
+          "value" : 0,
+          "currency" : "USD"
+        }
+      } ],
       "payment" : {
         "date" : "2015-05-27"
       }
@@ -5302,10 +5327,10 @@
           "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-          "value": "2718813985998"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value" : "2718813985998"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
