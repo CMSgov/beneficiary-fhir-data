@@ -51,6 +51,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <!-- Contains non-natively supported types for use with hibernate -->
             <groupId>com.vladmihalcea</groupId>
             <artifactId>hibernate-types-5</artifactId>
             <version>2.16.2</version>

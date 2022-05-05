@@ -31,7 +31,7 @@ import org.hibernate.annotations.Type;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(MessageError.PK.class)
-@Table(name = "message_error", schema = "rda")
+@Table(name = "message_errors", schema = "rda")
 public class MessageError {
   public enum ClaimType {
     FISS,

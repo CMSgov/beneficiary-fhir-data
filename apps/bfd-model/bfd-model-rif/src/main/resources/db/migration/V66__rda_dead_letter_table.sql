@@ -10,12 +10,12 @@
 
 ${logic.hsql-only} CREATE TYPE json AS longvarchar;
 
-CREATE TABLE rda.message_error (
+CREATE TABLE rda.message_errors (
     sequence_number bigint                      not null,
     claim_id        varchar(25)                 not null,
     claim_type      varchar(20)                 not null,
     received_date   timestamp with time zone    not null,
-    errors          ${type.jsonb}                not null,
-    message         ${type.jsonb}                not null,
+    errors          ${type.jsonb}               not null,
+    message         ${type.jsonb}               not null,
     primary key (sequence_number, claim_id, claim_type)
 );
