@@ -251,7 +251,7 @@ ${logic.hsql-only}    rev_cntr_rate_amt                   numeric(12,2) NOT NULL
 ${logic.hsql-only}    rev_cntr_ncvrd_chrg_amt             numeric(12,2) NOT NULL,
 ${logic.hsql-only}    rev_cntr_ddctbl_coinsrnc_cd         char(1),
 ${logic.hsql-only}    rev_cntr_ndc_qty_qlfr_cd            varchar(2),
-${logic.hsql-only}    rev_cntr_ndc_qty                    numeric,
+${logic.hsql-only}    rev_cntr_ndc_qty                    numeric(9,3),
 ${logic.hsql-only}    hcpcs_cd                            varchar(5),
 ${logic.hsql-only}    rndrng_physn_npi                    varchar(12),
 ${logic.hsql-only}    rndrng_physn_upin                   varchar(12),
