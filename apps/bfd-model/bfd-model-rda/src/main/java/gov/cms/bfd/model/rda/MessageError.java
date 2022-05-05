@@ -8,8 +8,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.Lob;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.Type;
 
 /** JPA class for the MessageError table */
 @Entity
@@ -61,16 +62,21 @@ public class MessageError {
   private Instant receivedDate;
 
   @Column(name = "errors")
-  @Lob
+  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType")
   private String errors;
 
   /** The original message that was received, represented as a json string */
   @Column(name = "message")
-  @Lob
+  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType")
   private String message;
 
   @PrePersist
   protected void onCreate() {
+    receivedDate = Instant.now();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
     receivedDate = Instant.now();
   }
 
@@ -81,6 +87,6 @@ public class MessageError {
   public static class PK implements Serializable {
     private Long sequenceNumber;
     private String claimId;
-    private RdaApiProgress.ClaimType claimType;
+    private ClaimType claimType;
   }
 }

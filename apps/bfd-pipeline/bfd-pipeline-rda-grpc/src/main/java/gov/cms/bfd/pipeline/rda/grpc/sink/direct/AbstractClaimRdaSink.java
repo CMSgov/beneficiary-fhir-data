@@ -60,7 +60,6 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       JsonFormat.printer().omittingInsignificantWhitespace();
   protected static final ObjectMapper mapper =
       JsonMapper.builder()
-          .enable(SerializationFeature.INDENT_OUTPUT)
           .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
           .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
           .addModule(new Jdk8Module())
@@ -143,6 +142,14 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         entityManager.getTransaction().rollback();
       }
     }
+  }
+
+  @Override
+  public void writeError(TMessage message, DataTransformer.TransformationException exception)
+      throws IOException {
+    entityManager.getTransaction().begin();
+    entityManager.merge(createMessageError(message, exception.getErrors()));
+    entityManager.getTransaction().commit();
   }
 
   /**
@@ -250,12 +257,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       } catch (DataTransformer.TransformationException transformationException) {
         metrics.transformFailures.mark();
         try {
-          entityManager.persist(createMessageError(message, transformationException.getErrors()));
+          writeError(message, transformationException);
         } catch (IOException e) {
-          e.addSuppressed(transformationException);
-          throw new ProcessingException(e, 0);
+          transformationException.addSuppressed(e);
         }
-        throw new ProcessingException(transformationException, 0);
+        throw transformationException;
       }
     }
     return claims;

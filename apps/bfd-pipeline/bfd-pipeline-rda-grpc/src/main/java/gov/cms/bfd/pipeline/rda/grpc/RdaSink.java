@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -59,6 +61,11 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    */
   default int writeMessage(String dataVersion, TMessage object) throws ProcessingException {
     return writeMessages(dataVersion, List.of(object));
+  }
+
+  default void writeError(TMessage message, DataTransformer.TransformationException exception)
+      throws IOException {
+    throw new UnsupportedOperationException();
   }
 
   /**
