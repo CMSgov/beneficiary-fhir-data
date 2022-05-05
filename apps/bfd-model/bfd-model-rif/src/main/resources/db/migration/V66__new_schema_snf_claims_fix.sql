@@ -11,8 +11,8 @@
 -- for SNF table(s).
 
 -- drop _new SNF claims tables in order to reload
-drop table snf_claim_lines_new cascade;
-drop table snf_claims_new cascade;
+drop table if exists public.snf_claim_lines_new cascade;
+drop table if exists public.snf_claims_new cascade;
 
 -- For HSQL, explicitly define/create a new SNF_CLAIMS_NEW table in
 -- the current PUBLIC schema
@@ -241,7 +241,7 @@ ${logic.hsql-only}     primary key (clm_id) );
 
 -- create a new SNF_CLAIM_LINES_NEW table in the current PUBLIC schema
 --
-${logic.hsql-only}    CREATE TABLE IF NOT EXISTS public.snf_claim_lines_new (
+${logic.hsql-only}  CREATE TABLE IF NOT EXISTS public.snf_claim_lines_new (
 ${logic.hsql-only}    clm_id                              bigint NOT NULL,
 ${logic.hsql-only}    clm_line_num                        smallint NOT NULL,
 ${logic.hsql-only}    rev_cntr                            varchar(4) NOT NULL,
@@ -257,6 +257,13 @@ ${logic.hsql-only}    rndrng_physn_npi                    varchar(12),
 ${logic.hsql-only}    rndrng_physn_upin                   varchar(12),
 ${logic.hsql-only}    CONSTRAINT snf_claim_lines_new_pkey
 ${logic.hsql-only}  PRIMARY KEY (clm_id, clm_line_num) );
+
+-- attempt to leverage parallell processing for PSQL inserts
+${logic.psql-only} SET max_parallel_workers = 24;
+${logic.psql-only} SET max_parallel_workers_per_gather = 20;
+${logic.psql-only} SET parallel_leader_participation = off;
+${logic.psql-only} SET parallel_tuple_cost = 0;
+${logic.psql-only} SET parallel_setup_cost = 0;
 
 -- migrate data via INSERT from current SNF_CLAIMS table to SNF_CLAIMS_NEW table
 --
@@ -483,12 +490,6 @@ ${logic.hsql-only}    prcdr_dt25 )
 -- PSQL allows us to dynamically create a table via the
 -- associated SELECT statement used to populate the table.
 --
-${logic.psql-only} SET max_parallel_workers = 24;
-${logic.psql-only} SET max_parallel_workers_per_gather = 20;
-${logic.psql-only} SET parallel_leader_participation = off;
-${logic.psql-only} SET parallel_tuple_cost = 0;
-${logic.psql-only} SET parallel_setup_cost = 0;
-
 ${logic.psql-only} create table public.snf_claims_new as
 select
 ${logic.hsql-only}  convert(clm_id, SQL_BIGINT),
@@ -817,3 +818,4 @@ ALTER TABLE IF EXISTS public.snf_claim_lines_new
 -- create an index of the BENE_ID in parent claims table
 CREATE INDEX IF NOT EXISTS snf_claims_new_bene_id_idx
     ON public.snf_claims_new (bene_id);
+    
