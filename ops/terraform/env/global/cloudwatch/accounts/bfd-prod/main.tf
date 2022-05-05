@@ -9,7 +9,9 @@ terraform {
   }
 }
 
-module "stateless" {
-  source = "../../../modules/resources/bfd_cw_dashboards"
+module "bfd_cw_dashboards" {
+  source             = "../../../../../modules/resources/bfd_cw_dashboards"
+  bfd_environment_id = "bfd-prod/bfd-server"
+  dashboard_name     = "bfd-server-prod"
 }
 
