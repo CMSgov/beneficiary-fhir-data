@@ -62,7 +62,7 @@ As previous synthetic data releases were separated by 3 months, and only 20,000 
 [Proposed Solution]: #proposed-solution
 
 Automated Recurring Generation: 
-To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is weekly and quarterly. 
+To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is weekly and quarterly.
 
   - Weekly - Synthetic data will be generated with a set batch size using the master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch, which is hosted in AWS S3. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
 
@@ -70,18 +70,18 @@ To increase the benefit and quality of synthetic data to the user, data that is 
 
   - Future Claim Data - For both quarterly and weekly, a batch of similar size for claim data with a future date will also be generated in a similar fashion. 
 
-  - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D Event ID (PDE ID). Despite monotonically increasing other parameters i.e. bene ID, claim group ID, the value of PDE ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
+  - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D Event ID (PDE ID). Despite monotonically increasing other parameters i.e. bene ID, claim group ID, the value of PDE ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and Synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
 
 Automated Recurring Loading: 
   - Once the synthetic data is generated, within the same hosted cloud instance, the latest version of the BFD application from github, and dockerized database, will have been installed prior, and will be used to run the BFD pipeline integration test (IT), to load the new batch of synthetic data, ensuring that the newly generated data can be inserted properly.
 
-  - Additionally, the RIF files from the previous weekly/quarterly batch of Synthea data will be pulled from AWS S3, and loaded into the database with the new batch of synthea data.  
+  - Additionally, the RIF files from the previous weekly/quarterly batch of Synthea data will be pulled from AWS S3, and loaded into the database with the new batch of Synthea data.  
 
   - Automated load testing will occur on this instance, and when complete, a script will run that modifies the new batch's generated manifest file, and uploads the RIF files, end-state properties, and manifest files to S3 via command line file transfer. This will trigger the BFD ingestion pipeline in PROD SBX or TEST so that the data is stored in the database.
 
   - The separate RIF files associated with future claim data for the given release will be uploaded to a designated folder in S3 for staging until loading in the future. Updates to the pipeline application will be made to scan for these folders and trigger an incoming load job after a certain period of time has passed. 
 
-  - Additional testing - As of 04/21/2022, there is a plan in place to remove 6 million de-duped non-synthetic benes, along with ~10-15 3 digit benes that were used for some other testing in the past. The cleanup will be removing the 6 million non-negative non-synthetic benes, along with the 3 digit benes, but will be leaving the existing 50k synthea benes. Claim data from this cleanup is largely responsible for the certain parameter collisions that have taken place in the past, when loading new Synthea data. Beneficiary id however will still have potential for collision, as most of the data being removed has non-negative beneficiary ids. Outside of setting beneficiary id ranges, once this data is permenantly removed, it will likely take many years for there to be enough data to cause overlap. The amount and queries and checks in the script that automates the synthea test plan will not have to be as thorough. 
+  - Additional testing - As of 04/21/2022, there is a plan in place to remove 6 million de-duped non-synthetic benes, along with ~10-15 3 digit benes that were used for some other testing in the past. The cleanup will be removing the 6 million non-negative non-synthetic benes, along with the 3 digit benes, but will be leaving the existing 50k Synthea benes. Claim data from this cleanup is largely responsible for the certain parameter collisions that have taken place in the past, when loading new Synthea data. Beneficiary id however will still have potential for collision, as most of the data being removed has non-negative beneficiary ids. Outside of setting beneficiary id ranges, once this data is permenantly removed, it will likely take many years for there to be enough data to cause overlap. The amount and queries and checks in the script that automates the Synthea test plan will not have to be as thorough. 
 
 Large Synthetic Data Generation:
   - Each PI (Program Increment), approximately every 8 weeks, 10 - 60 million Synthea beneficiaries will be generated and available for on-demand performance and load testing on TEST and PROD SBX databases. The number of beneficiaries in the dataset size is meant to reflect the size and shape of production. The process will be similar to that of automated recurring generation, however the memory and computational power of the AWS instance will be larger for time and cost effectiveness. 
@@ -91,7 +91,7 @@ Large Synthetic Data Generation:
   - For the time being, a single reusable instance will be used. Pipelining multiple EC2 instances to generate data more efficiently is something to explore at a later point, as well as running the generation and load testing of large data manually every PI. 
 
 Required BFD Application Changes:
-When CCW data is ingested by the BFD pipeline, the application has filter logic for beneficiary UPDATEs with reference years prior to the current year by default. However, Synthea data must be able to UPDATE prior years. For both Synthea and CCW data to be ingested by the pipeline application, the back-dated beneficiary filtering will have to be turned off for Synthea data. 
+When CCW data is ingested by the BFD pipeline, the application has filter logic for beneficiary UPDATEs with reference years prior to the current year by default. However, Synthea data must be able to UPDATE prior years. Additionally, future claims that are staged in S3 will need to be automatically ingested by the pipeline. For both Synthea and CCW data to be ingested by the pipeline application, the back-dated beneficiary filtering will have to be turned off for Synthea data, and a timestamp for future claims needs to be recognized. 
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
@@ -104,20 +104,27 @@ Automated Generation & Load Plan:
 
 * On a quarterly basis a cron job within Jenkins will be set up to do what the weekly plan does, but will also clone the latest version of Mitre Synthea codebase.
 
+* Failsafe options:
+If data fails to be loaded there are several options to easily revert:
+    - Revert to an earlier backup of the EC2 instance.
+    - Create a unique marker for each Synthea dataset to easily query and delete the data. 
+
+* Removing old staged data in S3:
+After a designated period of time, non-future claim Synthea RIF and manifest files that have already been loaded into TEST, PROD SBX, and PROD databases will be deleted with a cleanup script as a step in the automation execution chain.
+
+* Communications to partners Weekly vs Quarterly:
+Quarterly release will likely include changes to schema, fields, field values - and weekly releases will be announced in advance via a standard cadence message, e.g. "Weekly synthetic releases will occur on ___day each week before/after ___ o'clock (timezone)." and will only be updated when a specific weekly release is moved or cancelled.
+
 Large Synthetic Data Generation:
-  - Every PI, a m5a.24xlarge, or more powerful instance will be spun up to generate 60 million beneficiaries. 
+  - Every PI, a m5a.24xlarge, or more powerful instance will be spun up to generate 10 - 60 million beneficiaries. 
   - In order to distiguish load test data when stored in TEST or PROD SBX, the beneficiary ID range will start 1 million less than the smallest released Synthea beneficary ID 
   - After the load tests are complete, and data is reported, several delete SQL queries will be executed after load tests are completed, which will allow for beneficiary and claim data to be re-generated with future versions of Synthea.
 
+Required BFD Application Changes:
+For future claims and new Synthea data to be ingested, the manifest.xml file will need additional fields for both a timestamp and whether there Synthea data. The pipeline will then check for these two fields. For future claims, the data that has been staged in S3 will be ingested once it is the date in the timestamp in the manifest.
+
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
-When generating and loading data, what are some feasible failsafe options to explore?
-
-What data is meant to be collected and analyzed from large data load tests?
-
-What in the manifest and pipeline application exactly need to be updated? 
-
-What exactly will vary between weekly and quarterly communications to partners?
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
