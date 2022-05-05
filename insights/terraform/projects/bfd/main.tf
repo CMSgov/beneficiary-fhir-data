@@ -32,19 +32,27 @@ resource "aws_glue_catalog_table" "api_requests" {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
     "UPDATED_BY_CRAWLER"               = "bfd"
-    "averageRecordSize"                = "2034"
+    "averageRecordSize"                = "6006"
     "classification"                   = "json"
     "compressionType"                  = "gzip"
-    "objectCount"                      = "1"
-    "recordCount"                      = "1"
-    "sizeKey"                          = "1500"
+    "objectCount"                      = "2"
+    "recordCount"                      = "2"
+    "sizeKey"                          = "2719"
     "typeOfData"                       = "file"
   }
   retention  = 0
   table_type = "EXTERNAL_TABLE"
 
   partition_keys {
-    name = "dt"
+    name = "year"
+    type = "string"
+  }
+  partition_keys {
+    name = "month"
+    type = "string"
+  }
+  partition_keys {
+    name = "day"
     type = "string"
   }
 
@@ -59,12 +67,12 @@ resource "aws_glue_catalog_table" "api_requests" {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
       "UPDATED_BY_CRAWLER"               = "bfd"
-      "averageRecordSize"                = "2034"
+      "averageRecordSize"                = "6006"
       "classification"                   = "json"
       "compressionType"                  = "gzip"
-      "objectCount"                      = "1"
-      "recordCount"                      = "1"
-      "sizeKey"                          = "1500"
+      "objectCount"                      = "2"
+      "recordCount"                      = "2"
+      "sizeKey"                          = "2719"
       "typeOfData"                       = "file"
     }
     stored_as_sub_directories = false
@@ -87,7 +95,7 @@ resource "aws_glue_catalog_table" "api_requests" {
     columns {
       name       = "mdc"
       parameters = {}
-      type       = "struct<http_access.response.duration_milliseconds:string,http_access.request.clientSSL.DN:string,http_access.response.header.Date:string,http_access.request.header.Accept:string,http_access.request.header.Host:string,jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds:string,jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds:string,database_query.eobs_by_bene_id.inpatient.size:string,http_access.request.operation:string,database_query.eobs_by_bene_id.inpatient.success:string,jpa_query.eobs_by_bene_id.inpatient.record_count:string,database_query.eobs_by_bene_id.inpatient.datasource_name:string,http_access.response.header.X-Request-ID:string,database_query.eobs_by_bene_id.inpatient.batch_size:string,http_access.response.header.Content-Type:string,http_access.response.header.X-Powered-By:string,database_query.eobs_by_bene_id.inpatient.type:string,http_access.response.status:string,database_query.eobs_by_bene_id.inpatient.duration_milliseconds:string,http_access.request.header.User-Agent:string,http_access.response.header.Last-Modified:string,http_access.request_type:string,http_access.request.http_method:string,database_query.eobs_by_bene_id.inpatient.batch:string,http_access.request.url:string,http_access.request.uri:string,http_access.request.query_string:string,bene_id:string>"
+      type       = "struct<database_query.eobs_by_bene_id.hha.type:string,jpa_query.eobs_by_bene_id.snf.duration_milliseconds:string,database_query.eobs_by_bene_id.hha.batch_size:string,jpa_query.eobs_by_bene_id.carrier.record_count:string,http_access.response.header.Date:string,database_query.eobs_by_bene_id.snf.success:string,database_query.eobs_by_bene_id.outpatient.type:string,jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds:string,jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds:string,jpa_query.eobs_by_bene_id.inpatient.record_count:string,jpa_query.eobs_by_bene_id.outpatient.record_count:string,database_query.eobs_by_bene_id.inpatient.type:string,http_access.response.status:string,jpa_query.eobs_by_bene_id.dme.record_count:string,jpa_query.eobs_by_bene_id.pde.duration_milliseconds:string,jpa_query.eobs_by_bene_id.carrier.duration_milliseconds:string,jpa_query.eobs_by_bene_id.snf.duration_nanoseconds:string,jpa_query.eobs_by_bene_id.carrier.duration_nanoseconds:string,http_access.request.http_method:string,database_query.eobs_by_bene_id.pde.size:string,database_query.eobs_by_bene_id.carrier.size:string,http_access.request.query_string:string,jpa_query.eobs_by_bene_id.outpatient.duration_milliseconds:string,database_query.eobs_by_bene_id.hospice.datasource_name:string,jpa_query.eobs_by_bene_id.dme.duration_milliseconds:string,http_access.response.duration_milliseconds:string,jpa_query.eobs_by_bene_id.dme.duration_nanoseconds:string,database_query.eobs_by_bene_id.hha.batch:string,database_query.eobs_by_bene_id.outpatient.batch_size:string,database_query.eobs_by_bene_id.hha.size:string,database_query.eobs_by_bene_id.pde.batch_size:string,database_query.eobs_by_bene_id.hha.success:string,database_query.eobs_by_bene_id.inpatient.size:string,database_query.eobs_by_bene_id.inpatient.success:string,database_query.eobs_by_bene_id.snf.batch_size:string,database_query.eobs_by_bene_id.dme.size:string,database_query.eobs_by_bene_id.snf.size:string,database_query.eobs_by_bene_id.hospice.size:string,http_access.request.header.User-Agent:string,database_query.eobs_by_bene_id.pde.batch:string,jpa_query.eobs_by_bene_id.snf.record_count:string,jpa_query.eobs_by_bene_id.pde.record_count:string,database_query.eobs_by_bene_id.hha.datasource_name:string,database_query.eobs_by_bene_id.pde.type:string,jpa_query.eobs_by_bene_id.hha.record_count:string,jpa_query.eobs_by_bene_id.hospice.duration_milliseconds:string,database_query.eobs_by_bene_id.hha.duration_milliseconds:string,database_query.eobs_by_bene_id.carrier.success:string,http_access.request.clientSSL.DN:string,jpa_query.eobs_by_bene_id.hha.duration_nanoseconds:string,database_query.eobs_by_bene_id.snf.batch:string,database_query.eobs_by_bene_id.outpatient.datasource_name:string,http_access.request.header.Accept:string,database_query.eobs_by_bene_id.dme.success:string,database_query.eobs_by_bene_id.hospice.success:string,database_query.eobs_by_bene_id.carrier.duration_milliseconds:string,jpa_query.eobs_by_bene_id.hha.duration_milliseconds:string,http_access.request.operation:string,database_query.eobs_by_bene_id.dme.duration_milliseconds:string,database_query.eobs_by_bene_id.pde.duration_milliseconds:string,database_query.eobs_by_bene_id.snf.datasource_name:string,database_query.eobs_by_bene_id.inpatient.datasource_name:string,http_access.response.header.X-Request-ID:string,database_query.eobs_by_bene_id.snf.type:string,jpa_query.eobs_by_bene_id.pde.duration_nanoseconds:string,database_query.eobs_by_bene_id.hospice.type:string,database_query.eobs_by_bene_id.inpatient.batch_size:string,database_query.eobs_by_bene_id.dme.type:string,database_query.eobs_by_bene_id.snf.duration_milliseconds:string,http_access.response.header.X-Powered-By:string,database_query.eobs_by_bene_id.carrier.batch:string,database_query.eobs_by_bene_id.outpatient.success:string,database_query.eobs_by_bene_id.inpatient.duration_milliseconds:string,http_access.request_type:string,database_query.eobs_by_bene_id.inpatient.batch:string,database_query.eobs_by_bene_id.outpatient.batch:string,database_query.eobs_by_bene_id.pde.success:string,database_query.eobs_by_bene_id.pde.datasource_name:string,database_query.eobs_by_bene_id.outpatient.size:string,database_query.eobs_by_bene_id.dme.datasource_name:string,http_access.request.header.Host:string,jpa_query.eobs_by_bene_id.hospice.duration_nanoseconds:string,jpa_query.eobs_by_bene_id.hospice.record_count:string,database_query.eobs_by_bene_id.carrier.batch_size:string,jpa_query.eobs_by_bene_id.outpatient.duration_nanoseconds:string,http_access.response.header.Content-Type:string,database_query.eobs_by_bene_id.hospice.duration_milliseconds:string,database_query.eobs_by_bene_id.outpatient.duration_milliseconds:string,database_query.eobs_by_bene_id.hospice.batch:string,http_access.response.header.Last-Modified:string,database_query.eobs_by_bene_id.carrier.type:string,database_query.eobs_by_bene_id.dme.batch:string,http_access.request.url:string,database_query.eobs_by_bene_id.hospice.batch_size:string,http_access.request.uri:string,database_query.eobs_by_bene_id.carrier.datasource_name:string,bene_id:string,database_query.eobs_by_bene_id.dme.batch_size:string>"
     }
     columns {
       name       = "logger"
@@ -108,51 +116,6 @@ resource "aws_glue_catalog_table" "api_requests" {
     ser_de_info {
       parameters = {
         "paths" = "context,level,logger,mdc,message,thread,timestamp"
-      }
-      serialization_library = "org.openx.data.jsonserde.JsonSerDe"
-    }
-  }
-}
-
-resource "aws_glue_catalog_table" "beneficiaries_unique" {
-  catalog_id    = "577373831711"
-  database_name = "bfd"
-  name          = "beneficiaries_unique"
-  parameters = {
-    "classification" = "json"
-  }
-  retention  = 0
-  table_type = "EXTERNAL_TABLE"
-
-  storage_descriptor {
-    bucket_columns            = []
-    compressed                = false
-    input_format              = "org.apache.hadoop.mapred.TextInputFormat"
-    location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/beneficiaries_unique/"
-    number_of_buckets         = 0
-    output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-    parameters                = {}
-    stored_as_sub_directories = false
-
-    columns {
-      name       = "bene_id"
-      parameters = {}
-      type       = "string"
-    }
-    columns {
-      name       = "first_seen"
-      parameters = {}
-      type       = "string"
-    }
-    columns {
-      name       = "http_status"
-      parameters = {}
-      type       = "string"
-    }
-
-    ser_de_info {
-      parameters = {
-        "paths" = "mdc.bene_id"
       }
       serialization_library = "org.openx.data.jsonserde.JsonSerDe"
     }
@@ -363,7 +326,7 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
     "business"    = "OEDA"
     "project"     = "bfd"
   }
-  version_id = "2"
+  version_id = "3"
 
   extended_s3_configuration {
     bucket_arn          = "arn:aws:s3:::bfd-insights-bfd-577373831711"
@@ -372,7 +335,7 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
     compression_format  = "GZIP"
     error_output_prefix = "databases/bfd/api_requests_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
     kms_key_arn         = "arn:aws:kms:us-east-1:577373831711:key/9bfd6886-7124-4229-931a-4a30ce61c0ea"
-    prefix              = "databases/bfd/api_requests/dt=!{timestamp:yyyy-MM-dd}/"
+    prefix              = "databases/bfd/api_requests/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     role_arn            = "arn:aws:iam::577373831711:role/bfd-insights-bfd-api-requests"
     s3_backup_mode      = "Disabled"
 
@@ -400,8 +363,8 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
   }
 }
 
-resource "aws_cloudwatch_log_subscription_filter" "poc_access_json" {
-  name            = "poc_access_json"
+resource "aws_cloudwatch_log_subscription_filter" "bfd-test-access-log-subscription" {
+  name            = "bfd-test-access-log-subscription"
   log_group_name  = "/bfd/test/bfd-server/access.json"
   filter_pattern  = ""
   destination_arn = "arn:aws:firehose:us-east-1:${local.account_id}:deliverystream/${local.full_name}"
