@@ -27,6 +27,10 @@ import org.junit.jupiter.api.Test;
 
 public class ClaimDaoTest {
 
+  /**
+   * Verifies that the {@link ClaimDao#getEntityById(ResourceTypeV2, String)} method forwards a
+   * request to the overloaded {@link ClaimDao#getEntityById(Class, String, String)} method.
+   */
   @Test
   public void shouldInvokeGetByIdForClaimType() {
     String claimId = "123";
@@ -54,6 +58,10 @@ public class ClaimDaoTest {
     assertEquals(expected, actual);
   }
 
+  /**
+   * Verifies that {@link ClaimDao#getEntityById(Class, String, String)} builds the correct query to
+   * return the expected entity using a given ID.
+   */
   @Test
   public void shouldGetEntityById() {
     String idAttributeName = "someAttribute";
@@ -104,6 +112,11 @@ public class ClaimDaoTest {
     assertEquals(expected, actual);
   }
 
+  /**
+   * Verifies that {@link ClaimDao#findAllByMbiAttribute(Class, String, String, boolean,
+   * DateRangeParam, DateRangeParam, String, String)} builds the correct query to find dall entities
+   * by a given MBI.
+   */
   @Test
   public void shouldFindEntitiesByMbi() {
     final Class<Object> entityClass = Object.class;
@@ -111,6 +124,7 @@ public class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
     final String mbiValueAttributeName = Mbi.Fields.mbi;
+    final String idAttribute = "idAttribute";
     final String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
@@ -173,6 +187,7 @@ public class ClaimDaoTest {
             isMbiSearchValueHashed,
             null,
             null,
+            idAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
@@ -180,6 +195,11 @@ public class ClaimDaoTest {
     assertEquals(expected, actual);
   }
 
+  /**
+   * Verifies that {@link ClaimDao#findAllByMbiAttribute(Class, String, String, boolean,
+   * DateRangeParam, DateRangeParam, String, String)} builds the correct query to find dall entities
+   * by a given old MBI hash.
+   */
   @Test
   public void shouldFindEntitiesByOldMbiHash() {
     final Class<Object> entityClass = Object.class;
@@ -188,6 +208,7 @@ public class ClaimDaoTest {
     final boolean isMbiSearchValueHashed = true;
     final String mbiHashAttributeName = Mbi.Fields.hash;
     final String oldMbiHashAttributeName = Mbi.Fields.oldHash;
+    final String idAttribute = "idAttribute";
     final String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
@@ -262,6 +283,7 @@ public class ClaimDaoTest {
             isMbiSearchValueHashed,
             null,
             null,
+            idAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
@@ -269,6 +291,11 @@ public class ClaimDaoTest {
     assertEquals(expected, actual);
   }
 
+  /**
+   * Verifies that {@link ClaimDao#findAllByMbiAttribute(Class, String, String, boolean,
+   * DateRangeParam, DateRangeParam, String, String)} builds the correct query to find all entities
+   * by a given MBI and lastUpdated value.
+   */
   @Test
   public void shouldFindEntitiesByMbiHashAndLastUpdated() {
     final Class<Object> entityClass = Object.class;
@@ -276,6 +303,7 @@ public class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = true;
     final String mbiValueAttributeName = Mbi.Fields.hash;
+    final String idAttribute = "idAttribute";
     final String endAttribute = "endAttribute";
     final DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
     final DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);
@@ -363,6 +391,7 @@ public class ClaimDaoTest {
             isMbiSearchValueHashed,
             mockLastUpdatedParam,
             mockServiceDateParam,
+            idAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
@@ -370,6 +399,7 @@ public class ClaimDaoTest {
     assertEquals(expected, actual);
   }
 
+  /** A helper class to use for testing methods in place of actual resources. */
   private static class MockClaimType implements ResourceTypeV2<IBaseResource> {
 
     @Override

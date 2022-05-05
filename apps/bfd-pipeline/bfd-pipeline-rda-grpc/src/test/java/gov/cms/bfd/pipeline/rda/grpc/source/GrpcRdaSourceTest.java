@@ -4,9 +4,21 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterRead
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
@@ -22,7 +34,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,21 +50,60 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/** Unit tests for the {@link GrpcRdaSource} class. */
 public class GrpcRdaSourceTest {
+  /**
+   * We need a starting time for the {@link Clock} used to compute idle time. The time and date are
+   * arbitrary since only relative calculations are used.
+   */
+  private static final Instant BASE_TIME_FOR_TEST =
+      ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
+  /** Configuration setting for {@link GrpcRdaSource.Config#minIdleTimeBeforeConnectionDrop}. */
+  private static final long MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP =
+      Duration.ofMinutes(2).toMillis();
+
+  /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_1 = 101;
+  /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_2 = 102;
+  /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_3 = 103;
+  /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_4 = 104;
+  /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_5 = 105;
+
+  /** String used as a RDA API "version" in the unit tests. */
   public static final String VERSION = "version";
+
+  /** A MetricRegistry used to verify metrics. */
   private MetricRegistry appMetrics;
+  /** A mock clock used to when testing the idle time for dropped connection exceptions. */
+  @Mock private Clock clock;
+  /** A mock stream caller used to simulate data returned from the RDA API server. */
   @Mock private GrpcStreamCaller<Integer> caller;
+  /** A mock channel used to simulate a connection to the RDA API server. */
   @Mock private ManagedChannel channel;
+  /** A mock sink used to simulate writing claims to a database. */
   @Mock private RdaSink<Integer, Integer> sink;
+  /** A mock gRPC call used to simulate call parameters for a gRPC call. */
   @Mock private ClientCall<Integer, Integer> clientCall;
+  /** A mock response stream used to simulate claims arriving from the RDA API server. */
+  @Mock private GrpcResponseStream<Integer> mockResponseStream;
+  /** The object we are testing. */
   private GrpcRdaSource<Integer, Integer> source;
+  /**
+   * Shortcut for accessing the {@link gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource.Metrics}
+   * object.
+   */
   private GrpcRdaSource.Metrics metrics;
 
+  /**
+   * Establishes a baseline configuration consisting of mocks and real objects in the unit test
+   * methods.
+   *
+   * @throws Exception required because methods being used and simulated have checked exceptions
+   */
   @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
@@ -55,12 +111,21 @@ public class GrpcRdaSourceTest {
     source =
         spy(
             new GrpcRdaSource<>(
-                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.empty(),
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
     doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
+    doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
   }
 
+  /** Verify that all expected metrics are defined and have expected names. */
   @Test
   public void metricNames() {
     assertEquals(
@@ -75,6 +140,12 @@ public class GrpcRdaSourceTest {
         new ArrayList<>(appMetrics.getNames()));
   }
 
+  /**
+   * Verify that normal (happy path) processing saves objects, updates all expected metrics, and
+   * shuts down cleanly.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
     doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
@@ -100,12 +171,25 @@ public class GrpcRdaSourceTest {
     verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
+  /**
+   * Verify that a starting sequence number defined in the config is used instead of using the value
+   * from the database.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
     source =
         spy(
             new GrpcRdaSource<>(
-                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.of(18L)));
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.of(18L),
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
     doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
 
@@ -126,6 +210,12 @@ public class GrpcRdaSourceTest {
     verify(sink, times(0)).readMaxExistingSequenceNumber();
   }
 
+  /**
+   * Verify that a {@link ProcessingException} thrown by {@link GrpcStreamCaller} triggers a
+   * shutdown and is passed through in a new ProcessingException with updated count.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testPassesThroughProcessingExceptionFromSink() throws Exception {
     doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
@@ -161,6 +251,12 @@ public class GrpcRdaSourceTest {
     verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
+  /**
+   * Verify that an exception thrown by {@link GrpcStreamCaller} triggers a shutdown and is passed
+   * through in a ProcessingException.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testHandlesExceptionFromCaller() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
@@ -170,7 +266,14 @@ public class GrpcRdaSourceTest {
     source =
         spy(
             new GrpcRdaSource<>(
-                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.empty(),
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -190,6 +293,12 @@ public class GrpcRdaSourceTest {
     verify(source).setUptimeToStopped();
   }
 
+  /**
+   * Verify that {@link RuntimeException} thrown by the {@link RdaSink} triggers a shutdown and is
+   * passed through in a ProcessingException.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testHandlesRuntimeExceptionFromSink() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
@@ -222,6 +331,11 @@ public class GrpcRdaSourceTest {
     verify(caller).callService(channel, CallOptions.DEFAULT, 0L);
   }
 
+  /**
+   * Verify that {@link InterruptedException} from the stream causes a clean shutdown.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testHandlesInterruptFromStream() throws Exception {
     doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
@@ -263,6 +377,12 @@ public class GrpcRdaSourceTest {
     verify(channel, times(1)).awaitTermination(5, TimeUnit.SECONDS);
   }
 
+  /**
+   * Verify the {@link gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource.Config} class is
+   * serializable.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void configIsSerializable() throws Exception {
     final GrpcRdaSource.Config original =
@@ -283,6 +403,107 @@ public class GrpcRdaSourceTest {
       loaded = (GrpcRdaSource.Config) inp.readObject();
     }
     assertEquals(original, loaded);
+  }
+
+  /**
+   * Simulate an abrupt RDA API server disconnect before the minimum acceptable idle time has
+   * elapsed. In this scenario the exception should be passed through in a ProcessingException.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
+  @Test
+  public void testDisconnectBeforeExpectedIdleLimitThrowsException() throws Exception {
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+
+    // set up clock times to ensure idle time is not exceeded
+    doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 1)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 2)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP)
+        .when(clock)
+        .millis();
+
+    // set up the response to throw a dropped exception on the second call to next()
+    doReturn(true).when(mockResponseStream).hasNext();
+    doReturn(CLAIM_1)
+        .doReturn(CLAIM_2)
+        .doThrow(
+            new GrpcResponseStream.DroppedConnectionException(
+                new StatusRuntimeException(Status.INTERNAL)))
+        .when(mockResponseStream)
+        .next();
+    doReturn(mockResponseStream).when(caller).callService(channel, CallOptions.DEFAULT, 42L);
+
+    doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
+
+    try {
+      source.retrieveAndProcessObjects(2, sink);
+      fail("should have thrown an exception");
+    } catch (ProcessingException error) {
+      assertEquals(2, error.getProcessedCount());
+      assertTrue(error.getCause() instanceof GrpcResponseStream.DroppedConnectionException);
+    }
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(2, "received", metrics.getObjectsReceived());
+    assertMeterReading(2, "stored", metrics.getObjectsStored());
+    assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(1, "failures", metrics.getFailures());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(3)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+  }
+
+  /**
+   * Simulate an abrupt RDA API server disconnect after the minimum acceptable idle time has
+   * elapsed. In this scenario the exception will stop processing but will not pass through the
+   * exception since it's an acceptable error.
+   *
+   * @throws Exception not really thrown
+   */
+  @Test
+  public void testDisconnectAfterExpectedIdleLimitStopsButDoesNotThrow() throws Exception {
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+
+    // set up clock times to ensure idle time is exceeded
+    doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 1)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 2)
+        .doReturn(BASE_TIME_FOR_TEST.toEpochMilli() + 3 + MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP)
+        .when(clock)
+        .millis();
+
+    // set up the response to throw a dropped exception on the second call to next()
+    doReturn(true).when(mockResponseStream).hasNext();
+    doReturn(CLAIM_1)
+        .doReturn(CLAIM_2)
+        .doThrow(
+            new GrpcResponseStream.DroppedConnectionException(
+                new StatusRuntimeException(Status.INTERNAL)))
+        .when(mockResponseStream)
+        .next();
+    doReturn(mockResponseStream).when(caller).callService(channel, CallOptions.DEFAULT, 42L);
+
+    doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
+
+    int result = source.retrieveAndProcessObjects(2, sink);
+    assertEquals(2, result);
+
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(2, "received", metrics.getObjectsReceived());
+    assertMeterReading(2, "stored", metrics.getObjectsStored());
+    assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(3)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   private GrpcResponseStream<Integer> createResponse(int... values) {

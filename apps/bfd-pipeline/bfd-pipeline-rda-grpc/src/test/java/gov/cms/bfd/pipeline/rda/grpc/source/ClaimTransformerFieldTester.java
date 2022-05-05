@@ -25,11 +25,10 @@ import java.util.function.Function;
  *
  * @param <TClaimBuilder> class of the protobuf message object's builder (e.g. FissClaim.Builder)
  * @param <TClaim> class of the protobuf message object (e.g. FissClaim)
- * @param <TClaimEntity> class of the JPA entity for a claim (e.g. PreAdjFissClaim)
+ * @param <TClaimEntity> class of the JPA entity for a claim (e.g. RdaFissClaim)
  * @param <TTestEntityBuilder> class of the protobuf test object's builder (e.g.
  *     FissInsuredPayer.Builder)
- * @param <TTestEntity> class of the JPA entity for an object containing a field (e.g.
- *     PreAdjFissPayer)
+ * @param <TTestEntity> class of the JPA entity for an object containing a field (e.g. RdaFissPayer)
  */
 public abstract class ClaimTransformerFieldTester<
     TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity> {

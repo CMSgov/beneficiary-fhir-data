@@ -82,27 +82,37 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    */
   private static final boolean DEBUG = true;
 
+  /** The link to the data dictionary. */
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
 
+  /** The name to use for a parent claim. */
   private static final String PARENT_CLAIM = "parentClaim";
+  /** The name to use for a parent beneficiary. */
   private static final String PARENT_BENEFICIARY = "parentBeneficiary";
 
+  /** The list of log messages to write out. */
   private final List<String> logMessages = new LinkedList<>();
 
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes() */
+  /**
+   * {@inheritDoc} @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes()
+   */
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return ImmutableSet.of(RifLayoutsGenerator.class.getName());
   }
 
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion() */
+  /**
+   * {@inheritDoc} @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion()
+   */
   @Override
   public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latestSupported();
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see javax.annotation.processing.AbstractProcessor#process(java.util.Set,
    *     javax.annotation.processing.RoundEnvironment)
    */
@@ -141,6 +151,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Generates source files from the provided annotated package.
+   *
    * @param annotatedPackage the {@link PackageElement} to process that has been annotated with
    *     {@link RifLayoutsGenerator}
    * @throws IOException An {@link IOException} may be thrown if errors are encountered trying to
@@ -328,10 +340,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("snf_claims_new")
+              .setHeaderTable("snf_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("snf_claim_lines_new")
+              .setLineTable("snf_claim_lines")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1309,6 +1321,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "hospice_claims",
             "inpatient_claims",
             "outpatient_claims",
+            "snf_claims",
             "partd_events");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
@@ -1704,7 +1717,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   /**
    * Generates the field-to-CSV-value header.
    *
-   * @param fields {@link List<FieldSpec>} to process
+   * @param fields the list of {@link FieldSpec}s to process
    * @param mappingSpec the {@link MappingSpec} of the field to generate conversion code for
    * @return the string header of column names
    */
@@ -1732,6 +1745,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Generates a hash code method.
+   *
    * @param fields the fields that should be hashed
    * @return a new <code>hashCode()</code> implementation that uses the specified fields
    */
@@ -1749,6 +1764,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Generates an equals method.
+   *
    * @param typeName the {@link TypeName} of the class to add this method for
    * @param fields the fields that should be compared
    * @return a new <code>equals(...)</code> implementation that uses the specified fields
@@ -1786,6 +1803,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Creates an ordered {@link List} of {@link AnnotationSpec}s representing the JPA, etc.
+   * annotations that should be applied to the specified {@link RifField}.
+   *
    * @param mappingSpec the {@link MappingSpec} for the specified {@link RifField}
    * @param rifField the {@link RifField} to create the corresponding {@link AnnotationSpec}s for
    * @return an ordered {@link List} of {@link AnnotationSpec}s representing the JPA, etc.
@@ -1937,6 +1957,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Converts the specified string from snake case to camel case.
+   *
    * @param fieldName the JPA entity field name to convert from snake case to camel case
    * @return the input string converted to camel case
    */
@@ -1960,6 +1982,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Calculates the getter name for the specified entity field.
+   *
    * @param entityField the JPA entity {@link FieldSpec} for the field that the desired getter will
    *     wrap
    * @return the name of the Java "getter" for the specified {@link FieldSpec}
@@ -1974,6 +1998,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Adds a statement to a specified getter method.
+   *
    * @param rifField the {@link RifField} to generate the "getter" statement for
    * @param entityField the {@link FieldSpec} for the field being wrapped by the "getter"
    * @param entityGetter the "getter" method to generate the statement in
@@ -1984,6 +2010,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Adds a statement to a specified getter method.
+   *
    * @param optional <code>true</code> if the property is an {@link Optional} one, <code>false
    *     </code> otherwise
    * @param entityField the {@link FieldSpec} for the field being wrapped by the "getter"
@@ -1999,6 +2027,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Calculates the setter name for the specified entity field.
+   *
    * @param entityField the JPA entity {@link FieldSpec} for the field that the desired setter will
    *     wrap @Param overrideName allow flexibility in not using JPA entity name as the basis for
    *     setter
@@ -2009,6 +2039,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Adds a statement to a specified setter method.
+   *
    * @param rifField the {@link RifField} to generate the "setter" statement for
    * @param entityField the {@link FieldSpec} for the field being wrapped by the "setter"
    * @param entitySetter the "setter" method to generate the statement in
@@ -2019,6 +2051,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Adds a statement to a specified setter method.
+   *
    * @param optional <code>true</code> if the property is an {@link Optional} one, <code>false
    *     </code> otherwise
    * @param entityField the {@link FieldSpec} for the field being wrapped by the "setter"
@@ -2034,6 +2068,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Capitalizes the first letter of a string.
+   *
    * @param name the {@link String} to capitalize the first letter of
    * @return a capitalized {@link String}
    */
@@ -2231,11 +2267,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
-   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types
-   *     this represents the total number of digits that can be stored
-   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
-   *     represents how many of the total digits (see `columnLength`) are to the right of the
-   *     decimal point
+   * @param columnLength specifies the column length {@link Optional} {@link Integer}, for numeric
+   *     types this represents the total number of digits that can be stored
+   * @param columnScale specifies the column scale {@link Optional} {@link Integer}, for numeric
+   *     types this represents how many of the total digits (see `columnLength`) are to the right of
+   *     the decimal point
    * @return a Java poet {@link TypeName} that will be applied to the entity column; the use of the
    *     {@link boolean} isColumnOptional determines if the type can be a primitive (i.e., long) or
    *     in fact needs to be a Java class type (i.e., Long)
@@ -2284,11 +2320,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
-   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types
-   *     this represents the total number of digits that can be stored
-   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
-   *     represents how many of the total digits (see `columnLength`) are to the right of the
-   *     decimal point
+   * @param columnLength specifies the column length {@link Optional} {@link Integer}, for numeric
+   *     types this represents the total number of digits that can be stored
+   * @param columnScale specifies the column scale {@link Optional} {@link Integer}, for numeric
+   *     types this represents how many of the total digits (see `columnLength`) are to the right of
+   *     the decimal point
    * @return the java field type
    */
   private static TypeName selectJavaPropertyType(

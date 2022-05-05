@@ -22,7 +22,13 @@ import javax.xml.bind.annotation.XmlElementWrapper;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public final class ValueGroup {
+  /**
+   * A textual description that applies to all of the {@link Variable}s in this {@link ValueGroup},
+   * with one paragraph per {@link List} entry, or {@code null} if there is no such description
+   * (which will only be the case for {@link Variable}s with a single {@link ValueGroup}).
+   */
   private List<String> description;
+  /** The mutable {@link List} of {@link Value}s in this {@link ValueGroup}. */
   private final List<Value> values;
 
   /** Constructs a new {@link ValueGroup}. */
@@ -44,9 +50,11 @@ public final class ValueGroup {
   }
 
   /**
+   * Gets the {@link #description}.
+   *
    * @return a textual description that applies to all of the {@link Variable}s in this {@link
-   *     ValueGroup}, with one paragraph per {@link List} entry, or <code>null</code> if there is no
-   *     such description (which will only be the case for {@link Variable}s with a single {@link
+   *     ValueGroup}, with one paragraph per {@link List} entry, or {@code null} if there is no such
+   *     description (which will only be the case for {@link Variable}s with a single {@link
    *     ValueGroup})
    */
   @XmlElementWrapper(required = false)
@@ -55,12 +63,20 @@ public final class ValueGroup {
     return description;
   }
 
-  /** @param description the new value to use for {@link #getDescription()} */
+  /**
+   * Sets the {@link #description}.
+   *
+   * @param description the new value to use for {@link #getDescription()}
+   */
   public void setDescription(List<String> description) {
     this.description = description;
   }
 
-  /** @return the mutable {@link List} of {@link Value}s in this {@link ValueGroup} */
+  /**
+   * Gets the {@link #values}.
+   *
+   * @return the mutable {@link List} of {@link Value}s in this {@link ValueGroup}
+   */
   @XmlElement(name = "value")
   public List<Value> getValues() {
     return values;

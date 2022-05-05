@@ -1,0 +1,49 @@
+@startuml
+title Proposed BFD Server Health Checks (simplified)
+
+state Instantiation
+Instantiation : * EC2 Status Check (-)
+Instantiation : * CLB TCP Health Check (-)
+Instantiation : * bfd-server ready (-)
+
+note top of Configure
+       EC2 status checks may still be pending
+end note
+
+state Configure
+Configure : * EC2 Status Check (+)
+Configure : * CLB TCP Health Check (-)
+Configure : * Instance port 7443 (-)
+Configure : * bfd-server ready (-)
+
+state Startup
+Startup : * EC2 Status Check (+)
+Startup : * CLB TCP Health Check (-)
+Startup : * Instance port 7443 (-)
+Startup : * bfd-server ready (-)
+
+state Started
+Started : * EC2 Status Check (+)
+Started : * CLB TCP Health Check (+)
+Started : * Instance port 7443 (+)
+Started : * bfd-server ready (+)
+
+note right of Started
+       Instance eligible to receive traffic
+       Requests succeed!
+end note
+
+note left of Started
+       NOT DEPICTED
+       The ASG is configured to terminate bfd-server
+       instances that fail to reach "Ready" after 430s
+end note
+
+[*] -down-> Instantiation : ASG scaling event; bootstrap
+Instantiation -> Configure : successful bootstrap
+Configure -> Configure : execute cloud-init
+Configure -down-> Startup : bfd-server start; block 7443
+Startup -[#red]-> Startup : internal health check failure\nbfd-server restart
+Startup -down-> Started : internal health check success; unblock 7443
+Started -down-> [*]
+@enduml
