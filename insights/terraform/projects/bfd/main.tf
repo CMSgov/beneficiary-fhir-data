@@ -2,7 +2,7 @@ locals {
   tags       = { business = "OEDA", application = "bfd-insights", project = "bfd" }
   database   = "bfd"
   project    = "bfd"
-  table      = "beneficiaries"
+  table      = "api-requests"
   full_name  = "bfd-insights-${local.database}-${local.table}"
   account_id = data.aws_caller_identity.current.account_id
 }
@@ -23,10 +23,10 @@ module "database" {
   tags       = local.tags
 }
 
-resource "aws_glue_catalog_table" "beneficiaries" {
+resource "aws_glue_catalog_table" "api_requests" {
   catalog_id    = "577373831711"
   database_name = "bfd"
-  name          = "beneficiaries"
+  name          = "api_requests"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
@@ -52,7 +52,7 @@ resource "aws_glue_catalog_table" "beneficiaries" {
     bucket_columns    = []
     compressed        = true
     input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://bfd-insights-bfd-577373831711/databases/bfd/beneficiaries/"
+    location          = "s3://bfd-insights-bfd-577373831711/databases/bfd/api_requests/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     parameters = {
@@ -218,7 +218,7 @@ resource "aws_iam_group_policy" "poc" {
 
 resource "aws_iam_policy" "firehose" {
   description = "Allow firehose delivery to bfd-insights-bfd-577373831711"
-  name        = "bfd-insights-bfd-beneficiaries"
+  name        = "bfd-insights-bfd-api-requests"
   path        = "/bfd-insights/"
   policy = jsonencode(
     {
@@ -268,7 +268,7 @@ resource "aws_iam_policy" "firehose" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:logs:us-east-1:577373831711:log-group:/aws/kinesisfirehose/bfd-insights-bfd-beneficiaries:log-stream:*",
+            "arn:aws:logs:us-east-1:577373831711:log-group:/aws/kinesisfirehose/bfd-insights-bfd-api-requests:log-stream:*",
           ]
           Sid = ""
         },
@@ -280,7 +280,7 @@ resource "aws_iam_policy" "firehose" {
             "kinesis:ListShards",
           ]
           Effect   = "Allow"
-          Resource = "arn:aws:kinesis:us-east-1:577373831711:stream/bfd-insights-bfd-beneficiaries"
+          Resource = "arn:aws:kinesis:us-east-1:577373831711:stream/bfd-insights-bfd-api-requests"
           Sid      = ""
         },
       ]
@@ -309,10 +309,10 @@ resource "aws_iam_role" "firehose" {
   )
   force_detach_policies = false
   managed_policy_arns = [
-    "arn:aws:iam::577373831711:policy/bfd-insights/bfd-insights-bfd-beneficiaries",
+    "arn:aws:iam::577373831711:policy/bfd-insights/bfd-insights-bfd-api-requests",
   ]
   max_session_duration = 3600
-  name                 = "bfd-insights-bfd-beneficiaries"
+  name                 = "bfd-insights-bfd-api-requests"
   path                 = "/"
   tags = {
     "application" = "bfd-insights"
@@ -344,15 +344,15 @@ resource "aws_iam_role" "firehose" {
 }
 
 resource "aws_iam_role_policy_attachment" "main" {
-  policy_arn = "arn:aws:iam::577373831711:policy/bfd-insights/bfd-insights-bfd-beneficiaries"
-  role       = "bfd-insights-bfd-beneficiaries"
+  policy_arn = "arn:aws:iam::577373831711:policy/bfd-insights/bfd-insights-bfd-api-requests"
+  role       = "bfd-insights-bfd-api-requests"
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "main" {
-  arn            = "arn:aws:firehose:us-east-1:577373831711:deliverystream/bfd-insights-bfd-beneficiaries"
+  arn            = "arn:aws:firehose:us-east-1:577373831711:deliverystream/bfd-insights-bfd-api-requests"
   destination    = "extended_s3"
   destination_id = "destinationId-000000000001"
-  name           = "bfd-insights-bfd-beneficiaries"
+  name           = "bfd-insights-bfd-api-requests"
   tags = {
     "application" = "bfd-insights"
     "business"    = "OEDA"
@@ -370,10 +370,10 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
     buffer_interval     = 60
     buffer_size         = 5
     compression_format  = "GZIP"
-    error_output_prefix = "databases/bfd/beneficiaries_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
+    error_output_prefix = "databases/bfd/api_requests_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
     kms_key_arn         = "arn:aws:kms:us-east-1:577373831711:key/9bfd6886-7124-4229-931a-4a30ce61c0ea"
-    prefix              = "databases/bfd/beneficiaries/dt=!{timestamp:yyyy-MM-dd}/"
-    role_arn            = "arn:aws:iam::577373831711:role/bfd-insights-bfd-beneficiaries"
+    prefix              = "databases/bfd/api_requests/dt=!{timestamp:yyyy-MM-dd}/"
+    role_arn            = "arn:aws:iam::577373831711:role/bfd-insights-bfd-api-requests"
     s3_backup_mode      = "Disabled"
 
     cloudwatch_logging_options {
@@ -485,7 +485,7 @@ resource "aws_glue_job" "bfd-insights-bfd-unique-bene-combiner" {
     "--initialize"                       = "True"
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
-    "--sourceTable"                      = "beneficiaries"
+    "--sourceTable"                      = "api_requests"
     "--targetTable"                      = "beneficiaries_unique"
     "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
   }
