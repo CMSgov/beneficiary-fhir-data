@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-"""common.db
-
-Utility module for executing database queries
+"""Utility module for executing database queries.
 """
+
 from typing import List
 
 import psycopg2
 
 
-LIMIT = 10000  # global limit on the number of records to return
+LIMIT = 100000  # global limit on the number of records to return
 
 
 def _execute(uri: str, query: str) -> List:

@@ -35,8 +35,8 @@ class BFDUserBase(HttpUser):
         HttpUser.__init__(self, *args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
-        self.client_cert = setup.getClientCert()
-        self.server_public_key = setup.loadServerPublicKey()
+        self.client_cert = setup.get_client_cert()
+        self.server_public_key = setup.load_server_public_key()
         setup.disable_no_cert_warnings(self.server_public_key, urllib3)
         self.last_updated = data.get_last_updated()
 
