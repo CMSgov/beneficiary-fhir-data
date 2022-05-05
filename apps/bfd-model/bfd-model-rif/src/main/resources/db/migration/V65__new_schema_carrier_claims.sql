@@ -113,8 +113,8 @@ ${logic.hsql-only}    line_num                             smallint not null,
 ${logic.hsql-only}    carr_line_rdcd_pmt_phys_astn_c       char(1) not null,
 ${logic.hsql-only}    carr_line_prvdr_type_cd              char(1) not null,
 ${logic.hsql-only}    carr_line_prcng_lclty_cd             varchar(2) not null,
-${logic.hsql-only}    carr_line_mtus_cnt                   smallint not null,
-${logic.hsql-only}    carr_line_ansthsa_unit_cnt           smallint not null,
+${logic.hsql-only}    carr_line_mtus_cnt                   numeric(8,1) not null,
+${logic.hsql-only}    carr_line_ansthsa_unit_cnt           integer not null,
 ${logic.hsql-only}    carr_prfrng_pin_num                  varchar(15) not null,
 ${logic.hsql-only}    carr_line_mtus_cd                    char(1),
 ${logic.hsql-only}    carr_line_rx_num                     varchar(30),
@@ -131,7 +131,7 @@ ${logic.hsql-only}    line_bene_prmry_pyr_pd_amt           numeric(12,2) not nul
 ${logic.hsql-only}    line_bene_ptb_ddctbl_amt             numeric(12,2) not null,
 ${logic.hsql-only}    line_place_of_srvc_cd                varchar(2) not null,
 ${logic.hsql-only}    line_pmt_80_100_cd                   char(1),
-${logic.hsql-only}    line_srvc_cnt                        smallint not null,
+${logic.hsql-only}    line_srvc_cnt                        numeric(8,1) not null,
 ${logic.hsql-only}    line_cms_type_srvc_cd                char(1) not null,
 ${logic.hsql-only}    line_hct_hgb_type_cd                 varchar(2),
 ${logic.hsql-only}    line_hct_hgb_rslt_num                numeric(4,1) not null,
@@ -156,6 +156,12 @@ ${logic.hsql-only}    prf_physn_upin                       varchar(12),
 ${logic.hsql-only}    prtcptng_ind_cd                      char(1),
 ${logic.hsql-only}  CONSTRAINT carrier_claim_lines_new_pkey
 ${logic.hsql-only}  PRIMARY KEY (clm_id, line_num) );
+
+${logic.psql-only} SET max_parallel_workers = 24;
+${logic.psql-only} SET max_parallel_workers_per_gather = 20;
+${logic.psql-only} SET parallel_leader_participation = off;
+${logic.psql-only} SET parallel_tuple_cost = 0;
+${logic.psql-only} SET parallel_setup_cost = 0;
 
 -- migrate data via INSERT from current CARRIER_CLAIMS table to carrier_CLAIMS_NEW table
 --
@@ -218,20 +224,14 @@ ${logic.hsql-only}    icd_dgns_vrsn_cd12 )
 -- PSQL allows us to dynamically create a table via the
 -- associated SELECT statement used to populate the table.
 --
-${logic.psql-only} SET max_parallel_workers = 24;
-${logic.psql-only} SET max_parallel_workers_per_gather = 20;
-${logic.psql-only} SET parallel_leader_participation = off;
-${logic.psql-only} SET parallel_tuple_cost = 0;
-${logic.psql-only} SET parallel_setup_cost = 0;
-
 ${logic.psql-only} create table public.carrier_claims_new as
-select
-${logic.psql-only}  cast(clm_id as bigint),
-${logic.psql-only}  cast(bene_id as bigint),
-${logic.psql-only}  cast(clm_grp_id as bigint),  
+select 
 ${logic.hsql-only}  convert(clm_id, SQL_BIGINT),
 ${logic.hsql-only}  convert(bene_id, SQL_BIGINT),
 ${logic.hsql-only}  convert(clm_grp_id, SQL_BIGINT),
+${logic.psql-only}  cast(clm_id as bigint),
+${logic.psql-only}  cast(bene_id as bigint),
+${logic.psql-only}  cast(clm_grp_id as bigint), 
                     last_updated,
                     clm_from_dt,
                     clm_thru_dt,                  
@@ -368,17 +368,15 @@ ${logic.hsql-only}    prtcptng_ind_cd )
 --
 ${logic.psql-only} create table public.carrier_claim_lines_new as
 select
-${logic.psql-only}    cast(clm_id as bigint),
 ${logic.hsql-only}    convert(clm_id, SQL_BIGINT),
-${logic.psql-only}    cast(line_num as smallint),
 ${logic.hsql-only}    convert(line_num, SQL_SMALLINT),
+${logic.psql-only}    cast(clm_id as bigint),
+${logic.psql-only}    cast(line_num as smallint),
                       carr_line_rdcd_pmt_phys_astn_c,
                       carr_line_prvdr_type_cd,
                       carr_line_prcng_lclty_cd,
-${logic.psql-only}    cast(carr_line_mtus_cnt as smallint),
-${logic.hsql-only}    convert(carr_line_mtus_cnt, SQL_SMALLINT),
-${logic.psql-only}    cast(carr_line_ansthsa_unit_cnt as smallint),
-${logic.hsql-only}    convert(carr_line_ansthsa_unit_cnt, SQL_SMALLINT),
+                      carr_line_mtus_cnt,
+                      carr_line_ansthsa_unit_cnt,
                       carr_prfrng_pin_num,
                       carr_line_mtus_cd,
                       carr_line_rx_num,
@@ -395,8 +393,7 @@ ${logic.hsql-only}    convert(carr_line_ansthsa_unit_cnt, SQL_SMALLINT),
                       line_bene_ptb_ddctbl_amt,
                       line_place_of_srvc_cd,
                       line_pmt_80_100_cd,
-${logic.psql-only}    cast(line_srvc_cnt as smallint),
-${logic.hsql-only}    convert(line_srvc_cnt, SQL_SMALLINT),
+                      line_srvc_cnt,
                       line_cms_type_srvc_cd,
                       line_hct_hgb_type_cd,
                       line_hct_hgb_rslt_num,
