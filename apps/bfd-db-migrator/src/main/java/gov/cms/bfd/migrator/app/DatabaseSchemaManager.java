@@ -67,6 +67,8 @@ public final class DatabaseSchemaManager {
    * Create flyway using the specified parameters.
    *
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
+   * @param appConfiguration the app configuration to use, for gathering flyway specific
+   *     configuration
    * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
   private static Flyway createFlyway(DataSource dataSource, AppConfiguration appConfiguration) {
@@ -94,6 +96,8 @@ public final class DatabaseSchemaManager {
   }
 
   /**
+   * Creates the script placeholders map.
+   *
    * @param dataSource the {@link DataSource} that the replacements will be used for
    * @return the {@link Map} of key-value replacements to use for {@link
    *     FluentConfiguration#placeholders(Map)}
