@@ -7,7 +7,6 @@ import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -130,16 +129,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
 
   @Nonnull
   public TClaim transformMessage(String apiVersion, TMessage message) {
-    try {
-      return sink.transformMessage(apiVersion, message);
-    } catch (DataTransformer.TransformationException transformationException) {
-      try {
-        sink.writeError(message, transformationException);
-      } catch (IOException e) {
-        transformationException.addSuppressed(e);
-      }
-      throw transformationException;
-    }
+    return sink.transformMessage(apiVersion, message);
   }
 
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
