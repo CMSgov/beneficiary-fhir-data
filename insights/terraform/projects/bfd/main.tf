@@ -23,6 +23,142 @@ module "database" {
   tags            = local.tags
 }
 
+resource "aws_glue_catalog_table" "beneficiaries" {
+    catalog_id    = "577373831711"
+    database_name = "bfd"
+    name          = "beneficiaries"
+    owner         = "owner"
+    parameters    = {
+        "CrawlerSchemaDeserializerVersion" = "1.0"
+        "CrawlerSchemaSerializerVersion"   = "1.0"
+        "UPDATED_BY_CRAWLER"               = "bfd"
+        "averageRecordSize"                = "2034"
+        "classification"                   = "json"
+        "compressionType"                  = "gzip"
+        "objectCount"                      = "1"
+        "recordCount"                      = "1"
+        "sizeKey"                          = "1500"
+        "typeOfData"                       = "file"
+    }
+    retention     = 0
+    table_type    = "EXTERNAL_TABLE"
+
+    partition_keys {
+        name = "dt"
+        type = "string"
+    }
+
+    storage_descriptor {
+        bucket_columns            = []
+        compressed                = true
+        input_format              = "org.apache.hadoop.mapred.TextInputFormat"
+        location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/beneficiaries/"
+        number_of_buckets         = -1
+        output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+        parameters                = {
+            "CrawlerSchemaDeserializerVersion" = "1.0"
+            "CrawlerSchemaSerializerVersion"   = "1.0"
+            "UPDATED_BY_CRAWLER"               = "bfd"
+            "averageRecordSize"                = "2034"
+            "classification"                   = "json"
+            "compressionType"                  = "gzip"
+            "objectCount"                      = "1"
+            "recordCount"                      = "1"
+            "sizeKey"                          = "1500"
+            "typeOfData"                       = "file"
+        }
+        stored_as_sub_directories = false
+
+        columns {
+            name       = "timestamp"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "level"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "thread"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc"
+            parameters = {}
+            type       = "struct<http_access.response.duration_milliseconds:string,http_access.request.clientSSL.DN:string,http_access.response.header.Date:string,http_access.request.header.Accept:string,http_access.request.header.Host:string,jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds:string,jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds:string,database_query.eobs_by_bene_id.inpatient.size:string,http_access.request.operation:string,database_query.eobs_by_bene_id.inpatient.success:string,jpa_query.eobs_by_bene_id.inpatient.record_count:string,database_query.eobs_by_bene_id.inpatient.datasource_name:string,http_access.response.header.X-Request-ID:string,database_query.eobs_by_bene_id.inpatient.batch_size:string,http_access.response.header.Content-Type:string,http_access.response.header.X-Powered-By:string,database_query.eobs_by_bene_id.inpatient.type:string,http_access.response.status:string,database_query.eobs_by_bene_id.inpatient.duration_milliseconds:string,http_access.request.header.User-Agent:string,http_access.response.header.Last-Modified:string,http_access.request_type:string,http_access.request.http_method:string,database_query.eobs_by_bene_id.inpatient.batch:string,http_access.request.url:string,http_access.request.uri:string,http_access.request.query_string:string,bene_id:string>"
+        }
+        columns {
+            name       = "logger"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "message"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "context"
+            parameters = {}
+            type       = "string"
+        }
+
+        ser_de_info {
+            parameters            = {
+                "paths" = "context,level,logger,mdc,message,thread,timestamp"
+            }
+            serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+        }
+    }
+}
+
+resource "aws_glue_catalog_table" "beneficiaries_unique" {
+    catalog_id    = "577373831711"
+    database_name = "bfd"
+    name          = "beneficiaries_unique"
+    parameters    = {
+        "classification" = "json"
+    }
+    retention     = 0
+    table_type    = "EXTERNAL_TABLE"
+
+    storage_descriptor {
+        bucket_columns            = []
+        compressed                = false
+        input_format              = "org.apache.hadoop.mapred.TextInputFormat"
+        location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/beneficiaries_unique/"
+        number_of_buckets         = 0
+        output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+        parameters                = {}
+        stored_as_sub_directories = false
+
+        columns {
+            name       = "bene_id"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "first_seen"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "http_status"
+            parameters = {}
+            type       = "string"
+        }
+
+        ser_de_info {
+            parameters            = {
+                "paths" = "mdc.bene_id"
+            }
+            serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+        }
+    }
+}
+
 module "workgroup" {
   source          = "../../modules/workgroup"
   bucket          = module.bucket.id
@@ -333,5 +469,46 @@ resource "aws_lambda_function" "bfd-transform" {
 
     tracing_config {
         mode = "PassThrough"
+    }
+}
+
+resource "aws_glue_job" "bfd-insights-bfd-unique-bene-combiner" {
+    arn                       = "arn:aws:glue:us-east-1:577373831711:job/bfd-insights-bfd-unique-bene-combiner"
+    connections               = []
+    default_arguments         = {
+        "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+        "--class"                            = "GlueApp"
+        "--enable-continuous-cloudwatch-log" = "true"
+        "--enable-glue-datacatalog"          = "true"
+        "--enable-job-insights"              = "true"
+        "--enable-metrics"                   = "true"
+        "--enable-spark-ui"                  = "true"
+        "--initialize"                       = "True"
+        "--job-bookmark-option"              = "job-bookmark-disable"
+        "--job-language"                     = "python"
+        "--skipSynthetics"                   = "False"
+        "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+    }
+    glue_version              = "3.0"
+    id                        = "bfd-insights-bfd-unique-bene-combiner"
+    max_capacity              = 2
+    max_retries               = 0
+    name                      = "bfd-insights-bfd-unique-bene-combiner"
+    non_overridable_arguments = {}
+    number_of_workers         = 2
+    role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+    tags                      = {}
+    tags_all                  = {}
+    timeout                   = 2880
+    worker_type               = "G.1X"
+
+    command {
+        name            = "glueetl"
+        python_version  = "3"
+        script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-insights-bfd-unique-bene-combiner.py"
+    }
+
+    execution_property {
+        max_concurrent_runs = 1
     }
 }
