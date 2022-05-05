@@ -241,7 +241,7 @@ ${logic.hsql-only}     primary key (clm_id) );
 
 -- create a new SNF_CLAIM_LINES_NEW table in the current PUBLIC schema
 --
-${logic.hsql-only}    CREATE TABLE IF NOT EXISTS public.snf_claim_lines_new (
+${logic.hsql-only}  CREATE TABLE IF NOT EXISTS public.snf_claim_lines_new (
 ${logic.hsql-only}    clm_id                              bigint NOT NULL,
 ${logic.hsql-only}    clm_line_num                        smallint NOT NULL,
 ${logic.hsql-only}    rev_cntr                            varchar(4) NOT NULL,
@@ -251,7 +251,7 @@ ${logic.hsql-only}    rev_cntr_rate_amt                   numeric(12,2) NOT NULL
 ${logic.hsql-only}    rev_cntr_ncvrd_chrg_amt             numeric(12,2) NOT NULL,
 ${logic.hsql-only}    rev_cntr_ddctbl_coinsrnc_cd         char(1),
 ${logic.hsql-only}    rev_cntr_ndc_qty_qlfr_cd            varchar(2),
-${logic.hsql-only}    rev_cntr_ndc_qty                    numeric(9,3),
+${logic.hsql-only}    rev_cntr_ndc_qty                    numeric(12,3),
 ${logic.hsql-only}    hcpcs_cd                            varchar(5),
 ${logic.hsql-only}    rndrng_physn_npi                    varchar(12),
 ${logic.hsql-only}    rndrng_physn_upin                   varchar(12),
@@ -818,3 +818,4 @@ ALTER TABLE IF EXISTS public.snf_claim_lines_new
 -- create an index of the BENE_ID in parent claims table
 CREATE INDEX IF NOT EXISTS snf_claims_new_bene_id_idx
     ON public.snf_claims_new (bene_id);
+    
