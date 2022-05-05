@@ -302,3 +302,36 @@ resource "aws_iam_role" "cloudwatch_role" {
    })
   }
 }
+
+resource "aws_lambda_function" "bfd-transform" {
+    architectures                  = [
+        "x86_64",
+    ]
+    description                    = "An Amazon Kinesis Firehose stream processor that extracts individual log events from records sent by Cloudwatch Logs subscription filters."
+    function_name                  = "bfd-transform"
+    handler                        = "index.handler"
+    layers                         = []
+    memory_size                    = 128
+    package_type                   = "Zip"
+    reserved_concurrent_executions = -1
+    role                           = "arn:aws:iam::577373831711:role/service-role/bfd-transform-role-rlenc44a"
+    runtime                        = "nodejs14.x"
+    source_code_hash               = "xfOr6tQXzD/YDKTg0NT9+Dx+J26cyPLuDgCqWB+VeDU="
+    tags                           = {
+        "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor"
+    }
+    tags_all                       = {
+        "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor"
+    }
+    timeout                        = 300
+
+    ephemeral_storage {
+        size = 512
+    }
+
+    timeouts {}
+
+    tracing_config {
+        mode = "PassThrough"
+    }
+}
