@@ -3,13 +3,15 @@
 
 Utility module for executing database queries
 """
+from typing import List
+
 import psycopg2
 
 
 LIMIT = 10000  # global limit on the number of records to return
 
 
-def _execute(uri, query):
+def _execute(uri: str, query: str) -> List:
     """
     Execute a PSQL select statement and return its results
     """
@@ -28,14 +30,14 @@ def _execute(uri, query):
     return results
 
 
-def get_bene_ids(uri):
+def get_bene_ids(uri: str, table_sample_pct: float = 0.25) -> List:
     """
     Return a list of bene IDs from the adjudicated beneficiary table
     """
     bene_query = (
         'SELECT "bene_id" '
         'FROM "beneficiaries" '
-        # 'TABLESAMPLE SYSTEM (0.25) '
+        f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
         'WHERE "rfrnc_yr" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
@@ -43,14 +45,14 @@ def get_bene_ids(uri):
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_hashed_mbis(uri):
+def get_hashed_mbis(uri: str, table_sample_pct: float = 0.25) -> List:
     """
     Return a list of unique hashed MBIs from the adjudicated beneficiary table
     """
     bene_query = (
         'SELECT "mbi_hash" '
         'FROM "beneficiaries" '
-        # 'TABLESAMPLE SYSTEM (0.25) '
+        f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
         'WHERE "mbi_hash" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
@@ -58,7 +60,7 @@ def get_hashed_mbis(uri):
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_contract_ids(uri):
+def get_contract_ids(uri: str) -> List:
     """
     Return a list of contract id / reference year pairs from the beneficiary
     table
@@ -86,7 +88,7 @@ def get_contract_ids(uri):
     return contract_data
 
 
-def get_partially_adj_hashed_mbis(uri):
+def get_partially_adj_hashed_mbis(uri: str) -> List:
     """
     Return a list of unique hashed MBIs from the partially adjudicated
     FISS and MCS tables

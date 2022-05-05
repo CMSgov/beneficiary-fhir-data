@@ -10,12 +10,15 @@ from common import data, db
 # If we try to load things from the database within the BFDUserBase class, we'll end up loading
 # them once for every Worker, whereas loading it here will load once and each Worker will inherit
 # a copy.
-bene_ids = data.load_data_segment(db.get_bene_ids).copy()
+bene_ids = data.load_all(db.get_bene_ids, use_table_sample=True).copy()
 random.shuffle(bene_ids)
 
 
 class BeneTestUser(BFDUserBase):
     '''Locust tests that require a pool of beneficiary IDs.'''
+
+    # Mark this class as abstract so Locust knows it doesn't contain Tasks
+    abstract = True
 
     # Tests
 

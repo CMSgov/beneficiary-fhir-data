@@ -21,6 +21,9 @@ class BFDUserBase(HttpUser):
     This class should automatically handle most of the common tasks that our load tests require.
     '''
 
+    # Mark this class as abstract so Locust knows it doesn't contain Tasks
+    abstract = True
+
     # The goals against which to measure these results. Note that they also include the Failsafe
     # cutoff, which will default to the V2 cutoff time if not set.
     VALIDATION_GOALS = None

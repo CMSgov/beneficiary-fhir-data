@@ -17,6 +17,9 @@ random.shuffle(contract_data)
 class ContractTestUser(BFDUserBase):
     '''Locust tests that require a pool of contract data.'''
 
+    # Mark this class as abstract so Locust knows it doesn't contain Tasks
+    abstract = True
+
     # Helpers
 
     def __test_patient_test_coverage_contract(self, version: str):

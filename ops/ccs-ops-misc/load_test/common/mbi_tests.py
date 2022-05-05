@@ -1,6 +1,5 @@
 '''Locust tests that require a pool of MBIs.'''
 
-import logging
 import random
 
 from common.bfd_user_base import BFDUserBase
@@ -11,12 +10,15 @@ from common import data, db
 # If we try to load things from the database within the BFDUserBase class, we'll end up loading
 # them once for every Worker, whereas loading it here will load once and each Worker will inherit
 # a copy.
-hashed_mbis = data.load_data_segment(db.get_hashed_mbis).copy()
+hashed_mbis = data.load_all(db.get_hashed_mbis, use_table_sample=True).copy()
 random.shuffle(hashed_mbis)
 
 
 class MBITestUser(BFDUserBase):
     '''Locust tests that require a pool of hashed MBIs.'''
+
+    # Mark this class as abstract so Locust knows it doesn't contain Tasks
+    abstract = True
 
     # Helpers
 
