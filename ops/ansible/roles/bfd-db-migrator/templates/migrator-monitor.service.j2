@@ -1,0 +1,10 @@
+[Unit]
+Description=Monitoring and messaging functionality for the bfd-db-migrator.service
+
+[Service]
+WorkingDirectory={{ db_migrator_dir }}
+ExecStart={{ db_migrator_dir }}/migrator-monitor.sh
+User={{ db_migrator_user }}
+
+[Install]
+WantedBy=multi-user.target

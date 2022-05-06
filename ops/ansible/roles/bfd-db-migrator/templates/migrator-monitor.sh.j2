@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# This is a fairly simple, jinja2 templated script that monitors a pid
+# and pid file to determine the bfd-db-migrator's running state and
+# communicate the state to the CI mechanism that spawned the
+# bfd-db-migrator.
+#
+# While the bfd-db-migrator servie is running (executing a database
+# migration), this service periodically sends a heartbeat to sqs. When
+# the bfd-db-migrator exits, this service sends the exit state to sqs.
+set -euo pipefail
+
+AWS_REGION="${AWS_REGION:-us-east-1}"
+SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ bfd_env }}-db-migrator" --region "$AWS_REGION" --output text)"
+
+function find_migrator_pid_file {
+  cd {{ db_migrator_dir }} &&
+  ls -lt . |
+  grep '.pid' |
+  head --lines=1 |
+  awk '{ print $9 }'
+}
+
+function find_migrator_pid {
+  basename "$(find_migrator_pid_file)" | cut -f1 -d.
+}
+
+MIGRATOR_PID="$(find_migrator_pid)"
+function migrator_is_running {
+  ps -p "$MIGRATOR_PID" 2>&1 >/dev/null && true || false
+}
+
+function send_message {
+  local message="$1"
+  aws sqs send-message \
+    --region "$AWS_REGION" \
+    --queue-url "$SQS_QUEUE_URL" \
+    --message-body "$message"
+}
+
+function read_exit_code {
+  cat "$(find_migrator_pid_file)"
+}
+
+while migrator_is_running; do
+  # message is a single-line, well-formed, escaped json object string
+  message="$(jq -c -n --arg migratorPid "$MIGRATOR_PID" '{pid: $migratorPid, state: "heartbeat", rc: null}')"
+  send_message "$message"
+  sleep {{ migrator_monitor_heartbeat_interval_seconds }}
+done
+
+sleep 1
+
+if [ -s "$(find_migrator_pid_file)" ]; then
+  # Process no longer exists and the pidfile has an exit code.
+  final_message="$(jq -c -n --arg migratorPid "$MIGRATOR_PID" --arg exitCode "$(read_exit_code)" '{pid: $migratorPid, state: "exit", rc: $exitCode}')"
+else
+  # Process no longer exists but the pidfile is empty. Panic.
+  final_message="$(jq -c -n --arg migratorPid "$MIGRATOR_PID" '{pid: $migratorPid, state: "panic", rc: null}')"
+fi
+
+send_message "$final_message"
+mv "$(find_migrator_pid_file)" "$(find_migrator_pid_file).old"

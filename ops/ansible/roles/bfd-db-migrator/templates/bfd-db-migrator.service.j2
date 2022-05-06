@@ -1,11 +1,12 @@
 [Unit]
-Description=Blue Button DB Migrator Service
+Description=BFD DB Migrator Service
 Wants=network-online.target
-After=network.target network-online.target
+After=network.target network-online.target {% if (migrator_monitor_enabled|default('', false)) and (bfd_env|default('', false)) %}migrator-monitor.service{% endif %}
+
+{% if (migrator_monitor_enabled|default('', true)) and (bfd_env|default('', true)) %}Requires=migrator-monitor.service{% endif %}
+
 
 [Service]
-Type=oneshot
-RemainAfterExit=true
 WorkingDirectory={{ db_migrator_dir }}
 ExecStart={{ db_migrator_dir }}/bfd-db-migrator-service.sh
 User={{ db_migrator_user }}
