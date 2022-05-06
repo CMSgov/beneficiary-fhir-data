@@ -37,7 +37,6 @@ def get_bene_ids(uri: str, table_sample_pct: float = 0.25) -> List:
         'SELECT "bene_id" '
         'FROM "beneficiaries" '
         f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
-        'WHERE "rfrnc_yr" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
 
