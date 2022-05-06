@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IcdCode;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.Arrays;
 import java.util.Collections;
@@ -131,7 +132,8 @@ public final class Stu3EobSamhsaMatcherTest {
                         new MetricRegistry(),
                         r,
                         Optional.empty(),
-                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                        NPIOrgDataLookup.createNpiOrgLookupForTesting());
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -810,7 +812,8 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               sampleRifRecordForClaimType,
               Optional.empty(),
-              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+              NPIOrgDataLookup.createNpiOrgLookupForTesting());
 
       return sampleEobForClaimType;
     }

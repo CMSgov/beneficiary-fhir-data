@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -74,6 +75,15 @@ public class SpringConfiguration {
    * should only be set to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+
+  /**
+   * The {@link String } Boolean property that is used to enable the fake npi number (0000000000)
+   * that is used for integration testing. When this property is set to the string 'true', this fake
+   * npi number will be appended to the npi org data lookup map to avoid test failures that result
+   * This property defaults to false and should only be set to true when the server is under test in
+   * a local environment.
+   */
+  public static final String PROP_INCLUDE_FAKE_NPI_NUMBER = "bfdServer.include.fake.npi.number";
 
   public static final int TRANSACTION_TIMEOUT = 30;
 
@@ -487,6 +497,24 @@ public class SpringConfiguration {
       return FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     } else {
       return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    }
+  }
+
+  /**
+   * This bean provides an {@link NPIOrgDataLookup} for use in the transformers to look up npi
+   * numbers.
+   *
+   * @param includeFakeNPINumber if true, the {@link NPIOrgDataLookup} will include a fake NPI
+   *     Number for testing purposes.
+   * @return the {@link NPIOrgDataLookup} for the application.
+   */
+  @Bean
+  public NPIOrgDataLookup npiOrgDataLookup(
+      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeNPINumber) {
+    if (includeFakeNPINumber) {
+      return NPIOrgDataLookup.createNpiOrgLookupForTesting();
+    } else {
+      return NPIOrgDataLookup.createNpiOrgLookupForProduction();
     }
   }
 }

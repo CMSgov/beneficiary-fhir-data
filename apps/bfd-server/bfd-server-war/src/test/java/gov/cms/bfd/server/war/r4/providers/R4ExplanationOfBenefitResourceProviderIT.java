@@ -33,6 +33,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -407,7 +408,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             claim),
         eob);
   }
@@ -1458,7 +1460,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
@@ -2061,7 +2064,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
                 new TransformerContext(
                     PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                     Optional.of(false),
-                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                    NPIOrgDataLookup.createNpiOrgLookupForTesting()),
                 claim),
         searchResults);
   }

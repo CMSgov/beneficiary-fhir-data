@@ -92,7 +92,7 @@ public final class NPIDataUtilityApp {
             fileName = getFileName(true);
             buildNPIResource(convertedNpiDataFile, workingDir, fileName);
           } catch (Exception e) {
-            String exc = "";
+
           }
         } finally {
           // Recursively delete the working dir.
@@ -162,8 +162,6 @@ public final class NPIDataUtilityApp {
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
       String provider = "";
-      // skip first line which is header
-      reader.readLine();
       for (String in; (in = reader.readLine()) != null; ) {
         String[] inputLine = in.split(",");
         String orgData = inputLine[4].trim();
@@ -171,7 +169,7 @@ public final class NPIDataUtilityApp {
           provider = orgData;
         }
 
-        String output = inputLine[0].replace("\"", "") + "\t" + provider.replace("\"", "");
+        String output = inputLine[0] + "\t" + provider;
 
         out.write(output);
         out.newLine();
