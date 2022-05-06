@@ -173,11 +173,7 @@ public final class SNFClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     SNFClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-<<<<<<< HEAD
-    assertEquals(claimLine1.getLineNumber().intValue(), eobItem0.getSequence());
-=======
     assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
->>>>>>> 0b12224a51c2a2b49e114ec6262a4f05a5f0bd12
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHasCoding(

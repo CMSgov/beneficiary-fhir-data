@@ -15,7 +15,6 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -222,9 +221,7 @@ public final class CarrierClaimTransformerTest {
         CcwCodebookVariable.CARR_LINE_MTUS_CD, claimLine1.getMtusCode(), eobItem0);
 
     TransformerTestUtils.assertExtensionQuantityEquals(
-        CcwCodebookVariable.CARR_LINE_MTUS_CNT,
-        BigDecimal.valueOf(claimLine1.getMtusCount()),
-        eobItem0);
+        CcwCodebookVariable.CARR_LINE_MTUS_CNT, claimLine1.getMtusCount(), eobItem0);
 
     TransformerTestUtils.assertAdjudicationReasonEquals(
         CcwCodebookVariable.CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
@@ -250,7 +247,7 @@ public final class CarrierClaimTransformerTest {
     TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(
         eobItem0,
         eob,
-        BigDecimal.valueOf(claimLine1.getServiceCount()),
+        claimLine1.getServiceCount(),
         claimLine1.getPlaceOfServiceCode(),
         claimLine1.getFirstExpenseDate(),
         claimLine1.getLastExpenseDate(),

@@ -201,7 +201,7 @@ final class CarrierClaimTransformer {
             .addExtension(
                 TransformerUtils.createExtensionQuantity(
                     CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT,
-                    Short.valueOf(claimLine.getAnesthesiaUnitCount())));
+                    claimLine.getAnesthesiaUnitCount()));
       }
 
       if (claimLine.getMtusCode().isPresent()) {
@@ -210,10 +210,10 @@ final class CarrierClaimTransformer {
                 eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, claimLine.getMtusCode()));
       }
 
-      if (claimLine.getMtusCount() != 0) {
+      if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
         item.addExtension(
             TransformerUtils.createExtensionQuantity(
-                CcwCodebookVariable.CARR_LINE_MTUS_CNT, Short.valueOf(claimLine.getMtusCount())));
+                CcwCodebookVariable.CARR_LINE_MTUS_CNT, claimLine.getMtusCount()));
       }
 
       // Common item level fields between Carrier and DME
@@ -221,7 +221,7 @@ final class CarrierClaimTransformer {
           item,
           eob,
           claimGroup.getClaimId(),
-          BigDecimal.valueOf(claimLine.getServiceCount()),
+          claimLine.getServiceCount(),
           claimLine.getPlaceOfServiceCode(),
           claimLine.getFirstExpenseDate(),
           claimLine.getLastExpenseDate(),

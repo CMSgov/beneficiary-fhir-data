@@ -258,15 +258,14 @@ public class CarrierClaimTransformerV2 {
       if (line.getAnesthesiaUnitCount() > 0) {
         item.addExtension(
             TransformerUtilsV2.createExtensionQuantity(
-                CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT,
-                Short.valueOf(line.getAnesthesiaUnitCount())));
+                CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT, line.getAnesthesiaUnitCount()));
       }
 
       // CARR_LINE_MTUS_CNT => ExplanationOfBenefit.item.extension
-      if (line.getMtusCount() != 0) {
+      if (!line.getMtusCount().equals(BigDecimal.ZERO)) {
         item.addExtension(
             TransformerUtilsV2.createExtensionQuantity(
-                CcwCodebookVariable.CARR_LINE_MTUS_CNT, Short.valueOf(line.getMtusCount())));
+                CcwCodebookVariable.CARR_LINE_MTUS_CNT, line.getMtusCount()));
       }
 
       // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
@@ -312,7 +311,7 @@ public class CarrierClaimTransformerV2 {
           eob,
           claimGroup.getClaimId(),
           item.getSequence(),
-          BigDecimal.valueOf(line.getServiceCount()),
+          line.getServiceCount(),
           line.getPlaceOfServiceCode(),
           line.getFirstExpenseDate(),
           line.getLastExpenseDate(),

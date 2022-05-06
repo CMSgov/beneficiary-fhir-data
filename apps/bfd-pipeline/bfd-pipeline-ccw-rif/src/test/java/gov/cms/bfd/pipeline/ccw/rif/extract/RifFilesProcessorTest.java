@@ -396,7 +396,7 @@ public final class RifFilesProcessorTest {
     assertEquals("A", claimLine.getProcessingIndicatorCode().get());
     assertEquals(Character.valueOf('0'), claimLine.getPaymentCode().get());
     assertEquals(Character.valueOf('0'), claimLine.getServiceDeductibleCode().get());
-    assertEquals(1, claimLine.getMtusCount());
+    assertEquals(BigDecimal.valueOf(1L), claimLine.getMtusCount());
     assertEquals(Character.valueOf('3'), claimLine.getMtusCode().get());
     assertEquals("H12345", claimLine.getDiagnosisCode().get());
     assertEquals(Character.valueOf('0'), claimLine.getDiagnosisCodeVersion().get());

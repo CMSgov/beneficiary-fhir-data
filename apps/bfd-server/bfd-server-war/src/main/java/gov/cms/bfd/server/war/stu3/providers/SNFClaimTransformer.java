@@ -327,7 +327,7 @@ final class SNFClaimTransformer {
 
     for (SNFClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
-      item.setSequence(claimLine.getLineNumber().intValue());
+      item.setSequence(claimLine.getLineNumber());
 
       item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
