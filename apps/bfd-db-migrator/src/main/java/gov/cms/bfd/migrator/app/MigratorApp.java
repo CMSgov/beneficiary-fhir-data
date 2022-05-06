@@ -77,8 +77,8 @@ public final class MigratorApp {
   }
 
   /**
-   * This method is called to provide an external signal of the migrator app's exit state in the
-   * form of the exit code written to the {@link #PID_FILE}.
+   * Provides an external signal of the migrator app's exit state in the form of the exit code
+   * written to the {@link #PID_FILE}.
    *
    * @param exitCode the code corresponding to the application's exit state
    */
