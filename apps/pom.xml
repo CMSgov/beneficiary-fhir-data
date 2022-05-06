@@ -85,12 +85,14 @@
 		<metrics.version>4.1.29</metrics.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
-		<jackson.version>2.13.1</jackson.version>
+		<jackson.version>2.13.2</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
 		<newrelicAgent.version>7.5.0</newrelicAgent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-
+		<guava.version>31.1-jre</guava.version>
+		<logback.classic.version>1.2.11</logback.classic.version>
+		<postgres.driver.version>42.3.5</postgres.driver.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -150,7 +152,7 @@
 				<!-- Used as a logging backed/target for SLF4J. -->
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.2.8</version>
+				<version>${logback.classic.version}</version>
 			</dependency>
 
 			<dependency>
@@ -254,7 +256,7 @@
 				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.16</version>
+				<version>${postgres.driver.version}</version>
 			</dependency>
 			<dependency>
 				<!-- In-memory database that is used in some tests to speed things up. -->
@@ -283,7 +285,7 @@
 				<!-- Just useful. -->
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>31.0.1-jre</version>
+				<version>${guava.version}</version>
 			</dependency>
 
 			<dependency>
