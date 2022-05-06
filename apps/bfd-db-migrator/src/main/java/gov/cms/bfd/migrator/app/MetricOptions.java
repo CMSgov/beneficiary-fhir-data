@@ -10,11 +10,17 @@ import java.util.Optional;
 public final class MetricOptions implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  /** The secret key granting access to the New Relic Metric API. */
   private final String newRelicMetricKey;
+  /** The name of the app with which metrics are tagged in New Relic. */
   private final String newRelicAppName;
+  /** The host of the New Relic Metric API where telemetry will be sent. */
   private final String newRelicMetricHost;
+  /** The relative path of the New Relic Metric API where telemetry will be sent. */
   private final String newRelicMetricPath;
+  /** The interval between when each batch of metrics is sent to New Relic. */
   private final Integer newRelicMetricPeriod;
+  /** The hostname that will send metrics to New Relic. */
   private final String hostname;
 
   /**
@@ -42,37 +48,61 @@ public final class MetricOptions implements Serializable {
     this.hostname = hostname.orElse(null);
   }
 
-  /** @return the hostname that will send metrics to New Relic */
+  /**
+   * Gets the {@link #hostname}.
+   *
+   * @return the hostname that will send metrics to New Relic
+   */
   public Optional<String> getHostname() {
     return Optional.ofNullable(hostname);
   }
 
-  /** @return the interval between when each batch of metrics is sent to New Relic */
+  /**
+   * Gets the {@link #newRelicMetricPeriod}.
+   *
+   * @return the interval between when each batch of metrics is sent to New Relic
+   */
   public Optional<Integer> getNewRelicMetricPeriod() {
     return Optional.ofNullable(newRelicMetricPeriod);
   }
 
-  /** @return the relative path of the New Relic Metric API where telemetry will be sent */
+  /**
+   * Gets the {@link #newRelicMetricPath}.
+   *
+   * @return the relative path of the New Relic Metric API where telemetry will be sent
+   */
   public Optional<String> getNewRelicMetricPath() {
     return Optional.ofNullable(newRelicMetricPath);
   }
 
-  /** @return the host of the New Relic Metric API where telemetry will be sent */
+  /**
+   * Gets the {@link #newRelicMetricHost}.
+   *
+   * @return the host of the New Relic Metric API where telemetry will be sent
+   */
   public Optional<String> getNewRelicMetricHost() {
     return Optional.ofNullable(newRelicMetricHost);
   }
 
-  /** @return the name of the app with which metrics are tagged in New Relic */
+  /**
+   * Gets the {@link #newRelicAppName}.
+   *
+   * @return the name of the app with which metrics are tagged in New Relic
+   */
   public Optional<String> getNewRelicAppName() {
     return Optional.ofNullable(newRelicAppName);
   }
 
-  /** @return the secret key granting access to the New Relic Metric API */
+  /**
+   * Gets the {@link #newRelicMetricKey}.
+   *
+   * @return the secret key granting access to the New Relic Metric API
+   */
   public Optional<String> getNewRelicMetricKey() {
     return Optional.ofNullable(newRelicMetricKey);
   }
 
-  /** @see Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
