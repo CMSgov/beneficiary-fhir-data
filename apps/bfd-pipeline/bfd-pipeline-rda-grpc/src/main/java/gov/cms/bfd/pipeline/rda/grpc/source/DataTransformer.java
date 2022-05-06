@@ -152,6 +152,36 @@ public class DataTransformer {
   }
 
   /**
+   * Copies an optional field only if its value exists and is non-empty. Uses lambda expressions for
+   * the existence test as well as the value extraction. Optional fields must be nullable at the
+   * database level but must return non-null values when the supplier is called.
+   *
+   * <p>Checks the nullability and length of a string and then delivers it to the Consumer if the
+   * checks are successful. Valid null or empty string values are silently accepted without calling
+   * the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyOptionalNonEmptyString(
+      String fieldName,
+      int minLength,
+      int maxLength,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<String> copier) {
+    if (exists.getAsBoolean() && !Strings.isNullOrEmpty(value.get())) {
+      return copyString(fieldName, false, minLength, maxLength, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
    * Checks the nullability and length of a string and then delivers it to the Consumer if the
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    * Ensures that the actual value exactly matches an expected value. This is used to ensure an

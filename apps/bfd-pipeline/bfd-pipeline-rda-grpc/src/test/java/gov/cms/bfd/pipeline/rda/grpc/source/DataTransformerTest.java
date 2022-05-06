@@ -86,6 +86,29 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyOptionalNonEmptyString} method. */
+  @Test
+  public void testCopyOptionalNonEmptyString() {
+    transformer
+        .copyOptionalNonEmptyString("value-not-present", 1, 5, () -> false, () -> null, copied::add)
+        .copyOptionalNonEmptyString("null-value-present", 1, 5, () -> true, () -> null, copied::add)
+        .copyOptionalNonEmptyString("empty-value-present", 1, 5, () -> true, () -> "", copied::add)
+        .copyOptionalNonEmptyString(
+            "non-empty-value-present", 1, 5, () -> true, () -> "A", copied::add)
+        .copyOptionalNonEmptyString("length-below-min", 2, 5, () -> true, () -> "1", copied::add)
+        .copyOptionalNonEmptyString(
+            "length-above-max", 2, 5, () -> true, () -> "123456", copied::add);
+
+    assertEquals(ImmutableList.of("A"), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage(
+                "length-below-min", "invalid length: expected=[2,5] actual=1"),
+            new DataTransformer.ErrorMessage(
+                "length-above-max", "invalid length: expected=[2,5] actual=6")),
+        transformer.getErrors());
+  }
+
   /** Tests the {@link DataTransformer#copyCharacter} method. */
   @Test
   public void testCopyCharacter() {
