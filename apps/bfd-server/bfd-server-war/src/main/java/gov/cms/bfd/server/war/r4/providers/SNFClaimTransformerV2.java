@@ -321,9 +321,13 @@ public class SNFClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
+<<<<<<< HEAD
           line.getNationalDrugCodeQuantity().isPresent()
               ? Optional.of(line.getNationalDrugCodeQuantity().get())
               : Optional.empty(),
+=======
+          line.getNationalDrugCodeQuantity(),
+>>>>>>> 0b12224a51c2a2b49e114ec6262a4f05a5f0bd12
           line.getNationalDrugCodeQualifierCode());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue

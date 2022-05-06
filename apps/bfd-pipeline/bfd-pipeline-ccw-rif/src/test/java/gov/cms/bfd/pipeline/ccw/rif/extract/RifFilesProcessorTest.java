@@ -604,7 +604,11 @@ public final class RifFilesProcessorTest {
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals(567834L, claimGroup.getBeneficiaryId());
     assertEquals(777777777L, claimGroup.getClaimId());
+<<<<<<< HEAD
     assertEquals(BigDecimal.valueOf(900L), claimGroup.getClaimGroupId());
+=======
+    assertEquals(900L, claimGroup.getClaimGroupId());
+>>>>>>> 0b12224a51c2a2b49e114ec6262a4f05a5f0bd12
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("20", claimGroup.getClaimTypeCode());
     assertEquals(LocalDate.of(2013, 12, 01), claimGroup.getDateFrom());
