@@ -31,6 +31,9 @@ public class ClaimDaoIT {
     testUtils.truncateTables();
   }
 
+  /**
+   * Verifies that doing a claims search with a known MBI will return the expected number of claims.
+   */
   @Test
   public void verifyQueryWithKnownMbiFindsMatch() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
@@ -39,6 +42,7 @@ public class ClaimDaoIT {
     assertEquals(2, claims.size());
   }
 
+  /** Verifies that doing a claims search with an unknown MBI will return no claims. */
   @Test
   public void verifyQueryWithUnknownMbiFindsNothing() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
@@ -47,6 +51,10 @@ public class ClaimDaoIT {
     assertEquals(0, claims.size());
   }
 
+  /**
+   * Verifies that doing a claims search with a known MBI hash will return the expected number of
+   * claims.
+   */
   @Test
   public void verifyQueryWithKnownMbiHashFindsMatch() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
@@ -55,6 +63,7 @@ public class ClaimDaoIT {
     assertEquals(2, claims.size());
   }
 
+  /** Verifies that doing a claims search with an unknown MBI hash will return no claims. */
   @Test
   public void verifyQueryWithUnknownMbiHashFindsNothing() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
@@ -63,6 +72,10 @@ public class ClaimDaoIT {
     assertEquals(0, claims.size());
   }
 
+  /**
+   * Verifies that doing a claims search with an old MBI hash returns no results if old hash was
+   * disabled.
+   */
   @Test
   public void verifyQueryWithOldHashDisabledIgnoresOldHash() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
@@ -71,6 +84,10 @@ public class ClaimDaoIT {
     assertEquals(0, claims.size());
   }
 
+  /**
+   * Verifies that doing a claims search with an MBI hash returns the expected number of claims if
+   * old hash was enabled.
+   */
   @Test
   public void verifyQueryWithOldHashEnabledFindsHash() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
@@ -79,6 +96,10 @@ public class ClaimDaoIT {
     assertEquals(2, claims.size());
   }
 
+  /**
+   * Verifies that doing a claims search with an old MBI hash returns the expected number of claims
+   * if old hash was enabled.
+   */
   @Test
   public void verifyQueryWithOldHashEnabledFindsOldHash() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
@@ -87,6 +108,10 @@ public class ClaimDaoIT {
     assertEquals(2, claims.size());
   }
 
+  /**
+   * Verifies that doing a claims search with an unknown MBI hash returns no results even with old
+   * hash enabled
+   */
   @Test
   public void verifyQueryWithOldHashEnabledAndUnknownHashFindsNothing() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
@@ -95,6 +120,13 @@ public class ClaimDaoIT {
     assertEquals(0, claims.size());
   }
 
+  /**
+   * Helper function to run the common MBI lookup method on the {@link ClaimDao}.
+   *
+   * @param claimDao The {@link ClaimDao} to execute the query on.
+   * @param mbi The MBI value to lookup.
+   * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI.
+   */
   private List<RdaFissClaim> runFissMbiQuery(ClaimDao claimDao, String mbi) {
     return claimDao.findAllByMbiAttribute(
         RdaFissClaim.class,
@@ -103,9 +135,18 @@ public class ClaimDaoIT {
         false,
         null,
         null,
+        RdaFissClaim.Fields.dcn,
         RdaFissClaim.Fields.stmtCovToDate);
   }
 
+  /**
+   * Helper function to run the common MBI hash lookup method on the {@link ClaimDao}.
+   *
+   * @param claimDao The {@link ClaimDao} to execute the query on.
+   * @param mbiHash The MBI hash value to lookup.
+   * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI
+   *     hash.
+   */
   private List<RdaFissClaim> runFissMbiHashQuery(ClaimDao claimDao, String mbiHash) {
     return claimDao.findAllByMbiAttribute(
         RdaFissClaim.class,
@@ -114,6 +155,7 @@ public class ClaimDaoIT {
         true,
         null,
         null,
+        RdaFissClaim.Fields.dcn,
         RdaFissClaim.Fields.stmtCovToDate);
   }
 }

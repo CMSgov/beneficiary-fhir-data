@@ -96,7 +96,7 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
               JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
-          List<RdaFissClaim> claims = getPreAdjFissClaims(entityManager);
+          List<RdaFissClaim> claims = getRdaFissClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaFissClaim resultClaim : claims) {
             FissClaim expected = findMatchingFissClaim(expectedClaims, resultClaim);
@@ -144,7 +144,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getMessage().contains("invalid length"));
                     }
                   });
-          List<RdaFissClaim> claims = getPreAdjFissClaims(entityManager);
+          List<RdaFissClaim> claims = getRdaFissClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -188,7 +188,7 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
               JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
-          List<RdaMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          List<RdaMcsClaim> claims = getRdaMcsClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaMcsClaim resultClaim : claims) {
             McsClaim expected = findMatchingMcsClaim(expectedClaims, resultClaim);
@@ -238,7 +238,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                     }
                   });
-          List<RdaMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          List<RdaMcsClaim> claims = getRdaMcsClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -264,17 +264,17 @@ public class RdaLoadJobIT {
   }
 
   private void assertTablesAreEmpty(EntityManager entityManager) throws Exception {
-    assertEquals(0, getPreAdjFissClaims(entityManager).size());
-    assertEquals(0, getPreAdjMcsClaims(entityManager).size());
+    assertEquals(0, getRdaFissClaims(entityManager).size());
+    assertEquals(0, getRdaMcsClaims(entityManager).size());
   }
 
-  private List<RdaMcsClaim> getPreAdjMcsClaims(EntityManager entityManager) {
+  private List<RdaMcsClaim> getRdaMcsClaims(EntityManager entityManager) {
     return entityManager
         .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
         .getResultList();
   }
 
-  private List<RdaFissClaim> getPreAdjFissClaims(EntityManager entityManager) {
+  private List<RdaFissClaim> getRdaFissClaims(EntityManager entityManager) {
     return entityManager
         .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
         .getResultList();

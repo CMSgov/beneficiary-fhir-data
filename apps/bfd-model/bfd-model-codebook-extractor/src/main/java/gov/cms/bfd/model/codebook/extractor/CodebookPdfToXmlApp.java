@@ -73,6 +73,8 @@ public final class CodebookPdfToXmlApp {
   }
 
   /**
+   * Build a list of functions that will modify or replace variables as needed.
+   *
    * @return the {@link List} of "variable fixer" {@link Function}s, each of which will be given an
    *     opportunity to modify or replace each {@link Variable}
    */
@@ -96,6 +98,8 @@ public final class CodebookPdfToXmlApp {
   }
 
   /**
+   * Writes the given codebook as xml to a file, overwriting any file that already exists.
+   *
    * @param codebook the {@link Codebook} to write out
    * @param outputFile the {@link Path} of the file to write the {@link Codebook} out as XML to
    *     (which will be overwritten if it already exists)
