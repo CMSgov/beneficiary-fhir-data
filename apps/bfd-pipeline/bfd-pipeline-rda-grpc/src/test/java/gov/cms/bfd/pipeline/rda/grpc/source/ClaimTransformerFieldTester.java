@@ -55,7 +55,34 @@ public abstract class ClaimTransformerFieldTester<
           Function<TTestEntity, String> getter,
           String fieldLabel,
           int maxLength) {
-    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 0, maxLength);
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 0, maxLength, false);
+  }
+
+  /**
+   * Verifies that a string field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object, the minimum and maximum
+   * length validations are performed, and empty string values are ignored. This method uses a
+   * minimum valid length of 1 of the field.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @param minLength minimum valid length for the string field
+   * @param maxLength maximum valid length for the string field
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyStringFieldCopiedCorrectlyEmptyIgnored(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          String fieldLabel,
+          int maxLength) {
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 1, maxLength, true);
   }
 
   /**
@@ -80,7 +107,7 @@ public abstract class ClaimTransformerFieldTester<
           Function<TTestEntity, String> getter,
           String fieldLabel,
           int maxLength) {
-    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 1, maxLength);
+    return verifyStringFieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 1, maxLength, false);
   }
 
   /**
@@ -97,6 +124,7 @@ public abstract class ClaimTransformerFieldTester<
    *     messages}
    * @param minLength minimum valid length for the string field
    * @param maxLength maximum valid length for the string field
+   * @param ignoreEmpty when true indicates that empty strings do not generate errors for minLength
    * @return this object so that calls can be chained
    */
   @CanIgnoreReturnValue
@@ -106,7 +134,8 @@ public abstract class ClaimTransformerFieldTester<
           Function<TTestEntity, String> getter,
           String fieldLabel,
           int minLength,
-          int maxLength) {
+          int maxLength,
+          boolean ignoreEmpty) {
     final BiConsumer<TClaimBuilder, String> wrappedSetter =
         (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
     final Function<TClaimEntity, String> wrappedGetter =
@@ -115,7 +144,8 @@ public abstract class ClaimTransformerFieldTester<
     // limits the length os string tested for clob/text fields
     verifyStringFieldTransformationCorrect(
         wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
-    if (minLength > 0) {
+    // skip the minLength check if empty strings are being ignored and the minLength is 1
+    if (minLength > 0 && (minLength > 1 || !ignoreEmpty)) {
       verifyStringFieldLengthLimitsEnforced(
           wrappedSetter, wrappedFieldLabel, minLength, maxLength, minLength - 1);
     }
