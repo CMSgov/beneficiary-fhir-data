@@ -162,8 +162,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   @Override
   public int writeMessages(String apiVersion, List<TMessage> messages) throws ProcessingException {
-    final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
-    return writeClaims(claims);
+    try {
+      final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
+      return writeClaims(claims);
+    } catch (DataTransformer.TransformationException e) {
+      throw new ProcessingException(e, 0);
+    }
   }
 
   /**
@@ -246,8 +250,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     logger.debug("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
-  private List<RdaChange<TClaim>> transformMessages(
-      String apiVersion, Collection<TMessage> messages) throws ProcessingException {
+  @VisibleForTesting
+  List<RdaChange<TClaim>> transformMessages(String apiVersion, Collection<TMessage> messages)
+      throws ProcessingException {
     var claims = new ArrayList<RdaChange<TClaim>>();
     for (TMessage message : messages) {
       try {

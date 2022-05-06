@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -224,8 +224,9 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
    *
    * @param <TMessage> the RDA API message class
    */
-  @AllArgsConstructor
-  private static class Entry<TMessage> {
+  @Data
+  @VisibleForTesting
+  static class Entry<TMessage> {
     private final String apiVersion;
     private final TMessage object;
   }
@@ -243,13 +244,13 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
 
     void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry) {
       try {
-        final String claimKey = sink.getDedupKeyForMessage(entry.object);
-        final TClaim claim = sink.transformMessage(entry.apiVersion, entry.object);
-        allMessages.add(entry.object);
+        final String claimKey = sink.getDedupKeyForMessage(entry.getObject());
+        final TClaim claim = sink.transformMessage(entry.getApiVersion(), entry.getObject());
+        allMessages.add(entry.getObject());
         uniqueClaims.put(claimKey, claim);
       } catch (DataTransformer.TransformationException transformationException) {
         try {
-          sink.writeError(entry.object, transformationException);
+          sink.writeError(entry.getObject(), transformationException);
         } catch (IOException e) {
           transformationException.addSuppressed(e);
         }
