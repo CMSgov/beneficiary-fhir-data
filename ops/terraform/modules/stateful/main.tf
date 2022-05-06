@@ -122,6 +122,7 @@ module "aurora" {
 ## S3 Buckets
 #
 
+
 # admin bucket for adminstrative stuff
 module "admin" {
   source     = "../resources/s3"
@@ -196,6 +197,21 @@ resource "aws_iam_user" "etl" {
 resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
   user       = aws_iam_user.etl.name
   policy_arn = aws_iam_policy.etl_rw_s3.arn
+}
+
+
+## This is where cloudwatch dashboards are managed. 
+#
+module "prod_dashboard" {
+  source             = "../resources/bfd_cw_dashboards"
+  bfd_environment_id = "bfd-prod/bfd-server"
+  dashboard_name     = "bfd-server-prod"
+}
+
+module "prod_sbx_dashboard" {
+  source             = "../resources/bfd_cw_dashboards"
+  bfd_environment_id = "bfd-prod-sbx/bfd-server"
+  dashboard_name     = "bfd-server-prod-sbx"
 }
 
 
