@@ -69,6 +69,29 @@ data "aws_iam_policy_document" "s3_access" {
   }
 
   statement {
+    sid = "s3BucketsAppLogs"
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:HeadBucket",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+    ]
+    resources = ["arn:aws:s3:::bfd-insights-bfd-app-logs"]
+  }
+
+  statement {
+    sid = "s3ObjectsAppLogs"
+    actions = [
+      "s3:ListMultipartUploadParts",
+      "s3:AbortMultipartUpload",
+      "s3:GetObject*",
+      "s3:PutObject*",
+      "s3:DeleteObject*"
+    ]
+    resources = ["arn:aws:s3:::bfd-insights-bfd-app-logs/*"]
+  }
+
+  statement {
     sid = "CMK"
     actions = [
       "kms:Encrypt",
