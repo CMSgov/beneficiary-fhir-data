@@ -408,7 +408,7 @@ public class FissClaimTransformerTest {
                             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_EMPLOYEE)
                         .setBeneLastName("last-name")
                         .setBeneFirstName("first-name")
-                        .setBeneMidInit("Z")
+                        .setBeneMidInit("")
                         .setBeneSsnHic("ssn-hic")
                         .setInsuredGroupName("group-name")
                         .setBeneDob("2020-09-10")
@@ -440,7 +440,6 @@ public class FissClaimTransformerTest {
     payer.setBeneRel("08");
     payer.setBeneLastName("last-name");
     payer.setBeneFirstName("first-name");
-    payer.setBeneMidInit("Z");
     payer.setBeneSsnHic("ssn-hic");
     payer.setInsuredGroupName("group-name");
     payer.setBeneDob(LocalDate.of(2020, 9, 10));
@@ -1448,7 +1447,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneMidInit() {
     new BeneZPayerFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyIgnored(
             FissBeneZPayer.Builder::setBeneMidInit,
             RdaFissPayer::getBeneMidInit,
             RdaFissPayer.Fields.beneMidInit,
