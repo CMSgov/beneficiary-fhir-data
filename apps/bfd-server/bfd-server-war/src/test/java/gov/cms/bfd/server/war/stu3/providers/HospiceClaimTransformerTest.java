@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -47,7 +48,8 @@ public final class HospiceClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob);
   }

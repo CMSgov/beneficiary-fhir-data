@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -88,6 +89,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   private R4EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
   private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  private NPIOrgDataLookup npiOrgDataLookup;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -117,6 +119,12 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @Inject
   public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+  }
+
+  /** @param npiOrgDataLookup the {@link NPIOrgDataLookup } to use */
+  @Inject
+  public void setnpiOrgDataLookup(NPIOrgDataLookup npiOrgDataLookup) {
+    this.npiOrgDataLookup = npiOrgDataLookup;
   }
 
   /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
@@ -193,7 +201,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             .getTransformer()
             .transform(
                 new TransformerContext(
-                    metricRegistry, Optional.of(includeTaxNumbers), drugCodeDisplayLookup),
+                    metricRegistry,
+                    Optional.of(includeTaxNumbers),
+                    drugCodeDisplayLookup,
+                    npiOrgDataLookup),
                 claimEntity);
     return eob;
   }
@@ -293,7 +304,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.CARRIER,
               findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.DME)) {
@@ -302,7 +314,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
@@ -311,7 +324,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.HHA,
               findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
@@ -320,7 +334,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.HOSPICE,
               findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
@@ -330,7 +345,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               findClaimTypeByPatient(
                   ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
@@ -340,7 +356,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               findClaimTypeByPatient(
                   ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.PDE)) {
@@ -349,7 +366,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.PDE,
               findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (claimTypes.contains(ClaimTypeV2.SNF)) {
@@ -358,7 +376,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.SNF,
               findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgDataLookup));
     }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
@@ -504,7 +523,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       ClaimTypeV2 claimType,
       List<?> claims,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgDataLookup npiOrgDataLookup) {
     return claims.stream()
         .map(
             c ->
@@ -512,7 +532,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
                     .getTransformer()
                     .transform(
                         new TransformerContext(
-                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
+                            metricRegistry,
+                            includeTaxNumbers,
+                            drugCodeDisplayLookup,
+                            npiOrgDataLookup),
                         c))
         .collect(Collectors.toList());
   }

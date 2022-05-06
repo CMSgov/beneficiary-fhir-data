@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
@@ -51,7 +52,8 @@ public final class DMEClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob, Optional.of(true));
   }

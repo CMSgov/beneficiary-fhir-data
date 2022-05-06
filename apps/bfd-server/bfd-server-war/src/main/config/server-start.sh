@@ -177,6 +177,10 @@ fi
 # makes the ITs more stable.
 includeFakeDrugCode="true"
 
+# For testing purposes, we start the server with the property that causes a fake npi number to be available which
+# makes the ITs more stable.
+includeFakeNPINumber="true"
+
 # To enable JVM debugging, uncomment and add this line to the server start command below.
 #	"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 
@@ -198,6 +202,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
 	"-DbfdServer.include.fake.drug.code=${includeFakeDrugCode}" \
+	"-DbfdServer.include.fake.npi.number=${includeFakeNPINumber}" \
 	>"${serverLog}" 2>&1 \
 	&
 

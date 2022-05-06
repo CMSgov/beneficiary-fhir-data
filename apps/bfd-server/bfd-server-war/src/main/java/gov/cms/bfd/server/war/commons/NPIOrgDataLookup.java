@@ -32,10 +32,10 @@ public class NPIOrgDataLookup {
   private static NPIOrgDataLookup npiOrgLookupForProduction;
 
   /**
-   * Factory method for creating a {@link NPIOrgDataLookup } for testing that includes the
-   * fake org name.
+   * Factory method for creating a {@link NPIOrgDataLookup } for testing that includes the fake org
+   * name.
    *
-   * @return the {@link NPIOrgDataLookup
+   * @return the {@link NPIOrgDataLookup }
    */
   public static NPIOrgDataLookup createNpiOrgLookupForTesting() {
     if (npiOrgLookupForTesting == null) {
@@ -107,10 +107,13 @@ public class NPIOrgDataLookup {
                 .getResourceAsStream(NPIDataUtilityApp.NPI_RESOURCE);
         final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
       String line = "";
+      // skip first line which is header
+      npiOrgIn.readLine();
       while ((line = npiOrgIn.readLine()) != null) {
-        String ndcProductColumns[] = line.split("\t");
+        String npiProductColumns[] = line.split("\t");
         try {
-          npiOrgHashMap.put(ndcProductColumns[0], ndcProductColumns[1]);
+          npiOrgHashMap.put(
+              npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
         } catch (StringIndexOutOfBoundsException e) {
           continue;
         }

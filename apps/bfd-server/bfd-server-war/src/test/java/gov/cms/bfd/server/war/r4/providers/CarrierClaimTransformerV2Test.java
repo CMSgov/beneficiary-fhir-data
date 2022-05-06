@@ -14,6 +14,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.text.SimpleDateFormat;
@@ -77,7 +78,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -102,7 +104,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             claim));
   }
 
@@ -121,7 +124,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

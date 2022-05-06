@@ -13,6 +13,7 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -51,7 +52,8 @@ public final class InpatientClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgDataLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob);
   }

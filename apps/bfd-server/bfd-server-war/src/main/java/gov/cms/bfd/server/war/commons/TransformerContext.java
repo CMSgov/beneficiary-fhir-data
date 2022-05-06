@@ -17,19 +17,24 @@ public class TransformerContext {
   private final Optional<Boolean> includeTaxNumbers;
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  /** The {@link NPIOrgDataLookup} is to provide what npiOrgDataLookupto return */
+  private final NPIOrgDataLookup npiOrgDataLookup;
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param includeTaxNumbers the {@link Optional} populated with an {@link Boolean} to use
    * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use
+   * @param npiOrgDataLookup the {@link NPIOrgDataLookup} to use
    */
   public TransformerContext(
       MetricRegistry metricRegistry,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgDataLookup npiOrgDataLookup) {
     this.metricRegistry = metricRegistry;
     this.includeTaxNumbers = includeTaxNumbers;
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+    this.npiOrgDataLookup = npiOrgDataLookup;
   }
 
   /** @return the {@link MetricRegistry} */
@@ -45,5 +50,10 @@ public class TransformerContext {
   /** @return the {@link FdaDrugCodeDisplayLookup} */
   public FdaDrugCodeDisplayLookup getDrugCodeDisplayLookup() {
     return drugCodeDisplayLookup;
+  }
+
+  /** @return the {@link NPIOrgDataLookup} */
+  public NPIOrgDataLookup getNPIOrgDataLookup() {
+    return npiOrgDataLookup;
   }
 }
