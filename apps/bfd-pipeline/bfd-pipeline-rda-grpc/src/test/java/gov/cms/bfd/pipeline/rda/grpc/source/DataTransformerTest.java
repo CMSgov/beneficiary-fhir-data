@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for the {@link DataTransformer} class. */
 public class DataTransformerTest {
   private DataTransformer transformer;
   private List<Object> copied;
@@ -21,8 +22,9 @@ public class DataTransformerTest {
     copied = new ArrayList<>();
   }
 
+  /** Tests the {@code copyString} method. */
   @Test
-  public void copyString() {
+  public void testCopyString() {
     transformer
         .copyString("length-one-ok", false, 1, 5, "1", copied::add)
         .copyString("length-five-ok", false, 1, 5, "12345", copied::add)
@@ -42,8 +44,32 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@code copyOptionalNonEmptyString} method. */
   @Test
-  public void copyCharacter() {
+  public void testCopyOptionalNonEmptyString() {
+    transformer
+        .copyOptionalNonEmptyString("value-not-present", 1, 5, () -> false, () -> null, copied::add)
+        .copyOptionalNonEmptyString("null-value-present", 1, 5, () -> true, () -> null, copied::add)
+        .copyOptionalNonEmptyString("empty-value-present", 1, 5, () -> true, () -> "", copied::add)
+        .copyOptionalNonEmptyString(
+            "non-empty-value-present", 1, 5, () -> true, () -> "A", copied::add)
+        .copyOptionalNonEmptyString("length-below-min", 2, 5, () -> true, () -> "1", copied::add)
+        .copyOptionalNonEmptyString(
+            "length-above-max", 2, 5, () -> true, () -> "123456", copied::add);
+
+    assertEquals(ImmutableList.of("A"), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage(
+                "length-below-min", "invalid length: expected=[2,5] actual=1"),
+            new DataTransformer.ErrorMessage(
+                "length-above-max", "invalid length: expected=[2,5] actual=6")),
+        transformer.getErrors());
+  }
+
+  /** Tests the {@code copyCharacter} method. */
+  @Test
+  public void testCopyCharacter() {
     transformer
         .copyCharacter("length-one-ok", "1", copied::add)
         .copyCharacter("length-below-min", "", copied::add)
@@ -59,8 +85,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@code copyDate} method. */
   @Test
-  public void copyDate() {
+  public void testCopyDate() {
     transformer
         .copyDate("valid-1", false, "2021-03-01", copied::add)
         .copyDate("invalid-1", true, "2021/03/01", copied::add)
@@ -77,8 +104,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@code copyAmount} method. */
   @Test
-  public void copyAmount() {
+  public void testCopyAmount() {
     transformer
         .copyAmount("valid-1", false, "123.05", copied::add)
         .copyAmount("invalid-1", true, "not a number", copied::add)
@@ -98,8 +126,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@code copyEnumAsCharacter} method. */
   @Test
-  public void copyEnumAsCharacter() {
+  public void testCopyEnumAsCharacter() {
     transformer
         .copyEnumAsCharacter(
             "no-value",
@@ -127,8 +156,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@code copyEnumAsString} method. */
   @Test
-  public void copyEnumAsString() {
+  public void testCopyEnumAsString() {
     transformer
         .copyEnumAsString(
             "no-value",
@@ -170,8 +200,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@code copyExpectedValue} method. */
   @Test
-  public void copyExpectedValue() {
+  public void testCopyExpectedValue() {
     transformer
         .copyStringWithExpectedValue("both-null", true, 1, 1, null, null, copied::add)
         .copyStringWithExpectedValue("both-same", true, 1, 10, "abcdef", "abcdef", copied::add)

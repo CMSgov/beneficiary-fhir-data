@@ -1266,7 +1266,7 @@ public class FissClaimTransformer {
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneFirstName(),
         () -> from.getBeneZPayer().getBeneFirstName(),
         to::setBeneFirstName);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaFissPayer.Fields.beneMidInit,
         1,
         1,
