@@ -1321,10 +1321,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "hospice_claims",
             "inpatient_claims",
             "outpatient_claims",
-<<<<<<< HEAD
-            "snf_claims",
-=======
->>>>>>> 0b12224a51c2a2b49e114ec6262a4f05a5f0bd12
             "partd_events");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())

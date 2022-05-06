@@ -374,7 +374,7 @@ public final class RifFilesProcessorTest {
     assertEquals("41", claimLine.getProviderSpecialityCode().get());
     assertEquals(Character.valueOf('1'), claimLine.getProviderParticipatingIndCode().get());
     assertEquals('0', claimLine.getReducedPaymentPhysicianAsstCode());
-    assertEquals(1, claimLine.getServiceCount());
+    assertEquals(BigDecimal.valueOf(1L), claimLine.getServiceCount());
     assertEquals('1', claimLine.getCmsServiceTypeCode());
     assertEquals("11", claimLine.getPlaceOfServiceCode());
     assertEquals("15", claimLine.getLinePricingLocalityCode());
@@ -604,11 +604,7 @@ public final class RifFilesProcessorTest {
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals(567834L, claimGroup.getBeneficiaryId());
     assertEquals(777777777L, claimGroup.getClaimId());
-<<<<<<< HEAD
-    assertEquals(BigDecimal.valueOf(900L), claimGroup.getClaimGroupId());
-=======
     assertEquals(900L, claimGroup.getClaimGroupId());
->>>>>>> 0b12224a51c2a2b49e114ec6262a4f05a5f0bd12
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("20", claimGroup.getClaimTypeCode());
     assertEquals(LocalDate.of(2013, 12, 01), claimGroup.getDateFrom());
