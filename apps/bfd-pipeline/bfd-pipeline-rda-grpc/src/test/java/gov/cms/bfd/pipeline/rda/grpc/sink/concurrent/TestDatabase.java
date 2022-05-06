@@ -104,7 +104,8 @@ public class TestDatabase {
     }
 
     @Override
-    public void writeError(Message message, DataTransformer.TransformationException exception)
+    public void writeError(
+        String apiVersion, Message message, DataTransformer.TransformationException exception)
         throws IOException {
       // Do nothing
     }

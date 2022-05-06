@@ -63,7 +63,8 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
     return writeMessages(dataVersion, List.of(object));
   }
 
-  default void writeError(TMessage message, DataTransformer.TransformationException exception)
+  default void writeError(
+      String apiVersion, TMessage message, DataTransformer.TransformationException exception)
       throws IOException {
     throw new UnsupportedOperationException();
   }

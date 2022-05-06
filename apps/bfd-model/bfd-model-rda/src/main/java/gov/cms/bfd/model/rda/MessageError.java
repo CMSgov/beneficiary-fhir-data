@@ -57,27 +57,40 @@ public class MessageError {
   @EqualsAndHashCode.Include
   private ClaimType claimType;
 
-  /** Timestamp when we inserted the claim from this message into our database. */
-  @Column(name = "received_date")
-  private Instant receivedDate;
+  /**
+   * String specifying the source of the data contained in this record. Generally this will be the
+   * version string returned by the RDA API server but when populating data from mock server it will
+   * also include information about the mode the server was running in.
+   */
+  @Column(name = "api_source", length = 24, nullable = false)
+  private String apiSource;
 
-  @Column(name = "errors")
-  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType")
+  /** Timestamp when we first inserted the error into our database. */
+  @Column(name = "created_date", nullable = false, updatable = false)
+  private Instant createdDate;
+
+  /** Timestamp when we last updated the error in our database. */
+  @Column(name = "updated_date", nullable = false)
+  private Instant updatedDate;
+
+  @Column(name = "errors", nullable = false, columnDefinition = "varchar") // Makes HSQL happy
+  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType") // Makes Postgres happy
   private String errors;
 
   /** The original message that was received, represented as a json string */
-  @Column(name = "message")
-  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType")
+  @Column(name = "message", nullable = false, columnDefinition = "varchar") // Makes HSQL happy
+  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType") // Makes Postgres happy
   private String message;
 
   @PrePersist
   protected void onCreate() {
-    receivedDate = Instant.now();
+    createdDate = Instant.now();
+    updatedDate = Instant.now();
   }
 
   @PreUpdate
   protected void onUpdate() {
-    receivedDate = Instant.now();
+    updatedDate = Instant.now();
   }
 
   /** PK class for the MessageError table */

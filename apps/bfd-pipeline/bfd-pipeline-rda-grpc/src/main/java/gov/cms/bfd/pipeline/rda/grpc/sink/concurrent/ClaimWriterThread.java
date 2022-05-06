@@ -250,7 +250,7 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
         uniqueClaims.put(claimKey, claim);
       } catch (DataTransformer.TransformationException transformationException) {
         try {
-          sink.writeError(entry.getObject(), transformationException);
+          sink.writeError(entry.getApiVersion(), entry.getObject(), transformationException);
         } catch (IOException e) {
           transformationException.addSuppressed(e);
         }

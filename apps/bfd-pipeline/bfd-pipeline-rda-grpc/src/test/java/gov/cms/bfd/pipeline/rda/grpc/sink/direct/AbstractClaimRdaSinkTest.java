@@ -69,7 +69,7 @@ public class AbstractClaimRdaSinkTest {
 
     doNothing()
         .when(sinkSpy)
-        .writeError(anyString(), any(DataTransformer.TransformationException.class));
+        .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
     List<RdaChange<String>> expected =
         messages.stream().map(this::createChangeClaimFromMessage).collect(Collectors.toList());
@@ -80,7 +80,7 @@ public class AbstractClaimRdaSinkTest {
 
     assertClaimChangesEquals(expected, wrapper.unwrap());
     verify(sinkSpy, times(0))
-        .writeError(anyString(), any(DataTransformer.TransformationException.class));
+        .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
   }
 
   @Test
@@ -126,7 +126,7 @@ public class AbstractClaimRdaSinkTest {
 
     doNothing()
         .when(sinkSpy)
-        .writeError(anyString(), any(DataTransformer.TransformationException.class));
+        .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
     List<RdaChange<String>> expected =
         messages.stream().map(this::createChangeClaimFromMessage).collect(Collectors.toList());
@@ -138,7 +138,8 @@ public class AbstractClaimRdaSinkTest {
         () -> wrapper.wrap(sinkSpy.transformMessages(apiVersion, messages)));
 
     verify(sinkSpy, times(1))
-        .writeError(eq(badMessage), any(DataTransformer.TransformationException.class));
+        .writeError(
+            eq(apiVersion), eq(badMessage), any(DataTransformer.TransformationException.class));
   }
 
   private RdaChange<String> createChangeClaimFromMessage(String message) {
@@ -204,7 +205,8 @@ public class AbstractClaimRdaSinkTest {
     }
 
     @Override
-    MessageError createMessageError(String change, List<DataTransformer.ErrorMessage> errors)
+    MessageError createMessageError(
+        String apiVersion, String change, List<DataTransformer.ErrorMessage> errors)
         throws IOException {
       return null;
     }

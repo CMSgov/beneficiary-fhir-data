@@ -58,12 +58,14 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   }
 
   @Override
-  MessageError createMessageError(FissClaimChange change, List<DataTransformer.ErrorMessage> errors)
+  MessageError createMessageError(
+      String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)
       throws IOException {
     return MessageError.builder()
         .sequenceNumber(change.getSeq())
         .claimId(change.getClaim().getDcn())
         .claimType(MessageError.ClaimType.FISS)
+        .apiSource(apiVersion)
         .errors(mapper.writeValueAsString(errors))
         .message(writer.print(change))
         .build();

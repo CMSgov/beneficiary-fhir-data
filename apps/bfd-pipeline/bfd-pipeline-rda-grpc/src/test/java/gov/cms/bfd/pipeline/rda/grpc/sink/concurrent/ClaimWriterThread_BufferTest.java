@@ -83,13 +83,16 @@ public class ClaimWriterThread_BufferTest {
 
     doNothing()
         .when(mockSink)
-        .writeError(anyString(), any(DataTransformer.TransformationException.class));
+        .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
     ClaimWriterThread.Buffer<String, String> buffer = new ClaimWriterThread.Buffer<>();
 
     assertThrows(
         DataTransformer.TransformationException.class, () -> buffer.add(mockSink, mockEntry));
     verify(mockSink, times(1))
-        .writeError(eq(mockMessage), any(DataTransformer.TransformationException.class));
+        .writeError(
+            eq(mockApiVersion),
+            eq(mockMessage),
+            any(DataTransformer.TransformationException.class));
   }
 }

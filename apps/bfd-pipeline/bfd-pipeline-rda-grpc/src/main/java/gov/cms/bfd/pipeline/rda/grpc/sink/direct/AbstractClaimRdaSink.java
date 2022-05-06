@@ -145,10 +145,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   @Override
-  public void writeError(TMessage message, DataTransformer.TransformationException exception)
+  public void writeError(
+      String apiVersion, TMessage message, DataTransformer.TransformationException exception)
       throws IOException {
     entityManager.getTransaction().begin();
-    entityManager.merge(createMessageError(message, exception.getErrors()));
+    entityManager.merge(createMessageError(apiVersion, message, exception.getErrors()));
     entityManager.getTransaction().commit();
   }
 
@@ -236,7 +237,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
   abstract MessageError createMessageError(
-      TMessage change, List<DataTransformer.ErrorMessage> errors) throws IOException;
+      String apiVersion, TMessage change, List<DataTransformer.ErrorMessage> errors)
+      throws IOException;
 
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
@@ -262,7 +264,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       } catch (DataTransformer.TransformationException transformationException) {
         metrics.transformFailures.mark();
         try {
-          writeError(message, transformationException);
+          writeError(apiVersion, message, transformationException);
         } catch (IOException e) {
           transformationException.addSuppressed(e);
         }

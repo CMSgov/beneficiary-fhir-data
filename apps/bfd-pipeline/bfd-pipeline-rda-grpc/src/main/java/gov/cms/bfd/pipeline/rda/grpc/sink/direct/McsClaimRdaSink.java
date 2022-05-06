@@ -58,12 +58,14 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
   }
 
   @Override
-  MessageError createMessageError(McsClaimChange change, List<DataTransformer.ErrorMessage> errors)
+  MessageError createMessageError(
+      String apiVersion, McsClaimChange change, List<DataTransformer.ErrorMessage> errors)
       throws IOException {
     return MessageError.builder()
         .sequenceNumber(change.getSeq())
         .claimId(change.getClaim().getIdrClmHdIcn())
         .claimType(MessageError.ClaimType.MCS)
+        .apiSource(apiVersion)
         .errors(mapper.writeValueAsString(errors))
         .message(writer.print(change))
         .build();
