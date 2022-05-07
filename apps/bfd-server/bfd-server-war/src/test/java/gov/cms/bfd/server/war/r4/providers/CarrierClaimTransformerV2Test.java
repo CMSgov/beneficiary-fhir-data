@@ -676,7 +676,7 @@ public class CarrierClaimTransformerV2Test {
     Extension compare1 =
         new Extension(
             "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-            new Quantity().setValue(1));
+            new Quantity().setValue(1.1));
 
     assertTrue(compare1.equalsDeep(ex1));
 

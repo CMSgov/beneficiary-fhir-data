@@ -356,7 +356,7 @@
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
       "valueQuantity" : {
-        "value" : 1.0
+        "value" : 1.1
       }
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
