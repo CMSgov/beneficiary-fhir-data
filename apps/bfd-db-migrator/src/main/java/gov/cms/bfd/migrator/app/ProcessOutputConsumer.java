@@ -18,7 +18,11 @@ import java.util.function.Predicate;
  * <p>TODO: BFD-1558 Move to a common location for pipeline and this app
  */
 public final class ProcessOutputConsumer implements Runnable {
+
+  /** Reads the stream from stdout. */
   private final BufferedReader stdoutReader;
+
+  /** Holds the stdout contents. */
   private final List<String> stdoutContents;
 
   /**
@@ -38,7 +42,7 @@ public final class ProcessOutputConsumer implements Runnable {
     this.stdoutContents = new ArrayList<>();
   }
 
-  /** @see java.lang.Runnable#run() */
+  /** {@inheritDoc} */
   @Override
   public void run() {
     /*
@@ -57,7 +61,11 @@ public final class ProcessOutputConsumer implements Runnable {
     }
   }
 
-  /** @return a {@link String} that contains the <code>STDOUT</code> contents so far */
+  /**
+   * Gets a {@link String} that contains the <code>STDOUT</code> contents so far.
+   *
+   * @return the stdout contents
+   */
   public synchronized String getStdoutContents() {
     return String.join("\n", stdoutContents);
   }

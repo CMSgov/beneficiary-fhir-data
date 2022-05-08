@@ -16,7 +16,6 @@
 	<properties>
 		<flyway.version>8.5.5</flyway.version>
 		<reflections.version>0.10.2</reflections.version>
-		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
 
 	<dependencies>
