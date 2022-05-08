@@ -853,7 +853,7 @@ public final class RifFilesProcessorTest {
     assertEquals("9994931888", claimLine.getProviderTaxNumber());
     assertEquals("A5", claimLine.getProviderSpecialityCode().get());
     assertEquals('1', claimLine.getProviderParticipatingIndCode().get().charValue());
-    assertEquals(BigDecimal.valueOf(60), claimLine.getServiceCount());
+    assertEquals(BigDecimal.valueOf(60L), claimLine.getServiceCount());
     assertEquals('P', claimLine.getCmsServiceTypeCode());
     assertEquals("12", claimLine.getPlaceOfServiceCode());
     assertEquals(LocalDate.of(2014, 02, 03), claimLine.getFirstExpenseDate().get());
@@ -882,7 +882,7 @@ public final class RifFilesProcessorTest {
     assertEquals("MO", claimLine.getProviderStateCode());
     assertEquals(Character.valueOf('3'), claimLine.getSupplierTypeCode().get());
     assertEquals(new BigDecimal("0.00"), claimLine.getScreenSavingsAmount().get());
-    assertEquals(BigDecimal.valueOf(60), claimLine.getMtusCount());
+    assertEquals(BigDecimal.valueOf(60L), claimLine.getMtusCount());
     assertEquals('3', claimLine.getMtusCode().get().charValue());
     assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
     assertEquals("R2", claimLine.getHctHgbTestTypeCode().get());
