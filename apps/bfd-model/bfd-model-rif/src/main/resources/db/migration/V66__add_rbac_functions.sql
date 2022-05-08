@@ -1,8 +1,8 @@
 /*
-  Adds a set of database functions to help in managing, and automating, role based access controls and schema
-  ownership. This duplicates the createSchema.sql flyway callback script; however, it is being added here as
-  that callback is only executed before flyway creates non-existing schemas.
+  Adds a set of database helper functions for managing role-based access controls and database ownership.
 
+  This migration adds the same functions as the createSchema callback script would add on new installs/schemas.
+  
   All functions are idempotent.
 */
 ${logic.psql-only} DO $$
@@ -16,10 +16,10 @@ ${logic.psql-only} BEGIN
 ${logic.psql-only}   IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = role_name) THEN
 ${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON SEQUENCES FROM %I;', schema_name, role_name);
-${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON FUNCTIONS FROM %I;', schema_name, role_name);
+${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON ROUTINES FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL SEQUENCES IN SCHEMA %I FROM %I;', schema_name, role_name);
-${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL FUNCTIONS IN SCHEMA %I FROM %I;', schema_name, role_name);
+${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL ROUTINES IN SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}   END IF;
 ${logic.psql-only} END $func$ LANGUAGE plpgsql;

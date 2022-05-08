@@ -15,10 +15,10 @@ ${logic.psql-only} BEGIN
 ${logic.psql-only}   IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = role_name) THEN
 ${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON SEQUENCES FROM %I;', schema_name, role_name);
-${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON FUNCTIONS FROM %I;', schema_name, role_name);
+${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON ROUTINES FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL SEQUENCES IN SCHEMA %I FROM %I;', schema_name, role_name);
-${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL FUNCTIONS IN SCHEMA %I FROM %I;', schema_name, role_name);
+${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL ROUTINES IN SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}   END IF;
 ${logic.psql-only} END $func$ LANGUAGE plpgsql;
