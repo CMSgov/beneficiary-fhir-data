@@ -4,7 +4,7 @@
 -- which erroneously defined columns in the snf_claim_lines_new table
 -- as an integer. This script fixes that mistake and does a complete data
 -- migration of SNF claims data because the _new tables would have missed
--- the previous weekend's ETL propcessing.
+-- the previous weekend's ETL processing.
 --
 -- Once current table data is migrated to new table name/structure,
 -- a subsequent PR will be deployed that changes the ORM model(s)
