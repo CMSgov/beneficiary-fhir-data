@@ -251,7 +251,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   }
 
   /**
-   * Closes the channel used to communicate with the gRPC service.
+   * Closes the channel used to communicate with the gRPC service. Handles {@link
+   * InterruptedException} while waiting for the channel to close by retrying once, then if the
+   * second attempt is also interrupted just calling {@code shutdownNow()} and giving up on waiting.
+   * The interrupted flag is cleared when an {@link InterruptedException} is thrown so the second
+   * catch isn't strictly necessary. It's just there for safety purposes.
    *
    * @throws Exception if the channel could not be closed
    */
@@ -262,7 +266,18 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         channel.shutdown();
       }
       if (!channel.isTerminated()) {
-        channel.awaitTermination(5, TimeUnit.SECONDS);
+        try {
+          channel.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException ex) {
+          LOGGER.info("caught InterruptedException while closing ManagedChannel - retrying once");
+          try {
+            channel.awaitTermination(1, TimeUnit.MINUTES);
+          } catch (InterruptedException ex2) {
+            LOGGER.info(
+                "caught second InterruptedException while closing ManagedChannel - calling shutdownNow");
+            channel.shutdownNow();
+          }
+        }
       }
       channel = null;
     }

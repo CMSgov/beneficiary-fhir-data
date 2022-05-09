@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Tests proper operation of the {@link DataTransformer} class. */
 public class DataTransformerTest {
   private DataTransformer transformer;
   private List<Object> copied;
@@ -21,8 +22,51 @@ public class DataTransformerTest {
     copied = new ArrayList<>();
   }
 
+  /** Tests the {@link DataTransformer#validateAtLeastOneIsPresent} method. */
   @Test
-  public void copyString() {
+  public void testValidateAtLeastOneIsPresent() {
+    assertEquals(
+        true, transformer.validateAtLeastOneIsPresent("ok-first-1", "1", "ok-second-1", ""));
+    assertEquals(
+        true, transformer.validateAtLeastOneIsPresent("ok-first-2", "", "ok-second-2", "2"));
+    assertEquals(
+        true, transformer.validateAtLeastOneIsPresent("ok-first-3", "1", "ok-second-3", null));
+    assertEquals(
+        true, transformer.validateAtLeastOneIsPresent("ok-first-4", null, "ok-second-4", "2"));
+    assertEquals(
+        true, transformer.validateAtLeastOneIsPresent("ok-first-5", "a", "ok-second-5", "b"));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-1", "", "neither-second-1", ""));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-2", null, "neither-second-2", ""));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-3", "", "neither-second-3", null));
+    assertEquals(
+        false,
+        transformer.validateAtLeastOneIsPresent("neither-first-4", null, "neither-second-4", null));
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage(
+                "neither-first-1",
+                "expected either neither-first-1 or neither-second-1 to have value but neither did"),
+            new DataTransformer.ErrorMessage(
+                "neither-first-2",
+                "expected either neither-first-2 or neither-second-2 to have value but neither did"),
+            new DataTransformer.ErrorMessage(
+                "neither-first-3",
+                "expected either neither-first-3 or neither-second-3 to have value but neither did"),
+            new DataTransformer.ErrorMessage(
+                "neither-first-4",
+                "expected either neither-first-4 or neither-second-4 to have value but neither did")),
+        transformer.getErrors());
+  }
+
+  /** Tests the {@link DataTransformer#copyString} method. */
+  @Test
+  public void testCopyString() {
     transformer
         .copyString("length-one-ok", false, 1, 5, "1", copied::add)
         .copyString("length-five-ok", false, 1, 5, "12345", copied::add)
@@ -42,8 +86,32 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyOptionalNonEmptyString} method. */
   @Test
-  public void copyCharacter() {
+  public void testCopyOptionalNonEmptyString() {
+    transformer
+        .copyOptionalNonEmptyString("value-not-present", 1, 5, () -> false, () -> null, copied::add)
+        .copyOptionalNonEmptyString("null-value-present", 1, 5, () -> true, () -> null, copied::add)
+        .copyOptionalNonEmptyString("empty-value-present", 1, 5, () -> true, () -> "", copied::add)
+        .copyOptionalNonEmptyString(
+            "non-empty-value-present", 1, 5, () -> true, () -> "A", copied::add)
+        .copyOptionalNonEmptyString("length-below-min", 2, 5, () -> true, () -> "1", copied::add)
+        .copyOptionalNonEmptyString(
+            "length-above-max", 2, 5, () -> true, () -> "123456", copied::add);
+
+    assertEquals(ImmutableList.of("A"), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage(
+                "length-below-min", "invalid length: expected=[2,5] actual=1"),
+            new DataTransformer.ErrorMessage(
+                "length-above-max", "invalid length: expected=[2,5] actual=6")),
+        transformer.getErrors());
+  }
+
+  /** Tests the {@link DataTransformer#copyCharacter} method. */
+  @Test
+  public void testCopyCharacter() {
     transformer
         .copyCharacter("length-one-ok", "1", copied::add)
         .copyCharacter("length-below-min", "", copied::add)
@@ -59,8 +127,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyDate} method. */
   @Test
-  public void copyDate() {
+  public void testCopyDate() {
     transformer
         .copyDate("valid-1", false, "2021-03-01", copied::add)
         .copyDate("invalid-1", true, "2021/03/01", copied::add)
@@ -77,8 +146,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyAmount} method. */
   @Test
-  public void copyAmount() {
+  public void testCopyAmount() {
     transformer
         .copyAmount("valid-1", false, "123.05", copied::add)
         .copyAmount("invalid-1", true, "not a number", copied::add)
@@ -98,8 +168,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyEnumAsCharacter} method. */
   @Test
-  public void copyEnumAsCharacter() {
+  public void testCopyEnumAsCharacter() {
     transformer
         .copyEnumAsCharacter(
             "no-value",
@@ -127,8 +198,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyEnumAsString} method. */
   @Test
-  public void copyEnumAsString() {
+  public void testCopyEnumAsString() {
     transformer
         .copyEnumAsString(
             "no-value",
@@ -170,8 +242,9 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyStringWithExpectedValue} method. */
   @Test
-  public void copyExpectedValue() {
+  public void testCopyStringWithExpectedValue() {
     transformer
         .copyStringWithExpectedValue("both-null", true, 1, 1, null, null, copied::add)
         .copyStringWithExpectedValue("both-same", true, 1, 10, "abcdef", "abcdef", copied::add)

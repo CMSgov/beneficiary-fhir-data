@@ -1,10 +1,10 @@
 -- NEW_SCHEMA_SNF_CLAIMS_FIX.SQL
 -- flyway migration for SNF_CLAIMS_NEW and SNF_CLAIM_LINES_NEW tables into
--- a new schema structure; previous flyway script, V63__nw_schema_snf_claims.sql,
+-- a new schema structure; previous flyway script, V63__new_schema_snf_claims.sql,
 -- which erroneously defined columns in the snf_claim_lines_new table
 -- as an integer. This script fixes that mistake and does a complete data
 -- migration of SNF claims data because the _new tables would have missed
--- the prvious weekend's ETL propcessing.
+-- the previous weekend's ETL processing.
 --
 -- Once current table data is migrated to new table name/structure,
 -- a subsequent PR will be deployed that changes the ORM model(s)
