@@ -35,6 +35,12 @@ public class FissClaimRdaSinkIT {
   private static final ObjectMapper mapper =
       JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
+  /**
+   * Checks if writing valid FISS claim messages results in the entities being persisted to the
+   * database with the expected field values.
+   *
+   * @throws Exception If any unexpected exceptions are thrown.
+   */
   @Test
   public void fissClaim() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -138,6 +144,13 @@ public class FissClaimRdaSinkIT {
         });
   }
 
+  /**
+   * Checks if writing invalid FISS claim messages results in a {@link
+   * gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException} being thrown and
+   * if {@link MessageError} entities were written out to the database.
+   *
+   * @throws Exception If any unexpected exceptions were thrown.
+   */
   @Test
   public void invalidFissClaim() throws Exception {
     final String invalidLoc2 = "1A11111111";

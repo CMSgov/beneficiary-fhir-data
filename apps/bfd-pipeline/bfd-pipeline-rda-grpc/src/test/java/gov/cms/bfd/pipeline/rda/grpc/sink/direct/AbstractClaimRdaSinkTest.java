@@ -34,6 +34,12 @@ import org.junit.jupiter.api.Test;
 
 public class AbstractClaimRdaSinkTest {
 
+  /**
+   * Checks that claims are processed successfully when no exceptions were thrown by the {@link
+   * AbstractClaimRdaSink#transformMessage(String, Object)} invocation, and that no {@link
+   * AbstractClaimRdaSink#writeError(String, Object, DataTransformer.TransformationException)}
+   * method was not invoked.
+   */
   @Test
   void shouldTransformValidClaimsSuccessfully() throws IOException {
     MetricRegistry mockMetricRegistry = mock(MetricRegistry.class);
@@ -83,6 +89,13 @@ public class AbstractClaimRdaSinkTest {
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
   }
 
+  /**
+   * Checks that when {@link AbstractClaimRdaSink#transformMessage(String, Object)} throws an
+   * exception, the {@link
+   * gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException} is rethrown and
+   * the {@link AbstractClaimRdaSink#writeError(String, Object,
+   * DataTransformer.TransformationException)} method was correctly invoked.
+   */
   @Test
   void shouldNotTransformInvalidClaimsSuccessfully() throws IOException {
     final String badMessage = "message2";
@@ -142,10 +155,23 @@ public class AbstractClaimRdaSinkTest {
             eq(apiVersion), eq(badMessage), any(DataTransformer.TransformationException.class));
   }
 
+  /**
+   * Helper method to create a {@link RdaChange} object with the given message.
+   *
+   * @param message The message to use to create the {@link RdaChange} object.
+   * @return The created {@link RdaChange} object.
+   */
   private RdaChange<String> createChangeClaimFromMessage(String message) {
     return new RdaChange<>(0, RdaChange.Type.UPDATE, message + "_claim", Instant.ofEpochMilli(1));
   }
 
+  /**
+   * Helper method to check if the two {@link RdaChange} object lists are equivalent.
+   *
+   * @param expected The expected list of {@link RdaChange} values.
+   * @param actual The actual list of {@link RdaChange} values.
+   * @param <T> The type of the embedded data of the {@link RdaChange} objects.
+   */
   private <T> void assertClaimChangesEquals(
       List<RdaChange<T>> expected, List<RdaChange<T>> actual) {
     assertEquals(expected.size(), actual.size());
@@ -155,6 +181,13 @@ public class AbstractClaimRdaSinkTest {
     }
   }
 
+  /**
+   * Helper method to check if the two {@link RdaChange} objects are equivalent.
+   *
+   * @param expected The expected {@link RdaChange} value.
+   * @param actual The actual {@link RdaChange} value.
+   * @param <T> The type of the embedded data of the {@link RdaChange} object.
+   */
   private <T> void assertClaimChangeEquals(RdaChange<T> expected, RdaChange<T> actual) {
     assertEquals(expected.getSequenceNumber(), actual.getSequenceNumber());
     assertEquals(expected.getType(), actual.getType());
@@ -162,6 +195,11 @@ public class AbstractClaimRdaSinkTest {
     assertEquals(expected.getTimestamp(), actual.getTimestamp());
   }
 
+  /**
+   * Helper class for retrieving values from inside lambda expressions.
+   *
+   * @param <T> The type of data being wrapped.
+   */
   static class Wrapper<T> {
 
     private T wrapped;
@@ -175,6 +213,7 @@ public class AbstractClaimRdaSinkTest {
     }
   }
 
+  /** Simple implementation of {@link AbstractClaimRdaSink} for testing purposes. */
   static class TestClaimRdaSink extends AbstractClaimRdaSink<String, String> {
     protected TestClaimRdaSink(
         PipelineApplicationState appState,

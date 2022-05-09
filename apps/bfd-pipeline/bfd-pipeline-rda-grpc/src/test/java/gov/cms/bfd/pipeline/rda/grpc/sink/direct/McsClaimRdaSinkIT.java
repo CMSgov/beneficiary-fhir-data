@@ -35,6 +35,12 @@ public class McsClaimRdaSinkIT {
   private static final ObjectMapper mapper =
       JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
+  /**
+   * Checks if writing valid MCS claim messages results in the entities being persisted to the
+   * database with the expected field values.
+   *
+   * @throws Exception If any unexpected exceptions are thrown.
+   */
   @Test
   public void mcsClaim() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -129,6 +135,13 @@ public class McsClaimRdaSinkIT {
         });
   }
 
+  /**
+   * Checks if writing invalid MCS claim messages results in a {@link
+   * gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException} being thrown and
+   * if {@link MessageError} entities were written out to the database.
+   *
+   * @throws Exception If any unexpected exceptions were thrown.
+   */
   @Test
   public void invalidMcsClaim() throws Exception {
     final String invalidControlId = "invalid_control_id";

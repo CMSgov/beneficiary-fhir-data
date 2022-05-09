@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the MessageError table */
+/** JPA class for the MessageErrors table */
 @Entity
 @Getter
 @Setter

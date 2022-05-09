@@ -56,8 +56,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
+  /** Used to write out RDA messages to json strings */
   protected static final JsonFormat.Printer writer =
       JsonFormat.printer().omittingInsignificantWhitespace();
+
+  /** Used to map basic objects to json strings */
   protected static final ObjectMapper mapper =
       JsonMapper.builder()
           .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
@@ -144,6 +147,14 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
   }
 
+  /**
+   * Writes out the transformation error to the database for the given message and given apiVersion.
+   *
+   * @param apiVersion The version of the api used to get the message.
+   * @param message The message that was being transformed when the error occurred.
+   * @param exception The exception that was thrown while transforming the message.
+   * @throws IOException If there was an issue writing to the database.
+   */
   @Override
   public void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
@@ -236,6 +247,18 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
+  /**
+   * Helper method to generate {@link MessageError} entities from a given claim object. This is
+   * implementation specific logic for each claim type.
+   *
+   * @param apiVersion The version of the api the message was pulled from.
+   * @param change The claim change object that was being transformed when the error occurred.
+   * @param errors The transformation errors that occurred during the claim transformation.
+   * @return A new {@link MessageError} entity containing the details of the transformation error
+   *     and associated claim change object.
+   * @throws IOException If there was an issue writing the details to the {@link MessageError}
+   *     entity.
+   */
   abstract MessageError createMessageError(
       String apiVersion, TMessage change, List<DataTransformer.ErrorMessage> errors)
       throws IOException;
