@@ -27,3 +27,13 @@ variable "medicare_opt_out_config" {
 variable "module_features" {
   type = map(bool)
 }
+
+variable "dashboard_name" {
+  description = "Name of the bfd cloudwatch dashboards"
+  type = string
+}
+
+variable "dashboard_namespace" {
+  description = "The namespace in which the dashboards live in"
+  type = string
+}
