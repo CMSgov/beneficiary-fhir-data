@@ -62,13 +62,11 @@ As previous synthetic data releases were separated by 3 months, and only 20,000 
 [Proposed Solution]: #proposed-solution
 
 Automated Recurring Generation: 
-To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is weekly and quarterly.
+To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is quarterly.
 
-  - Weekly - Synthetic data will be generated with a set batch size using the master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch, which is hosted in AWS S3. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
+  - Weekly - Synthetic data will be generated with a set batch size using the up-to-date master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch, which is hosted in AWS S3. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
 
-  - Quarterly - The main difference in the process of generating Synthea data each quarter will be using the most recent version of the master branch of the Synthea codebase. This should introduce contrast in beneficiary and claim data properites between quarterly and weekly generated data, as Mitre regularly makes changes to the output of Synthea data generated over time. 
-
-  - Future Claim Data - For both quarterly and weekly, a batch of similar size for claim data with a future date will also be generated in a similar fashion. 
+  - Future Claim Data - A batch of similar size for claim data with a future date will also be generated in a similar fashion. 
 
   - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D Event ID (PDE ID). Despite monotonically increasing other parameters i.e. bene ID, claim group ID, the value of PDE ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and Synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
 
@@ -97,12 +95,12 @@ When CCW data is ingested by the BFD pipeline, the application has filter logic 
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
 Automated Generation & Load Plan:
-* On a weekly basis a cron job within Jenkins will be set up to start up and SSH into a provisioned AWS EC2 instance that will be turned off when not used, to run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
+* On a quarterly basis a cron job within Jenkins will be set up to start up and SSH into a provisioned AWS EC2 instance that will be turned off when not used, to run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
   - Run currently manual steps in the `Synthea Test Plan` such as accessing and comparing the latest Synthea end-properties file, running queries in PROD SBX to determine database ranges for beneficiary and claim properities, and ensuring the next batch of data will not overlap with existing data ranges.
   - Generate batches of both synthetic current and future data
   - Load into AWS S3, and when applicable, trigger the BFD pipeline to transform and load synthetic data into database for TEST, PROD SBX, and PROD.
 
-* On a quarterly basis a cron job within Jenkins will be set up to do what the weekly plan does, but will also clone the latest version of Mitre Synthea codebase.
+* On a weekly basis, future claims will be loaded into the database depending on their timestamp.
 
 * Failsafe options:
 If data fails to be loaded there are several options to easily revert:
