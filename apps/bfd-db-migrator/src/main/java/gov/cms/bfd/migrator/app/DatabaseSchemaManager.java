@@ -107,7 +107,7 @@ public final class DatabaseSchemaManager {
     try (Connection connection = dataSource.getConnection()) {
       if (DatabaseUtils.isHsqlConnection(connection)) {
         placeholders.put("type.int4", "integer");
-        placeholders.put("type.json", "longvarchar");
+        placeholders.put("type.jsonb", "longvarchar");
         placeholders.put("type.text", "longvarchar");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "--");
@@ -125,7 +125,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.hsql-only", "");
       } else if (DatabaseUtils.isPostgresConnection(connection)) {
         placeholders.put("type.int4", "int4");
-        placeholders.put("type.json", "json");
+        placeholders.put("type.jsonb", "jsonb");
         placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");

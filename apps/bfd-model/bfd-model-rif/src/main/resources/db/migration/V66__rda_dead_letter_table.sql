@@ -8,7 +8,7 @@
  * making it more challenging to resolve the original issue.
  */
 
-${logic.hsql-only} CREATE TYPE json AS longvarchar;
+${logic.hsql-only} CREATE TYPE jsonb AS longvarchar;
 
 CREATE TABLE rda.message_errors (
     sequence_number bigint                      not null,
@@ -17,7 +17,7 @@ CREATE TABLE rda.message_errors (
     api_source      varchar(24)                 not null,
     created_date    timestamp with time zone    not null,
     updated_date    timestamp with time zone    not null,
-    errors          ${type.json}                not null,
-    message         ${type.json}                not null,
+    errors          ${type.jsonb}               not null,
+    message         ${type.jsonb}               not null,
     primary key (sequence_number, claim_id, claim_type)
 );
