@@ -31,11 +31,6 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <groupId>org.hibernate.javax.persistence</groupId>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
         <!-- Compile Time -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -60,12 +55,6 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- Contains non-natively supported types for use with hibernate -->
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-5</artifactId>
-            <version>2.16.2</version>
         </dependency>
         <dependency>
             <!-- In-memory database that can be used for testing. -->

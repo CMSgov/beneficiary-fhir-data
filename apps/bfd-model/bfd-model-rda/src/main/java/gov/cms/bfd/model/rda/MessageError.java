@@ -19,7 +19,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
-import org.hibernate.annotations.Type;
 
 /** JPA class for the MessageError table */
 @Entity
@@ -73,13 +72,15 @@ public class MessageError {
   @Column(name = "updated_date", nullable = false)
   private Instant updatedDate;
 
-  @Column(name = "errors", nullable = false, columnDefinition = "varchar") // Makes HSQL happy
-  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType") // Makes Postgres happy
+  /**
+   * A list of transformation errors associated with the RDA message, represented as a json list
+   * string
+   */
+  @Column(name = "errors", nullable = false, columnDefinition = "json")
   private String errors;
 
   /** The original message that was received, represented as a json string */
-  @Column(name = "message", nullable = false, columnDefinition = "varchar") // Makes HSQL happy
-  @Type(type = "com.vladmihalcea.hibernate.type.json.JsonType") // Makes Postgres happy
+  @Column(name = "message", nullable = false, columnDefinition = "json")
   private String message;
 
   @PrePersist
