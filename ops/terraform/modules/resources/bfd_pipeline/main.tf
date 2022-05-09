@@ -234,7 +234,7 @@ module "ec2_instance" {
   env_config = var.env_config
   role       = "etl"
   layer      = "data"
-  az         =  local.is_prod ? "us-east-1a" : "us-east-1a" # Same as the master db
+  az         =  local.is_prod ? "us-east-1a" : "us-east-1b" # Place in same az as db writer nodes
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
