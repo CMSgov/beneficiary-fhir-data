@@ -8,7 +8,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count/metadata/all" ],
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/all" ],
                     [ ".", "http-requests/count/coverageAll/all" ],
                     [ ".", "http-requests/count/patientAll/all" ],
                     [ ".", "http-requests/count/eobAll/all" ]
@@ -29,7 +29,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count/metadata/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/bb" ],
                     [ ".", "http-requests/count/coverageAll/bb" ],
                     [ ".", "http-requests/count/patientAll/bb" ],
                     [ ".", "http-requests/count/eobAll/bb" ]
@@ -50,7 +50,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count/metadata/bcda" ],
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/bcda" ],
                     [ ".", "http-requests/count/coverageAll/bcda" ],
                     [ ".", "http-requests/count/patientAll/bcda" ],
                     [ ".", "http-requests/count/eobAll/bcda" ]
@@ -71,7 +71,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count/metadata/mct" ],
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/mct" ],
                     [ ".", "http-requests/count/coverageAll/mct" ],
                     [ ".", "http-requests/count/patientAll/mct" ],
                     [ ".", "http-requests/count/eobAll/mct" ]
@@ -92,7 +92,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/latency/eobAll/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
                     [ ".", "http-requests/latency/eobAll/bcda" ],
                     [ ".", "http-requests/latency/eobAll/mct" ],
                     [ ".", "http-requests/latency/eobAll/ab2d" ]
@@ -113,7 +113,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/latency/eobAll/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
                     [ ".", "http-requests/latency/eobAll/bcda" ],
                     [ ".", "http-requests/latency/eobAll/mct" ],
                     [ ".", "http-requests/latency/eobAll/ab2d" ]
@@ -134,7 +134,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/latency/eobAll/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
                     [ ".", "http-requests/latency/eobAll/bcda" ],
                     [ ".", "http-requests/latency/eobAll/mct" ],
                     [ ".", "http-requests/latency/eobAll/ab2d" ]
@@ -155,7 +155,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/latency/eobAll/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
                     [ ".", "http-requests/latency/eobAll/bcda" ],
                     [ ".", "http-requests/latency/eobAll/mct" ],
                     [ ".", "http-requests/latency/eobAll/ab2d" ]
@@ -196,7 +196,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count-500/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/count-500/bb" ],
                     [ ".", "http-requests/count-500/bcda" ],
                     [ ".", "http-requests/count-500/mct" ],
                     [ ".", "http-requests/count-500/dpc" ],
@@ -217,7 +217,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count-not-2xx/bb" ],
+                    [ "${dashboard_namespace}", "http-requests/count-not-2xx/bb" ],
                     [ ".", "http-requests/count-not-2xx/bcda" ],
                     [ ".", "http-requests/count-not-2xx/mct" ],
                     [ ".", "http-requests/count-not-2xx/dpc" ],
@@ -238,7 +238,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count/metadata/dpc" ],
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/dpc" ],
                     [ ".", "http-requests/count/coverageAll/dpc" ],
                     [ ".", "http-requests/count/patientAll/dpc" ],
                     [ ".", "http-requests/count/eobAll/dpc" ]
@@ -259,7 +259,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/count/metadata/ab2d" ],
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/ab2d" ],
                     [ ".", "http-requests/count/coverageAll/ab2d" ],
                     [ ".", "http-requests/count/patientAll/ab2d" ],
                     [ ".", "http-requests/count/eobAll/ab2d" ]
@@ -280,7 +280,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${bfd_environment_id}", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c" } ],
+                    [ "${dashboard_namespace}", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c" } ],
                     [ "...", { "color": "#ff7f0e", "stat": "p99" } ],
                     [ "...", { "color": "#d62728" } ]
                 ],

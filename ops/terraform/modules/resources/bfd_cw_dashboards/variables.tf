@@ -1,7 +1,7 @@
-variable "bfd_environment_id" {
+variable "dashboard_name" {
   type = string
 }
 
-variable "dashboard_name" {
+variable "dashboard_namespace" {
   type = string
 }
