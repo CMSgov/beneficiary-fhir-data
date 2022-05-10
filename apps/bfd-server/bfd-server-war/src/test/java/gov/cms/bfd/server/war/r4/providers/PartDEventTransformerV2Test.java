@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,6 +17,8 @@ import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -903,6 +906,66 @@ public final class PartDEventTransformerV2Test {
                     .setValue("1023011079"));
 
     assertTrue(compare.equalsDeep(eob.getProvider()));
+  }
+
+  /**
+   * Verifies that a claim processed through {@link PartDEventTransformerV2} has an adjudication
+   * total slice set. This is required for CARIN compliance.
+   */
+  @Test
+  public void shouldHaveAdjudicationTotalSliceSet() {
+    String expectedSystem = C4BBAdjudication.DRUG_COST.getSystem();
+
+    assertNotNull(eob.getTotal());
+    assertFalse(eob.getTotal().isEmpty());
+    // Get the total from the list with the expected system
+    Optional<ExplanationOfBenefit.TotalComponent> total =
+        eob.getTotal().stream()
+            .filter(t -> t.getCategory().getCoding().get(0).getSystem().equals(expectedSystem))
+            .findFirst();
+    assertTrue(
+        total.isPresent(),
+        "Did not find expected total in EOB (expected adjudication total slice for DRUG COST)");
+    assertEquals(
+        C4BBAdjudication.DRUG_COST.toCode(),
+        total.get().getCategory().getCoding().get(0).getCode());
+    assertEquals(
+        C4BBAdjudication.DRUG_COST.getDisplay(),
+        total.get().getCategory().getCoding().get(0).getDisplay());
+    // Check total amount
+    assertEquals(new BigDecimal("550.00"), total.get().getAmount().getValue());
+    assertEquals("USD", total.get().getAmount().getCurrency());
+  }
+
+  /**
+   * Verifies that a claim processed through {@link PartDEventTransformerV2} has an adjudication
+   * status total slice set. This is required for CARIN compliance. Note: In various examples the
+   * value is 0, so the value was hardcoded to 0, as adding this was primarily to satisfy CARIN
+   * compliance and not due to any specific user ask.
+   */
+  @Test
+  public void shouldHaveAdjudicationStatusTotalSliceSet() {
+    String expectedSystem = C4BBAdjudicationStatus.OTHER.getSystem();
+
+    assertNotNull(eob.getTotal());
+    assertFalse(eob.getTotal().isEmpty());
+    // Get the total from the list with the expected system
+    Optional<ExplanationOfBenefit.TotalComponent> total =
+        eob.getTotal().stream()
+            .filter(t -> t.getCategory().getCoding().get(0).getSystem().equals(expectedSystem))
+            .findFirst();
+    assertTrue(
+        total.isPresent(),
+        "Did not find expected total in EOB (expected adjudication status total slice for OTHER)");
+    assertEquals(
+        C4BBAdjudicationStatus.OTHER.toCode(),
+        total.get().getCategory().getCoding().get(0).getCode());
+    assertEquals(
+        C4BBAdjudicationStatus.OTHER.getDisplay(),
+        total.get().getCategory().getCoding().get(0).getDisplay());
+    // Check total amount
+    assertEquals(BigDecimal.valueOf(0), total.get().getAmount().getValue());
+    assertEquals("USD", total.get().getAmount().getCurrency());
   }
 
   /**

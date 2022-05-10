@@ -4531,6 +4531,31 @@
           }
         } ]
       } ],
+      "total" : [ {
+        "category" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code" : "drugcost",
+            "display" : "Drug Cost"
+          } ]
+        },
+        "amount" : {
+          "value" : 550.0,
+          "currency" : "USD"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+            "code" : "other",
+            "display" : "Other"
+          } ]
+        },
+        "amount" : {
+          "value" : 0,
+          "currency" : "USD"
+        }
+      } ],
       "payment" : {
         "date" : "2015-05-27"
       }
