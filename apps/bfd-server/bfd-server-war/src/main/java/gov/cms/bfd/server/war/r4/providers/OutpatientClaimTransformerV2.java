@@ -50,7 +50,10 @@ public class OutpatientClaimTransformerV2 {
     }
 
     ExplanationOfBenefit eob =
-        transformClaim((OutpatientClaim) claim, transformerContext.getDrugCodeDisplayLookup());
+        transformClaim(
+            (OutpatientClaim) claim,
+            transformerContext.getDrugCodeDisplayLookup(),
+            transformerContext);
 
     timer.stop();
     return eob;
@@ -59,11 +62,14 @@ public class OutpatientClaimTransformerV2 {
   /**
    * @param claimGroup the CCW {@link InpatientClaim} to transform
    * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the CCW {@link TransformerContext}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      OutpatientClaim claimGroup, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      OutpatientClaim claimGroup,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -130,6 +136,7 @@ public class OutpatientClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
+        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // NCH_PROFNL_CMPNT_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
@@ -187,6 +194,9 @@ public class OutpatientClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext
+            .getNPIOrgDataLookup()
+            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

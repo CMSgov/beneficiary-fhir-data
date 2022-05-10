@@ -2159,6 +2159,7 @@ public final class TransformerUtils {
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param organizationNpi ORG_NPI_NUM,
+   * @param organizationNpiOrgName,
    * @param claimFacilityTypeCode CLM_FAC_TYPE_CD,
    * @param claimFrequencyCode CLM_FREQ_CD,
    * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD,
@@ -2173,6 +2174,7 @@ public final class TransformerUtils {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> organizationNpiOrgName,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,

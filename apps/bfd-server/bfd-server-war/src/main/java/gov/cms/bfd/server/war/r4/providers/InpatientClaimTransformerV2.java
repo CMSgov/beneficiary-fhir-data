@@ -47,7 +47,7 @@ public class InpatientClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -55,10 +55,12 @@ public class InpatientClaimTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param transformerContext the CCW {@link TransformerContext}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      InpatientClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -103,6 +105,7 @@ public class InpatientClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
+        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
@@ -246,6 +249,9 @@ public class InpatientClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext
+            .getNPIOrgDataLookup()
+            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

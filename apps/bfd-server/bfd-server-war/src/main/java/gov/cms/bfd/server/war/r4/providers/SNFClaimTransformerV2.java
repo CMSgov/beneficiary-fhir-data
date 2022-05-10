@@ -43,15 +43,17 @@ public class SNFClaimTransformerV2 {
     }
 
     timer.stop();
-    return transformClaim((SNFClaim) claim);
+    return transformClaim((SNFClaim) claim, transformerContext);
   }
 
   /**
    * @param claimGroup the CCW {@link SNFClaim} to transform
+   * @param transformerContext the CCW {@link TransformerContext}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private static ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      SNFClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -103,6 +105,7 @@ public class SNFClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
+        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // add EOB information to fields that are common between the Inpatient and SNF claim types
@@ -256,6 +259,9 @@ public class SNFClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext
+            .getNPIOrgDataLookup()
+            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

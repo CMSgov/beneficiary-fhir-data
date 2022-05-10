@@ -75,7 +75,7 @@ public class NPIOrgDataLookup {
    * @param npiNumber - npiNumber value in claim records
    * @return the npi org data display string
    */
-  public String retrieveNPIOrgDisplay(Optional<String> npiNumber) {
+  public Optional<String> retrieveNPIOrgDisplay(Optional<String> npiNumber) {
     /*
      * Handle bad data (e.g. our random test data) if npiNumber is empty
      */
@@ -85,10 +85,10 @@ public class NPIOrgDataLookup {
 
     if (npiOrgHashMap.containsKey(npiNumber.get())) {
       String npiOrgName = npiOrgHashMap.get(npiNumber.get());
-      return npiOrgName;
+      return Optional.of(npiOrgName);
     }
 
-    return null;
+    return Optional.empty();
   }
 
   /**

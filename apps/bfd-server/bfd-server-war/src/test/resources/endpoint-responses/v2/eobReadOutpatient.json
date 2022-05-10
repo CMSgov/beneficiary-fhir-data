@@ -29,7 +29,8 @@
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "1497758544"
     } ],
-    "active" : true
+    "active" : true,
+    "name" : "CUMBERLAND COUNTY HOSPITAL SYSTEM"
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -39,10 +40,10 @@
       "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
     }
   }, {
-    "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-    "valueIdentifier": {
-      "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-      "value": "32490593716374487"
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "32490593716374487"
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
