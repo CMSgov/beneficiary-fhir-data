@@ -43,18 +43,17 @@ public class MessageError {
   @EqualsAndHashCode.Include
   private Long sequenceNumber;
 
-  /** Either dcn (FISS) or idrClmHdIcn (MCS). */
-  @Id
-  @Column(name = "claim_id", length = 25, nullable = false)
-  @EqualsAndHashCode.Include
-  private String claimId;
-
   /** Either F (FISS) or M (MCS). */
   @Id
   @Enumerated(EnumType.STRING)
   @Column(name = "claim_type", length = 20, nullable = false)
   @EqualsAndHashCode.Include
   private ClaimType claimType;
+
+  /** Either dcn (FISS) or idrClmHdIcn (MCS). */
+  @Column(name = "claim_id", length = 25, nullable = false)
+  @EqualsAndHashCode.Include
+  private String claimId;
 
   /**
    * String specifying the source of the data contained in this record. Generally this will be the
