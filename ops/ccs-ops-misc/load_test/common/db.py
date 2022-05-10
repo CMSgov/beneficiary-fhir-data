@@ -64,49 +64,46 @@ def get_partially_adj_hashed_mbis(uri):
     Return a list of unique hashed MBIs that represent a diverse set of FISS and MCS
     claims over a range of claim statuses.
     """
-    per_status_max = int(LIMIT / 40)    # Assuming ~40 distinct status values between FISS/MCS
-    per_status_limit = min(50, per_status_max)
-    per_claim_max = int(LIMIT / 10)     # Arbitrary
-    per_claim_limit = min(1000, per_claim_max)
+    per_status_max = int(LIMIT / 40)    # Based on 40 distinct status values between FISS/MCS
+
+    """
+    Selects rows partitioned into type/status combinations
+    """
+    partition_sub_query = (
+        'select api.*, ROW_NUMBER() '
+        '   over (partition by api.claim_type, api.claim_state order by api.received_date desc) '
+        'from rda.rda_api_claim_message_meta_data as api'
+    )
+
+    """
+    Selects only N distinct mbi ids from each type/status combination from the partition
+    """
+    status_sub_query = (
+        'select distinct partition.mbi_id '
+        f'from ({partition_sub_query}) partition '
+        f'where partition.row_number <= {per_status_max}'
+    )
 
     beneQuery = (
         # Get up to N distinct MBI hashes
-        'select distinct mbi.hash '
-        'from rda.mbi_cache as mbi '
-        'where mbi.mbi_id in ( '
+        'select mbi.hash '
+        'from ( '
         # Subquery sorts by source to weight 'filler' MBIs last
         '	select union_select.mbi_id '
         '	from ( '
-        # Select up to 50 claims for each distinct MCS status value
-        '		select src.mbi_id, 1 as source_order '
-        '		from ('
-        '			select mcs.*, ROW_NUMBER() over (partition by mcs.idr_status_code order by mcs.mbi_id) '
-        '           from rda.mcs_claims as mcs '
-        '			) src '
-        f'		where src.row_number <= {per_status_limit} '
-        '		union '
-        # Select up to 50 claims for each distinct FISS status value
-        '		select src.mbi_id, 2 as source_order '
-        '		from ( '
-        '			select fiss.*, ROW_NUMBER() over (partition by fiss.curr_status order by fiss.mbi_id) '
-        '           from rda.fiss_claims as fiss '
-        '			) src '
-        f'		where src.row_number <= {per_status_limit} '
-        '		union '
-        # Select up to 1000 whatever claims from MCS
-        '		select src.mbi_id, 3 as source_order '
-        f'		from (select mcs.* from rda.mcs_claims as mcs limit {per_claim_limit}) as src '
-        '		union '
-        # Select all the FISS claims as filler
-        '		select src.mbi_id, 4 as source_order '
-        f'		from (select fiss.* from rda.fiss_claims as fiss limit {per_claim_limit}) as src '
+        # Select up to N of the newest claims for each distinct FISS and MCS status value
+        '		select src.mbi_id, 1 as source_order'
+        f'		from ({status_sub_query}) src '
         '		union '
         # Select whatever MBIs as filler
-        '		select mbi.mbi_id, 5 as source_order '
-        f'		from rda.mbi_cache as mbi limit {LIMIT}'
+        '		select distinct mbi.mbi_id, 2 as source_order '
+        '		from rda.mbi_cache as mbi '
+        f'		where mbi.mbi_id not in ({status_sub_query}) '
+        f'		limit {LIMIT} '
         '	) as union_select '
         '	order by union_select.source_order '
-        ') '
+        ') sources '
+        'left join rda.mbi_cache as mbi on mbi.mbi_id = sources.mbi_id '
         f'limit {LIMIT}'
     )
 
