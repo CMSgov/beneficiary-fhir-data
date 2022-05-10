@@ -27,3 +27,7 @@ variable "medicare_opt_out_config" {
 variable "module_features" {
   type = map(bool)
 }
+
+variable "azs" {
+  type = list(string)
+}

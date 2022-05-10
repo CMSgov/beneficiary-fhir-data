@@ -1,3 +1,10 @@
+locals {
+  # order matters here, we want the writer node az first then shift other nodes right
+  # these can get out of order if a failover event occurs (a reader becomes the writer)
+  # so we will need to keep these in sync manually
+  azs = ["us-east-1b", "us-east-1c", "us-east-1a"]
+}
+
 terraform {
   required_version = "> 0.12.30, < 0.13"
 }
@@ -18,7 +25,7 @@ module "stateful" {
   aurora_config = {
     instance_class = "db.r5.2xlarge"
     cluster_nodes  = 3
-    engine_version = "12.6"
+    engine_version = "12.8"
     param_version  = "aurora-postgresql12"
   }
 
@@ -40,6 +47,8 @@ module "stateful" {
     env  = "prod-sbx"
     tags = { application = "bfd", business = "oeda", stack = "prod-sbx", Environment = "prod-sbx" }
   }
+
+  azs = local.azs
 
   victor_ops_url = var.victor_ops_url
 

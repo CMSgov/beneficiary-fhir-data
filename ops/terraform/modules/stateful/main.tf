@@ -2,7 +2,6 @@
 # Stateful resources for an environment and associated KMS needed by both stateful and stateless resources
 
 locals {
-  azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config        = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
   is_prod           = substr(var.env_config.env, 0, 4) == "prod"
   victor_ops_url    = var.victor_ops_url
@@ -24,9 +23,9 @@ data "aws_kms_key" "master_key" {
 
 # subnets
 data "aws_subnet" "data_subnets" {
-  count             = length(local.azs)
+  count             = length(var.azs)
   vpc_id            = data.aws_vpc.main.id
-  availability_zone = local.azs[count.index]
+  availability_zone = var.azs[count.index]
   filter {
     name   = "tag:Layer"
     values = ["data"]
@@ -107,9 +106,10 @@ module "aurora" {
   aurora_config      = var.aurora_config
   aurora_node_params = var.aurora_node_params
   stateful_config = {
-    azs        = local.azs
-    subnet_ids = [for s in data.aws_subnet.data_subnets : s.id]
-    kms_key_id = data.aws_kms_key.master_key.arn
+    azs         = var.azs
+    subnet_ids  = [for s in data.aws_subnet.data_subnets : s.id]
+    kms_key_id  = data.aws_kms_key.master_key.arn
+
     vpc_sg_ids = [
       data.aws_security_group.vpn.id,
       data.aws_security_group.tools.id,

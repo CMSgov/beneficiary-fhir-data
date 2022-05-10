@@ -1,3 +1,10 @@
+locals {
+  # order matters here, we want the writer node az first then shift other nodes right
+  # these can get out of order if a failover event occurs (a reader becomes the writer)
+  # so we will need to keep these in sync manually
+  azs = ["us-east-1b", "us-east-1c", "us-east-1a"]
+}
+
 terraform {
   required_version = "> 0.12.30, < 0.13"
 }
@@ -40,6 +47,8 @@ module "stateful" {
     env  = "test"
     tags = { application = "bfd", business = "oeda", stack = "test", Environment = "test" }
   }
+
+  azs = local.azs
 
   victor_ops_url = var.victor_ops_url
 
