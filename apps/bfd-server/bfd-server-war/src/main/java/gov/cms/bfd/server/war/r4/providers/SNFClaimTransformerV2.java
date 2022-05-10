@@ -299,7 +299,7 @@ public class SNFClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
@@ -321,9 +321,7 @@ public class SNFClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getNationalDrugCodeQuantity().isPresent()
-              ? Optional.of(line.getNationalDrugCodeQuantity().get())
-              : Optional.empty(),
+          line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
