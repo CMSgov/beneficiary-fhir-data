@@ -41,7 +41,7 @@ final class InpatientClaimTransformer {
             .time();
 
     if (!(claim instanceof InpatientClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -49,10 +49,12 @@ final class InpatientClaimTransformer {
 
   /**
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param transformerContext the CCW {@link TransformerContext}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      InpatientClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -193,6 +195,9 @@ final class InpatientClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext
+            .getNPIOrgDataLookup()
+            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

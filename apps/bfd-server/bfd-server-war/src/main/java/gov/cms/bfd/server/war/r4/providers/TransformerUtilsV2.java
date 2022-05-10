@@ -2962,6 +2962,7 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param organizationNpi ORG_NPI_NUM,
+   * @param organizationNpiOrgName,
    * @param claimFacilityTypeCode CLM_FAC_TYPE_CD,
    * @param claimFrequencyCode CLM_FREQ_CD,
    * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD,
@@ -2976,6 +2977,7 @@ public final class TransformerUtilsV2 {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> organizationNpiOrgName,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -2995,7 +2997,12 @@ public final class TransformerUtilsV2 {
                     CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, cntlNum)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
-    addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
+    addProviderSlice(
+        eob,
+        C4BBOrganizationIdentifierType.NPI,
+        organizationNpi,
+        organizationNpiOrgName,
+        lastUpdated);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -3397,6 +3404,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
+      Optional<String> npiOrgName,
       Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
@@ -3417,6 +3425,9 @@ public final class TransformerUtilsV2 {
       // Certain types have specific systems
       if (type == C4BBOrganizationIdentifierType.NPI) {
         id.setSystem(TransformerConstants.CODING_NPI_US);
+        if (npiOrgName.isPresent()) {
+          provider.setName(npiOrgName.get());
+        }
       }
 
       provider.addIdentifier(id);
@@ -3436,8 +3447,9 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
+      Optional<String> npiOrgName,
       Optional<Instant> lastupdated) {
-    addProviderSlice(eob, type, Optional.of(value), lastupdated);
+    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated);
   }
 
   /**

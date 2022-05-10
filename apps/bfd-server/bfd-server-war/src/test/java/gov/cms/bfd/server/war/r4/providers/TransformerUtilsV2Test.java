@@ -125,6 +125,7 @@ public class TransformerUtilsV2Test {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         Optional.empty(),
+        Optional.empty(),
         ' ',
         ' ',
         Optional.empty(),
@@ -161,6 +162,7 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
+        Optional.empty(),
         Optional.empty(),
         ' ',
         ' ',

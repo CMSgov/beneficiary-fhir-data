@@ -42,7 +42,8 @@
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1497758544"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "CUMBERLAND COUNTY HOSPITAL SYSTEM"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -2133,7 +2134,7 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "5555553305"
+          "value" : "0000000000"
         } ],
         "active" : true
       } ],
