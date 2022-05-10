@@ -14,6 +14,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -374,7 +375,7 @@ public class GrpcRdaSourceTest {
     source.close();
     source.close(); // second call does nothing
     verify(channel, times(1)).shutdown();
-    verify(channel, times(1)).awaitTermination(5, TimeUnit.SECONDS);
+    verify(channel, times(1)).awaitTermination(anyLong(), any(TimeUnit.class));
   }
 
   /**
@@ -504,6 +505,51 @@ public class GrpcRdaSourceTest {
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
     verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+  }
+
+  /**
+   * Verifies that if an InterruptedException is thrown while waiting for the {@link ManagedChannel}
+   * to close we retry the call internally and return successfully.
+   *
+   * @throws Exception required since method being tested has checked exceptions
+   */
+  @Test
+  public void testSingleInterruptedExceptionDuringChannelShutdown() throws Exception {
+    doReturn(false).when(channel).isShutdown();
+    doReturn(false).when(channel).isTerminated();
+    doThrow(new InterruptedException())
+        .doReturn(false)
+        .when(channel)
+        .awaitTermination(anyLong(), any());
+
+    source.close();
+
+    verify(channel).isShutdown();
+    verify(channel).isTerminated();
+    verify(channel).shutdown();
+    verify(channel, times(2)).awaitTermination(anyLong(), any(TimeUnit.class));
+    verify(channel, never()).shutdownNow();
+  }
+
+  /**
+   * Verifies that if an InterruptedException is thrown while waiting for the {@link ManagedChannel}
+   * to close and again when we retry that we punt and call {@link shutdownNow}.
+   *
+   * @throws Exception required since method being tested has checked exceptions
+   */
+  @Test
+  public void testDoubleInterruptedExceptionDuringChannelShutdown() throws Exception {
+    doReturn(false).when(channel).isShutdown();
+    doReturn(false).when(channel).isTerminated();
+    doThrow(new InterruptedException()).when(channel).awaitTermination(anyLong(), any());
+
+    source.close();
+
+    verify(channel).isShutdown();
+    verify(channel).isTerminated();
+    verify(channel).shutdown();
+    verify(channel, times(2)).awaitTermination(anyLong(), any(TimeUnit.class));
+    verify(channel).shutdownNow();
   }
 
   private GrpcResponseStream<Integer> createResponse(int... values) {

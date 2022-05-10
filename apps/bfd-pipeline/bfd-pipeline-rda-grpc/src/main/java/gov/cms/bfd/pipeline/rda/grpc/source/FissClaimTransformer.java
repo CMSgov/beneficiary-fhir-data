@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
 import gov.cms.bfd.model.rda.RdaFissClaim;
@@ -485,10 +486,19 @@ public class FissClaimTransformer {
     return new FissClaimTransformer(clock, mbiCache);
   }
 
+  /**
+   * Validate and copy field values from a gRPC {@link FissClaimChange} to corresponding fields in
+   * {@link RdaChange}.
+   *
+   * @param change source object
+   * @return the populated object
+   */
   public RdaChange<RdaFissClaim> transformClaim(FissClaimChange change) {
     FissClaim from = change.getClaim();
     final DataTransformer transformer = new DataTransformer();
-    final RdaFissClaim to = transformMessage(from, transformer, clock.instant());
+    Instant now = clock.instant();
+    final RdaFissClaim to = transformMessageImpl(from, transformer, now, "");
+    transformMessageArrays(from, to, transformer, now, "");
     to.setSequenceNumber(change.getSeq());
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
@@ -506,12 +516,16 @@ public class FissClaimTransformer {
         transformer.instant(change.getTimestamp()));
   }
 
-  private RdaFissClaim transformMessage(FissClaim from, DataTransformer transformer, Instant now) {
-    final RdaFissClaim to = transformMessageImpl(from, transformer, now, "");
-    transformMessageArrays(from, to, transformer, now, "");
-    return to;
-  }
-
+  /**
+   * Validate and copy field values from a gRPC {@link FissClaim} to corresponding fields in {@link
+   * RdaFissClaim}.
+   *
+   * @param from source object
+   * @param transformer transformer to perform validation and transformation
+   * @param now current time stamp
+   * @param namePrefix added to field names in error message to disambiguate messages
+   * @return the populated object
+   */
   private RdaFissClaim transformMessageImpl(
       FissClaim from, DataTransformer transformer, Instant now, String namePrefix) {
     final RdaFissClaim to = new RdaFissClaim();
@@ -978,6 +992,16 @@ public class FissClaimTransformer {
     return to;
   }
 
+  /**
+   * Validate and copy objects in arrays within the {@link FissClaim} to lists of corresponding
+   * database entity classes in the provided {@link RdaFissClaim} object.
+   *
+   * @param from source object
+   * @param to destination object
+   * @param transformer transformer to perform validation and transformation
+   * @param now current time stamp
+   * @param namePrefix added to field names in error message to disambiguate messages
+   */
   private void transformMessageArrays(
       FissClaim from,
       RdaFissClaim to,
@@ -1021,6 +1045,16 @@ public class FissClaimTransformer {
     }
   }
 
+  /**
+   * Validate and copy field values from a gRPC {@link FissProcedureCode} to corresponding fields in
+   * {@link RdaFissProcCode}.
+   *
+   * @param from source object
+   * @param transformer transformer to perform validation and transformation
+   * @param now current time stamp
+   * @param namePrefix added to field names in error message to disambiguate messages
+   * @return the populated object
+   */
   private RdaFissProcCode transformMessageImpl(
       FissProcedureCode from, DataTransformer transformer, Instant now, String namePrefix) {
     final RdaFissProcCode to = new RdaFissProcCode();
@@ -1047,13 +1081,24 @@ public class FissClaimTransformer {
     return to;
   }
 
-  private RdaFissDiagnosisCode transformMessageImpl(
+  /**
+   * Validate and copy field values from a gRPC {@link FissDiagnosisCode} to corresponding fields in
+   * {@link RdaFissDiagnosisCode}.
+   *
+   * @param from source object
+   * @param transformer transformer to perform validation and transformation
+   * @param now current time stamp
+   * @param namePrefix added to field names in error message to disambiguate messages
+   * @return the populated object
+   */
+  @VisibleForTesting
+  RdaFissDiagnosisCode transformMessageImpl(
       FissDiagnosisCode from, DataTransformer transformer, Instant now, String namePrefix) {
     final RdaFissDiagnosisCode to = new RdaFissDiagnosisCode();
     transformer.copyString(
         namePrefix + RdaFissDiagnosisCode.Fields.diagCd2,
         false,
-        1,
+        0,
         7,
         from.getDiagCd2(),
         to::setDiagCd2);
@@ -1065,15 +1110,30 @@ public class FissClaimTransformer {
         to::setDiagPoaInd);
     transformer.copyOptionalString(
         namePrefix + RdaFissDiagnosisCode.Fields.bitFlags,
-        1,
+        0,
         4,
         from::hasBitFlags,
         from::getBitFlags,
         to::setBitFlags);
     to.setLastUpdated(now);
+
+    // At least one of these two fields must have a value for the object to be valid.
+    transformer.validateAtLeastOneIsPresent(
+        namePrefix + RdaFissDiagnosisCode.Fields.diagCd2, from.getDiagCd2(),
+        namePrefix + RdaFissDiagnosisCode.Fields.bitFlags, from.getBitFlags());
     return to;
   }
 
+  /**
+   * Validate and copy field values from a gRPC {@link FissPayer} to corresponding fields in {@link
+   * RdaFissPayer}.
+   *
+   * @param from source object
+   * @param transformer transformer to perform validation and transformation
+   * @param now current time stamp
+   * @param namePrefix added to field names in error message to disambiguate messages
+   * @return the populated object
+   */
   private RdaFissPayer transformMessageImpl(
       FissPayer from, DataTransformer transformer, Instant now, String namePrefix) {
     final RdaFissPayer to = new RdaFissPayer();
@@ -1266,7 +1326,7 @@ public class FissClaimTransformer {
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneFirstName(),
         () -> from.getBeneZPayer().getBeneFirstName(),
         to::setBeneFirstName);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaFissPayer.Fields.beneMidInit,
         1,
         1,
@@ -1321,6 +1381,16 @@ public class FissClaimTransformer {
     return to;
   }
 
+  /**
+   * Validate and copy field values from a gRPC {@link FissAuditTrail} to corresponding fields in
+   * {@link RdaFissAuditTrail}.
+   *
+   * @param from source object
+   * @param transformer transformer to perform validation and transformation
+   * @param now current time stamp
+   * @param namePrefix added to field names in error message to disambiguate messages
+   * @return the populated object
+   */
   private RdaFissAuditTrail transformMessageImpl(
       FissAuditTrail from, DataTransformer transformer, Instant now, String namePrefix) {
     final RdaFissAuditTrail to = new RdaFissAuditTrail();
