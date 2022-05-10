@@ -1,0 +1,823 @@
+resource "aws_glue_catalog_table" "test_api_requests" {
+    catalog_id    = "577373831711"
+    database_name = "bfd"
+    name          = "test_api_requests"
+    parameters    = {
+        "CrawlerSchemaDeserializerVersion" = "1.0"
+        "CrawlerSchemaSerializerVersion"   = "1.0"
+        "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-initial-crawler"
+        "UpdatedByJob"                     = "bfd-history-ingest"
+        "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
+        "averageRecordSize"                = "3405"
+        "classification"                   = "json"
+        "compressionType"                  = "gzip"
+        "objectCount"                      = "8"
+        "recordCount"                      = "52"
+        "sizeKey"                          = "122975"
+        "typeOfData"                       = "file"
+    }
+    retention     = 0
+    table_type    = "EXTERNAL_TABLE"
+
+    partition_keys {
+        name = "year"
+        type = "string"
+    }
+    partition_keys {
+        name = "month"
+        type = "string"
+    }
+    partition_keys {
+        name = "day"
+        type = "string"
+    }
+
+    storage_descriptor {
+        bucket_columns            = []
+        compressed                = false
+        input_format              = "org.apache.hadoop.mapred.TextInputFormat"
+        location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_api_requests/"
+        number_of_buckets         = 0
+        output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+        parameters                = {}
+        stored_as_sub_directories = false
+
+        columns {
+            name       = "timestamp"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "level"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "thread"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.clientssl.dn"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.user-agent"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.date"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request_type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.accept"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.host"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.http_method"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.url"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.operation"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.uri"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.query_string"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.x-request-id"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.content-type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.x-powered-by"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.status"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.content-location"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_id.include_.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_id.include_.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_id.include_.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.last-modified"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.bene_id"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.snf.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.carrier.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.inpatient.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.outpatient.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.dme.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.pde.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.carrier.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.snf.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.carrier.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.outpatient.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.dme.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.dme.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.snf.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.pde.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.hha.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.hospice.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.hha.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.hha.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.pde.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.hospice.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.hospice.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.eobs_by_bene_id.outpatient.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.connection"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.content-encoding"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.accept-encoding"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.snf.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.outpatient.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.type"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.batch"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.datasource_name"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.batch_size"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.unknown.success"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.by_hash.collision.distinct_bene_ids"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.benes_by_year_month_part_d_contract_id.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.includeidentifiers"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_count_by_year_month_part_d_contract_id.duration_milliseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_count_by_year_month_part_d_contract_id.duration_nanoseconds"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.jpa_query.bene_count_by_year_month_part_d_contract_id.record_count"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.dme.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.inpatient.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.pde.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.carrier.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hospice.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.eobs_by_bene_id.hha.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.response.header.cache-control"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.http_access.request.header.cache-control"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "mdc.database_query.bene_by_id.include_hicns_and_mbis.query"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "logger"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "message"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "context"
+            parameters = {}
+            type       = "string"
+        }
+
+        ser_de_info {
+            parameters            = {
+                "paths" = "context,level,logger,mdc.bene_id,mdc.database_query.bene_by_id.include_hicns_and_mbis.batch,mdc.database_query.bene_by_id.include_hicns_and_mbis.batch_size,mdc.database_query.bene_by_id.include_hicns_and_mbis.datasource_name,mdc.database_query.bene_by_id.include_hicns_and_mbis.duration_milliseconds,mdc.database_query.bene_by_id.include_hicns_and_mbis.size,mdc.database_query.bene_by_id.include_hicns_and_mbis.success,mdc.database_query.bene_by_id.include_hicns_and_mbis.type,mdc.database_query.eobs_by_bene_id.carrier.batch,mdc.database_query.eobs_by_bene_id.carrier.batch_size,mdc.database_query.eobs_by_bene_id.carrier.datasource_name,mdc.database_query.eobs_by_bene_id.carrier.duration_milliseconds,mdc.database_query.eobs_by_bene_id.carrier.size,mdc.database_query.eobs_by_bene_id.carrier.success,mdc.database_query.eobs_by_bene_id.carrier.type,mdc.database_query.eobs_by_bene_id.dme.batch,mdc.database_query.eobs_by_bene_id.dme.batch_size,mdc.database_query.eobs_by_bene_id.dme.datasource_name,mdc.database_query.eobs_by_bene_id.dme.duration_milliseconds,mdc.database_query.eobs_by_bene_id.dme.size,mdc.database_query.eobs_by_bene_id.dme.success,mdc.database_query.eobs_by_bene_id.dme.type,mdc.database_query.eobs_by_bene_id.hha.batch,mdc.database_query.eobs_by_bene_id.hha.batch_size,mdc.database_query.eobs_by_bene_id.hha.datasource_name,mdc.database_query.eobs_by_bene_id.hha.duration_milliseconds,mdc.database_query.eobs_by_bene_id.hha.size,mdc.database_query.eobs_by_bene_id.hha.success,mdc.database_query.eobs_by_bene_id.hha.type,mdc.database_query.eobs_by_bene_id.hospice.batch,mdc.database_query.eobs_by_bene_id.hospice.batch_size,mdc.database_query.eobs_by_bene_id.hospice.datasource_name,mdc.database_query.eobs_by_bene_id.hospice.duration_milliseconds,mdc.database_query.eobs_by_bene_id.hospice.size,mdc.database_query.eobs_by_bene_id.hospice.success,mdc.database_query.eobs_by_bene_id.hospice.type,mdc.database_query.eobs_by_bene_id.inpatient.batch,mdc.database_query.eobs_by_bene_id.inpatient.batch_size,mdc.database_query.eobs_by_bene_id.inpatient.datasource_name,mdc.database_query.eobs_by_bene_id.inpatient.duration_milliseconds,mdc.database_query.eobs_by_bene_id.inpatient.size,mdc.database_query.eobs_by_bene_id.inpatient.success,mdc.database_query.eobs_by_bene_id.inpatient.type,mdc.database_query.eobs_by_bene_id.outpatient.batch,mdc.database_query.eobs_by_bene_id.outpatient.batch_size,mdc.database_query.eobs_by_bene_id.outpatient.datasource_name,mdc.database_query.eobs_by_bene_id.outpatient.duration_milliseconds,mdc.database_query.eobs_by_bene_id.outpatient.size,mdc.database_query.eobs_by_bene_id.outpatient.success,mdc.database_query.eobs_by_bene_id.outpatient.type,mdc.database_query.eobs_by_bene_id.pde.batch,mdc.database_query.eobs_by_bene_id.pde.batch_size,mdc.database_query.eobs_by_bene_id.pde.datasource_name,mdc.database_query.eobs_by_bene_id.pde.duration_milliseconds,mdc.database_query.eobs_by_bene_id.pde.size,mdc.database_query.eobs_by_bene_id.pde.success,mdc.database_query.eobs_by_bene_id.pde.type,mdc.database_query.eobs_by_bene_id.snf.batch,mdc.database_query.eobs_by_bene_id.snf.batch_size,mdc.database_query.eobs_by_bene_id.snf.datasource_name,mdc.database_query.eobs_by_bene_id.snf.duration_milliseconds,mdc.database_query.eobs_by_bene_id.snf.size,mdc.database_query.eobs_by_bene_id.snf.success,mdc.database_query.eobs_by_bene_id.snf.type,mdc.database_query.unknown.batch,mdc.database_query.unknown.batch_size,mdc.database_query.unknown.datasource_name,mdc.database_query.unknown.duration_milliseconds,mdc.database_query.unknown.query,mdc.database_query.unknown.size,mdc.database_query.unknown.success,mdc.database_query.unknown.type,mdc.http_access.request.clientssl.dn,mdc.http_access.request.header.Accept-Encoding,mdc.http_access.request.header.Cache-Control,mdc.http_access.request.header.Connection,mdc.http_access.request.header.IncludeIdentifiers,mdc.http_access.request.header.accept,mdc.http_access.request.header.host,mdc.http_access.request.header.user-agent,mdc.http_access.request.http_method,mdc.http_access.request.operation,mdc.http_access.request.query_string,mdc.http_access.request.uri,mdc.http_access.request.url,mdc.http_access.request_type,mdc.http_access.response.duration_milliseconds,mdc.http_access.response.header.Content-Encoding,mdc.http_access.response.header.Content-Location,mdc.http_access.response.header.content-type,mdc.http_access.response.header.date,mdc.http_access.response.header.last-modified,mdc.http_access.response.header.x-powered-by,mdc.http_access.response.header.x-request-id,mdc.http_access.response.status,mdc.jpa_query.bene_by_id.include_.duration_milliseconds,mdc.jpa_query.bene_by_id.include_.duration_nanoseconds,mdc.jpa_query.bene_by_id.include_.record_count,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_milliseconds,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_nanoseconds,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.record_count,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_milliseconds,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_nanoseconds,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.record_count,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.benes_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.eobs_by_bene_id.carrier.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.carrier.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.carrier.record_count,mdc.jpa_query.eobs_by_bene_id.dme.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.dme.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.dme.record_count,mdc.jpa_query.eobs_by_bene_id.hha.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.hha.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.hha.record_count,mdc.jpa_query.eobs_by_bene_id.hospice.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.hospice.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.hospice.record_count,mdc.jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.inpatient.record_count,mdc.jpa_query.eobs_by_bene_id.outpatient.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.outpatient.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.outpatient.record_count,mdc.jpa_query.eobs_by_bene_id.pde.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.pde.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.pde.record_count,mdc.jpa_query.eobs_by_bene_id.snf.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.snf.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.snf.record_count,message,thread,timestamp"
+            }
+            serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+        }
+    }
+}
