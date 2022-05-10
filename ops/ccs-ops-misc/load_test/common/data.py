@@ -16,8 +16,9 @@ def load_all(load_function: Callable, *args, use_table_sample: bool = False) -> 
         return []
 
     config_file = config.load()
+    print('Collecting test data...')
     if use_table_sample:
-        table_sample_pct = config_file.get('tableSamplePct')
+        table_sample_pct = config_file.get('tableSamplePct', 0.25)
         print(f"Table Sampling at: {table_sample_pct}")
         results = load_function(uri=config_file['dbUri'], table_sample_pct=table_sample_pct, *args)
     else:

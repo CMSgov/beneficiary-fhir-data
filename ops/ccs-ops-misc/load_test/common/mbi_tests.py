@@ -7,18 +7,23 @@ from common.url_path import create_url_path
 from common import data, db
 
 
-# If we try to load things from the database within the BFDUserBase class, we'll end up loading
-# them once for every Worker, whereas loading it here will load once and each Worker will inherit
-# a copy.
-hashed_mbis = data.load_all(db.get_hashed_mbis, use_table_sample=True).copy()
-random.shuffle(hashed_mbis)
-
-
 class MBITestUser(BFDUserBase):
     '''Locust tests that require a pool of hashed MBIs.'''
 
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
+
+    # Should we use the Table Sample feature of Postgres to query only against a portion of the
+    # table?
+    USE_TABLE_SANPLE = True
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hashed_mbis = data.load_all(db.get_hashed_mbis,
+            use_table_sample=self.USE_TABLE_SANPLE).copy()
+        random.shuffle(self.hashed_mbis)
+
 
     # Helpers
 
@@ -31,7 +36,7 @@ class MBITestUser(BFDUserBase):
         def make_url():
             return create_url_path(f'/{version}/fhir/Patient/', {
                 'identifier': 'https://bluebutton.cms.gov/resources/identifier/mbi-hash|'
-                    f'{hashed_mbis.pop()}',
+                    f'{self.hashed_mbis.pop()}',
                 '_IncludeIdentifiers': 'mbi'
             })
 

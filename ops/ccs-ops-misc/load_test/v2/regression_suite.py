@@ -21,6 +21,9 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
 
+    # No Table Sample for the Regression Suite, because we want to keep the tests more consistent.
+    USE_TABLE_SANPLE = False
+
 
     @task
     def coverage_test_id_count(self):

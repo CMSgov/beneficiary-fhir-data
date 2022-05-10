@@ -52,18 +52,17 @@ class BFDUserBase(HttpUser):
 
     def on_start(self):
         '''Run once when a BFDUser is initialized by Locust.
-
-        This method copies the necessary test data (lists of MBIs, beneficiary IDs, and contract
-        cursor URLs) as members of this particular BFDUser instance. We then shuffle these copied
-        lists such that concurrent BFDUsers are not querying the same data at the same time.
         '''
 
-        # Adds a global failsafe check to ensure that if this test overwhelms
-        # the database, we bail out and stop hitting the server
-        if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
-            validation.setup_failsafe_event(self.environment, self.VALIDATION_GOALS)
-        else:
-            validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
+        # Is this either the first worker or the only worker?
+        worker_number = self.__get_worker_number()
+        if worker_number is None or str(worker_number) == '0':
+            # Adds a global failsafe check to ensure that if this test overwhelms
+            # the database, we bail out and stop hitting the server
+            if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
+                validation.setup_failsafe_event(self.environment, self.VALIDATION_GOALS)
+            else:
+                validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
 
 
     def on_stop(self):

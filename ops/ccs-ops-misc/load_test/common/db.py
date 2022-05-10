@@ -14,10 +14,8 @@ def _execute(uri: str, query: str) -> List:
     """
     Execute a PSQL select statement and return its results
     """
-    print('Collecting test data...')
 
     conn = None
-
     try:
         with psycopg2.connect(uri) as conn:
             with conn.cursor() as cursor:
@@ -29,29 +27,35 @@ def _execute(uri: str, query: str) -> List:
     return results
 
 
-def get_bene_ids(uri: str, table_sample_pct: float = 0.25) -> List:
+def get_bene_ids(uri: str, table_sample_pct: float = None) -> List:
     """
     Return a list of bene IDs from the adjudicated beneficiary table
     """
+
+    if table_sample_pct is None:
+        table_sample_text = ''
+    else:
+        table_sample_text = f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
+
     bene_query = (
-        'SELECT "bene_id" '
-        'FROM "beneficiaries" '
-        f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
-        f'LIMIT {LIMIT}'
+        f'SELECT "bene_id" FROM "beneficiaries" {table_sample_text} LIMIT {LIMIT}'
     )
 
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_hashed_mbis(uri: str, table_sample_pct: float = 0.25) -> List:
+def get_hashed_mbis(uri: str, table_sample_pct: float = None) -> List:
     """
     Return a list of unique hashed MBIs from the adjudicated beneficiary table
     """
+
+    if table_sample_pct is None:
+        table_sample_text = ''
+    else:
+        table_sample_text = f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
+
     bene_query = (
-        'SELECT "mbi_hash" '
-        'FROM "beneficiaries" '
-        f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
-        'WHERE "mbi_hash" IS NOT NULL '
+        f'SELECT "mbi_hash" FROM "beneficiaries" {table_sample_text} WHERE "mbi_hash" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
 

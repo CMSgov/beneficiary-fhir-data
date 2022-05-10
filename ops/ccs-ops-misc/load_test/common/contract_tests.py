@@ -7,18 +7,20 @@ from common.url_path import create_url_path
 from common import data, db
 
 
-# If we try to load things from the database within the BFDUserBase class, we'll end up loading
-# them once for every Worker, whereas loading it here will load once and each Worker will inherit
-# a copy.
-contract_data = data.load_data_segment(db.get_contract_ids).copy()
-random.shuffle(contract_data)
-
-
 class ContractTestUser(BFDUserBase):
     '''Locust tests that require a pool of contract data.'''
 
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
+
+    def __init__(self, *args, **kwargs):
+        '''Initialize.
+        '''
+
+        super().__init__(*args, **kwargs)
+        self.contract_data = data.load_data_segment(db.get_contract_ids).copy()
+        random.shuffle(self.contract_data)
+
 
     # Helpers
 
@@ -29,7 +31,7 @@ class ContractTestUser(BFDUserBase):
             raise ValueError("Invalid version number")
 
         def make_url():
-            contract = contract_data.pop()
+            contract = self.contract_data.pop()
             return create_url_path(f'/{version}/fhir/Patient', {
                 '_has:Coverage.extension':
                     f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
