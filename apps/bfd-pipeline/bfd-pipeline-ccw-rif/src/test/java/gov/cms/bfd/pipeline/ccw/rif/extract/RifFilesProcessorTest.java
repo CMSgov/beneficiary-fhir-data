@@ -543,7 +543,7 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("693.11"), claimGroup.getPaymentAmount());
     assertEquals(new BigDecimal("11.00"), claimGroup.getPrimaryPayerPaidAmount());
     assertEquals("KY", claimGroup.getProviderStateCode());
-    assertEquals("1497758544", claimGroup.getOrganizationNpi().get());
+    assertEquals("0000000000", claimGroup.getOrganizationNpi().get());
     assertEquals("2222222222", claimGroup.getAttendingPhysicianNpi().get());
     assertEquals("3333333333", claimGroup.getOperatingPhysicianNpi().get());
     assertTrue(claimGroup.getOtherPhysicianNpi().isPresent());

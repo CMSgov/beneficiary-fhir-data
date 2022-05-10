@@ -2192,6 +2192,7 @@ public final class TransformerUtils {
       eob.setOrganization(
           TransformerUtils.createIdentifierReference(
               TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+
       eob.setFacility(
           TransformerUtils.createIdentifierReference(
               TransformerConstants.CODING_NPI_US, organizationNpi.get()));

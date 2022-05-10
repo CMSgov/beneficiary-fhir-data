@@ -650,11 +650,10 @@ public class CarrierClaimTransformerV2Test {
     CareTeamComponent compare4 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             4,
-            "1497758544",
+            "0000000000",
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
             "Primary provider");
-    compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
 
     assertTrue(compare4.equalsDeep(member4));
   }
