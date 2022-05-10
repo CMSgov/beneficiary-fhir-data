@@ -12,12 +12,12 @@ ${logic.hsql-only} CREATE TYPE jsonb AS longvarchar;
 
 CREATE TABLE rda.message_errors (
     sequence_number bigint                      not null,
-    claim_id        varchar(25)                 not null,
     claim_type      varchar(20)                 not null,
+    claim_id        varchar(25)                 not null,
     api_source      varchar(24)                 not null,
     created_date    timestamp with time zone    not null,
     updated_date    timestamp with time zone    not null,
     errors          ${type.jsonb}               not null,
     message         ${type.jsonb}               not null,
-    primary key (sequence_number, claim_id, claim_type)
+    primary key (sequence_number, claim_type)
 );
