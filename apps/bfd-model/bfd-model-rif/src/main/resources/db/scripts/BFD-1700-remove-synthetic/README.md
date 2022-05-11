@@ -39,7 +39,7 @@ BEGIN TRANSACTION;
 7. Commit the transaction if you are confident that everything ran according to plan, or else rollback to abort:
 
 ```sql
-COMMIT;
+COMMIT TRANSACTION;
 ```
 
 OR:
