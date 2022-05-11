@@ -23,12 +23,12 @@ This role is highly configurable, though it tries to provide reasonable defaults
 | db_migrator_db_password             | password for targeted database                                                                | n/a                  | yes             |
 | db_migrator_db_url                  | url for targeted database, e.g. `jdbc:postgresql://mydbserver.example.com:5432/mydb`          | n/a                  | yes             |
 | db_migrator_db_username             | username for targeted database                                                                | n/a                  | yes             |
-| bfd_env                             | deployment env, e.g. `prod`, `prod-sbx`, `test` **required by migrator-monitor**<sup>\*</sup> | n/a                  | no<sup>\*</sup> |
+| env                                 | deployment env, e.g. `prod`, `prod-sbx`, `test` **required by migrator-monitor**<sup>\*</sup> | test                 | no<sup>\*</sup> |
 | db_migrator_dir                     | primary, on-host directory for migrator-related resources                                     | /opt/bfd-db-migrator | no              |
 | db_migrator_jvm_args                | arguments passed directly to the JVM                                                          | -Xmx64g              | no              |
 | db_migrator_tmp_dir                 |                                                                                               | /tmp                 | no              |
 | db_migrator_user                    | user to be created to run migrator and migrator-monitor service                               | bb-migrator          | no              |
-| migrator_monitor_enabled            | migrator-monitor enabled for sqs message passing, **requires `bfd_env`**                      | false                | no              |
+| migrator_monitor_enabled            | migrator-monitor enabled for sqs message passing, **requires `env`**                          | false                | no              |
 | migrator_monitor_heartbeat_interval | sleep interval between monitor heartbeats                                                     | 300                  | no              |
 
 

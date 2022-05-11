@@ -1,9 +1,9 @@
 [Unit]
 Description=BFD DB Migrator Service
 Wants=network-online.target
-After=network.target network-online.target {% if (migrator_monitor_enabled|default('', false)) and (bfd_env|default('', false)) %}migrator-monitor.service{% endif %}
+After=network.target network-online.target {% if (migrator_monitor_enabled|default('', false)) and (env|default('', false)) %}migrator-monitor.service{% endif %}
 
-{% if (migrator_monitor_enabled|default('', true)) and (bfd_env|default('', true)) %}Requires=migrator-monitor.service{% endif %}
+{% if (migrator_monitor_enabled|default('', true)) and (env|default('', true)) %}Requires=migrator-monitor.service{% endif %}
 
 
 [Service]

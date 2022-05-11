@@ -70,7 +70,7 @@
   become: true
   when:
     - migrator_monitor_enabled | default('', true)
-    - bfd_env | default('', true)
+    - env | default('', true)
   tags:
     - post-ami
 
@@ -84,7 +84,7 @@
   become: true
   when:
     - migrator_monitor_enabled | default('', true)
-    - bfd_env | default('', true)
+    - env | default('', true)
   tags:
     - post-ami
 
