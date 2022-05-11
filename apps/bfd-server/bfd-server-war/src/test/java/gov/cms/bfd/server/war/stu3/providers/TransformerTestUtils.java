@@ -534,8 +534,14 @@ final class TransformerTestUtils {
             .findFirst();
 
     assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
-    if (expectedValue.isPresent())
-      assertQuantityEquals(expectedValue.get(), (Quantity) extensionForUrl.get().getValue());
+    // normalize values, by removing trailing zeros
+    if (expectedValue.isPresent()) {
+      BigDecimal expectedValueDecimal =
+          (new BigDecimal(expectedValue.get().toString())).stripTrailingZeros();
+      Quantity extensionValueQuantity = (Quantity) extensionForUrl.get().getValue();
+      BigDecimal extensionValueDecimal = extensionValueQuantity.getValue().stripTrailingZeros();
+      assertEquals(expectedValueDecimal, extensionValueDecimal);
+    }
   }
 
   /**
@@ -1662,7 +1668,8 @@ final class TransformerTestUtils {
       Optional<String> nationalDrugCode)
       throws FHIRException {
 
-    assertEquals(serviceCount, item.getQuantity().getValue());
+    assertEquals(
+        serviceCount.stripTrailingZeros(), item.getQuantity().getValue().stripTrailingZeros());
 
     assertHasCoding(
         CcwCodebookVariable.LINE_CMS_TYPE_SRVC_CD, cmsServiceTypeCode, item.getCategory());

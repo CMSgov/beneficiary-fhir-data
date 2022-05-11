@@ -365,7 +365,7 @@ public final class DMEClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cnt",
             new Quantity()
                 .setUnit("Number of services")
-                .setValue(60)
+                .setValue(60.123)
                 .setSystem("https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cd")
                 .setCode("3"));
 
