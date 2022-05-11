@@ -6,11 +6,49 @@ These scripts implement [BFD-1700](https://jira.cms.gov/browse/BFD-1700) to remo
 
 There are three directories in this directory: `test`, `prod-sbx`, and `prod`, one for each of the environments in which these scripts are intended to run.
 
-Each `.sql` script can be piped directly into the postgres console. Use `count.sql` to get a count of all records that would be affected and `delete.sql` to perform the delete.
+Each `.sql` script can be piped directly into the postgres console or copied and pasted. Use `count.sql` to get a count of all records that would be affected and `delete.sql` to perform the delete.
 
-From the command line, the syntax is (replace the Postgres instance URI with whatever is appropriate for the environment you're using):
+1. Begin in the directory of the proper environment:
 
-    cat count.sql | psql 'postgres://bfd:InsecureLocalDev@localhost:5432/bfd'
+```bash
+cd sql/<environment>
+```
+
+2. Create a record of the number of rows from each table that we will be deleting:
+
+```bash
+cat count.sql | psql 'postgres://bfd:InsecureLocalDev@localhost:5432/bfd' | tee deleted_rows_$(date +%Y-%m-%d--%H-%M-%S).log
+```
+
+3. Open a terminal for deleting the records:
+
+```sql
+psql 'postgres://bfd:InsecureLocalDev@localhost:5432/bfd'
+```
+
+4. Start a transaction:
+
+```sql
+BEGIN TRANSACTION;
+```
+
+5. Copy / paste the contents of delete.sql into the terminal. Verify from the output that the correct number of rows from each table were deleted.
+
+6. Copy / paste the contents of count.sql into the terminal to re-count the number of the targeted rows. There should not be any rows left in any table.
+
+7. Commit the transaction if you are confident that everything ran according to plan, or else rollback to abort:
+
+```sql
+COMMIT;
+```
+
+OR:
+
+```sql
+ROLLBACK;
+```
+
+8. Exit the terminal.
 
 ## Generating the SQL
 
@@ -22,4 +60,6 @@ The `generate_all_scripts.sh` script will create both `create.sql` and `delete.s
 
 From the command line, simply invoke the script from within this directory:
 
-    ./generate_all_scripts.sh
+```bash
+./generate_all_scripts.sh
+```
