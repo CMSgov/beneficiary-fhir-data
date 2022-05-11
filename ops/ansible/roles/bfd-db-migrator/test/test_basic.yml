@@ -24,6 +24,7 @@
         db_migrator_db_username: bfd
         db_migrator_db_password: bfd
         db_migrator_dir: /opt/bfd-db-migrator
+        migrator_monitor_enabled: false
         migrator_monitor_heartbeat_interval_seconds: 15
 
 # Verify that things worked as expected.
