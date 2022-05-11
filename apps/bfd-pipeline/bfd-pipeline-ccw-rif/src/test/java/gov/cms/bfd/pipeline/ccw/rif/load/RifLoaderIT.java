@@ -937,6 +937,74 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Runs {@link RifLoader} against the modified {@link StaticRifResourceGroup#SAMPLE_A} data for an
+   * <code>UPDATE</code> on a {@link Beneficiary} record that has a single file with multiple update
+   * records. The Beneficiary object will have been initialized by the pipeline causing the
+   * bene_id_numeric (native long) to be initialized to 0 (zero). However, the beneficiaries table
+   * has a pre-insert / pre-update trigger that populates the bene_id_numeric at the time the data
+   * is persisted to the table. This check verifies that both the insert and the update trigger has
+   * fired and successully populated the bene_id_numeric column.
+   *
+   * <p>NOTE: This test will be removed when the new schema migration has been completed; at that
+   * time the bene_id_numeric will no longer be needed and the trigger will be removed.
+   */
+  @Test
+  public void verifyBeneficiaryEntityHasPopulatedBeneIdNumeric() {
+    // persist a record into Beneficiary table
+    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
+
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+
+      // verify that the pre-insert trigger populated the bene_id_numeric
+      assertEquals(
+          567834L,
+          beneficiaryFromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric after INSERT");
+
+      /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
+      loadSampleABeneWithEnrollmentRefYear(
+          null,
+          CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+              USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+          true);
+      validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+
+      // verify that the pre-update trigger populated the bene_id_numeric
+      Beneficiary beneficiary2FromDb = entityManager.find(Beneficiary.class, "567834");
+      assertEquals(
+          beneficiaryFromDb.getBeneficiaryIdNumeric(),
+          beneficiary2FromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric after UPDATE");
+
+      // brute force trying to break the bene_id_numeric by explicitly setting to zero; this
+      // actually mimics a RIF load UPDATE as the RIF columns-to-entity setters will not know about
+      // bene_id_numeric.
+      beneficiary2FromDb.setBeneficiaryIdNumeric(0L);
+      entityManager.persist(beneficiary2FromDb);
+      // secret sauce for verifying that our Hibernate object actually was
+      // refreshed with what is in the database.
+      entityManager.refresh(beneficiary2FromDb);
+
+      // verify that the update trigger still did its thing
+      assertEquals(
+          567834L,
+          beneficiary2FromDb.getBeneficiaryIdNumeric(),
+          "Beneficiary has incorrect bene_id_numeric afer explicit UPDATE");
+
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
    * Gets the stream for the specified file type from the SAMPLE_A data.
    *
    * @param fileType the file type to get from the SAMPLE_A data

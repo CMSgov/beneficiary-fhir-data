@@ -15,7 +15,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -144,9 +143,7 @@ public class SNFClaimTransformerV2 {
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob,
-        CcwCodebookVariable.CLM_UTLZTN_DAY_CNT,
-        BigDecimal.valueOf(claimGroup.getUtilizationDayCount()));
+        eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
 
     // This is messy but appears to be specific to SNF.  Maybe revisit and clean in the future
     // NCH_QLFYD_STAY_FROM_DT => ExplanationOfBenefit.supportingInfo
@@ -205,11 +202,11 @@ public class SNFClaimTransformerV2 {
     // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT   => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
+        claimGroup.getCoinsuranceDayCount(),
+        claimGroup.getNonUtilizationDayCount(),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
+        claimGroup.getBloodPintsFurnishedQty(),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -324,10 +321,7 @@ public class SNFClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getNationalDrugCodeQuantity().isPresent()
-              ? Optional.of(
-                  BigDecimal.valueOf(line.getNationalDrugCodeQuantity().get().longValue()))
-              : Optional.empty(),
+          line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue

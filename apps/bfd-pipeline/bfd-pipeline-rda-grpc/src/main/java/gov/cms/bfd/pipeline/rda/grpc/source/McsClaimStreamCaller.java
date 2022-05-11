@@ -12,23 +12,21 @@ import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 
-/**
- * GrpcStreamCaller implementation that calls the RDA McsClaim service. At this stage in RDA API
- * development there is no way to resume a stream from a given point in time so every time the
- * service is called it sends all of its values.
- */
+/** GrpcStreamCaller implementation that calls the RDA McsClaim service. */
 public class McsClaimStreamCaller extends GrpcStreamCaller<McsClaimChange> {
   public McsClaimStreamCaller() {
     super(LoggerFactory.getLogger(McsClaimStreamCaller.class));
   }
 
   /**
-   * Calls the getMcsClaims RPC. The Iterator from the RPC call is wrapped with a transforming
-   * Iterator that converts the API McsClaim objects into database PreAdjMcsClaim entity objects.
+   * Calls the getMcsClaims RPC using the provided {@link ManagedChannel} and {@link CallOptions}
+   * and returns a {@link GrpcResponseStream} that can be used to receive the results in a blocking
+   * manner.
    *
    * @param channel an already open channel to the service being called
+   * @param callOptions additional {@link CallOptions} for the RPC call.
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
-   * @return a blocking GrpcResponseStream of PreAdjMcsClaim entity objects
+   * @return a blocking GrpcResponseStream of {@link McsClaimChange} objects
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override

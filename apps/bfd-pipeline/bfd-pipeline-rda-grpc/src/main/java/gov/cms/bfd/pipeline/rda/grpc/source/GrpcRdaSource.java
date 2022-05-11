@@ -15,11 +15,13 @@ import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -57,10 +59,14 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
+  private final Clock clock;
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
   private final Supplier<CallOptions> callOptionsFactory;
+  /** Expected time before RDA API server drops its connection when it has nothing to send. */
+  private final long minIdleMillisBeforeConnectionDrop;
+
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -81,12 +87,14 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       String claimType,
       Optional<Long> startingSequenceNumber) {
     this(
+        Clock.systemUTC(),
         config.createChannel(),
         caller,
         config::createCallOptions,
         appMetrics,
         claimType,
-        startingSequenceNumber);
+        startingSequenceNumber,
+        config.getMinIdleMillisBeforeConnectionDrop());
   }
 
   /**
@@ -94,6 +102,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * used internally by the primary constructor but is also used by unit tests to allow a mock
    * channel to be provided.
    *
+   * @param clock used to access current time
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
@@ -101,23 +110,28 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    */
   @VisibleForTesting
   GrpcRdaSource(
+      Clock clock,
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
-      Optional<Long> startingSequenceNumber) {
+      Optional<Long> startingSequenceNumber,
+      long minIdleMillisBeforeConnectionDrop) {
+    this.clock = clock;
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
     this.callOptionsFactory = callOptionsFactory;
     this.channel = Preconditions.checkNotNull(channel);
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
+    this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
     metrics = new Metrics(appMetrics, claimType);
   }
 
   /**
-   * Calls the service through the specific implementation of GrpcStreamCaller provided to our
-   * constructor. Cancels the response stream if reading from the stream is interrupted.
+   * {@inheritDoc} Calls the service through the specific implementation of GrpcStreamCaller
+   * provided to our constructor. Cancels the response stream if reading from the stream is
+   * interrupted.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
    * @param sink to receive batches of objects
@@ -131,6 +145,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     boolean interrupted = false;
     Exception error = null;
     int processed = 0;
+    long lastProcessedTime = clock.millis();
     try {
       setUptimeToRunning();
       final long startingSequenceNumber = getStartingSequenceNumber(sink);
@@ -152,6 +167,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(apiVersion, sink, batch);
           }
+          lastProcessedTime = clock.millis();
         }
         if (batch.size() > 0) {
           processed += submitBatchToSink(apiVersion, sink, batch);
@@ -161,6 +177,8 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         // and then shut down normally.
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
+      } catch (DroppedConnectionException ex) {
+        logOrRethrowDroppedConnectionException(lastProcessedTime, ex);
       }
       sink.shutdown(Duration.ofMinutes(5));
       processed += sink.getProcessedCount();
@@ -189,6 +207,33 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   }
 
   /**
+   * The RDA API server drops open connections abruptly when it has no data to transmit for some
+   * period of time. These closures are not clean at the protocol level so they appear as errors to
+   * gRPC but we don't want to trigger alerts when they happen since they are not unexpected.
+   *
+   * <p>This method determines if we have been idle long enough that such a drop is possible. If the
+   * drop is expected it simply logs the event but if the drop is not expected it rethrows the
+   * exception so that normal error logic can be applied to it.
+   *
+   * @param lastProcessedTime time in millis when we last processed a message from the server
+   * @param exception the exception to evaluate
+   * @throws DroppedConnectionException if not an expected drop
+   */
+  private void logOrRethrowDroppedConnectionException(
+      long lastProcessedTime, DroppedConnectionException exception)
+      throws DroppedConnectionException {
+    final long idleMillis = clock.millis() - lastProcessedTime;
+    if (idleMillis >= minIdleMillisBeforeConnectionDrop) {
+      LOGGER.info(
+          "RDA API server dropped connection after idle time: idleMillis={} message='{}'",
+          idleMillis,
+          exception.getMessage());
+    } else {
+      throw exception;
+    }
+  }
+
+  /**
    * Uses the hard coded starting sequence number if one has been configured. Otherwise asks the
    * sink to provide its maximum known sequence number as our starting point. When all else fails we
    * start at the beginning.
@@ -206,7 +251,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
   }
 
   /**
-   * Closes the channel used to communicate with the gRPC service.
+   * Closes the channel used to communicate with the gRPC service. Handles {@link
+   * InterruptedException} while waiting for the channel to close by retrying once, then if the
+   * second attempt is also interrupted just calling {@code shutdownNow()} and giving up on waiting.
+   * The interrupted flag is cleared when an {@link InterruptedException} is thrown so the second
+   * catch isn't strictly necessary. It's just there for safety purposes.
    *
    * @throws Exception if the channel could not be closed
    */
@@ -217,7 +266,18 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         channel.shutdown();
       }
       if (!channel.isTerminated()) {
-        channel.awaitTermination(5, TimeUnit.SECONDS);
+        try {
+          channel.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException ex) {
+          LOGGER.info("caught InterruptedException while closing ManagedChannel - retrying once");
+          try {
+            channel.awaitTermination(1, TimeUnit.MINUTES);
+          } catch (InterruptedException ex2) {
+            LOGGER.info(
+                "caught second InterruptedException while closing ManagedChannel - calling shutdownNow");
+            channel.shutdownNow();
+          }
+        }
       }
       channel = null;
     }
@@ -280,6 +340,11 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final String inProcessServerName;
     /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /**
+     * Minimum amount of idle time before a dropped connection is considered to be normal behavior
+     * by the RDA API server and thus not requiring an ERROR log entry.
+     */
+    private final Duration minIdleTimeBeforeConnectionDrop;
     /** Authorization token expiration date, in epoch seconds */
     private final Long expirationDate;
     /** The token to pass to the RDA API server to authenticate the client. */
@@ -302,12 +367,17 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         int port,
         String inProcessServerName,
         Duration maxIdle,
-        String authenticationToken) {
+        @Nullable Duration minIdleTimeBeforeConnectionDrop,
+        @Nullable String authenticationToken) {
       this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
       this.host = host;
       this.port = port;
       this.inProcessServerName = inProcessServerName;
       this.maxIdle = maxIdle;
+      this.minIdleTimeBeforeConnectionDrop =
+          minIdleTimeBeforeConnectionDrop == null
+              ? Duration.ofMillis(Long.MAX_VALUE)
+              : minIdleTimeBeforeConnectionDrop;
       if (serverType == ServerType.Remote) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(host), "host name is required");
         Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
@@ -429,6 +499,15 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       }
 
       return null;
+    }
+
+    /**
+     * Gets value of {@code minIdleTimeBeforeConnectionDrop} in milliseconds.
+     *
+     * @return value of {@code minIdleTimeBeforeConnectionDrop} in milliseconds.
+     */
+    private long getMinIdleMillisBeforeConnectionDrop() {
+      return minIdleTimeBeforeConnectionDrop.toMillis();
     }
   }
 

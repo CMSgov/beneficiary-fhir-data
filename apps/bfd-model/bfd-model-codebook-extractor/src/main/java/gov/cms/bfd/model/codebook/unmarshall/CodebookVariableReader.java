@@ -24,8 +24,10 @@ import javax.xml.bind.Unmarshaller;
 /** Can unmarshall {@link Codebook} XML and find {@link Variable}s. */
 public final class CodebookVariableReader {
   /**
-   * @return a {@link Map} of the known {@link Codebook} {@link Variable}s, keyed by {@link
-   *     Variable#getId()} (with duplicates removed safely)
+   * Builds a {@link Map} of the known {@link Codebook} {@link Variable}s, keyed by {@link
+   * Variable#getId()} (with duplicates removed safely).
+   *
+   * @return the de-duped map of {@link Variable}s
    */
   public static Map<String, Variable> buildVariablesMappedById() {
     Map<String, List<Variable>> variablesMultimapById = buildVariablesMultimappedById();
@@ -56,8 +58,11 @@ public final class CodebookVariableReader {
   }
 
   /**
-   * @return A multimap of the known Variables. Why a multimap? Because some {@link Variable}s
-   *     appear in more than one {@link Codebook}, and we need to cope with that.
+   * Builds A multimap of the known {@link Variable}s.
+   *
+   * <p>A multimap is used because some {@link Variable}s appear in more than one {@link Codebook}.
+   *
+   * @return A multimap of the known {@link Variable}s
    */
   private static Map<String, List<Variable>> buildVariablesMultimappedById() {
     /*
@@ -105,6 +110,8 @@ public final class CodebookVariableReader {
   }
 
   /**
+   * Unmarshalls an input stream representing a xml codebook.
+   *
    * @param codebookXmlStream the {@link Codebook} XML {@link InputStream} to unmarshall
    * @return the {@link Codebook} that was unmarshalled from the specified XML
    */
