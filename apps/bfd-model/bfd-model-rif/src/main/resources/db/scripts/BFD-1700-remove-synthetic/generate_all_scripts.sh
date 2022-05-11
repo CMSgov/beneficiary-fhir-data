@@ -22,17 +22,25 @@ fi
 
 # Generate SQL Scripts
 
+echo "TEST scripts..."
+
 mkdir -p $SCRIPT_PATH/sql/test
 
 python3 $SCRIPT_PATH/make_sql.py count test > $SCRIPT_PATH/sql/test/count.sql
 python3 $SCRIPT_PATH/make_sql.py delete test > $SCRIPT_PATH/sql/test/delete.sql
 
+echo "PROD-SBX scripts..."
+
 mkdir -p $SCRIPT_PATH/sql/prod-sbx
 
-python3 $SCRIPT_PATH/make_sql.py count test > $SCRIPT_PATH/sql/prod-sbx/count.sql
-python3 $SCRIPT_PATH/make_sql.py delete test > $SCRIPT_PATH/sql/prod-sbx/delete.sql
+python3 $SCRIPT_PATH/make_sql.py count prod-sbx > $SCRIPT_PATH/sql/prod-sbx/count.sql
+python3 $SCRIPT_PATH/make_sql.py delete prod-sbx > $SCRIPT_PATH/sql/prod-sbx/delete.sql
+
+echo "PROD scripts..."
 
 mkdir -p $SCRIPT_PATH/sql/prod
 
-python3 $SCRIPT_PATH/make_sql.py count test > $SCRIPT_PATH/sql/prod/count.sql
-python3 $SCRIPT_PATH/make_sql.py delete test > $SCRIPT_PATH/sql/prod/delete.sql
+python3 $SCRIPT_PATH/make_sql.py count prod > $SCRIPT_PATH/sql/prod/count.sql
+python3 $SCRIPT_PATH/make_sql.py delete prod > $SCRIPT_PATH/sql/prod/delete.sql
+
+echo "Done!"
