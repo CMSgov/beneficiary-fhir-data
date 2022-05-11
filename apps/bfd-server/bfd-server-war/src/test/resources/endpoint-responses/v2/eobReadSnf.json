@@ -39,10 +39,10 @@
       "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
     }
   }, {
-    "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-    "valueIdentifier": {
-      "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-      "value": "23443453453"
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "23443453453"
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -598,11 +598,18 @@
         "code" : "MMM"
       } ]
     },
+    "modifier" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "code" : "ML",
+        "display" : "Milliliter"
+      } ]
+    } ],
     "locationAddress" : {
       "state" : "FL"
     },
     "quantity" : {
-      "value" : 0
+      "value" : 234.567
     },
     "adjudication" : [ {
       "category" : {
