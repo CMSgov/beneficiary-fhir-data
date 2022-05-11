@@ -62,4 +62,23 @@ Running the Tests
 This role includes a test framework that tests everything out using Docker, locally.
 Those tests can be run, as follows:
 
+The tests are _optimized_ for running in GitHub Actions, and currently run in serial _after_ the java verification steps and generation of a GitHub-stored container image:
+
     $ ops/ansible/roles/bfd-db-migrator/test/run-tests.sh
+
+Local development is also possible and operators will need to supply a known image tag for `ghcr.io/cmsgov/bfd-apps`. For truly local development, operators might generate this locally from the _root_ of the repository, e.g.
+
+``` sh
+mvn -f apps/ --threads 1C -DskipTests -DskipITs --Dmaven.javadoc.skip=true clean verify
+docker build apps/ --file apps/Dockerfile -t ghcr.io/cmsgov/bfd-apps:some-image-tag
+```
+
+From this, the tests can be run by issuing the following:
+
+``` sh
+# running with
+# optional `-e` extra variables flag for migrator monitor enablement
+# optaional `-k` to keep the container running after test completion
+# and specifying `some-image-tag` to target the image generated above
+ops/ansible/roles/bfd-db-migrator/test/run-tests.sh -e migrator_monitor_enabled=True -k 
+```
