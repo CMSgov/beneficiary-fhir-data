@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
@@ -72,6 +73,31 @@ public class DataTransformer {
   }
 
   /**
+   * Checks to ensure that at least one of the two fields has a non-empty string value. If neither
+   * does an error is added to the list of errors.
+   *
+   * @param fieldName1 name of the first field
+   * @param value1 value (possibly null) of the first field
+   * @param fieldName2 name of the second field
+   * @param value2 value (possibly null) of the second field
+   * @return true if at least one of the two fields has a non-null, non-empty string value
+   */
+  public boolean validateAtLeastOneIsPresent(
+      String fieldName1, String value1, String fieldName2, String value2) {
+    final var isPresent1 = !Strings.isNullOrEmpty(value1);
+    final var isPresent2 = !Strings.isNullOrEmpty(value2);
+    final var isValid = isPresent1 || isPresent2;
+    if (!isValid) {
+      addError(
+          fieldName1,
+          "expected either %s or %s to have value but neither did",
+          fieldName1,
+          fieldName2);
+    }
+    return isValid;
+  }
+
+  /**
    * Checks the nullability and length of a string and then delivers it to the Consumer if the
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    *
@@ -120,6 +146,36 @@ public class DataTransformer {
       Supplier<String> value,
       Consumer<String> copier) {
     if (exists.getAsBoolean()) {
+      return copyString(fieldName, false, minLength, maxLength, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists and is non-empty. Uses lambda expressions for
+   * the existence test as well as the value extraction. Optional fields must be nullable at the
+   * database level but must return non-null values when the supplier is called.
+   *
+   * <p>Checks the nullability and length of a string and then delivers it to the Consumer if the
+   * checks are successful. Valid null or empty string values are silently accepted without calling
+   * the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyOptionalNonEmptyString(
+      String fieldName,
+      int minLength,
+      int maxLength,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<String> copier) {
+    if (exists.getAsBoolean() && !Strings.isNullOrEmpty(value.get())) {
       return copyString(fieldName, false, minLength, maxLength, value.get(), copier);
     }
     return this;
