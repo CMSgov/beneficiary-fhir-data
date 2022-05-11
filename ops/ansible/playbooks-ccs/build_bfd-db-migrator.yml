@@ -8,7 +8,6 @@
   remote_user: ec2-user
   gather_facts: yes
   vars:
-    bfd_db_migrator_dir: '/usr/local/bfd-migrator'
     ansible_ssh_pipelining: no
     env: "test"
 
@@ -17,7 +16,7 @@
       include_vars:
         file: vars/000_cross_env_vars.yml
       tags: [pre-ami, post-ami]
-    
+
     - name: Include env specific variables
       include_vars:
         dir: vars/{{ env }}
@@ -26,7 +25,7 @@
     - name: Apply base Cloudwatch Agent Role
       import_role:
         name: cloudwatch-agent-instrumented
-    
+
     - name: Apply latest host security patches
       import_role:
         name: base_patch
@@ -35,7 +34,6 @@
       import_role:
         name: bfd-db-migrator
       vars:
-        db_migrator_dir: "{{ bfd_db_migrator_dir }}"
         # Note: The `db_migrator_zip` variable should have been provided by `--extra-vars` on the command line.
         db_migrator_jvm_args: "-Xmx{{ (ansible_memtotal_mb * 0.80) | int }}m -XX:+PreserveFramePointer"
         db_migrator_tmp_dir: "{{ db_migrator_dir }}/tmp"
