@@ -78,7 +78,7 @@ From this, the tests can be run by issuing the following:
 ``` sh
 # running with
 # optional `-e` extra variables flag for migrator monitor enablement
-# optaional `-k` to keep the container running after test completion
+# optional `-k` to keep the container running after test completion
 # and specifying `some-image-tag` to target the image generated above
-ops/ansible/roles/bfd-db-migrator/test/run-tests.sh -e migrator_monitor_enabled=True -k 
+ops/ansible/roles/bfd-db-migrator/test/run-tests.sh -e migrator_monitor_enabled=True -k  some-image-tag
 ```

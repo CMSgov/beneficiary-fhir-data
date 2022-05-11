@@ -13,6 +13,16 @@ SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ env }}-db-migrator" --re
 MIGRATOR_SERVICE_NAME="{{ db_migrator_service_name_override | default('bfd-db-migrator.service', true) }}"
 MONITOR_HEARTBEAT_INTERVAL_SECONDS="{{ migrator_monitor_heartbeat_interval_seconds | default('300', true) }}"
 
+#######################################
+# Sends a message using AWS SQS
+# Globals:
+#   AWS_REGION
+#   SQS_QUEUE_URL
+# Arguments:
+#   message to send, a string.
+# Outputs:
+#  json response from AWS SQS to STDOUT. Unused.
+#######################################
 function send_message {
   local _message="$1"
   aws sqs send-message \
@@ -21,9 +31,20 @@ function send_message {
     --message-body "$_message"
 }
 
+#######################################
+# Represents the state of the migrator service as as json object.
+# Globals:
+#   MIGRATOR_SERVICE_NAME
+# Arguments:
+#   None
+# Outputs:
+#   json object including pid, start_time, stop_time, status, and code of the
+#   migrator service to STDOUT
+#######################################
 function get_migrator_state {
   systemctl show "$MIGRATOR_SERVICE_NAME" --no-pager --property=ExecStart \
-    | sed 's/ExecStart={ //' | sed 's/ }//'| sed 's/\[//g' | sed 's/\]//g' | sed 's/ ; /\n/g' \
+    | sed 's/ExecStart={ //' | sed 's/ }//' \
+    | sed 's/\[//g' | sed 's/\]//g' | sed 's/ ; /\n/g' \
     | grep -E "pid|start_time|stop_time|status|code" \
     | jq -cnR --raw-input '[ inputs
  | gsub("\r$"; "")
@@ -33,6 +54,15 @@ function get_migrator_state {
  | add'
 }
 
+#######################################
+# Determines running state based on json-formatted state input
+# Globals:
+#   None
+# Arguments:
+#   json-formatted state (intended to be produced by get_migrator_state)
+# Outputs:
+#   returns true when migrator is running, false when not running
+#######################################
 function migrator_is_running {
   local _state="$1"
   local _code="$(jq -r .code <<< "$_state")"
