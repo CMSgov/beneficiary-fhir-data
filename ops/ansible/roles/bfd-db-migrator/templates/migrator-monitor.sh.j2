@@ -1,62 +1,52 @@
 #!/usr/bin/env bash
-# This is a fairly simple, jinja2 templated script that monitors a pid
-# and pid file to determine the bfd-db-migrator's running state and
-# communicate the state to the CI mechanism that spawned the
-# bfd-db-migrator.
+# This is a simple, jinja2 templated script that monitors and reports
+# the ExecStart field of the bfd-db-migrator systemd service.
 #
-# While the bfd-db-migrator servie is running (executing a database
-# migration), this service periodically sends a heartbeat to sqs. When
-# the bfd-db-migrator exits, this service sends the exit state to sqs.
+# While the bfd-db-migrator service is running (executing a database
+# migration), this service effectively heartbeats via sqs. When the
+# bfd-db-migrator service is no longer running, this service sends the
+# final status message and exits.
 set -euo pipefail
 
 AWS_REGION="${AWS_REGION:-us-east-1}"
 SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ bfd_env }}-db-migrator" --region "$AWS_REGION" --output text)"
-
-function find_migrator_pid_file {
-  cd {{ db_migrator_dir }} &&
-  ls -lt . |
-  grep '.pid' |
-  head --lines=1 |
-  awk '{ print $9 }'
-}
-
-function find_migrator_pid {
-  basename "$(find_migrator_pid_file)" | cut -f1 -d.
-}
-
-MIGRATOR_PID="$(find_migrator_pid)"
-function migrator_is_running {
-  ps -p "$MIGRATOR_PID" 2>&1 >/dev/null && true || false
-}
+MIGRATOR_SERVICE_NAME="{{ db_migrator_service_name_override | default('bfd-db-migrator.service', true) }}"
+MONITOR_HEARTBEAT_INTERVAL_SECONDS="{{ migrator_monitor_heartbeat_interval_seconds | default('300', true) }}"
 
 function send_message {
-  local message="$1"
+  local _message="$1"
   aws sqs send-message \
     --region "$AWS_REGION" \
     --queue-url "$SQS_QUEUE_URL" \
-    --message-body "$message"
+    --message-body "$_message"
 }
 
-function read_exit_code {
-  cat "$(find_migrator_pid_file)"
+function get_migrator_state {
+  systemctl show "$MIGRATOR_SERVICE_NAME" --no-pager --property=ExecStart \
+    | sed 's/ExecStart={ //' | sed 's/ }//'| sed 's/\[//g' | sed 's/\]//g' | sed 's/ ; /\n/g' \
+    | grep -E "pid|start_time|stop_time|status|code" \
+    | jq -cnR --raw-input '[ inputs
+ | gsub("\r$"; "")
+ | split("="; "")
+ | select(length == 2)
+ | {(.[0]): .[1]}]
+ | add'
 }
 
-while migrator_is_running; do
-  # message is a single-line, well-formed, escaped json object string
-  message="$(jq -c -n --arg migratorPid "$MIGRATOR_PID" '{pid: $migratorPid, state: "heartbeat", rc: null}')"
-  send_message "$message"
-  sleep {{ migrator_monitor_heartbeat_interval_seconds }}
+function migrator_is_running {
+  local _state="$1"
+  local _code="$(jq -r .code <<< "$_state")"
+  local _status="$(jq -r .status <<< "$_state")"
+  [ "$_code" = '(null)' ] && [ "$_status" = "0/0" ]
+}
+
+while true; do
+  currentState="$(get_migrator_state)"
+  send_message "$currentState"
+  if migrator_is_running "$currentState"; then
+    sleep "$MONITOR_HEARTBEAT_INTERVAL_SECONDS"
+    continue
+  else
+    break
+  fi
 done
-
-sleep 1
-
-if [ -s "$(find_migrator_pid_file)" ]; then
-  # Process no longer exists and the pidfile has an exit code.
-  final_message="$(jq -c -n --arg migratorPid "$MIGRATOR_PID" --arg exitCode "$(read_exit_code)" '{pid: $migratorPid, state: "exit", rc: $exitCode}')"
-else
-  # Process no longer exists but the pidfile is empty. Panic.
-  final_message="$(jq -c -n --arg migratorPid "$MIGRATOR_PID" '{pid: $migratorPid, state: "panic", rc: null}')"
-fi
-
-send_message "$final_message"
-mv "$(find_migrator_pid_file)" "$(find_migrator_pid_file).old"

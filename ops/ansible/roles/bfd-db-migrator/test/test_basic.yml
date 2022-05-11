@@ -20,16 +20,14 @@
       vars:
         bfd_env: dev
         db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAPSHOT/bfd-db-migrator-1.0.0-SNAPSHOT.zip"
-        db_migrator_db_url: 'jdbc:hsqldb:mem:test'
-        db_migrator_db_username: "bfd"
-        db_migrator_db_password: "bfd"
-        db_migrator_dir: &migrator_dir "/opt/bfd-db-migrator"
+        db_migrator_db_url: jdbc:hsqldb:mem:test
+        db_migrator_db_username: bfd
+        db_migrator_db_password: bfd
+        db_migrator_dir: /opt/bfd-db-migrator
         migrator_monitor_heartbeat_interval_seconds: 15
 
 # Verify that things worked as expected.
 - hosts: bfd-db-migrator
-  vars:
-    db_migrator_dir: *migrator_dir
   tasks:
     - name: Ensure Service Is Running
       service:
@@ -41,13 +39,10 @@
 
     - name: Evaluate migrator exit code
       shell: >-
-        cd {{ db_migrator_dir }} &&
-        ls -lt . |
-        grep '.pid' |
-        head --lines=1 |
-        awk '{ print $9 }' |
-        xargs --max-args=1 cat
+        systemctl show bfd-db-migrator.service --property=ExecStart \
+        | xargs -n1
+        | grep status=
       retries: 10
       delay: 6
       register: exit_status
-      until: exit_status.stdout == '0'
+      until: exit_status.stdout == 'status=0'
