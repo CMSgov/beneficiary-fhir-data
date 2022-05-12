@@ -1,19 +1,92 @@
+resource "aws_glue_catalog_table" "test_api_history" {
+    catalog_id    = "577373831711"
+    database_name = "bfd"
+    name          = "test_api_history"
+    owner         = "owner"
+    parameters    = {
+        "CrawlerSchemaDeserializerVersion" = "1.0"
+        "CrawlerSchemaSerializerVersion"   = "1.0"
+        "UPDATED_BY_CRAWLER"               = "bfd-test-history-crawler"
+        "averageRecordSize"                = "2857"
+        "classification"                   = "cw-history"
+        "compressionType"                  = "gzip"
+        "grokPattern"                      = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+        "objectCount"                      = "209"
+        "recordCount"                      = "86598"
+        "sizeKey"                          = "284588120"
+        "typeOfData"                       = "file"
+    }
+    retention     = 0
+    table_type    = "EXTERNAL_TABLE"
+
+    partition_keys {
+        name = "partition_0"
+        type = "string"
+    }
+    partition_keys {
+        name = "partition_1"
+        type = "string"
+    }
+
+    storage_descriptor {
+        bucket_columns            = []
+        compressed                = true
+        input_format              = "org.apache.hadoop.mapred.TextInputFormat"
+        location                  = "s3://bfd-insights-bfd-app-logs/history/test_api_history/"
+        number_of_buckets         = -1
+        output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+        parameters                = {
+            "CrawlerSchemaDeserializerVersion" = "1.0"
+            "CrawlerSchemaSerializerVersion"   = "1.0"
+            "UPDATED_BY_CRAWLER"               = "bfd-test-history-crawler"
+            "averageRecordSize"                = "2857"
+            "classification"                   = "cw-history"
+            "compressionType"                  = "gzip"
+            "grokPattern"                      = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+            "objectCount"                      = "209"
+            "recordCount"                      = "86598"
+            "sizeKey"                          = "284588120"
+            "typeOfData"                       = "file"
+        }
+        stored_as_sub_directories = false
+
+        columns {
+            name       = "timestamp"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "message"
+            parameters = {}
+            type       = "string"
+        }
+
+        ser_de_info {
+            parameters            = {
+                "input.format" = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+            }
+            serialization_library = "com.amazonaws.glue.serde.GrokSerDe"
+        }
+    }
+}
+
 resource "aws_glue_catalog_table" "test_api_requests" {
     catalog_id    = "577373831711"
     database_name = "bfd"
     name          = "test_api_requests"
+    owner         = "owner"
     parameters    = {
         "CrawlerSchemaDeserializerVersion" = "1.0"
         "CrawlerSchemaSerializerVersion"   = "1.0"
-        "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-initial-crawler"
+        "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
         "UpdatedByJob"                     = "bfd-history-ingest"
         "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
-        "averageRecordSize"                = "3405"
+        "averageRecordSize"                = "9486"
         "classification"                   = "json"
-        "compressionType"                  = "gzip"
-        "objectCount"                      = "8"
-        "recordCount"                      = "52"
-        "sizeKey"                          = "122975"
+        "compressionType"                  = "none"
+        "objectCount"                      = "246"
+        "recordCount"                      = "4925483"
+        "sizeKey"                          = "46771821038"
         "typeOfData"                       = "file"
     }
     retention     = 0
@@ -37,9 +110,22 @@ resource "aws_glue_catalog_table" "test_api_requests" {
         compressed                = false
         input_format              = "org.apache.hadoop.mapred.TextInputFormat"
         location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_api_requests/"
-        number_of_buckets         = 0
+        number_of_buckets         = -1
         output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-        parameters                = {}
+        parameters                = {
+            "CrawlerSchemaDeserializerVersion" = "1.0"
+            "CrawlerSchemaSerializerVersion"   = "1.0"
+            "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+            "UpdatedByJob"                     = "bfd-history-ingest"
+            "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
+            "averageRecordSize"                = "9486"
+            "classification"                   = "json"
+            "compressionType"                  = "none"
+            "objectCount"                      = "246"
+            "recordCount"                      = "4925483"
+            "sizeKey"                          = "46771821038"
+            "typeOfData"                       = "file"
+        }
         stored_as_sub_directories = false
 
         columns {
@@ -815,9 +901,173 @@ resource "aws_glue_catalog_table" "test_api_requests" {
 
         ser_de_info {
             parameters            = {
-                "paths" = "context,level,logger,mdc.bene_id,mdc.database_query.bene_by_id.include_hicns_and_mbis.batch,mdc.database_query.bene_by_id.include_hicns_and_mbis.batch_size,mdc.database_query.bene_by_id.include_hicns_and_mbis.datasource_name,mdc.database_query.bene_by_id.include_hicns_and_mbis.duration_milliseconds,mdc.database_query.bene_by_id.include_hicns_and_mbis.size,mdc.database_query.bene_by_id.include_hicns_and_mbis.success,mdc.database_query.bene_by_id.include_hicns_and_mbis.type,mdc.database_query.eobs_by_bene_id.carrier.batch,mdc.database_query.eobs_by_bene_id.carrier.batch_size,mdc.database_query.eobs_by_bene_id.carrier.datasource_name,mdc.database_query.eobs_by_bene_id.carrier.duration_milliseconds,mdc.database_query.eobs_by_bene_id.carrier.size,mdc.database_query.eobs_by_bene_id.carrier.success,mdc.database_query.eobs_by_bene_id.carrier.type,mdc.database_query.eobs_by_bene_id.dme.batch,mdc.database_query.eobs_by_bene_id.dme.batch_size,mdc.database_query.eobs_by_bene_id.dme.datasource_name,mdc.database_query.eobs_by_bene_id.dme.duration_milliseconds,mdc.database_query.eobs_by_bene_id.dme.size,mdc.database_query.eobs_by_bene_id.dme.success,mdc.database_query.eobs_by_bene_id.dme.type,mdc.database_query.eobs_by_bene_id.hha.batch,mdc.database_query.eobs_by_bene_id.hha.batch_size,mdc.database_query.eobs_by_bene_id.hha.datasource_name,mdc.database_query.eobs_by_bene_id.hha.duration_milliseconds,mdc.database_query.eobs_by_bene_id.hha.size,mdc.database_query.eobs_by_bene_id.hha.success,mdc.database_query.eobs_by_bene_id.hha.type,mdc.database_query.eobs_by_bene_id.hospice.batch,mdc.database_query.eobs_by_bene_id.hospice.batch_size,mdc.database_query.eobs_by_bene_id.hospice.datasource_name,mdc.database_query.eobs_by_bene_id.hospice.duration_milliseconds,mdc.database_query.eobs_by_bene_id.hospice.size,mdc.database_query.eobs_by_bene_id.hospice.success,mdc.database_query.eobs_by_bene_id.hospice.type,mdc.database_query.eobs_by_bene_id.inpatient.batch,mdc.database_query.eobs_by_bene_id.inpatient.batch_size,mdc.database_query.eobs_by_bene_id.inpatient.datasource_name,mdc.database_query.eobs_by_bene_id.inpatient.duration_milliseconds,mdc.database_query.eobs_by_bene_id.inpatient.size,mdc.database_query.eobs_by_bene_id.inpatient.success,mdc.database_query.eobs_by_bene_id.inpatient.type,mdc.database_query.eobs_by_bene_id.outpatient.batch,mdc.database_query.eobs_by_bene_id.outpatient.batch_size,mdc.database_query.eobs_by_bene_id.outpatient.datasource_name,mdc.database_query.eobs_by_bene_id.outpatient.duration_milliseconds,mdc.database_query.eobs_by_bene_id.outpatient.size,mdc.database_query.eobs_by_bene_id.outpatient.success,mdc.database_query.eobs_by_bene_id.outpatient.type,mdc.database_query.eobs_by_bene_id.pde.batch,mdc.database_query.eobs_by_bene_id.pde.batch_size,mdc.database_query.eobs_by_bene_id.pde.datasource_name,mdc.database_query.eobs_by_bene_id.pde.duration_milliseconds,mdc.database_query.eobs_by_bene_id.pde.size,mdc.database_query.eobs_by_bene_id.pde.success,mdc.database_query.eobs_by_bene_id.pde.type,mdc.database_query.eobs_by_bene_id.snf.batch,mdc.database_query.eobs_by_bene_id.snf.batch_size,mdc.database_query.eobs_by_bene_id.snf.datasource_name,mdc.database_query.eobs_by_bene_id.snf.duration_milliseconds,mdc.database_query.eobs_by_bene_id.snf.size,mdc.database_query.eobs_by_bene_id.snf.success,mdc.database_query.eobs_by_bene_id.snf.type,mdc.database_query.unknown.batch,mdc.database_query.unknown.batch_size,mdc.database_query.unknown.datasource_name,mdc.database_query.unknown.duration_milliseconds,mdc.database_query.unknown.query,mdc.database_query.unknown.size,mdc.database_query.unknown.success,mdc.database_query.unknown.type,mdc.http_access.request.clientssl.dn,mdc.http_access.request.header.Accept-Encoding,mdc.http_access.request.header.Cache-Control,mdc.http_access.request.header.Connection,mdc.http_access.request.header.IncludeIdentifiers,mdc.http_access.request.header.accept,mdc.http_access.request.header.host,mdc.http_access.request.header.user-agent,mdc.http_access.request.http_method,mdc.http_access.request.operation,mdc.http_access.request.query_string,mdc.http_access.request.uri,mdc.http_access.request.url,mdc.http_access.request_type,mdc.http_access.response.duration_milliseconds,mdc.http_access.response.header.Content-Encoding,mdc.http_access.response.header.Content-Location,mdc.http_access.response.header.content-type,mdc.http_access.response.header.date,mdc.http_access.response.header.last-modified,mdc.http_access.response.header.x-powered-by,mdc.http_access.response.header.x-request-id,mdc.http_access.response.status,mdc.jpa_query.bene_by_id.include_.duration_milliseconds,mdc.jpa_query.bene_by_id.include_.duration_nanoseconds,mdc.jpa_query.bene_by_id.include_.record_count,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_milliseconds,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_nanoseconds,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.record_count,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_milliseconds,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_nanoseconds,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.record_count,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.benes_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.eobs_by_bene_id.carrier.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.carrier.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.carrier.record_count,mdc.jpa_query.eobs_by_bene_id.dme.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.dme.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.dme.record_count,mdc.jpa_query.eobs_by_bene_id.hha.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.hha.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.hha.record_count,mdc.jpa_query.eobs_by_bene_id.hospice.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.hospice.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.hospice.record_count,mdc.jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.inpatient.record_count,mdc.jpa_query.eobs_by_bene_id.outpatient.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.outpatient.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.outpatient.record_count,mdc.jpa_query.eobs_by_bene_id.pde.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.pde.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.pde.record_count,mdc.jpa_query.eobs_by_bene_id.snf.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.snf.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.snf.record_count,message,thread,timestamp"
+                "paths" = "context,level,logger,mdc.bene_id,mdc.database_query.bene_by_id.include_hicns_and_mbis.batch,mdc.database_query.bene_by_id.include_hicns_and_mbis.batch_size,mdc.database_query.bene_by_id.include_hicns_and_mbis.datasource_name,mdc.database_query.bene_by_id.include_hicns_and_mbis.duration_milliseconds,mdc.database_query.bene_by_id.include_hicns_and_mbis.query,mdc.database_query.bene_by_id.include_hicns_and_mbis.size,mdc.database_query.bene_by_id.include_hicns_and_mbis.success,mdc.database_query.bene_by_id.include_hicns_and_mbis.type,mdc.database_query.by_hash.collision.distinct_bene_ids,mdc.database_query.eobs_by_bene_id.carrier.batch,mdc.database_query.eobs_by_bene_id.carrier.batch_size,mdc.database_query.eobs_by_bene_id.carrier.datasource_name,mdc.database_query.eobs_by_bene_id.carrier.duration_milliseconds,mdc.database_query.eobs_by_bene_id.carrier.query,mdc.database_query.eobs_by_bene_id.carrier.size,mdc.database_query.eobs_by_bene_id.carrier.success,mdc.database_query.eobs_by_bene_id.carrier.type,mdc.database_query.eobs_by_bene_id.dme.batch,mdc.database_query.eobs_by_bene_id.dme.batch_size,mdc.database_query.eobs_by_bene_id.dme.datasource_name,mdc.database_query.eobs_by_bene_id.dme.duration_milliseconds,mdc.database_query.eobs_by_bene_id.dme.query,mdc.database_query.eobs_by_bene_id.dme.size,mdc.database_query.eobs_by_bene_id.dme.success,mdc.database_query.eobs_by_bene_id.dme.type,mdc.database_query.eobs_by_bene_id.hha.batch,mdc.database_query.eobs_by_bene_id.hha.batch_size,mdc.database_query.eobs_by_bene_id.hha.datasource_name,mdc.database_query.eobs_by_bene_id.hha.duration_milliseconds,mdc.database_query.eobs_by_bene_id.hha.query,mdc.database_query.eobs_by_bene_id.hha.size,mdc.database_query.eobs_by_bene_id.hha.success,mdc.database_query.eobs_by_bene_id.hha.type,mdc.database_query.eobs_by_bene_id.hospice.batch,mdc.database_query.eobs_by_bene_id.hospice.batch_size,mdc.database_query.eobs_by_bene_id.hospice.datasource_name,mdc.database_query.eobs_by_bene_id.hospice.duration_milliseconds,mdc.database_query.eobs_by_bene_id.hospice.query,mdc.database_query.eobs_by_bene_id.hospice.size,mdc.database_query.eobs_by_bene_id.hospice.success,mdc.database_query.eobs_by_bene_id.hospice.type,mdc.database_query.eobs_by_bene_id.inpatient.batch,mdc.database_query.eobs_by_bene_id.inpatient.batch_size,mdc.database_query.eobs_by_bene_id.inpatient.datasource_name,mdc.database_query.eobs_by_bene_id.inpatient.duration_milliseconds,mdc.database_query.eobs_by_bene_id.inpatient.query,mdc.database_query.eobs_by_bene_id.inpatient.size,mdc.database_query.eobs_by_bene_id.inpatient.success,mdc.database_query.eobs_by_bene_id.inpatient.type,mdc.database_query.eobs_by_bene_id.outpatient.batch,mdc.database_query.eobs_by_bene_id.outpatient.batch_size,mdc.database_query.eobs_by_bene_id.outpatient.datasource_name,mdc.database_query.eobs_by_bene_id.outpatient.duration_milliseconds,mdc.database_query.eobs_by_bene_id.outpatient.query,mdc.database_query.eobs_by_bene_id.outpatient.size,mdc.database_query.eobs_by_bene_id.outpatient.success,mdc.database_query.eobs_by_bene_id.outpatient.type,mdc.database_query.eobs_by_bene_id.pde.batch,mdc.database_query.eobs_by_bene_id.pde.batch_size,mdc.database_query.eobs_by_bene_id.pde.datasource_name,mdc.database_query.eobs_by_bene_id.pde.duration_milliseconds,mdc.database_query.eobs_by_bene_id.pde.query,mdc.database_query.eobs_by_bene_id.pde.size,mdc.database_query.eobs_by_bene_id.pde.success,mdc.database_query.eobs_by_bene_id.pde.type,mdc.database_query.eobs_by_bene_id.snf.batch,mdc.database_query.eobs_by_bene_id.snf.batch_size,mdc.database_query.eobs_by_bene_id.snf.datasource_name,mdc.database_query.eobs_by_bene_id.snf.duration_milliseconds,mdc.database_query.eobs_by_bene_id.snf.query,mdc.database_query.eobs_by_bene_id.snf.size,mdc.database_query.eobs_by_bene_id.snf.success,mdc.database_query.eobs_by_bene_id.snf.type,mdc.database_query.unknown.batch,mdc.database_query.unknown.batch_size,mdc.database_query.unknown.datasource_name,mdc.database_query.unknown.duration_milliseconds,mdc.database_query.unknown.query,mdc.database_query.unknown.size,mdc.database_query.unknown.success,mdc.database_query.unknown.type,mdc.http_access.request.clientSSL.DN,mdc.http_access.request.header.Accept,mdc.http_access.request.header.Accept-Encoding,mdc.http_access.request.header.Cache-Control,mdc.http_access.request.header.Connection,mdc.http_access.request.header.Host,mdc.http_access.request.header.IncludeIdentifiers,mdc.http_access.request.header.User-Agent,mdc.http_access.request.http_method,mdc.http_access.request.operation,mdc.http_access.request.query_string,mdc.http_access.request.uri,mdc.http_access.request.url,mdc.http_access.request_type,mdc.http_access.response.duration_milliseconds,mdc.http_access.response.header.Cache-Control,mdc.http_access.response.header.Content-Encoding,mdc.http_access.response.header.Content-Location,mdc.http_access.response.header.Content-Type,mdc.http_access.response.header.Date,mdc.http_access.response.header.Last-Modified,mdc.http_access.response.header.X-Powered-By,mdc.http_access.response.header.X-Request-ID,mdc.http_access.response.status,mdc.jpa_query.bene_by_id.include_.duration_milliseconds,mdc.jpa_query.bene_by_id.include_.duration_nanoseconds,mdc.jpa_query.bene_by_id.include_.record_count,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_milliseconds,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.duration_nanoseconds,mdc.jpa_query.bene_by_mbi.bene_by_mbi_or_id.include_.record_count,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_milliseconds,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.duration_nanoseconds,mdc.jpa_query.bene_by_mbi.mbis_from_beneficiarieshistory.record_count,mdc.jpa_query.bene_count_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.bene_count_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.bene_count_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.bene_ids_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_milliseconds,mdc.jpa_query.benes_by_year_month_part_d_contract_id.duration_nanoseconds,mdc.jpa_query.benes_by_year_month_part_d_contract_id.record_count,mdc.jpa_query.eobs_by_bene_id.carrier.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.carrier.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.carrier.record_count,mdc.jpa_query.eobs_by_bene_id.dme.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.dme.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.dme.record_count,mdc.jpa_query.eobs_by_bene_id.hha.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.hha.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.hha.record_count,mdc.jpa_query.eobs_by_bene_id.hospice.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.hospice.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.hospice.record_count,mdc.jpa_query.eobs_by_bene_id.inpatient.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.inpatient.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.inpatient.record_count,mdc.jpa_query.eobs_by_bene_id.outpatient.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.outpatient.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.outpatient.record_count,mdc.jpa_query.eobs_by_bene_id.pde.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.pde.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.pde.record_count,mdc.jpa_query.eobs_by_bene_id.snf.duration_milliseconds,mdc.jpa_query.eobs_by_bene_id.snf.duration_nanoseconds,mdc.jpa_query.eobs_by_bene_id.snf.record_count,message,thread,timestamp"
             }
             serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+        }
+    }
+}
+
+resource "aws_glue_catalog_table" "test_beneficiaries" {
+    catalog_id    = "577373831711"
+    database_name = "bfd"
+    name          = "test_beneficiaries"
+    owner         = "owner"
+    parameters    = {
+        "CrawlerSchemaDeserializerVersion" = "1.0"
+        "CrawlerSchemaSerializerVersion"   = "1.0"
+        "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+        "averageRecordSize"                = "49"
+        "classification"                   = "parquet"
+        "compressionType"                  = "none"
+        "objectCount"                      = "847"
+        "recordCount"                      = "2997471"
+        "sizeKey"                          = "85681749"
+        "typeOfData"                       = "file"
+    }
+    retention     = 0
+    table_type    = "EXTERNAL_TABLE"
+
+    partition_keys {
+        name = "year"
+        type = "string"
+    }
+    partition_keys {
+        name = "month"
+        type = "string"
+    }
+    partition_keys {
+        name = "day"
+        type = "string"
+    }
+
+    storage_descriptor {
+        bucket_columns            = []
+        compressed                = false
+        input_format              = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+        location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_beneficiaries/"
+        number_of_buckets         = -1
+        output_format             = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+        parameters                = {
+            "CrawlerSchemaDeserializerVersion" = "1.0"
+            "CrawlerSchemaSerializerVersion"   = "1.0"
+            "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+            "averageRecordSize"                = "49"
+            "classification"                   = "parquet"
+            "compressionType"                  = "none"
+            "objectCount"                      = "847"
+            "recordCount"                      = "2997471"
+            "sizeKey"                          = "85681749"
+            "typeOfData"                       = "file"
+        }
+        stored_as_sub_directories = false
+
+        columns {
+            name       = "bene_id"
+            parameters = {}
+            type       = "bigint"
+        }
+        columns {
+            name       = "timestamp"
+            parameters = {}
+            type       = "timestamp"
+        }
+        columns {
+            name       = "clientssl_dn"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "operation"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "uri"
+            parameters = {}
+            type       = "string"
+        }
+        columns {
+            name       = "query_string"
+            parameters = {}
+            type       = "string"
+        }
+
+        ser_de_info {
+            parameters            = {
+                "serialization.format" = "1"
+            }
+            serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+        }
+    }
+}
+
+resource "aws_glue_catalog_table" "test_beneficiaries_unique" {
+    catalog_id    = "577373831711"
+    database_name = "bfd"
+    name          = "test_beneficiaries_unique"
+    owner         = "owner"
+    parameters    = {
+        "CrawlerSchemaDeserializerVersion" = "1.0"
+        "CrawlerSchemaSerializerVersion"   = "1.0"
+        "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+        "averageRecordSize"                = "21"
+        "classification"                   = "parquet"
+        "compressionType"                  = "none"
+        "objectCount"                      = "37"
+        "recordCount"                      = "50032"
+        "sizeKey"                          = "637218"
+        "typeOfData"                       = "file"
+    }
+    retention     = 0
+    table_type    = "EXTERNAL_TABLE"
+
+    partition_keys {
+        name = "year"
+        type = "string"
+    }
+    partition_keys {
+        name = "month"
+        type = "string"
+    }
+
+    storage_descriptor {
+        bucket_columns            = []
+        compressed                = false
+        input_format              = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+        location                  = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_beneficiaries_unique/"
+        number_of_buckets         = -1
+        output_format             = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+        parameters                = {
+            "CrawlerSchemaDeserializerVersion" = "1.0"
+            "CrawlerSchemaSerializerVersion"   = "1.0"
+            "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+            "averageRecordSize"                = "21"
+            "classification"                   = "parquet"
+            "compressionType"                  = "none"
+            "objectCount"                      = "37"
+            "recordCount"                      = "50032"
+            "sizeKey"                          = "637218"
+            "typeOfData"                       = "file"
+        }
+        stored_as_sub_directories = false
+
+        columns {
+            name       = "bene_id"
+            parameters = {}
+            type       = "bigint"
+        }
+        columns {
+            name       = "first_seen"
+            parameters = {}
+            type       = "timestamp"
+        }
+
+        ser_de_info {
+            parameters            = {
+                "serialization.format" = "1"
+            }
+            serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
         }
     }
 }
