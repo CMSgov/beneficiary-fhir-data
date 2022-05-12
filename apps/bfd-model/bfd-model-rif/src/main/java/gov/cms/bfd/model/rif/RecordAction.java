@@ -2,15 +2,16 @@ package gov.cms.bfd.model.rif;
 
 /** Used in RIF files to indicate what type of DB operation that a given row/record represents. */
 public enum RecordAction {
+  /** Represents an INSERT action. */
   INSERT("INSERT"),
 
+  /** Represents an UPDATE action. */
   UPDATE("UPDATE"),
 
-  /*
-   * TODO
-   */
+  /** Represents a DELETE action; currently unimplemented. TODO: Implement or delete. */
   DELETE("TODO2");
 
+  /** The Text representation of the action. */
   private final String textRepresentation;
 
   /**
@@ -24,6 +25,8 @@ public enum RecordAction {
   }
 
   /**
+   * Provides the {@link RecordAction} that matches a string value.
+   *
    * @param value the text representation of the {@link RecordAction} to be returned
    * @return the {@link RecordAction} that matches the specified text value
    */
