@@ -99,7 +99,6 @@ public class MessageError {
   @AllArgsConstructor
   public static class PK implements Serializable {
     private Long sequenceNumber;
-    private String claimId;
     private ClaimType claimType;
   }
 }
