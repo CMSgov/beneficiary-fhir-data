@@ -1115,7 +1115,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cnt",
           "valueQuantity" : {
-            "value" : 60,
+            "value" : 60.234,
             "unit" : "Number of services",
             "system" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cd",
             "code" : "3"
@@ -3728,11 +3728,18 @@
             "code" : "MMM"
           } ]
         },
+        "modifier" : [ {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "code" : "ML",
+            "display" : "Milliliter"
+          } ]
+        } ],
         "locationAddress" : {
           "state" : "FL"
         },
         "quantity" : {
-          "value" : 0
+          "value" : 234.567
         },
         "adjudication" : [ {
           "category" : {
