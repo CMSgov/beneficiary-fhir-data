@@ -51,6 +51,7 @@ public final class SNFClaimTransformerTest {
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
+
     assertMatches(claim, eob);
   }
 
@@ -172,7 +173,7 @@ public final class SNFClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     SNFClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    assertEquals(claimLine1.getLineNumber().intValue(), eobItem0.getSequence());
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHasCoding(
@@ -202,10 +203,7 @@ public final class SNFClaimTransformerTest {
         claimLine1.getNonCoveredChargeAmount(),
         BigDecimal.valueOf(claimLine1.getUnitCount()),
         claimControlNumber,
-        claimLine1.getNationalDrugCodeQuantity().isPresent()
-            ? Optional.of(
-                BigDecimal.valueOf(claimLine1.getNationalDrugCodeQuantity().get().longValue()))
-            : Optional.empty(),
+        claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
         1 /* index */);

@@ -5,9 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 
+/** Represents a loaded RIF file. */
 @Entity
 @Table(name = "loaded_files")
 public class LoadedFile {
+  /** The file identifier. */
   @Id
   @Column(name = "loaded_file_id", nullable = false)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
@@ -17,12 +19,15 @@ public class LoadedFile {
       allocationSize = 1)
   private long loadedFileId;
 
+  /** The rif type of this file. */
   @Column(name = "rif_type", nullable = false)
   private String rifType;
 
+  /** The creation timestamp. */
   @Column(name = "created", nullable = false)
   private Instant created;
 
+  /** The batches associated with this file. */
   @OneToMany(
       mappedBy = "loadedFileId",
       orphanRemoval = false,
@@ -30,10 +35,11 @@ public class LoadedFile {
       cascade = CascadeType.ALL)
   private Set<LoadedBatch> batches = new HashSet<>();
 
+  /** Default constructor. */
   public LoadedFile() {}
 
   /**
-   * Create a LoadedFile
+   * Creates a LoadedFile.
    *
    * @param loadedFileId id
    * @param rifType RifFileType
@@ -47,7 +53,7 @@ public class LoadedFile {
   }
 
   /**
-   * Create a LoadedFile
+   * Create a LoadedFile.
    *
    * @param rifType RifFileType
    */
@@ -56,42 +62,74 @@ public class LoadedFile {
     this.rifType = rifType;
   }
 
-  /** @return the identifier */
+  /**
+   * Gets the {@link #loadedFileId}.
+   *
+   * @return the identifier
+   */
   public long getLoadedFileId() {
     return loadedFileId;
   }
 
-  /** @param loadedFileId the identifier to set */
+  /**
+   * Sets the {@link #loadedFileId}.
+   *
+   * @param loadedFileId the identifier to set
+   */
   public void setLoadedFileId(long loadedFileId) {
     this.loadedFileId = loadedFileId;
   }
 
-  /** @return the rifType */
+  /**
+   * Gets the {@link #rifType}.
+   *
+   * @return the rifType
+   */
   public String getRifType() {
     return rifType;
   }
 
-  /** @param rifType the rifType to set */
+  /**
+   * Sets the {@link #rifType}.
+   *
+   * @param rifType the rifType to set
+   */
   public void setRifType(String rifType) {
     this.rifType = rifType;
   }
 
-  /** @return the creation time stamp */
+  /**
+   * Gets the {@link #created}.
+   *
+   * @return the creation time stamp
+   */
   public Instant getCreated() {
     return created;
   }
 
-  /** @param created time stamp to set */
+  /**
+   * Sets the {@link #created}.
+   *
+   * @param created time stamp to set
+   */
   public void setCreated(Instant created) {
     this.created = created;
   }
 
-  /** @return the batches associated with this file */
+  /**
+   * Gets the {@link #batches}.
+   *
+   * @return the batches associated with this file
+   */
   public Set<LoadedBatch> getBatches() {
     return batches;
   }
 
-  /** @param batches associated with this file */
+  /**
+   * Sets the {@link #batches}.
+   *
+   * @param batches associated with this file
+   */
   public void setBatches(Set<LoadedBatch> batches) {
     this.batches = batches;
   }
