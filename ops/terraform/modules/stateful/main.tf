@@ -204,8 +204,8 @@ resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
 #
 module "bfd_dashboards" {
   source              = "../resources/bfd_cw_dashboards"
-  dashboard_name      = var.dashboard_name
-  dashboard_namespace = var.dashboard_namespace
+  dashboard_name      = "bfd-server-${var.env_config.env}"
+  dashboard_namespace = "bfd-${var.env_config.env}/bfd-server"
 }
 
 

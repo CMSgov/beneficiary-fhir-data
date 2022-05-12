@@ -47,9 +47,4 @@ module "stateful" {
   victor_ops_url = var.victor_ops_url
 
   medicare_opt_out_config = var.medicare_opt_out_config
-
-  ## Cloudwatch Dashboard ##
-  ## This is where the dashboard params are passed ##
-  dashboard_name      = "bfd-server-prod"
-  dashboard_namespace = "bfd-prod/bfd-server"
 }
