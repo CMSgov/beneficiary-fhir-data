@@ -63,7 +63,7 @@ public final class HibernateSchemaPrinter {
   private static final class CustomHibernatePersistenceProvider
       extends HibernatePersistenceProvider {
     /**
-     * (See overridden method; we're just making it <code>public</code>.)
+     * (See overridden method; we're just making it <code>public</code>).
      *
      * @param persistenceUnit (see overridden method)
      * @param properties (see overridden method)

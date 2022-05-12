@@ -48,7 +48,9 @@ public final class DatabaseTestUtils {
   public static final ImmutableList<String> FLYWAY_CLEAN_SCHEMAS =
       ImmutableList.of("PUBLIC", "rda");
 
+  /** The username used for HSQL locally. */
   private static final String HSQL_SERVER_USERNAME = "test";
+  /** The password used for HSQL locally. */
   private static final String HSQL_SERVER_PASSWORD = "test";
 
   /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
@@ -68,7 +70,11 @@ public final class DatabaseTestUtils {
     this.unpooledDataSource = initUnpooledDataSource();
   }
 
-  /** @return the singleton {@link DatabaseTestUtils} instance to use everywhere */
+  /**
+   * Get a singleton for {@link DatabaseTestUtils}.
+   *
+   * @return the singleton {@link DatabaseTestUtils} instance to use everywhere
+   */
   public static synchronized DatabaseTestUtils get() {
     /*
      * Why are we using a singleton and caching all of these fields? Because creating some of the
@@ -83,8 +89,10 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * @return the {@link DataSource} for the database to test against (as specified by the <code>
-   *     its.db.*</code> system properties, see {@link #initUnpooledDataSource() for details})
+   * Returns a {@link DataSource} for the database to test against (as specified by the <code>
+   * its.db.*</code> system properties, see {@link #initUnpooledDataSource() for details}).
+   *
+   * @return the datasource
    */
   private static DataSource initUnpooledDataSource() {
     /*
@@ -122,10 +130,11 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * @return the {@link Properties} file that contains the test DB connection properties (as created
-   *     by <code>gov.cms.bfd.server.war.SpringConfiguration#findTestDatabaseProperties()</code>, or
-   *     {@link Optional#empty()} if it's not present (indicating that just a regular DB connection
-   *     is being used)
+   * Gets the {@link Properties} file that contains the test DB connection properties (as created by
+   * <code>gov.cms.bfd.server.war.SpringConfiguration#findTestDatabaseProperties()</code>.
+   *
+   * @return the properties file or {@link Optional#empty()} if it's not present (indicating that
+   *     just a regular DB connection is being used)
    */
   private static Optional<Properties> readTestDatabaseProperties() {
     Path testDatabasePropertiesPath = findTestDatabaseProperties();
@@ -141,9 +150,11 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * @return the {@link Path} to the {@link Properties} file in <code>
-   *     bfd-server-war/target/server-work</code> that the test DB connection properties will be
-   *     written out to
+   * Gets the {@link Path} to the {@link Properties} file in <code>
+   *  bfd-server-war/target/server-work</code> that the test DB connection properties will be
+   * written out to.
+   *
+   * @return the database properties path
    */
   public static Path findTestDatabaseProperties() {
     Path serverRunDir = Paths.get("target", "server-work");
@@ -155,11 +166,13 @@ public final class DatabaseTestUtils {
   }
 
   /**
+   * Initiates a {@link DataSource} for the test DB, which will <strong>not</strong> be cleaned or
+   * schema-fied first.
+   *
    * @param url the JDBC URL for the test database to connect to
    * @param username the username for the test database to connect to
    * @param password the password for the test database to connect to
-   * @return a {@link DataSource} for the test DB, which will <strong>not</strong> be cleaned or
-   *     schema-fied first
+   * @return the datasource
    */
   private static DataSource initUnpooledDataSource(String url, String username, String password) {
     DataSource dataSource;
@@ -241,6 +254,8 @@ public final class DatabaseTestUtils {
   }
 
   /**
+   * Initiates a HSQL {@link DataSource} for the test DB.
+   *
    * @param url the JDBC URL that the application was configured to use
    * @param username the username for the test database to connect to
    * @param password the password for the test database to connect to
@@ -261,6 +276,8 @@ public final class DatabaseTestUtils {
   }
 
   /**
+   * Initiates a PostgreSQL {@link DataSource} for the test DB.
+   *
    * @param url the PostgreSQL JDBC URL to use
    * @param username the username for the test database to connect to
    * @param password the password for the test database to connect to
@@ -276,15 +293,17 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * @return the cached and shared unpooled {@link DataSource} for the database to test against (as
-   *     specified by the <code>its.db.*</code> system properties, see {@link
-   *     #initUnpooledDataSource() for details})
+   * Gets the cached and shared unpooled {@link DataSource} for the database to test against (as
+   * specified by the <code>its.db.*</code> system properties, see {@link #initUnpooledDataSource()
+   * for details}).
+   *
+   * @return the datasource
    */
   public DataSource getUnpooledDataSource() {
     return unpooledDataSource;
   }
 
-  /** Creates/updates the application schema into the {@link #getUnpooledDataSource()} database */
+  /** Creates/updates the application schema into the {@link #getUnpooledDataSource()} database. */
   public void createOrUpdateSchemaForDataSource() {
     DatabaseSchemaManager.createOrUpdateSchema(unpooledDataSource);
   }
@@ -325,13 +344,16 @@ public final class DatabaseTestUtils {
    * on the very constrained set of simple {@link DataSource}s that are supported for our tests.
    */
   public static final class DataSourceComponents {
+    /** The JDBC URL that should be used to connect to the test DB. */
     private final String url;
+    /** The username that should be used to connect to the test DB. */
     private final String username;
+    /** The password that should be used to connect to the test DB. */
     private final String password;
 
     /**
      * Constructs a {@link DataSourceComponents} instance for the specified test {@link DataSource}
-     * (does not support more complicated {@link DataSource}s, as discussed in the class' JavaDoc)
+     * (does not support more complicated {@link DataSource}s, as discussed in the class' JavaDoc).
      *
      * @param dataSource the data source
      */
@@ -356,17 +378,29 @@ public final class DatabaseTestUtils {
       }
     }
 
-    /** @return the JDBC URL that should be used to connect to the test DB */
+    /**
+     * Gets the JDBC URL that should be used to connect to the test DB.
+     *
+     * @return the url
+     */
     public String getUrl() {
       return url;
     }
 
-    /** @return the username that should be used to connect to the test DB */
+    /**
+     * Gets the username that should be used to connect to the test DB.
+     *
+     * @return the username
+     */
     public String getUsername() {
       return username;
     }
 
-    /** @return the password that should be used to connect to the test DB */
+    /**
+     * Gets the password that should be used to connect to the test DB.
+     *
+     * @return the password
+     */
     public String getPassword() {
       return password;
     }
@@ -374,7 +408,9 @@ public final class DatabaseTestUtils {
 
   /** Sends output to a specified {@link Logger}. */
   private static final class LoggerWriter extends Writer {
+    /** The logger to use for this writer. */
     private final Logger logger;
+    /** The message prefix to put before log messages written. */
     private final String messagePrefix;
 
     /**
@@ -388,7 +424,7 @@ public final class DatabaseTestUtils {
       this.messagePrefix = messagePrefix;
     }
 
-    /** @see java.io.Writer#write(char[], int, int) */
+    /** {@inheritDoc} */
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
       String message = new String(cbuf, off, len);
@@ -397,13 +433,13 @@ public final class DatabaseTestUtils {
       logger.debug(messagePrefix + message);
     }
 
-    /** @see java.io.Writer#flush() */
+    /** {@inheritDoc} */
     @Override
     public void flush() throws IOException {
       // Nothing to do.
     }
 
-    /** @see java.io.Writer#close() */
+    /** {@inheritDoc} */
     @Override
     public void close() throws IOException {
       // Nothing to do.

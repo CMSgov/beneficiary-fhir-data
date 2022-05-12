@@ -894,7 +894,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cnt",
           "valueQuantity" : {
-            "value" : 60,
+            "value" : 60.234,
             "unit" : "Number of services",
             "system" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cd",
             "code" : "3"
@@ -2901,6 +2901,15 @@
         "end" : "2013-12-18"
       },
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
+          "valueQuantity" : {
+            "value" : 234.567,
+            "unit" : "Milliliter",
+            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "code" : "ML"
+          }
+        } ],
         "sequence" : 1,
         "careTeamLinkId" : [ 5 ],
         "revenue" : {
