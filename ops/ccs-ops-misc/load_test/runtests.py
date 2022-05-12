@@ -52,18 +52,25 @@ def adjusted_run_time(runTime, maxClients, clientsPerSecond):
 Runs a specified test via the input args.
 '''
 def run_with_params(argv):
+    ## Dictionary that holds the default values of each config value
+    defaultConfigData = {
+        'homePath': '',
+        'clientCertPath': '',
+        'databaseUri': '',
+        'testHost': '',
+        'configPath': 'config.yml',
+        'serverPublicKey': '',
+        'testRunTime': "1m",
+        'testNumTotalClients': "100",
+        'testCreatedClientsPerSecond': "5",
+        'resetStatsAfterClientSpawn': False
+    }
+
+    ## Dictionary to hold data passed in via the CLI that will be stored 
+    ## in the root config.yml file
+    configData = {}
 
     testFile = ''
-
-    ## container to hold config data
-    class configData: pass
-
-    ## Optional Params with defaults
-    configData.serverPublicKey = ''
-    configData.testRunTime = "1m"
-    configData.testNumTotalClients = "100"
-    configData.testCreatedClientsPerSecond = "5"
-    configData.resetStatsAfterClientSpawn = False
     workerThreads = "1"
 
     helpString = ('runtests.py \n--homePath="<path/to/home/directory>" (Required) '
@@ -71,6 +78,7 @@ def run_with_params(argv):
      '\n--databaseUri="postgres://<username:password>@<database-aws-node>.rds.amazonaws.com:port/<dbname>" (Required)'
      '\n--testHost="https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)'
      '\n--testFile="/<v1/v2>/test_to_run.py" (Required)'
+     '\n--configPath="<path to a YAML configuration that will be read for CLI values but _not_ written to>" (Optional, Default: "./config.yml")'
      '\n--serverPublicKey="<server public key>" (Optional, Default: "")'
      '\n--testRunTime="<Test run time, ex. 30s, 1m, 2d 1h>" (Optional, Default 1m)'
      '\n--maxClients="<Max number of clients to create at once, int>" (Optional, Default 100)'
@@ -80,8 +88,8 @@ def run_with_params(argv):
 
     try:
         opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseUri=",
-        "testHost=", "serverPublicKey=", "testRunTime=", "maxClients=", "clientsPerSecond=",
-        "testFile=","workerThreads=","resetStats"])
+        "testHost=", "serverPublicKey=", "configPath=", "testRunTime=", "maxClients=",
+        "clientsPerSecond=", "testFile=", "workerThreads=", "resetStats"])
     except getopt.GetoptError:
         print(helpString)
         sys.exit(2)
@@ -91,48 +99,60 @@ def run_with_params(argv):
             print(helpString)
             sys.exit()
         elif opt == "--homePath":
-            configData.homePath = arg
+            configData["homePath"] = arg
         elif opt == "--clientCertPath":
-            configData.clientCertPath = arg
+            configData["clientCertPath"] = arg
         elif opt == "--databaseUri":
-            configData.dbUri = arg
+            configData["dbUri"] = arg
         elif opt == "--testHost":
-            configData.testHost = arg
+            configData["testHost"] = arg
+        elif opt == "--configPath":
+            configData["configPath"] = arg
         elif opt == "--serverPublicKey":
-            configData.serverPublicKey = arg
+            configData["serverPublicKey"] = arg
         elif opt == "--testRunTime":
-            configData.testRunTime = arg
+            configData["testRunTime"] = arg
         elif opt == "--maxClients":
-            configData.testNumTotalClients = arg
+            configData["testNumTotalClients"] = arg
         elif opt == "--clientsPerSecond":
-            configData.testCreatedClientsPerSecond = arg
+            configData["testCreatedClientsPerSecond"] = arg
         elif opt == "--testFile":
             testFile = arg
         elif opt == "--workerThreads":
             workerThreads = arg
         elif opt == "--resetStats":
-            configData.resetStatsAfterClientSpawn = True
+            configData["resetStatsAfterClientSpawn"] = True
         else:
             print(helpString)
             sys.exit()
 
+    ## Read the specified configuration file
+    yamlConfig = config.load_from_path(configData.get("configPath", defaultConfigData["configPath"]))
+    ## Merge the stored data with data passed in via the CLI, with the
+    ## CLI data taking priority
+    configData = {**yamlConfig, **configData}
+    ## Finally, merge the merged configuration values with the defaults,
+    ## in case any optional arguments were not set via the CLI or the specified
+    ## YAML configuration file
+    configData = {**defaultConfigData, **configData}
+
     ## Add on extra time to the run-time to account for ramp-up of clients.
-    adjusted_time = adjusted_run_time(configData.testRunTime,
-        configData.testNumTotalClients, configData.testCreatedClientsPerSecond)
+    adjusted_time = adjusted_run_time(configData["testRunTime"],
+        configData["testNumTotalClients"], configData["testCreatedClientsPerSecond"])
     if adjusted_time is None:
         print("Could not determine adjusted run time. Please use a format " +
             "like \"1m 30s\" for the --testRunTime option")
         sys.exit(1)
-    configData.testRunTime = f"{adjusted_time}s"
+    configData["testRunTime"] = f"{adjusted_time}s"
     print('Run time adjusted to account for ramp-up time. New run time: %s' %
         timedelta(seconds=adjusted_time))
 
     ## Check if all required params are set
-    if not all([configData.homePath, configData.clientCertPath, configData.dbUri, configData.testHost, testFile]):
+    if not all([configData["homePath"], configData["clientCertPath"], configData["dbUri"], configData["testHost"], testFile]):
         print("Missing required arg (See -h for help on params)")
         sys.exit(2)
 
-    ## write out config file
+    ## write out to repository root config file (_NOT_ the file specified by "configPath")
     config.save(configData)
     setup.set_locust_test_name(testFile)
 
