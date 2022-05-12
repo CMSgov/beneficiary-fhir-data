@@ -9,13 +9,22 @@ SLA_COVERAGE = "SLA_COVERAGE"
 SLA_PATIENT = "SLA_PATIENT"
 SLA_EOB_WITH_SINCE = "SLA_EOB_WITH_SINCE"
 SLA_EOB_WITHOUT_SINCE = "SLA_EOB_WITHOUT_SINCE"
+SLA_V1_BASELINE = "SLA_V1_BASELINE"
+SLA_V2_BASELINE = "SLA_V2_BASELINE"
 
 ## Values are for 50%, 95%, 99%, and the failsafe limit in order, in milliseconds
+## TODO: Pull these values from production metrics (i.e. New Relic) 
 slas = {
     SLA_COVERAGE : [10, 100, 250, 500],
     SLA_PATIENT : [1000, 3000, 5000, 8000],
     SLA_EOB_WITH_SINCE : [100, 250, 1000, 3000],
-    SLA_EOB_WITHOUT_SINCE : [500, 1000, 3000, 6000]
+    SLA_EOB_WITHOUT_SINCE : [500, 1000, 3000, 6000],
+    # The following values were selected for 5 concurrent users against
+    # a target c5xlarge AWS instance running bfd-server 
+    SLA_V1_BASELINE : [10, 325, 550, 10000],
+    # The following values were selected for 3 concurrent users against
+    # a target c5xlarge AWS instance running bfd-server
+    SLA_V2_BASELINE : [10, 325, 550, 10000],
 }
 
 '''
