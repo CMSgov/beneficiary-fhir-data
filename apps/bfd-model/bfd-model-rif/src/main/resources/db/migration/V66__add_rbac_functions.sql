@@ -1,7 +1,5 @@
 /*
-  Adds a set of database helper functions for managing role-based access controls and database ownership.
-
-  This migration adds the same functions as the createSchema callback script would add on new installs/schemas.
+  Adds a set of functions to help make managing role-based access controls and ownership easier.
   
   All functions are idempotent.
 */
@@ -19,7 +17,10 @@ ${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REV
 ${logic.psql-only}     EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON ROUTINES FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL SEQUENCES IN SCHEMA %I FROM %I;', schema_name, role_name);
-${logic.psql-only}     EXECUTE format('REVOKE ALL ON ALL ROUTINES IN SCHEMA %I FROM %I;', schema_name, role_name);
+${logic.psql-only}     BEGIN
+${logic.psql-only}       EXECUTE format('REVOKE ALL ON ALL ROUTINES IN SCHEMA %I FROM %I;', schema_name, role_name);
+${logic.psql-only}       EXCEPTION WHEN SQLSTATE '42501' THEN RAISE NOTICE 'cannot revoke permissions on system routines, skipping';
+${logic.psql-only}     END;
 ${logic.psql-only}     EXECUTE format('REVOKE ALL ON SCHEMA %I FROM %I;', schema_name, role_name);
 ${logic.psql-only}   END IF;
 ${logic.psql-only} END $func$ LANGUAGE plpgsql;
@@ -94,7 +95,10 @@ ${logic.psql-only}   PERFORM revoke_schema_privs(role_name, schema_name);
 ${logic.psql-only}   EXECUTE format('GRANT ALL ON SCHEMA %I TO %I;', schema_name, role_name);
 ${logic.psql-only}   EXECUTE format('GRANT ALL ON ALL TABLES IN SCHEMA %I TO %I;', schema_name, role_name);
 ${logic.psql-only}   EXECUTE format('GRANT ALL ON ALL SEQUENCES IN SCHEMA %I TO %I;', schema_name, role_name); --curval, nextval, setval
-${logic.psql-only}   EXECUTE format('GRANT ALL ON ALL ROUTINES IN SCHEMA %I TO %I;', schema_name, role_name);
+${logic.psql-only}   BEGIN
+${logic.psql-only}     EXECUTE format('GRANT ALL ON ALL ROUTINES IN SCHEMA %I TO %I;', schema_name, role_name);
+${logic.psql-only}     EXCEPTION WHEN SQLSTATE '42501' THEN RAISE NOTICE 'cannot grant permissions to system routine, skipping';
+${logic.psql-only}   END;
 ${logic.psql-only}   EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT ALL ON TABLES TO %I;', schema_name, role_name);
 ${logic.psql-only}   EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT ALL ON SEQUENCES TO %I;', schema_name, role_name);
 ${logic.psql-only}   EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT ALL ON ROUTINES TO %I;', schema_name, role_name);
@@ -120,20 +124,19 @@ ${logic.psql-only} $func$
 ${logic.psql-only} DECLARE
 ${logic.psql-only}  t record;
 ${logic.psql-only} BEGIN
-${logic.psql-only}   EXECUTE format('GRANT CONNECT ON DATABASE fhirdb TO %I', role_name); -- TODO: does this role need this?
-${logic.psql-only}   IF role_name != CURRENT_USER THEN
-${logic.psql-only}     -- you must be a member of a role to alter its ownership
-${logic.psql-only}     EXECUTE format('GRANT %I TO %I;', role_name, CURRENT_USER);
-${logic.psql-only}   END IF;
-${logic.psql-only}
-${logic.psql-only}   -- make role_name own all non system schemas
+${logic.psql-only}   -- make the fhirdb owner role own all schemas except public and system schemas
 ${logic.psql-only}   FOR t IN
-${logic.psql-only}     SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname != 'information_schema'
+${logic.psql-only}     SELECT nspname, nspowner FROM pg_catalog.pg_namespace 
+${logic.psql-only}     WHERE nspname != 'public' AND nspname != 'information_schema' AND nspname NOT LIKE 'pg_%'
 ${logic.psql-only}   LOOP
+${logic.psql-only}     -- you must be an owner of an object to change its ownership (note pg_has_role is a built in function)
+${logic.psql-only}     IF NOT pg_has_role(t.nspowner, 'member') THEN
+${logic.psql-only}       EXECUTE format('GRANT %I TO %I;', role_name, CURRENT_USER);
+${logic.psql-only}     END IF;
 ${logic.psql-only}     EXECUTE format('ALTER SCHEMA %I OWNER TO %I', t.nspname, role_name);
 ${logic.psql-only}   END LOOP;
 ${logic.psql-only}
-${logic.psql-only}   -- make role_name own all tables/views in all schemas (excludes system schemas/tables)
+${logic.psql-only}   -- make role_name own all tables/views in all non system schemas/tables
 ${logic.psql-only}   FOR t IN
 ${logic.psql-only}     SELECT table_schema, table_name
 ${logic.psql-only}     FROM information_schema.tables
@@ -149,20 +152,16 @@ ${logic.psql-only}   -- sequences
 ${logic.psql-only}   FOR t IN
 ${logic.psql-only}     SELECT sequence_schema, sequence_name
 ${logic.psql-only}     FROM information_schema.sequences
-${logic.psql-only}     WHERE sequence_name NOT LIKE 'pg_%'
-${logic.psql-only}         AND sequence_schema != 'information_schema'
-${logic.psql-only}         AND sequence_schema NOT LIKE 'pg_%'
+${logic.psql-only}     WHERE sequence_name NOT LIKE 'pg_%' AND sequence_schema != 'information_schema' AND sequence_schema NOT LIKE 'pg_%'
 ${logic.psql-only}   LOOP
 ${logic.psql-only}     EXECUTE format('ALTER SEQUENCE %I.%I OWNER TO %I;', t.sequence_schema, t.sequence_name, role_name);
 ${logic.psql-only}   END LOOP;
 ${logic.psql-only}
-${logic.psql-only}   -- functions and stored procedures
+${logic.psql-only}   -- functions and procedures (routines)
 ${logic.psql-only}   FOR t IN
 ${logic.psql-only}     SELECT routine_schema, routine_name
 ${logic.psql-only}     FROM information_schema.routines
-${logic.psql-only}     WHERE routine_schema NOT LIKE 'pg_%'
-${logic.psql-only}         AND routine_schema != 'information_schema'
-${logic.psql-only}         AND routine_name NOT LIKE 'pg_%'
+${logic.psql-only}     WHERE routine_schema != 'pg_catalog' AND routine_schema != 'information_schema' AND routine_name NOT LIKE 'pg_%'
 ${logic.psql-only}   LOOP
 ${logic.psql-only}     EXECUTE format('ALTER ROUTINE %I.%I OWNER TO %I;', t.routine_schema, t.routine_name, role_name);
 ${logic.psql-only}   END LOOP;
