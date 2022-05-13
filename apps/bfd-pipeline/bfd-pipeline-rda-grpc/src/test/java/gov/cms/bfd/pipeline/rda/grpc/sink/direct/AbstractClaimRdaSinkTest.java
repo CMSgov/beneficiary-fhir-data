@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -80,11 +81,11 @@ public class AbstractClaimRdaSinkTest {
     List<RdaChange<String>> expected =
         messages.stream().map(this::createChangeClaimFromMessage).collect(Collectors.toList());
 
-    Wrapper<List<RdaChange<String>>> wrapper = new Wrapper<>();
+    AtomicReference<List<RdaChange<String>>> wrapper = new AtomicReference<>();
 
-    assertDoesNotThrow(() -> wrapper.wrap(sinkSpy.transformMessages(apiVersion, messages)));
+    assertDoesNotThrow(() -> wrapper.set(sinkSpy.transformMessages(apiVersion, messages)));
 
-    assertClaimChangesEquals(expected, wrapper.unwrap());
+    assertClaimChangesEquals(expected, wrapper.get());
     verify(sinkSpy, times(0))
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
   }
@@ -141,14 +142,9 @@ public class AbstractClaimRdaSinkTest {
         .when(sinkSpy)
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
-    List<RdaChange<String>> expected =
-        messages.stream().map(this::createChangeClaimFromMessage).collect(Collectors.toList());
-
-    Wrapper<List<RdaChange<String>>> wrapper = new Wrapper<>();
-
     assertThrows(
         DataTransformer.TransformationException.class,
-        () -> wrapper.wrap(sinkSpy.transformMessages(apiVersion, messages)));
+        () -> sinkSpy.transformMessages(apiVersion, messages));
 
     verify(sinkSpy, times(1))
         .writeError(
@@ -193,24 +189,6 @@ public class AbstractClaimRdaSinkTest {
     assertEquals(expected.getType(), actual.getType());
     assertEquals(expected.getClaim(), actual.getClaim());
     assertEquals(expected.getTimestamp(), actual.getTimestamp());
-  }
-
-  /**
-   * Helper class for retrieving values from inside lambda expressions.
-   *
-   * @param <T> The type of data being wrapped.
-   */
-  static class Wrapper<T> {
-
-    private T wrapped;
-
-    void wrap(T wrapped) {
-      this.wrapped = wrapped;
-    }
-
-    T unwrap() {
-      return wrapped;
-    }
   }
 
   /** Simple implementation of {@link AbstractClaimRdaSink} for testing purposes. */
