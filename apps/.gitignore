@@ -6,3 +6,6 @@
 *.iml
 
 bluebutton-data-pipeline*
+logs
+*.orig
+cleanup.sql
