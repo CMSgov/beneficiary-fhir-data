@@ -4,3 +4,5 @@
 
 # Ignore IntelliJ configuration files
 *.iml
+
+bluebutton-data-pipeline*
