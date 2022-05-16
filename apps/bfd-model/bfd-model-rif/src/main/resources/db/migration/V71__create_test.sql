@@ -22,7 +22,7 @@ ${logic.psql-only} alter sequence rda.q restart with 100;
 ${logic.psql-only} alter function rda.inc(i integer) rename to inc2;
 ${logic.psql-only} 
 ${logic.psql-only} /* new schema */
-${logic.psql-only} create schema foo;
+${logic.psql-only} create schema if not exists foo;
 ${logic.psql-only} create table foo.t1(c1 serial, c2 integer);
 ${logic.psql-only} alter table foo.t1 add constraint foo_uc2 unique(c2);
 ${logic.psql-only} create sequence foo.q start 1 owned by foo.t1.c1;

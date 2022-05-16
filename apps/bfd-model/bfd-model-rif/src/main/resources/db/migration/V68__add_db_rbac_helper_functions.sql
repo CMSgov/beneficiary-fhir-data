@@ -52,7 +52,10 @@ ${logic.psql-only}   t record;
 ${logic.psql-only} BEGIN
 ${logic.psql-only}   IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = role_name) THEN
 ${logic.psql-only}     FOR t IN
-${logic.psql-only}       SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname != 'information_schema'
+${logic.psql-only}       SELECT nspname FROM pg_catalog.pg_namespace
+${logic.psql-only}       WHERE nspname NOT LIKE 'pg_%'
+${logic.psql-only}       AND nspname != 'information_schema'
+${logic.psql-only}       AND nspname != 'public'
 ${logic.psql-only}     LOOP
 ${logic.psql-only}       PERFORM revoke_schema_privs(t.nspname, role_name);
 ${logic.psql-only}     END LOOP;

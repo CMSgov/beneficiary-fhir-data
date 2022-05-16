@@ -6,8 +6,6 @@
 */
 
 ${logic.psql-only} DO $$
-${logic.psql-only} DECLARE
-${logic.psql-only} 	t record;
 ${logic.psql-only} BEGIN
 ${logic.psql-only}   -- designate a fhirdb owner
 ${logic.psql-only}   PERFORM create_role_if_not_exists('fhir');
