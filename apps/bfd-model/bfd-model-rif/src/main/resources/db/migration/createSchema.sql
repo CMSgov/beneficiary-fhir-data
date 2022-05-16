@@ -1,10 +1,7 @@
 /*
+  This callback is executed on new installations before flyway begins creating non-existent schemas.
 
-  Adds a set of functions to help make managing role-based access controls and object ownship easier. It is a duplicate
-  of the ./createSchema.sql callback script. It is being added here to ensure these functions exists both new and existing
-  databases.
-
-  Functions:
+  It dds a set of functions to help make managing role-based access controls and object ownship easier:
     - revoke_schema_privs(schema_name TEXT, role_name TEXT)
     - create_role_if_not_exists(role_name TEXT)
     - revoke_db_privs(db_name TEXT, role_name TEXT)
