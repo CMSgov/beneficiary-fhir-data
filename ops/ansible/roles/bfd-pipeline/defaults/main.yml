@@ -12,7 +12,7 @@ data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
 
 ## RDA API Pipeline
-# Used to download FISS/MCS pre-adjudicated claims data.
+# Used to download FISS/MCS partially adjudicated claims data.
 #
 # Set to true to enable the RDA pipeline jobs.
 data_pipeline_rda_job_enabled: false
