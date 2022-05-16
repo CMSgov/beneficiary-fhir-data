@@ -119,7 +119,7 @@ class BFDUserBase(HttpUser):
         except IndexError:
             url = None
 
-        if url is None and name in self.url_pools and self.url_pools[name]:
+        if url is None and self.url_pools.get(name):
             # We can't generate a URL from the callback, but there are still
             # URLs in the pool of paginated data. Use that.
             url = self.url_pools[name].pop()
