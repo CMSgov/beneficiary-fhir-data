@@ -1,25 +1,16 @@
 '''Load and save configuration file.
 '''
 
+from typing import Dict
+
 import yaml
 
-def save(file_data):
+def save(file_data: Dict[str, str]):
     '''Saves a config file using the input file data.
     '''
 
-    config_file = open('config.yml', 'w', encoding='utf-8')
-    config_file.write(f"homePath: \"{file_data['homePath']}\"\n")
-    config_file.write(f"clientCertPath: \"{file_data['clientCertPath']}\"\n")
-    config_file.write(f"serverPublicKey: \"{file_data['serverPublicKey']}\"\n")
-    config_file.write(f"dbUri: \"{file_data['dbUri']}\"\n")
-    config_file.write(f"testHost: \"{file_data['testHost']}\"\n")
-    config_file.write(f"tableSamplePct: \"{file_data['tableSamplePct']}\"\n")
-    config_file.write(f"testRunTime: \"{file_data['testRunTime']}\"\n")
-    config_file.write(f"testNumTotalClients: \"{file_data['testNumTotalClients']}\"\n")
-    config_file.write(f"testCreatedClientsPerSecond: \"{file_data['testCreatedClientsPerSecond']}"
-        "\"\n")
-    config_file.write(f"resetStatsAfterClientSpawn: \"{file_data['resetStatsAfterClientSpawn']}\"")
-    config_file.close()
+    with open('config.yml', 'w', encoding='utf-8') as config:
+        yaml.dump(file_data, config, default_flow_style=False)
 
 
 def create():
