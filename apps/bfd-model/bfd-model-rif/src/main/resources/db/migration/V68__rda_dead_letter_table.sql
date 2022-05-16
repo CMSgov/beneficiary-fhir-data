@@ -17,7 +17,7 @@ CREATE TABLE rda.message_errors (
     api_source      varchar(24)                 not null,
     created_date    timestamp with time zone    not null,
     updated_date    timestamp with time zone    not null,
-    errors          ${type.jsonb}               not null,
-    message         ${type.jsonb}               not null,
+    errors          jsonb                       not null,
+    message         jsonb                       not null,
     primary key (sequence_number, claim_type)
 );
