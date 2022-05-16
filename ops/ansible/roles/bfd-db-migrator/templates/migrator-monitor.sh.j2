@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# This is a simple, jinja2 templated script that monitors and reports
+# the ExecStart field of the bfd-db-migrator systemd service.
+#
+# While the bfd-db-migrator service is running (executing a database
+# migration), this service effectively heartbeats via sqs. When the
+# bfd-db-migrator service is no longer running, this service sends the
+# final status message and exits.
+set -euo pipefail
+
+AWS_REGION="${AWS_REGION:-us-east-1}"
+SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ env }}-db-migrator" --region "$AWS_REGION" --output text)"
+MIGRATOR_SERVICE_NAME="{{ db_migrator_service_name_override | default('bfd-db-migrator.service', true) }}"
+MONITOR_HEARTBEAT_INTERVAL_SECONDS="{{ migrator_monitor_heartbeat_interval_seconds | default('300', true) }}"
+
+#######################################
+# Sends a message using AWS SQS
+# Globals:
+#   AWS_REGION
+#   SQS_QUEUE_URL
+# Arguments:
+#   message to send, a string.
+# Outputs:
+#  json response from AWS SQS to STDOUT. Unused.
+#######################################
+function send_message {
+  local _message="$1"
+  aws sqs send-message \
+    --region "$AWS_REGION" \
+    --queue-url "$SQS_QUEUE_URL" \
+    --message-body "$_message"
+}
+
+#######################################
+# Represents the state of the migrator service as as json object.
+# Globals:
+#   MIGRATOR_SERVICE_NAME
+# Arguments:
+#   None
+# Outputs:
+#   json object including pid, start_time, stop_time, status, and code of the
+#   migrator service to STDOUT
+#######################################
+function get_migrator_state {
+  systemctl show "$MIGRATOR_SERVICE_NAME" --no-pager --property=ExecStart \
+    | sed 's/ExecStart={ //' | sed 's/ }//' \
+    | sed 's/\[//g' | sed 's/\]//g' | sed 's/ ; /\n/g' \
+    | grep -E "pid|start_time|stop_time|status|code" \
+    | jq -cnR --raw-input '[ inputs
+ | gsub("\r$"; "")
+ | split("="; "")
+ | select(length == 2)
+ | {(.[0]): .[1]}]
+ | add'
+}
+
+#######################################
+# Determines running state based on json-formatted state input
+# Globals:
+#   None
+# Arguments:
+#   json-formatted state (intended to be produced by get_migrator_state)
+# Outputs:
+#   returns true when migrator is running, false when not running
+#######################################
+function migrator_is_running {
+  local _state="$1"
+  local _code="$(jq -r .code <<< "$_state")"
+  local _status="$(jq -r .status <<< "$_state")"
+  [ "$_code" = '(null)' ] && [ "$_status" = "0/0" ]
+}
+
+while true; do
+  currentState="$(get_migrator_state)"
+  send_message "$currentState"
+  if migrator_is_running "$currentState"; then
+    sleep "$MONITOR_HEARTBEAT_INTERVAL_SECONDS"
+    continue
+  else
+    break
+  fi
+done

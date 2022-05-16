@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.pac;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -23,8 +23,8 @@ import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.SpringConfiguration;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -95,8 +95,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @PostConstruct
   public void init() {
     claimDao =
-        new ClaimDao(
-            entityManager, metricRegistry, SpringConfiguration.isPreAdjOldMbiHashEnabled());
+        new ClaimDao(entityManager, metricRegistry, SpringConfiguration.isPacOldMbiHashEnabled());
 
     setResourceType();
   }
