@@ -29,7 +29,7 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     END_ON_NO_DATA = False
 
     # No Table Sample for the Regression Suite, because we want to keep the tests more consistent.
-    USE_TABLE_SANPLE = False
+    USE_TABLE_SAMPLE = False
 
 
     @task

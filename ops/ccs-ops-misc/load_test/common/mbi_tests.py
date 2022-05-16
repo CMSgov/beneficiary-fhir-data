@@ -15,13 +15,13 @@ class MBITestUser(BFDUserBase):
 
     # Should we use the Table Sample feature of Postgres to query only against a portion of the
     # table?
-    USE_TABLE_SANPLE = True
+    USE_TABLE_SAMPLE = True
 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.hashed_mbis = data.load_all(db.get_hashed_mbis,
-            use_table_sample=self.USE_TABLE_SANPLE).copy()
+            use_table_sample=self.USE_TABLE_SAMPLE).copy()
         random.shuffle(self.hashed_mbis)
 
 

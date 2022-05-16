@@ -15,7 +15,7 @@ class BeneTestUser(BFDUserBase):
 
     # Should we use the Table Sample feature of Postgres to query only against a portion of the
     # table?
-    USE_TABLE_SANPLE = True
+    USE_TABLE_SAMPLE = True
 
 
     def __init__(self, *args, **kwargs):
@@ -23,7 +23,7 @@ class BeneTestUser(BFDUserBase):
         '''
         super().__init__(*args, **kwargs)
         self.bene_ids = data.load_all(db.get_bene_ids,
-            use_table_sample=self.USE_TABLE_SANPLE).copy()
+            use_table_sample=self.USE_TABLE_SAMPLE).copy()
         random.shuffle(self.bene_ids)
 
 
