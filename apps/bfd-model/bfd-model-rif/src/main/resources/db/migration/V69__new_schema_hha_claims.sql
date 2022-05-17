@@ -24,7 +24,7 @@
 --
 -- Once current table data is migrated to new table name/structure, a 
 -- subsequent PR will be deployed that changes the ORM model(s) and
--- operational code for DME Claims table(s).
+-- operational code for HHA Claims table(s).
 --
 -- HSQL differs from PSQL (postgres) in that the table defintion
 -- must be explicitly declared prior to loading data into the
