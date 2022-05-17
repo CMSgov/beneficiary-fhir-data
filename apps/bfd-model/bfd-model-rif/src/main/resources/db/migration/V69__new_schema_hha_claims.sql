@@ -17,9 +17,9 @@
 --      +-----------------------+--------+------+-------+
 --      |  db Column            |   Max  |  Min | Scale |
 --      +-----------------------+--------+------+-------+
---      | CLM_HHA_TOT_VISIT_CNT | 901576 |	 0  |   0   |
---      | CLM_LINE_NUM          |    446 |	 1  |   0   |
---      | REV_CNTR_UNIT_CNT     |    392 |	 0  |   0   |
+--      | CLM_HHA_TOT_VISIT_CNT | 901576 |   0  |   0   |
+--      | CLM_LINE_NUM          |    446 |   1  |   0   |
+--      | REV_CNTR_UNIT_CNT     |    392 |   0  |   0   |
 --      +-----------------------+--------+------+-------+   
 --
 -- Once current table data is migrated to new table name/structure, a 
