@@ -35,7 +35,7 @@ def check_global_fail(environment, fail_time_ms):
         time.sleep(1)
         if environment.stats.total.avg_response_time > fail_time_ms:
             logging.getLogger().warning('WARNING: Test aborted due to triggering test failsafe '
-                '(average response time ratio > %sms)', fail_time_ms)
+                '(average response time ratio > %d ms)', fail_time_ms)
             environment.runner.quit()
             return
 
