@@ -9,19 +9,13 @@
 --      The following db columns were redefined from NUMERIC to more
 --      appropriate data type(s):
 --
---      from: clm_utlztn_day_cnt numeric         : changed to integer
---      from: bene_hospc_prd_cnt numeric(2,0)    : changed to smallint
---      from: clm_line_num numeric               : changed to smallint
---      from rev_cntr_unit_cnt numeric           : changed to integer
+--      from: clm_line_num numeric   : changed to smallint
 --
 --       Current db data values for changed columns
 --      +-----------------------+--------+------+-------+
 --      |  db Column            |   Max  |  Min | Scale |
 --      +-----------------------+--------+------+-------+
---      | CLM_UTLZTN_DAY_CNT    |    240 | -87  |   0   |
---      | BENE_HOSPC_PRD_CNT    |      3 |   0  |   0   |
 --      | CLM_LINE_NUM          |    450 |   1  |   0   |
---      | REV_CNTR_UNIT_CNT     | 904404 |   0  |   0   |
 --      +-----------------------+--------+------+-------+   
 --
 -- Once current table data is migrated to new table name/structure, a 
@@ -50,7 +44,7 @@ ${logic.hsql-only}    clm_fac_type_cd                       char(1) NOT NULL,
 ${logic.hsql-only}    clm_freq_cd                           char(1) NOT NULL,
 ${logic.hsql-only}    clm_srvc_clsfctn_type_cd              char(1) NOT NULL,
 ${logic.hsql-only}    clm_tot_chrg_amt                      numeric(12,2) NOT NULL,
-${logic.hsql-only}    clm_utlztn_day_cnt                    integer NOT NULL,
+${logic.hsql-only}    clm_utlztn_day_cnt                    numeric NOT NULL,
 ${logic.hsql-only}    clm_hospc_start_dt_id                 date,
 ${logic.hsql-only}    clm_mdcr_non_pmt_rsn_cd               varchar(2),
 ${logic.hsql-only}    nch_clm_type_cd                       varchar(2) NOT NULL,
@@ -72,7 +66,7 @@ ${logic.hsql-only}    at_physn_upin                         varchar(9),
 ${logic.hsql-only}    org_npi_num                           varchar(10),
 ${logic.hsql-only}    prncpal_dgns_cd                       varchar(7),
 ${logic.hsql-only}    prncpal_dgns_vrsn_cd                  char(1),
-${logic.hsql-only}    bene_hospc_prd_cnt                    smallint,
+${logic.hsql-only}    bene_hospc_prd_cnt                    numeric(2,0),
 ${logic.hsql-only}    fst_dgns_e_cd                         varchar(7),
 ${logic.hsql-only}    fst_dgns_e_vrsn_cd                    char(1),
 ${logic.hsql-only}    icd_dgns_cd1                          varchar(7),
@@ -158,7 +152,7 @@ ${logic.hsql-only}  create table public.hospice_claim_lines_new (
 ${logic.hsql-only}    clm_id                                bigint NOT NULL,
 ${logic.hsql-only}    clm_line_num                          smallint not null,
 ${logic.hsql-only}    rev_cntr                              varchar(4) not null,
-${logic.hsql-only}    rev_cntr_unit_cnt                     integer not null,
+${logic.hsql-only}    rev_cntr_unit_cnt                     numeric not null,
 ${logic.hsql-only}    rev_cntr_tot_chrg_amt                 numeric(12,2) not null,
 ${logic.hsql-only}    rev_cntr_rate_amt                     numeric(12,2) not null,
 ${logic.hsql-only}    rev_cntr_ncvrd_chrg_amt               numeric(12,2),
@@ -318,8 +312,7 @@ ${logic.psql-only}    cast(clm_grp_id as bigint),
                       clm_freq_cd,
                       clm_srvc_clsfctn_type_cd,
                       clm_tot_chrg_amt,
-${logic.hsql-only}    clm_utlztn_day_cnt,
-${logic.psql-only}    cast(clm_utlztn_day_cnt as integer),
+                      clm_utlztn_day_cnt,
                       clm_hospc_start_dt_id,
                       clm_mdcr_non_pmt_rsn_cd,
                       nch_clm_type_cd,
@@ -341,8 +334,7 @@ ${logic.psql-only}    cast(clm_utlztn_day_cnt as integer),
                       org_npi_num,
                       prncpal_dgns_cd,
                       prncpal_dgns_vrsn_cd,
-${logic.hsql-only}    bene_hospc_prd_cnt,
-${logic.psql-only}    cast(bene_hospc_prd_cnt as smallint),
+                      bene_hospc_prd_cnt,
                       fst_dgns_e_cd,
                       fst_dgns_e_vrsn_cd,
                       icd_dgns_cd1,
@@ -455,8 +447,7 @@ ${logic.hsql-only}    convert(clm_line_num, SQL_SMALLINT),
 ${logic.psql-only}    cast(clm_id as bigint),
 ${logic.psql-only}    cast(clm_line_num as smallint),
                       rev_cntr,
-${logic.hsql-only}    rev_cntr_unit_cnt,
-${logic.psql-only}    cast(rev_cntr_unit_cnt as integer),
+                      rev_cntr_unit_cnt,
                       rev_cntr_tot_chrg_amt,
                       rev_cntr_rate_amt,
                       rev_cntr_ncvrd_chrg_amt,
