@@ -499,7 +499,7 @@ ${logic.psql-only}    alter column rev_cntr_tot_chrg_amt        SET NOT NULL,
 ${logic.psql-only}    alter column rev_cntr_rate_amt            SET NOT NULL,
 ${logic.psql-only}    alter column rev_cntr_bene_pmt_amt        SET NOT NULL,
 ${logic.psql-only}    alter column rev_cntr_pmt_amt_amt         SET NOT NULL,
-${logic.psql-only}    alter column  rev_cntr_prvdr_pmt_amt      SET NOT NULL;
+${logic.psql-only}    alter column rev_cntr_prvdr_pmt_amt       SET NOT NULL;
 
 -- for PSQL need to define our primary key    
 ${logic.psql-only} alter table public.hospice_claims_new
