@@ -9,17 +9,13 @@
 --      The following db columns were redefined from NUMERIC to more
 --      appropriate data type(s):
 --
---      from: clm_hha_tot_visit_cnt numeric(4,0) : changed to integer
 --      from: clm_line_num numeric               : changed to smallint
---      from rev_cntr_unit_cnt numeric           : changed to integer
 --
 --       Current db data values for changed columns
 --      +-----------------------+--------+------+-------+
 --      |  db Column            |   Max  |  Min | Scale |
 --      +-----------------------+--------+------+-------+
---      | CLM_HHA_TOT_VISIT_CNT | 901576 |   0  |   0   |
 --      | CLM_LINE_NUM          |    446 |   1  |   0   |
---      | REV_CNTR_UNIT_CNT     |    392 |   0  |   0   |
 --      +-----------------------+--------+------+-------+   
 --
 -- Once current table data is migrated to new table name/structure, a 
@@ -48,7 +44,7 @@ ${logic.hsql-only}    clm_fac_type_cd                       char(1) not null,
 ${logic.hsql-only}    clm_freq_cd                           char(1) not null,
 ${logic.hsql-only}    clm_srvc_clsfctn_type_cd              char(1) not null,
 ${logic.hsql-only}    clm_tot_chrg_amt                      numeric(12,2) not null,
-${logic.hsql-only}    clm_hha_tot_visit_cnt                 integer not null,
+${logic.hsql-only}    clm_hha_tot_visit_cnt                 numeric not null,
 ${logic.hsql-only}    clm_admsn_dt                          date,
 ${logic.hsql-only}    clm_pps_ind_cd                        char(1) not null,
 ${logic.hsql-only}    clm_hha_lupa_ind_cd                   char(1),
@@ -156,7 +152,7 @@ ${logic.hsql-only}  create table public.hha_claim_lines_new (
 ${logic.hsql-only}    clm_id                                bigint NOT NULL,
 ${logic.hsql-only}    clm_line_num                          smallint not null,
 ${logic.hsql-only}    rev_cntr                              varchar(4) not null,
-${logic.hsql-only}    rev_cntr_unit_cnt                     integer not null,
+${logic.hsql-only}    rev_cntr_unit_cnt                     numeric not null,
 ${logic.hsql-only}    rev_cntr_tot_chrg_amt                 numeric(12,2) not null,
 ${logic.hsql-only}    rev_cntr_rate_amt                     numeric(12,2) not null,
 ${logic.hsql-only}    rev_cntr_ncvrd_chrg_amt               numeric(12,2) not null,
@@ -318,8 +314,7 @@ ${logic.psql-only}    cast(clm_grp_id as bigint),
                       clm_freq_cd,
                       clm_srvc_clsfctn_type_cd,
                       clm_tot_chrg_amt,
-${logic.hsql-only}    clm_hha_tot_visit_cnt,
-${logic.psql-only}    cast(clm_hha_tot_visit_cnt as integer),                      
+                      clm_hha_tot_visit_cnt,                     
                       clm_admsn_dt,
                       clm_pps_ind_cd,
                       clm_hha_lupa_ind_cd,
@@ -456,8 +451,7 @@ ${logic.hsql-only}    convert(clm_line_num, sql_smallint),
 ${logic.psql-only}    cast(clm_id as bigint),
 ${logic.psql-only}    cast(clm_line_num as smallint),
                       rev_cntr,
-${logic.hsql-only}    rev_cntr_unit_cnt,
-${logic.psql-only}    cast(rev_cntr_unit_cnt as integer),
+                      rev_cntr_unit_cnt,
                       rev_cntr_tot_chrg_amt,
                       rev_cntr_rate_amt,
                       rev_cntr_ncvrd_chrg_amt,
