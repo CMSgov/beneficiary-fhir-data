@@ -16,4 +16,3 @@ class BFDUser(ContractTestUser):
     def patient_test_coverage_contract(self):
         '''Patient search by coverage contract (all pages)'''
         self._test_v1_patient_test_coverage_contract()
- 
