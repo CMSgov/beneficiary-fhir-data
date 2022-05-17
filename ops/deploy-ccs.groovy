@@ -108,19 +108,19 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			).trim()
 
 		// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-		dir('ops/ansible/playbooks-ccs'){
+		dir('ops/ansible/playbooks-ccs') {
 			sh "packer build -color=false -var vault_password_file=${vaultPasswordFile} \
 			-var source_ami=${goldAmi} \
 			-var subnet_id=subnet-092c2a68bd18b34d1 \
 			../../packer/build_bfd-platinum.json"
 		}
-	  return new AmiIds(
+		return new AmiIds(
 			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
 			bfdServerAmiId: amiIds.bfdServerAmiId,
-            bfdDbMigratorAmiId: amiIds.bfdDbMigratorAmiId,
+			bfdDbMigratorAmiId: amiIds.bfdDbMigratorAmiId,
 		)
- 	}
+	}
 }
 
 /**
@@ -185,7 +185,7 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		
 		// Gathering terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-        // TODO: BFD-1600 ensure the amiIds.bfdDbMigrator is leveraged for the the forthcoming terraform definition
+		// TODO: BFD-1600 ensure the amiIds.bfdDbMigrator is leveraged for the the forthcoming terraform definition
 		sh "terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
