@@ -53,9 +53,9 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
         self._test_v1_eob_test_id_last_updated_count()
 
     @task
-    def eob_test_id_include_tax_number(self):
+    def eob_test_id_include_tax_number_last_updated(self):
         '''Explanation of Benefit search by ID, Last Updated, Include Tax Numbers'''
-        self._test_v1_eob_test_id_include_tax_number()
+        self._test_v1_eob_test_id_include_tax_number_last_updated()
 
     @task
     def eob_test_id_last_updated(self):

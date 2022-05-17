@@ -39,7 +39,7 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
 
     @task
     def coverage_test_id(self):
-        '''Coverage search by ID, Last Updated'''
+        '''Coverage search by ID'''
         self._test_v2_coverage_test_id()
 
 
@@ -50,9 +50,9 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
 
 
     @task
-    def eob_test_id_include_tax_number(self):
+    def eob_test_id_include_tax_number_last_updated(self):
         '''Explanation of Benefit search by ID, Last Updated, Include Tax Numbers'''
-        self._test_v2_eob_test_id_include_tax_number()
+        self._test_v2_eob_test_id_include_tax_number_last_updated()
 
 
     @task
@@ -74,9 +74,9 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
 
 
     @task
-    def patient_test_id_last_updated(self):
+    def patient_test_id_include_mbi_last_updated(self):
         '''Patient search by ID with last updated, include MBI'''
-        self._test_v2_patient_test_id_last_updated()
+        self._test_v2_patient_test_id_include_mbi_last_updated()
 
 
     @task

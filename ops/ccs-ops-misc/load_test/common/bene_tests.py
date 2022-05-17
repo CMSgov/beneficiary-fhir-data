@@ -73,7 +73,7 @@ class BeneTestUser(BFDUserBase):
         }, name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100')
 
 
-    def _test_v1_eob_test_id_include_tax_number(self):
+    def _test_v1_eob_test_id_include_tax_number_last_updated(self):
         '''Explanation of Benefit search by ID, Last Updated, Include Tax Numbers'''
         self.run_task_by_parameters(base_path='/v1/fhir/ExplanationOfBenefit', params={
                 'patient': self.bene_ids,
@@ -127,7 +127,7 @@ class BeneTestUser(BFDUserBase):
 
 
     def _test_v2_coverage_test_id(self):
-        '''Coverage search by ID, Last Updated'''
+        '''Coverage search by ID'''
         self.run_task_by_parameters(base_path='/v2/fhir/Coverage', params={
                 'beneficiary': self.bene_ids,
         }, name='/v2/fhir/Coverage search by id')
@@ -142,7 +142,7 @@ class BeneTestUser(BFDUserBase):
         }, name='/v2/fhir/ExplanationOfBenefit search by id / count=10')
 
 
-    def _test_v2_eob_test_id_include_tax_number(self):
+    def _test_v2_eob_test_id_include_tax_number_last_updated(self):
         '''Explanation of Benefit search by ID, Last Updated, Include Tax Numbers'''
         self.run_task_by_parameters(base_path='/v2/fhir/ExplanationOfBenefit', params={
                 '_lastUpdated': f'gt{self.last_updated}',
@@ -160,7 +160,7 @@ class BeneTestUser(BFDUserBase):
         }, name='/v2/fhir/ExplanationOfBenefit search by id')
 
 
-    def _test_v2_patient_test_id_last_updated(self):
+    def _test_v2_patient_test_id_include_mbi_last_updated(self):
         '''Patient search by ID with last updated, include MBI'''
         self.run_task_by_parameters(base_path='/v2/fhir/Patient', params={
                 '_id': self.bene_ids,
