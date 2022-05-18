@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -875,9 +876,7 @@ public class HHAClaimTransformerV2Test {
   @Test
   public void shouldHaveRevenueCenterUnit() {
     TransformerTestUtilsV2.assertExtensionQuantityEquals(
-        "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
-        BigDecimal.valueOf(1),
-        eob.getItem());
+        CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(1), eob.getItem());
   }
 
   /** Benefit Balance */

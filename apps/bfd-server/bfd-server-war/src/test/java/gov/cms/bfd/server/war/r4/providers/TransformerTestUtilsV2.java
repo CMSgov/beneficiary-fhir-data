@@ -913,8 +913,11 @@ public final class TransformerTestUtilsV2 {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionQuantityEquals(
-      String expectedExtensionUrl, BigDecimal expectedValue, List<ItemComponent> itemComponents) {
+      CcwCodebookInterface ccwVariable,
+      BigDecimal expectedValue,
+      List<ItemComponent> itemComponents) {
 
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension returnExtension = null;
 
     for (ItemComponent ic : itemComponents) {

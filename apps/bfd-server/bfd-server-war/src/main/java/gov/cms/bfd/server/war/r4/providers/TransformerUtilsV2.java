@@ -465,20 +465,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param extensionUrl the being mapped
-   * @param quantityValue the value to use for for the resulting {@link BigDecimal}
-   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
-   *     specified input values
-   */
-  static Extension createExtensionQuantity(String extensionUrl, BigDecimal quantityValue) {
-
-    Quantity quantity = new Quantity().setValue(quantityValue);
-    Extension extension = new Extension(extensionUrl, quantity);
-
-    return extension;
-  }
-
-  /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
@@ -3590,8 +3576,7 @@ public final class TransformerUtilsV2 {
     // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
     if (unitCount != null && unitCount.compareTo(BigDecimal.ZERO) != 0) {
       Extension unitCountExtension =
-          createExtensionQuantity(
-              "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt", unitCount);
+          createExtensionQuantity(CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, unitCount);
       item.addExtension(unitCountExtension);
     }
 

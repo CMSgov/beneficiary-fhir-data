@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -1292,9 +1293,7 @@ public final class OutpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveRevenueCenterUnit() {
     TransformerTestUtilsV2.assertExtensionQuantityEquals(
-        "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
-        BigDecimal.valueOf(111),
-        eob.getItem());
+        CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(111), eob.getItem());
   }
 
   /**
