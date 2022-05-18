@@ -465,6 +465,20 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * @param extensionUrl the being mapped
+   * @param quantityValue the value to use for for the resulting {@link BigDecimal}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionQuantity(String extensionUrl, BigDecimal quantityValue) {
+
+    Quantity quantity = new Quantity().setValue(quantityValue);
+    Extension extension = new Extension(extensionUrl, quantity);
+
+    return extension;
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
@@ -3514,6 +3528,7 @@ public final class TransformerUtilsV2 {
    * @param nonCoveredChargeAmount REV_CNTR_NCVRD_CHRG_AMT,
    * @param nationalDrugCodeQuantity REV_CNTR_NDC_QTY,
    * @param nationalDrugCodeQualifierCode REV_CNTR_NDC_QTY_QLFR_CD,
+   * @param unitCount REV_CNTR_UNIT_CNT,
    * @return the {@link ItemComponent}
    */
   static ItemComponent mapEobCommonItemRevenue(
@@ -3524,7 +3539,8 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       Optional<BigDecimal> nonCoveredChargeAmount,
       Optional<BigDecimal> nationalDrugCodeQuantity,
-      Optional<String> nationalDrugCodeQualifierCode) {
+      Optional<String> nationalDrugCodeQualifierCode,
+      BigDecimal unitCount) {
 
     // REV_CNTR => ExplanationOfBenefit.item.revenue
     item.setRevenue(createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR, revenueCenterCode));
@@ -3569,6 +3585,14 @@ public final class TransformerUtilsV2 {
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
       item.setQuantity(drugQuantity);
+    }
+
+    // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
+    if (unitCount != null && unitCount.compareTo(BigDecimal.ZERO) != 0) {
+      Extension unitCountExtension =
+          createExtensionQuantity(
+              "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt", unitCount);
+      item.addExtension(unitCountExtension);
     }
 
     return item;
