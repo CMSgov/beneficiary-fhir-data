@@ -908,9 +908,9 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * @param extensionURL
-   * @param expectedValue the expected {@link Quantity#getValue()}
-   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   * @param ccwVariable the expected {@link CcwCodebookInterface}
+   * @param expectedValue the expected {@link BigDecimal}
+   * @param itemComponents the FHIR element to find and verify the {@link List<ItemComponent>} of
    */
   static void assertExtensionQuantityEquals(
       CcwCodebookInterface ccwVariable,
@@ -918,18 +918,14 @@ public final class TransformerTestUtilsV2 {
       List<ItemComponent> itemComponents) {
 
     String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-    Extension returnExtension = null;
+    Optional<Extension> returnExtension =
+        itemComponents.stream()
+            .flatMap(ic -> ic.getExtension().stream())
+            .filter(ext -> ext.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
 
-    for (ItemComponent ic : itemComponents) {
-      for (Extension ext : ic.getExtension()) {
-        if (ext.getUrl().equals(expectedExtensionUrl)) {
-          returnExtension = ext;
-        }
-      }
-    }
-
-    if (returnExtension != null) {
-      Quantity quantity = (Quantity) returnExtension.getValue();
+    if (returnExtension.isPresent()) {
+      Quantity quantity = (Quantity) returnExtension.get().getValue();
       assertEquals(expectedValue, quantity.getValue());
     }
   }
