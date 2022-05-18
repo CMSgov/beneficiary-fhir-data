@@ -1388,6 +1388,18 @@ public class SNFClaimTransformerV2Test {
   }
 
   /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+        BigDecimal.valueOf(477),
+        eob.getItem());
+  }
+
+  /**
    * Ensures the fi_num is correctly mapped to an eob as an extension when the
    * fiscalIntermediaryNumber is present.
    */

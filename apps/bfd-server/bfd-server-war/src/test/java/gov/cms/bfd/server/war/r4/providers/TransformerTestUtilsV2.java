@@ -908,6 +908,30 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * @param extensionURL
+   * @param expectedValue the expected {@link Quantity#getValue()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionQuantityEquals(
+      String expectedExtensionUrl, BigDecimal expectedValue, List<ItemComponent> itemComponents) {
+
+    Extension returnExtension = null;
+
+    for (ItemComponent ic : itemComponents) {
+      for (Extension ext : ic.getExtension()) {
+        if (ext.getUrl().equals(expectedExtensionUrl)) {
+          returnExtension = ext;
+        }
+      }
+    }
+
+    if (returnExtension != null) {
+      Quantity quantity = (Quantity) returnExtension.getValue();
+      assertEquals(expectedValue, quantity.getValue());
+    }
+  }
+
+  /**
    * Uses the setters of the specified record to set all {@link Optional} fields to {@link
    * Optional#empty()}.
    *

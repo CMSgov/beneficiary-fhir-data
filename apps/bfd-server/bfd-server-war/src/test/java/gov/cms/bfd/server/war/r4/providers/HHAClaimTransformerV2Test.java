@@ -868,6 +868,18 @@ public class HHAClaimTransformerV2Test {
     assertEquals(1, eob.getTotal().size());
   }
 
+  /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+        BigDecimal.valueOf(1),
+        eob.getItem());
+  }
+
   /** Benefit Balance */
   @Test
   public void shouldHaveBenefitBalance() {
