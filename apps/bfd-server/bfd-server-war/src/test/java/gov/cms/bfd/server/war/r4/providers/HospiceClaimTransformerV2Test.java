@@ -860,7 +860,7 @@ public final class HospiceClaimTransformerV2Test {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimTypeV2.HOSPICE,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
