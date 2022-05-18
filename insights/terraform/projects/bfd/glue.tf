@@ -1071,3 +1071,118 @@ resource "aws_glue_catalog_table" "test_beneficiaries_unique" {
         }
     }
 }
+
+resource "aws_glue_job" "bfd-history-ingest" {
+    connections               = []
+    default_arguments         = {
+        "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+        "--class"                            = "GlueApp"
+        "--enable-continuous-cloudwatch-log" = "true"
+        "--enable-glue-datacatalog"          = "true"
+        "--enable-job-insights"              = "true"
+        "--enable-metrics"                   = "true"
+        "--enable-spark-ui"                  = "true"
+        "--job-bookmark-option"              = "job-bookmark-disable"
+        "--job-language"                     = "python"
+        "--sourceTable"                      = "test"
+        "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+        "--targetTable"                      = "test_api_requests"
+    }
+    glue_version              = "3.0"
+    max_retries               = 0
+    name                      = "bfd-history-ingest"
+    non_overridable_arguments = {}
+    number_of_workers         = 10
+    role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+    tags                      = {}
+    tags_all                  = {}
+    timeout                   = 2880
+    worker_type               = "G.1X"
+
+    command {
+        name            = "glueetl"
+        python_version  = "3"
+        script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-history-ingest.py"
+    }
+
+    execution_property {
+        max_concurrent_runs = 1
+    }
+}
+
+resource "aws_glue_job" "bfd-populate-beneficiaries" {
+    connections               = []
+    default_arguments         = {
+        "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+        "--class"                            = "GlueApp"
+        "--enable-continuous-cloudwatch-log" = "true"
+        "--enable-glue-datacatalog"          = "true"
+        "--enable-job-insights"              = "true"
+        "--enable-metrics"                   = "true"
+        "--enable-spark-ui"                  = "true"
+        "--job-bookmark-option"              = "job-bookmark-disable"
+        "--job-language"                     = "python"
+        "--sourceTable"                      = "test_api_requests"
+        "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+        "--targetTable"                      = "test_beneficiaries"
+    }
+    glue_version              = "3.0"
+    max_retries               = 0
+    name                      = "bfd-populate-beneficiaries"
+    non_overridable_arguments = {}
+    number_of_workers         = 10
+    role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+    tags                      = {}
+    tags_all                  = {}
+    timeout                   = 2880
+    worker_type               = "G.1X"
+
+    command {
+        name            = "glueetl"
+        python_version  = "3"
+        script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-populate-beneficiaries.py"
+    }
+
+    execution_property {
+        max_concurrent_runs = 1
+    }
+}
+
+resource "aws_glue_job" "bfd-populate-beneficiary-unique" {
+    connections               = []
+    default_arguments         = {
+        "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+        "--class"                            = "GlueApp"
+        "--enable-continuous-cloudwatch-log" = "true"
+        "--enable-glue-datacatalog"          = "true"
+        "--enable-job-insights"              = "true"
+        "--enable-metrics"                   = "true"
+        "--enable-spark-ui"                  = "true"
+        "--initialize"                       = "True"
+        "--job-bookmark-option"              = "job-bookmark-disable"
+        "--job-language"                     = "python"
+        "--sourceTable"                      = "test_beneficiaries"
+        "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+        "--targetTable"                      = "test_beneficiaries_unique"
+    }
+    glue_version              = "3.0"
+    max_retries               = 0
+    name                      = "bfd-populate-beneficiary-unique"
+    non_overridable_arguments = {}
+    number_of_workers         = 10
+    role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+    tags                      = {}
+    tags_all                  = {}
+    timeout                   = 2880
+    worker_type               = "G.1X"
+
+    command {
+        name            = "glueetl"
+        python_version  = "3"
+        script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-populate-beneficiary-unique.py"
+    }
+
+    execution_property {
+        max_concurrent_runs = 1
+    }
+}
