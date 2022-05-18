@@ -1,10 +1,10 @@
 '''Single Locust test for BFD endpoint'''
 
-from common.bene_tests import BeneTestUser
+from common.contract_tests import ContractTestUser
 from common.validation import SLA_PATIENT
 from locust import task
 
-class BFDUser(BeneTestUser):
+class BFDUser(ContractTestUser):
     '''Single Locust test for BFD endpoint'''
 
     # The goals against which to measure these results. Note that they also include the Failsafe
@@ -13,6 +13,6 @@ class BFDUser(BeneTestUser):
 
 
     @task
-    def patient_test_id(self):
-        '''Patient search by ID'''
-        self._test_v1_patient_test_id()
+    def patient_test_coverage_contract(self):
+        '''Patient search by coverage contract (all pages)'''
+        self._test_v1_patient_test_coverage_contract()

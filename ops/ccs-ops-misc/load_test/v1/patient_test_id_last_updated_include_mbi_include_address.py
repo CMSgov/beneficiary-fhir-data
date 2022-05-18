@@ -13,6 +13,6 @@ class BFDUser(BeneTestUser):
 
 
     @task
-    def patient_test_id(self):
-        '''Patient search by ID'''
-        self._test_v1_patient_test_id()
+    def patient_test_id_last_updated_include_mbi_include_address(self):
+        '''Patient search by ID, Last Updated, include MBI, include Address'''
+        self._test_v1_patient_test_id_last_updated_include_mbi_include_address()
