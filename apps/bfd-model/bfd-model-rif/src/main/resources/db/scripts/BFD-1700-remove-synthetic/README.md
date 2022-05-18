@@ -4,7 +4,7 @@ These scripts implement [BFD-1700](https://jira.cms.gov/browse/BFD-1700) to remo
 
 ## Important After-Thoughts
 
-We ran these scripts on `prod-sbx` beginning 05/13/2022. Write throughput seems to have been capped at around 3,500 writes / second for reasons other than hardware, so it took around 55 hours to complete.
+We ran these scripts on `prod-sbx` beginning 05/13/2022. It took around 55 hours to complete.
 
 In order to speed things up on `test`, we ran a different set of scripts to copy the database tables from `prod-sbx` to `test`, since we wanted `test` to end up with the same data as `prod-sbx`. Those scripts are now here under the `sql` directory.
 

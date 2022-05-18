@@ -1,3 +1,6 @@
+-- Truncate tables and re-insert from local CSV files. Note that you have to run the truncate all
+-- at once to avoid problems with foreign key constraints.
+
 BEGIN TRANSACTION;
 
 TRUNCATE beneficiaries, beneficiaries_history, beneficiaries_history_invalid_beneficiaries, beneficiary_monthly, carrier_claim_lines, carrier_claims, dme_claim_lines, dme_claims, hha_claim_lines, hha_claims, hospice_claim_lines, hospice_claims, inpatient_claim_lines, inpatient_claims, medicare_beneficiaryid_history, medicare_beneficiaryid_history_invalid_beneficiaries, outpatient_claim_lines, outpatient_claims, partd_events, snf_claim_lines, snf_claims;

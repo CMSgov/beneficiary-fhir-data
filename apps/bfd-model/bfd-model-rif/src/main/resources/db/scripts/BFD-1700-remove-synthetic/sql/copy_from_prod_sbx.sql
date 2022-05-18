@@ -1,3 +1,5 @@
+-- Copy tables to CSV files on the local machine
+
 \copy beneficiaries to 'beneficiaries.csv' csv header;
 \copy beneficiaries_history to 'beneficiaries_history.csv' csv header;
 \copy beneficiaries_history_invalid_beneficiaries to 'beneficiaries_history_invalid_beneficiaries.csv' csv header;
