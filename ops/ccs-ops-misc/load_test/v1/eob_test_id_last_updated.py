@@ -1,7 +1,7 @@
 '''Single Locust test for BFD endpoint'''
 
 from common.bene_tests import BeneTestUser
-from common.validation import SLA_PATIENT
+from common.validation import SLA_EOB_WITHOUT_SINCE
 from locust import task
 
 class BFDUser(BeneTestUser):
@@ -9,10 +9,10 @@ class BFDUser(BeneTestUser):
 
     # The goals against which to measure these results. Note that they also include the Failsafe
     # cutoff, which will default to the V2 cutoff time if not set.
-    VALIDATION_GOALS = SLA_PATIENT
+    VALIDATION_GOALS = SLA_EOB_WITHOUT_SINCE
 
 
     @task
-    def patient_test_id(self):
-        '''Patient search by ID'''
-        self._test_v1_patient_test_id()
+    def eob_test_id_last_updated(self):
+        '''Explanation of Benefit search by ID, Last Updated'''
+        self._test_v1_eob_test_id_last_updated()
