@@ -15,6 +15,7 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -1664,6 +1665,18 @@ public final class InpatientClaimTransformerV2Test {
             .setUsed(new UnsignedIntType(0));
 
     assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+        BigDecimal.valueOf(0),
+        eob.getItem());
   }
 
   /**
