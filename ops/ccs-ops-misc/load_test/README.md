@@ -108,35 +108,9 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--workerThreads** : (Optional) : Controls running in distributed mode; If this is set to >1, will spawn that many worker threads to run the tests across multiple cores. If not provided, defaults to 1. See section on running in distributed mode for more info.
 
+**--tableSamplePct** : (Optional) : Determines how big a slice of the Beneficiaries table we want to use when finding endpoints for testing. Defaults to 0.25 (one-quarter of one percent), which is plenty for production databases with millions of rows. Note that this is only meant to randomize and streamline the data query, but if this option is set too small, it would act as a cap on the number of rows available. For the Test environment or local testing, it might be best to set to 100, which will effectively *not* use table sampling.
+
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
-
-### Data setup for contract tests
-
-There is one special type of test that requires a data setup script to be run beforehand; this is the coverage contract test. This test runs through every list of pages for a set of contracts, but the urls for hitting all the pages of whatever contracts need to be set up before the test runs. This can be done by calling the data setup script common/write_contract_cursors.py similar to this:
-
-> **Note:** You _must_ generate the contract URLs via the below script if you are running any of the following test suites:
-> * `v1/patient_test_coverageContract.py`
-> * `v1/regression_suite.py`
-> * `v2/patient_test_coverageContract.py`
-> * `v2/regression_suite.py`
-
-    python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"
-
-The script will write out the results to homePath specified in the config (and expect them there during runtime.)
-
-The following are the arguments passed to this data setup script:
-
-**--contracts** : (Required) : The list of comma separated contracts to use for writing out the test urls. You can add any number of contracts here, and the data script will loop through a search of each contract and all of its pages and write them to file.
-
-**--year** : (Required) : The year to search by for contracts. This will be applied to all contracts from --contracts. This should be in YYYY format.
-
-**--month** : (Required) : The month to search by for contracts. This will be applied to all contracts from --contracts. This must be in MM format (i.e. 01 for January, 05 for May, etc)
-
-**--count** : (Required) : How many results per page to request. A lower number means you'll get more pages with smaller sized results, higher number means less pages with larger results. This can help test various sized payloads, or give tests more urls to use.
-
-**--version** : (Required) : The endpoint version to setup the data for. The only valid values for this (at time of writing) are "v1" or "v2". The resulting file will be prepended with this version so that multiple cursor files can be set up for different endpoints.
-
-The script will output a file named after the --version in the configured home directory, where the contract tests are expecting it. Make sure you run the script again if you need to set up data for a different endpoint version.
 
 ### Quick Run
 
@@ -203,7 +177,3 @@ The results will look the same whether running in distributed or non-distributed
 This is a list of some improvements that could be made to the tests moving forward:
 - (Consider) Move all tests into one script with each test being a @Task
 - Set up tests to all run at once to simulate actual load across the whole system (i.e. during big spike loads)
-- Since each test shares boilerplate setup, commonize what is inside the tasks to take the url and name of the test with any required setup params.
-- Currently, when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
-- Add the ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
-- Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common db file)
