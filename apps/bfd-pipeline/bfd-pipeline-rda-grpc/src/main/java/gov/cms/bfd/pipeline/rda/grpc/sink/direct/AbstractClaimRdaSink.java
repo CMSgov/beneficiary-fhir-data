@@ -5,8 +5,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -194,13 +194,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Apply implementation specific logic to produce a populated {@link RdaApiClaimMessageMetaData}
+   * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
    * @param change an incoming RdaChange object from which to extract meta data
    * @return an object ready for insertion into the database
    */
-  abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+  abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =

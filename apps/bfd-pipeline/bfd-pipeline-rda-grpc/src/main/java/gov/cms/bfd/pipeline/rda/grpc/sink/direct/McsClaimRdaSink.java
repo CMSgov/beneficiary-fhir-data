@@ -1,12 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.RdaMcsLocation;
+import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import java.util.Comparator;
 import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
@@ -41,15 +44,21 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
   }
 
   @Override
-  RdaApiClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
+  RdaClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
     final RdaMcsClaim claim = change.getClaim();
-    return RdaApiClaimMessageMetaData.builder()
+    final var locations = new StringList();
+    claim.getLocations().stream()
+        .sorted(Comparator.comparing(RdaMcsLocation::getPriority))
+        .forEach(loc -> locations.addIfNonEmpty(loc.getIdrLocCode()));
+    return RdaClaimMessageMetaData.builder()
         .sequenceNumber(change.getSequenceNumber())
         .claimType(RdaApiProgress.ClaimType.MCS)
         .claimId(claim.getIdrClmHdIcn())
         .mbiRecord(claim.getMbiRecord())
         .claimState(claim.getIdrStatusCode())
         .receivedDate(claim.getLastUpdated())
+        .locations(locations)
+        .transactionDate(claim.getIdrStatusDate())
         .build();
   }
 }

@@ -1,7 +1,8 @@
 package gov.cms.bfd.model.rda;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -29,10 +32,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Integration tests to ensure basic functioning of the RDA API related JPA entity classes. */
 public class SchemaMigrationIT {
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   private Connection dbLifetimeConnection;
+  private EntityManagerFactory entityManagerFactory;
   private EntityManager entityManager;
 
   @BeforeEach
@@ -46,15 +51,35 @@ public class SchemaMigrationIT {
     dataSource.setUrl(dbUrl);
     dataSource.setUser("");
     dataSource.setPassword("");
+
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
-    entityManager = createEntityManager(dataSource);
+
+    final Map<String, Object> hibernateProperties =
+        ImmutableMap.of(
+            org.hibernate.cfg.AvailableSettings.DATASOURCE,
+            dataSource,
+            org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO,
+            Action.VALIDATE,
+            org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE,
+            10);
+
+    entityManagerFactory =
+        Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
+    entityManager = entityManagerFactory.createEntityManager();
   }
 
   @AfterEach
   public void tearDown() throws SQLException {
     if (entityManager != null && entityManager.isOpen()) {
+      if (entityManager.getTransaction().isActive()) {
+        entityManager.getTransaction().rollback();
+      }
       entityManager.close();
       entityManager = null;
+    }
+    if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+      entityManagerFactory.close();
+      entityManagerFactory = null;
     }
     if (dbLifetimeConnection != null) {
       dbLifetimeConnection.close();
@@ -239,6 +264,7 @@ public class SchemaMigrationIT {
     assertEquals("0:W:0,1:U:1", summarizeMcsDiagCodes(resultClaim));
   }
 
+  /** Ensure that the MBI cache relationships work properly in FISS claim entities. */
   @Test
   public void verifyFissMbiQueries() {
     // populate a schema with a bunch of claims
@@ -299,6 +325,7 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().commit();
   }
 
+  /** Ensure that the MBI cache relationships work properly in MCS claim entities. */
   @Test
   public void verifyMcsMbiQueries() {
     // populate a schema with a bunch of claims
@@ -369,23 +396,36 @@ public class SchemaMigrationIT {
         IntStream.of(1, 2, 3)
             .mapToObj(
                 i ->
-                    RdaApiClaimMessageMetaData.builder()
+                    RdaClaimMessageMetaData.builder()
                         .sequenceNumber(i)
                         .claimState("A")
                         .claimId(String.valueOf(i))
                         .receivedDate(Instant.now())
                         .claimType(RdaApiProgress.ClaimType.FISS)
+                        .locations(StringList.ofNonEmpty(String.valueOf(i)))
                         .build())
             .collect(Collectors.toList());
     entityManager.getTransaction().begin();
-    for (RdaApiClaimMessageMetaData metaData : metaDataList) {
-      assertEquals(0L, metaData.getMetaDataId());
-      entityManager.persist(metaData);
-      assertEquals(metaData.getSequenceNumber(), metaData.getMetaDataId());
-    }
+    metaDataList.forEach(entityManager::persist);
     entityManager.getTransaction().commit();
+    CriteriaQuery<RdaClaimMessageMetaData> criteria =
+        entityManager.getCriteriaBuilder().createQuery(RdaClaimMessageMetaData.class);
+    Root<RdaClaimMessageMetaData> root = criteria.from(RdaClaimMessageMetaData.class);
+    criteria.select(root);
+    var claims = entityManager.createQuery(criteria).getResultList();
+    claims.sort(Comparator.comparing(RdaClaimMessageMetaData::getSequenceNumber));
+    assertEquals(3, claims.size());
+    assertEquals(metaDataList.get(0).getLocations(), claims.get(0).getLocations());
   }
 
+  /**
+   * Create a minimally populated {@link RdaMcsDetail} object for use in tests.
+   *
+   * @param claim parent claim
+   * @param priority column value
+   * @param dtlStatus column value
+   * @return the object
+   */
   private RdaMcsDetail quickMcsDetail(RdaMcsClaim claim, int priority, String dtlStatus) {
     return RdaMcsDetail.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
@@ -394,6 +434,14 @@ public class SchemaMigrationIT {
         .build();
   }
 
+  /**
+   * Create a minimally populated {@link RdaMcsDiagCode} object for use in tests.
+   *
+   * @param claim parent claim
+   * @param priority column value
+   * @param icdType column value
+   * @return the object
+   */
   private RdaMcsDiagnosisCode quickMcsDiagCode(RdaMcsClaim claim, int priority, String icdType) {
     return RdaMcsDiagnosisCode.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
@@ -403,51 +451,81 @@ public class SchemaMigrationIT {
         .build();
   }
 
+  /**
+   * Produce a string that can be used as a quick check that claim was loaded correctly. Combines
+   * fields from all of the claim's {@link RdaFissProcCode} objects to produce the string.
+   *
+   * @param resultClaim claim to summary
+   * @return summary of key fields
+   */
   private String summarizeFissProcCodes(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getProcCodes().stream(),
         d -> format("%d:%s", d.getPriority(), d.getProcFlag()));
   }
 
+  /**
+   * Produce a string that can be used as a quick check that claim was loaded correctly. Combines
+   * fields from all of the claim's {@link RdaFissDiagnosisCode} objects to produce the string.
+   *
+   * @param resultClaim claim to summary
+   * @return summary of key fields
+   */
   private String summarizeFissDiagCodes(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
         d -> format("%d:%s", d.getPriority(), d.getDiagPoaInd()));
   }
 
+  /**
+   * Produce a string that can be used as a quick check that claim was loaded correctly. Combines
+   * fields from all of the claim's {@link RdaFissPayer} objects to produce the string.
+   *
+   * @param resultClaim claim to summary
+   * @return summary of key fields
+   */
   private String summarizeFissPayers(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getPayers().stream(),
         d -> format("%d:%s:%s", d.getPriority(), d.getPayerType(), d.getEstAmtDue()));
   }
 
+  /**
+   * Produce a string that can be used as a quick check that claim was loaded correctly. Combines
+   * fields from all of the claim's {@link RdaMcsDetail} objects to produce the string.
+   *
+   * @param resultClaim claim to summary
+   * @return summary of key fields
+   */
   private String summarizeMcsDetails(RdaMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDetails().stream(),
         d -> format("%d:%s", d.getPriority(), d.getIdrDtlStatus()));
   }
 
+  /**
+   * Produce a string that can be used as a quick check that claim was loaded correctly. Combines
+   * fields from all of the claim's {@link RdaMcsDiagnosisCode} objects to produce the string.
+   *
+   * @param resultClaim claim to summary
+   * @return summary of key fields
+   */
   private String summarizeMcsDiagCodes(RdaMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
         d -> format("%d:%s:%s", d.getPriority(), d.getIdrDiagIcdType(), d.getIdrDiagCode()));
   }
 
+  /**
+   * Calls a function to extract a string from each object in the stream and then joins them to
+   * produce a single summary string.
+   *
+   * @param objects objects to summary
+   * @param mapping function to summarize each object
+   * @return string combining all of the summaries
+   * @param <T> type of the objects being summarized
+   */
   private <T> String summarizeObjects(Stream<T> objects, Function<T, String> mapping) {
     return objects.map(mapping).sorted().collect(Collectors.joining(","));
-  }
-
-  private EntityManager createEntityManager(JDBCDataSource dataSource) {
-    final Map<String, Object> hibernateProperties =
-        ImmutableMap.of(
-            org.hibernate.cfg.AvailableSettings.DATASOURCE,
-            dataSource,
-            org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO,
-            Action.VALIDATE,
-            org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE,
-            10);
-
-    return Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
-        .createEntityManager();
   }
 }
