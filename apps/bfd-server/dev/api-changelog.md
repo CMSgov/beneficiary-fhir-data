@@ -3,7 +3,7 @@
 ## BFD-1519: Map Revenue Center Unit Count in V2
 
 This extension was not previously available in the v2 claims for revenue center unit count. The
-extension is now available in the extensions for Inpatient, Outpatient, HHA, Hospice, and SNF claims.
+extension is now available in the extensions for Inpatient, Outpatient, HHA, Hospice, and SNF claims.  Since we already mapped drug code to eob.item.quantity in v2 and we can't cause a backwards-incompatible change, we solved this by making a new extension and assigning claimLine.getUnitCount to valueQuantity in the extension. 
 ```json
   "item" : [ {
         "extension" : [ {
