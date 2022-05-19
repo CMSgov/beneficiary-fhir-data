@@ -1225,3 +1225,12 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   source             = "glue_src/bfd-populate-beneficiary-unique.py"
   etag               = filemd5("glue_src/bfd-populate-beneficiary-unique.py")
 }
+
+resource "aws_glue_classifier" "test_historicals_local" {
+    name = "test_historicals_local"
+
+    grok_classifier {
+        classification = "cw-history"
+        grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+    }
+}
