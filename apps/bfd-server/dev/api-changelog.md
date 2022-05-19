@@ -2,7 +2,7 @@
 
 ## BFD-1519: Map Revenue Center Unit Count in V2
 
-This extension was not previously available in the v2 claims for revenue center unit count.
+This extension was not previously available in the v2 claims for revenue center unit count. The
 extension is now available in the extensions for Inpatient, Outpatient, HHA, Hospice, and SNF claims.
 ```json
   "item" : [ {
