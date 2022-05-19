@@ -333,41 +333,41 @@ resource "aws_iam_role" "cloudwatch_role" {
 }
 
 data "archive_file" "zip_the_python_code" {
-    type        = "zip"
-    source_dir  = "${path.module}/lambda_src/"
-    output_path = "${path.module}/lambda_src/bfd-cw-to-flattened-json.zip"
+  type        = "zip"
+  source_dir  = "${path.module}/lambda_src/"
+  output_path = "${path.module}/lambda_src/bfd-cw-to-flattened-json.zip"
 }
 
 resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
-    architectures                  = [
-        "x86_64",
-    ]
-    description                    = "Extracts and flattens JSON messages from CloudWatch log subscriptions."
-    function_name                  = "bfd-cw-to-flattened-json"
-    filename                       = "${path.module}/lambda_src/bfd-cw-to-flattened-json.zip"
-    source_code_hash               = filebase64sha256("${path.module}/lambda_src/bfd-cw-to-flattened-json.zip")
-    handler                        = "lambda_function.lambda_handler"
-    layers                         = []
-    memory_size                    = 128
-    package_type                   = "Zip"
-    reserved_concurrent_executions = -1
-    role                           = "arn:aws:iam::577373831711:role/service-role/bfd-transform-role-rlenc44a"
-    runtime                        = "python3.8"
-    tags                           = {
-        "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python"
-    }
-    tags_all                       = {
-        "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python"
-    }
-    timeout                        = 300
+  architectures = [
+    "x86_64",
+  ]
+  description                    = "Extracts and flattens JSON messages from CloudWatch log subscriptions."
+  function_name                  = "bfd-cw-to-flattened-json"
+  filename                       = "${path.module}/lambda_src/bfd-cw-to-flattened-json.zip"
+  source_code_hash               = filebase64sha256("${path.module}/lambda_src/bfd-cw-to-flattened-json.zip")
+  handler                        = "bfd-cw-to-flattened-json.lambda_handler"
+  layers                         = []
+  memory_size                    = 128
+  package_type                   = "Zip"
+  reserved_concurrent_executions = -1
+  role                           = "arn:aws:iam::577373831711:role/service-role/bfd-transform-role-rlenc44a"
+  runtime                        = "python3.8"
+  tags = {
+    "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python"
+  }
+  tags_all = {
+    "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python"
+  }
+  timeout = 300
 
-    ephemeral_storage {
-        size = 512
-    }
+  ephemeral_storage {
+    size = 512
+  }
 
-    timeouts {}
+  timeouts {}
 
-    tracing_config {
-        mode = "PassThrough"
-    }
+  tracing_config {
+    mode = "PassThrough"
+  }
 }
