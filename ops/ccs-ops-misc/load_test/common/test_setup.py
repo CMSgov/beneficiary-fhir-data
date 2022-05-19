@@ -1,89 +1,100 @@
+'''Set up Locust tests from the configuration.
+'''
+
 import os
-import common.config as config
+from typing import Dict
+from common import config
 from locust.main import main
 
-'''
-Checks the config file for the client cert value.
-'''
-def getClientCert():
-    configFile = config.load()
-    return configFile["clientCertPath"]
 
-'''
-If there is a public key to verify the BFD Server's responses
-then it can be passed in with an environment variable. Otherwise,
-the error from the self-signed cert is ignored.
-'''
-def loadServerPublicKey():
+def get_client_cert() -> str:
+    '''Checks the config file for the client cert value.
+    '''
+
+    config_file = config.load()
+    return config_file["clientCertPath"]
+
+
+def load_server_public_key() -> str:
+    '''Load the public key to verify the BFD Server's responses or else ignore the warnings from
+    the self-signed cert.
+    '''
+
     try:
-        configFile = config.load()
-        server_public_key = configFile["serverPublicKey"]
-        if not server_public_key:
-            return False
-        else:
-            return server_public_key
+        config_file = config.load()
+        server_public_key = config_file["serverPublicKey"]
+        return server_public_key if server_public_key else False
     except KeyError:
         return False
 
-'''
-Sets a number of locust variables needed to run the test.
-'''
-def set_locust_env(configFile):
-    os.environ['LOCUST_HOST'] = configFile["testHost"]
-    os.environ['LOCUST_HEADLESS'] = "True"
-    os.environ['LOCUST_USERS'] = configFile["testNumTotalClients"]
-    os.environ['LOCUST_SPAWN_RATE'] = configFile["testCreatedClientsPerSecond"]
-    os.environ['LOCUST_LOGLEVEL'] = "INFO"
-    os.environ['LOCUST_RESET_STATS'] = configFile["resetStatsAfterClientSpawn"]
-    ## set the runtime if not running distributed or if test master
-    if not is_distributed() or is_master_thread():
-        os.environ['LOCUST_RUN_TIME'] = configFile["testRunTime"]
 
-'''
-Sets some settings specific to the distributed master test and begins the main test.
-'''
-def run_master_test(workers):
+def set_locust_env(config_file: Dict[str, str]):
+    '''Sets a number of locust variables needed to run the test.
+    '''
+
+    os.environ['LOCUST_HOST'] = config_file["testHost"]
+    os.environ['LOCUST_HEADLESS'] = "True"
+    os.environ['LOCUST_USERS'] = config_file["testNumTotalClients"]
+    os.environ['LOCUST_SPAWN_RATE'] = config_file["testCreatedClientsPerSecond"]
+    os.environ['LOCUST_LOGLEVEL'] = "INFO"
+    os.environ['LOCUST_RESET_STATS'] = config_file["resetStatsAfterClientSpawn"]
+    # Set the runtime if not running distributed or if test master
+    if not is_distributed() or is_master_thread():
+        os.environ['LOCUST_RUN_TIME'] = config_file["testRunTime"]
+
+
+def run_master_test(workers: int):
+    '''Sets some settings specific to the distributed master test and begins the main test.
+    '''
+
     os.environ['LOCUST_MODE_WORKER'] = "False"
     os.environ['LOCUST_MODE_MASTER'] = "True"
     os.environ['LOCUST_EXPECT_WORKERS'] = workers
     main()
 
-'''
-Sets some settings specific to the distributed worker test and begins the worker test.
-This should be called in a threaded capacity, or
-'''
-def run_worker_test(workerNum, workers):
+
+def run_worker_test(worker_num: int, workers: int):
+    '''Sets some settings specific to the distributed worker test and begins the worker test.
+
+    This should be called in a threaded capacity.
+    '''
+
     os.environ['LOCUST_MODE_WORKER'] = "True"
     os.environ['LOCUST_MODE_MASTER'] = "False"
     os.environ['LOCUST_NUM_WORKERS'] = workers
-    os.environ['LOCUST_WORKER_NUM'] = str(workerNum)
+    os.environ['LOCUST_WORKER_NUM'] = str(worker_num)
     main()
 
-'''
-Checks if the currently running test thread is a worker thread.
-Returns false if the test is not running in distributed mode.
-'''
-def is_worker_thread():
+
+def is_worker_thread() -> bool:
+    '''Checks if the currently running test thread is a worker thread.
+
+    Returns false if the test is not running in distributed mode.
+    '''
+
     return 'LOCUST_MODE_WORKER' in os.environ and os.environ['LOCUST_MODE_WORKER'] == "True"
 
-'''
-Checks if the currently running test thread is the singular master test thread.
-Returns false if the test is not running in distributed mode.
-'''
-def is_master_thread():
+
+def is_master_thread() -> bool:
+    '''Checks if the currently running test thread is the singular master test thread.
+
+    Returns false if the test is not running in distributed mode.
+    '''
+
     return 'LOCUST_MODE_MASTER' in os.environ and os.environ['LOCUST_MODE_MASTER'] == "True"
 
-'''
-Checks if the currently running test is running in distributed mode.
-'''
-def is_distributed():
+
+def is_distributed() -> bool:
+    '''Checks if the currently running test is running in distributed mode.
+    '''
+
     return 'LOCUST_MODE_MASTER' in os.environ or 'LOCUST_MODE_WORKER' in os.environ
 
-'''
-Resets the distributed mode environment variables, to allow
-for non-distributed test runs.
-'''
+
 def reset_distributed_values():
+    '''Resets the distributed mode environment variables, to allow for non-distributed test runs.
+    '''
+
     if "LOCUST_MODE_WORKER" in os.environ:
         os.environ.pop("LOCUST_MODE_WORKER")
     if "LOCUST_MODE_MASTER" in os.environ:
@@ -96,19 +107,20 @@ def reset_distributed_values():
         os.environ.pop("LOCUST_NUM_WORKERS")
 
 
-'''
-Sets the test name for the test, useful when running from the command line.
-'''
-def set_locust_test_name(testFileName):
-    os.environ['LOCUST_LOCUSTFILE'] = testFileName
+def set_locust_test_name(test_file_name):
+    '''Sets the test name for the test, useful when running from the command line.
+    '''
 
-'''
-If there is no server cert, disable warnings because thousands will appear in the logs and make it difficult
-to see anything else.
+    os.environ['LOCUST_LOCUSTFILE'] = test_file_name
 
-We need to pass in urllib3 because if it's imported in this class it causes some conflict
-with locust and produces a recursion error.
-'''
+
 def disable_no_cert_warnings(server_public_key, urllib3):
+    '''If there is no server cert, disable warnings because thousands will appear in the logs and
+    make it difficult to see anything else.
+
+    We need to pass in urllib3 because if it's imported in this class it causes some conflict
+    with locust and produces a recursion error.
+    '''
+
     if not server_public_key:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
