@@ -8,7 +8,7 @@ locals {
 }
 
 module "bucket" {
-  source      = "../../modules/bucket"
+  source      = "../../../modules/bucket"
   name        = local.database
   sensitivity = "high"
   tags        = local.tags
@@ -16,7 +16,7 @@ module "bucket" {
 }
 
 module "database" {
-  source     = "../../modules/database"
+  source     = "../../../modules/database"
   database   = local.database
   bucket     = module.bucket.id
   bucket_cmk = module.bucket.bucket_cmk
@@ -24,7 +24,7 @@ module "database" {
 }
 
 module "workgroup" {
-  source     = "../../modules/workgroup"
+  source     = "../../../modules/workgroup"
   bucket     = module.bucket.id
   bucket_cmk = module.bucket.bucket_cmk
   name       = local.database
@@ -32,7 +32,7 @@ module "workgroup" {
 }
 
 module "glue_jobs" {
-  source  = "../../modules/jobs"
+  source  = "../../../modules/jobs"
   project = local.project
   tags    = local.tags
 
