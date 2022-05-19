@@ -694,7 +694,7 @@ public final class RifFilesProcessorTest {
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals(567834L, claimGroup.getBeneficiaryId());
     assertEquals(9992223422L, claimGroup.getClaimId());
-    assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
+    assertEquals(900L, claimGroup.getClaimGroupId());
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("50", claimGroup.getClaimTypeCode());
     assertEquals(LocalDate.of(2014, 1, 01), claimGroup.getDateFrom());
@@ -710,7 +710,7 @@ public final class RifFilesProcessorTest {
     assertEquals("30", claimGroup.getPatientDischargeStatusCode());
     assertEquals(new BigDecimal("199.99"), claimGroup.getTotalChargeAmount());
     assertEquals(Character.valueOf('C'), claimGroup.getPatientStatusCd().get());
-    assertEquals(new BigDecimal(30), claimGroup.getUtilizationDayCount());
+    assertEquals(BigDecimal.valueOf(30L), claimGroup.getUtilizationDayCount());
     assertEquals(LocalDate.of(2015, 6, 29), claimGroup.getBeneficiaryDischargeDate().get());
     assertEquals("R5555", claimGroup.getDiagnosisPrincipalCode().get());
     assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get().charValue());
@@ -721,7 +721,7 @@ public final class RifFilesProcessorTest {
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
     HospiceClaimLine claimLine = claimGroup.getLines().get(0);
-    assertEquals(new BigDecimal(1), claimLine.getLineNumber());
+    assertEquals(1, claimLine.getLineNumber());
     assertEquals("651", claimLine.getRevenueCenterCode());
     assertEquals(new BigDecimal("26.00"), claimGroup.getLines().get(0).getPaymentAmount());
     assertEquals(
