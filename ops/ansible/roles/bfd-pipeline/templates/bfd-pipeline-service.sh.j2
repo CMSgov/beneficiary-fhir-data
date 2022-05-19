@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export CCW_RIF_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
 export S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
 export HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
 export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
