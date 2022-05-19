@@ -1,113 +1,64 @@
-import os
+'''Set up data for use in the tests.'''
+
+from typing import Callable, List
 import datetime
+import os
 
-from . import config, db, read_contract_cursors as cursors, test_setup as setup
+from . import config, test_setup as setup
 
-'''
-Gets the cursor data and either returns all the data in a list if not a distributed test,
-or takes a percentage of the data to distribute to the current worker thread. The percentage
-of the data in distributed mode depends on the total number of workers and the index of the
-data is dependant on which worker index calls this method.
-'''
-def load_cursors(version):
+
+def load_all(load_function: Callable, *args, use_table_sample: bool = False) -> List:
+    '''Loads all of the data from the database, using the database connection from the
+    configuration file.'''
+
     if setup.is_master_thread():
         ## Don't bother loading data for the master thread, it doenst run a test
-        return
-    elif setup.is_worker_thread():
+        return []
+
+    config_file = config.load()
+    print('Collecting test data...')
+    if use_table_sample:
+        table_sample_pct = config_file.get('tableSamplePct', 0.25)
+        print(f"Table Sampling at: {table_sample_pct}")
+        results = load_function(uri=config_file['dbUri'], table_sample_pct=table_sample_pct, *args)
+    else:
+        results = load_function(uri=config_file['dbUri'], *args)
+
+    print(f'Loaded {len(results)} results from the database')
+    return results
+
+
+def load_data_segment(load_function: Callable, *args) -> List:
+    '''Loads a segment of data and either returns all the data in a list if not a distributed test,
+    or takes a percentage of the data to distribute to the current worker thread.
+
+    The percentage of the data in distributed mode depends on the total number of workers and the
+    index of the data is dependant on which worker index calls this method.
+    '''
+
+    if setup.is_master_thread():
+        ## Don't bother loading data for the master thread, it doenst run a test
+        return []
+
+    if setup.is_worker_thread():
         worker_number = str(os.environ['LOCUST_WORKER_NUM'])
         num_workers = os.environ['LOCUST_NUM_WORKERS']
-        print(f"Worker {worker_number} starting...")
-        full_cursor_list = cursors.load_data(version)
-        data_per_user = len(full_cursor_list) // int(num_workers)
+        print(f"Worker {worker_number} loading segmented data...")
+        full_data_list = load_all(load_function, *args)
+        data_per_user = len(full_data_list) // int(num_workers)
         start_index = int(worker_number) * data_per_user
         end_index = start_index + data_per_user - 1
         print(f"Worker {worker_number} using data from indexes {start_index} to {end_index}")
-        return full_cursor_list[start_index:end_index]
-    else:
-        return cursors.load_data(version)
+        return full_data_list[start_index:end_index]
 
-'''
-Gets the bene id data and either returns all the data in a list if not a distributed test,
-or takes a percentage of the data to distribute to the current worker thread. The percentage
-of the data in distributed mode depends on the total number of workers and the index of the
-data is dependant on which worker index calls this method.
-'''
-def load_bene_ids():
-    if setup.is_master_thread():
-        ## Don't bother loading data for the master thread, it doenst run a test
-        return
-    elif setup.is_worker_thread():
-            worker_number = str(os.environ['LOCUST_WORKER_NUM'])
-            num_workers = os.environ['LOCUST_NUM_WORKERS']
-            print(f"Worker {worker_number} starting...")
-            configFile = config.load()
-            full_eob_list = db.get_bene_ids(configFile['dbUri'])
-            data_per_user = len(full_eob_list) // int(num_workers)
-            start_index = int(worker_number) * data_per_user
-            end_index = start_index + data_per_user - 1
-            print(f"Worker {worker_number} using data from indexes {start_index} to {end_index}")
-            return full_eob_list[start_index:end_index]
-    else:
-        configFile = config.load()
-        return db.get_bene_ids(configFile['dbUri'])
-
-'''
-Gets the hashed mbi data and either returns all the data in a list if not a distributed test,
-or takes a percentage of the data to distribute to the current worker thread. The percentage
-of the data in distributed mode depends on the total number of workers and the index of the
-data is dependant on which worker index calls this method.
-'''
-def load_mbis():
-    if setup.is_master_thread():
-        ## Don't bother loading data for the master thread, it doenst run a test
-        return
-    elif setup.is_worker_thread():
-        worker_number = str(os.environ['LOCUST_WORKER_NUM'])
-        num_workers = os.environ['LOCUST_NUM_WORKERS']
-        print(f"Worker {worker_number} starting...")
-        configFile = config.load()
-        full_mbi_list = db.get_hashed_mbis(configFile['dbUri'])
-        data_per_user = len(full_mbi_list) // int(num_workers)
-        start_index = int(worker_number) * data_per_user
-        end_index = start_index + data_per_user - 1
-        print(f"Worker {worker_number} using data from indexes {start_index} to {end_index}")
-        return full_mbi_list[start_index:end_index]
-    else:
-        configFile = config.load()
-        return db.get_hashed_mbis(configFile['dbUri'])
-
-'''
-Gets the hashed partially adjudicated mbi data and either returns all the data in a list if
-not a distributed test, or takes a percentage of the data to distribute to the current worker
-thread. The percentage of the data in distributed mode depends on the total number of workers
-and the index of the data is dependant on which worker index calls this method.
-'''
-def load_pa_mbis():
-    if setup.is_master_thread():
-        ## Don't bother loading data for the master thread, it doenst run a test
-        return
-    elif setup.is_worker_thread():
-        worker_number = str(os.environ['LOCUST_WORKER_NUM'])
-        num_workers = os.environ['LOCUST_NUM_WORKERS']
-        print(f"Worker {worker_number} starting...")
-        configFile = config.load()
-        full_mbi_list = db.get_partially_adj_hashed_mbis(configFile['dbUri'])
-        data_per_user = len(full_mbi_list) // int(num_workers)
-        start_index = int(worker_number) * data_per_user
-        end_index = start_index + data_per_user - 1
-        print(f"Worker {worker_number} using data from indexes {start_index} to {end_index}")
-        return full_mbi_list[start_index:end_index]
-    else:
-        configFile = config.load()
-        return db.get_partially_adj_hashed_mbis(configFile['dbUri'])
+    # This is neither master nor worker, so we must not be using multi-threading.
+    return load_all(load_function, *args)
 
 
-'''
-Gets a sample last_updated field for testing.
+def get_last_updated() -> str:
+    '''Gets a sample last_updated field for testing. Uses a date two weeks before when the script
+    is run.'''
 
-Uses a date two weeks before when the script is run.
-'''
-def get_last_updated():
     today = datetime.datetime.now()
     delta = datetime.timedelta(weeks = 2)
     prior_date = today - delta

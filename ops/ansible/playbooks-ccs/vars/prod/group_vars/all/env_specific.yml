@@ -51,3 +51,6 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_certificate.pem') }}"
   - alias: client_ab2d_prod_validation
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_validation_certificate.pem') }}"
+
+# Enables the CCW RIF job when true; disables when false
+data_pipeline_ccw_rif_job_enabled: true
