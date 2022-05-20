@@ -131,6 +131,10 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
 
+    BENE_BY_MBI_HISTORY(
+        "bene_by_mbi.mbis_from_beneficiarieshistory",
+        (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
+
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn.hicns_from_beneficiarieshistory",
         (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
