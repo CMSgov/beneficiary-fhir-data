@@ -1227,94 +1227,94 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
 }
 
 resource "aws_glue_classifier" "test_historicals_local" {
-    name = "test_historicals_local"
+  name = "test_historicals_local"
 
-    grok_classifier {
-        classification = "cw-history"
-        grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-    }
+  grok_classifier {
+    classification = "cw-history"
+    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+  }
 }
 
 resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
-    classifiers   = []
-    database_name = "bfd"
-    configuration = jsonencode(
-        {
-            CrawlerOutput = {
-                Partitions = {
-                    AddOrUpdateBehavior = "InheritFromTable"
-                }
-            }
-            Grouping      = {
-                TableGroupingPolicy = "CombineCompatibleSchemas"
-            }
-            Version       = 1
+  classifiers   = []
+  database_name = "bfd"
+  configuration = jsonencode(
+    {
+      CrawlerOutput = {
+        Partitions = {
+          AddOrUpdateBehavior = "InheritFromTable"
         }
-    )
-    name          = "bfd-test-api-requests-recurring-crawler"
-    role          = "bfd-insights/bfd-insights-bfd-glue-role"
-    schedule      = "cron(59 10 * * ? *)"
-    tags          = {}
-    tags_all      = {}
+      }
+      Grouping = {
+        TableGroupingPolicy = "CombineCompatibleSchemas"
+      }
+      Version = 1
+    }
+  )
+  name     = "bfd-test-api-requests-recurring-crawler"
+  role     = "bfd-insights/bfd-insights-bfd-glue-role"
+  schedule = "cron(59 10 * * ? *)"
+  tags     = {}
+  tags_all = {}
 
-    catalog_target {
-        database_name = "bfd"
-        tables        = [
-            "test_api_requests",
-        ]
-    }
-    catalog_target {
-        database_name = "bfd"
-        tables        = [
-            "test_beneficiaries",
-        ]
-    }
-    catalog_target {
-        database_name = "bfd"
-        tables        = [
-            "test_beneficiaries_unique",
-        ]
-    }
+  catalog_target {
+    database_name = "bfd"
+    tables = [
+      "test_api_requests",
+    ]
+  }
+  catalog_target {
+    database_name = "bfd"
+    tables = [
+      "test_beneficiaries",
+    ]
+  }
+  catalog_target {
+    database_name = "bfd"
+    tables = [
+      "test_beneficiaries_unique",
+    ]
+  }
 
-    lineage_configuration {
-        crawler_lineage_settings = "DISABLE"
-    }
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
 
-    recrawl_policy {
-        recrawl_behavior = "CRAWL_EVERYTHING"
-    }
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
 
-    schema_change_policy {
-        delete_behavior = "LOG"
-        update_behavior = "UPDATE_IN_DATABASE"
-    }
+  schema_change_policy {
+    delete_behavior = "LOG"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
 }
 
 resource "aws_glue_crawler" "bfd-test-history-crawler" {
-    classifiers   = [
-        "test_historicals_local",
-    ]
-    database_name = "bfd"
-    name          = "bfd-test-history-crawler"
-    role          = "bfd-insights/bfd-insights-bfd-glue-role"
-    tags          = {}
-    tags_all      = {}
+  classifiers = [
+    "test_historicals_local",
+  ]
+  database_name = "bfd"
+  name          = "bfd-test-history-crawler"
+  role          = "bfd-insights/bfd-insights-bfd-glue-role"
+  tags          = {}
+  tags_all      = {}
 
-    lineage_configuration {
-        crawler_lineage_settings = "DISABLE"
-    }
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
 
-    recrawl_policy {
-        recrawl_behavior = "CRAWL_EVERYTHING"
-    }
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
 
-    s3_target {
-        exclusions  = []
-        path        = "s3://bfd-insights-bfd-app-logs/history/test_api_history"
-    }
+  s3_target {
+    exclusions = []
+    path       = "s3://bfd-insights-bfd-app-logs/history/test_api_history"
+  }
 
-    schema_change_policy {
-        delete_behavior = "DEPRECATE_IN_DATABASE"
-        update_behavior = "UPDATE_IN_DATABASE"
-    }
+  schema_change_policy {
+    delete_behavior = "DEPRECATE_IN_DATABASE"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
 }
