@@ -123,11 +123,12 @@ class StatsJsonFileWriter(object):
 
         self.stats_json = stats_json
 
-    def write(self, path: str = '') -> None:
+    def write(self, path: str = '', pretty_print: bool = False) -> None:
         """Writes the JSON-formatted statistics to the given path
 
         Args:
             path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
+            pretty_print (bool, optional): A boolean which if True will write the JSON in a more human-readable format. Defaults to False.
         """
         with open(os.path.join(path, f'{self.stats_json.running_env.name}-{self.stats_json.stats_tag}-{int(time.time())}.json'), 'x') as json_file:
-            json_file.write(self.stats_json.get_stats_json())
+            json_file.write(self.stats_json.get_stats_json(pretty_print=pretty_print))
