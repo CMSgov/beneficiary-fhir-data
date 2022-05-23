@@ -4,6 +4,7 @@ Much of this file is adapted from equivalent Locust code, particularly locust.st
 from ast import Dict, List
 from enum import Enum
 import json
+import os
 import time
 from locust.env import Environment
 from locust.stats import StatsEntry, sort_stats
@@ -17,17 +18,22 @@ class StatsEnvironment(Enum):
 class StatsJSON:
     """Class to generate performance statistics in JSON format"""
 
-    def __init__(self, environment: Environment, percentiles_to_report: List[float]) -> None:
+    def __init__(self, locust_env: Environment, percentiles_to_report: List[float], stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
         """Creates a new instance of StatsJSON given the current Locust environment and a list of percentiles to report.
 
         Args:
             environment (Environment): Current Locust environment
             percentiles_to_report (List[float]): List of percentiles to report in the generated JSON
+            stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
+            running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the current testing environment; either TEST or PROD. Defaults to TEST.
         """
         super().__init__()
-        self.environment = environment
+        self.locust_env = locust_env
         self.percentiles_to_report = percentiles_to_report
         self.percentiles_na = ["N/A"] * len(self.percentiles_to_report)
+
+        self.stats_tag = stats_tag
+        self.running_env = running_env
 
     def _get_readable_percentile(self, percentile: float) -> str:
         """Returns a human-readable percent string for a given value from 0-1
@@ -83,15 +89,13 @@ class StatsJSON:
         Returns:
             List[Dict[str, any]]: A List of Dicts that represent the performance statistics of all Locust tasks
         """
-        stats = self.environment.stats
+        stats = self.locust_env.stats
         return [self._get_stats_entry_dict(stats_entry) for stats_entry in sort_stats(stats.entries)]
 
-    def get_stats_json(self, stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST, pretty_print: bool = False) -> str:
+    def get_stats_json(self, pretty_print: bool = False) -> str:
         """Returns a JSON-formatted string that encodes the performance statistics of all Locust tasks in the current environment
 
         Args:
-            stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
-            running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the current testing environment; either TEST or PROD. Defaults to TEST.
             pretty_print (bool, optional): A boolean which if True will generate the JSON in a more human-readable format. Defaults to False.
 
         Returns:
@@ -99,10 +103,31 @@ class StatsJSON:
         """
         full_dict = {**{
             'timestamp': int(time.time()),
-            'tag': stats_tag,
-            'environment': running_env.name
+            'tag': self.stats_tag,
+            'environment': self.running_env.name
         }, **{
             'statistics': self._get_stats_entries_list()
         }}
 
         return json.dumps(full_dict, indent=(4 if pretty_print else None))
+
+
+class StatsFileWriter():
+    def __init__(self, stats_json: StatsJSON) -> None:
+        """Creates a new instance of StatsFileWriter given a StatsJSON object
+
+        Args:
+            stats_json (StatsJSON): A StatsJSON object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+        """
+        super().__init__()
+
+        self.stats_json = stats_json
+
+    def write(self, path: str = '') -> None:
+        """Writes the JSON-formatted statistics to the given path
+
+        Args:
+            path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
+        """
+        with open(os.path.join(path, f'{self.stats_json.running_env}-{self.stats_json.stats_tag}-{int(time.time())}.json')) as json_file:
+            json_file.write(self.stats_json.get_stats_json())
