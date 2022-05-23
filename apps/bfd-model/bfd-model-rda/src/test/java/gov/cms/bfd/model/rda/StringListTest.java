@@ -20,9 +20,10 @@ public class StringListTest {
   @Test
   public void shouldAddNonEmptyStrings() {
     var list = StringList.ofNonEmpty();
-    assertEquals(StringList.of("x", "y"), list.addIfNonEmpty("y"));
+    assertEquals(StringList.of("y"), list.addIfNonEmpty("y"));
   }
 
+  /** Verify that the unfiltered add methods will add anything. */
   @Test
   public void shouldAddValues() {
     var list = StringList.ofNonEmpty();

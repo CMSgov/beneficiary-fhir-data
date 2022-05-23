@@ -100,9 +100,7 @@ public class FissClaimRdaSinkTest {
 
     for (RdaChange<RdaFissClaim> change : batch) {
       verify(entityManager).merge(change.getClaim());
-    }
-    for (RdaChange<RdaFissClaim> change : batch) {
-      verify(entityManager).persist(sink.createMetaData(change));
+      verify(entityManager).merge(sink.createMetaData(change));
     }
     // the merge transaction will be committed
     verify(transaction).commit();

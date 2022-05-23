@@ -237,7 +237,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
           var metaData = createMetaData(change);
-          entityManager.persist(metaData);
+          entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API

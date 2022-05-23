@@ -103,9 +103,7 @@ public class McsClaimRdaSinkTest {
     for (RdaChange<RdaMcsClaim> change : batch) {
       RdaMcsClaim claim = change.getClaim();
       verify(entityManager).merge(claim);
-    }
-    for (RdaChange<RdaMcsClaim> change : batch) {
-      verify(entityManager).persist(sink.createMetaData(change));
+      verify(entityManager).merge(sink.createMetaData(change));
     }
     // the merge transaction will be committed
     verify(transaction).commit();
