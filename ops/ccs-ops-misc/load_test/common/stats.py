@@ -15,11 +15,11 @@ class StatsEnvironment(Enum):
     PROD = 2
 
 
-class StatsJSON:
+class StatsJson:
     """Class to generate performance statistics in JSON format"""
 
     def __init__(self, locust_env: Environment, percentiles_to_report: List[float], stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
-        """Creates a new instance of StatsJSON given the current Locust environment and a list of percentiles to report.
+        """Creates a new instance of StatsJson given the current Locust environment and a list of percentiles to report.
 
         Args:
             environment (Environment): Current Locust environment
@@ -112,12 +112,12 @@ class StatsJSON:
         return json.dumps(full_dict, indent=(4 if pretty_print else None))
 
 
-class StatsFileWriter():
-    def __init__(self, stats_json: StatsJSON) -> None:
-        """Creates a new instance of StatsFileWriter given a StatsJSON object
+class StatsJsonFileWriter():
+    def __init__(self, stats_json: StatsJson) -> None:
+        """Creates a new instance of StatsJsonFileWriter given a StatsJson object
 
         Args:
-            stats_json (StatsJSON): A StatsJSON object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+            stats_json (StatsJson): A StatsJson object that encodes the aggregated performance statistics of all Locust tasks in the current environment
         """
         super().__init__()
 
