@@ -112,6 +112,8 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
+**--storeStatsTag**: (Optional) : If this argument is set, the currently running test suite's aggregated performance statistics will be stored to S3 under the specified "tag". This tag is used for retrieval and performance validation. If unset, no performance statistics are captured. _Note that this argument may be deprecated in the future once a more robust means of "tagging" captured statistics is developed._
+
 ### Quick Run
 
 Once you've run a test once and the configuration file is set, you can "quick run" a test by calling locust directly, like this:

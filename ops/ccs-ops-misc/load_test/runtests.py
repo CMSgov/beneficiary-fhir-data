@@ -70,7 +70,8 @@ def run_with_params(argv):
         'testRunTime': "1m",
         'testNumTotalClients': "100",
         'testCreatedClientsPerSecond': "5",
-        'resetStatsAfterClientSpawn': False
+        'resetStatsAfterClientSpawn': False,
+        'storeStatsTag': ''
     }
 
     # Dictionary to hold data passed in via the CLI that will be stored in the root config.yml file
@@ -95,7 +96,8 @@ def run_with_params(argv):
         '(Optional, Default 5)'
      '\n--worker_threads="<If >1 the test is run as distributed, and expects this many worker '
         'processes to start, int>" (Optional, Default 1 - non distributed mode)'
-     '\n--resetStats (Optional)')
+     '\n--resetStats (Optional)'
+     '\n--storeStatsTag="<Tag to store performance statistics in S3 under; if unset, stats are not stored> (Optional)')
 
     try:
         opts, _args = getopt.getopt(argv, "h", ["homePath=", "clientCertPath=", "databaseUri=",
@@ -136,6 +138,8 @@ def run_with_params(argv):
             worker_threads = arg
         elif opt == "--resetStats":
             config_data["resetStatsAfterClientSpawn"] = True
+        elif opt == "--storeStatsTag":
+            config_data["storeStatsTag"] = arg
         else:
             print(help_string)
             sys.exit()
