@@ -42,19 +42,6 @@ public class StringList {
   }
 
   /**
-   * Add the value converted to a String to our list if it is non-null.
-   *
-   * @param value potential value to be added
-   * @return this instance
-   */
-  public StringList addIfNonNull(Character value) {
-    if (value != null) {
-      values.add(value.toString());
-    }
-    return this;
-  }
-
-  /**
    * Add the value to our list if it is non-null and non-empty.
    *
    * @param value potential value to be added
@@ -68,13 +55,25 @@ public class StringList {
   }
 
   /**
-   * Add the value to our list.
+   * Add the value to our list. No null or length checks are performed so any String value can be
+   * added using this method.
    *
    * @param value value to be added
    * @return this instance
    */
   public StringList add(String value) {
     values.add(value);
+    return this;
+  }
+
+  /**
+   * Convert the character into a single character string and add the string to our list.
+   *
+   * @param value value to be added
+   * @return this instance
+   */
+  public StringList add(char value) {
+    values.add(String.valueOf(value));
     return this;
   }
 

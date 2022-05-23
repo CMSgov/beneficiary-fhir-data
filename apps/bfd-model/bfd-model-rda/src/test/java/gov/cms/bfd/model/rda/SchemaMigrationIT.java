@@ -401,6 +401,7 @@ public class SchemaMigrationIT {
                         .claimState("A")
                         .claimId(String.valueOf(i))
                         .receivedDate(Instant.now())
+                        .transactionDate(LocalDate.now())
                         .claimType(RdaApiProgress.ClaimType.FISS)
                         .locations(StringList.ofNonEmpty(String.valueOf(i)))
                         .build())
@@ -416,6 +417,7 @@ public class SchemaMigrationIT {
     claims.sort(Comparator.comparing(RdaClaimMessageMetaData::getSequenceNumber));
     assertEquals(3, claims.size());
     assertEquals(metaDataList.get(0).getLocations(), claims.get(0).getLocations());
+    assertEquals(metaDataList.get(0).getTransactionDate(), claims.get(0).getTransactionDate());
   }
 
   /**

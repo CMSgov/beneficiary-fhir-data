@@ -11,7 +11,6 @@ public class StringListTest {
   public void shouldFilterOutNullsAndEmpties() {
     final var empty = StringList.of();
     var list = StringList.ofNonEmpty();
-    assertEquals(empty, list.addIfNonNull(null));
     assertEquals(empty, list.addIfNonEmpty(null));
     assertEquals(empty, list.addIfNonEmpty(""));
     assertEquals(empty, StringList.ofNonEmpty("", null));
@@ -21,7 +20,12 @@ public class StringListTest {
   @Test
   public void shouldAddNonEmptyStrings() {
     var list = StringList.ofNonEmpty();
-    assertEquals(StringList.of("x"), list.addIfNonNull('x'));
     assertEquals(StringList.of("x", "y"), list.addIfNonEmpty("y"));
+  }
+
+  @Test
+  public void shouldAddValues() {
+    var list = StringList.ofNonEmpty();
+    assertEquals(StringList.of("x", "y", "", null), list.add('x').add("y").add("").add(null));
   }
 }
