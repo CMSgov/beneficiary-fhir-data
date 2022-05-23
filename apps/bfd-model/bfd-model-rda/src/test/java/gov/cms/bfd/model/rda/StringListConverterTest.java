@@ -11,8 +11,8 @@ public class StringListConverterTest {
   /** Verify that lists are serialized correctly. */
   @Test
   public void shouldSerializeToJsonArrayString() {
-    assertEquals("[ ]", converter.convertToDatabaseColumn(StringList.of()));
-    assertEquals("[ \"a\", \"b\" ]", converter.convertToDatabaseColumn(StringList.of("a", "b")));
+    assertEquals("[]", converter.convertToDatabaseColumn(StringList.of()));
+    assertEquals("[\"a\",\"b\"]", converter.convertToDatabaseColumn(StringList.of("a", "b")));
   }
 
   /** Verify that strings are deserialized correctly. */
