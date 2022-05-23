@@ -1102,7 +1102,7 @@ resource "aws_glue_job" "bfd-history-ingest" {
   command {
     name            = "glueetl"
     python_version  = "3"
-    script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-history-ingest.py"
+    script_location = "s3://${aws_s3_object.bfd-history-ingest.bucket}/${aws_s3_object.bfd-history-ingest.key}"
   }
 
   execution_property {
@@ -1140,7 +1140,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries" {
   command {
     name            = "glueetl"
     python_version  = "3"
-    script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-populate-beneficiaries.py"
+    script_location = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/${aws_s3_object.bfd-populate-beneficiaries.key}"
   }
 
   execution_property {
@@ -1179,7 +1179,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique" {
   command {
     name            = "glueetl"
     python_version  = "3"
-    script_location = "s3://aws-glue-assets-577373831711-us-east-1/scripts/bfd-populate-beneficiary-unique.py"
+    script_location = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/${aws_s3_object.bfd-populate-beneficiary-unique.key}"
   }
 
   execution_property {
