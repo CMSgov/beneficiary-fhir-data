@@ -1,7 +1,7 @@
 """
 Much of this file is adapted from equivalent Locust code, particularly locust.stats.StatsCSV
 """
-from ast import Dict, List
+from typing import Dict, List
 from enum import Enum
 import json
 import os
@@ -129,5 +129,5 @@ class StatsJsonFileWriter(object):
         Args:
             path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
         """
-        with open(os.path.join(path, f'{self.stats_json.running_env}-{self.stats_json.stats_tag}-{int(time.time())}.json')) as json_file:
+        with open(os.path.join(path, f'{self.stats_json.running_env.name}-{self.stats_json.stats_tag}-{int(time.time())}.json')) as json_file:
             json_file.write(self.stats_json.get_stats_json())
