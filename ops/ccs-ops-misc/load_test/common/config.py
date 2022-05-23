@@ -1,6 +1,7 @@
 '''Load and save configuration file.
 '''
 
+from enum import Enum
 from typing import Dict
 
 import yaml
@@ -10,7 +11,7 @@ def save(file_data: Dict[str, str]):
     '''
 
     with open('config.yml', 'w', encoding='utf-8') as config:
-        yaml.dump(file_data, config, default_flow_style=False)
+        yaml.dump(file_data, config, default_flow_style=False, Dumper=EnumeSafeDumper)
 
 
 def create():
@@ -74,3 +75,22 @@ def load_from_path(path: str):
     except OSError:
         print("Could not find/read configuration file; let's set it up!")
         return create()
+
+class EnumeSafeDumper(yaml.SafeDumper):
+    """Inherits from pyyaml's default SafeDumper to add a value-based representation for all Enums
+
+    Args:
+        yaml (SafeDumper): pyyaml's default SafeDumper
+    """
+    def represent_data(self, data):
+        """Defines how data is represented in YAML; for this Dumper, Enums are represented by their name.
+
+        Args:
+            data (Any): Data to be serialized to YAML
+
+        Returns:
+            Any: A mapping of how the data should be represented in YAML; in this case, Enums are represented by their name
+        """
+        if isinstance(data, Enum):
+            return self.represent_data(data.name)
+        return super().represent_data(data)
