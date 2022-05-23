@@ -11,6 +11,8 @@ from multiprocessing import Process
 from common import config, test_setup as setup
 from locust.main import main
 
+from common.stats import StatsEnvironment
+
 def parse_run_time(run_time):
     '''Parse a given run time setting (which Locust accepts as combinations of "1m", "30s", "2h",
     etc.), and return the duration in seconds.
@@ -72,7 +74,7 @@ def run_with_params(argv):
         'testCreatedClientsPerSecond': "5",
         'resetStatsAfterClientSpawn': False,
         'storeStatsTag': '',
-        'storeStatsEnvironment': 'TEST'
+        'storeStatsEnvironment': StatsEnvironment.TEST
     }
 
     # Dictionary to hold data passed in via the CLI that will be stored in the root config.yml file
@@ -143,9 +145,10 @@ def run_with_params(argv):
         elif opt == "--storeStatsTag":
             config_data["storeStatsTag"] = arg
         elif opt == "--storeStatsEnvironment":
-            if arg.upper() in ["TEST", "PROD"]:
-                config_data["storeStatsEnvironment"] = arg.upper()
-            else:
+            try:
+                config_data["storeStatsEnvironment"] = StatsEnvironment[opt.upper()]
+            except KeyError as err:
+                print(err)
                 print(help_string)
                 sys.exit()
         else:

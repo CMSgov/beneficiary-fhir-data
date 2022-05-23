@@ -2,10 +2,16 @@
 Much of this file is adapted from equivalent Locust code, particularly locust.stats.StatsCSV
 """
 from ast import Dict, List
+from enum import Enum
 import json
 import time
 from locust.env import Environment
 from locust.stats import StatsEntry, sort_stats
+
+
+class StatsEnvironment(Enum):
+    TEST = 1
+    PROD = 2
 
 
 class StatsJSON:
@@ -80,12 +86,12 @@ class StatsJSON:
         stats = self.environment.stats
         return [self._get_stats_entry_dict(stats_entry) for stats_entry in sort_stats(stats.entries)]
 
-    def get_stats_json(self, stats_tag: str, running_env: str = "TEST", pretty_print: bool = False) -> str:
+    def get_stats_json(self, stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST, pretty_print: bool = False) -> str:
         """Returns a JSON-formatted string that encodes the performance statistics of all Locust tasks in the current environment
 
         Args:
             stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
-            running_env (str, optional): A string which represents the current testing environment; either "TEST" or "PROD". Defaults to "TEST".
+            running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the current testing environment; either TEST or PROD. Defaults to TEST.
             pretty_print (bool, optional): A boolean which if True will generate the JSON in a more human-readable format. Defaults to False.
 
         Returns:
@@ -94,7 +100,7 @@ class StatsJSON:
         full_dict = {**{
             'timestamp': int(time.time()),
             'tag': stats_tag,
-            'environment': running_env
+            'environment': running_env.name
         }, **{
             'statistics': self._get_stats_entries_list()
         }}
