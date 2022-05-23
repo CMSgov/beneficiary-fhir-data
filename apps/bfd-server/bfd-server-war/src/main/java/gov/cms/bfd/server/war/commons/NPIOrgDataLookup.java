@@ -22,13 +22,13 @@ public class NPIOrgDataLookup {
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
-  /** */
+  /** Hashmap to keep the org names */
   private final Map<String, String> npiOrgHashMap = new HashMap<>();
 
-  /** */
+  /** A field to return the testing org lookup */
   private static NPIOrgDataLookup npiOrgLookupForTesting;
 
-  /** */
+  /** A field to return the production org lookup */
   private static NPIOrgDataLookup npiOrgLookupForProduction;
 
   /**
@@ -100,7 +100,7 @@ public class NPIOrgDataLookup {
    * @return a map with npi numbers and org data
    * @param includeNPIOrgCode
    */
-  private Map<String, String> readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
+  private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
     try (final InputStream npiOrgStream =
             Thread.currentThread()
                 .getContextClassLoader()
@@ -112,8 +112,7 @@ public class NPIOrgDataLookup {
       while ((line = npiOrgIn.readLine()) != null) {
         String npiProductColumns[] = line.split("\t");
         try {
-          npiOrgHashMap.put(
-              npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
+          npiOrgHashMap.put(npiProductColumns[0], npiProductColumns[1]);
         } catch (StringIndexOutOfBoundsException e) {
           continue;
         }
@@ -125,6 +124,5 @@ public class NPIOrgDataLookup {
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI data.", e);
     }
-    return null;
   }
 }

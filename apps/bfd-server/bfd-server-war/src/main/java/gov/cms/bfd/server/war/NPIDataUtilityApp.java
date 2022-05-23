@@ -28,16 +28,15 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A simple application that downloads the FDA NDC (national drug code) file; unzips it and then
- * converts it to UTF-8 format.
- *
- * <p>See the <code>download-fda-drug-data</code> execution of <code>exec-maven-plugin</code> in
- * this project's <code>pom.xml</code> for details on how this utility is run during the project's
- * build.
+ * A simple application that downloads NPI Data file; unzips it and then converts it to UTF-8
+ * format.
  */
 public final class NPIDataUtilityApp {
+  private static final Logger LOGGER = LoggerFactory.getLogger(NPIDataUtilityApp.class);
   /**
    * The name of the classpath resource (for the project's main web application) for the FDA
    * "Products" TSV file.
@@ -103,7 +102,7 @@ public final class NPIDataUtilityApp {
               .forEach(File::delete);
         }
       } catch (Exception exception) {
-
+        LOGGER.error("NPI data file could not be read.  Error:", exception);
       }
     }
   }
@@ -169,7 +168,7 @@ public final class NPIDataUtilityApp {
           provider = orgData;
         }
 
-        String output = inputLine[0] + "\t" + provider;
+        String output = inputLine[0].replace("\"", "") + "\t" + provider.replace("\"", "");
 
         out.write(output);
         out.newLine();
@@ -224,6 +223,12 @@ public final class NPIDataUtilityApp {
     bos.close();
   }
 
+  /**
+   * Extracts a file name
+   *
+   * @param getMonthBefore
+   * @return a file name string
+   */
   private static String getFileName(boolean getMonthBefore) {
     Map<Integer, String> months =
         new HashMap<Integer, String>() {
