@@ -25,7 +25,7 @@ public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
    */
   private static final ObjectMapper objectMapper =
       new ObjectMapper()
-          .enable(SerializationFeature.INDENT_OUTPUT)
+          .disable(SerializationFeature.INDENT_OUTPUT)
           .registerModule(new Jdk8Module())
           .registerModule(new JavaTimeModule())
           .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
