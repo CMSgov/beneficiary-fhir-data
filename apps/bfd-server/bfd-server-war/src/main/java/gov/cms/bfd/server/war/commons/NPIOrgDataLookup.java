@@ -98,7 +98,7 @@ public class NPIOrgDataLookup {
    * <p>See {@link gov.cms.bfd.server.war.NPIDataUtilityApp} for details.
    *
    * @return a map with npi numbers and org data
-   * @param includeNPIOrgCode
+   * @param includeFakeNPIOrgCode whether to include the fake testing NPI Org
    */
   private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
     try (final InputStream npiOrgStream =
@@ -116,10 +116,10 @@ public class NPIOrgDataLookup {
         } catch (StringIndexOutOfBoundsException e) {
           continue;
         }
+      }
 
-        if (includeFakeNPIOrgCode) {
-          npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
-        }
+      if (includeFakeNPIOrgCode) {
+        npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI data.", e);
