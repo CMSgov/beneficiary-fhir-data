@@ -1,0 +1,102 @@
+"""
+Much of this file is adapted from equivalent Locust code, particularly locust.stats.StatsCSV
+"""
+from ast import Dict, List
+import json
+import time
+from locust.env import Environment
+from locust.stats import StatsEntry, sort_stats
+
+
+class StatsJSON:
+    """Class to generate performance statistics in JSON format"""
+
+    def __init__(self, environment: Environment, percentiles_to_report: List[float]) -> None:
+        """Creates a new instance of StatsJSON given the current Locust environment and a list of percentiles to report.
+
+        Args:
+            environment (Environment): Current Locust environment
+            percentiles_to_report (List[float]): List of percentiles to report in the generated JSON
+        """
+        super().__init__()
+        self.environment = environment
+        self.percentiles_to_report = percentiles_to_report
+        self.percentiles_na = ["N/A"] * len(self.percentiles_to_report)
+
+    def _get_readable_percentile(self, percentile: float) -> str:
+        """Returns a human-readable percent string for a given value from 0-1
+
+        Args:
+            percentile (float): Floating-point percentile number between 0-1
+
+        Returns:
+            str: A human-readable percent string (i.e. "100%", "95%") for the given percentile number
+        """
+        return f"{int(percentile * 100) if (percentile * 100).is_integer() else round(100 * percentile, 6)}%"
+
+    def _get_percentiles_dict(self, stats_entry: StatsEntry) -> Dict[str, int]:
+        """Returns a dictionary of a human-readable percentile string to its reported value
+
+        Args:
+            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
+
+        Returns:
+            Dict[str, int]: A dictionary of human-readable percentile strings to the percent response time
+        """
+        if not stats_entry.num_requests:
+            return self.percentiles_na
+
+        return {self._get_readable_percentile(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0) for percentile in self.percentiles_to_report}
+
+    def _get_stats_entry_dict(self, stats_entry: StatsEntry) -> Dict[str, any]:
+        """Returns a dictionary representation of a StatsEntry object
+
+        Args:
+            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
+
+        Returns:
+            Dict[str, any]: A dictionary that represents most of the statistics exposed by StatsEntry, including percentiles
+        """
+        return {**{
+            'name': stats_entry.name,
+            'requestMethod': stats_entry.method,
+            'numRequests': stats_entry.num_requests,
+            'numFailures': stats_entry.num_failures,
+            'medianResponseTime': stats_entry.median_response_time,
+            'avgResponseTime': stats_entry.avg_response_time,
+            'minResponseTime': stats_entry.min_response_time or 0,
+            'maxResponseTime': stats_entry.max_response_time,
+            'avgContentLength': stats_entry.avg_content_length,
+            'totalRequestsPerSecond': stats_entry.total_rps,
+            'totalFailuresPerSecond': stats_entry.total_fail_per_sec
+        }, **self._get_percentiles_dict(stats_entry)}
+
+    def _get_stats_entries_list(self) -> List[Dict[str, any]]:
+        """Returns a list of dictionaries representing the performance statistics of _all_ Locust tasks that ran
+
+        Returns:
+            List[Dict[str, any]]: A List of Dicts that represent the performance statistics of all Locust tasks
+        """
+        stats = self.environment.stats
+        return [self._get_stats_entry_dict(stats_entry) for stats_entry in sort_stats(stats.entries)]
+
+    def get_stats_json(self, stats_tag: str, running_env: str = "TEST", pretty_print: bool = False) -> str:
+        """Returns a JSON-formatted string that encodes the performance statistics of all Locust tasks in the current environment
+
+        Args:
+            stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
+            running_env (str, optional): A string which represents the current testing environment; either "TEST" or "PROD". Defaults to "TEST".
+            pretty_print (bool, optional): A boolean which if True will generate the JSON in a more human-readable format. Defaults to False.
+
+        Returns:
+            str: A JSON-formatted string that encodes the performance statistics of the current Locust run
+        """
+        full_dict = {**{
+            'timestamp': int(time.time()),
+            'tag': stats_tag,
+            'environment': running_env
+        }, **{
+            'statistics': self._get_stats_entries_list()
+        }}
+
+        return json.dumps(full_dict, indent=(4 if pretty_print else None))
