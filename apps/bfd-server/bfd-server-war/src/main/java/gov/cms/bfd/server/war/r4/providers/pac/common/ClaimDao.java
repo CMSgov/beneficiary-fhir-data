@@ -141,7 +141,7 @@ public class ClaimDao {
       TransformerUtilsV2.recordQueryInMdc(
           CLAIM_BY_MBI_METRIC_QUERY,
           claimByIdQueryNanoSeconds,
-          claimEntities == null || claimEntities.isEmpty() ? 0 : 1);
+          claimEntities == null ? 0 : claimEntities.size());
     }
 
     return claimEntities;
