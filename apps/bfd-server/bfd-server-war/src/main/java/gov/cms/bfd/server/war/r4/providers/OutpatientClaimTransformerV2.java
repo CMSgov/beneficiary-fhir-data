@@ -8,7 +8,6 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -49,11 +48,7 @@ public class OutpatientClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob =
-        transformClaim(
-            (OutpatientClaim) claim,
-            transformerContext.getDrugCodeDisplayLookup(),
-            transformerContext);
+    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -61,15 +56,12 @@ public class OutpatientClaimTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link InpatientClaim} to transform
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @param transformerContext the CCW {@link TransformerContext}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      OutpatientClaim claimGroup,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      TransformerContext transformerContext) {
+      OutpatientClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -406,7 +398,9 @@ public class OutpatientClaimTransformerV2 {
       TransformerUtilsV2.addNationalDrugCode(
           item,
           line.getNationalDrugCode(),
-          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          transformerContext
+              .getDrugCodeDisplayLookup()
+              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 public class NPIOrgDataUtilsTest {
 
-  /** Return Fake NPI Org Data when parameter is true */
+  /** Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is true */
   @Test
   public void shouldReturnFakeOrgDataWhenConstructorSetToTrue() {
     NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForTesting();
@@ -17,7 +17,9 @@ public class NPIOrgDataUtilsTest {
     assertNotEquals(null, npiOrgDisplay.get());
   }
 
-  /** Do Not Return Fake NPI Org Data when parameter is false */
+  /**
+   * Do Not Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is false
+   */
   @Test
   public void shouldNotReturnFakeOrgWhenConstructorSetToFalse() {
     NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForProduction();
@@ -26,7 +28,7 @@ public class NPIOrgDataUtilsTest {
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
-  /** Return Fake NPI Org Name when parameter is true */
+  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true */
   @Test
   public void shouldReturnFakeNPIOrgNameWhenConstructorSetToTrue() {
     NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForTesting();
@@ -35,7 +37,7 @@ public class NPIOrgDataUtilsTest {
     assertEquals(NPIOrgDataLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
-  /** Return Fake NPI Org Name when parameter is true */
+  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true */
   @Test
   public void shouldNotReturnFakeNPIOrgNameWhenConstructorSetToFalse() {
     NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForProduction();
@@ -44,7 +46,7 @@ public class NPIOrgDataUtilsTest {
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
-  /** Return real NPI Org Data when parameter is false */
+  /** Return real NPI Org Data when the parameter bfdServer.include.fake.drug.code is false */
   @Test
   public void shouldReturnRealOrgDataWhenConstructorSetToTrue() {
     NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForProduction();

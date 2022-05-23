@@ -80,8 +80,9 @@ public class SpringConfiguration {
    * The {@link String } Boolean property that is used to enable the fake npi number (0000000000)
    * that is used for integration testing. When this property is set to the string 'true', this fake
    * npi number will be appended to the npi org data lookup map to avoid test failures that result
-   * This property defaults to false and should only be set to true when the server is under test in
-   * a local environment.
+   * unexpected changes to the external npi data file in {@link
+   * NPIOrgDataLookup#retrieveNPIOrgDisplay}. This property defaults to false and should only be set
+   * to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_NPI_NUMBER = "bfdServer.include.fake.npi.number";
 
@@ -510,7 +511,7 @@ public class SpringConfiguration {
    */
   @Bean
   public NPIOrgDataLookup npiOrgDataLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeNPINumber) {
+      @Value("${" + PROP_INCLUDE_FAKE_NPI_NUMBER + ":false}") Boolean includeFakeNPINumber) {
     if (includeFakeNPINumber) {
       return NPIOrgDataLookup.createNpiOrgLookupForTesting();
     } else {
