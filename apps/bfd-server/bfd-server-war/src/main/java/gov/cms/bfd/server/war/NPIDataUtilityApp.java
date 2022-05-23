@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -77,32 +76,23 @@ public final class NPIDataUtilityApp {
     }
 
     // Create a temp directory that will be recursively deleted when we're done.
-    Path workingDir = Files.createTempDirectory("npi-data");
+    Path tempDir = Files.createTempDirectory("npi-data");
 
     // If the output file isn't already there, go build it.
     Path convertedNpiDataFile = outputPath.resolve(NPI_RESOURCE);
     if (!Files.exists(convertedNpiDataFile)) {
-      String fileName = getFileName(false);
       try {
-        try {
-          buildNPIResource(convertedNpiDataFile, workingDir, fileName);
-        } catch (FileNotFoundException ex) {
-          try {
-            fileName = getFileName(true);
-            buildNPIResource(convertedNpiDataFile, workingDir, fileName);
-          } catch (Exception e) {
-
-          }
-        } finally {
-          // Recursively delete the working dir.
-          Files.walk(workingDir)
-              .sorted(Comparator.reverseOrder())
-              .map(Path::toFile)
-              .peek(System.out::println)
-              .forEach(File::delete);
-        }
+        buildNPIResource(convertedNpiDataFile, tempDir);
       } catch (Exception exception) {
         LOGGER.error("NPI data file could not be read.  Error:", exception);
+        System.exit(4);
+      } finally {
+        // Recursively delete the working dir.
+        Files.walk(tempDir)
+            .sorted(Comparator.reverseOrder())
+            .map(Path::toFile)
+            .peek(System.out::println)
+            .forEach(File::delete);
       }
     }
   }
@@ -114,33 +104,24 @@ public final class NPIDataUtilityApp {
    * @param workingDir a directory that temporary/working files can be written to
    * @throws IOException (any errors encountered will be bubbled up)
    */
-  private static void buildNPIResource(Path convertedNpiDataFile, Path workingDir, String fileName)
-      throws Exception {
-    // download NPI file
-    Path downloadedNpiZipFile =
-        Paths.get(workingDir.resolve("npidata.zip").toFile().getAbsolutePath());
-    URL ndctextZipUrl = new URL(fileName);
-    if (!Files.isReadable(downloadedNpiZipFile)) {
-      // connectionTimeout, readTimeout = 10 seconds
-      FileUtils.copyURLToFile(
-          ndctextZipUrl, new File(downloadedNpiZipFile.toFile().getAbsolutePath()), 10000, 10000);
+  private static void buildNPIResource(Path convertedNpiDataFile, Path workingDir)
+      throws IOException {
+    Path originalNpiDataFile;
+    String fileName;
+
+    try {
+      fileName = getFileName(false);
+      originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileName);
+    } catch (IOException e) {
+      fileName = getFileName(true);
+      originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileName);
     }
 
-    // unzip NPI file
-    unzip(downloadedNpiZipFile, workingDir);
-    File f = new File(workingDir.toString());
-    File[] matchingFiles =
-        f.listFiles(
-            new FilenameFilter() {
-              public boolean accept(File dir, String name) {
-                return name.startsWith("npidata_pfile_") && !name.endsWith("_FileHeader.csv");
-              }
-            });
+    convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
+  }
 
-    Path originalNpiDataFile = workingDir.resolve(matchingFiles[0].getName());
-    if (!Files.isReadable(originalNpiDataFile))
-      throw new IllegalStateException("Unable to locate npidata_pfile in " + ndctextZipUrl);
-
+  private static void convertNpiDataFile(Path convertedNpiDataFile, Path originalNpiDataFile)
+      throws IOException {
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
         Charset.forName("windows-1252")
@@ -174,6 +155,34 @@ public final class NPIDataUtilityApp {
         out.newLine();
       }
     }
+  }
+
+  private static Path getOriginalNpiDataFile(Path workingDir, String fileName) throws IOException {
+    // download NPI file
+    Path downloadedNpiZipFile =
+        Paths.get(workingDir.resolve("npidata.zip").toFile().getAbsolutePath());
+    URL ndctextZipUrl = new URL(fileName);
+    if (!Files.isReadable(downloadedNpiZipFile)) {
+      // connectionTimeout, readTimeout = 10 seconds
+      FileUtils.copyURLToFile(
+          ndctextZipUrl, new File(downloadedNpiZipFile.toFile().getAbsolutePath()), 10000, 10000);
+    }
+
+    // unzip NPI file
+    unzip(downloadedNpiZipFile, workingDir);
+    File f = new File(workingDir.toString());
+    File[] matchingFiles =
+        f.listFiles(
+            new FilenameFilter() {
+              public boolean accept(File dir, String name) {
+                return name.startsWith("npidata_pfile_") && !name.endsWith("_FileHeader.csv");
+              }
+            });
+
+    Path originalNpiDataFile = workingDir.resolve(matchingFiles[0].getName());
+    if (!Files.isReadable(originalNpiDataFile))
+      throw new IllegalStateException("Unable to locate npidata_pfile in " + ndctextZipUrl);
+    return originalNpiDataFile;
   }
 
   /**
