@@ -71,7 +71,8 @@ def run_with_params(argv):
         'testNumTotalClients': "100",
         'testCreatedClientsPerSecond': "5",
         'resetStatsAfterClientSpawn': False,
-        'storeStatsTag': ''
+        'storeStatsTag': '',
+        'storeStatsEnvironment': 'TEST'
     }
 
     # Dictionary to hold data passed in via the CLI that will be stored in the root config.yml file
@@ -97,7 +98,8 @@ def run_with_params(argv):
      '\n--worker_threads="<If >1 the test is run as distributed, and expects this many worker '
         'processes to start, int>" (Optional, Default 1 - non distributed mode)'
      '\n--resetStats (Optional)'
-     '\n--storeStatsTag="<Tag to store performance statistics in S3 under; if unset, stats are not stored> (Optional)')
+     '\n--storeStatsTag="<Tag to store performance statistics in S3 under; if unset, stats are not stored> (Optional)'
+     '\n--storeStatsEnvironment="<Either of two values ("TEST", "PROD") that denote test run environment> (Optional, Default "TEST")')
 
     try:
         opts, _args = getopt.getopt(argv, "h", ["homePath=", "clientCertPath=", "databaseUri=",
@@ -140,6 +142,12 @@ def run_with_params(argv):
             config_data["resetStatsAfterClientSpawn"] = True
         elif opt == "--storeStatsTag":
             config_data["storeStatsTag"] = arg
+        elif opt == "--storeStatsEnvironment":
+            if arg.upper() in ["TEST", "PROD"]:
+                config_data["storeStatsEnvironment"] = arg.upper()
+            else:
+                print(help_string)
+                sys.exit()
         else:
             print(help_string)
             sys.exit()

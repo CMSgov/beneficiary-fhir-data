@@ -114,6 +114,8 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--storeStatsTag**: (Optional) : If this argument is set, the currently running test suite's aggregated performance statistics will be stored to S3 under the specified "tag". This tag is used for retrieval and performance validation. If unset, no performance statistics are captured. _Note that this argument may be deprecated in the future once a more robust means of "tagging" captured statistics is developed._
 
+**--storeStatsEnvironment**: (Optional) : If **-storeStatsTag** is set, then the value of this argument is used to specify the testing environment that the statistics should be stored under. Can be one of two values, `TEST` or `PROD`. If not provided, defaults to `TEST`.
+
 ### Quick Run
 
 Once you've run a test once and the configuration file is set, you can "quick run" a test by calling locust directly, like this:
