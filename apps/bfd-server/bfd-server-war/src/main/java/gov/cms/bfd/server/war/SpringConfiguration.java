@@ -80,7 +80,7 @@ public class SpringConfiguration {
    * The {@link String } Boolean property that is used to enable the fake npi number (0000000000)
    * that is used for integration testing. When this property is set to the string 'true', this fake
    * npi number will be appended to the npi org data lookup map to avoid test failures that result
-   * unexpected changes to the external npi data file in {@link
+   * from unexpected changes to the external npi data file in {@link
    * NPIOrgDataLookup#retrieveNPIOrgDisplay}. This property defaults to false and should only be set
    * to true when the server is under test in a local environment.
    */
