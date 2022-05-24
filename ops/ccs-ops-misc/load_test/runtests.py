@@ -157,7 +157,7 @@ def run_with_params(argv):
 
     ## Read the specified configuration file
     yaml_config = config.load_from_path(config_data.get("configPath",
-        default_config_data["configPath"]))
+        default_config_data["configPath"])) or {}
     ## Merge the stored data with data passed in via the CLI, with the
     ## CLI data taking priority
     config_data = {**yaml_config, **config_data}
