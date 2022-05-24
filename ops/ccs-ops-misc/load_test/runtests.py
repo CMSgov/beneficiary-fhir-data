@@ -11,7 +11,7 @@ from multiprocessing import Process
 from common import config, test_setup as setup
 from locust.main import main
 
-from common.stats import StatsEnvironment
+from common.stats import StatsEnvironment, StatsStorageConfig
 
 def parse_run_time(run_time):
     '''Parse a given run time setting (which Locust accepts as combinations of "1m", "30s", "2h",
@@ -73,8 +73,7 @@ def run_with_params(argv):
         'testNumTotalClients': "100",
         'testCreatedClientsPerSecond': "5",
         'resetStatsAfterClientSpawn': False,
-        'storeStatsTag': '',
-        'storeStatsEnvironment': StatsEnvironment.TEST
+        'storeStats': None
     }
 
     # Dictionary to hold data passed in via the CLI that will be stored in the root config.yml file
@@ -99,14 +98,13 @@ def run_with_params(argv):
         '(Optional, Default 5)'
      '\n--worker_threads="<If >1 the test is run as distributed, and expects this many worker '
         'processes to start, int>" (Optional, Default 1 - non distributed mode)'
-     '\n--resetStats (Optional)'
-     '\n--storeStatsTag="<Tag to store performance statistics in S3 under; if unset, stats are not stored> (Optional)'
-     '\n--storeStatsEnvironment="<Either of two values ("TEST", "PROD") that denote test run environment> (Optional, Default "TEST")')
+     '\n--storeStats="<If set, stores stats in JSON to S3 or local file. Must follow format: <STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>" (Optional)'
+     '\n--resetStats (Optional)')
 
     try:
         opts, _args = getopt.getopt(argv, "h", ["homePath=", "clientCertPath=", "databaseUri=",
         "testHost=", "serverPublicKey=", 'tableSamplePct=', "configPath=", "testRunTime=",
-        "maxClients=", "clientsPerSecond=", "testFile=", "workerThreads=", "resetStats"])
+        "maxClients=", "clientsPerSecond=", "testFile=", "workerThreads=", "storeStats=", "resetStats"])
     except getopt.GetoptError as err:
         print(err)
         print(help_string)
@@ -140,17 +138,15 @@ def run_with_params(argv):
             test_file = arg
         elif opt == "--workerThreads":
             worker_threads = arg
-        elif opt == "--resetStats":
-            config_data["resetStatsAfterClientSpawn"] = True
-        elif opt == "--storeStatsTag":
-            config_data["storeStatsTag"] = arg
-        elif opt == "--storeStatsEnvironment":
+        elif opt == "--storeStats":
             try:
-                config_data["storeStatsEnvironment"] = StatsEnvironment[opt.upper()]
-            except KeyError as err:
-                print(err)
+                config_data["storeStats"] = StatsStorageConfig.from_arg_str(arg)
+            except ValueError as err:
+                print(f'--storeStats was invalid: {err}\n')
                 print(help_string)
                 sys.exit()
+        elif opt == "--resetStats":
+            config_data["resetStatsAfterClientSpawn"] = True
         else:
             print(help_string)
             sys.exit()
