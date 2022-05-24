@@ -6,12 +6,14 @@ from typing import Dict
 
 import yaml
 
+from common.stats import StatsFileStorageConfig, StatsS3StorageConfig, StatsStorageConfig
+
 def save(file_data: Dict[str, str]):
     '''Saves a config file using the input file data.
     '''
 
     with open('config.yml', 'w', encoding='utf-8') as config:
-        yaml.dump(file_data, config, default_flow_style=False, Dumper=EnumeSafeDumper)
+        yaml.dump(file_data, config, default_flow_style=False, Dumper=_get_dumper())
 
 
 def create():
@@ -40,7 +42,7 @@ def create():
 
     ## Attempt to read the new file
     try:
-        config = yaml.safe_load(open('config.yml', encoding='utf-8'))
+        config = yaml.load(open('config.yml', encoding='utf-8'), Loader=_get_loader())
         return config
     except yaml.YAMLError:
         print('Unable to parse YAML configuration file; please check/create the file manually from '
@@ -67,7 +69,7 @@ def load_from_path(path: str):
     '''
 
     try:
-        return yaml.safe_load(open(path, encoding='utf-8'))
+        return yaml.load(open(path, encoding='utf-8'), Loader=_get_loader())
     except yaml.YAMLError:
         print("Unable to parse YAML configuration file; please ensure the format matches the "
             "example file.")
@@ -76,21 +78,52 @@ def load_from_path(path: str):
         print("Could not find/read configuration file; let's set it up!")
         return create()
 
-class EnumeSafeDumper(yaml.SafeDumper):
-    """Inherits from pyyaml's default SafeDumper to add a value-based representation for all Enums
+def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsStorageConfig) -> yaml.nodes.ScalarNode:
+    """Returns a scalar representer that instructs PyYAML how to serialize a StatsStorageConfig instance
+    to an "arg string" in the format of "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>".
 
     Args:
-        yaml (SafeDumper): pyyaml's default SafeDumper
+        dumper (yaml.SafeDumper): PyYAML's default SafeDumper instance
+        stats_config (StatsStorageConfig): An instance of StatsStorageConfig to serialize
+
+    Returns:
+        yaml.nodes.ScalarNode: A scalar YAML node representing a StatsStorageConfig instance
     """
-    def represent_data(self, data):
-        """Defines how data is represented in YAML; for this Dumper, Enums are represented by their name.
+    return dumper.represent_scalar('!StatsConfig', stats_config.to_arg_str())
 
-        Args:
-            data (Any): Data to be serialized to YAML
+def _stats_config_constructor(loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> StatsStorageConfig:
+    """Returns a scalar constructor that instructs PyYAML how to deserialize a StatsStorageConfig
+    instance from an "arg string" in the format of "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>".
 
-        Returns:
-            Any: A mapping of how the data should be represented in YAML; in this case, Enums are represented by their name
-        """
-        if isinstance(data, Enum):
-            return self.represent_data(data.name)
-        return super().represent_data(data)
+    Args:
+        loader (yaml.SafeLoader): PyYAML's default SafeLoader instance
+        node (yaml.nodes.ScalarNode): A YAML scalar node with a string value representing a StatsStorageConfing instance
+
+    Returns:
+        StatsStorageConfig: A StatsStorageConfig instance deserialized from its string scalar representation
+    """
+    return StatsStorageConfig.from_arg_str(loader.construct_scalar(node))
+
+def _get_loader() -> yaml.SafeLoader:
+    """Returns a PyYAML SafeLoader with custom constructors added to it.
+
+    Returns:
+        yaml.SafeLoader: A PyYAML SafeLoader with custom constructors added to it
+    """
+    safe_loader = yaml.SafeLoader
+    safe_loader.add_constructor('!StatsConfig', _stats_config_constructor)
+
+    return safe_loader
+
+def _get_dumper() -> yaml.SafeDumper:
+    """Returns a PyYAML SafeDumper with custom representers added to it.
+
+    Returns:
+        yaml.SafeDumper: A PyYAML SafeDumper with custom representers added to it
+    """
+    safe_dumper = yaml.SafeDumper
+    safe_dumper.add_representer(StatsStorageConfig, _stats_config_representer)
+    safe_dumper.add_representer(StatsFileStorageConfig, _stats_config_representer)
+    safe_dumper.add_representer(StatsS3StorageConfig, _stats_config_representer)
+
+    return safe_dumper
