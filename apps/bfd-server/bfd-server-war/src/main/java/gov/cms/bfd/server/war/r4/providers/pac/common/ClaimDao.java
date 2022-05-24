@@ -141,11 +141,28 @@ public class ClaimDao {
     return claimEntities;
   }
 
+  /**
+   * Helper method for easier mocking related to metrics.
+   *
+   * @param queryTime The amount of time passed executing the query.
+   * @param querySize The number of entities returned by the query.
+   */
   @VisibleForTesting
   void logQueryMetric(long queryTime, int querySize) {
     TransformerUtilsV2.recordQueryInMdc(CLAIM_BY_MBI_METRIC_QUERY, queryTime, querySize);
   }
 
+  /**
+   * Helper method to create the appropriate MBI predicate depending on if the current or old MBI
+   * Hash should be used.
+   *
+   * @param root The root path of the entity to get attributes from.
+   * @param mbiSearchValue The MBI value being searched for.
+   * @param isMbiSearchValueHashed Indicates if the search value is a hash or raw MBI.
+   * @param isOldMbiHashEnabled Indicates if the old MBI should be checked for the query.
+   * @param builder The builder to use for creating predicates.
+   * @return A {@link Predicate} that checks for the given mbi value.
+   */
   @VisibleForTesting
   Predicate createMbiPredicate(
       Path<?> root,
@@ -162,12 +179,29 @@ public class ClaimDao {
     return answer;
   }
 
+  /**
+   * Helper method to create a date range predicat to make mocking easier.
+   *
+   * @param root The root path of the entity to get attributes from.
+   * @param dateRange The date range to search for.
+   * @param builder The builder to use for creating predicates.
+   * @return A {@link Predicate} that checks for the given date range.
+   */
   @VisibleForTesting
   Predicate createDateRangePredicate(
       Root<?> root, DateRangeParam dateRange, CriteriaBuilder builder) {
     return QueryUtils.createLastUpdatedPredicateInstant(builder, root, dateRange);
   }
 
+  /**
+   * Helper method to create a service date range predicate.
+   *
+   * @param root The root path of the entity to get attributes from.
+   * @param serviceDate The service date to search for.
+   * @param builder The builder to use for creating predicates.
+   * @param endDateAttributeName The name of the end date attribute on the entity.
+   * @return A {@link Predicate} that checks for the given service date range.
+   */
   @VisibleForTesting
   Predicate serviceDateRangePredicate(
       Root<?> root,
