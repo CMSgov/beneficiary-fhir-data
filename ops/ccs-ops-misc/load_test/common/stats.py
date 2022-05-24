@@ -107,7 +107,9 @@ class StatsJson(object):
             'timestamp': int(time.time()),
             'tag': self.stats_tag,
             'environment': self.running_env.name,
-            'numUsers': self.locust_env.runner.user_count,
+            'statsResetAfterSpawn': self.locust_env.reset_stats,
+            'numUsers': self.locust_env.parsed_options.num_users,
+            'usersPerSecond': self.locust_env.parsed_options.spawn_rate,
             # We cannot get the user provided runtime directly; however, we can compute a more exact
             # runtime by subtracting the start time from the last request's time
             'runtime': self.locust_env.stats.last_request_timestamp - self.locust_env.stats.start_time
