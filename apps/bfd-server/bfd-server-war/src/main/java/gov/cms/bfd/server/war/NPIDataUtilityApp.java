@@ -1,17 +1,14 @@
 package gov.cms.bfd.server.war;
 
 import com.google.common.base.Strings;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
@@ -24,9 +21,6 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +35,6 @@ public final class NPIDataUtilityApp {
    * "Products" TSV file.
    */
   public static final String NPI_RESOURCE = "npi_or.tsv";
-
-  /** Size of the buffer to read/write data */
-  private static final int BUFFER_SIZE = 4096;
 
   /**
    * The application entry point, which will receive all non-JVM command line options in the <code>
@@ -111,10 +102,10 @@ public final class NPIDataUtilityApp {
 
     try {
       fileName = getFileName(false);
-      originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileName);
+      originalNpiDataFile = DataUtilityCommons.getOriginalNpiDataFile(workingDir, fileName);
     } catch (IOException e) {
       fileName = getFileName(true);
-      originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileName);
+      originalNpiDataFile = DataUtilityCommons.getOriginalNpiDataFile(workingDir, fileName);
     }
 
     convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
@@ -155,81 +146,6 @@ public final class NPIDataUtilityApp {
         out.newLine();
       }
     }
-  }
-
-  private static Path getOriginalNpiDataFile(Path workingDir, String fileName) throws IOException {
-    // download NPI file
-    Path downloadedNpiZipFile =
-        Paths.get(workingDir.resolve("npidata.zip").toFile().getAbsolutePath());
-    URL ndctextZipUrl = new URL(fileName);
-    if (!Files.isReadable(downloadedNpiZipFile)) {
-      // connectionTimeout, readTimeout = 10 seconds
-      FileUtils.copyURLToFile(
-          ndctextZipUrl, new File(downloadedNpiZipFile.toFile().getAbsolutePath()), 10000, 10000);
-    }
-
-    // unzip NPI file
-    unzip(downloadedNpiZipFile, workingDir);
-    File f = new File(workingDir.toString());
-    File[] matchingFiles =
-        f.listFiles(
-            new FilenameFilter() {
-              public boolean accept(File dir, String name) {
-                return name.startsWith("npidata_pfile_") && !name.endsWith("_FileHeader.csv");
-              }
-            });
-
-    Path originalNpiDataFile = workingDir.resolve(matchingFiles[0].getName());
-    if (!Files.isReadable(originalNpiDataFile))
-      throw new IllegalStateException("Unable to locate npidata_pfile in " + ndctextZipUrl);
-    return originalNpiDataFile;
-  }
-
-  /**
-   * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
-   * (will be created if does not exists)
-   *
-   * @param zipFilePath
-   * @param destDirectory
-   * @throws IOException
-   */
-  private static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
-    ZipInputStream zipIn =
-        new ZipInputStream(new FileInputStream(zipFilePath.toFile().getAbsolutePath()));
-    ZipEntry entry = zipIn.getNextEntry();
-    // iterates over entries in the zip file
-    while (entry != null) {
-      Path filePath = Paths.get(destDirectory.toFile().getAbsolutePath(), entry.getName());
-      if (!entry.isDirectory()) {
-        // if the entry is a file, extracts it
-        extractFile(zipIn, filePath);
-      } else {
-        // if the entry is a directory, make the directory
-        File dir = new File(filePath.toFile().getAbsolutePath());
-        dir.mkdir();
-      }
-      zipIn.closeEntry();
-      entry = zipIn.getNextEntry();
-    }
-    zipIn.close();
-  }
-
-  /**
-   * Extracts a zip entry (file entry)
-   *
-   * @param zipIn
-   * @param filePath
-   * @throws IOException
-   */
-  private static void extractFile(ZipInputStream zipIn, Path filePath) throws IOException {
-    BufferedOutputStream bos =
-        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()));
-    byte[] bytesIn = new byte[BUFFER_SIZE];
-    int read = 0;
-    while ((read = zipIn.read(bytesIn)) != -1) {
-      bos.write(bytesIn, 0, read);
-    }
-    bos.close();
   }
 
   /**
