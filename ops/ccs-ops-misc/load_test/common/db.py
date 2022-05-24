@@ -66,22 +66,68 @@ def get_partially_adj_hashed_mbis(uri):
     """
     per_status_max = int(LIMIT / 40)    # Based on 40 distinct status values between FISS/MCS
 
+    sub_select_day_age = 30
+
     """
-    Selects rows partitioned into type/status combinations
+    selects FISS records only from the last N days
     """
-    partition_sub_query = (
-        'select api.*, ROW_NUMBER() '
-        '   over (partition by api.claim_type, api.claim_state order by api.received_date desc) '
-        'from rda.rda_api_claim_message_meta_data as api'
+    fiss_sub_query = (
+        'select * '
+        'from rda.fiss_claims '
+        f'where last_updated > current_date - interval \'{sub_select_day_age}\' day '
     )
 
     """
-    Selects only N distinct mbi ids from each type/status combination from the partition
+    Selects FISS rows partitioned by status
     """
-    status_sub_query = (
-        'select distinct partition.mbi_id '
-        f'from ({partition_sub_query}) partition '
-        f'where partition.row_number <= {per_status_max}'
+    fiss_partition_sub_query = (
+        'select fiss.*, ROW_NUMBER() '
+        '   over (partition by fiss.curr_status order by fiss.last_updated desc) '
+        f'from ({fiss_sub_query}) as fiss '
+    )
+
+    """
+    Selects the mbi ids from N of each FISS status
+    """
+    fiss_mbi_sub_query = (
+        'select fiss_partition.mbi_id '
+        f'from ({fiss_partition_sub_query}) fiss_partition '
+        f'where fiss_partition.row_number <= {per_status_max} and fiss_partition.mbi_id is not null '
+    )
+
+    """
+    selects MCS records only from the last N days
+    """
+    mcs_sub_query = (
+        'select * '
+        'from rda.mcs_claims '
+        f'where last_updated > current_date - interval \'{sub_select_day_age}\' day '
+    )
+
+    """
+    Selects MCS rows partitioned by status
+    """
+    mcs_partition_sub_query = (
+        'select mcs.*, ROW_NUMBER() '
+        '   over (partition by mcs.idr_status_code order by mcs.last_updated desc) '
+        f'from ({mcs_sub_query}) as mcs '
+    )
+
+    """
+    Selects the mbi ids from N of each MCS status
+    """
+    mcs_mbi_sub_query = (
+        'select mcs_partition.mbi_id '
+        f'from ({mcs_partition_sub_query}) mcs_partition '
+        f'where mcs_partition.row_number <= {per_status_max} and mcs_partition.mbi_id is not null '
+    )
+
+    """
+    Selects the distinct mbis from both fiss and mcs subqueries
+    """
+    distinct_type_status_mbis = (
+        'select distinct type_status.mbi_id '
+        f'from ({fiss_mbi_sub_query} union {mcs_mbi_sub_query}) as type_status '
     )
 
     beneQuery = (
@@ -92,13 +138,17 @@ def get_partially_adj_hashed_mbis(uri):
         '	select union_select.mbi_id '
         '	from ( '
         # Select up to N of the newest claims for each distinct FISS and MCS status value
-        '		select src.mbi_id, 1 as source_order'
-        f'		from ({status_sub_query}) src '
+        '		select src.mbi_id, 1 as source_order '
+        f'		from ({distinct_type_status_mbis}) src '
         '		union '
         # Select whatever MBIs as filler
         '		select distinct mbi.mbi_id, 2 as source_order '
-        '		from rda.mbi_cache as mbi '
-        f'		where mbi.mbi_id not in ({status_sub_query}) '
+        '		from ( '
+        '           select recent_mbis.* '
+        '           from rda.mbi_cache as recent_mbis '   
+        f'		    where recent_mbis.mbi_id not in ({distinct_type_status_mbis}) '
+        '           order by recent_mbis.last_updated desc '
+        '       ) as mbi '
         f'		limit {LIMIT} '
         '	) as union_select '
         '	order by union_select.source_order '
