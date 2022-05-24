@@ -6,14 +6,26 @@
 # Apply the role.
 - hosts: bfd-db-migrator
   tasks:
+    - name: Install Prerequisites
+      package:
+        name:
+          - procps
+          - awscli
+          - jq
+        state: present
+      become: true
     - name: Apply Role
       import_role:
         name: bfd-db-migrator
       vars:
+        bfd_env: dev
         db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAPSHOT/bfd-db-migrator-1.0.0-SNAPSHOT.zip"
-        db_migrator_db_url: 'jdbc:hsqldb:mem:test'
-        db_migrator_db_username: "bfd"
-        db_migrator_db_password: "bfd"
+        db_migrator_db_url: jdbc:hsqldb:mem:test
+        db_migrator_db_username: bfd
+        db_migrator_db_password: bfd
+        db_migrator_dir: /opt/bfd-db-migrator
+        migrator_monitor_enabled: false
+        migrator_monitor_heartbeat_interval_seconds: 15
 
 # Verify that things worked as expected.
 - hosts: bfd-db-migrator
@@ -26,16 +38,12 @@
       changed_when: false
       become: true
 
-    - name: Grab Log Contents
-      command: cat /opt/bfd-db-migrator/migrator-log.json
-      changed_when: false
-      register: read_log
-
-    - name: Log Failed Application Launches
-      debug:
-        msg: "{{ read_log.stdout }}"
-      when: "'Successfully started' not in read_log.stdout"
-
-    - name: Verify Log Contents
-      action: fail
-      when: "'Successfully started' not in read_log.stdout"
+    - name: Evaluate migrator exit code
+      shell: >-
+        systemctl show bfd-db-migrator.service --property=ExecStart \
+        | xargs -n1
+        | grep status=
+      retries: 10
+      delay: 6
+      register: exit_status
+      until: exit_status.stdout == 'status=0'

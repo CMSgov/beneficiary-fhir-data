@@ -9,8 +9,8 @@ env_name_std: 'prod-sbx'
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
 
-# Whether to enable BFD PreAdj Resources
-pre_adj_resources_enabled: true
+# Whether to enable BFD Partially Adjudicated Claims Resources
+pac_resources_enabled: true
 
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
@@ -79,6 +79,10 @@ data_server_ssl_client_certificates:
 data_pipeline_rda_grpc_server_type: 'InProcess'
 data_pipeline_rda_grpc_inproc_server_mode: 'S3'
 
+# Enables the CCW RIF job when true; disables when false
+data_pipeline_ccw_rif_job_enabled: true
+
 # Enable RDA API data ETL pipeline jobs.
 data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 3600
+

@@ -1,5 +1,19 @@
 # API Changelog
 
+## BFD-1519: Map Revenue Center Unit Count in V2
+
+This extension was not previously available in the v2 claims for revenue center unit count. The
+following claim types will have this extension available: Inpatient, Outpatient, HHA, Hospice, and SNF claims.  Since we already mapped drug code to eob.item.quantity in v2 and we can't cause a backwards-incompatible change, we solved this by making a new extension and assigning claimLine.getUnitCount to valueQuantity in the extension. 
+```json
+  "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 1
+          }
+        } ],
+```
+
 ## BFD-1672: Add FI_DOC_CLM_CNTL_NUM extension to v2 adjudicated institutional claims
 
 This extension was not previously available in the v2 claims for institutional based ExplanationOfBenefit resources.  This
