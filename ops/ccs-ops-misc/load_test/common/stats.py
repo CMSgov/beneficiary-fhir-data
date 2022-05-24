@@ -7,7 +7,9 @@ import json
 import os
 import time
 from locust.env import Environment
-from locust.stats import StatsEntry, sort_stats
+from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
+
+PERCENTILES_TO_REPORT = PERCENTILES_TO_REPORT
 
 
 class StatsEnvironment(Enum):
