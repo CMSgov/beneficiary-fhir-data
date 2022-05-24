@@ -413,6 +413,12 @@
         }
       } ],
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 111
+          }
+        } ],
         "sequence" : 25,
         "careTeamSequence" : [ 4 ],
         "revenue" : {
@@ -1109,7 +1115,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cnt",
           "valueQuantity" : {
-            "value" : 60,
+            "value" : 60.234,
             "unit" : "Number of services",
             "system" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cd",
             "code" : "3"
@@ -1917,6 +1923,12 @@
         }
       } ],
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 1
+          }
+        } ],
         "sequence" : 1,
         "careTeamSequence" : [ 2 ],
         "revenue" : {
@@ -3702,6 +3714,12 @@
         }
       } ],
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 477
+          }
+        } ],
         "sequence" : 1,
         "careTeamSequence" : [ 4 ],
         "revenue" : {
@@ -3722,11 +3740,18 @@
             "code" : "MMM"
           } ]
         },
+        "modifier" : [ {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "code" : "ML",
+            "display" : "Milliliter"
+          } ]
+        } ],
         "locationAddress" : {
           "state" : "FL"
         },
         "quantity" : {
-          "value" : 0
+          "value" : 234.567
         },
         "adjudication" : [ {
           "category" : {
@@ -4529,6 +4554,31 @@
           }
         } ]
       } ],
+      "total" : [ {
+        "category" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code" : "drugcost",
+            "display" : "Drug Cost"
+          } ]
+        },
+        "amount" : {
+          "value" : 550.0,
+          "currency" : "USD"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+            "code" : "other",
+            "display" : "Other"
+          } ]
+        },
+        "amount" : {
+          "value" : 0,
+          "currency" : "USD"
+        }
+      } ],
       "payment" : {
         "date" : "2015-05-27"
       }
@@ -5296,10 +5346,10 @@
           "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
-          "value": "2718813985998"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+          "value" : "2718813985998"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",

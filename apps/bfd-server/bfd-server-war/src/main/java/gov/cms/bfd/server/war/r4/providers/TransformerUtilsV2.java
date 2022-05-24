@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
@@ -850,11 +851,12 @@ public final class TransformerUtilsV2 {
 
   /**
    * Creates a C4BB Adjudication `adjudicationamounttype` {@link CodeableConcept} slice for use in
-   * multiple places
+   * multiple places.
+   *
+   * <p>Also adds the CCW variable as an additional coding.
    *
    * @param ccwVariable The CCW Variable that represents what the amount is
    * @param code The C4BBAdjudication code that represents this amount
-   * @param amount A dollar amount
    * @return The created {@link AdjudicationComponent}
    */
   private static CodeableConcept createAdjudicationAmtSliceCategory(
@@ -868,6 +870,34 @@ public final class TransformerUtilsV2 {
                 TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
                 CCWUtils.calculateVariableReferenceUrl(ccwVariable),
                 ccwVariable.getVariable().getLabel()));
+  }
+
+  /**
+   * Creates a C4BB Adjudication `adjudicationamounttype` {@link CodeableConcept} slice for use in
+   * multiple places. Does not add/require the CCW code, to keep in CARIN compliance in spots where
+   * having multiple codes is illegal.
+   *
+   * @param code The C4BBAdjudication code that represents this amount
+   * @return The created {@link AdjudicationComponent}
+   */
+  private static CodeableConcept createAdjudicationAmtSliceCategory(C4BBAdjudication code) {
+    return new CodeableConcept()
+        // Indicate the required coding for CC4BB adjudicationamounttype slice
+        .addCoding(new Coding(code.getSystem(), code.toCode(), code.getDisplay()));
+  }
+
+  /**
+   * Creates a C4BB Adjudication Status `C4BBPayerAdjudicationStatus` {@link CodeableConcept} slice
+   * for use in multiple places. Does not add/require the CCW code, to keep in CARIN compliance in
+   * spots where having multiple codes is illegal.
+   *
+   * @param code The C4BBAdjudicationStatus code that represents this amount
+   * @return The created {@link AdjudicationComponent}
+   */
+  private static CodeableConcept createAdjudicationStatusAmtSliceCategory(
+      C4BBAdjudicationStatus code) {
+    return new CodeableConcept()
+        .addCoding(new Coding(code.getSystem(), code.toCode(), code.getDisplay()));
   }
 
   /**
@@ -944,6 +974,8 @@ public final class TransformerUtilsV2 {
    * to the code to generate the {@link AdjudicationComponent} slice of the same name, but
    * unfortunately can't be reused because they are different types.
    *
+   * <p>Also adds the CCW variable as an additional coding.
+   *
    * @param eob The base {@link ExplanationOfBenefit} resource
    * @param ccwVariable The CCW Variable that represents what the reason is
    * @param code The C4BBAdjudication code that represents this amount
@@ -959,6 +991,43 @@ public final class TransformerUtilsV2 {
         amt ->
             new TotalComponent()
                 .setCategory(createAdjudicationAmtSliceCategory(ccwVariable, code))
+                .setAmount(createMoney(amount)));
+  }
+
+  /**
+   * Optionally Creates an `adjudicationamounttype` {@link TotalComponent} slice. This looks similar
+   * to the code to generate the {@link AdjudicationComponent} slice of the same name, but
+   * unfortunately can't be reused because they are different types.
+   *
+   * <p>Does not add/require the CCW variable as an additional coding, for situations where
+   * including it breaks CARIN compliance.
+   *
+   * @param code The C4BBAdjudication code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link TotalComponent}
+   */
+  static Optional<TotalComponent> createTotalAdjudicationAmountSlice(
+      C4BBAdjudication code, Optional<BigDecimal> amount) {
+    return amount.map(
+        amt ->
+            new TotalComponent()
+                .setCategory(createAdjudicationAmtSliceCategory(code))
+                .setAmount(createMoney(amount)));
+  }
+
+  /**
+   * Optionally Creates an `adjudication status amount` {@link TotalComponent} slice.
+   *
+   * @param code The C4BBAdjudicationStatus code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link TotalComponent}
+   */
+  public static Optional<TotalComponent> createTotalAdjudicationStatusAmountSlice(
+      C4BBAdjudicationStatus code, Optional<BigDecimal> amount) {
+    return amount.map(
+        amt ->
+            new TotalComponent()
+                .setCategory(createAdjudicationStatusAmtSliceCategory(code))
                 .setAmount(createMoney(amount)));
   }
 
@@ -3445,6 +3514,7 @@ public final class TransformerUtilsV2 {
    * @param nonCoveredChargeAmount REV_CNTR_NCVRD_CHRG_AMT,
    * @param nationalDrugCodeQuantity REV_CNTR_NDC_QTY,
    * @param nationalDrugCodeQualifierCode REV_CNTR_NDC_QTY_QLFR_CD,
+   * @param unitCount REV_CNTR_UNIT_CNT,
    * @return the {@link ItemComponent}
    */
   static ItemComponent mapEobCommonItemRevenue(
@@ -3455,7 +3525,8 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       Optional<BigDecimal> nonCoveredChargeAmount,
       Optional<BigDecimal> nationalDrugCodeQuantity,
-      Optional<String> nationalDrugCodeQualifierCode) {
+      Optional<String> nationalDrugCodeQualifierCode,
+      BigDecimal unitCount) {
 
     // REV_CNTR => ExplanationOfBenefit.item.revenue
     item.setRevenue(createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR, revenueCenterCode));
@@ -3500,6 +3571,13 @@ public final class TransformerUtilsV2 {
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
       item.setQuantity(drugQuantity);
+    }
+
+    // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
+    if (unitCount != null && unitCount.compareTo(BigDecimal.ZERO) != 0) {
+      Extension unitCountExtension =
+          createExtensionQuantity(CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, unitCount);
+      item.addExtension(unitCountExtension);
     }
 
     return item;

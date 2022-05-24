@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -222,5 +224,76 @@ public class TransformerUtilsV2Test {
         () -> {
           TransformerUtilsV2.createCoding(eob, CcwCodebookVariable.BENE_HOSPC_PRD_CNT, codingValue);
         });
+  }
+
+  /**
+   * Tests createTotalAdjudicationAmountSlice when the input amount Optional is empty, expect an
+   * empty Optional returned.
+   */
+  @Test
+  public void createTotalAdjudicationAmountSliceWhenAmountEmptyExpectEmptyOptionalReturned() {
+    Optional<BigDecimal> inputValue = Optional.empty();
+    C4BBAdjudication inputStatus = C4BBAdjudication.DISCOUNT;
+    Optional<ExplanationOfBenefit.TotalComponent> totalOptional =
+        TransformerUtilsV2.createTotalAdjudicationAmountSlice(inputStatus, inputValue);
+
+    assertTrue(totalOptional.isEmpty());
+  }
+
+  /**
+   * Tests createTotalAdjudicationAmountSlice when the input amount Optional is not empty, expect a
+   * TotalComponent is returned with the expected total values.
+   */
+  @Test
+  public void
+      createTotalAdjudicationAmountSliceWhenNonEmptyAmountExpectFilledOutOptionalReturned() {
+    Optional<BigDecimal> inputValue = Optional.of(new BigDecimal("64.22"));
+    C4BBAdjudication inputStatus = C4BBAdjudication.COINSURANCE;
+    Optional<ExplanationOfBenefit.TotalComponent> totalOptional =
+        TransformerUtilsV2.createTotalAdjudicationAmountSlice(inputStatus, inputValue);
+
+    assertFalse(totalOptional.isEmpty());
+    ExplanationOfBenefit.TotalComponent total = totalOptional.get();
+    assertEquals(inputValue.get(), total.getAmount().getValue());
+    assertNotNull(total.getCategory());
+    assertEquals(inputStatus.toCode(), total.getCategory().getCoding().get(0).getCode());
+    assertEquals(inputStatus.getDisplay(), total.getCategory().getCoding().get(0).getDisplay());
+    assertEquals(inputStatus.getSystem(), total.getCategory().getCoding().get(0).getSystem());
+  }
+
+  /**
+   * Tests createTotalAdjudicationStatusAmountSlice when the input amount Optional is empty, expect
+   * an empty Optional returned.
+   */
+  @Test
+  public void createTotalAdjudicationStatusAmountSliceWhenAmountEmptyExpectEmptyOptionalReturned() {
+    Optional<BigDecimal> inputValue = Optional.empty();
+    C4BBAdjudicationStatus inputStatus = C4BBAdjudicationStatus.OTHER;
+    Optional<ExplanationOfBenefit.TotalComponent> totalOptional =
+        TransformerUtilsV2.createTotalAdjudicationStatusAmountSlice(inputStatus, inputValue);
+
+    assertTrue(totalOptional.isEmpty());
+  }
+
+  /**
+   * Tests createTotalAdjudicationStatusAmountSlice when the input amount Optional is not empty,
+   * expect a TotalComponent is returned with the expected total values and the category data is
+   * set.
+   */
+  @Test
+  public void
+      createTotalAdjudicationStatusAmountSliceWhenNonEmptyAmountExpectFilledOutOptionalReturned() {
+    Optional<BigDecimal> inputValue = Optional.of(new BigDecimal("23.56"));
+    C4BBAdjudicationStatus inputStatus = C4BBAdjudicationStatus.OTHER;
+    Optional<ExplanationOfBenefit.TotalComponent> totalOptional =
+        TransformerUtilsV2.createTotalAdjudicationStatusAmountSlice(inputStatus, inputValue);
+
+    assertFalse(totalOptional.isEmpty());
+    ExplanationOfBenefit.TotalComponent total = totalOptional.get();
+    assertEquals(inputValue.get(), total.getAmount().getValue());
+    assertNotNull(total.getCategory());
+    assertEquals(inputStatus.toCode(), total.getCategory().getCoding().get(0).getCode());
+    assertEquals(inputStatus.getDisplay(), total.getCategory().getCoding().get(0).getDisplay());
+    assertEquals(inputStatus.getSystem(), total.getCategory().getCoding().get(0).getSystem());
   }
 }

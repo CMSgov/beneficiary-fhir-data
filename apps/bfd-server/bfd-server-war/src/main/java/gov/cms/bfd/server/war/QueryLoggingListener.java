@@ -131,6 +131,10 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
 
+    BENE_BY_MBI_HISTORY(
+        "bene_by_mbi.mbis_from_beneficiarieshistory",
+        (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
+
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn.hicns_from_beneficiarieshistory",
         (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
@@ -173,11 +177,11 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
     EOBS_BY_BENE_ID_SNF("eobs_by_bene_id.snf", (s -> s.contains(" from snf_claims "))),
 
-    FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from \"pre_adj\".\"Fiss")),
+    FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
 
-    MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from \"pre_adj\".\"Mcs")),
+    MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from rda.mcs")),
 
-    MBI_CACHE("mbi_cache_lookup", s -> s.contains("from \"pre_adj\".\"MbiCache\"")),
+    MBI_CACHE("mbi_cache_lookup", s -> s.contains("from rda.mbi_cache")),
 
     LOADED_BATCH("loaded_batch", (s -> s.contains(" from loaded_batches "))),
 

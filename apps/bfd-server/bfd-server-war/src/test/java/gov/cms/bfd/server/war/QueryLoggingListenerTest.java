@@ -34,6 +34,16 @@ public final class QueryLoggingListenerTest {
     assertEquals(QueryType.BENE_BY_ID_INCLUDE_IDENTIFIERS, QueryType.computeQueryType(queryInfo));
   }
 
+  /** Verifies that {@link QueryType#BENE_BY_MBI_HISTORY} works as expected. */
+  @Test
+  public void computeQueryType_BENE_BY_MBI_HISTORY() {
+    QueryInfo queryInfo =
+        new QueryInfo(
+            "select beneficiar0_.bene_id as col_0_0_ from beneficiaries_history beneficiar0_ where beneficiar0_.mbi_hash=?");
+
+    assertEquals(QueryType.BENE_BY_MBI_HISTORY, QueryType.computeQueryType(queryInfo));
+  }
+
   /** Verifies that {@link QueryType#BENE_BY_HICN_HISTORY} works as expected. */
   @Test
   public void computeQueryType_BENE_BY_HICN_HISTORY() {
@@ -150,7 +160,7 @@ public final class QueryLoggingListenerTest {
   public void computeQueryType_FISS_CLAIM() {
     QueryInfo queryInfo =
         new QueryInfo(
-            "select diagcodes0_.\"dcn\" as dcn1_2_0_, diagcodes0_.\"priority\" as priority2_2_0_, diagcodes0_.\"dcn\" as dcn1_2_1_, diagcodes0_.\"priority\" as priority2_2_1_, diagcodes0_.\"bitFlags\" as bitflags3_2_1_, diagcodes0_.\"diagCd2\" as diagcd4_2_1_, diagcodes0_.\"diagPoaInd\" as diagpoai5_2_1_, diagcodes0_.\"lastUpdated\" as lastupda6_2_1_ from \"pre_adj\".\"FissDiagnosisCodes\" diagcodes0_ where diagcodes0_.\"dcn\"=?");
+            "select diagcodes0_.\"dcn\" as dcn1_2_0_, diagcodes0_.\"priority\" as priority2_2_0_, diagcodes0_.\"dcn\" as dcn1_2_1_, diagcodes0_.\"priority\" as priority2_2_1_, diagcodes0_.\"bitFlags\" as bitflags3_2_1_, diagcodes0_.\"diagCd2\" as diagcd4_2_1_, diagcodes0_.\"diagPoaInd\" as diagpoai5_2_1_, diagcodes0_.\"lastUpdated\" as lastupda6_2_1_ from rda.fiss_diagnosis_codes diagcodes0_ where diagcodes0_.\"dcn\"=?");
 
     assertEquals(QueryType.FISS_CLAIM, QueryType.computeQueryType(queryInfo));
   }
@@ -160,7 +170,7 @@ public final class QueryLoggingListenerTest {
   public void computeQueryType_MCS_CLAIM() {
     QueryInfo queryInfo =
         new QueryInfo(
-            "select diagcodes0_.\"idrClmHdIcn\" as idrclmhd1_10_0_, diagcodes0_.\"priority\" as priority2_10_0_, diagcodes0_.\"idrClmHdIcn\" as idrclmhd1_10_1_, diagcodes0_.\"priority\" as priority2_10_1_, diagcodes0_.\"idrDiagCode\" as idrdiagc3_10_1_, diagcodes0_.\"idrDiagIcdType\" as idrdiagi4_10_1_, diagcodes0_.\"lastUpdated\" as lastupda5_10_1_ from \"pre_adj\".\"McsDiagnosisCodes\" diagcodes0_ where diagcodes0_.\"idrClmHdIcn\"=?");
+            "select diagcodes0_.\"idrClmHdIcn\" as idrclmhd1_10_0_, diagcodes0_.\"priority\" as priority2_10_0_, diagcodes0_.\"idrClmHdIcn\" as idrclmhd1_10_1_, diagcodes0_.\"priority\" as priority2_10_1_, diagcodes0_.\"idrDiagCode\" as idrdiagc3_10_1_, diagcodes0_.\"idrDiagIcdType\" as idrdiagi4_10_1_, diagcodes0_.\"lastUpdated\" as lastupda5_10_1_ from rda.mcs_diagnosis_codes diagcodes0_ where diagcodes0_.\"idrClmHdIcn\"=?");
 
     assertEquals(QueryType.MCS_CLAIM, QueryType.computeQueryType(queryInfo));
   }
@@ -170,7 +180,7 @@ public final class QueryLoggingListenerTest {
   public void computeQueryType_MBI_CACHE() {
     QueryInfo queryInfo =
         new QueryInfo(
-            "select mbi0_.\"mbiId\" as mbiid1_5_0_, mbi0_.\"hash\" as hash2_5_0_, mbi0_.\"lastUpdated\" as lastupda3_5_0_, mbi0_.\"mbi\" as mbi4_5_0_, mbi0_.\"oldHash\" as oldhash5_5_0_ from \"pre_adj\".\"MbiCache\" mbi0_ where mbi0_.\"mbiId\"=?");
+            "select mbi0_.\"mbiId\" as mbiid1_5_0_, mbi0_.\"hash\" as hash2_5_0_, mbi0_.\"lastUpdated\" as lastupda3_5_0_, mbi0_.\"mbi\" as mbi4_5_0_, mbi0_.\"oldHash\" as oldhash5_5_0_ from rda.mbi_cache mbi0_ where mbi0_.\"mbiId\"=?");
 
     assertEquals(QueryType.MBI_CACHE, QueryType.computeQueryType(queryInfo));
   }

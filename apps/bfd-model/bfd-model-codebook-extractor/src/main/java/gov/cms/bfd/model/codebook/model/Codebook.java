@@ -17,12 +17,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class Codebook {
+  /** The short identifier for this {@link Codebook}, for use in debugging. */
   @XmlAttribute private final String id;
 
+  /** The descriptive English name for this {@link Codebook}. */
   @XmlAttribute private final String name;
 
+  /**
+   * A human-readable {@link String} that identifies which version of the data is represented by
+   * this {@link Codebook}, typically something like "<code>December 2042, Version 42.0</code>".
+   */
   @XmlAttribute private final String version;
 
+  /** The mutable {@link List} of {@link Variable}s in the {@link Codebook}. */
   @XmlElement(name = "variable")
   private final List<Variable> variables;
 
@@ -48,17 +55,27 @@ public final class Codebook {
     this.variables = new ArrayList<>();
   }
 
-  /** @return the short identifier for this {@link Codebook}, for use in debugging */
+  /**
+   * Gets the {@link #id}.
+   *
+   * @return the short identifier for this {@link Codebook}, for use in debugging
+   */
   public String getId() {
     return id;
   }
 
-  /** @return the descriptive English name for this {@link Codebook} */
+  /**
+   * Gets the {@link #name}.
+   *
+   * @return the descriptive English name for this {@link Codebook}
+   */
   public String getName() {
     return name;
   }
 
   /**
+   * Gets the {@link #version}.
+   *
    * @return a human-readable {@link String} that identifies which version of the data is
    *     represented by this {@link Codebook}, typically something like "<code>
    *     December 2042, Version 42.0</code>"
@@ -67,12 +84,16 @@ public final class Codebook {
     return version;
   }
 
-  /** @return the mutable {@link List} of {@link Variable}s in the {@link Codebook} */
+  /**
+   * Gets the {@link #variables}.
+   *
+   * @return the mutable {@link List} of {@link Variable}s in the {@link Codebook}
+   */
   public List<Variable> getVariables() {
     return variables;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     return getId();

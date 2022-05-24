@@ -5,8 +5,14 @@ import java.util.Objects;
 
 /** Models a single {@link RifFile} within a {@link RifFilesEvent}. */
 public final class RifFileEvent {
+  /**
+   * The {@link MetricRegistry} that should be used to record the work done to process this {@link
+   * RifFileRecords}.
+   */
   private final MetricRegistry eventMetrics;
+  /** The {@link RifFilesEvent} that this {@link RifFileEvent} is a part of. */
   private final RifFilesEvent parentFilesEvent;
+  /** The {@link RifFile} represented by this {@link RifFileEvent}. */
   private final RifFile file;
 
   /**
@@ -26,6 +32,8 @@ public final class RifFileEvent {
   }
 
   /**
+   * Gets the {@link #eventMetrics}.
+   *
    * @return the {@link MetricRegistry} that should be used to record the work done to process this
    *     {@link RifFileRecords}
    */
@@ -33,17 +41,25 @@ public final class RifFileEvent {
     return eventMetrics;
   }
 
-  /** @return the {@link RifFilesEvent} that this {@link RifFileEvent} is a part of */
+  /**
+   * Gets the {@link #parentFilesEvent}.
+   *
+   * @return the {@link RifFilesEvent} that this {@link RifFileEvent} is a part of
+   */
   public RifFilesEvent getParentFilesEvent() {
     return parentFilesEvent;
   }
 
-  /** @return the {@link RifFile} represented by this {@link RifFileEvent} */
+  /**
+   * Gets the {@link #file}.
+   *
+   * @return the {@link RifFile} represented by this {@link RifFileEvent}
+   */
   public RifFile getFile() {
     return file;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

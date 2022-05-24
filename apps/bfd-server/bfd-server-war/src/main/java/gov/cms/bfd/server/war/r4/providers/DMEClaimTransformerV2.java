@@ -78,7 +78,7 @@ final class DMEClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.DME,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -171,7 +171,7 @@ final class DMEClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // add an extension for the provider billing number as there is not a good place
       // to map this in the existing FHIR specification

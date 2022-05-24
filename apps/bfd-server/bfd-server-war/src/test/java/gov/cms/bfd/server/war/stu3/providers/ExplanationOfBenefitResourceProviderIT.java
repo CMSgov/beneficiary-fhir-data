@@ -1421,7 +1421,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    hhaRifRecord = entityManager.find(HHAClaim.class, String.valueOf(hhaRifRecord.getClaimId()));
+    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
     hhaRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1446,7 +1446,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    snfRifRecord = entityManager.find(SNFClaim.class, String.valueOf(snfRifRecord.getClaimId()));
+    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
     snfRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1471,8 +1471,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    hospiceRifRecord =
-        entityManager.find(HospiceClaim.class, String.valueOf(hospiceRifRecord.getClaimId()));
+    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
     hospiceRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1497,7 +1496,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    dmeRifRecord = entityManager.find(DMEClaim.class, String.valueOf(dmeRifRecord.getClaimId()));
+    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
     dmeRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));

@@ -36,7 +36,7 @@ data "aws_kms_key" "master_key" {
 # CloudWatch metric filters
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   name           = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
-  pattern        = "[date, time, java_thread, level = \"ERROR\", java_class, message]"
+  pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class != \"*grpc*\", message]"
   log_group_name = local.log_groups.messages
 
   metric_transformation {
@@ -49,7 +49,7 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
 
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-count" {
   name           = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/datasetfailed"
-  pattern        = "[date, time, java_thread, level = \"ERROR\", java_class, message = \"*Data set failed with an unhandled error*\"]"
+  pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message = \"*Data set failed with an unhandled error*\"]"
   log_group_name = local.log_groups.messages
 
   metric_transformation {

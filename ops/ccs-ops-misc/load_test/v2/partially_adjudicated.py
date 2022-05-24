@@ -2,7 +2,7 @@ import urllib3
 
 from locust import HttpUser, task, tag
 
-from common import config, data, errors, test_setup as setup
+from common import config, data, test_setup as setup
 
 server_public_key = setup.loadServerPublicKey()
 
