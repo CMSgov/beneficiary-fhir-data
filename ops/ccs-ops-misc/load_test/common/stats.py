@@ -112,7 +112,7 @@ class StatsJson(object):
             # runtime by subtracting the start time from the last request's time
             'runtime': self.locust_env.stats.last_request_timestamp - self.locust_env.stats.start_time
         }, **{
-            'statistics': self._get_stats_entries_list()
+            'endpoints': self._get_stats_entries_list()
         }}
 
         return json.dumps(full_dict, indent=(4 if pretty_print else None))
