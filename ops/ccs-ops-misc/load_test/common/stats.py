@@ -106,7 +106,11 @@ class StatsJson(object):
         full_dict = {**{
             'timestamp': int(time.time()),
             'tag': self.stats_tag,
-            'environment': self.running_env.name
+            'environment': self.running_env.name,
+            'numUsers': self.locust_env.runner.user_count,
+            # We cannot get the user provided runtime directly; however, we can compute a more exact
+            # runtime by subtracting the start time from the last request's time
+            'runtime': self.locust_env.stats.last_request_timestamp - self.locust_env.stats.start_time
         }, **{
             'statistics': self._get_stats_entries_list()
         }}
@@ -133,4 +137,5 @@ class StatsJsonFileWriter(object):
             pretty_print (bool, optional): A boolean which if True will write the JSON in a more human-readable format. Defaults to False.
         """
         with open(os.path.join(path, f'{self.stats_json.running_env.name}-{self.stats_json.stats_tag}-{int(time.time())}.json'), 'x') as json_file:
-            json_file.write(self.stats_json.get_stats_json(pretty_print=pretty_print))
+            json_file.write(self.stats_json.get_stats_json(
+                pretty_print=pretty_print))
