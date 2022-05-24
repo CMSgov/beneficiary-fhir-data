@@ -77,9 +77,7 @@ public class ClaimDao {
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
     } finally {
-      long claimByIdQueryNanoSeconds = timerClaimQuery.stop();
-      TransformerUtilsV2.recordQueryInMdc(
-          CLAIM_BY_ID_METRIC_QUERY, claimByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
+      logQueryMetric(timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
     }
 
     return claimEntity;
@@ -137,14 +135,15 @@ public class ClaimDao {
     try {
       claimEntities = entityManager.createQuery(criteria).getResultList();
     } finally {
-      long claimByIdQueryNanoSeconds = timerClaimQuery.stop();
-      TransformerUtilsV2.recordQueryInMdc(
-          CLAIM_BY_MBI_METRIC_QUERY,
-          claimByIdQueryNanoSeconds,
-          claimEntities == null ? 0 : claimEntities.size());
+      logQueryMetric(timerClaimQuery.stop(), claimEntities == null ? 0 : claimEntities.size());
     }
 
     return claimEntities;
+  }
+
+  @VisibleForTesting
+  void logQueryMetric(long queryTime, int querySize) {
+    TransformerUtilsV2.recordQueryInMdc(CLAIM_BY_MBI_METRIC_QUERY, queryTime, querySize);
   }
 
   @VisibleForTesting
