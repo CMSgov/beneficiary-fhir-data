@@ -908,6 +908,32 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Verifies that the Item Component has an extension with the extension url that is passed in.
+   *
+   * @param expectedD
+   * @param ccwVariable the expected {@link CcwCodebookInterface}
+   * @param expectedValue the expected {@link BigDecimal}
+   * @param itemComponents the FHIR element to find and verify the {@link List<ItemComponent>} of
+   */
+  static void assertExtensionQuantityEquals(
+      CcwCodebookInterface ccwVariable,
+      BigDecimal expectedValue,
+      List<ItemComponent> itemComponents) {
+
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    Optional<Extension> returnExtension =
+        itemComponents.stream()
+            .flatMap(ic -> ic.getExtension().stream())
+            .filter(ext -> ext.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    if (returnExtension.isPresent()) {
+      Quantity quantity = (Quantity) returnExtension.get().getValue();
+      assertEquals(expectedValue, quantity.getValue());
+    }
+  }
+
+  /**
    * Uses the setters of the specified record to set all {@link Optional} fields to {@link
    * Optional#empty()}.
    *
