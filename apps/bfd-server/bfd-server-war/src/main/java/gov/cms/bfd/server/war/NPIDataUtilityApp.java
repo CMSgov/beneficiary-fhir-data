@@ -50,7 +50,7 @@ public final class NPIDataUtilityApp {
    *
    * @throws IOException if there is an issue creating or iterating over the downloaded files
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     if (args.length < 1) {
       System.err.println("OUTPUT_DIR argument not specified for NPI download.");
       System.exit(1);
@@ -67,24 +67,42 @@ public final class NPIDataUtilityApp {
     }
 
     // Create a temp directory that will be recursively deleted when we're done.
-    Path tempDir = Files.createTempDirectory("npi-data");
+    Path tempDir = null;
+    try {
+      tempDir = Files.createTempDirectory("npi-data");
+    } catch (IOException e) {
+      System.err.println("Cannot create temporary directory.");
+      System.exit(4);
+    }
 
     // If the output file isn't already there, go build it.
     Path convertedNpiDataFile = outputPath.resolve(NPI_RESOURCE);
     if (!Files.exists(convertedNpiDataFile)) {
       try {
         buildNPIResource(convertedNpiDataFile, tempDir);
-      } catch (Exception exception) {
+      } catch (IOException exception) {
         LOGGER.error("NPI data file could not be read.  Error:", exception);
-        System.exit(4);
+        System.exit(5);
       } finally {
-        // Recursively delete the working dir.
-        Files.walk(tempDir)
-            .sorted(Comparator.reverseOrder())
-            .map(Path::toFile)
-            .peek(System.out::println)
-            .forEach(File::delete);
+        recursivelyDelete(tempDir);
       }
+    }
+  }
+
+  /**
+   *
+   * @param tempDir
+   */
+  private static void recursivelyDelete(Path tempDir) {
+    // Recursively delete the working dir.
+    try {
+      Files.walk(tempDir)
+          .sorted(Comparator.reverseOrder())
+          .map(Path::toFile)
+          .peek(System.out::println)
+          .forEach(File::delete);
+    } catch (IOException e) {
+      LOGGER.warn("Failed to cleanup the temporary folder", e);
     }
   }
 
@@ -108,9 +126,17 @@ public final class NPIDataUtilityApp {
       originalNpiDataFile = DataUtilityCommons.getOriginalNpiDataFile(workingDir, fileName);
     }
 
+    // TODO: Need a check here for still not found
+
     convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
   }
 
+  /**
+   *
+   * @param convertedNpiDataFile
+   * @param originalNpiDataFile
+   * @throws IOException
+   */
   private static void convertNpiDataFile(Path convertedNpiDataFile, Path originalNpiDataFile)
       throws IOException {
     // convert file format from cp1252 to utf8
@@ -132,17 +158,25 @@ public final class NPIDataUtilityApp {
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
-      String provider = "";
-      for (String in; (in = reader.readLine()) != null; ) {
-        String[] inputLine = in.split(",");
-        String orgData = inputLine[4].trim();
-        if (!Strings.isNullOrEmpty(orgData) && !"\"\"".equals(orgData)) {
-          provider = orgData;
+      // TODO: Explain file format and show example
+      // TODO: Extract this logic into a testable method or class
+      String lastNonEmptyOrgName = null;
+      for (String line; (line = reader.readLine()) != null; ) {
+        String[] fields = line.split(",");
+
+        String orgName = fields[4].trim().replace("\"", "");
+        String npi = fields[0].replace("\"", "");
+
+        if (!Strings.isNullOrEmpty(orgName)) {
+          lastNonEmptyOrgName = orgName;
         }
 
-        String output = inputLine[0].replace("\"", "") + "\t" + provider.replace("\"", "");
+        if (lastNonEmptyOrgName == null) {
+          LOGGER.warn("Skipping a record due to unavailable organization name: '" + line + "'");
+          continue;
+        }
 
-        out.write(output);
+        out.write(npi + "\t" + lastNonEmptyOrgName);
         out.newLine();
       }
     }
