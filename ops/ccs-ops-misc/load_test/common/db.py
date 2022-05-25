@@ -94,6 +94,11 @@ def get_pac_hashed_mbis(uri: str) -> List:
     """
     Return a list of unique hashed MBIs that represent a diverse set of FISS and MCS
     claims over a range of claim statuses.
+
+    We anticipate that fields will have a mixture of blank vs non-blank values based on the status codes received.
+
+    By selecting MBIs that are related to claims with varying status codes, we can get a good mixture of claim data
+    elements, better testing our FHIR transformers' ability to correctly render them.
     """
     per_status_max = int(LIMIT / 40)    # Based on 40 distinct status values between FISS/MCS
 
