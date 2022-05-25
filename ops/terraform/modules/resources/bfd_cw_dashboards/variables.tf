@@ -1,11 +1,14 @@
 variable "dashboard_name" {
-  type = string
+  description = "BFD dashboard name"
+  type        = string
 }
 
 variable "dashboard_namespace" {
-  type = string
+  description = "BFD dashboard namespace"
+  type        = string
 }
 
 variable "asg" {
-    type = string
+  description = "The name of AWS autoscaling group"
+  type        = string
 }
