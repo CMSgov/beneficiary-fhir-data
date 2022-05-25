@@ -200,15 +200,6 @@ resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
 }
 
 
-## This is where cloudwatch dashboards are managed. 
-#
-module "bfd_dashboards" {
-  source              = "../resources/bfd_cw_dashboards"
-  dashboard_name      = var.dashboard_name
-  dashboard_namespace = var.dashboard_namespace
-}
-
-
 ## S3 bucket, policy, and KMS key for medicare opt out data
 #
 module "medicare_opt_out" {
