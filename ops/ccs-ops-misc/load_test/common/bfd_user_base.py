@@ -7,7 +7,7 @@ import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
-from common.stats import StatsFileStorageConfig, StatsJson, StatsJsonFileWriter, PERCENTILES_TO_REPORT, StatsJsonS3Writer, StatsS3StorageConfig
+from common.stats import StatsFileStorageConfig, AggregatedStats, StatsJsonFileWriter, PERCENTILES_TO_REPORT, StatsJsonS3Writer, StatsS3StorageConfig
 from common.url_path import create_url_path
 from locust import HttpUser, events
 from locust.env import Environment
@@ -191,16 +191,16 @@ def teardown(environment: Environment, **kwargs) -> None:
     if stats_storage_config == None:
         return
 
-    # Export statistics as JSON
-    stats_json = StatsJson(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
+    # If --storeStats was set and it is valid, get the aggregated stats of the stopping test run
+    stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
 
     if isinstance(stats_storage_config, StatsFileStorageConfig):
         logger.info("Writing aggregated performance statistics to file.")
 
-        stats_json_writer = StatsJsonFileWriter(stats_json)
+        stats_json_writer = StatsJsonFileWriter(stats)
         stats_json_writer.write(path=stats_storage_config.file_path, pretty_print=True)
     elif isinstance(stats_storage_config, StatsS3StorageConfig):
         logger.info("Writing aggregated performance statistics to S3.")
 
-        stats_s3_writer = StatsJsonS3Writer(stats_json)
+        stats_s3_writer = StatsJsonS3Writer(stats)
         stats_s3_writer.write(stats_storage_config.bucket)

@@ -119,11 +119,11 @@ class StatsS3StorageConfig(StatsStorageConfig):
         return f's3:{self.stats_environment.name}:{self.tag}:{self.bucket}'
 
 
-class StatsJson(object):
+class AggregatedStats(object):
     """Class to generate performance statistics in JSON format"""
 
     def __init__(self, locust_env: Environment, percentiles_to_report: List[float], stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
-        """Creates a new instance of StatsJson given the current Locust environment and a list of percentiles to report.
+        """Creates a new instance of AggregatedStats given the current Locust environment and a list of percentiles to report.
 
         Args:
             environment (Environment): Current Locust environment
@@ -196,16 +196,15 @@ class StatsJson(object):
         stats = self.locust_env.stats
         return [self._get_stats_entry_dict(stats_entry) for stats_entry in sort_stats(stats.entries)]
 
-    def get_stats_json(self, pretty_print: bool = False) -> str:
-        """Returns a JSON-formatted string that encodes the performance statistics of all Locust tasks in the current environment
-
-        Args:
-            pretty_print (bool, optional): A boolean which if True will generate the JSON in a more human-readable format. Defaults to False.
+    @property
+    def all_stats(self) -> Dict[str, any]:
+        """A property that returns a snapshot Dict of the current stats of aggregated performance statistics of the current
+        Locust environment.
 
         Returns:
-            str: A JSON-formatted string that encodes the performance statistics of the current Locust run
+            Dict[str, any]: A dictionary of the aggregated performance statistics of all endpoints
         """
-        full_dict = {**{
+        return {**{
             'timestamp': int(time.time()),
             'tag': self.stats_tag,
             'environment': self.running_env.name,
@@ -219,19 +218,17 @@ class StatsJson(object):
             'endpoints': self._get_stats_entries_list()
         }}
 
-        return json.dumps(full_dict, indent=(4 if pretty_print else None))
-
 
 class StatsJsonFileWriter(object):
-    def __init__(self, stats_json: StatsJson) -> None:
-        """Creates a new instance of StatsJsonFileWriter given a StatsJson object
+    def __init__(self, stats: AggregatedStats) -> None:
+        """Creates a new instance of StatsJsonFileWriter given an AggregatedStats object
 
         Args:
-            stats_json (StatsJson): A StatsJson object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+            stats (AggregatedStats): An AggregatedStats object that encodes the aggregated performance statistics of all Locust tasks in the current environment
         """
         super().__init__()
 
-        self.stats_json = stats_json
+        self.stats = stats
 
     def write(self, path: str = '', pretty_print: bool = False) -> None:
         """Writes the JSON-formatted statistics to the given path
@@ -240,23 +237,23 @@ class StatsJsonFileWriter(object):
             path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
             pretty_print (bool, optional): A boolean which if True will write the JSON in a more human-readable format. Defaults to False.
         """
-        with open(os.path.join(path, f'{self.stats_json.running_env.name}-{self.stats_json.stats_tag}-{int(time.time())}.json'), 'x') as json_file:
-            json_file.write(self.stats_json.get_stats_json(
-                pretty_print=pretty_print))
+        with open(os.path.join(path, f'{self.stats.running_env.name}-{self.stats.stats_tag}-{int(time.time())}.json'), 'x') as json_file:
+            json_file.write(json.dumps(self.stats.all_stats,
+                            indent=(4 if pretty_print else None)))
 
 
 class StatsJsonS3Writer(object):
-    def __init__(self, stats_json: StatsJson) -> None:
-        """Creates a new instance of StatsJsonS3Writer given a StatsJson object
+    def __init__(self, stats: AggregatedStats) -> None:
+        """Creates a new instance of StatsJsonS3Writer given an AggregatedStats object
 
         Args:
-            stats_json (StatsJson): A StatsJson object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+            stats (AggregatedStats): An AggregatedStats object that encodes the aggregated performance statistics of all Locust tasks in the current environment
         """
         super().__init__()
 
-        self.stats_json = stats_json
+        self.stats = stats
         self.s3 = boto3.client('s3')
 
     def write(self, bucket: str) -> None:
         self.s3.put_object(
-            Bucket=bucket, Key=f'databases/bfd/test_performance_stats/env={self.stats_json.running_env.name}/tag={self.stats_json.stats_tag}/{int(time.time())}.json', Body=self.stats_json.get_stats_json())
+            Bucket=bucket, Key=f'databases/bfd/test_performance_stats/env={self.stats.running_env.name}/tag={self.stats.stats_tag}/{int(time.time())}.json', Body=json.dumps(self.stats.all_stats))
