@@ -37,7 +37,7 @@ class StatsEnvironment(Enum):
 
 @dataclass
 class StatsStorageConfig(ABC):
-    """Abstract dataclass that holds data about where and how aggregated JSON performance statistics are stored"""
+    """Abstract dataclass that holds data about where and how aggregated performance statistics are stored"""
     stats_environment: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
     tag: str
@@ -102,8 +102,9 @@ class StatsStorageConfig(ABC):
 @dataclass
 class StatsFileStorageConfig(StatsStorageConfig):
     """Concrete dataclass inheriting from StatsStorageConfig distinguishing a config for storing
-    JSON files to a local file"""
+    statistics files to a local file"""
     file_path: str
+    """The parent path of the statistics file that will be written to disk"""
 
     def to_arg_str(self) -> str:
         return f'file:{self.stats_environment.name}:{self.tag}:{self.file_path}'
@@ -112,8 +113,9 @@ class StatsFileStorageConfig(StatsStorageConfig):
 @dataclass
 class StatsS3StorageConfig(StatsStorageConfig):
     """Concrete dataclass inheriting from StatsStorageConfig distinguishing a config for storing
-    JSON files to an S3 Bucket"""
+    statistics files to an S3 Bucket"""
     bucket: str
+    """The AWS S3 Bucket that statistics will be written to"""
 
     def to_arg_str(self) -> str:
         return f's3:{self.stats_environment.name}:{self.tag}:{self.bucket}'
