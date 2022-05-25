@@ -7,8 +7,10 @@ import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
+from common.stats import StatsFileStorageConfig, StatsJson, StatsJsonFileWriter, PERCENTILES_TO_REPORT, StatsJsonS3Writer, StatsS3StorageConfig
 from common.url_path import create_url_path
-from locust import HttpUser
+from locust import HttpUser, events
+from locust.env import Environment
 
 import urllib3
 
@@ -64,14 +66,12 @@ class BFDUserBase(HttpUser):
             else:
                 validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
 
-
     def on_stop(self):
         '''Run tear-down tasks after the tests have completed.'''
 
         # Report the various response time percentiles against the SLA
         if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
             validation.check_sla_validation(self.environment, self.VALIDATION_GOALS)
-
 
     def get_by_url(self, url: str, headers: Dict[str, str] = None,
             name: str = ''):
@@ -181,3 +181,26 @@ class BFDUserBase(HttpUser):
         if 'LOCUST_WORKER_NUM' in os.environ:
             return str(os.environ['LOCUST_WORKER_NUM'])
         return None
+
+@events.test_stop.add_listener
+def teardown(environment: Environment, **kwargs) -> None:
+    '''Run one-time teardown tasks after the tests have completed.'''
+
+    logger = logging.getLogger()
+    stats_storage_config = setup.load_stats_storage_config()
+    if stats_storage_config == None:
+        return
+
+    # Export statistics as JSON
+    stats_json = StatsJson(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
+
+    if isinstance(stats_storage_config, StatsFileStorageConfig):
+        logger.info("Writing aggregated performance statistics to file.")
+
+        stats_json_writer = StatsJsonFileWriter(stats_json)
+        stats_json_writer.write(path=stats_storage_config.file_path, pretty_print=True)
+    elif isinstance(stats_storage_config, StatsS3StorageConfig):
+        logger.info("Writing aggregated performance statistics to S3.")
+
+        stats_s3_writer = StatsJsonS3Writer(stats_json)
+        stats_s3_writer.write(stats_storage_config.bucket)
