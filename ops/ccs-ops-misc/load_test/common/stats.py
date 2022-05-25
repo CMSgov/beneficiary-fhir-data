@@ -1,16 +1,23 @@
 """
 Much of this file is adapted from equivalent Locust code, particularly locust.stats.StatsCSV
 """
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-import re
-from typing import Dict, List, Optional
-from enum import Enum
-import json
-import os
-import time
-from locust.env import Environment
 from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
+from locust.env import Environment
+import time
+import os
+import json
+from enum import Enum
+from typing import Dict, List, Optional
+import re
+from dataclasses import dataclass
+from abc import ABC, abstractmethod
+
+# botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
+# We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
+# See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
+from gevent import monkey
+monkey.patch_all()
+import boto3
 
 PERCENTILES_TO_REPORT = PERCENTILES_TO_REPORT
 """A list of floating-point percentiles to report when generating JSON performance reports"""
@@ -79,6 +86,9 @@ class StatsStorageConfig(ABC):
                 'RUNNING_ENVIRONMENT must be either "TEST" or "PROD"') from None
 
         tag = items[2]
+        # Tag must follow the BFD Insights data convention constraints for
+        # partition/folders names, as it is used as a partition folder when uploading
+        # to S3
         if re.fullmatch('[a-z0-9_]+', tag) == None:
             raise ValueError(
                 'TAG must only consist of lower-case letters, numbers and the "_" character') from None
@@ -233,3 +243,20 @@ class StatsJsonFileWriter(object):
         with open(os.path.join(path, f'{self.stats_json.running_env.name}-{self.stats_json.stats_tag}-{int(time.time())}.json'), 'x') as json_file:
             json_file.write(self.stats_json.get_stats_json(
                 pretty_print=pretty_print))
+
+
+class StatsJsonS3Writer(object):
+    def __init__(self, stats_json: StatsJson) -> None:
+        """Creates a new instance of StatsJsonS3Writer given a StatsJson object
+
+        Args:
+            stats_json (StatsJson): A StatsJson object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+        """
+        super().__init__()
+
+        self.stats_json = stats_json
+        self.s3 = boto3.client('s3')
+
+    def write(self, bucket: str) -> None:
+        self.s3.put_object(
+            Bucket=bucket, Key=f'databases/bfd/test_performance_stats/env={self.stats_json.running_env.name}/tag={self.stats_json.stats_tag}/{int(time.time())}.json', Body=self.stats_json.get_stats_json())
