@@ -70,8 +70,8 @@ resource "aws_iam_policy" "firehose" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:s3:::bfd-insights-bfd-577373831711",
-            "arn:aws:s3:::bfd-insights-bfd-577373831711/*",
+            local.external.s3_insights_arn,
+            "${local.external.s3_insights_arn}/*",
           ]
           Sid = ""
         },
@@ -85,7 +85,7 @@ resource "aws_iam_policy" "firehose" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:kms:us-east-1:577373831711:key/9bfd6886-7124-4229-931a-4a30ce61c0ea",
+            local.external.kms_arn
           ]
         },
         {
@@ -189,7 +189,7 @@ resource "aws_iam_role_policy_attachment" "main" {
   policy_arn = "arn:aws:iam::577373831711:policy/bfd-insights/bfd-insights-bfd-api-requests"
   role       = "bfd-insights-bfd-api-requests"
 }
-
+ 
 resource "aws_iam_role" "bfd-transform-role-rlenc44a" {
   assume_role_policy = jsonencode(
     {
@@ -215,6 +215,3 @@ resource "aws_iam_role" "bfd-transform-role-rlenc44a" {
   tags                 = {}
   tags_all             = {}
 }
-
-# TODO: "bfd-insights/bfd-insights-bfd-glue-role" does not seem to be in terraform
-

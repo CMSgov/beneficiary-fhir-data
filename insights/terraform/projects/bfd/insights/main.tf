@@ -1,11 +1,20 @@
 locals {
-  tags       = { business = "OEDA", application = "bfd-insights", project = "bfd" }
-  database   = "bfd"
-  project    = "bfd"
-  table      = "api-requests"
-  full_name  = "bfd-insights-${local.database}-${local.table}"
-  account_id = data.aws_caller_identity.current.account_id
-  region     = "us-east-1"
+  tags         = { business = "OEDA", application = "bfd-insights", project = "bfd" }
+  database     = "bfd"
+  project      = "bfd"
+  table        = "api-requests"
+  environment  = "test"
+  table_name   = "${local.environment}-${local.table}"
+  full_name    = "bfd-insights-${local.database}-${local.table}"
+  account_id   = data.aws_caller_identity.current.account_id
+  region       = "us-east-1"
+  external = {
+    s3_insights_arn        = "arn:aws:s3:::bfd-insights-bfd-577373831711"
+    kms_arn                = "arn:aws:kms:us-east-1:577373831711:key/9bfd6886-7124-4229-931a-4a30ce61c0ea"
+    insights_glue_role     = "bfd-insights/bfd-insights-bfd-glue-role"
+    insights_glue_role_arn = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+    s3_glue_assets_bucket  = "aws-glue-assets-577373831711-us-east-1"
+  }
 }
 
 module "bucket" {
@@ -48,18 +57,18 @@ module "glue_jobs" {
 resource "aws_kinesis_firehose_delivery_stream" "main" {
   destination    = "extended_s3"
   destination_id = "destinationId-000000000001"
-  name           = "bfd-insights-bfd-api-requests"
+  name           = local.full_name
   tags = local.tags
   tags_all = local.tags
   version_id = "10"
 
   extended_s3_configuration {
-    bucket_arn          = "arn:aws:s3:::bfd-insights-bfd-577373831711"
+    bucket_arn          = local.external.s3_insights_arn
     buffer_interval     = 60
     buffer_size         = 128
     compression_format  = "GZIP"
     error_output_prefix = "databases/bfd/api_requests_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
-    kms_key_arn         = "arn:aws:kms:us-east-1:577373831711:key/9bfd6886-7124-4229-931a-4a30ce61c0ea"
+    kms_key_arn         = local.external.kms_arn
     prefix              = "databases/bfd/test_api_requests/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     role_arn            = aws_iam_role.firehose.arn
     s3_backup_mode      = "Disabled"
@@ -132,7 +141,8 @@ resource "aws_cloudwatch_log_subscription_filter" "bfd-test-access-log-subscript
   name            = "bfd-test-access-log-subscription"
   log_group_name  = "/bfd/test/bfd-server/access.json"
   filter_pattern  = ""
-  destination_arn = "arn:aws:firehose:us-east-1:${local.account_id}:deliverystream/${local.full_name}"
+  destination_arn = aws_kinesis_firehose_delivery_stream.main.arn
+  # destination_arn = "arn:aws:firehose:us-east-1:${local.account_id}:deliverystream/${local.full_name}"
   role_arn        = aws_iam_role.cloudwatch_role.arn
 }
 

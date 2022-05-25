@@ -1,12 +1,12 @@
 resource "aws_glue_catalog_table" "test_api_history" {
-  catalog_id    = "577373831711"
+  catalog_id    = local.account_id
   database_name = "bfd"
   name          = "test_api_history"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = "bfd-test-history-crawler"
+    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-history-crawler.name
     "averageRecordSize"                = "2857"
     "classification"                   = "cw-history"
     "compressionType"                  = "gzip"
@@ -32,13 +32,13 @@ resource "aws_glue_catalog_table" "test_api_history" {
     bucket_columns    = []
     compressed        = true
     input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://bfd-insights-bfd-app-logs/history/test_api_history/"
+    location          = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = "bfd-test-history-crawler"
+      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-history-crawler.name
       "averageRecordSize"                = "2857"
       "classification"                   = "cw-history"
       "compressionType"                  = "gzip"
@@ -71,15 +71,15 @@ resource "aws_glue_catalog_table" "test_api_history" {
 }
 
 resource "aws_glue_catalog_table" "test_api_requests" {
-  catalog_id    = "577373831711"
+  catalog_id    = local.account_id
   database_name = "bfd"
   name          = "test_api_requests"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
-    "UpdatedByJob"                     = "bfd-history-ingest"
+    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-api-requests-recurring-crawler.name
+    "UpdatedByJob"                     = aws_glue_job.bfd-history-ingest.name
     "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
     "averageRecordSize"                = "9486"
     "classification"                   = "json"
@@ -109,14 +109,15 @@ resource "aws_glue_catalog_table" "test_api_requests" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_api_requests/"
+    # TODO: Change this to a canonical name-spaced location
+    location          = "s3://${module.bucket.id}/databases/${local.database}/test_api_requests/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
-      "UpdatedByJob"                     = "bfd-history-ingest"
+      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-api-requests-recurring-crawler.name
+      "UpdatedByJob"                     = aws_glue_job.bfd-history-ingest.name
       "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
       "averageRecordSize"                = "9486"
       "classification"                   = "json"
@@ -909,14 +910,14 @@ resource "aws_glue_catalog_table" "test_api_requests" {
 }
 
 resource "aws_glue_catalog_table" "test_beneficiaries" {
-  catalog_id    = "577373831711"
+  catalog_id    = local.account_id
   database_name = "bfd"
   name          = "test_beneficiaries"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-api-requests-recurring-crawler.name
     "averageRecordSize"                = "49"
     "classification"                   = "parquet"
     "compressionType"                  = "none"
@@ -945,13 +946,14 @@ resource "aws_glue_catalog_table" "test_beneficiaries" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location          = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_beneficiaries/"
+    # TODO: Change this to a canonical name-spaced location
+    location          = "s3://${module.bucket.id}/databases/bfd/test_beneficiaries/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-api-requests-recurring-crawler.name
       "averageRecordSize"                = "49"
       "classification"                   = "parquet"
       "compressionType"                  = "none"
@@ -1003,14 +1005,14 @@ resource "aws_glue_catalog_table" "test_beneficiaries" {
 }
 
 resource "aws_glue_catalog_table" "test_beneficiaries_unique" {
-  catalog_id    = "577373831711"
+  catalog_id    = local.account_id
   database_name = "bfd"
   name          = "test_beneficiaries_unique"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-api-requests-recurring-crawler.name
     "averageRecordSize"                = "21"
     "classification"                   = "parquet"
     "compressionType"                  = "none"
@@ -1035,13 +1037,14 @@ resource "aws_glue_catalog_table" "test_beneficiaries_unique" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location          = "s3://bfd-insights-bfd-577373831711/databases/bfd/test_beneficiaries_unique/"
+    # TODO: Change this to a canonical name-spaced location
+    location          = "s3://${module.bucket.id}/databases/bfd/test_beneficiaries_unique/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = "bfd-test-api-requests-recurring-crawler"
+      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-api-requests-recurring-crawler.name
       "averageRecordSize"                = "21"
       "classification"                   = "parquet"
       "compressionType"                  = "none"
@@ -1075,7 +1078,7 @@ resource "aws_glue_catalog_table" "test_beneficiaries_unique" {
 resource "aws_glue_job" "bfd-history-ingest" {
   connections = []
   default_arguments = {
-    "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+    "--TempDir"                          = "s3://${aws_s3_object.bfd-history-ingest.bucket}/temporary/"
     "--class"                            = "GlueApp"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-glue-datacatalog"          = "true"
@@ -1085,7 +1088,7 @@ resource "aws_glue_job" "bfd-history-ingest" {
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
     "--sourceTable"                      = "test"
-    "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+    "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/"
     "--targetTable"                      = "test_api_requests"
   }
   glue_version              = "3.0"
@@ -1093,7 +1096,7 @@ resource "aws_glue_job" "bfd-history-ingest" {
   name                      = "bfd-history-ingest"
   non_overridable_arguments = {}
   number_of_workers         = 10
-  role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+  role_arn                  = local.external.insights_glue_role_arn
   tags                      = {}
   tags_all                  = {}
   timeout                   = 2880
@@ -1113,7 +1116,7 @@ resource "aws_glue_job" "bfd-history-ingest" {
 resource "aws_glue_job" "bfd-populate-beneficiaries" {
   connections = []
   default_arguments = {
-    "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+    "--TempDir"                          = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/temporary/"
     "--class"                            = "GlueApp"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-glue-datacatalog"          = "true"
@@ -1123,7 +1126,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries" {
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
     "--sourceTable"                      = "test_api_requests"
-    "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+    "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/"
     "--targetTable"                      = "test_beneficiaries"
   }
   glue_version              = "3.0"
@@ -1131,7 +1134,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries" {
   name                      = "bfd-populate-beneficiaries"
   non_overridable_arguments = {}
   number_of_workers         = 10
-  role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+  role_arn                  = local.external.insights_glue_role_arn
   tags                      = {}
   tags_all                  = {}
   timeout                   = 2880
@@ -1151,7 +1154,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries" {
 resource "aws_glue_job" "bfd-populate-beneficiary-unique" {
   connections = []
   default_arguments = {
-    "--TempDir"                          = "s3://aws-glue-assets-577373831711-us-east-1/temporary/"
+    "--TempDir"                          = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/temporary/"
     "--class"                            = "GlueApp"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-glue-datacatalog"          = "true"
@@ -1162,7 +1165,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique" {
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
     "--sourceTable"                      = "test_beneficiaries"
-    "--spark-event-logs-path"            = "s3://aws-glue-assets-577373831711-us-east-1/sparkHistoryLogs/"
+    "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/"
     "--targetTable"                      = "test_beneficiaries_unique"
   }
   glue_version              = "3.0"
@@ -1170,7 +1173,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique" {
   name                      = "bfd-populate-beneficiary-unique"
   non_overridable_arguments = {}
   number_of_workers         = 10
-  role_arn                  = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
+  role_arn                  = local.external.insights_glue_role_arn
   tags                      = {}
   tags_all                  = {}
   timeout                   = 2880
@@ -1188,7 +1191,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique" {
 }
 
 resource "aws_s3_object" "bfd-history-ingest" {
-  bucket             = "aws-glue-assets-577373831711-us-east-1"
+  bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
   key                = "scripts/bfd-history-ingest.py"
@@ -1201,7 +1204,7 @@ resource "aws_s3_object" "bfd-history-ingest" {
 }
 
 resource "aws_s3_object" "bfd-populate-beneficiaries" {
-  bucket             = "aws-glue-assets-577373831711-us-east-1"
+  bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
   key                = "scripts/bfd-populate-beneficiaries.py"
@@ -1214,7 +1217,7 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
 }
 
 resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
-  bucket             = "aws-glue-assets-577373831711-us-east-1"
+  bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
   key                = "scripts/bfd-populate-beneficiary-unique.py"
@@ -1252,7 +1255,7 @@ resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
     }
   )
   name     = "bfd-test-api-requests-recurring-crawler"
-  role     = "bfd-insights/bfd-insights-bfd-glue-role"
+  role     = local.external.insights_glue_role
   schedule = "cron(59 10 * * ? *)"
   tags     = {}
   tags_all = {}
@@ -1296,7 +1299,7 @@ resource "aws_glue_crawler" "bfd-test-history-crawler" {
   ]
   database_name = "bfd"
   name          = "bfd-test-history-crawler"
-  role          = "bfd-insights/bfd-insights-bfd-glue-role"
+  role          = local.external.insights_glue_role
   tags          = {}
   tags_all      = {}
 
@@ -1310,7 +1313,7 @@ resource "aws_glue_crawler" "bfd-test-history-crawler" {
 
   s3_target {
     exclusions = []
-    path       = "s3://bfd-insights-bfd-app-logs/history/test_api_history"
+    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history"
   }
 
   schema_change_policy {
