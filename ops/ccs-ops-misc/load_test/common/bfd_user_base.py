@@ -198,7 +198,7 @@ def teardown(environment: Environment, **kwargs) -> None:
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(path=stats_storage_config.file_path, pretty_print=True)
+        stats_json_writer.write(stats_storage_config.file_path)
     elif isinstance(stats_storage_config, StatsS3StorageConfig):
         logger.info("Writing aggregated performance statistics to S3.")
 
