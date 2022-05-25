@@ -105,7 +105,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
     fiss_sub_query = (
         'select * '
         'from rda.fiss_claims '
-        f'where last_updated > current_date - interval \'{sub_select_day_age}\' day '
+        f'where last_updated > current_date - interval \'{sub_select_day_age}\' day and mbi_id is not null '
     )
 
     """
@@ -123,7 +123,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
     fiss_mbi_sub_query = (
         'select fiss_partition.mbi_id '
         f'from ({fiss_partition_sub_query}) fiss_partition '
-        f'where fiss_partition.row_number <= {per_status_max} and fiss_partition.mbi_id is not null '
+        f'where fiss_partition.row_number <= {per_status_max} '
     )
 
     """
@@ -132,7 +132,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
     mcs_sub_query = (
         'select * '
         'from rda.mcs_claims '
-        f'where last_updated > current_date - interval \'{sub_select_day_age}\' day '
+        f'where last_updated > current_date - interval \'{sub_select_day_age}\' day and mbi_id is not null '
     )
 
     """
@@ -150,7 +150,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
     mcs_mbi_sub_query = (
         'select mcs_partition.mbi_id '
         f'from ({mcs_partition_sub_query}) mcs_partition '
-        f'where mcs_partition.row_number <= {per_status_max} and mcs_partition.mbi_id is not null '
+        f'where mcs_partition.row_number <= {per_status_max} '
     )
 
     """
