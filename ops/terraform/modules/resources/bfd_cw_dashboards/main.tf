@@ -2,7 +2,7 @@
 #
 
 data "template_file" "dashboard-template" {
-  template       = "${file("${path.module}/templates/bfd-dashboards.tpl")}"
+  template = "${file("${path.module}/templates/bfd-dashboards.tpl")}"
   vars = {
     asg_name            = var.asg
     dashboard_namespace = var.dashboard_namespace
@@ -10,6 +10,6 @@ data "template_file" "dashboard-template" {
 }
 
 resource "aws_cloudwatch_dashboard" "bfd-dashboards-fhir" {
-  dashboard_name      = var.dashboard_name
-  dashboard_body      = data.template_file.dashboard-template.rendered
+  dashboard_name = var.dashboard_name
+  dashboard_body = data.template_file.dashboard-template.rendered
 }

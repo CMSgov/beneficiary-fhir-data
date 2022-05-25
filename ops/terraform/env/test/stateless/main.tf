@@ -21,7 +21,6 @@ module "stateless" {
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
 
-
   ## Cloudwatch Dashboard ##
   ## This is where the dashboard params are passed ##
   dashboard_name      = "bfd-server-test"
