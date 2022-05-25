@@ -90,7 +90,7 @@ def get_contract_ids(uri: str) -> List:
     return contract_data
 
 
-def get_partially_adj_hashed_mbis(uri: str) -> List:
+def get_pac_hashed_mbis(uri: str) -> List:
     """
     Return a list of unique hashed MBIs that represent a diverse set of FISS and MCS
     claims over a range of claim statuses.
