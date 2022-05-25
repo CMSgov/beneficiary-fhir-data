@@ -28,8 +28,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
+  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id */
   private final Map<String, BeneficiaryData> mbiMap;
-  private final String MEDICARE = "MEDICARE";
+  /** Constant value used within the code */
+  private static final String MEDICARE = "MEDICARE";
 
   /**
    * Transforms the given {@link Parser.Data} into RDA {@link FissClaimChange} data.
