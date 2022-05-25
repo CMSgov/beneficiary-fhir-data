@@ -122,7 +122,6 @@ module "aurora" {
 ## S3 Buckets
 #
 
-
 # admin bucket for adminstrative stuff
 module "admin" {
   source     = "../resources/s3"

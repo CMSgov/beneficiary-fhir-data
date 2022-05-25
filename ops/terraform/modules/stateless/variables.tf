@@ -36,10 +36,10 @@ variable "is_public" {
 
 variable "dashboard_name" {
   description = "Name of the bfd cloudwatch dashboards"
-  type = string
+  type        = string
 }
 
 variable "dashboard_namespace" {
   description = "The namespace in which the dashboards live in"
-  type = string
+  type        = string
 }
