@@ -5,3 +5,7 @@ variable "dashboard_name" {
 variable "dashboard_namespace" {
   type = string
 }
+
+variable "asg" {
+    type = string
+}

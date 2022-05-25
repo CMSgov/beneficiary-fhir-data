@@ -45,8 +45,4 @@ module "stateful" {
 
   medicare_opt_out_config = var.medicare_opt_out_config
 
-  ## Cloudwatch Dashboard ##
-  ## This is where the dashboard params are passed ##
-  dashboard_name      = "bfd-server-prod-sbx"
-  dashboard_namespace = "bfd-prod-sbx/bfd-server"
 }
