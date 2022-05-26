@@ -21,4 +21,9 @@ module "stateless" {
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
   is_public       = true
+
+  ## Cloudwatch Dashboard ##
+  ## This is where the dashboard params are passed ##
+  dashboard_name      = "bfd-server-prod-sbx"
+  dashboard_namespace = "bfd-prod-sbx/bfd-server"
 }

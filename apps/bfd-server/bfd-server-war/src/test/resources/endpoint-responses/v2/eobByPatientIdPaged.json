@@ -419,6 +419,12 @@
         }
       } ],
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 111
+          }
+        } ],
         "sequence" : 25,
         "careTeamSequence" : [ 4 ],
         "revenue" : {
@@ -1923,6 +1929,12 @@
         }
       } ],
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 1
+          }
+        } ],
         "sequence" : 1,
         "careTeamSequence" : [ 2 ],
         "revenue" : {
@@ -3708,6 +3720,12 @@
         }
       } ],
       "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 477
+          }
+        } ],
         "sequence" : 1,
         "careTeamSequence" : [ 4 ],
         "revenue" : {
@@ -5043,7 +5061,7 @@
           } ]
         },
         "quantity" : {
-          "value" : 1
+          "value" : 1.0
         },
         "adjudication" : [ {
           "category" : {

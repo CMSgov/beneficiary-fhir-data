@@ -19,6 +19,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
+import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.util.HashMap;
 import java.util.Map;
@@ -405,6 +406,8 @@ public class FissTransformerIT {
               FissPayer.newBuilder()
                   .setBeneZPayer(
                       FissBeneZPayer.newBuilder()
+                          .setPayersIdEnum(FissPayersCode.PAYERS_CODE_MEDICARE)
+                          .setPayersName("MEDICARE")
                           .setBeneFirstName("Firstname")
                           .setBeneMidInit("M")
                           .setBeneLastName("Lastname")
