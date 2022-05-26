@@ -97,7 +97,7 @@
     mode: u=rwx,g=rx,o=rx
   become: true
   notify:
-    - 'Restart Migrator Service'
+    - Restart Migrator Service
   tags:
     - post-ami
 
@@ -110,7 +110,7 @@
     mode: u=rw,g=r,o=r
   become: true
   notify:
-    - 'Enable Migrator Service'
-    - 'Restart Migrator Service'
+    - Enable Migrator Service
+    - Restart Migrator Service
   tags:
     - post-ami
