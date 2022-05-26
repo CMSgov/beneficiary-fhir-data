@@ -96,6 +96,8 @@
     group: "{{ db_migrator_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
+  notify:
+    - Restart Migrator Service
   tags:
     - post-ami
 
@@ -107,5 +109,8 @@
     group: root
     mode: u=rw,g=r,o=r
   become: true
+  notify:
+    - Enable Migrator Service
+    - Restart Migrator Service
   tags:
     - post-ami
