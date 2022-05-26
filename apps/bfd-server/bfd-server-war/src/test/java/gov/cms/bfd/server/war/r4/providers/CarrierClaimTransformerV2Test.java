@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class CarrierClaimTransformerV2Test {
@@ -113,7 +114,7 @@ public class CarrierClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  // @Disabled
+  @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
