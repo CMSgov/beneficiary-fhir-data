@@ -9,7 +9,7 @@
 --      The following db columns were redefined from NUMERIC to more
 --      appropriate data type(s):
 --
---           line_num - changed to smallint
+--           clm_line_num - changed to smallint
 --
 -- Once current table data is migrated to new table name/structure, a 
 -- subsequent PR will be deployed that changes the ORM model(s) and
