@@ -82,12 +82,14 @@ public class MessageError {
   @Column(name = "message", nullable = false, columnDefinition = "json")
   private String message;
 
+  /** Hibernate used method to set certain values only on insert */
   @PrePersist
   protected void onCreate() {
     createdDate = Instant.now();
     updatedDate = Instant.now();
   }
 
+  /** Hibernate used method to update certain values only on updates */
   @PreUpdate
   protected void onUpdate() {
     updatedDate = Instant.now();
