@@ -100,7 +100,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
     By selecting MBIs that are related to claims with varying status codes, we can get a good mixture of claim data
     elements, better testing our FHIR transformers' ability to correctly render them.
     """
-    per_status_max = int(LIMIT / 40)    # Based on 40 distinct status values between FISS/MCS
+    per_status_max = int(LIMIT / 40)    # Based on ~40 distinct status values between FISS/MCS
 
     sub_select_day_age = 30
 
