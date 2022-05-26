@@ -26,13 +26,17 @@ PERCENTILES_TO_REPORT = PERCENTILES_TO_REPORT
 class StatsStorageType(Enum):
     """Enumeration for each available type of storage for JSON stats"""
     FILE = 1
+    """Indicates that aggregated statistics will be stored to a local file"""
     S3 = 2
+    """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
 
 class StatsEnvironment(Enum):
     """Enumeration for each possible test running environment"""
     TEST = 1
+    """Indicates that the running environment is in testing, using testing resources"""
     PROD = 2
+    """Indicates that the running environment is in production, using production resources"""
 
 
 @dataclass
@@ -122,7 +126,8 @@ class StatsS3StorageConfig(StatsStorageConfig):
 
 
 class AggregatedStats(object):
-    """Class to generate performance statistics in JSON format"""
+    """Represents a snapshot of aggregated performance statistics of all tasks, or endpoints, that
+    ran in the current Locust environment"""
 
     def __init__(self, locust_env: Environment, percentiles_to_report: List[float], stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
         """Creates a new instance of AggregatedStats given the current Locust environment and a list of percentiles to report.
@@ -222,6 +227,8 @@ class AggregatedStats(object):
 
 
 class StatsJsonFileWriter(object):
+    """Writes an AggegratedStats instance to a specified directory path in JSON format"""
+
     def __init__(self, stats: AggregatedStats) -> None:
         """Creates a new instance of StatsJsonFileWriter given an AggregatedStats object
 
@@ -243,6 +250,8 @@ class StatsJsonFileWriter(object):
 
 
 class StatsJsonS3Writer(object):
+    """Writes an AggegratedStats instance to a specified S3 bucket in JSON format"""
+
     def __init__(self, stats: AggregatedStats) -> None:
         """Creates a new instance of StatsJsonS3Writer given an AggregatedStats object
 
@@ -255,5 +264,11 @@ class StatsJsonS3Writer(object):
         self.s3 = boto3.client('s3')
 
     def write(self, bucket: str) -> None:
+        """Writes the JSON-formatted statistics to the given S3 bucket to a pre-determined path
+        following BFD Insights data organization standards
+
+        Args:
+            bucket (str): The S3 bucket in AWS to write the JSON to
+        """
         self.s3.put_object(
             Bucket=bucket, Key=f'databases/bfd/test_performance_stats/env={self.stats.running_env.name}/tag={self.stats.stats_tag}/{int(time.time())}.json', Body=json.dumps(self.stats.all_stats))

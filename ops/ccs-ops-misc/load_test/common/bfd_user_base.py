@@ -184,7 +184,11 @@ class BFDUserBase(HttpUser):
 
 @events.test_stop.add_listener
 def teardown(environment: Environment, **kwargs) -> None:
-    '''Run one-time teardown tasks after the tests have completed.'''
+    """Run one-time teardown tasks after the tests have completed
+
+    Args:
+        environment (Environment): The current Locust environment
+    """
 
     logger = logging.getLogger()
     stats_storage_config = setup.load_stats_storage_config()
