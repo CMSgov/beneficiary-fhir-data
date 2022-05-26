@@ -52,6 +52,3 @@
       become: true
       tags:
         - post-ami
-
-  handlers:
-    - import_tasks: handlers/main.yml
