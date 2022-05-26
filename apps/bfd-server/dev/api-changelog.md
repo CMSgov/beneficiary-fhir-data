@@ -5,8 +5,6 @@
 Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.
 
 C4BBAdjudication example:
-
-C4BBPayerAdjudicationStatus example:
 ```json
   "resource" : {
     "resourceType" : "ExplanationOfBenefit",
