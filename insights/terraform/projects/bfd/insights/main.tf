@@ -3,8 +3,7 @@ locals {
   database     = "bfd"
   project      = "bfd"
   table        = "api-requests"
-  environment  = "test"
-  table_name   = "${local.environment}-${local.table}"
+  table_name   = "test-${local.table}"
   full_name    = "bfd-insights-${local.database}-${local.table}"
   account_id   = data.aws_caller_identity.current.account_id
   region       = "us-east-1"
@@ -15,6 +14,7 @@ locals {
     insights_glue_role_arn = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
     s3_glue_assets_bucket  = "aws-glue-assets-577373831711-us-east-1"
   }
+  environments = toset( [ "prod-sbx" ] )
 }
 
 module "bucket" {
@@ -183,6 +183,45 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
 
   tracing_config {
     mode = "PassThrough"
+  }
+}
+
+
+resource "aws_glue_crawler" "bfd-test-history-crawler" {
+  classifiers = [
+    "test_historicals_local",
+  ]
+  database_name = "bfd"
+  name          = "bfd-test-history-crawler"
+  role          = local.external.insights_glue_role
+  tags          = {}
+  tags_all      = {}
+
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
+
+  s3_target {
+    exclusions = []
+    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history"
+  }
+
+  schema_change_policy {
+    delete_behavior = "DEPRECATE_IN_DATABASE"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+resource "aws_glue_classifier" "test_historicals_local" {
+  name = "test_historicals_local"
+
+  grok_classifier {
+    classification = "cw-history"
+    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
   }
 }
 

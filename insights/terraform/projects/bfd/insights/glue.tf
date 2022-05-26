@@ -1,74 +1,11 @@
-resource "aws_glue_catalog_table" "test_api_history" {
-  catalog_id    = local.account_id
-  database_name = "bfd"
-  name          = "test_api_history"
-  owner         = "owner"
-  parameters = {
-    "CrawlerSchemaDeserializerVersion" = "1.0"
-    "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-history-crawler.name
-    "averageRecordSize"                = "2857"
-    "classification"                   = "cw-history"
-    "compressionType"                  = "gzip"
-    "grokPattern"                      = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-    "objectCount"                      = "209"
-    "recordCount"                      = "86598"
-    "sizeKey"                          = "284588120"
-    "typeOfData"                       = "file"
-  }
-  retention  = 0
-  table_type = "EXTERNAL_TABLE"
-
-  partition_keys {
-    name = "partition_0"
-    type = "string"
-  }
-  partition_keys {
-    name = "partition_1"
-    type = "string"
-  }
-
-  storage_descriptor {
-    bucket_columns    = []
-    compressed        = true
-    input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history/"
-    number_of_buckets = -1
-    output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-    parameters = {
-      "CrawlerSchemaDeserializerVersion" = "1.0"
-      "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-test-history-crawler.name
-      "averageRecordSize"                = "2857"
-      "classification"                   = "cw-history"
-      "compressionType"                  = "gzip"
-      "grokPattern"                      = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-      "objectCount"                      = "209"
-      "recordCount"                      = "86598"
-      "sizeKey"                          = "284588120"
-      "typeOfData"                       = "file"
-    }
-    stored_as_sub_directories = false
-
-    columns {
-      name       = "timestamp"
-      parameters = {}
-      type       = "string"
-    }
-    columns {
-      name       = "message"
-      parameters = {}
-      type       = "string"
-    }
-
-    ser_de_info {
-      parameters = {
-        "input.format" = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-      }
-      serialization_library = "com.amazonaws.glue.serde.GrokSerDe"
-    }
-  }
-}
+# module "api_history" {
+#   source         = "../modules/api_history"
+#   glue_role      = local.external.insights_glue_role
+#   account_id     = local.account_id
+#   database       = local.database
+#   environment    = "prod-sbx"
+#   app_log_bucket = aws_s3_bucket.bfd-insights-bfd-app-logs.bucket
+# }
 
 resource "aws_glue_catalog_table" "test_api_requests" {
   catalog_id    = local.account_id
@@ -1229,15 +1166,6 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   etag               = filemd5("glue_src/bfd-populate-beneficiary-unique.py")
 }
 
-resource "aws_glue_classifier" "test_historicals_local" {
-  name = "test_historicals_local"
-
-  grok_classifier {
-    classification = "cw-history"
-    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-  }
-}
-
 resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
   classifiers   = []
   database_name = "bfd"
@@ -1293,12 +1221,91 @@ resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
   }
 }
 
-resource "aws_glue_crawler" "bfd-test-history-crawler" {
+
+# API History
+
+resource "aws_glue_catalog_table" "api_history" {
+  for_each = local.environments
+
+  catalog_id    = local.account_id
+  database_name = local.database
+  name          = "${each.key}_api_history"
+  owner         = "owner"
+  parameters = {
+    "CrawlerSchemaDeserializerVersion" = "1.0"
+    "CrawlerSchemaSerializerVersion"   = "1.0"
+    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.history-crawler[each.key].name
+    "averageRecordSize"                = "2857"
+    "classification"                   = "cw-history"
+    "compressionType"                  = "gzip"
+    "grokPattern"                      = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+    "objectCount"                      = "209"
+    "recordCount"                      = "86598"
+    "sizeKey"                          = "284588120"
+    "typeOfData"                       = "file"
+  }
+  retention  = 0
+  table_type = "EXTERNAL_TABLE"
+
+  partition_keys {
+    name = "partition_0"
+    type = "string"
+  }
+  partition_keys {
+    name = "partition_1"
+    type = "string"
+  }
+
+  storage_descriptor {
+    bucket_columns    = []
+    compressed        = true
+    input_format      = "org.apache.hadoop.mapred.TextInputFormat"
+    location          = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/${each.key}_api_history/"
+    number_of_buckets = -1
+    output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    parameters = {
+      "CrawlerSchemaDeserializerVersion" = "1.0"
+      "CrawlerSchemaSerializerVersion"   = "1.0"
+      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.history-crawler[each.key].name
+      "averageRecordSize"                = "2857"
+      "classification"                   = "cw-history"
+      "compressionType"                  = "gzip"
+      "grokPattern"                      = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+      "objectCount"                      = "209"
+      "recordCount"                      = "86598"
+      "sizeKey"                          = "284588120"
+      "typeOfData"                       = "file"
+    }
+    stored_as_sub_directories = false
+
+    columns {
+      name       = "timestamp"
+      parameters = {}
+      type       = "string"
+    }
+    columns {
+      name       = "message"
+      parameters = {}
+      type       = "string"
+    }
+
+    ser_de_info {
+      parameters = {
+        "input.format" = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+      }
+      serialization_library = "com.amazonaws.glue.serde.GrokSerDe"
+    }
+  }
+}
+
+resource "aws_glue_crawler" "history-crawler" {
+  for_each = local.environments
+
   classifiers = [
-    "test_historicals_local",
+    aws_glue_classifier.historicals_local[each.key].name
   ]
-  database_name = "bfd"
-  name          = "bfd-test-history-crawler"
+  database_name = local.database
+  name          = "${local.database}-${each.key}-history-crawler"
   role          = local.external.insights_glue_role
   tags          = {}
   tags_all      = {}
@@ -1313,11 +1320,22 @@ resource "aws_glue_crawler" "bfd-test-history-crawler" {
 
   s3_target {
     exclusions = []
-    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history"
+    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/${each.key}_api_history"
   }
 
   schema_change_policy {
     delete_behavior = "DEPRECATE_IN_DATABASE"
     update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+resource "aws_glue_classifier" "historicals_local" {
+  for_each = local.environments
+
+  name = "${each.key}_historicals_local"
+
+  grok_classifier {
+    classification = "cw-history"
+    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
   }
 }
