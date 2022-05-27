@@ -197,7 +197,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     if stats_storage_config == None:
         return
 
-    # If --storeStats was set and it is valid, get the aggregated stats of the stopping test run
+    # If --stats was set and it is valid, get the aggregated stats of the stopping test run
     stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
 
     if isinstance(stats_storage_config, StatsFileStorageConfig):

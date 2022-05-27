@@ -108,7 +108,7 @@ def load_stats_storage_config() -> StatsStorageConfig:
     """
 
     config_file = load()
-    return config_file["storeStats"]
+    return config_file["stats"]
 
 def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsStorageConfig) -> yaml.nodes.ScalarNode:
     """Returns a scalar representer that instructs PyYAML how to serialize a StatsStorageConfig instance
