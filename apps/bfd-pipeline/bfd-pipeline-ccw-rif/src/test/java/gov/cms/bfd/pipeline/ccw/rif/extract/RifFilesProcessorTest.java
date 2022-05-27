@@ -322,7 +322,7 @@ public final class RifFilesProcessorTest {
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals(567834L, claimGroup.getBeneficiaryId());
     assertEquals(9991831999L, claimGroup.getClaimId());
-    assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
+    assertEquals(900L, claimGroup.getClaimGroupId());
     assertEquals('O', claimGroup.getNearLineRecordIdCode());
     assertEquals("71", claimGroup.getClaimTypeCode());
     assertEquals(LocalDate.of(1999, 10, 27), claimGroup.getDateFrom());
@@ -333,7 +333,7 @@ public final class RifFilesProcessorTest {
     assertEquals("61026", claimGroup.getCarrierNumber());
     assertEquals("1", claimGroup.getPaymentDenialCode());
     assertEquals(new BigDecimal("199.99"), claimGroup.getPaymentAmount());
-    assertEquals(new BigDecimal("0"), claimGroup.getPrimaryPayerPaidAmount());
+    assertEquals(BigDecimal.ZERO, claimGroup.getPrimaryPayerPaidAmount());
     assertEquals("1234534", claimGroup.getReferringPhysicianUpin().get());
     assertEquals("8765676", claimGroup.getReferringPhysicianNpi().get());
     assertEquals(Character.valueOf('A'), claimGroup.getProviderAssignmentIndicator().get());
@@ -362,7 +362,7 @@ public final class RifFilesProcessorTest {
 
     // Verify one of the claim lines.
     CarrierClaimLine claimLine = claimGroup.getLines().get(0);
-    assertEquals(new BigDecimal(6), claimLine.getLineNumber());
+    assertEquals(6, claimLine.getLineNumber());
     assertEquals("K25555", claimLine.getPerformingProviderIdNumber());
     assertFalse(claimLine.getPerformingPhysicianUpin().isPresent());
     assertEquals("1923124", claimLine.getPerformingPhysicianNpi().get());
@@ -374,7 +374,7 @@ public final class RifFilesProcessorTest {
     assertEquals("41", claimLine.getProviderSpecialityCode().get());
     assertEquals(Character.valueOf('1'), claimLine.getProviderParticipatingIndCode().get());
     assertEquals('0', claimLine.getReducedPaymentPhysicianAsstCode());
-    assertEquals(new BigDecimal(1), claimLine.getServiceCount());
+    assertEquals(new BigDecimal("1.0"), claimLine.getServiceCount());
     assertEquals('1', claimLine.getCmsServiceTypeCode());
     assertEquals("11", claimLine.getPlaceOfServiceCode());
     assertEquals("15", claimLine.getLinePricingLocalityCode());
@@ -385,11 +385,11 @@ public final class RifFilesProcessorTest {
     assertFalse(claimLine.getHcpcsSecondModifierCode().isPresent());
     assertEquals("T2D", claimLine.getBetosCode().get());
     assertEquals(new BigDecimal("37.5"), claimLine.getPaymentAmount());
-    assertEquals(new BigDecimal("0"), claimLine.getBeneficiaryPaymentAmount());
+    assertEquals(BigDecimal.ZERO, claimLine.getBeneficiaryPaymentAmount());
     assertEquals(new BigDecimal("37.5"), claimLine.getProviderPaymentAmount());
-    assertEquals(new BigDecimal("0"), claimLine.getBeneficiaryPartBDeductAmount());
+    assertEquals(BigDecimal.ZERO, claimLine.getBeneficiaryPartBDeductAmount());
     assertTrue(claimLine.getPrimaryPayerCode().isPresent());
-    assertEquals(new BigDecimal("0"), claimLine.getPrimaryPayerPaidAmount());
+    assertEquals(BigDecimal.ZERO, claimLine.getPrimaryPayerPaidAmount());
     assertEquals(new BigDecimal("9.57"), claimLine.getCoinsuranceAmount());
     assertEquals(new BigDecimal("75"), claimLine.getSubmittedChargeAmount());
     assertEquals(new BigDecimal("47.84"), claimLine.getAllowedChargeAmount());
@@ -406,7 +406,7 @@ public final class RifFilesProcessorTest {
     assertEquals("R1", claimLine.getHctHgbTestTypeCode().get());
     assertEquals("49035044700", claimLine.getNationalDrugCode().get());
     assertEquals("BB889999AA", claimLine.getCliaLabNumber().get());
-    assertEquals(new BigDecimal(0), claimLine.getAnesthesiaUnitCount());
+    assertEquals(BigDecimal.ZERO, claimLine.getAnesthesiaUnitCount());
   }
 
   /**

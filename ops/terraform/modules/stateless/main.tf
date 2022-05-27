@@ -388,3 +388,12 @@ module "bfd_pipeline" {
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
 }
+
+## This is where cloudwatch dashboards are managed. 
+#
+module "bfd_dashboards" {
+  source              = "../resources/bfd_cw_dashboards"
+  dashboard_name      = var.dashboard_name
+  dashboard_namespace = var.dashboard_namespace
+  asg                 = module.fhir_asg.asg_id
+}

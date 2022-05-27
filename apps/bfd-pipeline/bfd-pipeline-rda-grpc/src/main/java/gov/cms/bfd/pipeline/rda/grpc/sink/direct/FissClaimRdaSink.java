@@ -1,13 +1,17 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import java.io.IOException;
+import java.util.List;
 import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds FISS claim specific methods. */
@@ -53,6 +57,20 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .receivedDate(claim.getLastUpdated())
         .locations(new StringList().add(claim.getCurrLoc1()).addIfNonEmpty(claim.getCurrLoc2()))
         .transactionDate(claim.getCurrTranDate())
+        .build();
+  }
+
+  @Override
+  MessageError createMessageError(
+      String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)
+      throws IOException {
+    return MessageError.builder()
+        .sequenceNumber(change.getSeq())
+        .claimId(change.getClaim().getDcn())
+        .claimType(MessageError.ClaimType.FISS)
+        .apiSource(apiVersion)
+        .errors(mapper.writeValueAsString(errors))
+        .message(writer.print(change))
         .build();
   }
 }

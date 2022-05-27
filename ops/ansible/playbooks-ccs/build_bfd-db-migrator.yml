@@ -9,6 +9,7 @@
   gather_facts: yes
   vars:
     ansible_ssh_pipelining: no
+    bfd_migrator_dir: /opt/bfd-db-migrator
     env: "test"
 
   tasks:
@@ -34,10 +35,10 @@
       import_role:
         name: bfd-db-migrator
       vars:
-        # Note: The `db_migrator_zip` variable should have been provided by `--extra-vars` on the command line.
-        db_migrator_jvm_args: "-Xmx{{ (ansible_memtotal_mb * 0.80) | int }}m -XX:+PreserveFramePointer"
-        db_migrator_tmp_dir: "{{ db_migrator_dir }}/tmp"
-        # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`:
+        db_migrator_dir: "{{ bfd_migrator_dir  }}"
+        db_migrator_tmp_dir: "{{ bfd_migrator_dir }}/tmp"
+        # NOTE: The `db_migrator_zip` variable should have been provided by `--extra-vars` on the command line.
+        # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`
         db_migrator_db_url: "{{ vault_data_db_primary_url }}"
         db_migrator_db_username: "{{ vault_data_pipeline_db_username }}" # TODO: BFD-1552 get migrator-specific credentials
         db_migrator_db_password: "{{ vault_data_pipeline_db_password }}" # TODO: BFD-1552 get migrator-specific credentials

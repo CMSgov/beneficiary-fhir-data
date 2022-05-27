@@ -1,15 +1,19 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsLocation;
 import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import java.io.IOException;
 import java.util.Comparator;
+import java.util.List;
 import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
@@ -59,6 +63,20 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .receivedDate(claim.getLastUpdated())
         .locations(locations)
         .transactionDate(claim.getIdrStatusDate())
+        .build();
+  }
+
+  @Override
+  MessageError createMessageError(
+      String apiVersion, McsClaimChange change, List<DataTransformer.ErrorMessage> errors)
+      throws IOException {
+    return MessageError.builder()
+        .sequenceNumber(change.getSeq())
+        .claimId(change.getClaim().getIdrClmHdIcn())
+        .claimType(MessageError.ClaimType.MCS)
+        .apiSource(apiVersion)
+        .errors(mapper.writeValueAsString(errors))
+        .message(writer.print(change))
         .build();
   }
 }
