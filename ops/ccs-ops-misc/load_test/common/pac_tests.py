@@ -1,5 +1,3 @@
-import random
-
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.url_path import create_url_path
@@ -17,26 +15,24 @@ class PACTestUser(BFDUserBase):
     # table?
     USE_TABLE_SAMPLE = False
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.hashed_mbis = data.load_all(db.get_pac_hashed_mbis, use_table_sample=self.USE_TABLE_SAMPLE).copy()
-        random.shuffle(self.hashed_mbis)
+    @classmethod
+    def _hashed_mbis(cls):
+        if not hasattr(cls, '_hashed_mbis'):
+            cls._hashed_mbis = data.load_all(
+                    db.get_pac_hashed_mbis
+                    use_table_sample=cls.USE_TABLE_SAMPLE)
+        return cls._hashed_mbis
 
     # Helper
 
-    def _mbi(self):
-        return self.hashed_mbis.pop()
-
     def _get(self, resource, name, parameters=None):
         params = {} if parameters is None else parameters
-        params["mbi"] = f'{self.hashed_mbis.pop()}'
+        params["mbi"] = self.hashed_mbis()
 
-        def make_url():
-            return create_url_path(f'/v2/fhir/{resource}/', params)
-
-        self.run_task(
-            name=name,
-            url_callback=make_url)
+        self.run_task_by_parameters(
+                base_path=f'/v2/fhir/{resource}',
+                params=params,
+                name=name)
 
     # Tests
 

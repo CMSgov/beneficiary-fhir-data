@@ -1,3 +1,5 @@
+import random
+
 from locust import HttpUser, task, tag
 from common.pac_tests import PACTestUser
 
@@ -5,6 +7,12 @@ from common.pac_tests import PACTestUser
 class PACUser(PACTestUser):
 
     """Tests for Partially Adjudicated Claims endpoints"""
+
+    @classmethod
+    def _hashed_mbis(cls):
+        mbis = super(PACUser, cls)._hashed_mbis()
+        random.shuffle(mbis)
+        return mbis
 
     @tag('claim')
     @task

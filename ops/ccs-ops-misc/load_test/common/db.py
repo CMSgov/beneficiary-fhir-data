@@ -193,4 +193,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
         f'limit {LIMIT}'
     )
 
-    return [str(r[0]) for r in _execute(uri, mbi_query)]
+    # intentionally reversing the query results, as the important mbis to test
+    # will be at the beginning of the result set and BFDUserBase will pop items
+    # off of the end of the list
+    return [str(r[0]) for r in reversed(_execute(uri, mbi_query))]
