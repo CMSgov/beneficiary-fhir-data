@@ -4,13 +4,6 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
@@ -57,18 +50,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   private static final NumericGauges GAUGES = new NumericGauges();
 
   /** Used to write out RDA messages to json strings */
-  protected static final JsonFormat.Printer writer =
+  protected static final JsonFormat.Printer protobufObjectWriter =
       JsonFormat.printer().omittingInsignificantWhitespace();
-
-  /** Used to map basic objects to json strings */
-  protected static final ObjectMapper mapper =
-      JsonMapper.builder()
-          .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
-          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-          .addModule(new Jdk8Module())
-          .addModule(new JavaTimeModule())
-          .serializationInclusion(JsonInclude.Include.NON_NULL)
-          .build();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either

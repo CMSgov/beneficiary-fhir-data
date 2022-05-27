@@ -3,8 +3,11 @@ package gov.cms.bfd.model.rda;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.function.Supplier;
@@ -20,16 +23,17 @@ import javax.persistence.AttributeConverter;
  */
 public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
   /**
-   * {@code ObjectMapper} instances are thread safe so this singleton instance ensures consistent
-   * formatting behavior for all instances.
+   * Used to map basic objects to json strings. {@link ObjectMapper} instances are thread safe so
+   * this singleton instance ensures consistent formatting behavior for all instances.
    */
   private static final ObjectMapper objectMapper =
-      new ObjectMapper()
-          .disable(SerializationFeature.INDENT_OUTPUT)
-          .registerModule(new Jdk8Module())
-          .registerModule(new JavaTimeModule())
-          .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-          .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+      JsonMapper.builder()
+          .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+          .addModule(new Jdk8Module())
+          .addModule(new JavaTimeModule())
+          .serializationInclusion(JsonInclude.Include.NON_NULL)
+          .build();
 
   /** The class of objects being converted to and from JSON. */
   private final Class<T> klass;
@@ -69,10 +73,7 @@ public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
   @Override
   public String convertToDatabaseColumn(T attribute) {
     try {
-      if (attribute == null) {
-        return null;
-      }
-      return objectMapper.writeValueAsString(attribute);
+      return convertObjectToJsonString(attribute);
     } catch (final Exception ex) {
       throw new RuntimeException(
           format("Failed to convert %s to JSON: %s", klass.getSimpleName(), ex.getMessage()), ex);
@@ -98,5 +99,16 @@ public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
       throw new RuntimeException(
           format("Failed to convert JSON to %s: %s", klass.getSimpleName(), ex.getMessage()), ex);
     }
+  }
+
+  /**
+   * Convert an object into a JSON String. If the object is null a null value will be returned.
+   *
+   * @param object the entity attribute value to be converted
+   * @return the String or null of the entity was null
+   * @throws JsonProcessingException if the object could not be converted
+   */
+  public static <T> String convertObjectToJsonString(T object) throws JsonProcessingException {
+    return object != null ? objectMapper.writeValueAsString(object) : null;
   }
 }

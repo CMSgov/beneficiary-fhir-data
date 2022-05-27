@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import gov.cms.bfd.model.rda.AbstractJsonConverter;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
@@ -75,8 +76,8 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .claimId(change.getClaim().getIdrClmHdIcn())
         .claimType(MessageError.ClaimType.MCS)
         .apiSource(apiVersion)
-        .errors(mapper.writeValueAsString(errors))
-        .message(writer.print(change))
+        .errors(AbstractJsonConverter.convertObjectToJsonString(errors))
+        .message(protobufObjectWriter.print(change))
         .build();
   }
 }
