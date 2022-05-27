@@ -6,6 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
@@ -121,6 +122,13 @@ public final class PipelineApplicationState implements AutoCloseable {
     pooledDataSource.setMetricRegistry(metrics);
     pooledDataSource.setMinimumIdle(MIN_IDLE_CONNECTIONS);
     pooledDataSource.setIdleTimeout(IDLE_CONNECTION_TIMEOUT_MILLIS);
+
+    // In order to store and retrieve JSON in postgresql without adding any additional maven
+    // dependencies  we can set this property to allow String values to be transparently
+    // converted to/from jsonb values.
+    Properties dataSourceProperties = new Properties();
+    dataSourceProperties.setProperty("stringtype", "unspecified");
+    pooledDataSource.setDataSourceProperties(dataSourceProperties);
 
     return pooledDataSource;
   }
