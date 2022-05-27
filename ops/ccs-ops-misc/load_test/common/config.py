@@ -6,7 +6,7 @@ from typing import Dict
 
 import yaml
 
-from common.stats import StatsFileStorageConfig, StatsS3StorageConfig, StatsStorageConfig
+from common.stats.stats_config import StatsFileStorageConfig, StatsS3StorageConfig, StatsStorageConfig
 
 def save(file_data: Dict[str, str]):
     '''Saves a config file using the input file data.

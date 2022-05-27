@@ -11,7 +11,7 @@ from multiprocessing import Process
 from common import config, test_setup as setup
 from locust.main import main
 
-from common.stats import StatsStorageConfig
+from common.stats.stats_config import StatsStorageConfig
 
 def parse_run_time(run_time):
     '''Parse a given run time setting (which Locust accepts as combinations of "1m", "30s", "2h",

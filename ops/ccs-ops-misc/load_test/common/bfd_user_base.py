@@ -7,7 +7,9 @@ import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
-from common.stats import StatsFileStorageConfig, AggregatedStats, StatsJsonFileWriter, PERCENTILES_TO_REPORT, StatsJsonS3Writer, StatsS3StorageConfig
+from common.stats.aggregated_stats import AggregatedStats, PERCENTILES_TO_REPORT
+from common.stats.stats_config import StatsFileStorageConfig, StatsS3StorageConfig
+from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
 from locust import HttpUser, events
 from locust.env import Environment
