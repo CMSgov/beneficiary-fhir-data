@@ -42,7 +42,7 @@ class AggregatedStats(object):
         Returns:
             str: A human-readable percent string (i.e. "100%", "95%") for the given percentile number
         """
-        return f"{int(percentile * 100) if (percentile * 100).is_integer() else round(100 * percentile, 6)}%"
+        return f"{int(percentile * 100) if (percentile * 100).is_integer() else round(100 * percentile, 6)}"
 
     def _get_percentiles_dict(self, stats_entry: StatsEntry) -> Dict[str, int]:
         """Returns a dictionary of a human-readable percentile string to its reported value
