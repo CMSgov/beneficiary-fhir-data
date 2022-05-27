@@ -140,7 +140,7 @@ def run_with_params(argv):
             worker_threads = arg
         elif opt == "--stats":
             try:
-                config_data["stats"] = StatsStorageConfig.from_arg_str(arg)
+                config_data["stats"] = StatsStorageConfig.from_key_val_str(arg)
             except ValueError as err:
                 print(f'--stats was invalid: {err}\n')
                 print(help_string)

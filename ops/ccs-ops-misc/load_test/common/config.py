@@ -121,7 +121,7 @@ def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsStorag
     Returns:
         yaml.nodes.ScalarNode: A scalar YAML node representing a StatsStorageConfig instance
     """
-    return dumper.represent_scalar('!StatsConfig', stats_config.to_arg_str())
+    return dumper.represent_scalar('!StatsConfig', stats_config.to_key_val_str())
 
 def _stats_config_constructor(loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> StatsStorageConfig:
     """Returns a scalar constructor that instructs PyYAML how to deserialize a StatsStorageConfig
@@ -134,7 +134,7 @@ def _stats_config_constructor(loader: yaml.SafeLoader, node: yaml.nodes.ScalarNo
     Returns:
         StatsStorageConfig: A StatsStorageConfig instance deserialized from its string scalar representation
     """
-    return StatsStorageConfig.from_arg_str(loader.construct_scalar(node))
+    return StatsStorageConfig.from_key_val_str(loader.construct_scalar(node))
 
 def _get_loader() -> yaml.SafeLoader:
     """Returns a PyYAML SafeLoader with custom constructors added to it.

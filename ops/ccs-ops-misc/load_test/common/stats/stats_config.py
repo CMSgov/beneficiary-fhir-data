@@ -29,59 +29,68 @@ class StatsStorageConfig(ABC):
     """A simple string tag that is used to partition collected statistics when stored"""
 
     @abstractmethod
-    def to_arg_str(self) -> str:
-        """Returns an "arg string" representation of this StatsStorageConfig instance. Follows the format
-        <STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET> 
+    def to_key_val_str(self) -> str:
+        """Returns a key-value string representation of this StatsStorageConfig instance.
         Used to serialize this object to config.
 
         Returns:
-            str: The "arg string" representation of this object.
+            str: The key-value string representation of this object.
         """
         return
 
     @staticmethod
-    def from_arg_str(arg_str: str):
-        """Constructs a concrete instance of StatsStorageConfig from a given "arg string" in the format of
-        "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>".
+    def from_key_val_str(key_val_str: str):
+        """Constructs a concrete instance of StatsStorageConfig from a given string in key-value format seperated
+        by semi-colons ("key1=value1;key2=value2").
 
         Args:
-            arg_str (str): The "arg string" representation of this object.
+            key_val_str (str): The key-value representation of this object.
 
         Raises:
             ValueError: Raised if the passed string does not follow the proper format.
 
         Returns:
-            StatsStorageConfig: Returns a concrete instance of StatsStorageConfig with the values specified in the "arg string".
+            StatsStorageConfig: Returns a concrete instance of StatsStorageConfig with the values specified in the key-value string.
         """
-        items = arg_str.split(':')
-        if len(items) != 4:
-            raise ValueError(
-                'Input must follow format: "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>"') from None
+        key_vals_list = key_val_str.split(';')
+        # Create a dictionary from the list of split key-value pairs by parsing each
+        # "key=value" string in the list into {'key': 'value'}.
+        # Empty values are simply considered to be empty strings.
+        config_dict = {k: str(v or '') for k, v in (
+            key_val.split('=') for key_val in key_vals_list)}
+
+        # Check for required parameters, like type, tag, environment
+        if not set(['type', 'tag', "env"]).issubset(set(config_dict.keys())):
+            raise ValueError('type, tag, and env must be specified') from None
 
         try:
-            storage_type = StatsStorageType[items[0].upper()]
+            storage_type = StatsStorageType[config_dict['type'].upper()]
         except KeyError:
             raise ValueError(
-                'STORAGE_TYPE must be either "file" or "s3"') from None
+                '"type" must be either "file" or "s3"') from None
 
         try:
-            stats_environment = StatsEnvironment[items[1].upper()]
+            stats_environment = StatsEnvironment[config_dict['env'].upper()]
         except KeyError:
             raise ValueError(
-                'RUNNING_ENVIRONMENT must be either "TEST" or "PROD"') from None
+                '"env" must be either "TEST" or "PROD"') from None
 
-        tag = items[2]
+        tag = config_dict['tag']
         # Tag must follow the BFD Insights data convention constraints for
         # partition/folders names, as it is used as a partition folder when uploading
         # to S3
         if re.fullmatch('[a-z0-9_]+', tag) == None:
             raise ValueError(
-                'TAG must only consist of lower-case letters, numbers and the "_" character') from None
+                '"tag" must only consist of lower-case letters, numbers and the "_" character') from None
 
         if storage_type == StatsStorageType.FILE:
-            return StatsFileStorageConfig(stats_environment, tag, items[3])
+            return StatsFileStorageConfig(stats_environment, tag, config_dict.get('path') or '')
         else:
-            return StatsS3StorageConfig(stats_environment, tag, items[3])
+            if not 'bucket' in config_dict:
+                raise ValueError(
+                    '"bucket" must be specified if "type" is "s3"') from None
+
+            return StatsS3StorageConfig(stats_environment, tag, config_dict['bucket'])
 
 
 @dataclass
@@ -91,8 +100,8 @@ class StatsFileStorageConfig(StatsStorageConfig):
     file_path: str
     """The parent path of the statistics file that will be written to disk"""
 
-    def to_arg_str(self) -> str:
-        return f'file:{self.stats_environment.name}:{self.tag}:{self.file_path}'
+    def to_key_val_str(self) -> str:
+        return f'type=file;env={self.stats_environment.name};tag={self.tag};path={self.file_path}'
 
 
 @dataclass
@@ -102,5 +111,5 @@ class StatsS3StorageConfig(StatsStorageConfig):
     bucket: str
     """The AWS S3 Bucket that statistics will be written to"""
 
-    def to_arg_str(self) -> str:
-        return f's3:{self.stats_environment.name}:{self.tag}:{self.bucket}'
+    def to_key_val_str(self) -> str:
+        return f'type=s3;env={self.stats_environment.name};tag={self.tag};bucket={self.bucket}'
