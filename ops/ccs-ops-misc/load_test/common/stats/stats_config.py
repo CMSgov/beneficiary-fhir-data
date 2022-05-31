@@ -1,7 +1,8 @@
+import dataclasses
 from enum import Enum
 import re
 from dataclasses import dataclass
-from abc import ABC, abstractmethod
+from typing import Optional
 
 
 class StatsStorageType(Enum):
@@ -21,26 +22,33 @@ class StatsEnvironment(Enum):
 
 
 @dataclass
-class StatsStorageConfig(ABC):
-    """Abstract dataclass that holds data about where and how aggregated performance statistics are stored"""
-    stats_environment: StatsEnvironment
+class StatsConfiguration():
+    """Dataclass that holds data about where and how aggregated performance statistics are stored"""
+    type: StatsStorageType
+    """The storage type that the stats will be written to"""
+    env: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
     tag: str
     """A simple string tag that is used to partition collected statistics when stored"""
+    path: Optional[str]
+    """The local parent directory where JSON files will be written to. Used only if type is file, ignored if type is s3"""
+    bucket: Optional[str]
+    """The AWS S3 Bucket that the JSON will be written to. Used only if type is s3, ignored if type is file"""
 
-    @abstractmethod
     def to_key_val_str(self) -> str:
-        """Returns a key-value string representation of this StatsStorageConfig instance.
+        """Returns a key-value string representation of this StatsConfiguration instance.
         Used to serialize this object to config.
 
         Returns:
             str: The key-value string representation of this object.
         """
-        return
+        as_dict = dataclasses.asdict(self)
+        dict_non_empty = {k: v for k,
+                          v in as_dict.items() if v is not None and v != ''}
+        return ';'.join([f'{k}={v}' for k,v in dict_non_empty.items()])
 
-    @staticmethod
     def from_key_val_str(key_val_str: str):
-        """Constructs a concrete instance of StatsStorageConfig from a given string in key-value format seperated
+        """Constructs a concrete instance of StatsConfiguration from a given string in key-value format seperated
         by semi-colons ("key1=value1;key2=value2").
 
         Args:
@@ -50,7 +58,7 @@ class StatsStorageConfig(ABC):
             ValueError: Raised if the passed string does not follow the proper format.
 
         Returns:
-            StatsStorageConfig: Returns a concrete instance of StatsStorageConfig with the values specified in the key-value string.
+            StatsConfiguration: Returns a concrete instance of StatsConfiguration with the values specified in the key-value string.
         """
         key_vals_list = key_val_str.split(';')
         # Create a dictionary from the list of split key-value pairs by parsing each
@@ -83,33 +91,9 @@ class StatsStorageConfig(ABC):
             raise ValueError(
                 '"tag" must only consist of lower-case letters, numbers and the "_" character') from None
 
-        if storage_type == StatsStorageType.FILE:
-            return StatsFileStorageConfig(stats_environment, tag, config_dict.get('path') or '')
-        else:
-            if not 'bucket' in config_dict:
-                raise ValueError(
-                    '"bucket" must be specified if "type" is "s3"') from None
+        if storage_type == StatsStorageType.S3 and not 'bucket' in config_dict:
+            raise ValueError(
+                '"bucket" must be specified if "type" is "s3"') from None
 
-            return StatsS3StorageConfig(stats_environment, tag, config_dict['bucket'])
-
-
-@dataclass
-class StatsFileStorageConfig(StatsStorageConfig):
-    """Concrete dataclass inheriting from StatsStorageConfig distinguishing a config for storing
-    statistics files to a local file"""
-    file_path: str
-    """The parent path of the statistics file that will be written to disk"""
-
-    def to_key_val_str(self) -> str:
-        return f'type=file;env={self.stats_environment.name};tag={self.tag};path={self.file_path}'
-
-
-@dataclass
-class StatsS3StorageConfig(StatsStorageConfig):
-    """Concrete dataclass inheriting from StatsStorageConfig distinguishing a config for storing
-    statistics files to an S3 Bucket"""
-    bucket: str
-    """The AWS S3 Bucket that statistics will be written to"""
-
-    def to_key_val_str(self) -> str:
-        return f'type=s3;env={self.stats_environment.name};tag={self.tag};bucket={self.bucket}'
+        return StatsConfiguration(type=storage_type, env=stats_environment, tag=tag,
+                                  path=config_dict.get('path') or '', bucket=config_dict.get('bucket'))

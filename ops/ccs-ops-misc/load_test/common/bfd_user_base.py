@@ -8,7 +8,7 @@ import os
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
 from common.stats.aggregated_stats import AggregatedStats, PERCENTILES_TO_REPORT
-from common.stats.stats_config import StatsFileStorageConfig, StatsS3StorageConfig
+from common.stats.stats_config import StatsStorageType
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
 from locust import HttpUser, events
@@ -193,20 +193,20 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
-    stats_storage_config = config.load_stats_storage_config()
-    if stats_storage_config == None:
+    stats_config = config.load_stats_storage_config()
+    if stats_config == None:
         return
 
     # If --stats was set and it is valid, get the aggregated stats of the stopping test run
-    stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
+    stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_config.tag, stats_config.env)
 
-    if isinstance(stats_storage_config, StatsFileStorageConfig):
+    if stats_config.type == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_storage_config.file_path)
-    elif isinstance(stats_storage_config, StatsS3StorageConfig):
+        stats_json_writer.write(stats_config.file_path)
+    elif stats_config.type == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
 
         stats_s3_writer = StatsJsonS3Writer(stats)
-        stats_s3_writer.write(stats_storage_config.bucket)
+        stats_s3_writer.write(stats_config.bucket)

@@ -11,7 +11,7 @@ from multiprocessing import Process
 from common import config, test_setup as setup
 from locust.main import main
 
-from common.stats.stats_config import StatsStorageConfig
+from common.stats.stats_config import StatsConfiguration
 
 def parse_run_time(run_time):
     '''Parse a given run time setting (which Locust accepts as combinations of "1m", "30s", "2h",
@@ -140,7 +140,7 @@ def run_with_params(argv):
             worker_threads = arg
         elif opt == "--stats":
             try:
-                config_data["stats"] = StatsStorageConfig.from_key_val_str(arg)
+                config_data["stats"] = StatsConfiguration.from_key_val_str(arg)
             except ValueError as err:
                 print(f'--stats was invalid: {err}\n')
                 print(help_string)
