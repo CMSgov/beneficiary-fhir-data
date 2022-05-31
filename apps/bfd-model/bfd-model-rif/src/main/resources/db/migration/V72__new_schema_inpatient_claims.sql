@@ -892,7 +892,8 @@ ${logic.psql-only}    alter column nch_bene_pta_coinsrnc_lblty_am SET NOT NULL,
 ${logic.psql-only}    alter column nch_ip_ncvrd_chrg_amt          SET NOT NULL,   
 ${logic.psql-only}    alter column nch_ip_tot_ddctn_amt           SET NOT NULL,   
 ${logic.psql-only}    alter column nch_prmry_pyr_clm_pd_amt       SET NOT NULL,   
-${logic.psql-only}    alter column nch_profnl_cmpnt_chrg_amt      SET NOT NULL;
+${logic.psql-only}    alter column nch_profnl_cmpnt_chrg_amt      SET NOT NULL,
+${logic.psql-only}    alter column nch_wkly_proc_dt               SET NOT NULL;
 
 -- migrate data via INSERT from current INPATIENT_CLAIM_LINES table to INPATIENT_CLAIM_LINES_NEW table
 --
