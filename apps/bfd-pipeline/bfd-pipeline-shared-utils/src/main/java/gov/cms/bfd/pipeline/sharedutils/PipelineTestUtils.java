@@ -192,9 +192,7 @@ public final class PipelineTestUtils {
         if (DatabaseUtils.isPostgresConnection(connection)) {
           truncateTableSql = truncateTableSql + " CASCADE";
         }
-        try (var statement = connection.createStatement()) {
-          statement.execute(truncateTableSql);
-        }
+        connection.createStatement().execute(truncateTableSql);
 
         connection.setSchema(defaultSchemaName.get());
       }
