@@ -21,7 +21,7 @@
 -- the data input (i.e., column name, data type). Thus, for HSQL,
 -- we need to explicitly define the table structure prior to loading data.
 --
--- For HSQL, explicitly define/create a new CARRIER_CLAIMS_NEW table in
+-- For HSQL, explicitly define/create a new INPATIENT_CLAIMS_NEW table in
 -- the current PUBLIC schema
 
 ${logic.hsql-only} create table public.inpatient_claims_new (
