@@ -30,7 +30,7 @@ class StatsJsonFileWriter(object):
         Args:
             path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
         """
-        with open(os.path.join(path, f'{self.stats.running_env.name}-{self.stats.stats_tag}-{int(time.time())}.json'), 'x') as json_file:
+        with open(os.path.join(path, f'{self.stats.running_env.name}-{self.stats.stats_tag}-{int(time.time())}.stats.json'), 'x') as json_file:
             json_file.write(json.dumps(self.stats.all_stats, indent=4))
 
 
