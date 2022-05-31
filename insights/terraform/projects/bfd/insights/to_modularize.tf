@@ -69,3 +69,61 @@ resource "aws_glue_catalog_table" "test_api_history" {
     }
   }
 }
+
+
+# API History
+
+resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
+  classifiers   = []
+  database_name = "bfd"
+  configuration = jsonencode(
+    {
+      CrawlerOutput = {
+        Partitions = {
+          AddOrUpdateBehavior = "InheritFromTable"
+        }
+      }
+      Grouping = {
+        TableGroupingPolicy = "CombineCompatibleSchemas"
+      }
+      Version = 1
+    }
+  )
+  name     = "bfd-test-api-requests-recurring-crawler"
+  role     = local.external.insights_glue_role
+  schedule = "cron(59 10 * * ? *)"
+  tags     = {}
+  tags_all = {}
+
+  catalog_target {
+    database_name = "bfd"
+    tables = [
+      "test_api_requests",
+    ]
+  }
+  catalog_target {
+    database_name = "bfd"
+    tables = [
+      "test_beneficiaries",
+    ]
+  }
+  catalog_target {
+    database_name = "bfd"
+    tables = [
+      "test_beneficiaries_unique",
+    ]
+  }
+
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
+
+  schema_change_policy {
+    delete_behavior = "LOG"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
+}

@@ -1,12 +1,3 @@
-# module "api_history" {
-#   source         = "../modules/api_history"
-#   glue_role      = local.external.insights_glue_role
-#   account_id     = local.account_id
-#   database       = local.database
-#   environment    = "prod-sbx"
-#   app_log_bucket = aws_s3_bucket.bfd-insights-bfd-app-logs.bucket
-# }
-
 resource "aws_glue_catalog_table" "test_api_requests" {
   catalog_id    = local.account_id
   database_name = "bfd"
@@ -1166,9 +1157,13 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   etag               = filemd5("glue_src/bfd-populate-beneficiary-unique.py")
 }
 
-resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
+# API Requests
+
+resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
+  for_each = local.environments
+
   classifiers   = []
-  database_name = "bfd"
+  database_name = local.database
   configuration = jsonencode(
     {
       CrawlerOutput = {
@@ -1182,28 +1177,28 @@ resource "aws_glue_crawler" "bfd-test-api-requests-recurring-crawler" {
       Version = 1
     }
   )
-  name     = "bfd-test-api-requests-recurring-crawler"
+  name     = "bfd-${each.key}-api-requests-recurring-crawler"
   role     = local.external.insights_glue_role
   schedule = "cron(59 10 * * ? *)"
   tags     = {}
   tags_all = {}
 
   catalog_target {
-    database_name = "bfd"
+    database_name = local.database
     tables = [
-      "test_api_requests",
+      "${each.key}_api_requests",
     ]
   }
   catalog_target {
-    database_name = "bfd"
+    database_name = local.database
     tables = [
-      "test_beneficiaries",
+      "${each.key}_beneficiaries",
     ]
   }
   catalog_target {
-    database_name = "bfd"
+    database_name = local.database
     tables = [
-      "test_beneficiaries_unique",
+      "${each.key}_beneficiaries_unique",
     ]
   }
 
@@ -1339,3 +1334,4 @@ resource "aws_glue_classifier" "historicals_local" {
     grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
   }
 }
+
