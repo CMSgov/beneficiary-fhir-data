@@ -381,15 +381,15 @@ public enum StaticRifResource {
    * the population size that Synthea is told to produce.
    */
   SYNTHEA_BENES(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2011.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
   SYNTHEA_BENE_INTERIM(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_interim.csv")),
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2015.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
   SYNTHEA_BENE_FINAL(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_final.csv")),
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2021.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
 
@@ -819,13 +819,15 @@ public enum StaticRifResource {
             new ProcessExecutor(
                     syntheaBinPath.toString(),
                     "-s",
-                    "0",
+                    "1010",
                     "-cs",
                     "0",
                     "-r",
                     "20210520",
+                    "-e",
+                    "20210520",
                     "-p",
-                    "10",
+                    "20",
                     "--exporter.fhir.export=false",
                     "--exporter.bfd.export=true",
                     "--exporter.bfd.require_code_maps=false",
