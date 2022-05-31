@@ -259,7 +259,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
               .setHeaderEntity("PartDEvent")
-              .setHeaderTable("partd_events")
+              .setHeaderTable("partd_events_new")
               .setHeaderEntityIdField("PDE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1317,8 +1317,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "beneficiaries_history",
             "medicare_beneficiaryid_history",
             "outpatient_claims",
-            "inpatient_claims",
-            "partd_events");
+            "inpatient_claims");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());
