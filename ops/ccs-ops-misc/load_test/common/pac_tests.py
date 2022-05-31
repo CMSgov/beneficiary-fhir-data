@@ -17,17 +17,17 @@ class PACTestUser(BFDUserBase):
 
     @classmethod
     def _hashed_mbis(cls):
-        if not hasattr(cls, '_hashed_mbis'):
-            cls._hashed_mbis = data.load_all(
-                    db.get_pac_hashed_mbis
+        if not hasattr(cls, '_cached_hashed_mbis'):
+            cls._cached_hashed_mbis = data.load_all(
+                    db.get_pac_hashed_mbis,
                     use_table_sample=cls.USE_TABLE_SAMPLE)
-        return cls._hashed_mbis
+        return cls._cached_hashed_mbis
 
     # Helper
 
     def _get(self, resource, name, parameters=None):
         params = {} if parameters is None else parameters
-        params["mbi"] = self.hashed_mbis()
+        params["mbi"] = self._hashed_mbis()
 
         self.run_task_by_parameters(
                 base_path=f'/v2/fhir/{resource}',
