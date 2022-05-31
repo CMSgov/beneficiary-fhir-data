@@ -98,7 +98,7 @@ def run_with_params(argv):
         '(Optional, Default 5)'
      '\n--worker_threads="<If >1 the test is run as distributed, and expects this many worker '
         'processes to start, int>" (Optional, Default 1 - non distributed mode)'
-     '\n--stats="<If set, stores stats in JSON to S3 or local file. Must follow format: <STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>" (Optional)'
+     '\n--stats="<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)'
      '\n--resetStats (Optional)')
 
     try:
