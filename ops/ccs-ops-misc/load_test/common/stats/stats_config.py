@@ -79,7 +79,7 @@ class StatsStorageConfig(ABC):
         # Tag must follow the BFD Insights data convention constraints for
         # partition/folders names, as it is used as a partition folder when uploading
         # to S3
-        if re.fullmatch('[a-z0-9_]+', tag) == None:
+        if re.fullmatch('[a-z0-9_]+', tag) == None or tag == '':
             raise ValueError(
                 '"tag" must only consist of lower-case letters, numbers and the "_" character') from None
 
