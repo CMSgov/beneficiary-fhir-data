@@ -37,8 +37,8 @@ class BFDUserBase(HttpUser):
         HttpUser.__init__(self, *args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
-        self.client_cert = setup.get_client_cert()
-        self.server_public_key = setup.load_server_public_key()
+        self.client_cert = config.get_client_cert()
+        self.server_public_key = config.load_server_public_key()
         setup.disable_no_cert_warnings(self.server_public_key, urllib3)
         self.last_updated = data.get_last_updated()
 
@@ -191,7 +191,7 @@ def teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
-    stats_storage_config = setup.load_stats_storage_config()
+    stats_storage_config = config.load_stats_storage_config()
     if stats_storage_config == None:
         return
 

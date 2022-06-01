@@ -78,6 +78,38 @@ def load_from_path(path: str):
         print("Could not find/read configuration file; let's set it up!")
         return create()
 
+
+def get_client_cert() -> str:
+    '''Checks the config file for the client cert value.
+    '''
+
+    config_file = load()
+    return config_file["clientCertPath"]
+
+
+def load_server_public_key() -> str:
+    '''Load the public key to verify the BFD Server's responses or else ignore the warnings from
+    the self-signed cert.
+    '''
+
+    try:
+        config_file = load()
+        server_public_key = config_file["serverPublicKey"]
+        return server_public_key if server_public_key else False
+    except KeyError:
+        return False
+
+
+def load_stats_storage_config() -> StatsStorageConfig:
+    """Load the storage configuration for storing aggregated statistics.
+
+    Returns:
+        StatsStorageConfig: A dataclass representing the storage configuration for aggregated statistics
+    """
+
+    config_file = load()
+    return config_file["storeStats"]
+
 def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsStorageConfig) -> yaml.nodes.ScalarNode:
     """Returns a scalar representer that instructs PyYAML how to serialize a StatsStorageConfig instance
     to an "arg string" in the format of "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>".
