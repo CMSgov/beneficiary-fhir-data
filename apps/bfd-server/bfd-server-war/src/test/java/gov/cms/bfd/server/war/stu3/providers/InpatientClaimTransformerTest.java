@@ -15,7 +15,6 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -75,7 +74,7 @@ public final class InpatientClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.INPATIENT,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -207,7 +206,7 @@ public final class InpatientClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     InpatientClaimLine claimLine1 = claim.getLines().get(0);
-    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 

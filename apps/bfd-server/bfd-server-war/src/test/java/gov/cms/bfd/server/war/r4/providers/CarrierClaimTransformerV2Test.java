@@ -17,6 +17,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -661,7 +662,7 @@ public class CarrierClaimTransformerV2Test {
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
 
-    Quantity compare = new Quantity(1);
+    Quantity compare = new Quantity().setValue(new BigDecimal("1.0"));
 
     assertTrue(compare.equalsDeep(quantity));
   }
@@ -679,7 +680,7 @@ public class CarrierClaimTransformerV2Test {
     Extension compare1 =
         new Extension(
             "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
-            new Quantity().setValue(1));
+            new Quantity().setValue(new BigDecimal("1")));
 
     assertTrue(compare1.equalsDeep(ex1));
 
@@ -1195,7 +1196,7 @@ public class CarrierClaimTransformerV2Test {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimTypeV2.CARRIER,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),

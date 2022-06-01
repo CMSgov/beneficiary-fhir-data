@@ -13,7 +13,6 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +69,7 @@ public final class HHAClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.HHA,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -122,7 +121,7 @@ public final class HHAClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     HHAClaimLine claimLine1 = claim.getLines().get(0);
-    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 

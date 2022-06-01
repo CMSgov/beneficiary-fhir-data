@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -17,6 +18,7 @@ import gov.cms.bfd.server.war.commons.NPIOrgDataLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -1284,6 +1286,16 @@ public final class OutpatientClaimTransformerV2Test {
     assertEquals(expectedExtensionUrl, ext.getUrl());
     assertTrue(ext.getValue() instanceof Coding);
     assertNotNull(((Coding) ext.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(111), eob.getItem());
   }
 
   /**

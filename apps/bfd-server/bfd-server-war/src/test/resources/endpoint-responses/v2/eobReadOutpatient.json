@@ -401,6 +401,12 @@
     }
   } ],
   "item" : [ {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+      "valueQuantity" : {
+        "value" : 111
+      }
+    } ],
     "sequence" : 25,
     "careTeamSequence" : [ 4 ],
     "revenue" : {

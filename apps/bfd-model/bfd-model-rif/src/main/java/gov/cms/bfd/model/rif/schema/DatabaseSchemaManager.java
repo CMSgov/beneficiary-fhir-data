@@ -43,8 +43,10 @@ public final class DatabaseSchemaManager {
   }
 
   /**
+   * Creates a {@link Flyway} instance that can be used for the specified {@link DataSource}.
+   *
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
-   * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
+   * @return a {@link Flyway} instance
    */
   private static Flyway createFlyway(DataSource dataSource) {
     FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
@@ -65,6 +67,8 @@ public final class DatabaseSchemaManager {
   }
 
   /**
+   * Creates the script placeholders map.
+   *
    * @param dataSource the {@link DataSource} that the replacements will be used for
    * @return the {@link Map} of key-value replacements to use for {@link
    *     Flyway#setPlaceholders(Map)}

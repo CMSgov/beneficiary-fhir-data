@@ -3526,6 +3526,7 @@ public final class TransformerUtilsV2 {
    * @param nonCoveredChargeAmount REV_CNTR_NCVRD_CHRG_AMT,
    * @param nationalDrugCodeQuantity REV_CNTR_NDC_QTY,
    * @param nationalDrugCodeQualifierCode REV_CNTR_NDC_QTY_QLFR_CD,
+   * @param unitCount REV_CNTR_UNIT_CNT,
    * @return the {@link ItemComponent}
    */
   static ItemComponent mapEobCommonItemRevenue(
@@ -3536,7 +3537,8 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       Optional<BigDecimal> nonCoveredChargeAmount,
       Optional<BigDecimal> nationalDrugCodeQuantity,
-      Optional<String> nationalDrugCodeQualifierCode) {
+      Optional<String> nationalDrugCodeQualifierCode,
+      BigDecimal unitCount) {
 
     // REV_CNTR => ExplanationOfBenefit.item.revenue
     item.setRevenue(createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR, revenueCenterCode));
@@ -3581,6 +3583,13 @@ public final class TransformerUtilsV2 {
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
       item.setQuantity(drugQuantity);
+    }
+
+    // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
+    if (unitCount != null && unitCount.compareTo(BigDecimal.ZERO) != 0) {
+      Extension unitCountExtension =
+          createExtensionQuantity(CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, unitCount);
+      item.addExtension(unitCountExtension);
     }
 
     return item;

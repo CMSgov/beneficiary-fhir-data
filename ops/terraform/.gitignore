@@ -2,3 +2,4 @@
 *.tfvars
 .terraform
 !.terraform-version
+!.terraform-docs.yml

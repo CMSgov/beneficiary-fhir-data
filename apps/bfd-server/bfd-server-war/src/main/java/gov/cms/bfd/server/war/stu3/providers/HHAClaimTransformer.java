@@ -59,7 +59,7 @@ final class HHAClaimTransformer {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimType.HHA,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -204,7 +204,7 @@ final class HHAClaimTransformer {
 
     for (HHAClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
-      item.setSequence(claimLine.getLineNumber().intValue());
+      item.setSequence(claimLine.getLineNumber());
 
       item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 

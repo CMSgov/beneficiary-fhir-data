@@ -1,42 +1,17 @@
-import urllib3
-import common.config as config
-import common.data as data
-import common.errors as errors
-import common.test_setup as setup
-import common.validation as validation
-from locust import HttpUser, task, events
+'''Single Locust test for BFD endpoint'''
 
-server_public_key = setup.loadServerPublicKey()
-setup.disable_no_cert_warnings(server_public_key, urllib3)
+from common.bene_tests import BeneTestUser
+from common.validation import SLA_EOB_WITHOUT_SINCE
+from locust import task
 
-eob_ids = data.load_bene_ids()
-client_cert = setup.getClientCert()
-setup.set_locust_env(config.load())
+class BFDUser(BeneTestUser):
+    '''Single Locust test for BFD endpoint'''
+    
+    # The goals against which to measure these results. Note that they also include the Failsafe
+    # cutoff, which will default to the V2 cutoff time if not set.
+    VALIDATION_GOALS = SLA_EOB_WITHOUT_SINCE
 
-class BFDUser(HttpUser):
     @task
-    def explanation_of_benefit(self):
-        if len(eob_ids) == 0:
-            errors.no_data_stop_test(self)
-
-        id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_count=10&_format=application%2Ffhir%2Bjson',
-                cert=client_cert,
-                verify=server_public_key,
-                name='/v2/fhir/ExplanationOfBenefit search by id / count=10')
-
-'''
-Adds a global failsafe check to ensure that if this test overwhelms the
-database, we bail out and stop hitting the server.
-'''
-@events.init.add_listener
-def on_locust_init(environment, **_kwargs):
-    validation.setup_failsafe_event(environment, validation.SLA_EOB_WITHOUT_SINCE)
-
-'''
-Adds a listener that will run when the test ends which checks the various
-response time percentiles against the SLA for this endpoint.
-'''
-@events.test_stop.add_listener
-def on_locust_quit(environment, **_kwargs):
-    validation.check_sla_validation(environment, validation.SLA_EOB_WITHOUT_SINCE)
+    def eob_test_id_count(self):
+        '''Explanation of Benefit search by ID, Paginated'''
+        self._test_v2_eob_test_id_count()

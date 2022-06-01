@@ -63,7 +63,7 @@ final class InpatientClaimTransformer {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimType.INPATIENT,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -301,7 +301,7 @@ final class InpatientClaimTransformer {
 
     for (InpatientClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
-      item.setSequence(claimLine.getLineNumber().intValue());
+      item.setSequence(claimLine.getLineNumber());
 
       TransformerUtils.mapHcpcs(
           eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());
