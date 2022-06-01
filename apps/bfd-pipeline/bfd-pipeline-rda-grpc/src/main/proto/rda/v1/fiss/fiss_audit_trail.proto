@@ -15,4 +15,5 @@ message FissAuditTrail {
   optional string badt_oper_id = 4;
   optional string badt_reas = 5;
   optional string badt_curr_date_cymd = 6;
+  uint32 rda_position = 7;
 }

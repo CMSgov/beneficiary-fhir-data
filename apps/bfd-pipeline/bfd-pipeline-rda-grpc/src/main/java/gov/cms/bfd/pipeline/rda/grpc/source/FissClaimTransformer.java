@@ -1427,6 +1427,7 @@ public class FissClaimTransformer {
         from::hasBadtCurrDateCymd,
         from::getBadtCurrDateCymd,
         to::setBadtCurrDate);
+    transformer.copyInt(from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 }

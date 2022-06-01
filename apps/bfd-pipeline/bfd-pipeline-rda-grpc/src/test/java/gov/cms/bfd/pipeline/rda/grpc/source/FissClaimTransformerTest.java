@@ -477,6 +477,7 @@ public class FissClaimTransformerTest {
                 .setBadtOperId("2")
                 .setBadtReas("3")
                 .setBadtCurrDateCymd("2021-12-03")
+                .setRdaPosition(0)
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
@@ -1878,6 +1879,13 @@ public class FissClaimTransformerTest {
             FissAuditTrail.Builder::setBadtCurrDateCymd,
             RdaFissAuditTrail::getBadtCurrDate,
             RdaFissAuditTrail.Fields.badtCurrDate);
+  }
+
+  @Test
+  public void testAudiTrailRdaPosition() {
+    new AuditTrailFieldTester()
+        .verifyIntFieldCopiedCorrectly(
+            FissAuditTrail.Builder::setRdaPosition, RdaFissAuditTrail::getRdaPosition);
   }
 
   // endregion AuditTrail tests

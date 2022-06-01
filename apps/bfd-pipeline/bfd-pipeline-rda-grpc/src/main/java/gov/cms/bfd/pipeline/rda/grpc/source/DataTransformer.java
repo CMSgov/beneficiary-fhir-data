@@ -212,6 +212,11 @@ public class DataTransformer {
     return this;
   }
 
+  public DataTransformer copyInt(IntSupplier value, IntConsumer copier) {
+    copier.accept(value.getAsInt());
+    return this;
+  }
+
   public DataTransformer copyOptionalInt(
       BooleanSupplier exists, IntSupplier value, IntConsumer copier) {
     if (exists.getAsBoolean()) {
