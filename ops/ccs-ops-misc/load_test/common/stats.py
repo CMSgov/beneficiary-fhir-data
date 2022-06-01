@@ -1,5 +1,7 @@
 """
-Much of this file is adapted from equivalent Locust code, particularly locust.stats.StatsCSV
+Much of this file is adapted from equivalent Locust code, particularly locust.stats.StatsCSV.
+Code in this file relates to the storing and retrieval of performance statistics in a given Locust
+environment.
 """
 from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
 from locust.env import Environment
