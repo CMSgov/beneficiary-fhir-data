@@ -13,7 +13,7 @@ def validate_file(filename):
         for line in infile:
             count = line.count("|")
             if count != 203:
-                print("Bad count on line " + str(lineCount))
+                print("Bad column count on line " + str(lineCount))
                 fail = 'True'
             doubleSpaceCount = line.count("  ")
             if doubleSpaceCount > 0:
