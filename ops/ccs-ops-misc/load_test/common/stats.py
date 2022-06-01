@@ -21,6 +21,9 @@ from gevent import monkey
 monkey.patch_all()
 import boto3
 
+# We are re-exporting Locust's default percentiles list here so that consumers of members
+# of this file do not need to also import from the locust.stats module if they want to use
+# the default reporting percentiles
 PERCENTILES_TO_REPORT = PERCENTILES_TO_REPORT
 """A list of floating-point percentiles to report when generating JSON performance reports"""
 
