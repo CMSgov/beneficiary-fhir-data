@@ -183,7 +183,7 @@ class BFDUserBase(HttpUser):
         return None
 
 @events.test_stop.add_listener
-def teardown(environment: Environment, **kwargs) -> None:
+def one_time_teardown(environment: Environment, **kwargs) -> None:
     """Run one-time teardown tasks after the tests have completed
 
     Args:
