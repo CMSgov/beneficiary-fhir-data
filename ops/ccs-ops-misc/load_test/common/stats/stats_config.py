@@ -31,7 +31,7 @@ class StatsComparisonType(Enum):
 
 @dataclass
 class StatsConfiguration():
-    """Dataclass that holds data about where and how aggregated performance statistics are stored"""
+    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared"""
     type: StatsStorageType
     """The storage type that the stats will be written to"""
     env: StatsEnvironment
@@ -44,6 +44,8 @@ class StatsConfiguration():
     """The AWS S3 Bucket that the JSON will be written to. Used only if type is s3, ignored if type is file"""
     compare: Optional[StatsComparisonType]
     """Indicates the type of performance stats comparison that will be done"""
+    comp_tag: Optional[str]
+    """Indicates the tag from which comparison statistics will be loaded"""
 
     def to_key_val_str(self) -> str:
         """Returns a key-value string representation of this StatsConfiguration instance.
@@ -79,7 +81,7 @@ class StatsConfiguration():
 
         # Check for required parameters, like type, tag, environment
         if not set(['type', 'tag', 'env']).issubset(set(config_dict.keys())):
-            raise ValueError('type, tag, and env must be specified') from None
+            raise ValueError('"type", "tag", and "env" must be specified') from None
 
         # Handle all of the enum-backed fields
         storage_type = _enum_from_val(
@@ -89,21 +91,18 @@ class StatsConfiguration():
         compare_type = _enum_from_val(
             config_dict['compare'], StatsComparisonType, 'compare') if 'compare' in config_dict else None
 
-        tag = config_dict['tag']
-        # Tag must follow the BFD Insights data convention constraints for
-        # partition/folders names, as it is used as a partition folder when uploading
-        # to S3
-        if re.fullmatch('[a-z0-9_]+', tag) == None or tag == '':
-            raise ValueError(
-                '"tag" must only consist of lower-case letters, numbers and the "_" character') from None
+        # Validate all of the tags passed in
+        tag = _validate_tag(config_dict['tag'], 'tag')       
+        comparison_tag = _validate_tag(config_dict['comp_tag'], 'comp_tag') if 'comp_tag' in config_dict else tag
 
+        # Validate that bucket is specified if S3 is being used as the store
         if storage_type == StatsStorageType.S3 and not 'bucket' in config_dict:
             raise ValueError(
                 '"bucket" must be specified if "type" is "s3"') from None
 
         return StatsConfiguration(type=storage_type, env=stats_environment, tag=tag,
                                   path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
-                                  compare=compare_type)
+                                  compare=compare_type, comp_tag=comparison_tag)
 
 
 def _enum_from_val(val: str, enum_type: Type[Enum], field_name: str):
@@ -112,3 +111,13 @@ def _enum_from_val(val: str, enum_type: Type[Enum], field_name: str):
     except KeyError:
         raise ValueError(
             f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
+
+def _validate_tag(tag: str, field_name: str) -> str:
+    # Tags must follow the BFD Insights data convention constraints for
+    # partition/folders names, as it is used as a partition folder when uploading
+    # to S3
+    if re.fullmatch('[a-z0-9_]+', tag) == None or tag == '':
+        raise ValueError(
+            f'"{field_name}" must only consist of lower-case letters, numbers and the "_" character') from None
+
+    return tag
