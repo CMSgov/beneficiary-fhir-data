@@ -42,6 +42,8 @@ class StatsConfiguration():
     """The local parent directory where JSON files will be written to. Used only if type is file, ignored if type is s3"""
     bucket: Optional[str]
     """The AWS S3 Bucket that the JSON will be written to. Used only if type is s3, ignored if type is file"""
+    compare: Optional[StatsComparisonType]
+    """Indicates the type of performance stats comparison that will be done"""
 
     def to_key_val_str(self) -> str:
         """Returns a key-value string representation of this StatsConfiguration instance.
@@ -84,6 +86,8 @@ class StatsConfiguration():
             config_dict['type'], StatsStorageType, 'type')
         stats_environment = _enum_from_val(
             config_dict['env'], StatsEnvironment, 'env')
+        compare_type = _enum_from_val(
+            config_dict['compare'], StatsComparisonType, 'compare') if 'compare' in config_dict else None
 
         tag = config_dict['tag']
         # Tag must follow the BFD Insights data convention constraints for
@@ -98,7 +102,8 @@ class StatsConfiguration():
                 '"bucket" must be specified if "type" is "s3"') from None
 
         return StatsConfiguration(type=storage_type, env=stats_environment, tag=tag,
-                                  path=config_dict.get('path') or '', bucket=config_dict.get('bucket'))
+                                  path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
+                                  compare=compare_type)
 
 
 def _enum_from_val(val: str, enum_type: Type[Enum], field_name: str):
