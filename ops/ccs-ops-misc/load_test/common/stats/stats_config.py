@@ -21,6 +21,14 @@ class StatsEnvironment(Enum):
     """Indicates that the running environment is in production, using production resources"""
 
 
+class StatsComparisonType(Enum):
+    """Enumeration for each possible type of stats comparison"""
+    PREVIOUS = 1
+    """Indicates that the comparison will be against the most recent, previous run under a given tag"""
+    AVERAGE = 2
+    """Indicates that the comparison will be against the average of all runs under a given tag"""
+
+
 @dataclass
 class StatsConfiguration():
     """Dataclass that holds data about where and how aggregated performance statistics are stored"""
@@ -45,7 +53,7 @@ class StatsConfiguration():
         as_dict = dataclasses.asdict(self)
         dict_non_empty = {k: v for k,
                           v in as_dict.items() if v is not None and v != ''}
-        return ';'.join([f'{k}={v}' for k,v in dict_non_empty.items()])
+        return ';'.join([f'{k}={v}' for k, v in dict_non_empty.items()])
 
     def from_key_val_str(key_val_str: str):
         """Constructs a concrete instance of StatsConfiguration from a given string in key-value format seperated
