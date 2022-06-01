@@ -528,7 +528,7 @@ resource "aws_glue_crawler" "history-crawler" {
   for_each = local.environments
 
   classifiers = [
-    aws_glue_classifier.historicals_local.name
+    aws_glue_classifier.bfd_historicals_local.name
   ]
   database_name = local.database
   name          = "${local.database}-${each.key}-history-crawler"
@@ -552,15 +552,6 @@ resource "aws_glue_crawler" "history-crawler" {
   schema_change_policy {
     delete_behavior = "DEPRECATE_IN_DATABASE"
     update_behavior = "UPDATE_IN_DATABASE"
-  }
-}
-
-resource "aws_glue_classifier" "historicals_local" {
-  name = "bfd_historicals_local"
-
-  grok_classifier {
-    classification = "cw-history"
-    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
   }
 }
 
