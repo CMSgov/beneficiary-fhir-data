@@ -2,7 +2,7 @@ import dataclasses
 from enum import Enum
 import re
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Type
 
 
 class StatsStorageType(Enum):
@@ -53,7 +53,7 @@ class StatsConfiguration():
         as_dict = dataclasses.asdict(self)
         dict_non_empty = {k: v for k,
                           v in as_dict.items() if v is not None and v != ''}
-        return ';'.join([f'{k}={v}' for k, v in dict_non_empty.items()])
+        return ';'.join([f'{k}={str(v) if not isinstance(v, Enum) else v.name}' for k, v in dict_non_empty.items()])
 
     def from_key_val_str(key_val_str: str):
         """Constructs a concrete instance of StatsConfiguration from a given string in key-value format seperated
@@ -76,20 +76,14 @@ class StatsConfiguration():
             key_val.split('=') for key_val in key_vals_list)}
 
         # Check for required parameters, like type, tag, environment
-        if not set(['type', 'tag', "env"]).issubset(set(config_dict.keys())):
+        if not set(['type', 'tag', 'env']).issubset(set(config_dict.keys())):
             raise ValueError('type, tag, and env must be specified') from None
 
-        try:
-            storage_type = StatsStorageType[config_dict['type'].upper()]
-        except KeyError:
-            raise ValueError(
-                '"type" must be either "file" or "s3"') from None
-
-        try:
-            stats_environment = StatsEnvironment[config_dict['env'].upper()]
-        except KeyError:
-            raise ValueError(
-                '"env" must be either "TEST" or "PROD"') from None
+        # Handle all of the enum-backed fields
+        storage_type = _enum_from_val(
+            config_dict['type'], StatsStorageType, 'type')
+        stats_environment = _enum_from_val(
+            config_dict['env'], StatsEnvironment, 'env')
 
         tag = config_dict['tag']
         # Tag must follow the BFD Insights data convention constraints for
@@ -105,3 +99,11 @@ class StatsConfiguration():
 
         return StatsConfiguration(type=storage_type, env=stats_environment, tag=tag,
                                   path=config_dict.get('path') or '', bucket=config_dict.get('bucket'))
+
+
+def _enum_from_val(val: str, enum_type: Type[Enum], field_name: str):
+    try:
+        return enum_type[val.upper()]
+    except KeyError:
+        raise ValueError(
+            f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
