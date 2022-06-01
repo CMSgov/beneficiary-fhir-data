@@ -94,44 +94,6 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
   }
 }
 
-resource "aws_glue_crawler" "bfd-test-history-crawler" {
-  classifiers = [
-    "test_historicals_local",
-  ]
-  database_name = "bfd"
-  name          = "bfd-test-history-crawler"
-  role          = local.external.insights_glue_role
-  tags          = {}
-  tags_all      = {}
-
-  lineage_configuration {
-    crawler_lineage_settings = "DISABLE"
-  }
-
-  recrawl_policy {
-    recrawl_behavior = "CRAWL_EVERYTHING"
-  }
-
-  s3_target {
-    exclusions = []
-    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history"
-  }
-
-  schema_change_policy {
-    delete_behavior = "DEPRECATE_IN_DATABASE"
-    update_behavior = "UPDATE_IN_DATABASE"
-  }
-}
-
-resource "aws_glue_classifier" "test_historicals_local" {
-  name = "test_historicals_local"
-
-  grok_classifier {
-    classification = "cw-history"
-    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-  }
-}
-
 resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
   bucket              = "bfd-insights-bfd-app-logs"
   hosted_zone_id      = "Z3AQBSTGFYJSTF"

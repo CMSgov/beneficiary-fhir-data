@@ -1340,3 +1340,41 @@ resource "aws_cloudwatch_log_subscription_filter" "bfd-test-access-log-subscript
   # destination_arn = "arn:aws:firehose:us-east-1:${local.account_id}:deliverystream/${local.full_name}"
   role_arn        = aws_iam_role.cloudwatch_role.arn
 }
+
+resource "aws_glue_crawler" "bfd-test-history-crawler" {
+  classifiers = [
+    "test_historicals_local",
+  ]
+  database_name = "bfd"
+  name          = "bfd-test-history-crawler"
+  role          = local.external.insights_glue_role
+  tags          = {}
+  tags_all      = {}
+
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
+
+  s3_target {
+    exclusions = []
+    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/test_api_history"
+  }
+
+  schema_change_policy {
+    delete_behavior = "DEPRECATE_IN_DATABASE"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+resource "aws_glue_classifier" "test_historicals_local" {
+  name = "test_historicals_local"
+
+  grok_classifier {
+    classification = "cw-history"
+    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+  }
+}

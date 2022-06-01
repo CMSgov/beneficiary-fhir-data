@@ -53,6 +53,47 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   }
 }
 
+resource "aws_glue_crawler" "bfd-history-crawler" {
+  for_each = local.environments
+
+  classifiers = [
+    aws_glue_classifier.bfd_historicals_local.name,
+  ]
+  database_name = local.database
+  name          = "bfd-${each.key}-history-crawler"
+  role          = local.external.insights_glue_role
+  tags          = {}
+  tags_all      = {}
+
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
+
+  s3_target {
+    exclusions = []
+    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/${each.key}_api_history"
+  }
+
+  schema_change_policy {
+    delete_behavior = "DEPRECATE_IN_DATABASE"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+resource "aws_glue_classifier" "bfd_historicals_local" {
+  name = "bfd_historicals_local"
+
+  grok_classifier {
+    classification = "cw-history"
+    grok_pattern   = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
+  }
+}
+
+
 # Beneficiaries
 
 resource "aws_s3_object" "bfd-populate-beneficiaries" {
