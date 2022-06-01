@@ -1,5 +1,6 @@
 # History
 
+# S3 object containing the Glue Script for history ingestion
 resource "aws_s3_object" "bfd-history-ingest" {
   bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
@@ -13,6 +14,7 @@ resource "aws_s3_object" "bfd-history-ingest" {
   etag               = filemd5("glue_src/bfd-history-ingest.py")
 }
 
+# Glue Job for history ingestion
 resource "aws_glue_job" "bfd-history-ingest-job" {
   for_each = local.environments
 
@@ -27,9 +29,9 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--enable-spark-ui"                  = "true"
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
-    "--sourceTable"                      = "test"
+    "--sourceTable"                      = each.key
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/${each.key}/"
-    "--targetTable"                      = "${each.key}_api_requests"
+    "--targetTable"                      = aws_glue_catalog_table.api_requests_table[each.key].name
   }
   glue_version              = "3.0"
   max_retries               = 0
@@ -53,6 +55,7 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   }
 }
 
+# Glue Crawler to process the ingested logs and populate the S3 target
 resource "aws_glue_crawler" "bfd-history-crawler" {
   for_each = local.environments
 
@@ -84,6 +87,7 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   }
 }
 
+# Glue Classifier to read data from the data store and generate the schema
 resource "aws_glue_classifier" "bfd_historicals_local" {
   name = "bfd_historicals_local"
 
@@ -96,6 +100,7 @@ resource "aws_glue_classifier" "bfd_historicals_local" {
 
 # Beneficiaries
 
+# S3 Object for Glue Script
 resource "aws_s3_object" "bfd-populate-beneficiaries" {
   bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
@@ -109,6 +114,7 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   etag               = filemd5("glue_src/bfd-populate-beneficiaries.py")
 }
 
+# Glue Job to populate the beneficiaries table
 resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
   for_each = local.environments
 
@@ -123,9 +129,9 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--enable-spark-ui"                  = "true"
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
-    "--sourceTable"                      = "${each.key}_api_requests"
+    "--sourceTable"                      = aws_glue_catalog_table.api_requests_table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${each.key}/"
-    "--targetTable"                      = "${each.key}_beneficiaries"
+    "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table[each.key].name
   }
   glue_version              = "3.0"
   max_retries               = 0
@@ -149,7 +155,8 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
   }
 }
 
-resource "aws_glue_catalog_table" "beneficiaries-job" {
+# Glue Catalog Table to hold Beneficiaries
+resource "aws_glue_catalog_table" "beneficiaries-table" {
   for_each = local.environments
 
   catalog_id    = local.account_id
@@ -159,7 +166,7 @@ resource "aws_glue_catalog_table" "beneficiaries-job" {
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
+    # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
     "averageRecordSize"                = "49"
     "classification"                   = "parquet"
     "compressionType"                  = "none"
@@ -188,14 +195,13 @@ resource "aws_glue_catalog_table" "beneficiaries-job" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    # TODO: Change this to a canonical name-spaced location
     location          = "s3://${module.bucket.id}/databases/bfd/${each.key}_beneficiaries/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
+      # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
       "averageRecordSize"                = "49"
       "classification"                   = "parquet"
       "compressionType"                  = "none"
@@ -249,6 +255,7 @@ resource "aws_glue_catalog_table" "beneficiaries-job" {
 
 # Beneficiary Unique
 
+# S3 Object for the Glue Script
 resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
@@ -262,6 +269,7 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   etag               = filemd5("glue_src/bfd-populate-beneficiary-unique.py")
 }
 
+# Glue Job to populate the beneficiary_unique table
 resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   for_each = local.environments
 
@@ -277,9 +285,9 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
     "--initialize"                       = "True"
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
-    "--sourceTable"                      = "test_beneficiaries"
+    "--sourceTable"                      = aws_glue_catalog_table.beneficiaries-table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/${each.key}/"
-    "--targetTable"                      = "${each.key}_beneficiaries_unique"
+    "--targetTable"                      = aws_glue_catalog_table.beneficiaries_unique_table[each.key].name
   }
   glue_version              = "3.0"
   max_retries               = 0
@@ -303,7 +311,8 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   }
 }
 
-resource "aws_glue_catalog_table" "beneficiaries_unique-job" {
+# Glue Catalog Table for unique beneficiaries
+resource "aws_glue_catalog_table" "beneficiaries_unique_table" {
   for_each = local.environments
 
   catalog_id    = local.account_id
@@ -313,7 +322,7 @@ resource "aws_glue_catalog_table" "beneficiaries_unique-job" {
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
+    # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
     "averageRecordSize"                = "21"
     "classification"                   = "parquet"
     "compressionType"                  = "none"
@@ -344,7 +353,7 @@ resource "aws_glue_catalog_table" "beneficiaries_unique-job" {
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
+      # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
       "averageRecordSize"                = "21"
       "classification"                   = "parquet"
       "compressionType"                  = "none"
@@ -375,8 +384,10 @@ resource "aws_glue_catalog_table" "beneficiaries_unique-job" {
   }
 }
 
+
 # API Requests
 
+# TODO: What *is* this?
 resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
   for_each = local.environments
 
@@ -404,19 +415,19 @@ resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
   catalog_target {
     database_name = local.database
     tables = [
-      "${each.key}_api_requests",
+      aws_glue_catalog_table.api_requests_table[each.key].name,
     ]
   }
   catalog_target {
     database_name = local.database
     tables = [
-      "${each.key}_beneficiaries",
+      aws_glue_catalog_table.beneficiaries-table[each.key].name,
     ]
   }
   catalog_target {
     database_name = local.database
     tables = [
-      "${each.key}_beneficiaries_unique",
+      aws_glue_catalog_table.beneficiaries_unique_table[each.key].name,
     ]
   }
 
@@ -434,8 +445,10 @@ resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
   }
 }
 
+
 # API History
 
+# Glue Catalog Table to store API History
 resource "aws_glue_catalog_table" "api_history" {
   for_each = local.environments
 
@@ -446,7 +459,7 @@ resource "aws_glue_catalog_table" "api_history" {
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.history-crawler[each.key].name
+    # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.history-crawler[each.key].name
     "averageRecordSize"                = "2857"
     "classification"                   = "cw-history"
     "compressionType"                  = "gzip"
@@ -478,7 +491,7 @@ resource "aws_glue_catalog_table" "api_history" {
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.history-crawler[each.key].name
+      # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.history-crawler[each.key].name
       "averageRecordSize"                = "2857"
       "classification"                   = "cw-history"
       "compressionType"                  = "gzip"
@@ -510,11 +523,12 @@ resource "aws_glue_catalog_table" "api_history" {
   }
 }
 
+# Glue Crawler to parse and store history
 resource "aws_glue_crawler" "history-crawler" {
   for_each = local.environments
 
   classifiers = [
-    aws_glue_classifier.historicals_local[each.key].name
+    aws_glue_classifier.historicals_local.name
   ]
   database_name = local.database
   name          = "${local.database}-${each.key}-history-crawler"
@@ -542,9 +556,7 @@ resource "aws_glue_crawler" "history-crawler" {
 }
 
 resource "aws_glue_classifier" "historicals_local" {
-  for_each = local.environments
-
-  name = "${each.key}_historicals_local"
+  name = "bfd_historicals_local"
 
   grok_classifier {
     classification = "cw-history"
@@ -562,9 +574,9 @@ resource "aws_glue_catalog_table" "api_requests_table" {
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
     "CrawlerSchemaSerializerVersion"   = "1.0"
-    "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
-    "UpdatedByJob"                     = aws_glue_job.bfd-history-ingest-job[each.key].name
-    "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
+    # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
+    # "UpdatedByJob"                     = aws_glue_job.bfd-history-ingest-job[each.key].name
+    # "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
     "averageRecordSize"                = "9486"
     "classification"                   = "json"
     "compressionType"                  = "none"
@@ -599,9 +611,9 @@ resource "aws_glue_catalog_table" "api_requests_table" {
     parameters = {
       "CrawlerSchemaDeserializerVersion" = "1.0"
       "CrawlerSchemaSerializerVersion"   = "1.0"
-      "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
-      "UpdatedByJob"                     = aws_glue_job.bfd-history-ingest-job[each.key].name
-      "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
+      # "UPDATED_BY_CRAWLER"               = aws_glue_crawler.bfd-api-requests-recurring-crawler[each.key].name
+      # "UpdatedByJob"                     = aws_glue_job.bfd-history-ingest-job[each.key].name
+      # "UpdatedByJobRun"                  = "jr_0d9384dec6facd8b8f8d22433e9d7dc3aaa35cd36d82aeb4e63accfad04a743c"
       "averageRecordSize"                = "9486"
       "classification"                   = "json"
       "compressionType"                  = "none"
