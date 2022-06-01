@@ -115,6 +115,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 **--storeStats**: (Optional) : Argument specifying that aggregated performance statistics should be stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified in the following format: `<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>`, where
 
 * `STORAGE_TYPE` is either `file` or `s3`. 
+  * Note that the `file` `STORAGE_TYPE` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. 
 * `RUNNING_ENVIRONMENT` is either `TEST` or `PROD`.
 * `TAG` can be any string that follows BFD Insights data organization standards (lower-case letters, numbers and "_").
   * The tag is used to partition performance statistics for more accurate performance validation between corresponding runs.
