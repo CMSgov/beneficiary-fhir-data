@@ -204,7 +204,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_config.file_path)
+        stats_json_writer.write(stats_config.path)
     elif stats_config.type == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
 
