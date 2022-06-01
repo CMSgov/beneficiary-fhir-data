@@ -268,10 +268,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
               .setHeaderEntity("CarrierClaim")
-              .setHeaderTable("carrier_claims")
+              .setHeaderTable("carrier_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("carrier_claim_lines")
+              .setLineTable("carrier_claim_lines_new")
               .setLineEntityLineNumberField("LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -280,10 +280,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
               .setHeaderEntity("InpatientClaim")
-              .setHeaderTable("inpatient_claims")
+              .setHeaderTable("inpatient_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("inpatient_claim_lines")
+              .setLineTable("inpatient_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1316,8 +1316,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "beneficiaries",
             "beneficiaries_history",
             "medicare_beneficiaryid_history",
-            "carrier_claims",
-            "inpatient_claims",
             "outpatient_claims",
             "partd_events");
 

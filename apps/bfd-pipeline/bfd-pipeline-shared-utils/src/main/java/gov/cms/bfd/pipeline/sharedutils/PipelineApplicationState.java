@@ -6,6 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
@@ -19,16 +20,6 @@ import org.hibernate.tool.schema.Action;
 public final class PipelineApplicationState implements AutoCloseable {
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
   public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
-
-  /**
-   * Minimum number of idle connections in the pool. By default the pool would immediately open all
-   * allowed connections. This is excessive for unit/IT testing so we lower it to avoid exceeding
-   * max connections in postgresql.
-   */
-  public static final int MIN_IDLE_CONNECTIONS = 3;
-
-  /** Maximum amount of time a connection can be idle before it is closed. */
-  public static final int IDLE_CONNECTION_TIMEOUT_MILLIS = 30_000;
 
   private final MetricRegistry metrics;
   private final HikariDataSource pooledDataSource;
@@ -119,8 +110,13 @@ public final class PipelineApplicationState implements AutoCloseable {
     pooledDataSource.setMaximumPoolSize(dbOptions.getMaxPoolSize());
     pooledDataSource.setRegisterMbeans(true);
     pooledDataSource.setMetricRegistry(metrics);
-    pooledDataSource.setMinimumIdle(MIN_IDLE_CONNECTIONS);
-    pooledDataSource.setIdleTimeout(IDLE_CONNECTION_TIMEOUT_MILLIS);
+
+    // In order to store and retrieve JSON in postgresql without adding any additional maven
+    // dependencies  we can set this property to allow String values to be transparently
+    // converted to/from jsonb values.
+    Properties dataSourceProperties = new Properties();
+    dataSourceProperties.setProperty("stringtype", "unspecified");
+    pooledDataSource.setDataSourceProperties(dataSourceProperties);
 
     return pooledDataSource;
   }
@@ -140,8 +136,6 @@ public final class PipelineApplicationState implements AutoCloseable {
     pooledDataSource.setMaximumPoolSize(maxPoolSize);
     pooledDataSource.setRegisterMbeans(true);
     pooledDataSource.setMetricRegistry(metrics);
-    pooledDataSource.setMinimumIdle(MIN_IDLE_CONNECTIONS);
-    pooledDataSource.setIdleTimeout(IDLE_CONNECTION_TIMEOUT_MILLIS);
 
     return pooledDataSource;
   }

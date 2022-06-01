@@ -170,7 +170,8 @@ public class FissClaimRdaSinkTest {
           error.getCause(), CoreMatchers.instanceOf(DataTransformer.TransformationException.class));
     }
 
-    verify(transaction, times(0)).begin();
+    verify(transaction, times(1)).begin();
+    verify(transaction, times(1)).commit();
     verify(transaction, times(0)).rollback();
 
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
