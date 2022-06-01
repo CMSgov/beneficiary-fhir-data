@@ -31,7 +31,7 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--job-language"                     = "python"
     "--sourceTable"                      = each.key
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/${each.key}/"
-    "--targetTable"                      = aws_glue_catalog_table.api_requests_table[each.key].name
+    "--targetTable"                      = aws_glue_catalog_table.api-requests-table[each.key].name
   }
   glue_version              = "3.0"
   max_retries               = 0
@@ -60,7 +60,7 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   for_each = local.environments
 
   classifiers = [
-    aws_glue_classifier.bfd_historicals_local.name,
+    aws_glue_classifier.bfd-historicals-local.name,
   ]
   database_name = local.database
   name          = "bfd-${each.key}-history-crawler"
@@ -88,8 +88,8 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
 }
 
 # Glue Classifier to read data from the data store and generate the schema
-resource "aws_glue_classifier" "bfd_historicals_local" {
-  name = "bfd_historicals_local"
+resource "aws_glue_classifier" "bfd-historicals-local" {
+  name = "bfd-historicals-local"
 
   grok_classifier {
     classification = "cw-history"
@@ -129,7 +129,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--enable-spark-ui"                  = "true"
     "--job-bookmark-option"              = "job-bookmark-disable"
     "--job-language"                     = "python"
-    "--sourceTable"                      = aws_glue_catalog_table.api_requests_table[each.key].name
+    "--sourceTable"                      = aws_glue_catalog_table.api-requests-table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${each.key}/"
     "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table[each.key].name
   }
@@ -161,7 +161,7 @@ resource "aws_glue_catalog_table" "beneficiaries-table" {
 
   catalog_id    = local.account_id
   database_name = local.database
-  name          = "${each.key}_beneficiaries"
+  name          = "${each.key}-beneficiaries"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
@@ -287,7 +287,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
     "--job-language"                     = "python"
     "--sourceTable"                      = aws_glue_catalog_table.beneficiaries-table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/${each.key}/"
-    "--targetTable"                      = aws_glue_catalog_table.beneficiaries_unique_table[each.key].name
+    "--targetTable"                      = aws_glue_catalog_table.beneficiaries-unique-table[each.key].name
   }
   glue_version              = "3.0"
   max_retries               = 0
@@ -312,12 +312,12 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
 }
 
 # Glue Catalog Table for unique beneficiaries
-resource "aws_glue_catalog_table" "beneficiaries_unique_table" {
+resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
   for_each = local.environments
 
   catalog_id    = local.account_id
   database_name = local.database
-  name          = "${each.key}_beneficiaries_unique"
+  name          = "${each.key}-beneficiaries-unique"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
@@ -415,7 +415,7 @@ resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
   catalog_target {
     database_name = local.database
     tables = [
-      aws_glue_catalog_table.api_requests_table[each.key].name,
+      aws_glue_catalog_table.api-requests-table[each.key].name,
     ]
   }
   catalog_target {
@@ -427,7 +427,7 @@ resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
   catalog_target {
     database_name = local.database
     tables = [
-      aws_glue_catalog_table.beneficiaries_unique_table[each.key].name,
+      aws_glue_catalog_table.beneficiaries-unique-table[each.key].name,
     ]
   }
 
@@ -449,12 +449,12 @@ resource "aws_glue_crawler" "bfd-api-requests-recurring-crawler" {
 # API History
 
 # Glue Catalog Table to store API History
-resource "aws_glue_catalog_table" "api_history" {
+resource "aws_glue_catalog_table" "api-history" {
   for_each = local.environments
 
   catalog_id    = local.account_id
   database_name = local.database
-  name          = "${each.key}_api_history"
+  name          = "${each.key}-api-history"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"
@@ -528,7 +528,7 @@ resource "aws_glue_crawler" "history-crawler" {
   for_each = local.environments
 
   classifiers = [
-    aws_glue_classifier.bfd_historicals_local.name
+    aws_glue_classifier.bfd-historicals-local.name
   ]
   database_name = local.database
   name          = "${local.database}-${each.key}-history-crawler"
@@ -555,12 +555,12 @@ resource "aws_glue_crawler" "history-crawler" {
   }
 }
 
-resource "aws_glue_catalog_table" "api_requests_table" {
+resource "aws_glue_catalog_table" "api-requests-table" {
   for_each = local.environments
 
   catalog_id    = local.account_id
   database_name = local.database
-  name          = "${each.key}_api_requests"
+  name          = "${each.key}-api-requests"
   owner         = "owner"
   parameters = {
     "CrawlerSchemaDeserializerVersion" = "1.0"

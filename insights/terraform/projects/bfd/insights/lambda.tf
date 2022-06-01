@@ -1,5 +1,5 @@
 # Zip File containing Lambda script
-data "archive_file" "zip_the_python_code" {
+data "archive_file" "bfd-cw-to-flattened" {
   type        = "zip"
   source_dir  = "${path.module}/lambda_src/"
   output_path = "${path.module}/lambda_src/bfd-cw-to-flattened-json.zip"
@@ -12,7 +12,7 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
   ]
   description                    = "Extracts and flattens JSON messages from CloudWatch log subscriptions."
   function_name                  = "bfd-cw-to-flattened-json"
-  filename                       = data.archive_file.zip_the_python_code.output_path
+  filename                       = data.archive_file.bfd-cw-to-flattened.output_path
   source_code_hash               = filebase64sha256("${path.module}/lambda_src/bfd-cw-to-flattened-json.zip")
   handler                        = "bfd-cw-to-flattened-json.lambda_handler"
   layers                         = []

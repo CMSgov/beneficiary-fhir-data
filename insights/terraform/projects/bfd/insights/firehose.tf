@@ -3,7 +3,7 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
 
   destination    = "extended_s3"
   destination_id = "destinationId-000000000001"
-  name           = local.full_name
+  name           = "bfd-${each.key}-firehose"
   tags = local.tags
   tags_all = local.tags
   version_id = "10"
@@ -55,7 +55,7 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
       }
 
       schema_configuration {
-        database_name = "bfd"
+        database_name = local.database
         region        = local.region
         role_arn      = aws_iam_role.firehose.arn
         table_name    = "bfd-${each.key}-api-requests"
