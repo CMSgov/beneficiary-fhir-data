@@ -138,7 +138,7 @@ class AggregatedStats(object):
         """Creates a new instance of AggregatedStats given the current Locust environment and a list of percentiles to report.
 
         Args:
-            environment (Environment): Current Locust environment
+            locust_env (Environment): Current Locust environment
             percentiles_to_report (List[float]): List of percentiles to report in the generated JSON
             stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
             running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the current testing environment; either TEST or PROD. Defaults to TEST.
