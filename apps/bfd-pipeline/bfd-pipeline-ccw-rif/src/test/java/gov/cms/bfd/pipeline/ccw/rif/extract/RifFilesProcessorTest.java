@@ -437,7 +437,7 @@ public final class RifFilesProcessorTest {
     assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals(567834L, claimGroup.getBeneficiaryId());
     assertEquals(333333222222L, claimGroup.getClaimId());
-    assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
+    assertEquals(900L, claimGroup.getClaimGroupId());
     assertEquals('V', claimGroup.getNearLineRecordIdCode());
     assertEquals("60", claimGroup.getClaimTypeCode());
     assertEquals(LocalDate.of(2016, 01, 15), claimGroup.getDateFrom());
@@ -483,14 +483,14 @@ public final class RifFilesProcessorTest {
     assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
 
     assertEquals("R5555", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get().charValue());
+    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
 
     assertEquals("R5555", claimGroup.getDiagnosis1Code().get());
     assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get().charValue());
-    assertEquals('Y', claimGroup.getDiagnosis1PresentOnAdmissionCode().get().charValue());
+    assertEquals(Character.valueOf('Y'), claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
 
     assertEquals("0TCDDEE", claimGroup.getProcedure1Code().get());
-    assertEquals('0', claimGroup.getProcedure1CodeVersion().get().charValue());
+    assertEquals(Character.valueOf('0'), claimGroup.getProcedure1CodeVersion().get());
     assertEquals(LocalDate.of(2016, 1, 16), claimGroup.getProcedure1Date().get());
     assertEquals(new BigDecimal("120.56"), claimGroup.getClaimUncompensatedCareAmount().get());
     assertEquals("28486613848", claimGroup.getFiDocumentClaimControlNumber().get());
