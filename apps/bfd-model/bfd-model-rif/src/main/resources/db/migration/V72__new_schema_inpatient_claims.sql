@@ -2,7 +2,7 @@
 -- flyway migration for INPATIENT_CLAIMS and INPATIENT_CLAIM_LINES tables into
 -- a new schema structure that:
 --   1) changes data type of CLM_ID, BENE_ID from varchar to BIGINT.
---   2) change data type of CLM_GROUP_ID from numeric to BIGINT
+--   2) change data type of CLM_GRP_ID from numeric to BIGINT
 --   3) organizes parent claim table (INPATIENT_CLAIMS) such that common
 --      claims data columns are organized at top of table structure.
 --
