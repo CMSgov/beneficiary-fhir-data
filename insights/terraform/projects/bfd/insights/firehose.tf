@@ -2,7 +2,6 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   for_each = local.environments
 
   destination    = "extended_s3"
-  destination_id = "destinationId-000000000001"
   name           = "bfd-${each.key}-firehose"
   tags = local.tags
   tags_all = local.tags
@@ -92,4 +91,3 @@ resource "aws_cloudwatch_log_subscription_filter" "bfd-access-log-subscription" 
   destination_arn = aws_kinesis_firehose_delivery_stream.bfd-firehose[each.key].arn
   role_arn        = aws_iam_role.cloudwatch_role.arn
 }
-
