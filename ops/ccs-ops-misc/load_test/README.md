@@ -118,11 +118,11 @@ Essentially, all the items you would set up in the config file are set in a sing
 | :-: | :-: | :-: | - |
 | `store` | Yes | `file`, `s3` | Specifies where the stats are stored. Note that the `file` `store` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. 
 | `env` | Yes | `TEST`, `PROD` | Specifies which environment the test ran in.
-| `tag` | Yes | Must be non-empty, consisting of letters, numbers and the `_` character | A tag that is used to bucket or partition statistics for more accurate performance validation between corresponding runs.
+| `store_tag` | Yes | Must be non-empty, consisting of letters, numbers and the `_` character | A tag that is used to bucket or partition statistics for more accurate performance validation between corresponding runs.
 | `path` | No | N/A | The _local_ **parent directory** where JSON files will be written to. Used only if `store` is `file`, ignored if `store` is `s3`.
 | `bucket` | Yes, _if `store` is `s3`_ | N/A | The AWS S3 Bucket that the JSON will be written to under a predetermined path following BFD Insights data organization standards.
-| `compare` | No | `previous`, `average` | Specifies if the current run should be compared to existing statistics. These statistics will be retrieved from the same type of store as specified by `store`. If `previous` is specified, the most recent run from the same `tag` will be compared against. If `average` is specified, the average of _all_ previous runs from the same `tag` will be compared against.
-| `comp_tag` | No | Must be non-empty, consisting of letters, numbers and the `_` character | Tag from which comparison statistics will be loaded from the given `store`. Defaults to `tag` if unspecified. |
+| `compare` | No | `previous`, `average` | Specifies if the current run should be compared to existing statistics. These statistics will be retrieved from the same type of store as specified by `store`. If `previous` is specified, the most recent run from `comp_tag` will be compared against. If `average` is specified, the average of _all_ previous runs from `comp_tag` will be compared against.
+| `comp_tag` | No | Must be non-empty, consisting of letters, numbers and the `_` character | Tag from which comparison statistics will be loaded from the given `store`. Defaults to `store_tag` if unspecified. |
 
 ### Quick Run
 

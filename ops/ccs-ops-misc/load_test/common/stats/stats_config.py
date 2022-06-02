@@ -6,6 +6,7 @@ from typing import Optional, Type, TypeVar
 
 E = TypeVar('E', Enum)
 
+
 class StatsStorageType(Enum):
     """Enumeration for each available type of storage for JSON stats"""
     FILE = 1
@@ -37,7 +38,7 @@ class StatsConfiguration():
     """The storage type that the stats will be written to"""
     env: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
-    tag: str
+    store_tag: str
     """A simple string tag that is used to partition collected statistics when stored"""
     path: Optional[str]
     """The local parent directory where JSON files will be written to. Used only if type is file, ignored if type is s3"""
@@ -83,7 +84,8 @@ class StatsConfiguration():
 
         # Check for required parameters, like type, tag, environment
         if not set(['type', 'tag', 'env']).issubset(set(config_dict.keys())):
-            raise ValueError('"type", "tag", and "env" must be specified') from None
+            raise ValueError(
+                '"type", "tag", and "env" must be specified') from None
 
         # Handle all of the enum-backed fields
         storage_type = _enum_from_val(
@@ -94,15 +96,16 @@ class StatsConfiguration():
             config_dict['compare'], StatsComparisonType, 'compare') if 'compare' in config_dict else None
 
         # Validate all of the tags passed in
-        tag = _validate_tag(config_dict['tag'], 'tag')       
-        comparison_tag = _validate_tag(config_dict['comp_tag'], 'comp_tag') if 'comp_tag' in config_dict else tag
+        storage_tag = _validate_tag(config_dict['tag'], 'tag')
+        comparison_tag = _validate_tag(
+            config_dict['comp_tag'], 'comp_tag') if 'comp_tag' in config_dict else storage_tag
 
         # Validate that bucket is specified if S3 is being used as the store
         if storage_type == StatsStorageType.S3 and not 'bucket' in config_dict:
             raise ValueError(
                 '"bucket" must be specified if "type" is "s3"') from None
 
-        return StatsConfiguration(store=storage_type, env=stats_environment, tag=tag,
+        return StatsConfiguration(store=storage_type, env=stats_environment, store_tag=storage_tag,
                                   path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
                                   compare=compare_type, comp_tag=comparison_tag)
 
@@ -113,6 +116,7 @@ def _enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
     except KeyError:
         raise ValueError(
             f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
+
 
 def _validate_tag(tag: str, field_name: str) -> str:
     # Tags must follow the BFD Insights data convention constraints for
