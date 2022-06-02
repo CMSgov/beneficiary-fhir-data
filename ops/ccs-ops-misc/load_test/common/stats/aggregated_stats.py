@@ -5,30 +5,22 @@ from typing import Dict, List
 
 from common.stats.stats_config import StatsEnvironment
 
-# We are re-exporting Locust's default percentiles list here so that consumers of members
-# of this file do not need to also import from the locust.stats module if they want to use
-# the default reporting percentiles
-PERCENTILES_TO_REPORT = PERCENTILES_TO_REPORT
-"""A list of floating-point percentiles to report when generating JSON performance reports"""
-
 
 class AggregatedStats(object):
     """Represents a snapshot of aggregated performance statistics of all tasks, or endpoints, that
     ran in the current Locust environment"""
 
-    def __init__(self, locust_env: Environment, percentiles_to_report: List[float], stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
+    def __init__(self, locust_env: Environment, stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
         """Creates a new instance of AggregatedStats given the current Locust environment and a list of percentiles to report.
 
         Args:
             locust_env (Environment): Current Locust environment
-            percentiles_to_report (List[float]): List of percentiles to report in the generated JSON
             stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
             running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the current testing environment; either TEST or PROD. Defaults to TEST.
         """
         super().__init__()
         self.locust_env = locust_env
-        self.percentiles_to_report = percentiles_to_report
-        self.percentiles_na = ["N/A"] * len(self.percentiles_to_report)
+        self.percentiles_na = ["N/A"] * len(PERCENTILES_TO_REPORT)
 
         self.stats_tag = stats_tag
         self.running_env = running_env
@@ -56,7 +48,7 @@ class AggregatedStats(object):
         if not stats_entry.num_requests:
             return self.percentiles_na
 
-        return {self._get_readable_percentile(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0) for percentile in self.percentiles_to_report}
+        return {self._get_readable_percentile(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0) for percentile in PERCENTILES_TO_REPORT}
 
     def _get_stats_entry_dict(self, stats_entry: StatsEntry) -> Dict[str, any]:
         """Returns a dictionary representation of a StatsEntry object
