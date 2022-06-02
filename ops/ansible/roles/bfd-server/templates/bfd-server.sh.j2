@@ -64,7 +64,6 @@ export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
 
 # Begin smoke testing startup routine
 STARTUP_TESTING_REQ_TIMEOUT='15'
-STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='10'
 STARTUP_TESTING_BENE_ID='-88888888888888'
 
 ##
@@ -90,14 +89,13 @@ check_endpoint() {
 }
 
 ##
-# Runs test queries to verify that the server is working as expected. If not, issues a 'kill -INT' on the server's process to shut it down.
+# Runs test queries to verify that the server is working as expected before allowing traffic in the firewall.
 ##
-test_check_service_if_failing() {
+service_startup_check() {
   # Reject all external traffic to port 7443 until the application has started successfully
   sudo iptables -A INPUT -p tcp ! -i lo --dport 7443 -j REJECT
-  log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
 
-  while [ true ]; do
+  while true; do
     log "Checking V1 metadata endpoint"
     STARTUP_TESTING_CHECK_V1_METADATA=$(check_endpoint "https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_V1_METADATA_EXIT=$?
@@ -128,13 +126,12 @@ test_check_service_if_failing() {
       log "Server started properly"
       return 0
     else
-      log "Server failed to start properly, backing off"
-      sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
+      log "Server failed to start properly, retrying..."
     fi
   done
 }
 
-(test_check_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
+(service_startup_check >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
 # End smoke testing startup routine
 
 # Set some additional variables.
