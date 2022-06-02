@@ -1,7 +1,7 @@
 import sys
 
 def validate_file(filename):
-    '''Validates a beneficiary csv and ensures that the file is valid for loading
+    '''Validates synthea rif csv files and ensures that the file is valid for loading
     into the pipeline. This is primarily designed to check synthea files for minor
     errors post-generation. Validations can be added here as needed.
     '''
@@ -10,14 +10,25 @@ def validate_file(filename):
     
     with open(filename) as infile:
         lineCount = 0
+        expectedColumns = 0
         for line in infile:
-            count = line.count("|")
-            if count != 203:
-                print("Bad column count on line " + str(lineCount))
+            multiInsertCount = line.count("INSERT")
+            if multiInsertCount > 1:
+                print("Multiple INSERTs on line " + str(lineCount))
+                fail = 'True'
+            multiUpdateCount = line.count("UPDATE")
+            if multiUpdateCount > 0:
+                print("Multiple UPDATES on line " + str(lineCount))
                 fail = 'True'
             doubleSpaceCount = line.count("  ")
             if doubleSpaceCount > 0:
                 print("Multiple spaces on line " + str(lineCount))
+                fail = 'True'
+            columnCount = line.count("|")
+            if expectedColumns == 0:
+                expectedColumns = columnCount
+            if columnCount != expectedColumns:
+                print("Bad column count on line " + str(lineCount))
                 fail = 'True'
             lineCount = lineCount + 1
             
