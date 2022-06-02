@@ -662,7 +662,7 @@ public class CarrierClaimTransformerV2Test {
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
 
-    Quantity compare = new Quantity().setValue(new BigDecimal("1.0"));
+    Quantity compare = new Quantity().setValue(new BigDecimal(""));
 
     assertTrue(compare.equalsDeep(quantity));
   }
