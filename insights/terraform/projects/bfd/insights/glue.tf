@@ -523,38 +523,6 @@ resource "aws_glue_catalog_table" "api-history" {
   }
 }
 
-# Glue Crawler to parse and store history
-resource "aws_glue_crawler" "history-crawler" {
-  for_each = local.environments
-
-  classifiers = [
-    aws_glue_classifier.bfd-historicals-local.name
-  ]
-  database_name = local.database
-  name          = "${local.database}-${each.key}-history-crawler"
-  role          = local.external.insights_glue_role
-  tags          = {}
-  tags_all      = {}
-
-  lineage_configuration {
-    crawler_lineage_settings = "DISABLE"
-  }
-
-  recrawl_policy {
-    recrawl_behavior = "CRAWL_EVERYTHING"
-  }
-
-  s3_target {
-    exclusions = []
-    path       = "s3://${aws_s3_bucket.bfd-insights-bfd-app-logs.bucket}/history/${each.key}_api_history"
-  }
-
-  schema_change_policy {
-    delete_behavior = "DEPRECATE_IN_DATABASE"
-    update_behavior = "UPDATE_IN_DATABASE"
-  }
-}
-
 resource "aws_glue_catalog_table" "api-requests-table" {
   for_each = local.environments
 
