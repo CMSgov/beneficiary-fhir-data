@@ -1,8 +1,13 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -24,15 +29,16 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
-public class ClaimDaoTest {
+class ClaimDaoTest {
 
   /**
    * Verifies that the {@link ClaimDao#getEntityById(ResourceTypeV2, String)} method forwards a
    * request to the overloaded {@link ClaimDao#getEntityById(Class, String, String)} method.
    */
   @Test
-  public void shouldInvokeGetByIdForClaimType() {
+  void shouldInvokeGetByIdForClaimType() {
     String claimId = "123";
 
     MetricRegistry registry = new MetricRegistry();
@@ -63,7 +69,7 @@ public class ClaimDaoTest {
    * return the expected entity using a given ID.
    */
   @Test
-  public void shouldGetEntityById() {
+  void shouldGetEntityById() {
     String idAttributeName = "someAttribute";
     String claimId = "123";
 
@@ -103,13 +109,82 @@ public class ClaimDaoTest {
 
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
+    doNothing().when(daoSpy).logQueryMetric(anyLong(), anyInt());
+
     Object actual = daoSpy.getEntityById(Long.class, idAttributeName, claimId);
+
+    ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
 
     // unchecked - This is fine for the purposes of this test.
     //noinspection unchecked
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockPredicate);
+    verify(daoSpy, times(1)).logQueryMetric(timeCaptor.capture(), sizeCaptor.capture());
+
+    assertEquals(1, sizeCaptor.getValue());
     assertEquals(expected, actual);
+  }
+
+  /**
+   * Verifies that {@link ClaimDao#getEntityById(Class, String, String)} builds the correct query to
+   * return the expected null value when no entity found using a given ID.
+   */
+  @Test
+  void shouldGetEntityByIdWhenNull() {
+    String idAttributeName = "someAttribute";
+    String claimId = "123";
+
+    MetricRegistry registry = new MetricRegistry();
+    EntityManager mockEntityManager = mock(EntityManager.class);
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry, true));
+
+    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
+    CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
+    // rawtypes - Due to mocking the object.
+    //noinspection rawtypes
+    Root mockRoot = mock(Root.class);
+
+    Predicate mockPredicate = mock(Predicate.class);
+    // rawtypes - Due to mocking the object.
+    //noinspection rawtypes
+    Path mockPath = mock(Path.class);
+
+    // rawtypes - Due to mocking the object.
+    //noinspection rawtypes
+    TypedQuery mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(mockPath).when(mockRoot).get(idAttributeName);
+
+    doReturn(mockRoot).when(mockQuery).from(Long.class);
+
+    doReturn(mockQuery).when(mockBuilder).createQuery(Long.class);
+
+    doReturn(mockPredicate).when(mockBuilder).equal(mockPath, claimId);
+
+    doReturn(mockBuilder).when(mockEntityManager).getCriteriaBuilder();
+
+    doReturn(null).when(mockTypedQuery).getSingleResult();
+
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
+
+    doNothing().when(daoSpy).logQueryMetric(anyLong(), anyInt());
+
+    Object actual = daoSpy.getEntityById(Long.class, idAttributeName, claimId);
+
+    ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    // unchecked - This is fine for the purposes of this test.
+    //noinspection unchecked
+    verify(mockQuery, times(1)).select(mockRoot);
+    verify(mockQuery, times(1)).where(mockPredicate);
+    verify(daoSpy, times(1)).logQueryMetric(timeCaptor.capture(), sizeCaptor.capture());
+
+    assertEquals(0, sizeCaptor.getValue());
+
+    assertNull(actual);
   }
 
   /**
@@ -118,7 +193,7 @@ public class ClaimDaoTest {
    * by a given MBI.
    */
   @Test
-  public void shouldFindEntitiesByMbi() {
+  void shouldFindEntitiesByMbi() {
     final Class<Object> entityClass = Object.class;
     final String mbiRecordAttributeName = "attr";
     final String mbiSearchValue = "value";
@@ -201,7 +276,7 @@ public class ClaimDaoTest {
    * by a given old MBI hash.
    */
   @Test
-  public void shouldFindEntitiesByOldMbiHash() {
+  void shouldFindEntitiesByOldMbiHash() {
     final Class<Object> entityClass = Object.class;
     final String mbiRecordAttributeName = "attr";
     final String mbiSearchValue = "value";
@@ -297,7 +372,7 @@ public class ClaimDaoTest {
    * by a given MBI and lastUpdated value.
    */
   @Test
-  public void shouldFindEntitiesByMbiHashAndLastUpdated() {
+  void shouldFindEntitiesByMbiHashAndLastUpdated() {
     final Class<Object> entityClass = Object.class;
     final String mbiRecordAttributeName = "attr";
     final String mbiSearchValue = "value";
@@ -397,6 +472,138 @@ public class ClaimDaoTest {
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockAndPredicate);
     assertEquals(expected, actual);
+  }
+
+  /**
+   * Verifies that {@link ClaimDao#logQueryMetric(long, int)} was invoked with the correct return
+   * size of the query.
+   */
+  @Test
+  void shouldSetClaimByMbiMetricForClaimsSearch() {
+    final Class<Object> entityClass = Object.class;
+    final String mbiRecordAttributeName = "attr";
+    final String mbiSearchValue = "value";
+    final boolean isMbiSearchValueHashed = false;
+    final String idAttribute = "idAttribute";
+    final String endAttribute = "endAttribute";
+
+    EntityManager mockEntityManager = mock(EntityManager.class);
+    MetricRegistry metricRegistry = new MetricRegistry();
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+
+    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    CriteriaQuery<Object> mockQuery = mock(CriteriaQuery.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    Root<Object> mockRoot = mock(Root.class);
+    // rawtypes - Due to mocking the object.
+    //noinspection rawtypes
+    TypedQuery mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(null)
+        .when(daoSpy)
+        .createMbiPredicate(
+            any(), anyString(), anyBoolean(), anyBoolean(), any(CriteriaBuilder.class));
+
+    doReturn(mockRoot).when(mockQuery).from(entityClass);
+
+    doReturn(mockBuilder).when(mockEntityManager).getCriteriaBuilder();
+
+    doReturn(mockQuery).when(mockBuilder).createQuery(any());
+
+    List<Object> mockList = List.of(1, 1, 1, 1, 1);
+
+    doReturn(mockList).when(mockTypedQuery).getResultList();
+
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(any(CriteriaQuery.class));
+
+    doNothing().when(daoSpy).logQueryMetric(anyLong(), anyInt());
+
+    daoSpy.findAllByMbiAttribute(
+        entityClass,
+        mbiRecordAttributeName,
+        mbiSearchValue,
+        isMbiSearchValueHashed,
+        null,
+        null,
+        idAttribute,
+        endAttribute);
+
+    ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    verify(daoSpy, times(1)).logQueryMetric(timeCaptor.capture(), sizeCaptor.capture());
+
+    assertEquals(5, sizeCaptor.getValue());
+  }
+
+  /**
+   * Verifies that {@link ClaimDao#logQueryMetric(long, int)} was invoked with size set to 0 if the
+   * query result was null.
+   */
+  @Test
+  void shouldSetClaimByMbiMetricForNullClaimsSearch() {
+    final Class<Object> entityClass = Object.class;
+    final String mbiRecordAttributeName = "attr";
+    final String mbiSearchValue = "value";
+    final boolean isMbiSearchValueHashed = false;
+    final String idAttribute = "idAttribute";
+    final String endAttribute = "endAttribute";
+
+    EntityManager mockEntityManager = mock(EntityManager.class);
+    MetricRegistry metricRegistry = new MetricRegistry();
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+
+    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    CriteriaQuery<Object> mockQuery = mock(CriteriaQuery.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    Root<Object> mockRoot = mock(Root.class);
+    // rawtypes - Due to mocking the object.
+    //noinspection rawtypes
+    TypedQuery mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(null)
+        .when(daoSpy)
+        .createMbiPredicate(
+            any(), anyString(), anyBoolean(), anyBoolean(), any(CriteriaBuilder.class));
+
+    doReturn(mockRoot).when(mockQuery).from(entityClass);
+
+    doReturn(mockBuilder).when(mockEntityManager).getCriteriaBuilder();
+
+    doReturn(mockQuery).when(mockBuilder).createQuery(any());
+
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(any(CriteriaQuery.class));
+
+    doNothing().when(daoSpy).logQueryMetric(anyLong(), anyInt());
+
+    daoSpy.findAllByMbiAttribute(
+        entityClass,
+        mbiRecordAttributeName,
+        mbiSearchValue,
+        isMbiSearchValueHashed,
+        null,
+        null,
+        idAttribute,
+        endAttribute);
+
+    ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    verify(daoSpy, times(1)).logQueryMetric(timeCaptor.capture(), sizeCaptor.capture());
+
+    assertEquals(0, sizeCaptor.getValue());
   }
 
   /** A helper class to use for testing methods in place of actual resources. */
