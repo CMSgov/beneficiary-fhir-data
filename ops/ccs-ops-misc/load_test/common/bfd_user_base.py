@@ -200,12 +200,12 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     # If --stats was set and it is valid, get the aggregated stats of the stopping test run
     stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_config.tag, stats_config.env)
 
-    if stats_config.type == StatsStorageType.FILE:
+    if stats_config.store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
         stats_json_writer.write(stats_config.path)
-    elif stats_config.type == StatsStorageType.S3:
+    elif stats_config.store == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
 
         stats_s3_writer = StatsJsonS3Writer(stats)

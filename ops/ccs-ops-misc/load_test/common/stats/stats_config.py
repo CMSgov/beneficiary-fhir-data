@@ -33,7 +33,7 @@ class StatsComparisonType(Enum):
 @dataclass
 class StatsConfiguration():
     """Dataclass that holds data about where and how aggregated performance statistics are stored and compared"""
-    type: StatsStorageType
+    store: StatsStorageType
     """The storage type that the stats will be written to"""
     env: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
@@ -102,7 +102,7 @@ class StatsConfiguration():
             raise ValueError(
                 '"bucket" must be specified if "type" is "s3"') from None
 
-        return StatsConfiguration(type=storage_type, env=stats_environment, tag=tag,
+        return StatsConfiguration(store=storage_type, env=stats_environment, tag=tag,
                                   path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
                                   compare=compare_type, comp_tag=comparison_tag)
 
