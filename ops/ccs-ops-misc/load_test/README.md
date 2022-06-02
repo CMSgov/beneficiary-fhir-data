@@ -112,6 +112,16 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
+**--storeStats**: (Optional) : Argument specifying that aggregated performance statistics should be stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified in the following format: `<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>`, where
+
+* `STORAGE_TYPE` is either `file` or `s3`. 
+  * Note that the `file` `STORAGE_TYPE` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. 
+* `RUNNING_ENVIRONMENT` is either `TEST` or `PROD`.
+* `TAG` can be any string that follows BFD Insights data organization standards (lower-case letters, numbers and "_").
+  * The tag is used to partition performance statistics for more accurate performance validation between corresponding runs.
+  * _Note that this argument may be deprecated in the future once a more robust means of "tagging" captured statistics is developed._
+* `PATH_OR_BUCKET`, if `STORAGE_TYPE` is `file`, must be a valid local file path. Otherwise, if `STORAGE_TYPE` is `s3`, it must be a valid AWS S3 _bucket_.
+
 ### Quick Run
 
 Once you've run a test once and the configuration file is set, you can "quick run" a test by calling locust directly, like this:
