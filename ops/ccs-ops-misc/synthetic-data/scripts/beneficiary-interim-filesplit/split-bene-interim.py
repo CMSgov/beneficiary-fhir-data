@@ -1,35 +1,38 @@
 import pandas as pd
 import warnings
 import csv
+import sys
 
 warnings.filterwarnings("ignore")
 
-# RIF file CSV column
-col = 'bene_id'
-#column in data frame
-dfCol = 'BENE_ID'
+def split_file(filename):
+    '''Splits beneficiary-interim RIF file to n number of RIF files 
+     with only one beneficiary record per bene_id in each file.
+    '''
 
-# load RIF data into dataframe 
-df = pd.read_csv('<PATH TO BENEFICIARY INTERIM FILE>', sep='|', keep_default_na=False)
-df.head()
+    with open(filename) as infile:
+        col = 'bene_id' # RIF file CSV column
+        dfCol = 'BENE_ID' # column in data frame
+        
+        # load RIF data into dataframe 
+        df = pd.read_csv(infile, sep='|', keep_default_na=False)
+        df.head()
+        csvHeader = (list(df.columns.values)) # CSV file header
 
-# CSV file header
-csvHeader = (list(df.columns.values))
+        idList= (df[dfCol].unique().tolist()) # list of unique bene_ids
+        beneRows = [] # list of lists of records for each bene_id
+        for id in idList:
+            beneRows.append(pd.DataFrame(df.loc[df['BENE_ID'] == id]).values.tolist())
 
-# Creating a list of lists of records for each bene_id
-idList= (df[dfCol].unique().tolist())
-beneRows = []
-for id in idList:
-    beneRows.append(pd.DataFrame(df.loc[df['BENE_ID'] == id]).values.tolist())
+        zipped_list = list(zip(*beneRows)) # list of n lists with a unique record for a given bene_id
 
-# Create n number of lists with a unique record for a given bene_id
-zipped_list = list(zip(*beneRows))
+        # export CSV files
+        for x in zipped_list:
+            with open('bene_' + str(zipped_list.index(x)) +'.csv','w') as f:
+                writer = csv.writer(f, delimiter='|')
+                writer.writerow(csvHeader)
+                writer.writerows(x)
 
-# export CSV files
-for x in zipped_list:
-    with open('bene_' + str(zipped_list.index(x)) +'.csv','w') as f:
-        writer = csv.writer(f, delimiter='|')
-        writer.writerow(csvHeader)
-        writer.writerows(x)
-
-
+## Runs the program via run args when this file is run
+if __name__ == "__main__":
+    split_file(sys.argv[1])
