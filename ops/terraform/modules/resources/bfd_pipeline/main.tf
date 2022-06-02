@@ -263,14 +263,7 @@ module "ec2_instance" {
 }
 
 # BFD Pipeline CloudWatch Dashboard
-data "template_file" "dashboard-template" {
-  template = "${file("${path.module}/templates/bfd-dashboards.tpl")}"
-  vars = {
-    dashboard_namespace = "bfd-prod/bfd-pipeline"
-  }
-}
-
 resource "aws_cloudwatch_dashboard" "bfd-pipeline-dashboard" {
   dashboard_name = "bfd-pipeline-${var.env_config.env}"
-  dashboard_body = data.template_file.dashboard-template.rendered
+  dashboard_body = templatefile("${path.module}/templates/bfd-dashboards.tpl", { dashboard_namespace = "bfd-prod/bfd-pipeline" })
 }
