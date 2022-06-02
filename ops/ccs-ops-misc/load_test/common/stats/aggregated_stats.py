@@ -6,12 +6,12 @@ from typing import Dict, List
 from common.stats.stats_config import StatsEnvironment
 
 
-class AggregatedStats(object):
-    """Represents a snapshot of aggregated performance statistics of all tasks, or endpoints, that
+class StatsCollector(object):
+    """Used to collect a snapshot of aggregated performance statistics of all tasks, or endpoints, that
     ran in the current Locust environment"""
 
     def __init__(self, locust_env: Environment, stats_tag: str, running_env: StatsEnvironment = StatsEnvironment.TEST) -> None:
-        """Creates a new instance of AggregatedStats given the current Locust environment and a list of percentiles to report.
+        """Creates a new instance of StatsCollector given the current Locust environment and a list of percentiles to report.
 
         Args:
             locust_env (Environment): Current Locust environment

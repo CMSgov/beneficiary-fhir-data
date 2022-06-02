@@ -1,7 +1,7 @@
 import time
 import os
 import json
-from common.stats.aggregated_stats import AggregatedStats
+from common.stats.aggregated_stats import StatsCollector
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
@@ -14,11 +14,11 @@ import boto3
 class StatsJsonFileWriter(object):
     """Writes an AggegratedStats instance to a specified directory path in JSON format"""
 
-    def __init__(self, stats: AggregatedStats) -> None:
-        """Creates a new instance of StatsJsonFileWriter given an AggregatedStats object
+    def __init__(self, stats: StatsCollector) -> None:
+        """Creates a new instance of StatsJsonFileWriter given an StatsCollector object
 
         Args:
-            stats (AggregatedStats): An AggregatedStats object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+            stats (StatsCollector): An StatsCollector object that is used to collect performance statistics
         """
         super().__init__()
 
@@ -37,11 +37,11 @@ class StatsJsonFileWriter(object):
 class StatsJsonS3Writer(object):
     """Writes an AggegratedStats instance to a specified S3 bucket in JSON format"""
 
-    def __init__(self, stats: AggregatedStats) -> None:
-        """Creates a new instance of StatsJsonS3Writer given an AggregatedStats object
+    def __init__(self, stats: StatsCollector) -> None:
+        """Creates a new instance of StatsJsonS3Writer given an StatsCollector object
 
         Args:
-            stats (AggregatedStats): An AggregatedStats object that encodes the aggregated performance statistics of all Locust tasks in the current environment
+            stats (StatsCollector): An StatsCollector object that is used to collect performance statistics
         """
         super().__init__()
 
