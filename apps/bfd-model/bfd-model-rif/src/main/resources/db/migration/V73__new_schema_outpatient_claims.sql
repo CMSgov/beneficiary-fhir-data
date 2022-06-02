@@ -807,23 +807,23 @@ from
 -- we explicitly defined a table structure before migrating data.
 --
 ${logic.psql-only} alter table public.outpatient_claim_lines_new
-${logic.psql-only}    alter column clm_idclm_id                          SET NOT NULL,
-${logic.psql-only}    alter column clm_idclm_line_num                    SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr                        SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_unit_cnt               SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_rate_amt               SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_tot_chrg_amt           SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_ncvrd_chrg_amt         SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_coinsrnc_wge_adjstd_c  SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_bene_pmt_amt           SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_blood_ddctbl_amt       SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_cash_ddctbl_amt        SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_rdcd_coinsrnc_amt      SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_pmt_amt_amt            SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_prvdr_pmt_amt          SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_ptnt_rspnsblty_pmt     SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_1st_msp_pd_amt         SET NOT NULL,
-${logic.psql-only}    alter column clm_idrev_cntr_2nd_msp_pd_amt         SET NOT NULL;
+${logic.psql-only}    alter column clm_id                          SET NOT NULL,
+${logic.psql-only}    alter column clm_line_num                    SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr                        SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_unit_cnt               SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_rate_amt               SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_tot_chrg_amt           SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_ncvrd_chrg_amt         SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_coinsrnc_wge_adjstd_c  SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_bene_pmt_amt           SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_blood_ddctbl_amt       SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_cash_ddctbl_amt        SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_rdcd_coinsrnc_amt      SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_pmt_amt_amt            SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_prvdr_pmt_amt          SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_ptnt_rspnsblty_pmt     SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_1st_msp_pd_amt         SET NOT NULL,
+${logic.psql-only}    alter column rev_cntr_2nd_msp_pd_amt         SET NOT NULL;
 
 -- for PSQL need to define our primary key    
 ${logic.psql-only} alter table public.outpatient_claims_new
