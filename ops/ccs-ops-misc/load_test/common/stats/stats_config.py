@@ -2,8 +2,9 @@ import dataclasses
 from enum import Enum
 import re
 from dataclasses import dataclass
-from typing import Optional, Type
+from typing import Optional, Type, TypeVar
 
+E = TypeVar('E', Enum)
 
 class StatsStorageType(Enum):
     """Enumeration for each available type of storage for JSON stats"""
@@ -105,7 +106,7 @@ class StatsConfiguration():
                                   compare=compare_type, comp_tag=comparison_tag)
 
 
-def _enum_from_val(val: str, enum_type: Type[Enum], field_name: str):
+def _enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
     try:
         return enum_type[val.upper()]
     except KeyError:
