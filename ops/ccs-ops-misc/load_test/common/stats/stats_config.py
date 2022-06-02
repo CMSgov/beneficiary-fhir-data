@@ -60,7 +60,8 @@ class StatsConfiguration():
                           v in as_dict.items() if v is not None and v != ''}
         return ';'.join([f'{k}={str(v) if not isinstance(v, Enum) else v.name}' for k, v in dict_non_empty.items()])
 
-    def from_key_val_str(key_val_str: str):
+    @staticmethod
+    def from_key_val_str(key_val_str: str) -> 'StatsConfiguration':
         """Constructs a concrete instance of StatsConfiguration from a given string in key-value format seperated
         by semi-colons ("key1=value1;key2=value2").
 
