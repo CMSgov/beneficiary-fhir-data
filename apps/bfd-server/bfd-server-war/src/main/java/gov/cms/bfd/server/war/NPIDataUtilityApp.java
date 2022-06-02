@@ -72,7 +72,7 @@ public final class NPIDataUtilityApp {
       tempDir = Files.createTempDirectory("npi-data");
     } catch (IOException e) {
       System.err.println("Cannot create temporary directory.");
-      System.exit(4);
+      // System.exit(4);
     }
 
     // If the output file isn't already there, go build it.
@@ -82,17 +82,14 @@ public final class NPIDataUtilityApp {
         buildNPIResource(convertedNpiDataFile, tempDir);
       } catch (IOException exception) {
         LOGGER.error("NPI data file could not be read.  Error:", exception);
-        System.exit(5);
+        // System.exit(5);
       } finally {
         recursivelyDelete(tempDir);
       }
     }
   }
 
-  /**
-   *
-   * @param tempDir
-   */
+  /** @param tempDir */
   private static void recursivelyDelete(Path tempDir) {
     // Recursively delete the working dir.
     try {
@@ -132,7 +129,6 @@ public final class NPIDataUtilityApp {
   }
 
   /**
-   *
    * @param convertedNpiDataFile
    * @param originalNpiDataFile
    * @throws IOException
