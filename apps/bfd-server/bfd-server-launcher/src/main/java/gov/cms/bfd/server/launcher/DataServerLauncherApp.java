@@ -214,7 +214,8 @@ public final class DataServerLauncherApp {
             + " \"%{BlueButton-Application}i\""
             + " %{BlueButton-UserId}i"
             + " \"%{BlueButton-User}i\""
-            + " %{BlueButton-BeneficiaryId}i";
+            + " %{BlueButton-BeneficiaryId}i"
+            + " %{X-Request-ID}o";
     final CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);
