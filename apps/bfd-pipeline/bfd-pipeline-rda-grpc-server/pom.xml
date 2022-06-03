@@ -265,7 +265,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>gov.cms.bfd.pipeline.rda.grpc.sink.LoadRdaJsonApp</mainClass>
+                            <mainClass>gov.cms.bfd.pipeline.rda.grpc.apps.LoadRdaJsonApp</mainClass>
                         </configuration>
                     </plugin>
                 </plugins>

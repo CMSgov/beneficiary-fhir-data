@@ -157,7 +157,7 @@ export CLASSPATH=$cp
 
 java \
   -Ds3.local=true \
-  gov.cms.bfd.pipeline.rda.grpc.server.RdaServerApp \
+  gov.cms.bfd.pipeline.rda.grpc.apps.RdaServerApp \
   seed:42 \
   maxToSend:50000 \
 #  s3Bucket:rda \
