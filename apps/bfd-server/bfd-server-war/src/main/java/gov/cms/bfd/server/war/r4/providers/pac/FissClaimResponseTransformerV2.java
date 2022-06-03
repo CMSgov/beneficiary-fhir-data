@@ -33,16 +33,18 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME =
-      Map.of(
-          ' ', ClaimResponse.RemittanceOutcome.QUEUED,
-          'a', ClaimResponse.RemittanceOutcome.QUEUED,
-          's', ClaimResponse.RemittanceOutcome.PARTIAL,
-          'p', ClaimResponse.RemittanceOutcome.COMPLETE,
-          'd', ClaimResponse.RemittanceOutcome.COMPLETE,
-          'i', ClaimResponse.RemittanceOutcome.PARTIAL,
-          'r', ClaimResponse.RemittanceOutcome.COMPLETE,
-          't', ClaimResponse.RemittanceOutcome.PARTIAL,
-          'm', ClaimResponse.RemittanceOutcome.PARTIAL);
+      Map.ofEntries(
+          Map.entry(' ', ClaimResponse.RemittanceOutcome.QUEUED),
+          Map.entry('a', ClaimResponse.RemittanceOutcome.QUEUED),
+          Map.entry('d', ClaimResponse.RemittanceOutcome.COMPLETE),
+          Map.entry('f', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('i', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('m', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('p', ClaimResponse.RemittanceOutcome.COMPLETE),
+          Map.entry('r', ClaimResponse.RemittanceOutcome.COMPLETE),
+          Map.entry('s', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('t', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('u', ClaimResponse.RemittanceOutcome.COMPLETE));
 
   private FissClaimResponseTransformerV2() {}
 
