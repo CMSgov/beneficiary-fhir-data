@@ -11,6 +11,8 @@ from multiprocessing import Process
 from common import config, test_setup as setup
 from locust.main import main
 
+from common.stats import StatsStorageConfig
+
 def parse_run_time(run_time):
     '''Parse a given run time setting (which Locust accepts as combinations of "1m", "30s", "2h",
     etc.), and return the duration in seconds.
@@ -70,7 +72,8 @@ def run_with_params(argv):
         'testRunTime': "1m",
         'testNumTotalClients': "100",
         'testCreatedClientsPerSecond': "5",
-        'resetStatsAfterClientSpawn': False
+        'resetStatsAfterClientSpawn': False,
+        'storeStats': None
     }
 
     # Dictionary to hold data passed in via the CLI that will be stored in the root config.yml file
@@ -95,12 +98,13 @@ def run_with_params(argv):
         '(Optional, Default 5)'
      '\n--worker_threads="<If >1 the test is run as distributed, and expects this many worker '
         'processes to start, int>" (Optional, Default 1 - non distributed mode)'
+     '\n--storeStats="<If set, stores stats in JSON to S3 or local file. Must follow format: <STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>" (Optional)'
      '\n--resetStats (Optional)')
 
     try:
         opts, _args = getopt.getopt(argv, "h", ["homePath=", "clientCertPath=", "databaseUri=",
         "testHost=", "serverPublicKey=", 'tableSamplePct=', "configPath=", "testRunTime=",
-        "maxClients=", "clientsPerSecond=", "testFile=", "workerThreads=", "resetStats"])
+        "maxClients=", "clientsPerSecond=", "testFile=", "workerThreads=", "storeStats=", "resetStats"])
     except getopt.GetoptError as err:
         print(err)
         print(help_string)
@@ -134,6 +138,13 @@ def run_with_params(argv):
             test_file = arg
         elif opt == "--workerThreads":
             worker_threads = arg
+        elif opt == "--storeStats":
+            try:
+                config_data["storeStats"] = StatsStorageConfig.from_arg_str(arg)
+            except ValueError as err:
+                print(f'--storeStats was invalid: {err}\n')
+                print(help_string)
+                sys.exit()
         elif opt == "--resetStats":
             config_data["resetStatsAfterClientSpawn"] = True
         else:
@@ -142,7 +153,7 @@ def run_with_params(argv):
 
     ## Read the specified configuration file
     yaml_config = config.load_from_path(config_data.get("configPath",
-        default_config_data["configPath"]))
+        default_config_data["configPath"])) or {}
     ## Merge the stored data with data passed in via the CLI, with the
     ## CLI data taking priority
     config_data = {**yaml_config, **config_data}

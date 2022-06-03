@@ -104,6 +104,13 @@ public class TestDatabase {
     }
 
     @Override
+    public void writeError(
+        String apiVersion, Message message, DataTransformer.TransformationException exception)
+        throws IOException {
+      // Do nothing
+    }
+
+    @Override
     public String getDedupKeyForMessage(Message message) {
       return message.claimId;
     }

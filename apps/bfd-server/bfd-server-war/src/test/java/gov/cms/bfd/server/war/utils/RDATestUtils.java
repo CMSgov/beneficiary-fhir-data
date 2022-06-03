@@ -23,13 +23,9 @@ import java.util.function.Consumer;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Supplies test data for the RDA based unit tests. */
 public class RDATestUtils {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(RDATestUtils.class);
 
   /** Tracking entities (tables) so they can be cleaned after. */
   private static final List<Class<?>> TABLE_ENTITIES =
@@ -51,27 +47,19 @@ public class RDATestUtils {
   private EntityManager entityManager;
 
   public void init() {
-    try {
-      final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
+    final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
 
-      final Map<String, Object> hibernateProperties =
-          Map.of(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
+    final Map<String, Object> hibernateProperties =
+        Map.of(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
 
-      entityManager =
-          Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
-              .createEntityManager();
-    } catch (RuntimeException error) {
-      LOGGER.error(
-          "caught exception while creating entityManager: message={}", error.getMessage(), error);
-      throw error;
-    }
+    entityManager =
+        Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
+            .createEntityManager();
   }
 
   public void destroy() {
     if (entityManager != null) {
-      var factory = entityManager.getEntityManagerFactory();
       entityManager.close();
-      factory.close();
     }
   }
 

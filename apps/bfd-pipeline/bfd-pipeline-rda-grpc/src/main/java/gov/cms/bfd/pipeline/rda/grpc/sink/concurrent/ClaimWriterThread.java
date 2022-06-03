@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ReportingCallback.ProcessedBatch;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,8 +224,9 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
    *
    * @param <TMessage> the RDA API message class
    */
-  @AllArgsConstructor
-  private static class Entry<TMessage> {
+  @Data
+  @VisibleForTesting
+  static class Entry<TMessage> {
     private final String apiVersion;
     private final TMessage object;
   }
@@ -241,10 +243,19 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     private final Map<String, TClaim> uniqueClaims = new LinkedHashMap<>();
 
     void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry) {
-      final String claimKey = sink.getDedupKeyForMessage(entry.object);
-      final TClaim claim = sink.transformMessage(entry.apiVersion, entry.object);
-      allMessages.add(entry.object);
-      uniqueClaims.put(claimKey, claim);
+      try {
+        final String claimKey = sink.getDedupKeyForMessage(entry.getObject());
+        final TClaim claim = sink.transformMessage(entry.getApiVersion(), entry.getObject());
+        allMessages.add(entry.getObject());
+        uniqueClaims.put(claimKey, claim);
+      } catch (DataTransformer.TransformationException transformationException) {
+        try {
+          sink.writeError(entry.getApiVersion(), entry.getObject(), transformationException);
+        } catch (IOException e) {
+          transformationException.addSuppressed(e);
+        }
+        throw transformationException;
+      }
     }
 
     void clear() {
