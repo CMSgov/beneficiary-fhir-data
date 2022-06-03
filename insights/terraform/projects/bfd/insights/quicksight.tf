@@ -5,17 +5,17 @@
 #
 # What about the analysis?
 
-resource "aws_quicksight_data_source" "bfd-beneficiaries" {
-  for_each = local.environments
+# resource "aws_quicksight_data_source" "bfd-beneficiaries" {
+#   for_each = local.environments
 
-  name    = "bfd-${each.key}-beneficiaries"
-  data_source_id = "bfd-${each.key}-beneficiaries"
-  type    = "ATHENA"
-  parameters {
-    athena {
-      work_group = "bfd"
-    }
-  }
-}
+#   name    = "bfd-${each.key}-beneficiaries"
+#   data_source_id = "bfd-${each.key}-beneficiaries"
+#   type    = "ATHENA"
+#   parameters {
+#     athena {
+#       work_group = "bfd"
+#     }
+#   }
+# }
 
 # TODO: Add a QuickSight user based on IAM user
