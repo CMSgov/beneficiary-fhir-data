@@ -4,7 +4,12 @@ from common.pac_tests import PACTestUser
 
 class PACUser(PACTestUser):
 
-    """Tests for Partially Adjudicated Claims endpoints..."""
+    """
+    Tests for Partially Adjudicated Claims endpoints to error check the transformers
+    
+    Copies are made of the MBI list so that both the claim and claimResponse object is checked
+    for every MBI.
+    """
 
     @classmethod
     def _hashed_mbis(cls):

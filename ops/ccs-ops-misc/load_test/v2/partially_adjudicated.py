@@ -6,7 +6,11 @@ from common.pac_tests import PACTestUser
 
 class PACUser(PACTestUser):
 
-    """Tests for Partially Adjudicated Claims endpoints"""
+    """
+    Tests for Partially Adjudicated Claims endpoints to test their performance
+    
+    The MBI list is randomly shuffled to get better sampling in sequential testing.
+    """
 
     @classmethod
     def _hashed_mbis(cls):
