@@ -197,9 +197,13 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog
-     * NOTE: As of late October 2021, the access.log file is slightly different
-     * in terms of response time being in microseconds instead of milliseconds
+    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog. Available format strings are
+     * documented here: https://www.eclipse.org/jetty/javadoc/jetty-10/org/eclipse/jetty/server/CustomRequestLog.html.
+     *
+     * Response time units have varied during BFD's history as follows:
+     * Prior to Oct 28 2021 - milliseconds
+     * Oct 28 2021 - Mar 24 2022 - microseconds
+     * Since Mar 24 2022 - milliseconds
      */
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
@@ -214,7 +218,8 @@ public final class DataServerLauncherApp {
             + " \"%{BlueButton-Application}i\""
             + " %{BlueButton-UserId}i"
             + " \"%{BlueButton-User}i\""
-            + " %{BlueButton-BeneficiaryId}i";
+            + " %{BlueButton-BeneficiaryId}i"
+            + " %{X-Request-ID}o";
     final CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);
