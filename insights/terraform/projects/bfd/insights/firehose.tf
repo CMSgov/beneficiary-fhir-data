@@ -5,7 +5,6 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   name           = "bfd-${each.key}-firehose"
   tags = local.tags
   tags_all = local.tags
-  version_id = "10"
 
   extended_s3_configuration {
     bucket_arn          = local.external.s3_insights_arn
