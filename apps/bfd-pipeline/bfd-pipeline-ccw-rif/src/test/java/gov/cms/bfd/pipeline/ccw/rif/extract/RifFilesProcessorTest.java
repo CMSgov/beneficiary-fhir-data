@@ -374,7 +374,7 @@ public final class RifFilesProcessorTest {
     assertEquals("41", claimLine.getProviderSpecialityCode().get());
     assertEquals(Character.valueOf('1'), claimLine.getProviderParticipatingIndCode().get());
     assertEquals('0', claimLine.getReducedPaymentPhysicianAsstCode());
-    assertEquals(new BigDecimal("1"), claimLine.getServiceCount());
+    assertEquals(new BigDecimal("1.0"), claimLine.getServiceCount());
     assertEquals('1', claimLine.getCmsServiceTypeCode());
     assertEquals("11", claimLine.getPlaceOfServiceCode());
     assertEquals("15", claimLine.getLinePricingLocalityCode());
