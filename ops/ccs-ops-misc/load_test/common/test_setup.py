@@ -7,27 +7,6 @@ from common import config
 from locust.main import main
 
 
-def get_client_cert() -> str:
-    '''Checks the config file for the client cert value.
-    '''
-
-    config_file = config.load()
-    return config_file["clientCertPath"]
-
-
-def load_server_public_key() -> str:
-    '''Load the public key to verify the BFD Server's responses or else ignore the warnings from
-    the self-signed cert.
-    '''
-
-    try:
-        config_file = config.load()
-        server_public_key = config_file["serverPublicKey"]
-        return server_public_key if server_public_key else False
-    except KeyError:
-        return False
-
-
 def set_locust_env(config_file: Dict[str, str]):
     '''Sets a number of locust variables needed to run the test.
     '''
@@ -37,7 +16,8 @@ def set_locust_env(config_file: Dict[str, str]):
     os.environ['LOCUST_USERS'] = config_file["testNumTotalClients"]
     os.environ['LOCUST_SPAWN_RATE'] = config_file["testCreatedClientsPerSecond"]
     os.environ['LOCUST_LOGLEVEL'] = "INFO"
-    os.environ['LOCUST_RESET_STATS'] = config_file["resetStatsAfterClientSpawn"]
+    os.environ['LOCUST_RESET_STATS'] = str(
+        config_file["resetStatsAfterClientSpawn"])
     # Set the runtime if not running distributed or if test master
     if not is_distributed() or is_master_thread():
         os.environ['LOCUST_RUN_TIME'] = config_file["testRunTime"]
