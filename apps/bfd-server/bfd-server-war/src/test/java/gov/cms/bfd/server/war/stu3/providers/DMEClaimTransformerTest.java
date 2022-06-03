@@ -14,7 +14,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.math.BigDecimal;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,10 +47,11 @@ public final class DMEClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         DMEClaimTransformer.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(true),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob, Optional.of(true));
   }
 
@@ -75,7 +76,7 @@ public final class DMEClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.DME,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -104,7 +105,7 @@ public final class DMEClaimTransformerTest {
     assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     DMEClaimLine claimLine1 = claim.getLines().get(0);
-    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     TransformerTestUtils.assertExtensionIdentifierEquals(
         CcwCodebookVariable.SUPLRNUM, claimLine1.getProviderBillingNumber(), eobItem0);

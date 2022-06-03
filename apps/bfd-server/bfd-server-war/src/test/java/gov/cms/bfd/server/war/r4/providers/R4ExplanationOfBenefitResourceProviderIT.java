@@ -35,6 +35,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import java.time.Instant;
@@ -403,10 +404,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     // Compare result to transformed EOB
     assertEobEquals(
         OutpatientClaimTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            claim,
-            Optional.of(false),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            new TransformerContext(
+                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim),
         eob);
   }
 
@@ -1030,8 +1032,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    carrierRifRecord =
-        entityManager.find(CarrierClaim.class, String.valueOf(carrierRifRecord.getClaimId()));
+    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
     carrierRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1056,8 +1057,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    inpatientRifRecord =
-        entityManager.find(InpatientClaim.class, String.valueOf(inpatientRifRecord.getClaimId()));
+    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
     inpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1108,7 +1108,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    hhaRifRecord = entityManager.find(HHAClaim.class, String.valueOf(hhaRifRecord.getClaimId()));
+    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
     hhaRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1158,8 +1158,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    hospiceRifRecord =
-        entityManager.find(HospiceClaim.class, String.valueOf(hospiceRifRecord.getClaimId()));
+    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
     hospiceRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1184,7 +1183,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    dmeRifRecord = entityManager.find(DMEClaim.class, String.valueOf(dmeRifRecord.getClaimId()));
+    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
     dmeRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1456,10 +1455,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     // Compare result to transformed EOB
     assertEobEquals(
         PartDEventTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            partDEvent,
-            Optional.of(false),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            new TransformerContext(
+                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -1616,7 +1616,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         .doTransaction(
             (em) -> {
               em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")
-                  .setParameter("claimId", String.valueOf(claimId))
+                  .setParameter("claimId", claimId)
                   .executeUpdate();
             });
 
@@ -2058,10 +2058,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         claimType
             .getTransformer()
             .transform(
-                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                claim,
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                new TransformerContext(
+                    PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                    Optional.of(false),
+                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                claim),
         searchResults);
   }
 

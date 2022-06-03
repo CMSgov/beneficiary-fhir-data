@@ -14,6 +14,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -49,19 +50,21 @@ public final class CarrierClaimTransformerTest {
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
         CarrierClaimTransformer.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(true),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
     claim.setLastUpdated(Optional.empty());
     ExplanationOfBenefit eobWithoutLastUpdated =
         CarrierClaimTransformer.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(true),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
 
@@ -85,10 +88,11 @@ public final class CarrierClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         CarrierClaimTransformer.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(true),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     assertMatches(claim, eob, Optional.of(true));
   }
 
@@ -114,7 +118,7 @@ public final class CarrierClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.CARRIER,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -144,7 +148,7 @@ public final class CarrierClaimTransformerTest {
 
     CarrierClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     TransformerTestUtils.assertCareTeamEquals(
         claimLine1.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY, eob);

@@ -15,7 +15,7 @@ DB_USERNAME='{{ data_server_db_username }}'
 DB_PASSWORD='{{ data_server_db_password }}'
 DB_CONNECTIONS_MAX='{{ data_server_db_connections_max }}'
 BFD_V2_ENABLED='{{ data_server_v2_enabled }}'
-BFD_PREADJ_ENABLED='{{ pre_adj_resources_enabled }}'
+BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
 
 # The New Relic agent running in the WAR needs some additional environment variables, so set those.
 {% if data_server_new_relic_license_key is defined %}
@@ -67,7 +67,7 @@ STARTUP_TESTING_RETRIES='3'
 STARTUP_TESTING_BOOT_TIMEOUT='60'
 STARTUP_TESTING_REQ_TIMEOUT='15'
 STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='10'
-STARTUP_TESTING_BENE_ID='-201'
+STARTUP_TESTING_BENE_ID='-88888888888888'
 
 ##
 # Prints out the specified message.
@@ -95,6 +95,8 @@ check_endpoint() {
 # Runs test queries to verify that the server is working as expected. If not, issues a 'kill -INT' on the server's process to shut it down.
 ##
 stop_service_if_failing() {
+  # Reject all external traffic to port 7443 until the application has started successfully
+  sudo iptables -A INPUT -p tcp ! -i lo --dport 7443 -j REJECT
   log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
   sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
@@ -124,6 +126,8 @@ stop_service_if_failing() {
     STARTUP_TESTING_CHECK_V2_EOB_EXIT=$?
 
     if [[ $STARTUP_TESTING_CHECK_V1_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_EOB_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_EOB_EXIT == 0 ]]; then
+      # Effectively allow traffic from external sources to reach instance port 7443
+      sudo iptables -D INPUT -p tcp ! -i lo --dport 7443 -j REJECT
       log "Server started properly"
       return 0
     elif [[ $I -lt $STARTUP_TESTING_RETRIES ]]; then
@@ -160,6 +164,6 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
   "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
-  "-DbfdServer.preadj.enabled=${BFD_PREADJ_ENABLED}" \
+  "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
   "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
   >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1

@@ -8,10 +8,10 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -29,23 +29,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  */
 public class InpatientClaimTransformerV2 {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link InpatientClaim} to transform
-   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     R4ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry,
-      Object claim,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(InpatientClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
@@ -86,7 +79,7 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.INPATIENT,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -323,7 +316,7 @@ public class InpatientClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
@@ -334,6 +327,7 @@ public class InpatientClaimTransformerV2 {
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,
@@ -342,7 +336,8 @@ public class InpatientClaimTransformerV2 {
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
           line.getNationalDrugCodeQuantity(),
-          line.getNationalDrugCodeQualifierCode());
+          line.getNationalDrugCodeQualifierCode(),
+          line.getUnitCount());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
       TransformerUtilsV2.addItemRevenue(

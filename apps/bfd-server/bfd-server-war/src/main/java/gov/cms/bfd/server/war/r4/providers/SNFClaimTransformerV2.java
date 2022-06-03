@@ -8,9 +8,9 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -26,23 +26,16 @@ import org.hl7.fhir.r4.model.Period;
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 public class SNFClaimTransformerV2 {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link SNFClaim} to transform
-   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     R4ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry,
-      Object claim,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
@@ -151,9 +144,7 @@ public class SNFClaimTransformerV2 {
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob,
-        CcwCodebookVariable.CLM_UTLZTN_DAY_CNT,
-        BigDecimal.valueOf(claimGroup.getUtilizationDayCount()));
+        eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
 
     // This is messy but appears to be specific to SNF.  Maybe revisit and clean in the future
     // NCH_QLFYD_STAY_FROM_DT => ExplanationOfBenefit.supportingInfo
@@ -212,11 +203,11 @@ public class SNFClaimTransformerV2 {
     // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT   => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
+        claimGroup.getCoinsuranceDayCount(),
+        claimGroup.getNonUtilizationDayCount(),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
+        claimGroup.getBloodPintsFurnishedQty(),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -324,6 +315,7 @@ public class SNFClaimTransformerV2 {
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,
@@ -331,11 +323,9 @@ public class SNFClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getNationalDrugCodeQuantity().isPresent()
-              ? Optional.of(
-                  BigDecimal.valueOf(line.getNationalDrugCodeQuantity().get().longValue()))
-              : Optional.empty(),
-          line.getNationalDrugCodeQualifierCode());
+          line.getNationalDrugCodeQuantity(),
+          line.getNationalDrugCodeQualifierCode(),
+          BigDecimal.valueOf(line.getUnitCount()));
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
       TransformerUtilsV2.addItemRevenue(

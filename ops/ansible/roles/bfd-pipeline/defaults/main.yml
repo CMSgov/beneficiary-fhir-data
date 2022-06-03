@@ -10,9 +10,10 @@ data_pipeline_idempotency_required: true
 data_pipeline_filtering_non_null_and_non_2022_benes: true
 data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
+data_pipeline_ccw_rif_job_enabled: true
 
 ## RDA API Pipeline
-# Used to download FISS/MCS pre-adjudicated claims data.
+# Used to download FISS/MCS partially adjudicated claims data.
 #
 # Set to true to enable the RDA pipeline jobs.
 data_pipeline_rda_job_enabled: false

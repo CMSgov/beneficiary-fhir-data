@@ -9,8 +9,8 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -24,23 +24,16 @@ import org.hl7.fhir.dstu3.model.Period;
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class SNFClaimTransformer {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link SNFClaim} to transform
-   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry,
-      Object claim,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
@@ -107,7 +100,7 @@ final class SNFClaimTransformer {
         eob,
         claimGroup.getClaimAdmissionDate(),
         claimGroup.getBeneficiaryDischargeDate(),
-        Optional.of(BigDecimal.valueOf(claimGroup.getUtilizationDayCount())));
+        Optional.of(claimGroup.getUtilizationDayCount()));
 
     /*
      * add field values to the benefit balances that are common between the
@@ -115,11 +108,11 @@ final class SNFClaimTransformer {
      */
     TransformerUtils.addCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claimGroup.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claimGroup.getNonUtilizationDayCount()),
+        claimGroup.getCoinsuranceDayCount(),
+        claimGroup.getNonUtilizationDayCount(),
         claimGroup.getDeductibleAmount(),
         claimGroup.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claimGroup.getBloodPintsFurnishedQty()),
+        claimGroup.getBloodPintsFurnishedQty(),
         claimGroup.getNoncoveredCharge(),
         claimGroup.getTotalDeductionAmount(),
         claimGroup.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -342,12 +335,6 @@ final class SNFClaimTransformer {
           eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());
 
       // Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
-      Optional<BigDecimal> ndcQuantity =
-          claimLine.getNationalDrugCodeQuantity().isPresent()
-              ? Optional.of(
-                  BigDecimal.valueOf(claimLine.getNationalDrugCodeQuantity().get().longValue()))
-              : Optional.empty();
-
       TransformerUtils.mapEobCommonItemRevenue(
           item,
           eob,
@@ -356,7 +343,7 @@ final class SNFClaimTransformer {
           claimLine.getTotalChargeAmount(),
           claimLine.getNonCoveredChargeAmount(),
           BigDecimal.valueOf(claimLine.getUnitCount()),
-          ndcQuantity,
+          claimLine.getNationalDrugCodeQuantity(),
           claimLine.getNationalDrugCodeQualifierCode(),
           claimLine.getRevenueCenterRenderingPhysicianNPI());
 

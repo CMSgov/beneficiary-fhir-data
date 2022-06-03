@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -17,6 +18,8 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -79,10 +82,11 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB(Optional<Boolean> includeTaxNumber) {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(),
-            claim,
-            includeTaxNumber,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new TransformerContext(
+                new MetricRegistry(),
+                includeTaxNumber,
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -113,10 +117,11 @@ public final class HospiceClaimTransformerV2Test {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
-            new MetricRegistry(),
-            claim,
-            Optional.of(false),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()));
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim));
   }
 
   /** Common top level ExplanationOfBenefit values */
@@ -813,6 +818,16 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(0), eob.getItem());
+  }
+
   @Test
   public void shouldHaveCBenefitClaimPaidAmt() {
     BenefitComponent benefit =
@@ -857,7 +872,7 @@ public final class HospiceClaimTransformerV2Test {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimTypeV2.HOSPICE,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),

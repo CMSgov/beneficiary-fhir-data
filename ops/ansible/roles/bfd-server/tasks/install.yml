@@ -11,6 +11,14 @@
     shell: /bin/false
   become: true
 
+- name: Add server user to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: "{{ data_server_user }} ALL=(ALL) NOPASSWD: /sbin/iptables"
+    validate: /usr/sbin/visudo -cf %s
+  become: true
+
 - name: Create Server Directory
   file:
     path: "{{ data_server_dir }}"

@@ -10,12 +10,15 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,21 +31,16 @@ import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformerV2 {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link PartDEvent} to transform
-   * @param includeTaxNumbers boolean to return tax numbers or not
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry,
-      Object claim,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
@@ -50,7 +48,8 @@ final class PartDEventTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim, drugCodeDisplayLookup);
+    ExplanationOfBenefit eob =
+        transformClaim((PartDEvent) claim, transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;
@@ -260,6 +259,18 @@ final class PartDEventTransformerV2 {
             CcwCodebookVariable.TOT_RX_CST_AMT,
             C4BBAdjudication.DRUG_COST,
             claimGroup.getTotalPrescriptionCost()));
+
+    // TOT_RX_CST_AMT => ExplanationOfBenefit.total
+    TransformerUtilsV2.addTotal(
+        eob,
+        TransformerUtilsV2.createTotalAdjudicationAmountSlice(
+            C4BBAdjudication.DRUG_COST, Optional.of(claimGroup.getTotalPrescriptionCost())));
+
+    // Benefit Payment Status Slice for CARIN compliance
+    TransformerUtilsV2.addTotal(
+        eob,
+        TransformerUtilsV2.createTotalAdjudicationStatusAmountSlice(
+            C4BBAdjudicationStatus.OTHER, Optional.of(BigDecimal.ZERO)));
 
     // RPTD_GAP_DSCNT_NUM => ExplanationOfBenefit.item.adjudication.amount
     TransformerUtilsV2.addAdjudication(

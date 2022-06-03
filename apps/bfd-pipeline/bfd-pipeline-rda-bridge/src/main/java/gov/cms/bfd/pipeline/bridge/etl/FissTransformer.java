@@ -15,6 +15,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
+import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Instant;
 import java.util.Map;
@@ -27,10 +28,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
-  private static final int MAX_PROC_CODES = 25;
-  private static final int MAX_DIAG_CODES = 25;
-
+  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id */
   private final Map<String, BeneficiaryData> mbiMap;
+  /** Constant value used within the code */
+  private static final String MEDICARE = "MEDICARE";
 
   /**
    * Transforms the given {@link Parser.Data} into RDA {@link FissClaimChange} data.
@@ -158,6 +159,9 @@ public class FissTransformer extends AbstractTransformer {
         });
     consumeIfNotNull(mbiMap.get(beneId).getDob(), payerBuilder::setBeneDob);
 
+    payerBuilder.setPayersIdEnum(FissPayersCode.PAYERS_CODE_MEDICARE); // 'Z'
+    payerBuilder.setPayersName(MEDICARE);
+
     claimBuilder.addFissPayers(FissPayer.newBuilder().setBeneZPayer(payerBuilder.build()).build());
 
     data.get(Fiss.ADMTG_DGNS_CD).ifPresent(claimBuilder::setAdmDiagCode);
@@ -217,18 +221,19 @@ public class FissTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addDiagCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
-    for (int i = 1; i <= MAX_DIAG_CODES; ++i) {
+    for (int i = 0; i < Fiss.MAX_DIAG_CODES; ++i) {
+      // We can't use the loop index directly because value must be final in the lambda expression
       final int INDEX = i;
 
       // HHA and Hospice do not include procedure codes
-      data.get(Fiss.ICD_DGNS_CD + i)
+      data.get(Fiss.ICD_DGNS_CD.get(INDEX))
           .ifPresent(
               value -> {
                 FissDiagnosisCode.Builder diagBuilder =
                     FissDiagnosisCode.newBuilder().setDiagCd2(value);
 
                 consumeIf(
-                    data.get(Fiss.CLM_POA_IND_SW + INDEX).orElse(null),
+                    data.get(Fiss.CLM_POA_IND_SW.get(INDEX)).orElse(null),
                     NumberUtils::isDigits,
                     poa -> diagBuilder.setDiagPoaIndEnumValue(Integer.parseInt(poa)));
 
@@ -245,18 +250,19 @@ public class FissTransformer extends AbstractTransformer {
    */
   @VisibleForTesting
   void addProcCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
-    for (int i = 1; i <= MAX_PROC_CODES; ++i) {
+    for (int i = 0; i < Fiss.MAX_PROC_CODES; ++i) {
+      // We can't use the loop index directly because value must be final in the lambda expression
       final int INDEX = i;
 
       // HHA and Hospice do not include procedure codes
-      data.get(Fiss.ICD_PRCDR_CD + i)
+      data.get(Fiss.ICD_PRCDR_CD.get(INDEX))
           .ifPresent(
               value ->
                   claimBuilder.addFissProcCodes(
                       FissProcedureCode.newBuilder()
                           .setProcCd(value)
                           .setProcDt(
-                              data.getFromType(Fiss.PRCDR_DT + INDEX, Parser.Data.Type.DATE)
+                              data.getFromType(Fiss.PRCDR_DT.get(INDEX), Parser.Data.Type.DATE)
                                   .orElse(""))
                           .build()));
     }

@@ -49,6 +49,10 @@
         "type" : "date",
         "documentation" : "Include resources that completed in the given range"
       }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      }, {
         "name" : "type",
         "type" : "token",
         "documentation" : "A list of claim types to include"
@@ -83,6 +87,10 @@
         "name" : "service-date",
         "type" : "date",
         "documentation" : "Include resources that completed in the given range"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
       }, {
         "name" : "type",
         "type" : "token",
