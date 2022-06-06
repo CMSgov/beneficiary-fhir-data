@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
 from locust.env import Environment
 import time
@@ -43,7 +43,7 @@ class StatsCollector(object):
             AggregatedStats: An instance of AggregatedStats representing a snapshot of all stats at the current time
         """
         return AggregatedStats(metadata=StatsMetadata.from_locust_env(timestamp=int(time.time()), tag=self.stats_tag,
-                                                               environment=self.running_env, locust_env=self.locust_env),
+                                                                      environment=self.running_env, locust_env=self.locust_env),
                                tasks_stats=self._get_task_stats_list())
 
 
