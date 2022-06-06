@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import Optional, Type, TypeVar
 
-E = TypeVar('E', Enum)
+E = TypeVar('E', bound=Enum)
 
 
 class StatsStorageType(Enum):
@@ -83,20 +83,20 @@ class StatsConfiguration():
             key_val.split('=') for key_val in key_vals_list)}
 
         # Check for required parameters, like type, tag, environment
-        if not set(['type', 'tag', 'env']).issubset(set(config_dict.keys())):
+        if not set(['store', 'store_tag', 'env']).issubset(set(config_dict.keys())):
             raise ValueError(
-                '"type", "tag", and "env" must be specified') from None
+                '"store", "store_tag", and "env" must be specified') from None
 
         # Handle all of the enum-backed fields
         storage_type = _enum_from_val(
-            config_dict['type'], StatsStorageType, 'type')
+            config_dict['store'], StatsStorageType, 'store')
         stats_environment = _enum_from_val(
             config_dict['env'], StatsEnvironment, 'env')
         compare_type = _enum_from_val(
             config_dict['compare'], StatsComparisonType, 'compare') if 'compare' in config_dict else None
 
         # Validate all of the tags passed in
-        storage_tag = _validate_tag(config_dict['tag'], 'tag')
+        storage_tag = _validate_tag(config_dict['store_tag'], 'store_tag')
         comparison_tag = _validate_tag(
             config_dict['comp_tag'], 'comp_tag') if 'comp_tag' in config_dict else storage_tag
 
