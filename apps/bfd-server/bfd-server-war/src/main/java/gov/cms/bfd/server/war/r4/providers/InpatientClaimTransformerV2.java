@@ -79,7 +79,7 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.INPATIENT,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -316,7 +316,7 @@ public class InpatientClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
