@@ -14,7 +14,7 @@
                 "stacked": false,
                 "title": "Messages Error Count",
                 "region": "us-east-1",
-                "stat": "Avg",
+                "stat": "Average",
                 "period": 300
             }
         },
