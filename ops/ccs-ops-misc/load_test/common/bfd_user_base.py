@@ -7,8 +7,10 @@ import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
+from common.stats import StatsFileStorageConfig, AggregatedStats, StatsJsonFileWriter, PERCENTILES_TO_REPORT, StatsJsonS3Writer, StatsS3StorageConfig
 from common.url_path import create_url_path
-from locust import HttpUser
+from locust import HttpUser, events
+from locust.env import Environment
 
 import urllib3
 
@@ -35,8 +37,8 @@ class BFDUserBase(HttpUser):
         HttpUser.__init__(self, *args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
-        self.client_cert = setup.get_client_cert()
-        self.server_public_key = setup.load_server_public_key()
+        self.client_cert = config.get_client_cert()
+        self.server_public_key = config.load_server_public_key()
         setup.disable_no_cert_warnings(self.server_public_key, urllib3)
         self.last_updated = data.get_last_updated()
 
@@ -64,14 +66,12 @@ class BFDUserBase(HttpUser):
             else:
                 validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
 
-
     def on_stop(self):
         '''Run tear-down tasks after the tests have completed.'''
 
         # Report the various response time percentiles against the SLA
         if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
             validation.check_sla_validation(self.environment, self.VALIDATION_GOALS)
-
 
     def get_by_url(self, url: str, headers: Dict[str, str] = None,
             name: str = ''):
@@ -181,3 +181,30 @@ class BFDUserBase(HttpUser):
         if 'LOCUST_WORKER_NUM' in os.environ:
             return str(os.environ['LOCUST_WORKER_NUM'])
         return None
+
+@events.test_stop.add_listener
+def one_time_teardown(environment: Environment, **kwargs) -> None:
+    """Run one-time teardown tasks after the tests have completed
+
+    Args:
+        environment (Environment): The current Locust environment
+    """
+
+    logger = logging.getLogger()
+    stats_storage_config = config.load_stats_storage_config()
+    if stats_storage_config == None:
+        return
+
+    # If --storeStats was set and it is valid, get the aggregated stats of the stopping test run
+    stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
+
+    if isinstance(stats_storage_config, StatsFileStorageConfig):
+        logger.info("Writing aggregated performance statistics to file.")
+
+        stats_json_writer = StatsJsonFileWriter(stats)
+        stats_json_writer.write(stats_storage_config.file_path)
+    elif isinstance(stats_storage_config, StatsS3StorageConfig):
+        logger.info("Writing aggregated performance statistics to S3.")
+
+        stats_s3_writer = StatsJsonS3Writer(stats)
+        stats_s3_writer.write(stats_storage_config.bucket)
