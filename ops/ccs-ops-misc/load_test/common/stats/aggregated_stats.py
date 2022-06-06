@@ -1,3 +1,4 @@
+from dataclasses import asdict, dataclass
 from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
 from locust.env import Environment
 import time
@@ -20,35 +21,9 @@ class StatsCollector(object):
         """
         super().__init__()
         self.locust_env = locust_env
-        self.percentiles_na = ["N/A"] * len(PERCENTILES_TO_REPORT)
 
         self.stats_tag = stats_tag
         self.running_env = running_env
-
-    def _get_readable_percentile(self, percentile: float) -> str:
-        """Returns a human-readable percent string for a given value from 0-1
-
-        Args:
-            percentile (float): Floating-point percentile number between 0-1
-
-        Returns:
-            str: A human-readable percent string (i.e. "100%", "95%") for the given percentile number
-        """
-        return f"{int(percentile * 100) if (percentile * 100).is_integer() else round(100 * percentile, 6)}"
-
-    def _get_percentiles_dict(self, stats_entry: StatsEntry) -> Dict[str, int]:
-        """Returns a dictionary of a human-readable percentile string to its reported value
-
-        Args:
-            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
-
-        Returns:
-            Dict[str, int]: A dictionary of human-readable percentile strings to the percent response time
-        """
-        if not stats_entry.num_requests:
-            return self.percentiles_na
-
-        return {self._get_readable_percentile(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0) for percentile in PERCENTILES_TO_REPORT}
 
     def _get_stats_entry_dict(self, stats_entry: StatsEntry) -> Dict[str, any]:
         """Returns a dictionary representation of a StatsEntry object
@@ -59,19 +34,7 @@ class StatsCollector(object):
         Returns:
             Dict[str, any]: A dictionary that represents most of the statistics exposed by StatsEntry, including percentiles
         """
-        return {**{
-            'name': stats_entry.name,
-            'requestMethod': stats_entry.method,
-            'numRequests': stats_entry.num_requests,
-            'numFailures': stats_entry.num_failures,
-            'medianResponseTime': stats_entry.median_response_time,
-            'avgResponseTime': stats_entry.avg_response_time,
-            'minResponseTime': stats_entry.min_response_time or 0,
-            'maxResponseTime': stats_entry.max_response_time,
-            'avgContentLength': stats_entry.avg_content_length,
-            'totalRequestsPerSecond': stats_entry.total_rps,
-            'totalFailuresPerSecond': stats_entry.total_fail_per_sec
-        }, **self._get_percentiles_dict(stats_entry)}
+        return asdict(TaskStats.from_stats_entry(stats_entry))
 
     def _get_stats_entries_list(self) -> List[Dict[str, any]]:
         """Returns a list of dictionaries representing the performance statistics of _all_ Locust tasks that ran
@@ -103,3 +66,70 @@ class StatsCollector(object):
         }, **{
             'endpoints': self._get_stats_entries_list()
         }}
+
+
+@dataclass
+class TaskStats():
+    """Dataclass representing the performance statistics of a given Locust task"""
+    task_name: str
+    """The name specified by the task"""
+    request_method: str
+    """The HTTP request method (i.e. POST, GET) used by the Task"""
+    num_requests: int
+    """The total number of requests of this Task sent during the test run"""
+    num_failures: int
+    """The total number of failures received by this Task during the test run"""
+    median_response_time: int
+    """The median response time, in seconds, of each of this Task's requests"""
+    average_response_time: float
+    """The average response time, in seconds, of each of this Task's requests"""
+    min_response_time: float
+    """The fastest response time, in seconds, out of all this Task's requests"""
+    max_response_time: float
+    """The slowest respone time, in seconds, out of all this Task's requests"""
+    average_content_length: float
+    """The average length of a response from this Task's requests"""
+    total_reqs_per_second: float
+    """The average number of requests-per-second of this Taks's requests over the test run"""
+    total_fails_per_sec: float
+    """The average number of failures-per-second of this Task's requests over the test run"""
+    response_time_percentiles: Dict[float, int]
+    """A dictionary of response time percentiles to the number of responses under that percentile"""
+
+    @classmethod
+    def from_stats_entry(cls, stats_entry: StatsEntry) -> 'TaskStats':
+        """A class method that constructs an instance of TaskStats from a Locust StatsEntry
+        instance
+
+        Args:
+            stats_entry (StatsEntry): A Locust StatsEntry instance encapsulating a Task's stats
+
+        Returns:
+            TaskStats: A TaskStats dataclass instance that encapsulates the most important stats of a given Task
+        """
+        return cls(task_name=stats_entry.name, request_method=stats_entry.method,
+                   num_requests=stats_entry.num_requests, num_failures=stats_entry.num_failures,
+                   median_response_time=stats_entry.median_response_time, average_response_time=stats_entry.avg_response_time,
+                   min_response_time=stats_entry.min_response_time or 0, max_response_time=stats_entry.max_response_time,
+                   average_content_length=stats_entry.avg_content_length,
+                   total_reqs_per_second=stats_entry.total_rps,
+                   total_fails_per_sec=stats_entry.total_fail_per_sec,
+                   response_time_percentiles=cls.__get_percentiles_dict(stats_entry))
+
+    @classmethod
+    def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> Dict[float, int]:
+        """Returns a dictionary of response time percentiles to the number of responses under that percentile
+
+        Args:
+            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
+
+        Returns:
+            Dict[str, int]: A dictionary of response time percentiles to the number of responses under that percentile
+        """
+        if not stats_entry.num_requests:
+            # If there were no requests made, simply return a dictionary with 0
+            # for each of its values
+            return {k:0 for k in PERCENTILES_TO_REPORT}
+
+        return {percentile: int(stats_entry.get_response_time_percentile(percentile) or 0)
+                for percentile in PERCENTILES_TO_REPORT}
