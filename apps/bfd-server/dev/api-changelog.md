@@ -1,5 +1,38 @@
 # API Changelog
 
+## BFD-1604: added the Organization Name to the contained Organization resource for V2
+
+Adds the Organization Name to the Organization resource to be in compliance with CARIN.
+```json
+  "contained" : [ {
+    "resourceType" : "Organization",
+    "id" : "provider-org",
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+    },
+    "identifier" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "PRN"
+        } ]
+      },
+      "value" : "777776"
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+          "code" : "npi"
+        } ]
+      },
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "0000000000"
+    } ],
+    "active" : true,
+    "name" : "Fake ORG Name"
+  } ]
+```
+
 ## BFD-1620: Add Total Slices for CARIN Compliance
 
 Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.
