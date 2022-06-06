@@ -27,9 +27,9 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--enable-job-insights"              = "true"
     "--enable-metrics"                   = "true"
     "--enable-spark-ui"                  = "true"
-    "--job-bookmark-option"              = "job-bookmark-disable"
+    "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
-    "--sourceTable"                      = each.key # This is *not* going to work. Should be a db table from the crawler
+    "--sourceTable"                      = "${replace(each.key, "-", "_")}_api_history"
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/${each.key}/"
     "--targetTable"                      = aws_glue_catalog_table.api-requests-table[each.key].name
   }
