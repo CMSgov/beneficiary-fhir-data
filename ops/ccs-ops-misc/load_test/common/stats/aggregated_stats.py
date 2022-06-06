@@ -25,47 +25,26 @@ class StatsCollector(object):
         self.stats_tag = stats_tag
         self.running_env = running_env
 
-    def _get_stats_entry_dict(self, stats_entry: StatsEntry) -> Dict[str, any]:
-        """Returns a dictionary representation of a StatsEntry object
-
-        Args:
-            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
+    def _get_task_stats_list(self) -> List['TaskStats']:
+        """Returns a list of TaskStats representing the performance statistics of _all_ Locust tasks that ran
 
         Returns:
-            Dict[str, any]: A dictionary that represents most of the statistics exposed by StatsEntry, including percentiles
-        """
-        return asdict(TaskStats.from_stats_entry(stats_entry))
-
-    def _get_stats_entries_list(self) -> List[Dict[str, any]]:
-        """Returns a list of dictionaries representing the performance statistics of _all_ Locust tasks that ran
-
-        Returns:
-            List[Dict[str, any]]: A List of Dicts that represent the performance statistics of all Locust tasks
+            List[TaskStats]: A List of TaskStats that represent the performance statistics of all Locust tasks
         """
         stats = self.locust_env.stats
-        return [self._get_stats_entry_dict(stats_entry) for stats_entry in sort_stats(stats.entries)]
+        return [TaskStats.from_stats_entry(stats_entry) for stats_entry in sort_stats(stats.entries)]
 
     @property
-    def all_stats(self) -> Dict[str, any]:
-        """A property that returns a snapshot Dict of the current stats of aggregated performance statistics of the current
-        Locust environment.
+    def all_stats(self) -> 'AggregatedStats':
+        """A property that returns an AggregatedStats instance representing a snapshot of the aggregated performance
+        statistics of the current Locust environment at current time.
 
         Returns:
-            Dict[str, any]: A dictionary of the aggregated performance statistics of all endpoints
+            AggregatedStats: An instance of AggregatedStats representing a snapshot of all stats at the current time
         """
-        return {**{
-            'timestamp': int(time.time()),
-            'tag': self.stats_tag,
-            'environment': self.running_env.name,
-            'statsResetAfterSpawn': self.locust_env.reset_stats,
-            'numUsers': self.locust_env.parsed_options.num_users,
-            'usersPerSecond': self.locust_env.parsed_options.spawn_rate,
-            # We cannot get the user provided runtime directly; however, we can compute a more exact
-            # runtime by subtracting the start time from the last request's time
-            'runtime': self.locust_env.stats.last_request_timestamp - self.locust_env.stats.start_time
-        }, **{
-            'endpoints': self._get_stats_entries_list()
-        }}
+        return AggregatedStats(metadata=StatsMetadata.from_locust_env(timestamp=int(time.time()), tag=self.stats_tag,
+                                                               environment=self.running_env, locust_env=self.locust_env),
+                               tasks_stats=self._get_task_stats_list())
 
 
 @dataclass
@@ -129,7 +108,55 @@ class TaskStats():
         if not stats_entry.num_requests:
             # If there were no requests made, simply return a dictionary with 0
             # for each of its values
-            return {k:0 for k in PERCENTILES_TO_REPORT}
+            return {k: 0 for k in PERCENTILES_TO_REPORT}
 
         return {percentile: int(stats_entry.get_response_time_percentile(percentile) or 0)
                 for percentile in PERCENTILES_TO_REPORT}
+
+
+@dataclass
+class StatsMetadata():
+    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated performance stats"""
+    timestamp: int
+    """A timestamp indicating the time a stats snapshot was collected"""
+    tag: str
+    """The tag that partitions or buckets the statistics"""
+    environment: StatsEnvironment
+    """The environment that the stats were collected from"""
+    stats_reset_after_spawn: bool
+    """Indicates whether the test run's stats were reset after all users were spawned"""
+    num_total_users: int
+    """The number of users spawned running Tasks during the test run"""
+    num_users_per_second: float
+    """The number of users spawned per second when the test run started"""
+    total_runtime: float
+    """The total runtime of the test run"""
+
+    @classmethod
+    def from_locust_env(cls, timestamp: int, tag: str, environment: StatsEnvironment, locust_env: Environment) -> 'StatsMetadata':
+        """A class method that constructs an instance of StatsMetadata by computing its fields from a given
+        Locust environment
+
+        Args:
+            timestamp (int): A Unix timestamp indicating the time that the stats were collected
+            tag (str): A simple string tag that is used as a partitioning tag
+            environment (StatsEnvironment): The environment that the test run was started in
+            locust_env (Environment): The current Locust environment
+
+        Returns:
+            StatsMetadata: A StatsMetadata instance encapsulating all of the necessary metadata to store and compare statistics
+        """
+        return cls(timestamp, tag, environment,
+                   stats_reset_after_spawn=locust_env.reset_stats, num_total_users=locust_env.parsed_options.num_users,
+                   num_users_per_second=locust_env.parsed_options.spawn_rate,
+                   total_runtime=locust_env.stats.last_request_timestamp - locust_env.stats.start_time)
+
+
+@dataclass
+class AggregatedStats():
+    """A dataclass encoding the entirety of performance statistics for every Locust Task along with
+    metadata necessary for comparison and storage"""
+    metadata: StatsMetadata
+    """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task statistics"""
+    tasks_stats: List[TaskStats]
+    """A list of TaskStats where each entry represents the performance statistics of each Task"""
