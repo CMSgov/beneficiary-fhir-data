@@ -32,6 +32,9 @@ public final class DataUtilityCommons {
   /** Size of the buffer to read/write data */
   private static final int BUFFER_SIZE = 4096;
 
+  /** Private constructor */
+  private DataUtilityCommons() {}
+
   /**
    * Creates the file in the specified location.
    *
@@ -51,7 +54,17 @@ public final class DataUtilityCommons {
           ndctextZipUrl, new File(downloadedNpiZipFile.toFile().getAbsolutePath()), 100000, 100000);
     }
 
-    // unzip NPI file
+    // unzip NPI file.  Zip file contains these files
+    // pl_pfile_20050523-20220410.csv
+    // pl_pfile_20050523-20220410_FileHeader.csv
+    // othername_pfile_20050523-20220410.csv
+    // othername_pfile_20050523-20220410_FileHeader.csv
+    // NPPES_Data_Dissemination_Readme.pdf
+    // NPPES_Data_Dissemination_CodeValues.pdf
+    // npidata_pfile_20050523-20220410.csv
+    // npidata_pfile_20050523-20220410_FileHeader.csv
+    // endpoint_pfile_20050523-20220410.csv
+    // endpoint_pfile_20050523-20220410_FileHeader.csv
     unzip(downloadedNpiZipFile, workingDir);
     File f = new File(workingDir.toString());
     File[] matchingFiles =
