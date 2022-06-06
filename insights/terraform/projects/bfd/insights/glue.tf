@@ -127,7 +127,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--enable-job-insights"              = "true"
     "--enable-metrics"                   = "true"
     "--enable-spark-ui"                  = "true"
-    "--job-bookmark-option"              = "job-bookmark-disable"
+    "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
     "--sourceTable"                      = aws_glue_catalog_table.api-requests-table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${each.key}/"
@@ -228,7 +228,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
     "--enable-metrics"                   = "true"
     "--enable-spark-ui"                  = "true"
     "--initialize"                       = "True"
-    "--job-bookmark-option"              = "job-bookmark-disable"
+    "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
     "--sourceTable"                      = aws_glue_catalog_table.beneficiaries-table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/${each.key}/"
@@ -401,7 +401,7 @@ resource "aws_glue_catalog_table" "api-requests-table" {
   catalog_id    = local.account_id
   database_name = local.database
   name          = "${each.key}-api-requests"
-  owner         = "owner"
+  # owner         = "owner"
   retention  = 0
   table_type = "EXTERNAL_TABLE"
 
