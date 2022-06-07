@@ -17,7 +17,7 @@ def split_file(filename):
         dfCol = 'BENE_ID' # column in data frame
         
         # load RIF data into dataframe 
-        csv_dataframe = pd.read_csv(infile, sep='|')
+        csv_dataframe = pd.read_csv(infile, sep='|', dtype=str, keep_default_na = False)
         print("File rows/columns: " + str(csv_dataframe.shape))
         
         years = ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021']
@@ -30,13 +30,13 @@ def split_file(filename):
 
 def write_split_file(csv_dataframe, year):
     
-    query = '`RFRNC_YR` == ' + year;
+    query = '`RFRNC_YR` == "' + year + '"';
     fileName = 'bene_' + year + '.csv'
 
     query_result_dataframe = csv_dataframe.query(query)
     print(f"#{year} query results: " + str(query_result_dataframe.shape))
     query_result_dataframe.to_csv(fileName, sep='|', index=False)
-    print(f"Wrote file for bene_#{year}")
+    print(f"Wrote file for bene_{year}")
     
 
 ## Runs the program via run args when this file is run
