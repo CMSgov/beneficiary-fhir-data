@@ -7,27 +7,27 @@ from typing import Optional, Type, TypeVar
 E = TypeVar('E', bound=Enum)
 
 
-class StatsStorageType(Enum):
+class StatsStorageType(str, Enum):
     """Enumeration for each available type of storage for JSON stats"""
-    FILE = 1
+    FILE = 'file'
     """Indicates that aggregated statistics will be stored to a local file"""
-    S3 = 2
+    S3 = 's3'
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
 
-class StatsEnvironment(Enum):
+class StatsEnvironment(str, Enum):
     """Enumeration for each possible test running environment"""
-    TEST = 1
+    TEST = 'test'
     """Indicates that the running environment is in testing, using testing resources"""
-    PROD = 2
+    PROD = 'prod'
     """Indicates that the running environment is in production, using production resources"""
 
 
-class StatsComparisonType(Enum):
+class StatsComparisonType(str, Enum):
     """Enumeration for each possible type of stats comparison"""
-    PREVIOUS = 1
+    PREVIOUS = 'previous'
     """Indicates that the comparison will be against the most recent, previous run under a given tag"""
-    AVERAGE = 2
+    AVERAGE = 'average'
     """Indicates that the comparison will be against the average of all runs under a given tag"""
 
 
