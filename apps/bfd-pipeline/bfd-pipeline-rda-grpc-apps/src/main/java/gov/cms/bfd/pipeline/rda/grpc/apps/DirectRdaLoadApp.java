@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.apps;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;

@@ -1,6 +1,6 @@
 # RDA Bridge
 Utility project for converting data to RDA data (such as rif files into RDA ndjson files) to be used with the
-bfd-pipeline-rda-grpc-server to provide synthetic RDA data for FISS and MCS claims.
+bfd-pipeline-rda-grpc-apps to provide synthetic RDA data for FISS and MCS claims.
 
 Additionally, the tool offers the ability to generate attribution files for the MBI values present in the
 generated claims, providing your own template sql script using handlebars templates.
