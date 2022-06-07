@@ -34,9 +34,8 @@ class StatsCollector(object):
         stats = self.locust_env.stats
         return [TaskStats.from_stats_entry(stats_entry) for stats_entry in sort_stats(stats.entries)]
 
-    @property
-    def all_stats(self) -> 'AggregatedStats':
-        """A property that returns an AggregatedStats instance representing a snapshot of the aggregated performance
+    def collect_stats(self) -> 'AggregatedStats':
+        """A method that returns an AggregatedStats instance representing a snapshot of the aggregated performance
         statistics of the current Locust environment at current time.
 
         Returns:

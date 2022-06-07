@@ -199,7 +199,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
 
     # If --stats was set and it is valid, get the aggregated stats of the stopping test run
     stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
-    stats = stats_collector.all_stats
+    stats = stats_collector.collect_stats()
 
     if stats_config.store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
