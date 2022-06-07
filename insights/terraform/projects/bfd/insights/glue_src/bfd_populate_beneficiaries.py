@@ -1,12 +1,12 @@
+'''Populate the Beneficiaries table from the api_history table'''
 import sys
-from awsglue.transforms import *
+
+from awsglue.context import GlueContext
+from awsglue.dynamicframe import DynamicFrame
+from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from awsglue.context import GlueContext
-from awsglue.job import Job
-from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql import functions as SqlFuncs
-from pyspark.sql.window import Window
 
 args = getResolvedOptions(sys.argv, ["JOB_NAME"])
 sc = SparkContext()

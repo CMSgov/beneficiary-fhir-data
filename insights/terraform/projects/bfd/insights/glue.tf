@@ -5,13 +5,13 @@ resource "aws_s3_object" "bfd-history-ingest" {
   bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
-  key                = "scripts/bfd-history-ingest.py"
+  key                = "scripts/bfd_history_ingest.py"
   metadata           = {}
   storage_class      = "STANDARD"
   tags               = {}
   tags_all           = {}
-  source             = "glue_src/bfd-history-ingest.py"
-  etag               = filemd5("glue_src/bfd-history-ingest.py")
+  source             = "glue_src/bfd_history_ingest.py"
+  etag               = filemd5("glue_src/bfd_history_ingest.py")
 }
 
 # Glue Job for history ingestion
@@ -105,13 +105,13 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
-  key                = "scripts/bfd-populate-beneficiaries.py"
+  key                = "scripts/bfd_populate_beneficiaries.py"
   metadata           = {}
   storage_class      = "STANDARD"
   tags               = {}
   tags_all           = {}
-  source             = "glue_src/bfd-populate-beneficiaries.py"
-  etag               = filemd5("glue_src/bfd-populate-beneficiaries.py")
+  source             = "glue_src/bfd_populate_beneficiaries.py"
+  etag               = filemd5("glue_src/bfd_populate_beneficiaries.py")
 }
 
 # Glue Job to populate the beneficiaries table
@@ -205,13 +205,13 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   bucket             = local.external.s3_glue_assets_bucket
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
-  key                = "scripts/bfd-populate-beneficiary-unique.py"
+  key                = "scripts/bfd_populate_beneficiary_unique.py"
   metadata           = {}
   storage_class      = "STANDARD"
   tags               = {}
   tags_all           = {}
-  source             = "glue_src/bfd-populate-beneficiary-unique.py"
-  etag               = filemd5("glue_src/bfd-populate-beneficiary-unique.py")
+  source             = "glue_src/bfd_populate_beneficiary_unique.py"
+  etag               = filemd5("glue_src/bfd_populate_beneficiary_unique.py")
 }
 
 # Glue Job to populate the beneficiary_unique table

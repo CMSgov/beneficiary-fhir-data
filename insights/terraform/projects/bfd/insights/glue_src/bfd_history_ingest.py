@@ -1,10 +1,12 @@
+'''Ingest historical log data.'''
 import sys
-from awsglue.transforms import *
+
+from awsglue.context import GlueContext
+from awsglue.dynamicframe import DynamicFrame
+from awsglue.job import Job
+from awsglue.transforms import Unbox
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from awsglue.context import GlueContext
-from awsglue.job import Job
-from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql import functions as SqlFuncs
 
 args = getResolvedOptions(sys.argv, ["JOB_NAME"])

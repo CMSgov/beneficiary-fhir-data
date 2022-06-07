@@ -1,10 +1,13 @@
+'''Populate the Beneficiary-Unique table from the Beneficiary table.'''
+
 import sys
-from awsglue.transforms import *
+
+from awsglue.context import GlueContext
+from awsglue.dynamicframe import DynamicFrame
+from awsglue.job import Job
+from awsglue.transforms import RenameField, SelectFields
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from awsglue.context import GlueContext
-from awsglue.job import Job
-from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql import functions as SqlFuncs
 from pyspark.sql.window import Window
 
@@ -25,13 +28,14 @@ print("initialize is set to: ", args['initialize'])
 print("sourceTable is set to: ", args['sourceTable'])
 print("targetTable is set to: ", args['targetTable'])
 
-SourceDyf = glueContext.create_dynamic_frame.from_catalog(database="bfd", table_name=args['sourceTable'], transformation_ctx="SourceDyf",)
+SourceDyf = glueContext.create_dynamic_frame.from_catalog(database="bfd",
+    table_name=args['sourceTable'], transformation_ctx="SourceDyf",)
 
 # With bookmarks enabled, we have to make sure that there is data to be processed
 if SourceDyf.count() > 0:
     JoinLhsDf = (
         SourceDyf.toDF()
-        .withColumn("row",SqlFuncs.row_number().over(
+        .withColumn("row", SqlFuncs.row_number().over(
             Window.partitionBy("bene_id").orderBy(SqlFuncs.col("timestamp")))
             )
         .filter(SqlFuncs.col("row") == 1)
