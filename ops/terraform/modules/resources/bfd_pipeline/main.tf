@@ -261,3 +261,9 @@ module "ec2_instance" {
   # Ensure that the DB is accessible before the BFD Pipeline is launched.
   ec2_depends_on_1 = "aws_security_group_rule.allow_db_primary_access"
 }
+
+# BFD Pipeline CloudWatch Dashboard
+resource "aws_cloudwatch_dashboard" "bfd-pipeline-dashboard" {
+  dashboard_name = "bfd-pipeline-${var.env_config.env}"
+  dashboard_body = templatefile("${path.module}/templates/bfd-dashboards.tpl", { dashboard_namespace = "bfd-${var.env_config.env}/bfd-pipeline" })
+}

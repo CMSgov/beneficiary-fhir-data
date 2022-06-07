@@ -723,7 +723,7 @@ checkJavaFormat
 		</plugins>
 		<extensions>
 			<extension>
-				<!-- Used by the bfd-pipeline-rda-grpc-server and bfd-pipeline-rda-grpc modules, but
+				<!-- Used by the bfd-pipeline-rda-grpc-apps and bfd-pipeline-rda-grpc modules, but
 				defined here to workaround https://issues.apache.org/jira/browse/MDEPLOY-193. -->
 				<groupId>kr.motd.maven</groupId>
 				<artifactId>os-maven-plugin</artifactId>

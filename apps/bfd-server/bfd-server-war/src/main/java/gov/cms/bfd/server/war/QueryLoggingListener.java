@@ -170,10 +170,10 @@ public final class QueryLoggingListener implements QueryExecutionListener {
         "eobs_by_bene_id.hospice", (s -> s.contains(" from hospice_claims_new "))),
 
     EOBS_BY_BENE_ID_INPATIENT(
-        "eobs_by_bene_id.inpatient", (s -> s.contains(" from inpatient_claims "))),
+        "eobs_by_bene_id.inpatient", (s -> s.contains(" from inpatient_claims_new "))),
 
     EOBS_BY_BENE_ID_OUTPATIENT(
-        "eobs_by_bene_id.outpatient", (s -> s.contains(" from outpatient_claims "))),
+        "eobs_by_bene_id.outpatient", (s -> s.contains(" from outpatient_claims_new "))),
 
     EOBS_BY_BENE_ID_PDE("eobs_by_bene_id.pde", (s -> s.contains(" from partd_events "))),
 

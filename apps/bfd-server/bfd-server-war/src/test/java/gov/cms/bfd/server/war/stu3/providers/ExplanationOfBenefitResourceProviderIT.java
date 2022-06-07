@@ -1368,8 +1368,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
 
     entityManager.getTransaction().begin();
-    inpatientRifRecord =
-        entityManager.find(InpatientClaim.class, String.valueOf(inpatientRifRecord.getClaimId()));
+    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
     inpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
@@ -1395,7 +1394,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     entityManager.getTransaction().begin();
     outpatientRifRecord =
-        entityManager.find(OutpatientClaim.class, String.valueOf(outpatientRifRecord.getClaimId()));
+        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
     outpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));

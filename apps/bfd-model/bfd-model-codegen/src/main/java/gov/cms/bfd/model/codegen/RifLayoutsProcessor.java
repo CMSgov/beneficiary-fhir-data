@@ -280,10 +280,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
               .setHeaderEntity("InpatientClaim")
-              .setHeaderTable("inpatient_claims")
+              .setHeaderTable("inpatient_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("inpatient_claim_lines")
+              .setLineTable("inpatient_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -292,10 +292,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
               .setHeaderEntity("OutpatientClaim")
-              .setHeaderTable("outpatient_claims")
+              .setHeaderTable("outpatient_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("outpatient_claim_lines")
+              .setLineTable("outpatient_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1312,12 +1312,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
     final List<String> futureBigIntTables =
-        Arrays.asList(
-            "beneficiaries",
-            "beneficiaries_history",
-            "medicare_beneficiaryid_history",
-            "outpatient_claims",
-            "inpatient_claims");
+        Arrays.asList("beneficiaries", "beneficiaries_history", "medicare_beneficiaryid_history");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());

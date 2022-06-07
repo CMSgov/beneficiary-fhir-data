@@ -752,7 +752,10 @@ public final class OutpatientClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/codesystem/adjudication",
                                 "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
                                 "Revenue Center Non-Covered Charge Amount"))))
-            .setAmount(new Money().setValue(134).setCurrency(TransformerConstants.CODED_MONEY_USD));
+            .setAmount(
+                new Money()
+                    .setValue(new BigDecimal("134.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }
@@ -1021,7 +1024,9 @@ public final class OutpatientClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/variables/rev_cntr_pmt_amt_amt",
                                 "Revenue Center (Medicare) Payment Amount"))))
             .setAmount(
-                new Money().setValue(5000).setCurrency(TransformerConstants.CODED_MONEY_USD));
+                new Money()
+                    .setValue(new BigDecimal("5000.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }
