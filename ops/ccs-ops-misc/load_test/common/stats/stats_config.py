@@ -61,8 +61,8 @@ class StatsConfiguration():
                           v in as_dict.items() if v is not None and v != ''}
         return ';'.join([f'{k}={str(v) if not isinstance(v, Enum) else v.name}' for k, v in dict_non_empty.items()])
 
-    @staticmethod
-    def from_key_val_str(key_val_str: str) -> 'StatsConfiguration':
+    @classmethod
+    def from_key_val_str(cls, key_val_str: str) -> 'StatsConfiguration':
         """Constructs a concrete instance of StatsConfiguration from a given string in key-value format seperated
         by semi-colons ("key1=value1;key2=value2").
 
@@ -88,16 +88,16 @@ class StatsConfiguration():
                 '"store", "store_tag", and "env" must be specified') from None
 
         # Handle all of the enum-backed fields
-        storage_type = _enum_from_val(
+        storage_type = cls.__enum_from_val(
             config_dict['store'], StatsStorageType, 'store')
-        stats_environment = _enum_from_val(
+        stats_environment = cls.__enum_from_val(
             config_dict['env'], StatsEnvironment, 'env')
-        compare_type = _enum_from_val(
+        compare_type = cls.__enum_from_val(
             config_dict['compare'], StatsComparisonType, 'compare') if 'compare' in config_dict else None
 
         # Validate all of the tags passed in
-        storage_tag = _validate_tag(config_dict['store_tag'], 'store_tag')
-        comparison_tag = _validate_tag(
+        storage_tag = cls.__validate_tag(config_dict['store_tag'], 'store_tag')
+        comparison_tag = cls.__validate_tag(
             config_dict['comp_tag'], 'comp_tag') if 'comp_tag' in config_dict else storage_tag
 
         # Validate that bucket is specified if S3 is being used as the store
@@ -105,25 +105,23 @@ class StatsConfiguration():
             raise ValueError(
                 '"bucket" must be specified if "type" is "s3"') from None
 
-        return StatsConfiguration(store=storage_type, env=stats_environment, store_tag=storage_tag,
-                                  path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
-                                  compare=compare_type, comp_tag=comparison_tag)
+        return cls(store=storage_type, env=stats_environment, store_tag=storage_tag,
+                   path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
+                   compare=compare_type, comp_tag=comparison_tag)
 
+    def __enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
+        try:
+            return enum_type[val.upper()]
+        except KeyError:
+            raise ValueError(
+                f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
 
-def _enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
-    try:
-        return enum_type[val.upper()]
-    except KeyError:
-        raise ValueError(
-            f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
+    def __validate_tag(tag: str, field_name: str) -> str:
+        # Tags must follow the BFD Insights data convention constraints for
+        # partition/folders names, as it is used as a partition folder when uploading
+        # to S3
+        if re.fullmatch('[a-z0-9_]+', tag) == None or tag == '':
+            raise ValueError(
+                f'"{field_name}" must only consist of lower-case letters, numbers and the "_" character') from None
 
-
-def _validate_tag(tag: str, field_name: str) -> str:
-    # Tags must follow the BFD Insights data convention constraints for
-    # partition/folders names, as it is used as a partition folder when uploading
-    # to S3
-    if re.fullmatch('[a-z0-9_]+', tag) == None or tag == '':
-        raise ValueError(
-            f'"{field_name}" must only consist of lower-case letters, numbers and the "_" character') from None
-
-    return tag
+        return tag
