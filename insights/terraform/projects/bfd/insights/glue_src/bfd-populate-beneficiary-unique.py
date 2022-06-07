@@ -92,6 +92,7 @@ if SourceDyf.count() > 0:
         additional_options={
             "updateBehavior": "UPDATE_IN_DATABASE",
             "partitionKeys": ["year", "month"],
+            "enableUpdateCatalog": True,
         },
         transformation_ctx="WriteBeneUniqueNode",
     )

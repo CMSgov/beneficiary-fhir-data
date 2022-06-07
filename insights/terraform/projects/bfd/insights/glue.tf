@@ -228,7 +228,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
     "--enable-metrics"                   = "true"
     "--enable-spark-ui"                  = "true"
     "--initialize"                       = "True"
-    "--job-bookmark-option"              = "job-bookmark-enable"
+    "--job-bookmark-option"              = "job-bookmark-disable" # We need to process all records
     "--job-language"                     = "python"
     "--sourceTable"                      = aws_glue_catalog_table.beneficiaries-table[each.key].name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/${each.key}/"
@@ -284,6 +284,17 @@ resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     stored_as_sub_directories = false
+
+    columns {
+      name       = "bene_id"
+      parameters = {}
+      type       = "bigint"
+    }
+    columns {
+      name       = "first_seen"
+      parameters = {}
+      type       = "timestamp"
+    }
 
     ser_de_info {
       parameters = {
