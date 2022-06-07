@@ -25,14 +25,14 @@ class StatsCollector(object):
         self.stats_tag = stats_tag
         self.running_env = running_env
 
-    def _get_task_stats_list(self) -> List['TaskStats']:
-        """Returns a list of TaskStats representing the performance statistics of _all_ Locust tasks that ran
+    def _get_task_stats_dict(self) -> Dict[str, 'TaskStats']:
+        """Returns a dictionary of the name of a task to its TaskStats representing the performance statistics of _all_ Locust tasks that ran
 
         Returns:
-            List[TaskStats]: A List of TaskStats that represent the performance statistics of all Locust tasks
+            List[TaskStats]: A a dictionary of the name of a task to its TaskStats
         """
         stats = self.locust_env.stats
-        return [TaskStats.from_stats_entry(stats_entry) for stats_entry in sort_stats(stats.entries)]
+        return {task.task_name: task for task in (TaskStats.from_stats_entry(stats_entry) for stats_entry in sort_stats(stats.entries))}
 
     def collect_stats(self) -> 'AggregatedStats':
         """A method that returns an AggregatedStats instance representing a snapshot of the aggregated performance
@@ -43,7 +43,7 @@ class StatsCollector(object):
         """
         return AggregatedStats(metadata=StatsMetadata.from_locust_env(timestamp=int(time.time()), tag=self.stats_tag,
                                                                       environment=self.running_env, locust_env=self.locust_env),
-                               tasks_stats=self._get_task_stats_list())
+                               tasks=self._get_task_stats_dict())
 
 
 @dataclass
@@ -157,5 +157,5 @@ class AggregatedStats():
     metadata necessary for comparison and storage"""
     metadata: StatsMetadata
     """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task statistics"""
-    tasks_stats: List[TaskStats]
-    """A list of TaskStats where each entry represents the performance statistics of each Task"""
+    tasks: Dict[str, TaskStats]
+    """A dictionary of the name of a task to its TaskStats where each entry represents the performance statistics of each Task"""
