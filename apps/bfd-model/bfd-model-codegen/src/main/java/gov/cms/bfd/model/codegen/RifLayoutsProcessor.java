@@ -292,10 +292,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
               .setHeaderEntity("OutpatientClaim")
-              .setHeaderTable("outpatient_claims")
+              .setHeaderTable("outpatient_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("outpatient_claim_lines")
+              .setLineTable("outpatient_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1316,7 +1316,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             "beneficiaries",
             "beneficiaries_history",
             "medicare_beneficiaryid_history",
-            "outpatient_claims",
             "partd_events");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
