@@ -7,7 +7,7 @@
 #serverAlias=server
 #serverCommonName=server.example.com
 clientAlias=client-foo
-clientCommonName=client-foo.example.com
+clientCommonName=client-foo
 
 # Generate the server keypair into a temp keystore.
 #keytool -genkeypair -alias "${serverAlias}" -keyalg RSA -keysize 4096 -dname cn="${serverCommonName}" -validity 3650 -keypass changeit -keystore tmp-keystore.jks -storepass changeit
@@ -20,11 +20,20 @@ clientCommonName=client-foo.example.com
 #rm tmp-keystore.p12
 
 # Generate the client keypair into a temp keystore.
-keytool -genkeypair -alias "${clientAlias}" -keyalg RSA -keysize 4096 -dname cn="${clientCommonName}" -validity 3650 -keypass changeit -keystore tmp-keystore.jks -storepass changeit
+keytool -genkeypair -alias "${clientAlias}" -keyalg RSA -keysize 4096 -dname cn="${clientCommonName}" -validity 3650 -keypass changeit -keystore keystore.jks -storepass changeit
 
 # Extract the client certificate to a separate file.
-keytool -exportcert -rfc -alias "${clientAlias}" -file client-foo.crt.pem -keystore tmp-keystore.jks -storepass changeit
+#keytool -exportcert -rfc -alias "${clientAlias}" -file client-foo.crt.pem -keystore tmp-keystore.jks -storepass changeit
 
-# Remove the temp keystore.
-rm tmp-keystore.jks
+openssl pkcs12 -in keystore.jks -nodes -nocerts -out tmp-key.pem -password pass:changeit
+openssl pkcs12 -in keystore.jks -nokeys -out tmp-cert.pem -password pass:changeit
 
+# create x509ish keypair
+cat tmp-key.pem tmp-cert.pem > keypair.pem
+
+# create x509 cert
+openssl x509 -in tmp-cert.pem > cert.pem
+cat tmp-key.pem | sed -ne '/-BEGIN PRIVATE KEY-/,/-END PRIVATE KEY-/p' > key.pem
+
+# Remove the temp resources
+# rm tmp-cert.pem tmp-key.pem

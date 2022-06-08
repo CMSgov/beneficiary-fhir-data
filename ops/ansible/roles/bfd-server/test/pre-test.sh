@@ -32,6 +32,8 @@ if [ ! -L "roles/${ROLE}" ]; then ln -s "$(cd .. && pwd)" "roles/${ROLE}"; fi
 if [ "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}')" != "$CONTAINER_NAME" ]; then
   docker run \
     --cap-add=SYS_ADMIN \
+    --cap-add=NET_ADMIN \
+    --cap-add=NET_RAW \
     --detach \
     --rm \
     --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
