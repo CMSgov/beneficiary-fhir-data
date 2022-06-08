@@ -1083,7 +1083,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     entityManager.getTransaction().begin();
     outpatientRifRecord =
-        entityManager.find(OutpatientClaim.class, String.valueOf(outpatientRifRecord.getClaimId()));
+        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
     outpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
