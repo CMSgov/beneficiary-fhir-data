@@ -66,7 +66,7 @@ class StatsFileLoader(StatsLoader):
         filtered_stats = [stats for stats in stats_list if self.__verify_metadata(stats.metadata)]
 
         # Sort them based upon timestamp, greater to lower
-        filtered_stats.sort(key=lambda x: x.metadata.timestamp, reverse=True)
+        filtered_stats.sort(key=lambda stats: stats.metadata.timestamp, reverse=True)
 
         # Take the first item, if it exists -- this is the most recent, previous run
         return (filtered_stats[0:1] or [None])[0]
@@ -93,8 +93,8 @@ class StatsFileLoader(StatsLoader):
             loaded_metadata.num_total_users == self.metadata.num_total_users,
             loaded_metadata.num_users_per_second == self.metadata.num_users_per_second,
             loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
-            # Pick some delta that the runtimes should be under -- in this case, we're using 0.2
-            loaded_metadata.total_runtime - self.metadata.total_runtime < 0.2
+            # Pick some delta that the runtimes should be under -- in this case, we're using 1 second
+            loaded_metadata.total_runtime - self.metadata.total_runtime < 1.0
         ])
 
 class StatsAthenaLoader(StatsLoader):
