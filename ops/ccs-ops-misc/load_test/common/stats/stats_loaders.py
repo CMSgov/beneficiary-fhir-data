@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from common.stats.aggregated_stats import AggregatedStats
-from common.stats.stats_config import StatsConfiguration
+from common.stats.stats_config import StatsComparisonType, StatsConfiguration
 
 
 class StatsLoader(ABC):
@@ -10,14 +10,14 @@ class StatsLoader(ABC):
     def __init__(self, stats_config: StatsConfiguration) -> None:
         self.stats_config = stats_config
 
-    @abstractmethod
     def load(self) -> AggregatedStats:
         """Loads an AggregatedStats instance constructed based on what type of comparison is required
 
         Returns:
             AggregatedStats: An AggregatedStats instance representing the set of stats requested to load
         """
-        pass
+        is_avg_compare = self.stats_config.compare == StatsComparisonType.AVERAGE
+        return self._load_average() if is_avg_compare else self._load_previous()
 
     @abstractmethod
     def _load_previous(self) -> AggregatedStats:
