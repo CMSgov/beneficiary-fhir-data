@@ -8,7 +8,7 @@ on developer computers to assist in local development and testing.
 ## Installation
 
 To install or use these applications you need to expand
-the `bfd-pipeline/bfd-pipeline-rda-grpc-server/target/bfd-pipeline-rda-grpc-server-1.0.0-SNAPSHOT.zip`
+the `bfd-pipeline/bfd-pipeline-rda-grpc-apps/target/bfd-pipeline-rda-grpc-apps-1.0.0-SNAPSHOT.zip`
 file into a directory. Then set your CLASSPATH to include the application jar and all jars in the lib directory.
 Then invoke the desired applications using the java CLI.
 
@@ -133,19 +133,19 @@ Configuration settings and their associated properties are:
 run_dir=`dirname $0`
 cd $run_dir
 
-zip_name=bfd-pipeline-rda-grpc-server-1.0.0-SNAPSHOT.zip
+zip_name=bfd-pipeline-rda-grpc-apps-1.0.0-SNAPSHOT.zip
 bin_dir=`basename $zip_name .zip`
 echo $bin_dir
 ls -l $bin_dir
 
 binaries_base=$HOME/projects/beneficiary-fhir-data
-binaries_zip=$binaries_base/apps/bfd-pipeline/bfd-pipeline-rda-grpc-server/target/$zip_name
+binaries_zip=$binaries_base/apps/bfd-pipeline/bfd-pipeline-rda-grpc-apps/target/$zip_name
 
 rm -rf $bin_dir
 unzip $binaries_zip
 ls -l $bin_dir
 
-jar=$bin_dir/bfd-pipeline-rda-grpc-server-1.0.0-SNAPSHOT.jar
+jar=$bin_dir/bfd-pipeline-rda-grpc-apps-1.0.0-SNAPSHOT.jar
 
 ls -l $bin_dir/lib
 
@@ -157,7 +157,7 @@ export CLASSPATH=$cp
 
 java \
   -Ds3.local=true \
-  gov.cms.bfd.pipeline.rda.grpc.server.RdaServerApp \
+  gov.cms.bfd.pipeline.rda.grpc.apps.RdaServerApp \
   seed:42 \
   maxToSend:50000 \
 #  s3Bucket:rda \

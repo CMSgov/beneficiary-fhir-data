@@ -133,7 +133,7 @@ public final class PartDEventTransformerTest {
         claim.getEventId(),
         claim.getBeneficiaryId(),
         ClaimType.PDE,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_D,
         Optional.of(claim.getPrescriptionFillDate()),
         Optional.of(claim.getPrescriptionFillDate()),
