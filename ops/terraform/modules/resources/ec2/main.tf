@@ -65,7 +65,7 @@ resource "aws_instance" "main" {
     volume_size           = var.launch_config.volume_size
     delete_on_termination = true
     encrypted             = true
-    kms_key_id            = data.aws_kms_key.master_key.key_id
+    kms_key_id            = data.aws_kms_key.master_key.arn
   }
 
   user_data = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
