@@ -1312,14 +1312,14 @@ public class FissClaimTransformer {
         2,
         RdaFissPayer_beneZPayer_beneRel_Extractor.getEnumString(from),
         to::setBeneRel);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaFissPayer.Fields.beneLastName,
         1,
         15,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneLastName(),
         () -> from.getBeneZPayer().getBeneLastName(),
         to::setBeneLastName);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaFissPayer.Fields.beneFirstName,
         1,
         10,
