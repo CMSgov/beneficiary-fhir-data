@@ -64,7 +64,7 @@ final class PartDEventTransformer {
         claimGroup.getEventId(),
         claimGroup.getBeneficiaryId(),
         ClaimType.PDE,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_D,
         Optional.of(claimGroup.getPrescriptionFillDate()),
         Optional.of(claimGroup.getPrescriptionFillDate()),
