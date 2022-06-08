@@ -369,7 +369,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
       optional(() -> payer.setBadtOperId(randomAlphaNumeric(1, 9)));
       optional(() -> payer.setBadtReas(randomAlphaNumeric(1, 5)));
       optional(() -> payer.setBadtCurrDateCymd(randomDate()));
-      payer.setRdaPosition(i - 1);
+      payer.setRdaPosition(i);
 
       claim.addFissAuditTrail(payer.build());
     }
