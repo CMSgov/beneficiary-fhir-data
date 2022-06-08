@@ -106,7 +106,7 @@ class StatsConfiguration():
                 '"bucket" must be specified if "type" is "s3"') from None
 
         return cls(store=storage_type, env=stats_environment, store_tag=storage_tag,
-                   path=config_dict.get('path') or '', bucket=config_dict.get('bucket'),
+                   path=config_dict.get('path') or './', bucket=config_dict.get('bucket'),
                    compare=compare_type, comp_tag=comparison_tag)
 
     def __enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
