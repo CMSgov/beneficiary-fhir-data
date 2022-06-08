@@ -4,26 +4,20 @@
 
 	<parent>
 		<groupId>gov.cms.bfd</groupId>
-		<artifactId>bfd-parent</artifactId>
+		<artifactId>bfd-model-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bfd-model-parent</artifactId>
+	<artifactId>bfd-model-dsl-codegen-parent</artifactId>
 	<packaging>pom</packaging>
 
 	<description>
-			A parent POM for the bfd-model-* projects, which provide shared/library code for the BFD applications.
+			A parent POM for the bfd-model-dsl-codegen-* projects, which provide a code generation plugin and associated library for RDA API data.
 	</description>
 
 	<modules>
-		<module>bfd-model-codebook-extractor</module>
-		<module>bfd-model-codebook-data</module>
-		<module>bfd-model-codegen-annotations</module>
-		<module>bfd-model-codegen</module>
-                <module>bfd-model-dsl-codegen</module>
-		<module>bfd-model-rda</module>
-		<module>bfd-model-rif</module>
-		<module>bfd-model-rif-samples</module>
+		<module>bfd-model-dsl-codegen-plugin</module>
+		<module>bfd-model-dsl-codegen-library</module>
 	</modules>
 
 	<dependencyManagement>
@@ -37,7 +31,14 @@
 			</dependency>
 
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+				<!-- Used to run our unit and integration tests. -->
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.1</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>9.4.1208</version>
