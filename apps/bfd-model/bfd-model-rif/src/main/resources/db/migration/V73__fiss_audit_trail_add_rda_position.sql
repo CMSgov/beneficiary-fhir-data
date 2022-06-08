@@ -1,1 +1,1 @@
-alter table rda.fiss_audit_trails add column rda_position smallint default 0 not null;
+alter table rda.fiss_audit_trails add column rda_position smallint default 1 not null;
