@@ -159,3 +159,11 @@ class AggregatedStats():
     """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task statistics"""
     tasks: List[TaskStats]
     """A list of TaskStats where each entry represents the performance statistics of each Task"""
+
+    def __post_init__(self):
+        # Support conversion directly from a nested dictionary, such as when loading from JSON files
+        # or from Athena
+        if isinstance(self.metadata, dict):
+            self.metadata = StatsMetadata(**self.metadata)
+        if isinstance(self.tasks, list) and all(isinstance(task_dict, dict) for task_dict in self.tasks):
+            self.tasks = [TaskStats(**task_dict) for task_dict in self.tasks]
