@@ -71,7 +71,7 @@ class TaskStats():
     """The average number of requests-per-second of this Taks's requests over the test run"""
     total_fails_per_sec: float
     """The average number of failures-per-second of this Task's requests over the test run"""
-    response_time_percentiles: Dict[float, int]
+    response_time_percentiles: Dict[str, int]
     """A dictionary of response time percentiles to the number of responses under that percentile"""
 
     @classmethod
@@ -95,7 +95,7 @@ class TaskStats():
                    response_time_percentiles=cls.__get_percentiles_dict(stats_entry))
 
     @classmethod
-    def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> Dict[float, int]:
+    def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> Dict[str, int]:
         """Returns a dictionary of response time percentiles to the number of responses under that percentile
 
         Args:
@@ -109,7 +109,7 @@ class TaskStats():
             # for each of its values
             return {k: 0 for k in PERCENTILES_TO_REPORT}
 
-        return {percentile: int(stats_entry.get_response_time_percentile(percentile) or 0)
+        return {str(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0)
                 for percentile in PERCENTILES_TO_REPORT}
 
 
