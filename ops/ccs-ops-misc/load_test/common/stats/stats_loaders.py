@@ -1,10 +1,18 @@
+import time
 from abc import ABC, abstractmethod
 import json
 import os
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from common.stats.aggregated_stats import AggregatedStats, StatsMetadata
 from common.stats.stats_config import StatsComparisonType, StatsConfiguration, StatsStorageType
+
+# botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
+# We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
+# See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
+from gevent import monkey
+monkey.patch_all()
+import boto3
 
 
 class StatsLoader(ABC):
@@ -101,9 +109,57 @@ class StatsFileLoader(StatsLoader):
             loaded_metadata.total_runtime - self.metadata.total_runtime < 1.0
         ])
 
+
 class StatsAthenaLoader(StatsLoader):
+    def __init__(self, stats_config: StatsConfiguration, metadata: StatsMetadata) -> None:
+        self.client = boto3.client('athena')
+
+        super().__init__(stats_config, metadata)
+
     def load_previous(self) -> AggregatedStats:
         return super().load_previous()
 
     def load_average(self) -> AggregatedStats:
         return super().load_average()
+
+    def __start_athena_query(self, query: str) -> Dict[str, Any]:
+        return self.client.start_query_execution(
+            QueryString=query,
+            QueryExecutionContext={
+                'Database': self.stats_config.athena_db
+            },
+            ResultConfiguration={
+                'OutputLocation': f's3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stat/'
+            },
+            WorkGroup='bfd'
+        )
+
+    def __get_athena_query_status(self, query_execution_id: str) -> str:
+        return self.client.get_query_execution(
+            QueryExecutionId=query_execution_id,
+            WorkGroup='bfd'
+        )['Status']['State']
+
+    def __get_athena_query_result(self, query_execution_id: str) -> Dict[str, Any]:
+        return self.client.get_query_results(
+            QueryExecutionId=query_execution_id
+        )['ResultSet']['Rows']
+
+    def __run_query(self, query: str, max_retries: int = 10) -> Optional[Dict[str, Any]]:
+        start_response = self.__start_athena_query(query)
+        query_execution_id = start_response['QueryExecutionId']
+
+        for try_number in range(0, max_retries - 1):
+            # Exponentially back-off from hitting the API to ensure we don't hit the API limit
+            # See https://docs.aws.amazon.com/general/latest/gr/api-retries.html
+            time.sleep((2**try_number * 100.0) / 1000.0)
+
+            status = self.__get_athena_query_status(query_execution_id)
+
+            if status == 'SUCCEEDED':
+                break
+            elif status == 'FAILED' or status == 'CANCELLED':
+                raise RuntimeError(
+                    f'Query failed to complete -- status returned was {status}')
+
+        return self.__get_athena_query_result(query_execution_id)

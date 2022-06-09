@@ -112,7 +112,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
-**--stats**: (Optional) : Argument specifying that aggregated performance statistics should be collected and stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified as a list of key-value pairs seperated by semi-colons: `--stats="store=<file/s3>;env=<TEST/PROD>;tag=;path=;bucket=;compare=<previous/average>"`
+**--stats**: (Optional) : Argument specifying that aggregated performance statistics should be collected and stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified as a list of key-value pairs seperated by semi-colons: `--stats="store=<file/s3>;env=<TEST/PROD>;tag=;path=;bucket=;compare=<previous/average>;comp_tag=;athena_db="`
 
 | Key | Required? | Possible Values | Description |
 | :-: | :-: | :-: | - |
@@ -123,6 +123,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 | `bucket` | Yes, _if `store` is `s3`_ | N/A | The AWS S3 Bucket that the JSON will be written to under a predetermined path following BFD Insights data organization standards.
 | `compare` | No | `previous`, `average` | Specifies if the current run should be compared to existing statistics. These statistics will be retrieved from the same type of store as specified by `store`. If `previous` is specified, the most recent run from `comp_tag` will be compared against. If `average` is specified, the average of _all_ previous runs from `comp_tag` will be compared against. If unspecified, no comparisons will be done.
 | `comp_tag` | No | Must be non-empty, consisting of letters, numbers and the `_` character | Tag from which comparison statistics will be loaded from the given `store`. Defaults to `store_tag` if unspecified. |
+| `athena_db` | Yes, _if `store` is `s3` **and** `compare` is set_ | N/A | Name of the database to query using Athena if `store` is `s3` and `compare` is set. |
 
 ### Quick Run
 
