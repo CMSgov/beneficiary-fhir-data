@@ -1,0 +1,99 @@
+mappings:
+  - id: FissPayer
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissPayer
+    entityClassName: gov.cms.test.FissPayer
+    table:
+      name: FissPayers
+      schema: pre_adj
+      primaryKeyColumns:
+        - dcn
+        - priority
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: payerType
+          enumType: PayerType
+          sqlType: varchar(20)
+        - name: payersId
+          sqlType: varchar(1)
+        - name: estAmtDue
+          sqlType: decimal(11,2)
+        - name: beneRel
+          sqlType: varchar(2)
+          comment: "BeneZ only"
+        - name: insuredName
+          sqlType: varchar(25)
+          comment: "Insured only"
+        - name: insuredSex
+          sqlType: varchar(1)
+        - name: insuredRelX12
+          sqlType: varchar(2)
+        - name: insuredDob
+          sqlType: date
+        - name: insuredDobText
+          sqlType: varchar(9)
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    enumTypes:
+      - name: PayerType
+        values:
+          - BeneZ
+          - Insured
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      # The payerType is set to one of 2 enum values depending on which of the 2
+      # nested payer fields is populated.
+      - from: beneZPayer
+        to: payerType
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: PayerType
+          enumValue: BeneZ
+      - from: insuredPayer
+        to: payerType
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: PayerType
+          enumValue: Insured
+      - from: NONE
+        to: payerType
+      - from: insuredPayer.payersId
+        to: payersId
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+      - from: insuredPayer.estAmtDue
+      - from: insuredPayer.insuredName
+      - from: insuredPayer.insuredSex
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+      - from: insuredPayer.insuredRelX12
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: insuredPayer.insuredDob
+      - from: insuredPayer.insuredDobText
+      - from: beneZPayer.estAmtDue
+      - from: beneZPayer.beneRel
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: beneZPayer.insuredSex
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+      - from: beneZPayer.insuredRelX12
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+      - from: NOW
+        to: lastUpdated
