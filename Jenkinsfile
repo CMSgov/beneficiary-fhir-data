@@ -38,7 +38,8 @@ properties([
 	parameters([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
-		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
+		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
+		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -48,6 +49,7 @@ def awsCredentials
 def deployEnvironment
 def scriptForApps
 def scriptForDeploys
+def migratorScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -55,6 +57,7 @@ def amiIds
 def currentStage
 def gitCommitId
 def gitRepoUrl
+def awsRegion = 'us-east-1'
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
@@ -125,7 +128,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 // begin pipeline
 try {
 	// See ops/jenkins/cbc-build-push.sh for this image's definition.
-	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tf12', command: 'cat', ttyEnabled: true, alwaysPullImage: true, resourceLimitCpu: '4000m', resourceLimitMemory: '8192Mi', resourceRequestCpu: '4000m', resourceRequestMemory: '8192Mi')], serviceAccount: 'bfd') {
+	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv', command: 'cat', ttyEnabled: true, alwaysPullImage: true, resourceLimitCpu: '4000m', resourceLimitMemory: '8192Mi', resourceRequestCpu: '4000m', resourceRequestMemory: '8192Mi')], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
 			stage('Prepare') {
 				currentStage = "${env.STAGE_NAME}"
@@ -136,6 +139,7 @@ try {
 					// Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
+					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
 
 					// Unset any pre-existing session variables
 					// Set global AWS environment variables from role assumption
@@ -197,28 +201,58 @@ try {
 			}
 
 			stage('Build Apps') {
-				currentStage = "${env.STAGE_NAME}"
-				milestone(label: 'stage_build_apps_start')
+				if (!params.use_latest_images) {
+					currentStage = "${env.STAGE_NAME}"
+					milestone(label: 'stage_build_apps_start')
 
-				container('bfd-cbc-build') {
-					build_env = deployEnvironment
-					appBuildResults = scriptForApps.build(build_env)
+					container('bfd-cbc-build') {
+						build_env = deployEnvironment
+						appBuildResults = scriptForApps.build(build_env)
+					}
 				}
 			}
 
 
 			stage('Build App AMIs') {
-				currentStage = "${env.STAGE_NAME}"
-				milestone(label: 'stage_build_app_amis_test_start')
+				if (!params.use_latest_images) {
+					currentStage = "${env.STAGE_NAME}"
+					milestone(label: 'stage_build_app_amis_test_start')
 
-				container('bfd-cbc-build') {
-					amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+					container('bfd-cbc-build') {
+						amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+					}
+				}
+			}
+
+			stage('Deploy Migrator to TEST') {
+				bfdEnv = 'test'
+				currentStage = "${env.STAGE_NAME}"
+
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_migration_start')
+					container('bfd-cbc-build') {
+
+						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+							amiId: amiIds.bfdMigratorAmiId,
+							bfdEnv: bfdEnv,
+							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+							awsRegion: awsRegion,
+							gitBranchName: gitBranchName,
+							this.&awsAssumeRole
+						)
+
+						if (migratorDeploymentSuccessful) {
+							println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+						} else {
+							error('Migrator deployment failed')
+						}
+					}
 				}
 			}
 
 			stage('Deploy to TEST') {
 				currentStage = "${env.STAGE_NAME}"
-				lock(resource: 'env_test', inversePrecendence: true) {
+				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
@@ -233,7 +267,7 @@ try {
 								env.AWS_SESSION_TOKEN = awsCredentials[3]
 							}
 						}
-						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 					}
 				}
 			}
@@ -264,10 +298,39 @@ try {
 				}
 			}
 
+			stage('Deploy Migrator to PROD-SBX') {
+				bfdEnv = 'prod-sbx'
+				currentStage = "${env.STAGE_NAME}"
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_migration_start')
+						container('bfd-cbc-build') {
+
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								gitBranchName: gitBranchName,
+								this.&awsAssumeRole
+							)
+
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+							} else {
+								error('Migrator deployment failed')
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
 			stage('Deploy to PROD-SBX') {
 				currentStage = "${env.STAGE_NAME}"
 				if (willDeployToProdEnvs) {
-					lock(resource: 'env_prod_sbx', inversePrecendence: true) {
+					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
 
 						container('bfd-cbc-build') {
@@ -282,7 +345,7 @@ try {
 									env.AWS_SESSION_TOKEN = awsCredentials[3]
 								}
 							}
-							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 						}
 					}
 				} else {
@@ -290,10 +353,40 @@ try {
 				}
 			}
 
+			stage('Deploy Migrator to PROD') {
+				bfdEnv = 'prod'
+				currentStage = "${env.STAGE_NAME}"
+
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_migration_start')
+						container('bfd-cbc-build') {
+
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								gitBranchName: gitBranchName,
+								this.&awsAssumeRole
+							)
+
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+							} else {
+								error('Migrator deployment failed')
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
 			stage('Deploy to PROD') {
 				currentStage = "${env.STAGE_NAME}"
 				if (willDeployToProdEnvs) {
-					lock(resource: 'env_prod', inversePrecendence: true) {
+					lock(resource: 'env_prod') {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
@@ -308,7 +401,7 @@ try {
 									env.AWS_SESSION_TOKEN = awsCredentials[3]
 								}
 							}
-							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
 						}
 					}
 				} else {
@@ -325,4 +418,65 @@ try {
 	throw ex
 } finally {
 	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+}
+
+/**
+ * Wrap the awscli to authenticate with AWS by assuming a specific, fully qualified role. The role
+ * must be the id of an available Jenkins secret.
+ *
+ * In addition to the setting credentials as environment variables for AWS requests, this also
+ * sets AWS_REGION, DEFAULT_AWS_REGION, and a special NEXT_AWS_AUTH. NEXT_AWS_AUTH contains the
+ * the time at which ~50% of the requested session has elapsed. If this environment variable is
+ * populated, the script will only re-authenticate if there is less than half the time left in the
+ * current session. By default, this requests a 60 minute session and subsequent calls of this
+ * method will only reauthenticate if there are fewer than 30 minutes remaining on the session. This
+ * keeps both the Jenkins logs tidier and avoids excessive role assumption as recorded in cloudwatch
+ * logs. This is an especially important consideration in tight loops that seek to ensure valid AWS
+ * credentials before or after each iteration.
+ *
+ * TODO: consider transitioning away from wrapped awscli role assumption to something in groovy/java
+ * TODO: implement validation safety surrounding e.g. credentialsId, sessionName
+ *
+ * @param args {@link Map} that optionally includes sessionDurationSeconds, sessionName, awsRegion,
+ * and credentialsId
+ */
+void awsAssumeRole(Map args = [:]) {
+	sessionDurationSeconds = args.sessionDurationSeconds ?: 3600
+	// default `sessionName` as `env.JOB_NAME` is vaguely sanitized to replace non-alphanumeric
+	// chars with '-' AND deduplicates consecutive '-'. This is somewhat more restrictive than the
+	// regex used in the STS API for RoleSessionName, i.e. `/[\w+=,.@:\/-]*/`
+	// See https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
+	sessionName = args.sessionName ?: env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
+	credentialsId = args.credentialsId ?: 'bfd-aws-assume-role'
+	awsRegion = args.awsRegion ?: 'us-east-1'
+
+	if (env.NEXT_AWS_AUTH == null || java.time.Instant.now() > java.time.Instant.parse(env.NEXT_AWS_AUTH)) {
+		echo "Authenticating..."
+		withEnv(["DURATION=${sessionDurationSeconds}",
+				 "SESSION_NAME=${sessionName}",
+				 'AWS_ACCESS_KEY_ID=',
+				 'AWS_SECRET_ACCESS_KEY=',
+				 'AWS_SESSION_TOKEN=']) {
+			withCredentials([string(credentialsId: credentialsId, variable: 'JENKINS_ROLE')]) {
+				awsCredentials = sh(
+					returnStdout: true,
+					script: '''
+aws sts assume-role \
+  --duration-seconds "$DURATION" \
+  --role-arn "$JENKINS_ROLE" \
+  --role-session-name "$SESSION_NAME" \
+  --output text --query Credentials
+'''
+				).trim().split(/\s+/)
+				// Set nextAuthSeconds to renew through ~50% of original session's duration
+				nextAuthSeconds = (sessionDurationSeconds / 2).longValue()
+				env.NEXT_AWS_AUTH = java.time.Instant.now().plus(java.time.Duration.ofSeconds(nextAuthSeconds))
+				env.AWS_REGION = awsRegion
+				env.AWS_DEFAULT_REGION = awsRegion
+				env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+				env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+				env.AWS_SESSION_TOKEN = awsCredentials[3]
+			}
+		}
+	}
 }
