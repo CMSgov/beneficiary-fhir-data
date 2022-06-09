@@ -17,6 +17,8 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -35,6 +37,7 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
@@ -55,6 +58,12 @@ public final class DataServerLauncherApp {
       "Application shutdown housekeeping complete.";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DataServerLauncherApp.class);
+
+  /**
+   * Logger for the structured access log ('access.json') that has one line for every request that
+   * the server receives.
+   */
+  private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
 
   /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
@@ -220,7 +229,7 @@ public final class DataServerLauncherApp {
             + " \"%{BlueButton-User}i\""
             + " %{BlueButton-BeneficiaryId}i"
             + " %{X-Request-ID}o";
-    final CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
+    final BfdRequestLog requestLog = new BfdRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);
 
@@ -284,6 +293,67 @@ public final class DataServerLauncherApp {
      * Anything past this point is not guaranteed to run, as the thread may get stopped before it
      * has a chance to execute.
      */
+  }
+
+  /**
+   * BFD implementation of the Jetty {@link org.eclipse.jetty.server.RequestLog} which provides
+   * callback functionality appropriate for writing access logs which contain information for each
+   * request received by the server.
+   *
+   * <p>This implementation is responsible for writing to two different log files upon completion of
+   * each request:
+   *
+   * <ul>
+   *   <li>access.json - a structured log built from the {@link MDC}
+   *   <li>access.log - an unstructured NCSA style log that should be considered deprecated and
+   *       slated for removal
+   * </ul>
+   *
+   * TODO: BFD-1844 Remove access.log.
+   */
+  private static class BfdRequestLog extends CustomRequestLog {
+    /**
+     * Construct a BFD Request Log
+     *
+     * @param accessLogFileName filename for the unstructured log 'access.log'
+     * @param accessLogFormat format for the unstructured log 'access.log'
+     */
+    public BfdRequestLog(String accessLogFileName, String accessLogFormat) {
+      super(accessLogFileName, accessLogFormat);
+    }
+
+    /**
+     * Log a message for a request/response pair to both the access.log (via the Jetty
+     * CustomRequestLog) and the access.json (via Logback).
+     *
+     * @param request the request
+     * @param response the response
+     */
+    @Override
+    public void log(Request request, Response response) {
+      try {
+        /*
+         * Call the implementation from CustomRequestLog to write the access.log entry.
+         */
+        super.log(request, response);
+
+        /*
+         * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
+         * CustomRequestLog to write the payload size to the access.log (see @CustomRequestLog.logBytesSent()).
+         */
+        MDC.put(
+            "http_access.response.output_size_in_bytes",
+            String.valueOf(response.getHttpOutput().getWritten()));
+
+        /*
+         * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
+         * automatically included with it is!
+         */
+        LOGGER_HTTP_ACCESS.info("response complete");
+      } finally {
+        MDC.clear();
+      }
+    }
   }
 
   /**
