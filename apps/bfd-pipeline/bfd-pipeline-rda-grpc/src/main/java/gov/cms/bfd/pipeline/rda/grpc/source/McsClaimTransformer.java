@@ -670,7 +670,7 @@ public class McsClaimTransformer {
         from::hasIdrDtlToDate,
         from::getIdrDtlToDate,
         to::setIdrDtlToDate);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaMcsDetail.Fields.idrProcCode,
         1,
         5,
