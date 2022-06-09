@@ -16,7 +16,6 @@ String deleteMessage(String receipt, String sqsQueueUrl, String awsRegion = 'us-
 
 // returns true when if the given `sqsQueueName` exists
 boolean queueExists(String sqsQueueName, String awsRegion = 'us-east-1') {
-    // For whatever reason, the ternary expression doesn't work here. I still don't understand Groovy.
     exists = sh(returnStatus: true, script: "aws sqs get-queue-url --queue-name ${sqsQueueName} --region ${awsRegion} --output text")
     if (exists == 0) {
         return true
@@ -32,12 +31,23 @@ def purgeQueue(String sqsQueueName, String awsRegion = 'us-east-1') {
     return result
 }
 
-// wraps the aws cli's receive-message subcommand to produce JSON objects
-// that represent the deployed migrator's state. Contains the following
-// fields mapped to string values: pid, start_time, stop_time, status, code
+/* Wrapping `aws sqs receive-message`, this returns a JSON array of migrator messages from sqs.
+ * Messages contain `pid`, `start_time`, `stop_time`, `status`, `code keys` and string values.
+ *
+ * @param args a {@link Map} must include maxMessages, sqsQueueUrl, visibilityTimeoutSeconds,
+ * and waitTimeSeconds.
+ * <ul>
+ * <li>awsRegion targeted aws region. Defaults to 'us-east-1'</li>
+ * <li>maxMessages as a maximum, SQS may return fewer but no more than this figure.</li>
+ * <li>sqsQueueUrl targeted sqs queue url</li>
+ * <li>visibilityTimeoutSeconds indicate amount of time to prevent other clients from reading a message</li>
+ * <li>waitTimeSeconds long polling up to 20 seconds. This is the maximum amount of time to poll before
+ * prematurely returning with empty results.</li>
+ * </ul>
+ */
 def receiveMessages(Map args = [:]) {
-    maxMessages = args.maxMessages
     awsRegion = args.awsRegion ?: 'us-east-1'
+    maxMessages = args.maxMessages
     sqsQueueUrl = args.sqsQueueUrl
     visibilityTimeoutSeconds = args.visibilityTimeoutSeconds
     waitTimeSeconds = args.waitTimeSeconds
