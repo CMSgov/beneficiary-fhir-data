@@ -59,30 +59,34 @@ class StatsLoader(ABC):
 
 class StatsFileLoader(StatsLoader):
     def load_previous(self) -> AggregatedStats:
-        # Get a list of all AggregatedStats from stats.json files under path 
+        # Get a list of all AggregatedStats from stats.json files under path
         stats_list = self.__load_stats_from_files()
 
         # Filter those that don't match the config and current run's metadata
-        filtered_stats = [stats for stats in stats_list if self.__verify_metadata(stats.metadata)]
+        filtered_stats = [
+            stats for stats in stats_list if self.__verify_metadata(stats.metadata)]
 
         # Sort them based upon timestamp, greater to lower
-        filtered_stats.sort(key=lambda stats: stats.metadata.timestamp, reverse=True)
+        filtered_stats.sort(
+            key=lambda stats: stats.metadata.timestamp, reverse=True)
 
         # Take the first item, if it exists -- this is the most recent, previous run
         return (filtered_stats[0:1] or [None])[0]
 
     def load_average(self) -> AggregatedStats:
-        raise NotImplementedError('Average stats is not implemented for files at this time.')
+        raise NotImplementedError(
+            'Average stats is not implemented for files at this time.')
 
     def __load_stats_from_files(self, suffix: str = '.stats.json') -> List[AggregatedStats]:
         path = self.stats_config.path
         stats_files = [os.path.join(path, file)
                        for file in os.listdir(path) if file.endswith(suffix)]
-        
+
         aggregated_stats_list = []
         for stats_file in stats_files:
             with open(stats_file) as json_file:
-                aggregated_stats_list.append(AggregatedStats(**json.load(json_file)))
+                aggregated_stats_list.append(
+                    AggregatedStats(**json.load(json_file)))
 
         return aggregated_stats_list
 
