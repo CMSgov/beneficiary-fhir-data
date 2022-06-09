@@ -23,9 +23,11 @@ public class ColumnBean {
   /** Regex used to recognize numeric columns by their SQL type. */
   private static final Pattern NumericTypeRegex =
       Pattern.compile("(numeric|decimal)\\((\\d+)(,(\\d+))?\\)", Pattern.CASE_INSENSITIVE);
-  /** Group number in {@link NumericTypeRegex} that contains the numeric precision value. */
+  /**
+   * Group number in {@link ColumnBean#NumericTypeRegex} that contains the numeric precision value.
+   */
   private static final int NumericPrecisionGroup = 2;
-  /** Group number in {@link NumericTypeRegex} that contains the numeric scale value. */
+  /** Group number in {@link ColumnBean#NumericTypeRegex} that contains the numeric scale value. */
   private static final int NumericScaleGroup = 4;
   /**
    * Regex to extract the length from a SQL type if it is character type with a defined integer
@@ -33,14 +35,16 @@ public class ColumnBean {
    */
   private static final Pattern CharacterLengthRegex =
       Pattern.compile("char\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
-  /** Group number in {@link CharacterLengthRegex} that contains the numeric length value. */
+  /**
+   * Group number in {@link ColumnBean#CharacterLengthRegex} that contains the numeric length value.
+   */
   private static final int CharacterLengthGroup = 1;
   /** Regex used to recognize date columns by their SQL type. */
   private static final Pattern DateTypeRegex = Pattern.compile("date", Pattern.CASE_INSENSITIVE);
 
   /** Name of the field in the entity object corresponding to this column. */
   private String name;
-  /** Alternative name used in database for this column. Defaults to {@link name}. */
+  /** Alternative name used in database for this column. Defaults to {@link ColumnBean#name}. */
   private String dbName;
   /** SQL database type for this column. */
   private String sqlType;
@@ -68,8 +72,8 @@ public class ColumnBean {
    */
   private boolean updatable = true;
   /**
-   * The {@link FieldType} for the field. Either {@link FieldType.Column} or {@link
-   * FieldType.Transient}.
+   * The {@link FieldType} for the field. Either {@link FieldType#Column} or {@link
+   * FieldType#Transient}.
    */
   private FieldType fieldType = FieldType.Column;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
@@ -88,8 +92,8 @@ public class ColumnBean {
   }
 
   /**
-   * Gets the name of the database column. Uses {@link dbName} if defined, otherwise uses {@link
-   * name}.
+   * Gets the name of the database column. Uses {@link ColumnBean#dbName} if defined, otherwise uses
+   * {@link name}.
    *
    * @return name of the column in the database
    */
@@ -119,7 +123,8 @@ public class ColumnBean {
   /**
    * Computes the appropriate java type for the field associated with this column.
    *
-   * @return either the {@link javaType} or a type derived from the {@link sqlType}.
+   * @return either the {@link ColumnBean#javaType} or a type derived from the {@link
+   *     ColumnBean#sqlType}.
    */
   public TypeName computeJavaType() {
     if (Strings.isNullOrEmpty(javaType)) {
@@ -135,7 +140,7 @@ public class ColumnBean {
    * Computes the appropriate java type for the accessor (getter/setter) generated for the field
    * associated with this column.
    *
-   * @return either the {@link javaAccessorType} or the computed field type.
+   * @return either the {@link ColumnBean#javaAccessorType} or the computed field type.
    */
   public TypeName computeJavaAccessorType() {
     if (Strings.isNullOrEmpty(javaAccessorType)) {
@@ -267,9 +272,10 @@ public class ColumnBean {
   }
 
   /**
-   * Determines an appropriate java type to use based on the value of our {@link sqlType}.
+   * Determines an appropriate java type to use based on the value of our {@link
+   * ColumnBean#sqlType}.
    *
-   * @return an appropriate java type to use based on our {@link sqlType}
+   * @return an appropriate java type to use based on our {@link ColumnBean#sqlType}
    */
   private TypeName mapSqlTypeToTypeName() {
     final String sqlType = this.sqlType.toLowerCase();
@@ -320,8 +326,8 @@ public class ColumnBean {
   /**
    * Compute the appropriate {@link TypeName} to use for the given {@code javaType}.
    *
-   * @param javaType either {@link javaType} or {@link javaAccessorType}
-   * @param name the {@link name} for the {@link ColumnBean}
+   * @param javaType either {@link ColumnBean#javaType} or {@link ColumnBean#javaAccessorType}
+   * @param name the {@link ColumnBean#name} for the {@link ColumnBean}
    * @return an appropriate {@link TypeName}
    */
   private static TypeName mapJavaTypeToTypeName(String javaType, String name) {

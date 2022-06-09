@@ -2,6 +2,7 @@ package gov.cms.model.dsl.codegen.plugin.transformer;
 
 import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.ENUM_CLASS_OPT;
 import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.EXTRACTOR_OPTIONS_OPT;
+import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.HAS_UNRECOGNIZED_OPT;
 import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.UNSUPPORTED_ENUM_VALUES_OPT;
 import static org.junit.Assert.assertEquals;
 
@@ -94,9 +95,9 @@ public class MessageEnumFieldTransformerTest {
         block.toString());
   }
 
-  /** Verify that field initializer is defined correctly. */
+  /** Verify that field initializer is defined correctly when the source field is not nested. */
   @Test
-  public void testGenerateFieldInitializers() {
+  public void testGenerateFieldInitializersWithSimpleFieldName() {
     ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
     TransformationBean transformation =
         TransformationBean.builder()
@@ -118,6 +119,65 @@ public class MessageEnumFieldTransformerTest {
     List<CodeBlock> block = generator.generateFieldInitializers(mapping, column, transformation);
     assertEquals(
         "[Entity_claimStatus_Extractor = enumExtractorFactory.createEnumStringExtractor(gov.cms.test.Message::hasClaimStatusEnum,gov.cms.test.Message::getClaimStatusEnum,gov.cms.test.Message::hasClaimStatusUnrecognized,gov.cms.test.Message::getClaimStatusUnrecognized,gov.cms.test.Value.UNRECOGNIZED,java.util.Set.of(gov.cms.test.Value.Bad,gov.cms.test.Value.Worse),java.util.Set.of(gov.cms.model.dsl.codegen.library.EnumStringExtractor.Options.Alpha,gov.cms.model.dsl.codegen.library.EnumStringExtractor.Options.Beta));\n]",
+        block.toString());
+  }
+
+  /**
+   * Verify that field initializer is defined correctly when the source field is nested within
+   * another object.
+   */
+  @Test
+  public void testGenerateFieldInitializersWithNestedFieldName() {
+    ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
+    TransformationBean transformation =
+        TransformationBean.builder()
+            .optional(false)
+            .from("detail.claimStatus")
+            .transformer("MessageEnum")
+            .transformerOption(ENUM_CLASS_OPT, "gov.cms.test.Value")
+            .transformerOption(UNSUPPORTED_ENUM_VALUES_OPT, "Bad,Worse")
+            .transformerOption(EXTRACTOR_OPTIONS_OPT, "Alpha,Beta")
+            .build();
+    MappingBean mapping =
+        MappingBean.builder()
+            .messageClassName("gov.cms.test.Message")
+            .entityClassName("gov.cms.test.Entity")
+            .transformation(transformation)
+            .build();
+
+    var generator = new MessageEnumFieldTransformer();
+    List<CodeBlock> block = generator.generateFieldInitializers(mapping, column, transformation);
+    assertEquals(
+        "[Entity_detail_claimStatus_Extractor = enumExtractorFactory.createEnumStringExtractor(message -> message.hasDetail() && message.getDetail().hasClaimStatusEnum(),message -> message.getDetail().getClaimStatusEnum(),message -> message.hasDetail() && message.getDetail().hasClaimStatusUnrecognized(),message -> message.getDetail().getClaimStatusUnrecognized(),gov.cms.test.Value.UNRECOGNIZED,java.util.Set.of(gov.cms.test.Value.Bad,gov.cms.test.Value.Worse),java.util.Set.of(gov.cms.model.dsl.codegen.library.EnumStringExtractor.Options.Alpha,gov.cms.model.dsl.codegen.library.EnumStringExtractor.Options.Beta));\n]",
+        block.toString());
+  }
+
+  /**
+   * Verify that field initializer is defined correctly when the {@link
+   * MessageEnumFieldTransformer#HAS_UNRECOGNIZED_OPT} is false.
+   */
+  @Test
+  public void testGenerateFieldInitializersWithNoUnrecognizedValueField() {
+    ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
+    TransformationBean transformation =
+        TransformationBean.builder()
+            .optional(false)
+            .from("claimStatus")
+            .transformer("MessageEnum")
+            .transformerOption(ENUM_CLASS_OPT, "gov.cms.test.Value")
+            .transformerOption(HAS_UNRECOGNIZED_OPT, "false")
+            .build();
+    MappingBean mapping =
+        MappingBean.builder()
+            .messageClassName("gov.cms.test.Message")
+            .entityClassName("gov.cms.test.Entity")
+            .transformation(transformation)
+            .build();
+
+    var generator = new MessageEnumFieldTransformer();
+    List<CodeBlock> block = generator.generateFieldInitializers(mapping, column, transformation);
+    assertEquals(
+        "[Entity_claimStatus_Extractor = enumExtractorFactory.createEnumStringExtractor(gov.cms.test.Message::hasClaimStatusEnum,gov.cms.test.Message::getClaimStatusEnum,ignored -> false,ignored -> null,gov.cms.test.Value.UNRECOGNIZED,java.util.Set.of(),java.util.Set.of());\n]",
         block.toString());
   }
 }

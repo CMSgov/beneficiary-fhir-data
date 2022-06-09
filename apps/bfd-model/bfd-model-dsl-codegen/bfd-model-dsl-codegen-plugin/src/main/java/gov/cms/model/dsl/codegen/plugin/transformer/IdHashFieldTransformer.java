@@ -12,6 +12,9 @@ import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
  * before being copied to the destination field.
  */
 public class IdHashFieldTransformer implements FieldTransformer {
+  /** Argument value for minimum length field when calling copy string methods. */
+  private static final int ID_HASH_MIN_LENGTH = 1;
+
   /**
    * {@inheritDoc}
    *
@@ -32,9 +35,10 @@ public class IdHashFieldTransformer implements FieldTransformer {
           String.format("()-> %s.apply(%s)", HASHER_VAR, getter.createGetCall(transformation));
       return CodeBlock.builder()
           .addStatement(
-              "$L.copyOptionalString($L, 1, $L, $L, $L, $L)",
+              "$L.copyOptionalString($L, $L, $L, $L, $L, $L)",
               TRANSFORMER_VAR,
               TransformerUtil.createFieldNameForErrorReporting(mapping, column),
+              ID_HASH_MIN_LENGTH,
               column.computeLength(),
               getter.createHasRef(transformation),
               valueFunc,
@@ -45,10 +49,11 @@ public class IdHashFieldTransformer implements FieldTransformer {
           String.format("%s.apply(%s)", HASHER_VAR, getter.createGetCall(transformation));
       return CodeBlock.builder()
           .addStatement(
-              "$L.copyString($L, $L, 1, $L, $L, $L)",
+              "$L.copyString($L, $L, $L, $L, $L, $L)",
               TRANSFORMER_VAR,
               TransformerUtil.createFieldNameForErrorReporting(mapping, column),
               column.isNullable(),
+              ID_HASH_MIN_LENGTH,
               column.computeLength(),
               value,
               setter.createSetRef(column))
