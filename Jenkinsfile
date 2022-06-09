@@ -301,26 +301,29 @@ try {
 			stage('Deploy Migrator to PROD-SBX') {
 				bfdEnv = 'prod-sbx'
 				currentStage = "${env.STAGE_NAME}"
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_migration_start')
+						container('bfd-cbc-build') {
 
-				lock(resource: 'env_prod_sbx') {
-					milestone(label: 'stage_deploy_prod_sbx_migration_start')
-					container('bfd-cbc-build') {
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								gitBranchName: gitBranchName,
+								this.&awsAssumeRole
+							)
 
-						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-							amiId: amiIds.bfdMigratorAmiId,
-							bfdEnv: bfdEnv,
-							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-							awsRegion: awsRegion,
-							gitBranchName: gitBranchName,
-							this.&awsAssumeRole
-						)
-
-						if (migratorDeploymentSuccessful) {
-							println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
-						} else {
-							error('Migrator deployment failed')
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+							} else {
+								error('Migrator deployment failed')
+							}
 						}
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 				}
 			}
 
@@ -354,25 +357,29 @@ try {
 				bfdEnv = 'prod'
 				currentStage = "${env.STAGE_NAME}"
 
-				lock(resource: 'env_prod') {
-					milestone(label: 'stage_deploy_prod_migration_start')
-					container('bfd-cbc-build') {
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_migration_start')
+						container('bfd-cbc-build') {
 
-						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-							amiId: amiIds.bfdMigratorAmiId,
-							bfdEnv: bfdEnv,
-							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-							awsRegion: awsRegion,
-							gitBranchName: gitBranchName,
-							this.&awsAssumeRole
-						)
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								gitBranchName: gitBranchName,
+								this.&awsAssumeRole
+							)
 
-						if (migratorDeploymentSuccessful) {
-							println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
-						} else {
-							error('Migrator deployment failed')
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+							} else {
+								error('Migrator deployment failed')
+							}
 						}
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 				}
 			}
 
