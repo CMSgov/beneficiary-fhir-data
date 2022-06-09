@@ -7,8 +7,10 @@ import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
-from common.stats.aggregated_stats import StatsCollector, PERCENTILES_TO_REPORT
+from common.stats.aggregated_stats import StatsCollector
+from common.stats.stats_compare import DEFAULT_PERCENT_THRESHOLD, validate_aggregated_stats
 from common.stats.stats_config import StatsStorageType
+from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
 from locust import HttpUser, events
@@ -200,6 +202,24 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     # If --stats was set and it is valid, get the aggregated stats of the stopping test run
     stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
     stats = stats_collector.collect_stats()
+
+    if stats_config.compare != None:
+        stats_loader = StatsLoader.create(stats_config, stats.metadata)
+        previous_stats = stats_loader.load()
+
+        validation_result = validate_aggregated_stats(previous_stats, stats, DEFAULT_PERCENT_THRESHOLD)
+        if validation_result == {}:
+            logger.info(
+                'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+        else:
+            # If we get here, that means some tasks have stats exceeding the threshold percent
+            # between the previous/average run and the current. Fail the test run, and log the
+            # failing tasks along with their relative stat percents
+            logger = logging.getLogger()
+            
+            environment.process_exit_code = 1
+            logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that were at least %.2f%% slower: %s', 
+                         stats_config.compare.value, stats_config.comp_tag, DEFAULT_PERCENT_THRESHOLD, validation_result)
 
     if stats_config.store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
