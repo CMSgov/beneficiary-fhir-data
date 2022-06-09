@@ -414,7 +414,8 @@ try {
 }
 
 /**
- * Authenticate with AWS by assuming a specific, fully qualified role stored as a Jenkins secret.
+ * Wrap the awscli to authenticate with AWS by assuming a specific, fully qualified role. The role
+ * must be the id of an available Jenkins secret.
  *
  * In addition to the setting credentials as environment variables for AWS requests, this also
  * sets AWS_REGION, DEFAULT_AWS_REGION, and a special NEXT_AWS_AUTH. NEXT_AWS_AUTH contains the
@@ -426,12 +427,21 @@ try {
  * logs. This is an especially important consideration in tight loops that seek to ensure valid AWS
  * credentials before or after each iteration.
  *
- * @param args Map that optionally included sessionDurationSeconds, sessionName, and awsRegion
+ * TODO: consider transitioning away from wrapped awscli role assumption to something in groovy/java
+ * TODO: implement validation safety surrounding e.g. credentialsId, sessionName
+ *
+ * @param args {@link Map} that optionally includes sessionDurationSeconds, sessionName, awsRegion,
+ * and credentialsId
  */
 void awsAssumeRole(Map args = [:]) {
 	sessionDurationSeconds = args.sessionDurationSeconds ?: 3600
+	// default `sessionName` as `env.JOB_NAME` is vaguely sanitized to replace non-alphanumeric
+	// chars with '-' AND deduplicates consecutive '-'. This is somewhat more restrictive than the
+	// regex used in the STS API for RoleSessionName, i.e. `/[\w+=,.@:\/-]*/`
+	// See https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
 	sessionName = args.sessionName ?: env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
-	region = args.awsRegion ?: 'us-east-1'
+	credentialsId = args.credentialsId ?: 'bfd-aws-assume-role'
+	awsRegion = args.awsRegion ?: 'us-east-1'
 
 	if (env.NEXT_AWS_AUTH == null || java.time.Instant.now() > java.time.Instant.parse(env.NEXT_AWS_AUTH)) {
 		echo "Authenticating..."
@@ -440,7 +450,7 @@ void awsAssumeRole(Map args = [:]) {
 				 'AWS_ACCESS_KEY_ID=',
 				 'AWS_SECRET_ACCESS_KEY=',
 				 'AWS_SESSION_TOKEN=']) {
-			withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'JENKINS_ROLE')]) {
+			withCredentials([string(credentialsId: credentialsId, variable: 'JENKINS_ROLE')]) {
 				awsCredentials = sh(
 					returnStdout: true,
 					script: '''
