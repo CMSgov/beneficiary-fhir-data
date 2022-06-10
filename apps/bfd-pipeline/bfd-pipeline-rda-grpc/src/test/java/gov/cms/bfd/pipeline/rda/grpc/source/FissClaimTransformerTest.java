@@ -1319,6 +1319,15 @@ public class FissClaimTransformerTest {
             4);
   }
 
+  @Test
+  public void testDiagnosisCodeRdaPosition() {
+    new DiagnosisCodeFieldTester(false)
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissDiagnosisCode.Builder::setRdaPosition,
+            RdaFissDiagnosisCode::getRdaPosition,
+            RdaFissDiagnosisCode.Fields.rdaPosition);
+  }
+
   /**
    * Ensures that a {@link }FissDiagnosisCode} with either {@code diagCd2} or {@code bitFlags}
    * defined transforms without error but one with neither has an appropriate error.
@@ -1394,6 +1403,16 @@ public class FissClaimTransformerTest {
             RdaFissProcCode::getProcDate,
             RdaFissProcCode.Fields.procDate);
   }
+
+  @Test
+  public void testProcCodeRdaPosition() {
+    new ProcCodeFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissProcedureCode.Builder::setRdaPosition,
+            RdaFissProcCode::getRdaPosition,
+            RdaFissProcCode.Fields.rdaPosition);
+  }
+
   // endregion ProcCode tests
   // region BeneZPayer tests
 
@@ -1619,6 +1638,15 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  @Test
+  public void testBeneZPayerRdaPosition() {
+    new BeneZPayerFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissBeneZPayer.Builder::setRdaPosition,
+            RdaFissPayer::getRdaPosition,
+            RdaFissPayer.Fields.rdaPosition);
+  }
+
   // endregion BeneZPayer tests
   // region InsuredPayer tests
 
@@ -1827,6 +1855,15 @@ public class FissClaimTransformerTest {
             RdaFissPayer::getInsuredDobText,
             RdaFissPayer.Fields.insuredDobText,
             9);
+  }
+
+  @Test
+  public void testInsuredPayerRdaPosition() {
+    new InsuredPayerFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissInsuredPayer.Builder::setRdaPosition,
+            RdaFissPayer::getRdaPosition,
+            RdaFissPayer.Fields.rdaPosition);
   }
 
   // endregion InsuredPayer tests

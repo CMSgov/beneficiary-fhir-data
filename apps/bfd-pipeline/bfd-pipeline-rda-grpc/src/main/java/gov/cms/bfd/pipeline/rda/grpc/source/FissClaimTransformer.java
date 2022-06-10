@@ -1077,6 +1077,8 @@ public class FissClaimTransformer {
         from::hasProcDt,
         from::getProcDt,
         to::setProcDate);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissProcCode.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     to.setLastUpdated(now);
     return to;
   }
@@ -1115,6 +1117,10 @@ public class FissClaimTransformer {
         from::hasBitFlags,
         from::getBitFlags,
         to::setBitFlags);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissDiagnosisCode.Fields.rdaPosition,
+        from::getRdaPosition,
+        to::setRdaPosition);
     to.setLastUpdated(now);
 
     // At least one of these two fields must have a value for the object to be valid.
@@ -1257,6 +1263,12 @@ public class FissClaimTransformer {
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredDobText(),
         () -> from.getInsuredPayer().getInsuredDobText(),
         to::setInsuredDobText);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissPayer.Fields.rdaPosition,
+        from.hasBeneZPayer()
+            ? from.getBeneZPayer()::getRdaPosition
+            : from.getInsuredPayer()::getRdaPosition,
+        to::setRdaPosition);
     transformer.copyEnumAsString(
         namePrefix + RdaFissPayer.Fields.payersId,
         true,

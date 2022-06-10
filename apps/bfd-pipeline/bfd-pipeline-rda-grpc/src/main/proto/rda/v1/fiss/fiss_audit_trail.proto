@@ -15,5 +15,9 @@ message FissAuditTrail {
   optional string badt_oper_id = 4;
   optional string badt_reas = 5;
   optional string badt_curr_date_cymd = 6;
+
+  // RDA Position:
+  //
+  // Indicates which position this audit trail is located in on the claim. This value is assigned by RDA.
   uint32 rda_position = 7;
 }

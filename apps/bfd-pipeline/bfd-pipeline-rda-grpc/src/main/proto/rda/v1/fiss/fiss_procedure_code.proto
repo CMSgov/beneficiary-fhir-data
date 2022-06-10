@@ -12,6 +12,11 @@ message FissProcedureCode {
   // during the billing period covered by the claim. This field is required for inpatient claims.
   string proc_cd = 1;
 
+  // RDA Position:
+  //
+  // Indicates which position this procedure code is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 2;
+
   // Procedure Flag:
   //
   // Identifies a set of flags returned from the Medicare Code Editor (MCE) module to indicate claim procedure code
