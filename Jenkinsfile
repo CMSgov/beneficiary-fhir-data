@@ -39,14 +39,14 @@ properties([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
-		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false)
+		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
+		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def awsCredentials
-def deployEnvironment
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
@@ -58,6 +58,7 @@ def currentStage
 def gitCommitId
 def gitRepoUrl
 def awsRegion = 'us-east-1'
+def verboseMaven = params.verbose_mvn_logging
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
@@ -205,8 +206,7 @@ try {
 					milestone(label: 'stage_build_apps_start')
 
 					container('bfd-cbc-build') {
-						build_env = deployEnvironment
-						appBuildResults = scriptForApps.build(build_env)
+						appBuildResults = scriptForApps.build(verboseMaven)
 					}
 				}
 			}
