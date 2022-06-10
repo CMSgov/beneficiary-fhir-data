@@ -24,7 +24,7 @@ class StatsLoader(ABC):
         self.stats_config = stats_config
         self.metadata = metadata
 
-    def load(self) -> AggregatedStats:
+    def load(self) -> Optional[AggregatedStats]:
         """Loads an AggregatedStats instance constructed based on what type of comparison is required
 
         Returns:
@@ -34,7 +34,7 @@ class StatsLoader(ABC):
         return self.load_average() if is_avg_compare else self.load_previous()
 
     @abstractmethod
-    def load_previous(self) -> AggregatedStats:
+    def load_previous(self) -> Optional[AggregatedStats]:
         """Loads an AggregatedStats instance constructed based on the most recent, previous test suite runs' 
         stats under the tag specified by the user
 
@@ -44,7 +44,7 @@ class StatsLoader(ABC):
         pass
 
     @abstractmethod
-    def load_average(self) -> AggregatedStats:
+    def load_average(self) -> Optional[AggregatedStats]:
         """Loads an AggregatedStats instance constructed based on the the average of all of the previous test suite
         runs' stats under the tag specified by the user
 
@@ -70,7 +70,7 @@ class StatsLoader(ABC):
 class StatsFileLoader(StatsLoader):
     """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
 
-    def load_previous(self) -> AggregatedStats:
+    def load_previous(self) -> Optional[AggregatedStats]:
         # Get a list of all AggregatedStats from stats.json files under path
         stats_list = self.__load_stats_from_files()
 
@@ -83,9 +83,9 @@ class StatsFileLoader(StatsLoader):
             key=lambda stats: stats.metadata.timestamp, reverse=True)
 
         # Take the first item, if it exists -- this is the most recent, previous run
-        return (filtered_stats[0:1] or [None])[0]
+        return filtered_stats[0] if filtered_stats else None
 
-    def load_average(self) -> AggregatedStats:
+    def load_average(self) -> Optional[AggregatedStats]:
         raise NotImplementedError(
             'Average stats is not implemented for files at this time.')
 
@@ -122,7 +122,7 @@ class StatsAthenaLoader(StatsLoader):
 
         super().__init__(stats_config, metadata)
 
-    def load_previous(self) -> AggregatedStats:
+    def load_previous(self) -> Optional[AggregatedStats]:
         # This is bad, but Athena does not have any way to sanely export structs in such
         # a way that we can use a standard parser (JSON, CSV, etc.); either we export in
         # their JSON-ish proprietary format and keep the names of fields but have no way
@@ -135,9 +135,9 @@ class StatsAthenaLoader(StatsLoader):
         raw_json_list = self.__get_raw_json_list(query_result)
         aggregated_stats_list = self.__stats_from_json_list(raw_json_list)
 
-        return aggregated_stats_list[0]
+        return aggregated_stats_list[0] if aggregated_stats_list else None
 
-    def load_average(self) -> AggregatedStats:
+    def load_average(self) -> Optional[AggregatedStats]:
         return super().load_average()
 
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
