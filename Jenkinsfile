@@ -134,9 +134,12 @@ try {
 			containerTemplate(
 				name: 'bfd-cbc-build',
 				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv',
-				command: 'cat', ttyEnabled: true, alwaysPullImage: true, resourceLimitCpu: '4000m',
-				resourceLimitMemory: '8192Mi',
+				command: 'cat',
+				ttyEnabled: true,
+				alwaysPullImage: false, // TODO: implies that we observe immutable container tags
 				resourceRequestCpu: '4000m',
+				resourceLimitCpu: '4000m',
+				resourceLimitMemory: '8192Mi',
 				resourceRequestMemory: '8192Mi'
 			)], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
