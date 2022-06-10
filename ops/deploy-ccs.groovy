@@ -135,15 +135,19 @@ packer build -color=false -var vault_password_file="$vaultPasswordFile" \
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+
+	amis = [
+		'data_server_launcher': "${workspace}/${appBuildResults.dataServerLauncher}",
+		'data_server_war': "${workspace}/${appBuildResults.dataServerWar}",
+		'data_pipeline_zip': "${workspace}/${appBuildResults.dataPipelineZip}",
+		'db_migrator_zip': "${workspace}/${appBuildResults.dbMigratorZip}"
+	]
+
 	dir('ops/ansible/playbooks-ccs'){
+
+		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
+
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-			// TODO: use
-			writeFile file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", text: """{
-	"data_server_launcher": "${workspace}/${appBuildResults.dataServerLauncher}",
-	"data_server_war": "${workspace}/${appBuildResults.dataServerWar}",
-	"data_pipeline_zip": "${workspace}/${appBuildResults.dataPipelineZip}",
-	"db_migrator_zip": "${workspace}/${appBuildResults.dbMigratorZip}",
-}"""
 			// build AMIs in parallel
 			sh """
 packer build -color=false \
