@@ -122,22 +122,22 @@ class StatsAthenaLoader(StatsLoader):
         super().__init__(stats_config, metadata)
 
     def load_previous(self) -> Optional[AggregatedStats]:
-        # This is bad, but Athena does not have any way to sanely export structs in such
-        # a way that we can use a standard parser (JSON, CSV, etc.); either we export in
-        # their JSON-ish proprietary format and keep the names of fields but have no way
-        # to use a standard parser AND lose type information OR we can export "as JSON" but
-        # Athena opts to export structs as JSON arrays without field names. Given that we
-        # can use a JSON parser to parse a JSON array and we can assume stable order, we are
-        # sticking with getting results as a JSON array and working from there.
-        query = f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC LIMIT 1'
-        query_result = self.__run_query(query)
-        raw_json_list = self.__get_raw_json_list(query_result)
-        aggregated_stats_list = self.__stats_from_json_list(raw_json_list)
+        query = (
+            f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" '
+            f'WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC '
+            'LIMIT 1'
+        )
 
-        return aggregated_stats_list[0] if aggregated_stats_list else None
+        queried_stats = self.__get_stats_from_query(query)
+        return queried_stats[0] if queried_stats else None
 
     def load_average(self) -> Optional[AggregatedStats]:
         return super().load_average()
+
+    def __get_stats_from_query(self, query: str) -> List[AggregatedStats]:
+        query_result = self.__run_query(query)
+        raw_json_list = self.__get_raw_json_list(query_result)
+        return self.__stats_from_json_list(raw_json_list)
 
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
         return self.client.start_query_execution(
@@ -181,7 +181,7 @@ class StatsAthenaLoader(StatsLoader):
         return self.__get_athena_query_result(query_execution_id)
 
     def __get_where_clause(self) -> str:
-        # The following TaskStats fields need to be excluded from having their
+        # The following StatsMetadata fields need to be excluded from having their
         # equality check being auto-generated as they either should not be checked
         # (i.e. timestamp) or require a different type of check
         fields_to_exclude = ['timestamp', 'tag', 'total_runtime']
@@ -220,13 +220,23 @@ class StatsAthenaLoader(StatsLoader):
         return [item['Data'][0]['VarCharValue'] for item in query_result[1:]]
 
     def __stats_from_json_list(self, raw_json_list: List[str]) -> List[AggregatedStats]:
+        # This is bad, but Athena does not have any way to sanely export structs in such
+        # a way that we can use a standard parser (JSON, CSV, etc.); either we export in
+        # their JSON-ish proprietary format and keep the names of fields but have no way
+        # to use a standard parser AND lose type information OR we can export "as JSON" but
+        # Athena opts to export structs as JSON arrays without field names. Given that we
+        # can use a JSON parser to parse a JSON array and we can assume stable order, we are
+        # sticking with getting results as a JSON array and working from there.
+
         # The serialization from a TaskStats array will give a list of values, so the serialized
-        # list will be a list of lists of lists (in inner to outer order: TaskStats -> AggregatedStats -> List[AggregatedStats])
+        # list will be a list of lists of lists (in inner to outer order:
+        # TaskStats -> AggregatedStats -> List[AggregatedStats])
         serialized_list: List[List[List[Any]]] = [json.loads(json_str) for json_str
                                                   in raw_json_list]
         # The metadata is unnecessary here since by the time we've gotten here the metadata for each of the
         # tasks we're serializing here has already been checked
-        return [AggregatedStats(metadata=None, tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list])
+        return [AggregatedStats(metadata=None,
+                                tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list])
                 for agg_tasks_list in serialized_list]
 
 
