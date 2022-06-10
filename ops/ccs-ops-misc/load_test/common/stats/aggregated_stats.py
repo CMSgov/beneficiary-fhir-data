@@ -65,8 +65,6 @@ class TaskStats():
     """The fastest response time, in seconds, out of all this Task's requests"""
     max_response_time: float
     """The slowest respone time, in seconds, out of all this Task's requests"""
-    average_content_length: float
-    """The average length of a response from this Task's requests"""
     total_reqs_per_second: float
     """The average number of requests-per-second of this Taks's requests over the test run"""
     total_fails_per_sec: float
@@ -90,7 +88,6 @@ class TaskStats():
                    num_requests=stats_entry.num_requests, num_failures=stats_entry.num_failures,
                    median_response_time=stats_entry.median_response_time, average_response_time=stats_entry.avg_response_time,
                    min_response_time=stats_entry.min_response_time or 0, max_response_time=stats_entry.max_response_time,
-                   average_content_length=stats_entry.avg_content_length,
                    total_reqs_per_second=stats_entry.total_rps,
                    total_fails_per_sec=stats_entry.total_fail_per_sec,
                    response_time_percentiles=cls.__get_percentiles_dict(stats_entry))
