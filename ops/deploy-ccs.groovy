@@ -97,7 +97,7 @@ def findAmis() {
  */
 def buildPlatinumAmi(AmiIds amiIds) {
 	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-		def goldAmi = sh(
+		env.goldAmi = sh(
 			returnStdout: true,
 			script: '''
 aws ec2 describe-images --filters \
@@ -108,12 +108,12 @@ jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'
 		).trim()
 		// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
 		dir('ops/ansible/playbooks-ccs') {
-			sh """
+			sh '''
 packer build -color=false -var vault_password_file="$vaultPasswordFile" \
- -var source_ami="${goldAmi}" \
+ -var source_ami="$goldAmi" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 ../../packer/build_bfd-platinum.json
-"""
+'''
 		}
 		return new AmiIds(
 			platinumAmiId: extractAmiIdFromPackerManifest(
@@ -148,24 +148,27 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
 
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-			// build AMIs in parallel
-			sh """
+			withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",
+					 "gitCommitId=${gitCommitId}"]) {
+					// build AMIs in parallel
+				sh '''
 packer build -color=false \
 -var vault_password_file="$vaultPasswordFile" \
--var 'source_ami=${amiIds.platinumAmiId}' \
--var 'subnet_id=subnet-092c2a68bd18b34d1' \
--var 'git_branch=${gitBranchName}' \
--var 'git_commit=${gitCommitId}' \
+-var source_ami="$platinumAmiId" \
+-var subnet_id=subnet-092c2a68bd18b34d1 \
+-var git_branch="$gitBranchName" \
+-var git_commit="$gitCommitId" \
 ../../packer/build_bfd-all.json
-"""
+'''
+			}
 			return new AmiIds(
-				platinumAmiId: amiIds.platinumAmiId,
-				bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
-					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
-				bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
-					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
-				bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
-					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
+					platinumAmiId: amiIds.platinumAmiId,
+					bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
+					bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
+					bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
 			)
 		}
 	}
