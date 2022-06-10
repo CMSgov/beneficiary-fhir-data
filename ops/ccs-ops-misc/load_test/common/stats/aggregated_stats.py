@@ -72,7 +72,8 @@ class TaskStats():
     total_fails_per_sec: float
     """The average number of failures-per-second of this Task's requests over the test run"""
     response_time_percentiles: Dict[str, int]
-    """A dictionary of response time percentiles to the number of responses under that percentile"""
+    """A dictionary of response time percentiles indicating the percentage of requests that completed
+    in a particular timeframe"""
 
     @classmethod
     def from_stats_entry(cls, stats_entry: StatsEntry) -> 'TaskStats':
@@ -117,13 +118,14 @@ class TaskStats():
 
     @classmethod
     def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> Dict[str, int]:
-        """Returns a dictionary of response time percentiles to the number of responses under that percentile
+        """Returns a dictionary of response time percentiles indicating the percentage of requests that completed
+        in a particular timeframe
 
         Args:
             stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
 
         Returns:
-            Dict[str, int]: A dictionary of response time percentiles to the number of responses under that percentile
+            Dict[str, int]: A dictionary of response time percentiles
         """
         if not stats_entry.num_requests:
             # If there were no requests made, simply return a dictionary with 0

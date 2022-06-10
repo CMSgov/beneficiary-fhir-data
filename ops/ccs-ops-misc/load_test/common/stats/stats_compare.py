@@ -57,17 +57,17 @@ def get_stats_relative_percent(previous: TaskStats, current: TaskStats) -> List[
     return percents_higher + percents_lower + percents_percentiles
 
 
-def get_stats_above_threshold(stat_deltas: List[StatPercent], threshold: float) -> List[StatPercent]:
+def get_stats_above_threshold(stat_percents: List[StatPercent], threshold: float) -> List[StatPercent]:
     """Computes the list of StatPercents whose relative percentages exceed a given threshold
 
     Args:
-        stat_deltas (List[StatPercent]): A list of deltas between the current run of a Task and a previous run of a Task
+        stat_percents (List[StatPercent]): A list of relative stat percents to the current run of a Task and a previous run of a Task
         threshold (float, optional): Percentage threshold that the delta should not exceed. Defaults to 500.0.
 
     Returns:
         List[StatPercent]: A filtered list of stats with relative percent increase that exceed the given threshold
     """
-    return [stat_delta for stat_delta in stat_deltas if stat_delta.percent > threshold]
+    return [stat_delta for stat_delta in stat_percents if stat_delta.percent > threshold]
 
 
 def validate_aggregated_stats(previous: AggregatedStats, current: AggregatedStats, threshold: float = DEFAULT_PERCENT_THRESHOLD) -> Dict[str, List[StatPercent]]:
