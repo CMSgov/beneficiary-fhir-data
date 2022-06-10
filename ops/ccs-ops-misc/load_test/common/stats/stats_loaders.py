@@ -130,7 +130,7 @@ class StatsAthenaLoader(StatsLoader):
         # Athena opts to export structs as JSON arrays without field names. Given that we
         # can use a JSON parser to parse a JSON array and we can assume stable order, we are
         # sticking with getting results as a JSON array and working from there.
-        query = f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" WHERE {self.__get_where_statement()} ORDER BY metadata.timestamp DESC LIMIT 1'
+        query = f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC LIMIT 1'
         query_result = self.__run_query(query)
         raw_json_list = self.__get_raw_json_list(query_result)
         aggregated_stats_list = self.__stats_from_json_list(raw_json_list)
@@ -181,14 +181,21 @@ class StatsAthenaLoader(StatsLoader):
 
         return self.__get_athena_query_result(query_execution_id)
 
-    def __get_where_statement(self) -> str:
+    def __get_where_clause(self) -> str:
+        # The following TaskStats fields need to be excluded from having their
+        # equality check being auto-generated as they either should not be checked
+        # (i.e. timestamp) or require a different type of check
+        fields_to_exclude = ['timestamp', 'tag', 'total_runtime']
+        filtered_fields = [field for field in fields(StatsMetadata) if not field in fields_to_exclude]
         # Automatically generate a list of equality checks for all of the fields that are
         # necessary to validate to ensure that stats can be compared
-        clause_list = [self.__get_equality_check_str(field) for field in fields(StatsMetadata)
-                       if field.name != 'timestamp' and field.name != 'total_runtime']
-        runtime_clause = f'(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0'
+        generated_checks = [self.__get_equality_check_str(field) for field in filtered_fields]
+        explicit_checks = [
+            f"metadata.tag='{self.stats_config.comp_tag}'",
+            f"(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0",
+        ]
 
-        return ' AND '.join(clause_list + [runtime_clause])
+        return ' AND '.join(generated_checks + explicit_checks)
 
     def __get_equality_check_str(self, field: Field) -> str:
         instance_value = getattr(self.metadata, field.name)
