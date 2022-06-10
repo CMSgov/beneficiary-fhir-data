@@ -1527,7 +1527,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneLastName() {
     new BeneZPayerFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyIgnored(
             FissBeneZPayer.Builder::setBeneLastName,
             RdaFissPayer::getBeneLastName,
             RdaFissPayer.Fields.beneLastName,
@@ -1537,7 +1537,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneFirstName() {
     new BeneZPayerFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyIgnored(
             FissBeneZPayer.Builder::setBeneFirstName,
             RdaFissPayer::getBeneFirstName,
             RdaFissPayer.Fields.beneFirstName,

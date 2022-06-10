@@ -1064,7 +1064,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrProcCode() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyIgnored(
             McsDetail.Builder::setIdrProcCode,
             RdaMcsDetail::getIdrProcCode,
             RdaMcsDetail.Fields.idrProcCode,
