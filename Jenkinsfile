@@ -137,10 +137,10 @@ try {
 				command: 'cat',
 				ttyEnabled: true,
 				alwaysPullImage: false, // TODO: implies that we observe immutable container tags
-				resourceRequestCpu: '4000m',
-				resourceLimitCpu: '4000m',
-				resourceLimitMemory: '8192Mi',
-				resourceRequestMemory: '8192Mi'
+				resourceRequestCpu: '8000m',
+				resourceLimitCpu: '8000m',
+				resourceLimitMemory: '16384Mi',
+				resourceRequestMemory: '16384Mi'
 			)], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
 			stage('Prepare') {
