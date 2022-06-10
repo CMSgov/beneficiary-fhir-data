@@ -1,3 +1,5 @@
+import boto3
+from ctypes import Array
 from dataclasses import Field, fields
 import time
 from abc import ABC, abstractmethod
@@ -5,7 +7,7 @@ import json
 import os
 from typing import Any, Dict, List, Optional
 
-from common.stats.aggregated_stats import AggregatedStats, StatsMetadata
+from common.stats.aggregated_stats import AggregatedStats, StatsMetadata, TaskStats
 from common.stats.stats_config import StatsComparisonType, StatsConfiguration, StatsStorageType
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
@@ -13,7 +15,6 @@ from common.stats.stats_config import StatsComparisonType, StatsConfiguration, S
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 from gevent import monkey
 monkey.patch_all()
-import boto3
 
 
 class StatsLoader(ABC):
@@ -67,6 +68,8 @@ class StatsLoader(ABC):
 
 
 class StatsFileLoader(StatsLoader):
+    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
+
     def load_previous(self) -> AggregatedStats:
         # Get a list of all AggregatedStats from stats.json files under path
         stats_list = self.__load_stats_from_files()
@@ -112,13 +115,27 @@ class StatsFileLoader(StatsLoader):
 
 
 class StatsAthenaLoader(StatsLoader):
+    """Child class of StatsLoader that loads aggregated task stats from S3 via Athena"""
+
     def __init__(self, stats_config: StatsConfiguration, metadata: StatsMetadata) -> None:
-        self.client = boto3.client('athena')
+        self.client = boto3.client('athena', region_name='us-east-1')
 
         super().__init__(stats_config, metadata)
 
     def load_previous(self) -> AggregatedStats:
-        return super().load_previous()
+        # This is bad, but Athena does not have any way to sanely export structs in such
+        # a way that we can use a standard parser (JSON, CSV, etc.); either we export in
+        # their JSON-ish proprietary format and keep the names of fields but have no way
+        # to use a standard parser AND lose type information OR we can export "as JSON" but
+        # Athena opts to export structs as JSON arrays without field names. Given that we
+        # can use a JSON parser to parse a JSON array and we can assume stable order, we are
+        # sticking with getting results as a JSON array and working from there.
+        query = f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" WHERE {self.__get_where_statement()} ORDER BY metadata.timestamp DESC LIMIT 1'
+        query_result = self.__run_query(query)
+        raw_json_list = self.__get_raw_json_list(query_result)
+        aggregated_stats_list = self.__stats_from_json_list(raw_json_list)
+
+        return aggregated_stats_list[0]
 
     def load_average(self) -> AggregatedStats:
         return super().load_average()
@@ -127,19 +144,18 @@ class StatsAthenaLoader(StatsLoader):
         return self.client.start_query_execution(
             QueryString=query,
             QueryExecutionContext={
-                'Database': self.stats_config.athena_db
+                'Database': 'bfd'
             },
             ResultConfiguration={
-                'OutputLocation': f's3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stat/'
+                'OutputLocation': f's3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stats/'
             },
             WorkGroup='bfd'
         )
 
     def __get_athena_query_status(self, query_execution_id: str) -> str:
         return self.client.get_query_execution(
-            QueryExecutionId=query_execution_id,
-            WorkGroup='bfd'
-        )['Status']['State']
+            QueryExecutionId=query_execution_id
+        )['QueryExecution']['Status']['State']
 
     def __get_athena_query_result(self, query_execution_id: str) -> Dict[str, Any]:
         return self.client.get_query_results(
@@ -169,16 +185,46 @@ class StatsAthenaLoader(StatsLoader):
         # Automatically generate a list of equality checks for all of the fields that are
         # necessary to validate to ensure that stats can be compared
         clause_list = [self.__get_equality_check_str(field) for field in fields(StatsMetadata)
-                       if field.name != 'timestamp' or field.name != 'total_runtime']
+                       if field.name != 'timestamp' and field.name != 'total_runtime']
         runtime_clause = f'(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0'
 
-        return ' AND'.join(clause_list + runtime_clause)
+        return ' AND '.join(clause_list + [runtime_clause])
 
     def __get_equality_check_str(self, field: Field) -> str:
         instance_value = getattr(self.metadata, field.name)
         # Anything that's a string should be surrounded by single quotes to denote it as a string
         # in SQL. Otherwise, no quotes should surround it
-        rhs_operand = f"'{instance_value}'" if type(
-            field.type) == str else f"{instance_value}"
+        rhs_operand = f"'{instance_value}'" if issubclass(
+            field.type, str) else f"{instance_value}"
 
         return f"metadata.{field.name}={rhs_operand}"
+
+    def __get_raw_json_list(self, query_result: List[Dict[str, List[Dict[str, str]]]]) -> List[str]:
+        # The data is returned as an array of dicts, each with a 'Data' key. These 'Data'
+        # dicts values are arrays of dicts with the key being the data type and the value being
+        # the actual returned result. The first dict in the array is the column names, and subsequent
+        # items are the data
+
+        # We make a few assumptions:
+        # 1. The first item is always the column names
+        # 2. The data returned is always of the type `VarCharValue`
+        # 3. We are only retrieving a single column
+        return [item['Data'][0]['VarCharValue'] for item in query_result[1:]]
+
+    def __stats_from_json_list(self, raw_json_list: List[str]) -> List[AggregatedStats]:
+        # The serialization from a TaskStats array will give a list of values, so the serialized
+        # list will be a list of lists of lists (in inner to outer order: TaskStats -> AggregatedStats -> List[AggregatedStats])
+        serialized_list: List[List[List[Any]]] = [
+            json.loads(json_str) for json_str in raw_json_list]
+        # The metadata is unnecessary here since by the time we've gotten here the metadata for each of the
+        # tasks we're serializing here has already been checked
+        return [AggregatedStats(metadata=None, tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list])
+                for agg_tasks_list in serialized_list]
+
+
+def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, TaskStats]:
+    pass
+
+
+def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
+    pass

@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
 from locust.env import Environment
 import time
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 from common.stats.stats_config import StatsEnvironment
 
@@ -95,6 +95,27 @@ class TaskStats():
                    response_time_percentiles=cls.__get_percentiles_dict(stats_entry))
 
     @classmethod
+    def from_list(cls, values: List[Any]) -> 'TaskStats':
+        """Constructs a new instance of TaskStats given a List of values in field declaration order.
+        Used primarily to construct a TaskStats from Athena queries
+
+        Args:
+            values (List[Any]): A List of TaskStats values in field declaration order
+
+        Returns:
+            TaskStats: A TaskStats instance representing the values from the given List
+        """
+        # We assume the list is in field declaration order, otherwise we cannot
+        # create a TaskStats from it
+        inter_dict = {field.name: values[i]
+                      for i, field in enumerate(fields(cls))}
+        # response_time_percentiles will be a list as well, we need to convert it to a dict
+        inter_dict['response_time_percentiles'] = {str(percentile): inter_dict['response_time_percentiles'][i]
+                                                   for i, percentile in enumerate(PERCENTILES_TO_REPORT)}
+
+        return TaskStats(**inter_dict)
+
+    @classmethod
     def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> Dict[str, int]:
         """Returns a dictionary of response time percentiles to the number of responses under that percentile
 
@@ -155,7 +176,7 @@ class StatsMetadata():
 class AggregatedStats():
     """A dataclass encoding the entirety of performance statistics for every Locust Task along with
     metadata necessary for comparison and storage"""
-    metadata: StatsMetadata
+    metadata: Optional[StatsMetadata]
     """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task statistics"""
     tasks: List[TaskStats]
     """A list of TaskStats where each entry represents the performance statistics of each Task"""
