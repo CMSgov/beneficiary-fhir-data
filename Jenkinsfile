@@ -140,7 +140,7 @@ try {
 			)], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
 			stage('Prepare') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				container('bfd-cbc-build') {
 					// Grab the commit that triggered the build.
 					checkout scm
@@ -176,7 +176,7 @@ try {
 			name during PR builds. 
 			*/
 			stage('Set Branch Name') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				script {
 					if (env.BRANCH_NAME.startsWith('PR')) {
 						gitBranchName = env.CHANGE_BRANCH
@@ -187,7 +187,7 @@ try {
 			}
 
 			stage('Build Platinum AMI') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (params.build_platinum || amiIds.platinumAmiId == null) {
 					milestone(label: 'stage_build_platinum_ami_start')
 
@@ -201,7 +201,7 @@ try {
 
 			stage('Build Apps') {
 				if (!params.use_latest_images) {
-					currentStage = "${env.STAGE_NAME}"
+					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_apps_start')
 
 					container('bfd-cbc-build') {
@@ -213,7 +213,7 @@ try {
 
 			stage('Build App AMIs') {
 				if (!params.use_latest_images) {
-					currentStage = "${env.STAGE_NAME}"
+					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_app_amis_test_start')
 
 					container('bfd-cbc-build') {
@@ -224,7 +224,7 @@ try {
 
 			stage('Deploy Migrator to TEST') {
 				bfdEnv = 'test'
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_migration_start')
@@ -249,7 +249,7 @@ try {
 			}
 
 			stage('Deploy to TEST') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_start')
 
@@ -261,7 +261,7 @@ try {
 			}
 
 			stage('Manual Approval') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (canDeployToProdEnvs) {
 					/*
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
@@ -288,7 +288,7 @@ try {
 
 			stage('Deploy Migrator to PROD-SBX') {
 				bfdEnv = 'prod-sbx'
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_migration_start')
@@ -316,7 +316,7 @@ try {
 			}
 
 			stage('Deploy to PROD-SBX') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
@@ -332,7 +332,7 @@ try {
 
 			stage('Deploy Migrator to PROD') {
 				bfdEnv = 'prod'
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
@@ -361,7 +361,7 @@ try {
 			}
 
 			stage('Deploy to PROD') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
 						milestone(label: 'stage_deploy_prod_start')
