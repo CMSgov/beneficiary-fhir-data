@@ -1,3 +1,5 @@
+from functools import reduce
+from statistics import mean
 import boto3
 from dataclasses import Field, fields
 import time
@@ -240,9 +242,36 @@ class StatsAthenaLoader(StatsLoader):
                 for agg_tasks_list in serialized_list]
 
 
-def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, TaskStats]:
-    pass
+def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, List[TaskStats]]:
+    tasks_by_name: Dict[str, List[TaskStats]] = {}
+    for stats in all_stats:
+        for task in stats.tasks:
+            if not task.task_name in tasks_by_name:
+                tasks_by_name[task.task_name] = []
+
+            tasks_by_name[task.task_name].append(task)
+
+    return tasks_by_name
 
 
-def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
-    pass
+def _get_average_task_stats(all_tasks: List[TaskStats]) -> Optional[TaskStats]:
+    if all_tasks == []:
+        return None
+
+    if not all(x.task_name == all_tasks[0].task_name for x in all_tasks):
+        raise ValueError('The list of TaskStats must be for the same task')
+
+    fields_to_exclude = ['task_name',
+                         'request_method', 'response_time_percentiles']
+    fields_to_calculate = [field for field in fields(TaskStats)
+                           if not field in fields_to_exclude]
+    avg_task_stats = {field.name: mean(getattr(task, field) for task in all_tasks)
+                      for field in fields_to_calculate}
+
+    common_percents = reduce(lambda prev, next: prev & next.keys(),
+                             (task.response_time_percentiles for task in all_tasks), set())
+    avg_task_percents = {p: mean(task.response_time_percentiles[p] for task in all_tasks)
+                         for p in common_percents}
+
+    return TaskStats(task_name=all_tasks[0].task_name, request_method=all_tasks[0].request_method,
+                     response_time_percentiles=avg_task_percents, **avg_task_stats)
