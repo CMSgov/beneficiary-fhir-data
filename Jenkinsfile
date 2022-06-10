@@ -141,17 +141,7 @@ try {
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
 
-					// Unset any pre-existing session variables
-					// Set global AWS environment variables from role assumption
-					withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-						withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-							awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-							env.AWS_DEFAULT_REGION = 'us-east-1'
-							env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-							env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-							env.AWS_SESSION_TOKEN = awsCredentials[3]
-						}
-					}
+					awsAssumeRole()
 
 					// Find the most current AMI IDs (if any).
 					amiIds = null
@@ -212,7 +202,6 @@ try {
 				}
 			}
 
-
 			stage('Build App AMIs') {
 				if (!params.use_latest_images) {
 					currentStage = "${env.STAGE_NAME}"
@@ -256,17 +245,7 @@ try {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
-						// Unset any pre-existing session variables
-						// Assume new role session for each deploy to prevent timeout
-						withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-							withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-								awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-								env.AWS_DEFAULT_REGION = 'us-east-1'
-								env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-								env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-								env.AWS_SESSION_TOKEN = awsCredentials[3]
-							}
-						}
+						awsAssumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 					}
 				}
@@ -332,19 +311,8 @@ try {
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
-
 						container('bfd-cbc-build') {
-							// Unset any pre-existing session variables
-							// Assume new role session for each deploy to prevent timeout
-							withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-								withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-									awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-									env.AWS_DEFAULT_REGION = 'us-east-1'
-									env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-									env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-									env.AWS_SESSION_TOKEN = awsCredentials[3]
-								}
-							}
+							awsAssumeRole()
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 						}
 					}
@@ -390,17 +358,7 @@ try {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
-							// Unset any pre-existing session variables
-							// Assume new role session for each deploy to prevent timeout
-							withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-								withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-									awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-									env.AWS_DEFAULT_REGION = 'us-east-1'
-									env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-									env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-									env.AWS_SESSION_TOKEN = awsCredentials[3]
-								}
-							}
+							awsAssumeRole()
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
 						}
 					}
