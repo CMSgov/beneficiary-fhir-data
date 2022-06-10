@@ -187,8 +187,8 @@ class StatsAthenaLoader(StatsLoader):
         # equality check being auto-generated as they either should not be checked
         # (i.e. timestamp) or require a different type of check
         fields_to_exclude = ['timestamp', 'tag', 'total_runtime']
-        filtered_fields = [field for field in fields(StatsMetadata)
-                           if not field in fields_to_exclude]
+        filtered_fields = [field.name for field in fields(StatsMetadata)
+                           if not field.name in fields_to_exclude]
         # Automatically generate a list of equality checks for all of the fields that are
         # necessary to validate to ensure that stats can be compared
         generated_checks = [self.__generate_check_str(field)
@@ -263,10 +263,10 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> Optional[TaskStats]:
 
     fields_to_exclude = ['task_name',
                          'request_method', 'response_time_percentiles']
-    fields_to_calculate = [field for field in fields(TaskStats)
-                           if not field in fields_to_exclude]
-    avg_task_stats = {field.name: mean(getattr(task, field) for task in all_tasks)
-                      for field in fields_to_calculate}
+    stats_to_average = [field.name for field in fields(TaskStats)
+                        if not field.name in fields_to_exclude]
+    avg_task_stats = {stat_name: mean(getattr(task, stat_name) for task in all_tasks)
+                      for stat_name in stats_to_average}
 
     common_percents = reduce(lambda prev, next: prev & next.keys(),
                              (task.response_time_percentiles for task in all_tasks), set())
