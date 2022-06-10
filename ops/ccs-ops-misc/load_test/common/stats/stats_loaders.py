@@ -75,12 +75,12 @@ class StatsFileLoader(StatsLoader):
         stats_list = self.__load_stats_from_files()
 
         # Filter those that don't match the config and current run's metadata
-        filtered_stats = [
-            stats for stats in stats_list if self.__verify_metadata(stats.metadata)]
+        filtered_stats = [stats for stats in stats_list
+                          if self.__verify_metadata(stats.metadata)]
 
         # Sort them based upon timestamp, greater to lower
-        filtered_stats.sort(
-            key=lambda stats: stats.metadata.timestamp, reverse=True)
+        filtered_stats.sort(key=lambda stats: stats.metadata.timestamp,
+                            reverse=True)
 
         # Take the first item, if it exists -- this is the most recent, previous run
         return filtered_stats[0] if filtered_stats else None
@@ -186,10 +186,12 @@ class StatsAthenaLoader(StatsLoader):
         # equality check being auto-generated as they either should not be checked
         # (i.e. timestamp) or require a different type of check
         fields_to_exclude = ['timestamp', 'tag', 'total_runtime']
-        filtered_fields = [field for field in fields(StatsMetadata) if not field in fields_to_exclude]
+        filtered_fields = [field for field in fields(StatsMetadata)
+                           if not field in fields_to_exclude]
         # Automatically generate a list of equality checks for all of the fields that are
         # necessary to validate to ensure that stats can be compared
-        generated_checks = [self.__get_equality_check_str(field) for field in filtered_fields]
+        generated_checks = [self.__generate_check_str(field)
+                            for field in filtered_fields]
         explicit_checks = [
             f"metadata.tag='{self.stats_config.comp_tag}'",
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0",
@@ -197,7 +199,7 @@ class StatsAthenaLoader(StatsLoader):
 
         return ' AND '.join(generated_checks + explicit_checks)
 
-    def __get_equality_check_str(self, field: Field) -> str:
+    def __generate_check_str(self, field: Field) -> str:
         instance_value = getattr(self.metadata, field.name)
         # Anything that's a string should be surrounded by single quotes to denote it as a string
         # in SQL. Otherwise, no quotes should surround it
@@ -221,8 +223,8 @@ class StatsAthenaLoader(StatsLoader):
     def __stats_from_json_list(self, raw_json_list: List[str]) -> List[AggregatedStats]:
         # The serialization from a TaskStats array will give a list of values, so the serialized
         # list will be a list of lists of lists (in inner to outer order: TaskStats -> AggregatedStats -> List[AggregatedStats])
-        serialized_list: List[List[List[Any]]] = [
-            json.loads(json_str) for json_str in raw_json_list]
+        serialized_list: List[List[List[Any]]] = [json.loads(json_str) for json_str
+                                                  in raw_json_list]
         # The metadata is unnecessary here since by the time we've gotten here the metadata for each of the
         # tasks we're serializing here has already been checked
         return [AggregatedStats(metadata=None, tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list])
