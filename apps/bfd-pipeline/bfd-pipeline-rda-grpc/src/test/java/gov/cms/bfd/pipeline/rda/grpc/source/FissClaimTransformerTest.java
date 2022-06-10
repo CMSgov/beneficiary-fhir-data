@@ -1321,7 +1321,7 @@ public class FissClaimTransformerTest {
 
   @Test
   public void testDiagnosisCodeRdaPosition() {
-    new DiagnosisCodeFieldTester(false)
+    new DiagnosisCodeFieldTester(true)
         .verifyUIntFieldToShortFieldCopiedCorrectly(
             FissDiagnosisCode.Builder::setRdaPosition,
             RdaFissDiagnosisCode::getRdaPosition,
