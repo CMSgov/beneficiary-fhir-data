@@ -48,6 +48,12 @@ Why: Runs the test execution and reporting
 Install: _pip3 install locust_
 See: http://docs.locust.io/en/stable/installation.html
 
+**boto3**
+
+What: Library for interfacing with AWS services
+Why: Store and load performance stats from S3
+Install: _pip3 install boto3_
+See: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
 
 In addition to these libraries, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
 Run the following two commands on the box from your local directory:
