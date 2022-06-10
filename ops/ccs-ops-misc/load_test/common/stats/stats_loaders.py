@@ -137,7 +137,13 @@ class StatsAthenaLoader(StatsLoader):
         return queried_stats[0] if queried_stats else None
 
     def load_average(self) -> Optional[AggregatedStats]:
-        return super().load_average()
+        query = (
+            f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" '
+            f'WHERE {self.__get_where_clause()}'
+        )
+
+        queried_stats = self.__get_stats_from_query(query)
+        return _get_average_all_stats(queried_stats)
 
     def __get_stats_from_query(self, query: str) -> List[AggregatedStats]:
         query_result = self.__run_query(query)
