@@ -1,6 +1,5 @@
 from functools import reduce
 from statistics import mean
-import boto3
 from dataclasses import Field, fields
 import time
 from abc import ABC, abstractmethod
@@ -16,6 +15,7 @@ from common.stats.stats_config import StatsComparisonType, StatsConfiguration, S
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 from gevent import monkey
 monkey.patch_all()
+import boto3
 
 
 class StatsLoader(ABC):
@@ -87,8 +87,11 @@ class StatsFileLoader(StatsLoader):
         return filtered_stats[0] if filtered_stats else None
 
     def load_average(self) -> Optional[AggregatedStats]:
-        raise NotImplementedError(
-            'Average stats is not implemented for files at this time.')
+        stats_list = self.__load_stats_from_files()
+        verified_stats = [stats for stats in stats_list
+                          if self.__verify_metadata(stats.metadata)]
+
+        return _get_average_all_stats(verified_stats)
 
     def __load_stats_from_files(self, suffix: str = '.stats.json') -> List[AggregatedStats]:
         path = self.stats_config.path
@@ -261,17 +264,36 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> Optional[TaskStats]:
     if not all(x.task_name == all_tasks[0].task_name for x in all_tasks):
         raise ValueError('The list of TaskStats must be for the same task')
 
+    # Exclude fields that are not statistics and the response time percentiles
+    # dict which will be handled on its own later
     fields_to_exclude = ['task_name',
                          'request_method', 'response_time_percentiles']
     stats_to_average = [field.name for field in fields(TaskStats)
                         if not field.name in fields_to_exclude]
+    # Calculate the mean automatically for every matching stat in the list of
+    # all stats, and then put the mean in a dict
     avg_task_stats = {stat_name: mean(getattr(task, stat_name) for task in all_tasks)
                       for stat_name in stats_to_average}
 
-    common_percents = reduce(lambda prev, next: prev & next.keys(),
-                             (task.response_time_percentiles for task in all_tasks), set())
+    # Get the common keys between all of the response time percentile dicts in
+    # the list of task stats
+    common_percents = reduce(lambda prev, next: prev & next,
+                             (task.response_time_percentiles.keys() for task in all_tasks))
+    # Do the same thing as above but for each entry in each response time percentile dict --
+    # get the mean of each percentile across all tasks and make it the value of a new
+    # percentile dict
     avg_task_percents = {p: mean(task.response_time_percentiles[p] for task in all_tasks)
                          for p in common_percents}
 
     return TaskStats(task_name=all_tasks[0].task_name, request_method=all_tasks[0].request_method,
                      response_time_percentiles=avg_task_percents, **avg_task_stats)
+
+
+def _get_average_all_stats(all_stats: List[AggregatedStats]) -> Optional[AggregatedStats]:
+    partitioned_task_stats = _bucket_tasks_by_name(all_stats)
+    averaged_tasks = [_get_average_task_stats(tasks)
+                      for tasks in partitioned_task_stats.values()]
+
+    # With an averaged aggregated stats there really is no such thing as metadata
+    # since it's the result of many
+    return AggregatedStats(metadata=None, tasks=averaged_tasks) if averaged_tasks else None
