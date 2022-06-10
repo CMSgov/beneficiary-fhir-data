@@ -1884,8 +1884,10 @@ public class FissClaimTransformerTest {
   @Test
   public void testAudiTrailRdaPosition() {
     new AuditTrailFieldTester()
-        .verifyIntFieldCopiedCorrectly(
-            FissAuditTrail.Builder::setRdaPosition, RdaFissAuditTrail::getRdaPosition);
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissAuditTrail.Builder::setRdaPosition,
+            RdaFissAuditTrail::getRdaPosition,
+            RdaFissAuditTrail.Fields.rdaPosition);
   }
 
   // endregion AuditTrail tests

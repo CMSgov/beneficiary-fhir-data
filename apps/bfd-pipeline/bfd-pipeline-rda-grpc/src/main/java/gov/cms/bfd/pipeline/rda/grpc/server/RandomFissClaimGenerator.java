@@ -360,18 +360,18 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private void addRandomAudits(FissClaim.Builder claim) {
     final int count = 1 + randomInt(MAX_AUDITS);
     for (int i = 1; i <= count; ++i) {
-      FissAuditTrail.Builder payer = FissAuditTrail.newBuilder();
+      FissAuditTrail.Builder audit = FissAuditTrail.newBuilder();
 
       oneOf(
-          () -> payer.setBadtStatusEnum(randomEnum(FissClaimStatusEnums)),
-          () -> payer.setBadtStatusUnrecognized(randomAlphaNumeric(1, 1)));
-      optional(() -> payer.setBadtLoc(randomAlphaNumeric(1, 5)));
-      optional(() -> payer.setBadtOperId(randomAlphaNumeric(1, 9)));
-      optional(() -> payer.setBadtReas(randomAlphaNumeric(1, 5)));
-      optional(() -> payer.setBadtCurrDateCymd(randomDate()));
-      payer.setRdaPosition(i);
+          () -> audit.setBadtStatusEnum(randomEnum(FissClaimStatusEnums)),
+          () -> audit.setBadtStatusUnrecognized(randomAlphaNumeric(1, 1)));
+      optional(() -> audit.setBadtLoc(randomAlphaNumeric(1, 5)));
+      optional(() -> audit.setBadtOperId(randomAlphaNumeric(1, 9)));
+      optional(() -> audit.setBadtReas(randomAlphaNumeric(1, 5)));
+      optional(() -> audit.setBadtCurrDateCymd(randomDate()));
+      audit.setRdaPosition(i);
 
-      claim.addFissAuditTrail(payer.build());
+      claim.addFissAuditTrail(audit.build());
     }
   }
 }
