@@ -1,3 +1,4 @@
+from dataclasses import Field, fields
 import time
 from abc import ABC, abstractmethod
 import json
@@ -163,3 +164,21 @@ class StatsAthenaLoader(StatsLoader):
                     f'Query failed to complete -- status returned was {status}')
 
         return self.__get_athena_query_result(query_execution_id)
+
+    def __get_where_statement(self) -> str:
+        # Automatically generate a list of equality checks for all of the fields that are
+        # necessary to validate to ensure that stats can be compared
+        clause_list = [self.__get_equality_check_str(field) for field in fields(StatsMetadata)
+                       if field.name != 'timestamp' or field.name != 'total_runtime']
+        runtime_clause = f'(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0'
+
+        return ' AND'.join(clause_list + runtime_clause)
+
+    def __get_equality_check_str(self, field: Field) -> str:
+        instance_value = getattr(self.metadata, field.name)
+        # Anything that's a string should be surrounded by single quotes to denote it as a string
+        # in SQL. Otherwise, no quotes should surround it
+        rhs_operand = f"'{instance_value}'" if type(
+            field.type) == str else f"{instance_value}"
+
+        return f"metadata.{field.name}={rhs_operand}"
