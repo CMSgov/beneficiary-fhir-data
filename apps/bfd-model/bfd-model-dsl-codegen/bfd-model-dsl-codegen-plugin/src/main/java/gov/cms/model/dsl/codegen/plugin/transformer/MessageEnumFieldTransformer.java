@@ -55,10 +55,10 @@ public class MessageEnumFieldTransformer implements FieldTransformer {
    */
   public static final String UNRECOGNIZED_NAME_SUFFIX = "unrecognizedNameSuffix";
 
-  /** Default value for the {@link ENUM_NAME_SUFFIX} option. */
+  /** Default value for the {@link MessageEnumFieldTransformer#ENUM_NAME_SUFFIX} option. */
   public static final String DEFAULT_ENUM_NAME_SUFFIX = "Enum";
 
-  /** Default value for the {@link UNRECOGNIZED_NAME_SUFFIX} option. */
+  /** Default value for the {@link MessageEnumFieldTransformer#UNRECOGNIZED_NAME_SUFFIX} option. */
   public static final String DEFAULT_UNRECOGNIZED_NAME_SUFFIX = "Unrecognized";
 
   /**
@@ -171,8 +171,9 @@ public class MessageEnumFieldTransformer implements FieldTransformer {
   }
 
   /**
-   * Combines the {@link baseFieldName} and the value (or default) of the {@link ENUM_NAME_SUFFIX}
-   * option to produce a name for the enum field in the source object.
+   * Combines the {@code baseFieldName} and the value (or default) of the {@link
+   * MessageEnumFieldTransformer#ENUM_NAME_SUFFIX} option to produce a name for the enum field in
+   * the source object.
    *
    * @param transformation model object describing the transformation to apply
    * @param baseFieldName prefix to add to the field name
@@ -184,9 +185,9 @@ public class MessageEnumFieldTransformer implements FieldTransformer {
   }
 
   /**
-   * Combines the {@link baseFieldName} and the value (or default) of the {@link
-   * UNRECOGNIZED_NAME_SUFFIX} option to produce a name for the enum's unrecognized value field in
-   * the source object.
+   * Combines the {@code baseFieldName} and the value (or default) of the {@link
+   * MessageEnumFieldTransformer#UNRECOGNIZED_NAME_SUFFIX} option to produce a name for the enum's
+   * unrecognized value field in the source object.
    *
    * @param transformation model object describing the transformation to apply
    * @param baseFieldName prefix to add to the field name
@@ -342,7 +343,8 @@ public class MessageEnumFieldTransformer implements FieldTransformer {
   }
 
   /**
-   * Extract the value of the {@link ENUM_CLASS_OPT} option and convert it into a {@link ClassName}.
+   * Extract the value of the {@link MessageEnumFieldTransformer#ENUM_CLASS_OPT} option and convert
+   * it into a {@link ClassName}.
    *
    * @param transformation model object describing the transformation being applied
    * @return correct {@link ClassName}

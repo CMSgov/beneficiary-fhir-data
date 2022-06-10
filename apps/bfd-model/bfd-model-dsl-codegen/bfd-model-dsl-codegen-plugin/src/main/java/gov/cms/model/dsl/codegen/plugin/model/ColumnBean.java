@@ -72,8 +72,8 @@ public class ColumnBean {
    */
   private boolean updatable = true;
   /**
-   * The {@link FieldType} for the field. Either {@link FieldType#Column} or {@link
-   * FieldType#Transient}.
+   * The {@link FieldType} for the field. Either {@link FieldType.Column} or {@link
+   * FieldType.Transient}.
    */
   private FieldType fieldType = FieldType.Column;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
@@ -93,7 +93,7 @@ public class ColumnBean {
 
   /**
    * Gets the name of the database column. Uses {@link ColumnBean#dbName} if defined, otherwise uses
-   * {@link name}.
+   * {@link ColumnBean#name}.
    *
    * @return name of the column in the database
    */

@@ -34,7 +34,7 @@ public class JoinBean {
   /** Type of join annotation to apply to this field. */
   private JoinType joinType;
 
-  /** Name of the {@link FetchType}. Either {@code EAGER} or @{code LAZY}. */
+  /** Name of the {@link FetchType}. Either {@link FetchType.EAGER} or @{link FetchType.LAZY}. */
   private FetchType fetchType;
 
   /** Optional comment string to be added to the join field in the generated entity. */
@@ -70,7 +70,7 @@ public class JoinBean {
   /**
    * Determine if the entity class name is valid.
    *
-   * @return true if the {@link entityClass} property has a valid value
+   * @return true if the {@link JoinBean#entityClass} property has a valid value
    */
   public boolean isValidEntityClass() {
     return entityClass != null && entityClass.indexOf('.') > 0;

@@ -9,13 +9,14 @@ import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 
 /**
  * Implementation of {@link FieldTransformer} to set the value of a timestamp field to the current
- * timestamp from the variable named {@code NOW_VALUE}.
+ * timestamp from the variable named {@link FieldTransformer#NOW_VALUE}.
  */
 public class TimestampFieldTransformer implements FieldTransformer {
   /**
    * {@inheritDoc}
    *
-   * <p>Generate code to copy the value of the {@link NOW_VALUE} param/variable to the field.
+   * <p>Generate code to copy the value of the {@link FieldTransformer#NOW_VALUE} param/variable to
+   * the field.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column

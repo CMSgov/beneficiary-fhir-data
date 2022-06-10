@@ -57,9 +57,9 @@ public interface FieldTransformer {
    * a {@link DataTransformer} object. The returned {@link CodeBlock} will be inserted into a method
    * definition by our caller. That method will have variables for the source, destination, and
    * transformer objects that use the standard names defined in this interface as constants. For
-   * example, the generated code can use {@link FieldTransformer #SOURCE_VAR} to reference the RDA
-   * API source object, {@link DEST_VAR} to reference the destination entity object, and {@link
-   * TRANSFORMER_VAR} to reference the {@link DataTransformer}.
+   * example, the generated code can use {@link FieldTransformer#SOURCE_VAR} to reference the RDA
+   * API source object, {@link FieldTransformer#DEST_VAR} to reference the destination entity
+   * object, and {@link FieldTransformer#TRANSFORMER_VAR} to reference the {@link DataTransformer}.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column

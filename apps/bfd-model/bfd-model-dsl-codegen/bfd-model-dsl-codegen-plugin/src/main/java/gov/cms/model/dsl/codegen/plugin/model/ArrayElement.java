@@ -29,7 +29,7 @@ public class ArrayElement {
    * Tests whether or not the array element objects have a field to hold a reference to the parent
    * object.
    *
-   * @return true if the {@link parentField} has a non-empty value
+   * @return true if the {@link ArrayElement#parentField} has a non-empty value
    */
   public boolean hasParentField() {
     return !Strings.isNullOrEmpty(parentField);
