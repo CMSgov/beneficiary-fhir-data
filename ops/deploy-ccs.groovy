@@ -181,10 +181,10 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 	dir("${workspace}/ops/terraform/env/${environmentId}/stateless") {
 		// Debug output terraform version
 		sh "terraform --version"
-		
-		// Initilize terraform 
+
+		// Initilize terraform
 		sh "terraform init -no-color"
-		
+
 		// Gathering terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "terraform plan \
@@ -194,6 +194,7 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		-var='git_branch_name=${gitBranchName}' \
 		-var='git_commit_id=${gitCommitId}' \
 		-no-color -out=tfplan"
+
 		// Apply Terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "terraform apply \
