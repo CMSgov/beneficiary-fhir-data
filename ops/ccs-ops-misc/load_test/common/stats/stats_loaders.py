@@ -196,7 +196,7 @@ class StatsAthenaLoader(StatsLoader):
         # equality check being auto-generated as they either should not be checked
         # (i.e. timestamp) or require a different type of check
         fields_to_exclude = ['timestamp', 'tag', 'total_runtime']
-        filtered_fields = [field.name for field in fields(StatsMetadata)
+        filtered_fields = [field for field in fields(StatsMetadata)
                            if not field.name in fields_to_exclude]
         # Automatically generate a list of equality checks for all of the fields that are
         # necessary to validate to ensure that stats can be compared
