@@ -57,29 +57,29 @@ def findAmis() {
 			'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-    ).trim(),
-    bfdPipelineAmiId: sh(
-      returnStdout: true,
-      script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-etl-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-    ).trim(),
-    bfdServerAmiId: sh(
-      returnStdout: true,
-      script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-fhir-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-    ).trim(),
-    bfdMigratorAmiId: sh(
-      returnStdout: true,
-      script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-db-migrator-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-    ).trim(),
-  )
+		).trim(),
+		bfdPipelineAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+					'Name=name,Values=bfd-amzn2-jdk11-etl-??????????????' \
+					'Name=state,Values=available' --region us-east-1 --output json | \
+					jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim(),
+		bfdServerAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+					'Name=name,Values=bfd-amzn2-jdk11-fhir-??????????????' \
+					'Name=state,Values=available' --region us-east-1 --output json | \
+					jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim(),
+		bfdMigratorAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+					'Name=name,Values=bfd-amzn2-jdk11-db-migrator-??????????????' \
+					'Name=state,Values=available' --region us-east-1 --output json | \
+					jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim(),
+	)
 }
 
 /**
