@@ -77,9 +77,7 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
-  /**
-   * MDC key for the http output size in bytes
-   */
+  /** MDC key for the http output size in bytes */
   public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
       "http_access.response.output_size_in_bytes";
 
