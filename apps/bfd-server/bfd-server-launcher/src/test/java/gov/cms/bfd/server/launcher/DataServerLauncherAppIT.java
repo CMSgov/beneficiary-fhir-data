@@ -229,6 +229,9 @@ public final class DataServerLauncherAppIT {
               .resolve("access.json");
       assertTrue(Files.isReadable(accessLogJson));
       assertTrue(Files.size(accessLogJson) > 0);
+      assertTrue(
+          Files.readString(accessLogJson)
+              .contains(DataServerLauncherApp.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
 
       // Stop the application.
       serverProcess.close();

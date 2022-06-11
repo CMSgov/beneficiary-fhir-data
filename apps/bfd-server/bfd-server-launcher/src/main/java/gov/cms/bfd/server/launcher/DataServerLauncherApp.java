@@ -77,6 +77,9 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
+  public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
+      "http_access.response.output_size_in_bytes";
+
   private static Server server;
 
   /**
@@ -347,7 +350,7 @@ public final class DataServerLauncherApp {
          * accessible to the filter.
          */
         MDC.put(
-            "http_access.response.output_size_in_bytes",
+            HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
             String.valueOf(response.getHttpOutput().getWritten()));
 
         /*
