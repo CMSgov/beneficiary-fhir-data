@@ -216,7 +216,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
                 # between the previous/average run and the current. Fail the test run, and log the
                 # failing tasks along with their relative stat percents   
                 environment.process_exit_code = 1
-                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that were at least %.2f%% slower: %s', 
+                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
                             stats_config.compare.value, stats_config.comp_tag, DEFAULT_PERCENT_THRESHOLD, validation_result)
         else:
             logger.warn(
