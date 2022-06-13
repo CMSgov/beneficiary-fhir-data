@@ -32,10 +32,10 @@ def validate_file(filename):
                 passed = False
             lineCount = lineCount + 1
             
-    if passed == False:
-        print("Validation failed")
-    else:
+    if passed:
         print("Validation passed")
+    else:
+        print("Validation failed")
     
     return passed
 
