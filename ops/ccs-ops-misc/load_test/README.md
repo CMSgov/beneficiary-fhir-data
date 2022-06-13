@@ -118,7 +118,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
-**--stats**: (Optional) : Argument specifying that aggregated performance statistics should be collected and stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified as a list of key-value pairs seperated by semi-colons: `--stats="store=<file/s3>;env=<TEST/PROD>;tag=;path=;bucket=;compare=<previous/average>;comp_tag=;athena_db="`
+**--stats**: (Optional) : Argument specifying that aggregated performance statistics should be collected and stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified as a list of key-value pairs seperated by semi-colons: `--stats="store=<file/s3>;env=<TEST/PROD>;tag=;path=;bucket=;compare=<previous/average>;comp_tag=;athena_tbl="`
 
 | Key | Required? | Possible Values | Description |
 | :-: | :-: | :-: | - |
