@@ -206,20 +206,21 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     if stats_config.compare != None:
         stats_loader = StatsLoader.create(stats_config, stats.metadata)
         previous_stats = stats_loader.load()
-
-        validation_result = validate_aggregated_stats(previous_stats, stats, DEFAULT_PERCENT_THRESHOLD)
-        if validation_result == {}:
-            logger.info(
-                'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+        if previous_stats != None:
+            validation_result = validate_aggregated_stats(previous_stats, stats, DEFAULT_PERCENT_THRESHOLD)
+            if validation_result == {}:
+                logger.info(
+                    'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+            else:
+                # If we get here, that means some tasks have stats exceeding the threshold percent
+                # between the previous/average run and the current. Fail the test run, and log the
+                # failing tasks along with their relative stat percents   
+                environment.process_exit_code = 1
+                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that were at least %.2f%% slower: %s', 
+                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_PERCENT_THRESHOLD, validation_result)
         else:
-            # If we get here, that means some tasks have stats exceeding the threshold percent
-            # between the previous/average run and the current. Fail the test run, and log the
-            # failing tasks along with their relative stat percents
-            logger = logging.getLogger()
-            
-            environment.process_exit_code = 1
-            logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that were at least %.2f%% slower: %s', 
-                         stats_config.compare.value, stats_config.comp_tag, DEFAULT_PERCENT_THRESHOLD, validation_result)
+            logger.warn(
+                'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
 
     if stats_config.store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
