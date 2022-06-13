@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.junit.jupiter.api.Test;
 
 public final class AppTest {
@@ -44,12 +45,11 @@ public final class AppTest {
 
   @Test
   public void happyPathUnitTest() {
-try (MockedStatic<App> app = Mockito.mockStatic(App.class)) {
+    try (MockedStatic<DataUtilityCommons> dataUtilityCommons  = Mockito.mockStatic(DataUtilityCommons.class)) {
         String outputDir = "outputDir";
-    DataUtilityCommons dataUtilityCommons = mock(DataUtilityCommons.class);
-    doNothing().when(dataUtilityCommons).getFDADrugCodes(any(String.class), any(String.class));
-    app.main(new String[] {outputDir});
-    }
-    
+
+        doNothing().when(dataUtilityCommons).getFDADrugCodes(any(String.class), any(String.class));
+        App.main(new String[] {outputDir});
+    }  
   }
 }
