@@ -1,3 +1,5 @@
+"""Members of this file/module are related to the loading of performance statistics
+from various data "stores" (such as from files or AWS S3)"""
 from functools import reduce
 from statistics import mean
 from dataclasses import Field, fields
@@ -153,21 +155,31 @@ class StatsAthenaLoader(StatsLoader):
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
         return self.client.start_query_execution(
             QueryString=query,
+            # The database should _always_ be "bfd", so we're hardcoding it here
             QueryExecutionContext={
                 'Database': 'bfd'
             },
+            # This method requires an OutputLocation, so we're using the "adhoc"
+            # path defined in the BFD Insights data organization standards to
+            # store query results
             ResultConfiguration={
                 'OutputLocation': f's3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stats/'
             },
+            # The workgroup should also always be "bfd" if we're targeting the "bfd"
+            # database
             WorkGroup='bfd'
         )
 
     def __get_athena_query_status(self, query_execution_id: str) -> str:
+        # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_execution
+        # for the structure of the returned Dict
         return self.client.get_query_execution(
             QueryExecutionId=query_execution_id
         )['QueryExecution']['Status']['State']
 
     def __get_athena_query_result(self, query_execution_id: str) -> Dict[str, Any]:
+        # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_results
+        # for the structure of the returned Dict
         return self.client.get_query_results(
             QueryExecutionId=query_execution_id
         )['ResultSet']['Rows']

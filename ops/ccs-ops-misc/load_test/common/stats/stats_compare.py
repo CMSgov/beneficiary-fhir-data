@@ -1,3 +1,6 @@
+"""Members of this file/module are related to the comparison and subsequent validation 
+of performance statistics against a previous set of statistics or an average of all
+previous statistics"""
 from dataclasses import dataclass
 from typing import Dict, List, Union
 from common.stats.aggregated_stats import AggregatedStats, TaskStats
@@ -13,9 +16,10 @@ class StatPercent:
     stat: str
     """The name of the stat"""
     percent: float
-    """The percent value of this stat's value versus a previous run's, i.e. this stat is percent% worse than
-    the previous run or average of all runs. A value of 100 means no change, whereas values lower than 100 generally
-    indicate positive change and values greater than 100 indicate negative change"""
+    """The percent value of this stat's value versus a previous run's, i.e. this stat is percent% times worse than
+    the previous run or average of all runs. A value of 100 means no change (i.e. current stat is 100% 
+    of a previous snapshot of the same stat), whereas values lower than 100 generally indicate
+    positive change and values greater than 100 indicate negative change"""
 
 
 def get_stats_relative_percent(previous: TaskStats, current: TaskStats) -> List[StatPercent]:

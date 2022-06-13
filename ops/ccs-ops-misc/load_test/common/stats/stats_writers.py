@@ -1,3 +1,5 @@
+"""Members of this file/module are related to writing performance statistics to a user-specified
+data "store" (such as to file or AWS S3)"""
 from dataclasses import asdict
 import time
 import os
