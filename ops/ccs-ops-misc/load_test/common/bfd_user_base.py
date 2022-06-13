@@ -195,7 +195,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
-    stats_config = config.load_stats_storage_config()
+    stats_config = config.load_stats_config()
     if stats_config == None:
         return
 

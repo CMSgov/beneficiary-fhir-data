@@ -100,11 +100,11 @@ def load_server_public_key() -> str:
         return False
 
 
-def load_stats_storage_config() -> StatsConfiguration:
-    """Load the storage configuration for storing aggregated statistics.
+def load_stats_config() -> StatsConfiguration:
+    """Load the stats configuration for storing and comparing aggregated statistics.
 
     Returns:
-        StatsConfiguration: A dataclass representing the storage configuration for aggregated statistics
+        StatsConfiguration: A dataclass representing the user-specified options for comparing and loading statistics
     """
 
     config_file = load()
