@@ -6,7 +6,7 @@ def validate_file(filename):
     errors post-generation. Validations can be added here as needed.
     '''
 
-    fail = 'False'
+    passed = True
     
     with open(filename) as infile:
         lineCount = 0
@@ -15,27 +15,29 @@ def validate_file(filename):
             multiInsertCount = line.count("INSERT")
             if multiInsertCount > 1:
                 print("Multiple INSERTs on line " + str(lineCount))
-                fail = 'True'
+                passed = False
             multiUpdateCount = line.count("UPDATE")
-            if multiUpdateCount > 0:
+            if multiUpdateCount > 1:
                 print("Multiple UPDATES on line " + str(lineCount))
-                fail = 'True'
+                passed = False
             doubleSpaceCount = line.count("  ")
             if doubleSpaceCount > 0:
                 print("Multiple spaces on line " + str(lineCount))
-                fail = 'True'
+                passed = False
             columnCount = line.count("|")
             if expectedColumns == 0:
                 expectedColumns = columnCount
             if columnCount != expectedColumns:
                 print("Bad column count on line " + str(lineCount))
-                fail = 'True'
+                passed = False
             lineCount = lineCount + 1
             
-    if fail == 'True':
+    if passed == False:
         print("Validation failed")
     else:
         print("Validation passed")
+    
+    return passed
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
