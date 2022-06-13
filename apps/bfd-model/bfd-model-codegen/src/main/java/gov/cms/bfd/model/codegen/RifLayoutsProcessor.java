@@ -259,7 +259,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
               .setHeaderEntity("PartDEvent")
-              .setHeaderTable("partd_events")
+              .setHeaderTable("partd_events_new")
               .setHeaderEntityIdField("PDE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1312,11 +1312,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
     final List<String> futureBigIntTables =
-        Arrays.asList(
-            "beneficiaries",
-            "beneficiaries_history",
-            "medicare_beneficiaryid_history",
-            "partd_events");
+        Arrays.asList("beneficiaries", "beneficiaries_history", "medicare_beneficiaryid_history");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());
