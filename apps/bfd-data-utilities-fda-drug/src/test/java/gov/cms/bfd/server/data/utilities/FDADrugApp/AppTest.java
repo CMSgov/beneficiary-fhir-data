@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
 public final class AppTest {
   @Test
@@ -48,7 +51,7 @@ public final class AppTest {
     try (MockedStatic<DataUtilityCommons> dataUtilityCommons  = Mockito.mockStatic(DataUtilityCommons.class)) {
         String outputDir = "outputDir";
 
-        doNothing().when(dataUtilityCommons).getFDADrugCodes(any(String.class), any(String.class));
+        dataUtilityCommons.when(() -> DataUtilityCommons.getFDADrugCodes(any(), any())).thenAnswer((Answer<Void>) invocation -> null);
         App.main(new String[] {outputDir});
     }  
   }
