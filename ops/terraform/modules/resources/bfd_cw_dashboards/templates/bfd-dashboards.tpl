@@ -204,8 +204,8 @@
                 ],
                 "view": "singleValue",
                 "region": "us-east-1",
-                "title": "HTTP 500s",
-                "period": 300,
+                "title": "Total number of HTTP 500s errors in the last 24 hours",
+                "period": 86400,
                 "stat": "Sum"
             }
         },
@@ -225,8 +225,8 @@
                 ],
                 "view": "singleValue",
                 "region": "us-east-1",
-                "title": "HTTP non 2XXs",
-                "period": 300,
+                "title": "Total number of HTTP non-2XXs errors in the last 24 hours",
+                "period": 86400,
                 "stat": "Sum"
             }
         },

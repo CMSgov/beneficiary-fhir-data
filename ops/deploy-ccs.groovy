@@ -40,9 +40,8 @@ class AmiIds implements Serializable {
 	/**
 	 * The ID of the AMI that will run the BFD DB Migrator service, or <code>null</code> if such an AMI does not yet exist.
 	 */
-    String bfdDbMigratorAmiId
+    String bfdMigratorAmiId
 }
-
 
 /**
  * Finds the IDs of the latest BFD AMIs (if any) in the environment.
@@ -74,7 +73,7 @@ def findAmis() {
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
-    bfdDbMigratorAmiId: sh(
+    bfdMigratorAmiId: sh(
       returnStdout: true,
       script: "aws ec2 describe-images --owners self --filters \
 			'Name=name,Values=bfd-amzn2-jdk11-db-migrator-??????????????' \
@@ -118,7 +117,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
 			bfdServerAmiId: amiIds.bfdServerAmiId,
-			bfdDbMigratorAmiId: amiIds.bfdDbMigratorAmiId,
+			bfdMigratorAmiId: amiIds.bfdMigratorAmiId,
 		)
 	}
 }
@@ -157,7 +156,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
-				bfdDbMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
+				bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
 			)
 		}
@@ -171,10 +170,9 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
  * @param gitBranchName the name of the Git branch this build is for
  * @param gitCommitId the hash/ID of the Git commit that this build is for
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
- * @param appBuildResults (not used in the CCS environment; this stuff is all baked into the AMIs there, instead)
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
-def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds) {
 	dir("${workspace}/ops/terraform/env/${environmentId}/stateless") {
 
 		// Debug output terraform version 
@@ -185,7 +183,6 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		
 		// Gathering terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-		// TODO: BFD-1600 ensure the amiIds.bfdDbMigrator is leveraged for the the forthcoming terraform definition
 		sh "terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \

@@ -75,11 +75,11 @@ public class MessageError {
    * A list of transformation errors associated with the RDA message, represented as a json list
    * string
    */
-  @Column(name = "errors", nullable = false, columnDefinition = "json")
+  @Column(name = "errors", nullable = false, columnDefinition = "jsonb")
   private String errors;
 
   /** The original message that was received, represented as a json string */
-  @Column(name = "message", nullable = false, columnDefinition = "json")
+  @Column(name = "message", nullable = false, columnDefinition = "jsonb")
   private String message;
 
   /** Hibernate used method to set certain values only on insert */
