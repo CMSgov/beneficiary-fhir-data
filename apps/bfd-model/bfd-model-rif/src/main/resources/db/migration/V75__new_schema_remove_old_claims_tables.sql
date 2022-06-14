@@ -1,7 +1,7 @@
 --
 -- Script to drop old claims tables that have been replaced by _new tables.
--- Once all entire db changes are complete, the _new table names will be
--- renamed to original claims table names.
+-- Once all db changes are complete, the _new table names will be renamed
+-- back to their original table names.
 --
 DROP TABLE IF EXISTS public.partd_events CASCADE;
 --
