@@ -69,7 +69,7 @@ public final class Operation {
     String canonicalName = getCanonicalName();
 
     // Ensure that the operation name lands in our access logs.
-    MDC.put(RequestResponseLoggingFilter.computeMdcRequestKey("operation"), canonicalName);
+    MDC.put(RequestResponsePopulateMdcFilter.computeMdcRequestKey("operation"), canonicalName);
 
     // If we got a known operation name, publish it to New Relic as the "transaction name",
     // otherwise stick with New Relic's default transaction name.

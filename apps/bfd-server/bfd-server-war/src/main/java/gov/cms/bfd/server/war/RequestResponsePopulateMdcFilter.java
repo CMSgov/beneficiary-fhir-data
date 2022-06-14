@@ -20,19 +20,17 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * Ensure that every request-response pair lands in the application's NDJSON-formatted HTTP access
- * log. Also adds a bunch of data to the logging {@link MDC} and also ensures that the {@link MDC}
- * is completely cleared after every request. This {@link Filter} must be declared before all others
- * in the {@code web.xml}.
+ * Ensure that every request-response pair adds data to the logging {@link MDC} which will be
+ * present on all log messages, particularly the log messages written to the access log via Jetty.
+ * This {@link Filter} must be declared before all others in the {@code web.xml}.
  *
  * <p>(Note: We don't use or extend Logback's builtin <code>MDCInsertingServletFilter</code>, as it
  * includes more properties than we really need. It also doesn't fully clear the {@link MDC} after
  * each request, only partially.)
  */
-public final class RequestResponseLoggingFilter implements Filter {
-  private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
+public final class RequestResponsePopulateMdcFilter implements Filter {
   private static final Logger LOGGER_MISC =
-      LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
+      LoggerFactory.getLogger(RequestResponsePopulateMdcFilter.class);
 
   private static final String REQUEST_ATTRIB_START = computeMdcKey("request_start_milliseconds");
 
@@ -43,18 +41,17 @@ public final class RequestResponseLoggingFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
+    /*
+     * This should be cleared by Jetty via the request log handling but just in case we have a situation where
+     * that handler does not fire (say, due to a Jetty defect) clear it now before the request starts.
+     */
+    MDC.clear();
+
+    handleRequest(request);
     try {
-      handleRequest(request);
-      try {
-        chain.doFilter(request, response);
-      } finally {
-        handleResponse(request, response);
-        addToHttpAccessLog();
-      }
+      chain.doFilter(request, response);
     } finally {
-      // Using a separate finally to clear the MDC ensures a thrown exception during
-      // request/response processing can't leak values into another request.
-      clearMdc();
+      handleResponse(request, response);
     }
   }
 
@@ -175,20 +172,6 @@ public final class RequestResponseLoggingFilter implements Filter {
       MDC.put(
           computeMdcKey("response.duration_milliseconds"),
           Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
-  }
-
-  /** Write a single entry out to {@link #LOGGER_HTTP_ACCESS} for the request-response. */
-  private static void addToHttpAccessLog() {
-    /*
-     * The message here isn't actually the payload; the MDC context that will get
-     * automatically included with it is!
-     */
-    LOGGER_HTTP_ACCESS.info("response complete");
-  }
-
-  /** Completely clears the MDC after each request. */
-  private void clearMdc() {
-    MDC.clear();
   }
 
   /** @see javax.servlet.Filter#init(javax.servlet.FilterConfig) */
