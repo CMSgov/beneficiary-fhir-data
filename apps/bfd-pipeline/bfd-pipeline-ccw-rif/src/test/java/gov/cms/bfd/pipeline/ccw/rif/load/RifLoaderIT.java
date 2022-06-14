@@ -687,7 +687,6 @@ public final class RifLoaderIT {
     verifyRecordPrimaryKeysPresent(samples);
   }
 
-  @Disabled
   @Test
   public void loadSyntheaData() {
     List<StaticRifResource> samples =
