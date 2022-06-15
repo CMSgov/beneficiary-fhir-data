@@ -7,7 +7,7 @@ DOCKER_TAG="${CBC_DOCKER_TAG:-"jdk11-mvn3-an29-tfenv-${GIT_SHORT_HASH}"}"
 DOCKER_TAG_LATEST="${CBC_DOCKER_TAG_LATEST:-"jdk11-mvn3-an29-tfenv-latest"}"
 
 docker build . \
-  --build-arg VERSION_JAVA="${CBC_JAVA_VERSION:-11}" \
+  --build-arg JAVA_VERSION="${CBC_JAVA_VERSION:-11}" \
   --build-arg MAVEN_VERSION="${CBC_MAVEN_VERSION:-3}" \
   --build-arg ANSIBLE_VERSION="${CBC_ANSIBLE_VERSION:-2.9.25}" \
   --build-arg PACKER_VERSION="${CBC_PACKER_VERSION:-1.6.6}" \
