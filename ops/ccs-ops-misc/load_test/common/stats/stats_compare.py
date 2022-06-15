@@ -9,7 +9,7 @@ TaskStatsOrPercentiles = type(Union[TaskStats, Dict[str, int]])
 """Type indicating a value that is either a TaskStats instance or a response time
 percentiles dictionary"""
 
-DEFAULT_PERCENT_THRESHOLD = 500.0
+DEFAULT_DEVIANCE_FAILURE_THRESHOLD = 500.0
 """The default percent threshold that stats should not exceed or be worse than compared to a previous or average run"""
 
 
@@ -80,7 +80,7 @@ def get_stats_above_threshold(compare_results: List[StatCompareResult], threshol
     return [stat_delta for stat_delta in compare_results if stat_delta.percent > threshold]
 
 
-def validate_aggregated_stats(previous: AggregatedStats, current: AggregatedStats, threshold: float = DEFAULT_PERCENT_THRESHOLD) -> Dict[str, List[StatCompareResult]]:
+def validate_aggregated_stats(previous: AggregatedStats, current: AggregatedStats, threshold: float = DEFAULT_DEVIANCE_FAILURE_THRESHOLD) -> Dict[str, List[StatCompareResult]]:
     """Validates and compares the given AggregatedStats instances against each other, checking each of their common
     TaskStats and returning a dictionary of the name of those tasks that exceed the given threshold to the actual stats
     that failed

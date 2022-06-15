@@ -8,7 +8,7 @@ import os
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
 from common.stats.aggregated_stats import StatsCollector
-from common.stats.stats_compare import DEFAULT_PERCENT_THRESHOLD, validate_aggregated_stats
+from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
 from common.stats.stats_config import StatsStorageType
 from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
@@ -207,7 +207,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
         stats_loader = StatsLoader.create(stats_config, stats.metadata)
         previous_stats = stats_loader.load()
         if previous_stats != None:
-            validation_result = validate_aggregated_stats(previous_stats, stats, DEFAULT_PERCENT_THRESHOLD)
+            validation_result = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
             if validation_result == {}:
                 logger.info(
                     'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
@@ -217,7 +217,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
                 # failing tasks along with their relative stat percents   
                 environment.process_exit_code = 1
                 logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
-                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_PERCENT_THRESHOLD, validation_result)
+                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validation_result)
         else:
             logger.warn(
                 'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
