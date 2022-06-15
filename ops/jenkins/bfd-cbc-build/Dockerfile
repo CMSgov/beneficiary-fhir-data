@@ -1,3 +1,4 @@
+ARG PACKER_VERSION
 ARG JAVA_VERSION
 ARG MAVEN_VERSION
 
@@ -22,14 +23,12 @@ COPY tfenv-install.sh /root/tfenv-install.sh
 RUN chmod +x /root/tfenv-install.sh && \
     /root/tfenv-install.sh "${TFENV_REPO_HASH}" "${TFENV_VERSIONS}"
 
-FROM base as hashicorp
-ARG PACKER_VERSION
-RUN curl -L -o packer.zip https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip && \
-    unzip packer.zip -d /usr/local/bin
+# declaring `packer` stage here allows us to inject `PACKER_VERSION` unlike `COPY --from` below
+FROM hashicorp/packer:${PACKER_VERSION} as packer
 
 FROM base as dist
 ENV PATH="/root/.tfenv/bin:${PATH}"
 # COPY tfenv files
 COPY --from=tfenv /root/.tfenv /root/.tfenv
-# Copy hashicorp files (packer)
-COPY --from=hashicorp /usr/local/bin/packer /usr/local/bin/packer
+# Copy packer files
+COPY --from=packer /bin/packer /usr/local/bin/packer
