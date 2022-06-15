@@ -60,13 +60,13 @@ class TaskStats():
     num_failures: int
     """The total number of failures received by this Task during the test run"""
     median_response_time: int
-    """The median response time, in seconds, of each of this Task's requests"""
+    """The median response time, in milliseconds, of each of this Task's requests"""
     average_response_time: float
-    """The average response time, in seconds, of each of this Task's requests"""
+    """The average response time, in milliseconds, of each of this Task's requests"""
     min_response_time: float
-    """The fastest response time, in seconds, out of all this Task's requests"""
+    """The fastest response time, in milliseconds, out of all this Task's requests"""
     max_response_time: float
-    """The slowest respone time, in seconds, out of all this Task's requests"""
+    """The slowest respone time, in milliseconds, out of all this Task's requests"""
     total_reqs_per_second: float
     """The average number of requests-per-second of this Taks's requests over the test run"""
     total_fails_per_sec: float
