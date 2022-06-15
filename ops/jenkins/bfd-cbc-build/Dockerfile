@@ -10,8 +10,8 @@ COPY jdk${JAVA_VERSION}.toolchains.xml /root/.m2/toolchains.xml
 
 ARG ANSIBLE_VERSION
 
-RUN apt -y update && \
-    apt -y install python3-pip jq && \
+RUN apt-get -y update && \
+    apt-get -y install python3-pip jq && \
     pip3 install ansible==${ANSIBLE_VERSION} awscli boto
 
 FROM base as tfenv
