@@ -17,7 +17,7 @@ RUN apt-get -y update && \
 
 FROM base as tfenv
 ARG TFENV_REPO_HASH
-# NOTE: versions represented as string; Dockerfile's RUN contexts don't use arrays
+# NOTE: versions represented as space-delimited string; Dockerfile's RUN contexts don't use arrays
 ARG TFENV_VERSIONS
 COPY tfenv-install.sh /root/tfenv-install.sh
 RUN chmod +x /root/tfenv-install.sh && \
