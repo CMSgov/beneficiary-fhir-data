@@ -1,0 +1,49 @@
+ignore_list: # (928 total errors)
+  global_filter:
+    error_patterns: # (603 errors)
+      - ".*Unknown Code System '.*/C4BBIdentifierType'"                  # Unfixable (6 errors)
+      - ".*is not valid in the system http://hl7.org/fhir/sid/icd-10.*"  # Invalid proc code for system (112 errors)
+      - ".*Unknown Code.*"                                               # Invalid code (3 errors)
+      - ".*None of the codings provided are in the value set.*"          # Invalid diag code for system (244 errors)
+      - ".*IGNORED_FIELD.*"                                              # Illegal value (142 errors)
+      - ".*must have a fullUrl which is the identity.*"                  # Missing bundle entry property (28 errors)
+      - ".*missing a fullUrl*"                                           # Missing bundle entry property (39 errors)
+      - ".*entry missing fullUrl*"                                       # Missing bundle entry property (22 errors)
+      - ".*Bundle.id.*Invalid Resource id.*"                             # Invalid bundle id (7 errors)
+  file_filter:
+    - file_pattern: .*/claim.*\.json
+      error_patterns:
+        - ".*Claim\\.insurance: minimum required = 1, but only found 0.*"             # Missing required field (2 errors)
+        - ".*Claim\\.insurance\\.coverage: minimum required = 1, but only found 0.*"  # Missing required field (4 errors)
+    - file_pattern: .*/coverage.*\.json
+      error_patterns:
+        - ".*Coverage\\.meta\\.profile:supportedProfile: minimum required.*"          # Unsupported profile? (5 errors)
+    - file_pattern: .*/eob.*\.json
+      error_patterns: # (307 errors)
+        - ".*ExplanationOfBenefit\\.meta\\.profile:supportedProfile: minimum required.*" # Unsupported profile? (26 errors)
+        - ".*adjudication-has-amount-type-slice.*"                                    # ??? (16 errors)
+        - ".*EOB-careteam-qualification.*"                                            # ??? (3 errors)
+        - ".*ExplanationOfBenefit\\.insurance.* minimum required.*"                   # Missing required field (52 errors)
+        - ".*ExplanationOfBenefit\\.item.* minimum required.*"                        # Missing required field (24 errors)
+        - ".*ExplanationOfBenefit\\.provider: minimum required.*"                     # Missing required field (22 errors)
+        - ".*ExplanationOfBenefit\\.procedure.type: minimum required.*"               # Missing required field (21 errors)
+        - ".*ExplanationOfBenefit\\.subType.* minimum required.*"                     # Missing required field (16 errors)
+        - ".*ExplanationOfBenefit\\.supportingInfo.* minimum required.*"              # Missing required field (29 errors)
+        - ".*ExplanationOfBenefit\\.total.* minimum required.*"                       # Missing required field (29 errors)
+        - ".*ofType\\(Organization\\).*minimum required.*"                            # Missing required field (45 errors)
+        - ".*Unable to find a match for profile.*"                                    # Referencing errors (15 errors)
+        - ".*ExplanationOfBenefit\\)?\\.item\\[\\d+\\].location.ofType\\(Address\\).*" # Illegal element type (9 errors)
+    - file_pattern: .*/metadata\.json
+      error_patterns:
+        - ".*Search parameter names must be unique in the context of a resource.*"    # REST API requirement (2 errors)
+        - ".*Invalid Resource id.*"                                                   # Invalid resource ID (1 error)
+    - file_pattern: .*/patient.*\.json
+      error_patterns:
+        - ".*Patient\\.meta\\.profile:supportedProfile: minimum required.*"           # Unsupported profile? (6 errors)
+    # V1 specific validation issues
+    - file_pattern: .*/v1/.*\.json
+      error_patterns:
+        - ".*Coding\\.system must be an absolute reference.*"                         # Coding.system reference (2 errors)
+        - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
+        - ".*ExplanationOfBenefit\\.item\\.detail\\.sequence.* minimum required.*"    # Missing field (3 errors)
+        - ".*ReferralRequest\\.intent.* minimum required.*"                           # Missing field (8 errors)
