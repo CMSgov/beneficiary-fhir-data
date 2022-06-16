@@ -55,7 +55,7 @@ data_server_ssl_client_certificates:
 data_pipeline_ccw_rif_job_enabled: false # Temporarily disabled as part of BFD-1652. To be re-enabled as part of BFD-1746.
 
 # Enables the RDA API data pipline with a 1 hour retry interval.
-data_pipeline_rda_job_enabled: false
+data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 3600
 
 # Only define this variable if you want to force the RDA API pipeline to always request a specific
