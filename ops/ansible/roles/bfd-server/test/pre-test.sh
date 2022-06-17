@@ -40,6 +40,7 @@ if [ "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}')" != "$CONTA
     --tmpfs /run \
     --tmpfs /run/lock \
     --name "$CONTAINER_NAME" \
+    --publish 7443:7443 \
     "ghcr.io/cmsgov/bfd-apps:${BFD_APPS_IMAGE_ID}"
 fi
 
