@@ -100,7 +100,7 @@ stop_service_if_failing() {
   log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
   sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
-  while true; do
+  for I in $(seq $STARTUP_TESTING_RETRIES); do
     log "Checking V1 metadata endpoint"
     STARTUP_TESTING_CHECK_V1_METADATA=$(check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_V1_METADATA_EXIT=$?
@@ -130,11 +130,22 @@ stop_service_if_failing() {
       sudo iptables -D INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
       log "Server started properly"
       return 0
-    else
+    elif [[ $I -lt $STARTUP_TESTING_RETRIES ]]; then
       log "Server failed to start properly, backing off"
       sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
     fi
   done
+
+  log "Server failed to start properly, shutting down"
+  STARTUP_TESTING_BFD_PID=$(ps -ef | grep 'DataServerLauncherApp' | grep -v grep | awk '{print $2}')
+  STARTUP_TESTING_BFD_PID_EXIT=$?
+
+  if [[ $STARTUP_TESTING_BFD_PID_EXIT == 0 ]] && kill -INT $STARTUP_TESTING_BFD_PID; then
+    log "Server shut down gracefully"
+  else
+    log "Error shutting down server gracefully"
+  fi
+  return 1
 }
 
 (stop_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
