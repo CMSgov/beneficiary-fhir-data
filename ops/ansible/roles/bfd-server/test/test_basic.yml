@@ -21,12 +21,12 @@
         data_server_appserver_https_port: &data_server_appserver_https_port "443"
         data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
         data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
-        data_server_appserver_keystore: 'files/server-fake.pem'
+        data_server_appserver_keystore: files/server-keystore.jks
         data_server_ssl_client_certificates:
           - alias: 'client-foo'
-            certificate: "{{ lookup('file', 'files/server-fake.crt.pem') }}"
+            certificate: "{{ lookup('file', 'files/client-trusted.cer') }}"
         data_server_db_url: 'jdbc:hsqldb:mem:test'
-        data_server_ssl_client_certificate_test: 'files/server-fake.chain.pem'
+        data_server_ssl_client_certificate_test: files/client-unsecured.pem
         data_server_db_username: ""
         data_server_db_password: ""
         data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m'
