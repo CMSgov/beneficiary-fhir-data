@@ -49,11 +49,6 @@
       changed_when: false
       become: true
 
-    - name: Fetch certificate
-      fetch:
-        src: "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
-        dest: ./tmp
-
     - name: Check Log Content
       find:
         paths: /usr/local/bfd-server/
@@ -62,18 +57,3 @@
       register: modified
       retries: 20
       delay: 5
-
-# - hosts: localhost
-#   vars:
-#     data_server_appserver_https_port: *data_server_appserver_https_port
-
-#     - name: Check external availability
-#       shell: |
-#         curl --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
-#       find:
-#         paths: /usr/local/bfd-server/
-#         patterns: bluebutton-server-app-log.json
-#         contains: Started Jetty. Server available at
-#       register: modified
-#       retries: 20
-#       delay: 5
