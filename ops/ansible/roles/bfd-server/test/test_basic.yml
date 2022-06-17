@@ -30,8 +30,10 @@
         data_server_ssl_client_certificate_test: files/client-unsecured.pem
         data_server_db_username: ""
         data_server_db_password: ""
-        data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m'
+        # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
+        data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m -DbfdServer.db.schema.apply=true'
         data_server_dir: &data_server_dir /usr/local/bfd-server
+        data_server_v2_enabled: true
 
 # Verify that things worked as expected.
 - hosts: bfd-server
