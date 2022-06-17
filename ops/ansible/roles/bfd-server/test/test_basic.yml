@@ -49,11 +49,10 @@
       changed_when: false
       become: true
 
-    - name: Check Log Content
-      find:
-        paths: /usr/local/bfd-server/
-        patterns: bluebutton-server-app-log.json
-        contains: Started Jetty. Server available at
-      register: modified
+    - name: Check bfd-server-startup.log Content
+      shell: |
+        grep 'Server started properly' {{ data_server_dir }}/bfd-server-startup.log
+      register: check_result
+      until: "check_result is not failed"
       retries: 20
       delay: 5
