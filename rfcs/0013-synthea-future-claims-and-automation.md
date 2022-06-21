@@ -60,7 +60,7 @@ In addition to these steps, BFD follows a thorough [Synthea Test Plan](https://g
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-Automated Recurring Generation: 
+### Automated Recurring Generation
 
 To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is quarterly.
 
