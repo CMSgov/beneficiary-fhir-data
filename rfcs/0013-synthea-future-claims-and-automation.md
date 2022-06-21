@@ -92,7 +92,7 @@ Additional testing - As of 04/21/2022, there is a plan in place to remove 6 mill
 
   - For the time being, a single reusable instance will be used. Pipelining multiple EC2 instances to generate data more efficiently is something to explore at a later point, as well as running the generation and load testing of large data manually every PI. 
 
-Required BFD Application Changes:
+### Required BFD Application Changes
 
 - When CCW data is ingested by the BFD pipeline, the application has filter logic for beneficiary UPDATEs with reference years prior to the current year by default. However, Synthea data must be able to UPDATE prior years. Additionally, future claims that are staged in S3 will need to be automatically ingested by the pipeline. For both Synthea and CCW data to be ingested by the pipeline application, the back-dated beneficiary filtering will have to be turned off for Synthea data, and a timestamp for future claims needs to be recognized. 
 
