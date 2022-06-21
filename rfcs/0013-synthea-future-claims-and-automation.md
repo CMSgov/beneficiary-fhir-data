@@ -71,7 +71,11 @@ Automating the generation and loading of Synthea data will remove a lot of error
   - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D Event ID (PDE ID). Despite monotonically increasing other parameters i.e. bene ID, claim group ID, the value of PDE ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and Synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
 
 ### Automated Recurring Loading
-  - Once the synthetic data is generated, within the same hosted cloud instance, the latest version of the BFD application from github, and dockerized database, will have been installed prior, and will be used to run the BFD pipeline integration test (IT), to load the new batch of synthetic data, ensuring that the newly generated data can be inserted properly.
+
+  - The synthetic data will be tested in isolation by (on the same system that was used to generate the data):
+    1. Cloning the latest version of BFD from GitHub.
+    2. Launching a local PostgreSQL database via Docker.
+    3. Running the BFD build and integration tests, using the newly generated Synthea data, to verify that it loads as expected.
 
   - Additionally, the RIF files from the previous quarterly batch of Synthea data will be pulled from AWS S3, and loaded into the database with the new batch of Synthea data.  
 
