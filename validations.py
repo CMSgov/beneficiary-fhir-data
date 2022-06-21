@@ -162,16 +162,16 @@ def main():
 
     if invalid_resources:
         total_errors = sum(len(invalid_resources[key]) for key in invalid_resources)
-        print('There were {} invalid resources ({} total errors)'.format(len(invalid_resources), total_errors))
+        print('Results: {} invalid resources ({} total errors)'.format(len(invalid_resources), total_errors))
         for file_name in invalid_resources:
             print(f'  - {file_name}')
             for error in invalid_resources[file_name]:
                 print(f'    {error}')
         exit(1)
     elif total_count > 0:
-        print('{} resources validated'.format(v1_count + v2_count))
+        print('Results: {} resources validated'.format(v1_count + v2_count))
     else:
-        print('No resources were validated')
+        print('Results: No resources were validated')
 
 
 if __name__ == "__main__":
