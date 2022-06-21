@@ -3,8 +3,7 @@ locals {
   database     = "bfd"
   project      = "bfd"
   table        = "api-requests"
-  table_name   = "test-${local.table}"
-  full_name    = "bfd-insights-${local.database}-${local.table}"
+  full_name    = "${local.project}-${local.database}-${local.table}"
   account_id   = data.aws_caller_identity.current.account_id
   region       = "us-east-1"
   # External resources not in this Terraform module
@@ -15,7 +14,6 @@ locals {
     insights_glue_role_arn = "arn:aws:iam::577373831711:role/bfd-insights/bfd-insights-bfd-glue-role"
     s3_glue_assets_bucket  = "aws-glue-assets-577373831711-us-east-1"
   }
-  environments = toset( [ "prod-sbx" ] )
 }
 
 module "bucket" {

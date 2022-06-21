@@ -1,3 +1,5 @@
+ # Firehose
+
 resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   for_each = local.environments
 
