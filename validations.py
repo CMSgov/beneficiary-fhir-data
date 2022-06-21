@@ -22,20 +22,25 @@ def any_filters_match(patterns, error):
     return any(re.match(regex, error) for regex in patterns)
 
 
-def filter_errors(global_error_patterns, file_error_patterns, errors):
-    filtered_errors = []
-    for error in errors:
-        if not any_filters_match(global_error_patterns, error) and not any_filters_match(file_error_patterns, error):
-            filtered_errors.append(error)
-    return filtered_errors
+def get_global_filter(ignore_list):
+    global_filters = []
+
+    if type(ignore_list) is dict:
+        if 'global_filter' in ignore_list and type(ignore_list['global_filter']) is dict:
+            global_filter = ignore_list['global_filter']
+
+            if 'error_patterns' in global_filter and type(global_filter['error_patterns']) is list:
+                global_filters = global_filter['error_patterns']
+
+    return global_filters
 
 
-def get_file_filter(white_list, file_path):
+def get_file_filter(ignore_list, file_path):
     filters = []
 
-    if type(white_list) is dict:
-        if 'file_filter' in white_list and white_list['file_filter'] is not None:
-            for file_filter in white_list['file_filter']:
+    if type(ignore_list) is dict:
+        if 'file_filter' in ignore_list and ignore_list['file_filter'] is not None:
+            for file_filter in ignore_list['file_filter']:
                 if re.search(file_filter['file_pattern'], file_path):
                     if 'error_patterns' in file_filter and type(file_filter['error_patterns']) is list:
                         filters = filters + file_filter['error_patterns']
@@ -43,12 +48,31 @@ def get_file_filter(white_list, file_path):
     return filters
 
 
-def validate_resource(version, ignore_list, file_path):
-    file_filters = get_file_filter(ignore_list, file_path)
-    java_call = subprocess.run(
-        ['java', '-Xmx3G', '-Xms2G', '-jar', 'validator_cli.jar', file_path, '-version', version],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+def filter_errors(ignore_list, errors_per_file):
+    global_filters = get_global_filter(ignore_list)
+
+    filtered_errors_per_file = {}
+
+    for file_name in list(errors_per_file.keys()):
+        file_filters = get_file_filter(ignore_list, file_name)
+
+        for error in errors_per_file[file_name]:
+            if not any_filters_match(global_filters, error) and not any_filters_match(file_filters, error):
+                filtered_errors_per_file.setdefault(file_name, []).append(error)
+
+    return filtered_errors_per_file
+
+
+def validate_resources(version, ignore_list, files):
+    java_commands = ['java', '-Xmx3G', '-Xms2G', '-jar', 'validator_cli.jar']
+
+    for file_name in files:
+        java_commands.append(file_name)
+
+    java_commands.append('-version')
+    java_commands.append(version)
+
+    java_call = subprocess.run(java_commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = java_call.stdout.decode('utf-8')
     error_output = java_call.stderr.decode('utf-8')
     if java_call.returncode != 0:
@@ -60,36 +84,36 @@ def validate_resource(version, ignore_list, file_path):
             exit(1)
     output_lines = output.split('\n')
 
-    errors = []
+    file_name = "loading_output"
+    errors_per_file = {}
 
     for line in output_lines:
+        if line.startswith('-- '):
+            file_search = re.search('-- ([^\\s]*) -*', line)
+
+            if file_search:
+                file_name = file_search.group(1)
+                errors_per_file[file_name] = []
+
         stripped_line = line.strip()
+
         if stripped_line.lower().startswith('error @'):
-            errors.append(stripped_line)
+            errors_per_file[file_name].append(stripped_line)
 
-    global_filters = []
-
-    if type(ignore_list) is dict:
-        if 'global_filter' in ignore_list and type(ignore_list['global_filter']) is dict:
-            global_filter = ignore_list['global_filter']
-
-            if 'error_patterns' in global_filter and type(global_filter['error_patterns']) is list:
-                global_filters = global_filter['error_patterns']
-
-    return filter_errors(global_filters, file_filters, errors)
+    return filter_errors(ignore_list, errors_per_file)
 
 
-def validate_resources(run_config, ignore_list, recently_changed):
+def validate_resource_dir(run_config, ignore_list, recently_changed):
     print('Checking directory {}'.format(run_config.target_dir))
     files = get_fhir_resource_files(run_config.target_dir, recently_changed)
     files.sort()
     file_count = len(files)
-    print('Validating {} resources (This should take about {} minutes)...'.format(file_count, file_count))
-    invalid_resources = {}
-    for file_path in files:
-        errors = validate_resource(run_config.version, ignore_list, file_path)
-        if errors:
-            invalid_resources[file_path] = errors
+    print('Validating {} resources'.format(file_count))
+
+    invalid_resources = validate_resources(run_config.version, ignore_list, files)
+    for resource in invalid_resources:
+        if len(resource) == 0:
+            del invalid_resources[resource]
     return invalid_resources
 
 
@@ -101,7 +125,9 @@ class RunConfig(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--ignorefile', default='validations_ignorelist.yml', help='path to the ignore list yaml file', )
+    parser.add_argument('-i', '--ignorefile',
+                        default='validations_ignorelist.yml',
+                        help='path to the ignore list yaml file', )
     parser.add_argument('-r', '--recent', action='store_const', const=True, help="Recent changes")
     args = parser.parse_args()
 
@@ -110,7 +136,10 @@ def main():
     except:
         ignore_list = {'ignore_list': {}}
 
-    filters = ignore_list['ignore_list']
+    if ignore_list is not None and 'ignore_list' in ignore_list:
+        filters = ignore_list['ignore_list']
+    else:
+        filters = {'ignore_list': {}}
 
     v1_config = RunConfig()
     v1_config.target_dir = 'apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v1'
@@ -120,8 +149,8 @@ def main():
     v2_config.target_dir = 'apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2'
     v2_config.version = '4.0'
 
-    invalid_resources = validate_resources(v1_config, filters, args.recent)
-    invalid_resources = dict(invalid_resources, **validate_resources(v2_config, filters, args.recent))
+    invalid_resources = validate_resource_dir(v1_config, filters, args.recent)
+    invalid_resources = dict(invalid_resources, **validate_resource_dir(v2_config, filters, args.recent))
 
     if invalid_resources:
         total_errors = sum(len(invalid_resources[key]) for key in invalid_resources)
