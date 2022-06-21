@@ -4,7 +4,7 @@ import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTrans
 import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.EXTRACTOR_OPTIONS_OPT;
 import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.HAS_UNRECOGNIZED_OPT;
 import static gov.cms.model.dsl.codegen.plugin.transformer.MessageEnumFieldTransformer.UNSUPPORTED_ENUM_VALUES_OPT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -14,7 +14,7 @@ import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit test for {@link MessageEnumFieldTransformer}. */
 public class MessageEnumFieldTransformerTest {
@@ -39,7 +39,7 @@ public class MessageEnumFieldTransformerTest {
         generator.generateCodeBlock(
             mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
     assertEquals(
-        "transformer.copyEnumAsString(namePrefix + gov.cms.test.Entity.Fields.claimStatus, false, 0, 20, Entity_claimStatus_Extractor.getEnumString(from), to::setClaimStatus);\n",
+        "transformer.copyEnumAsString(namePrefix + gov.cms.test.Entity.Fields.claimStatus, true, 0, 20, Entity_claimStatus_Extractor.getEnumString(from), to::setClaimStatus);\n",
         block.toString());
   }
 

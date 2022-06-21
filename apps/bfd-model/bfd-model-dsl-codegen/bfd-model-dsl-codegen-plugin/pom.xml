@@ -85,15 +85,15 @@
 
         <!-- Testing -->
         <dependency>
-            <!-- Used to run our unit and integration tests. -->
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <!-- The test framework used for unit and integration tests. -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Used to create mock objects for unit tests. -->
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-inline</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>

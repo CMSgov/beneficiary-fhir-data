@@ -41,7 +41,7 @@ public class JoinBean {
   private String comment;
 
   /** Type of collection to use for storing joined objects. */
-  private CollectionType collectionType = CollectionType.List;
+  @Builder.Default private CollectionType collectionType = CollectionType.List;
 
   /** Value for {@code mappedBy} argument to annotation. */
   private String mappedBy;
@@ -50,7 +50,7 @@ public class JoinBean {
   private Boolean orphanRemoval;
 
   /** {@link CascadeType}s to use as argument to the annotation. */
-  private List<CascadeType> cascadeTypes = new ArrayList<>();
+  @Builder.Default private List<CascadeType> cascadeTypes = new ArrayList<>();
 
   /**
    * Optionally specifies an order by expression to add using an {@link javax.persistence.OrderBy}

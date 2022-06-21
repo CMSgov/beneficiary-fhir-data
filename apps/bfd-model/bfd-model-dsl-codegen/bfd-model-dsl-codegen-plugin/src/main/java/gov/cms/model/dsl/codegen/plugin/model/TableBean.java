@@ -141,4 +141,15 @@ public class TableBean {
       return Set.of();
     }
   }
+
+  /**
+   * Wrap the name in JPA quotes if this table requires quoted names. Otherwise return the name
+   * unchanged.
+   *
+   * @param name name to quote
+   * @return quoted or unchanged name
+   */
+  public String quoteName(String name) {
+    return isQuoteNames() ? "`" + name + "`" : name;
+  }
 }

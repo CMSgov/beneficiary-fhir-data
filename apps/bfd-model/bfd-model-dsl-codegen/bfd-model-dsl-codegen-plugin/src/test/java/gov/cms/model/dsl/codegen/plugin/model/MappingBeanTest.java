@@ -1,11 +1,12 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.Test;
 
 public class MappingBeanTest {
   /** Verify that entity class name can be parsed into package and simple names. */
@@ -58,5 +59,20 @@ public class MappingBeanTest {
             .build();
     assertTrue(mapping.findJoinByFieldName("a").isPresent());
     assertFalse(mapping.findJoinByFieldName("x").isPresent());
+  }
+
+  /** Verify that joins associated with array fields are properly filtered. */
+  @Test
+  public void testGetNonArrayJoins() {
+    JoinBean joinA = JoinBean.builder().fieldName("a").build();
+    JoinBean joinB = JoinBean.builder().fieldName("b").build();
+    JoinBean joinC = JoinBean.builder().fieldName("c").build();
+    ArrayBean arrayB = ArrayBean.builder().to("b").build();
+    MappingBean mapping =
+        MappingBean.builder()
+            .table(TableBean.builder().join(joinA).join(joinB).join(joinC).build())
+            .array(arrayB)
+            .build();
+    assertEquals(ImmutableList.of(joinA, joinC), mapping.getNonArrayJoins());
   }
 }

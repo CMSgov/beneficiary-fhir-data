@@ -22,16 +22,16 @@ public class ModelUtil {
    * Load all mappings from the provided file or directory. If a directory is provided all YAML
    * files in that directory will be loaded.
    *
-   * @param mappingFile path to a file or directory containing mappings
+   * @param mappingPath path to a file or directory containing mappings
    * @return consolidated {@link RootBean} containing all mappings
    * @throws IOException if any I/O errors prevent loading
    */
-  public static RootBean loadModelFromYamlFileOrDirectory(String mappingFile) throws IOException {
-    if (!isValidMappingSource(mappingFile)) {
-      throw new IOException("mappingFile not defined or does not exist");
+  public static RootBean loadModelFromYamlFileOrDirectory(String mappingPath) throws IOException {
+    if (!isValidMappingSource(mappingPath)) {
+      throw new IOException("mappingPath not defined or does not exist");
     }
 
-    return loadMappingsFromYamlFileOrDirectory(mappingFile);
+    return loadMappingsFromYamlFileOrDirectory(mappingPath);
   }
 
   /**
@@ -81,18 +81,19 @@ public class ModelUtil {
   /**
    * Load mappings from the given path.
    *
-   * @param path path to a file or directory
+   * @param mappingPath path to a file or directory
    * @return a {@link RootBean} containing the mappings loaded from path
    * @throws IOException if anything could not be loaded
    */
-  private static RootBean loadMappingsFromYamlFileOrDirectory(String path) throws IOException {
-    final var file = new File(path);
+  private static RootBean loadMappingsFromYamlFileOrDirectory(String mappingPath)
+      throws IOException {
+    final var file = new File(mappingPath);
     final var fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
     if (fileAttributes.isRegularFile()) {
       return objectMapper.readValue(file, RootBean.class);
     }
     if (!fileAttributes.isDirectory()) {
-      throw new IOException("expected a file or directory: " + path);
+      throw new IOException("expected a file or directory: " + mappingPath);
     }
 
     var combinedRoot = new RootBean(new ArrayList<>());

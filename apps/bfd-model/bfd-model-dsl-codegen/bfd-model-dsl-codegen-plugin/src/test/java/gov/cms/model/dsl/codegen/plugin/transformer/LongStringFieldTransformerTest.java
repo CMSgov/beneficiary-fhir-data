@@ -1,6 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin.transformer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.squareup.javapoet.CodeBlock;
 import gov.cms.model.dsl.codegen.plugin.accessor.GrpcGetter;
@@ -8,7 +8,7 @@ import gov.cms.model.dsl.codegen.plugin.accessor.StandardSetter;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit test for {@link LongStringFieldTransformer}. */
 public class LongStringFieldTransformerTest {

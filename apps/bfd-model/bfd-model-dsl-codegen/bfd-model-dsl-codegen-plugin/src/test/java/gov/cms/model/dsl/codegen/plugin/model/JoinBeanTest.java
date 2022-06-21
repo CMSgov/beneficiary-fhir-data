@@ -1,12 +1,12 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.squareup.javapoet.ClassName;
 import javax.persistence.FetchType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for the {@link JoinBean} class. */
 public class JoinBeanTest {

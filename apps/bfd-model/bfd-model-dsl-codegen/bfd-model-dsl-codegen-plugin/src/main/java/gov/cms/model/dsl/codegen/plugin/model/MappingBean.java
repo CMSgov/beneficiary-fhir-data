@@ -1,9 +1,11 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,7 +49,7 @@ public class MappingBean {
   @Singular private List<TransformationBean> transformations = new ArrayList<>();
 
   /** Meta data for arrays. */
-  @Singular private List<ArrayElement> arrays = new ArrayList<>();
+  @Singular private List<ArrayBean> arrays = new ArrayList<>();
 
   /** Meta data for any external transformations used in transformer. */
   @Singular private List<ExternalTransformationBean> externalTransformations = new ArrayList<>();
@@ -153,6 +155,19 @@ public class MappingBean {
    */
   public Optional<JoinBean> findJoinByFieldName(String name) {
     return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findAny();
+  }
+
+  /**
+   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are not related
+   * to one of the {@link ArrayBean} fields in this {@link MappingBean}.
+   *
+   * @return filtered list of {@link JoinBean}
+   */
+  public List<JoinBean> getNonArrayJoins() {
+    var arrayFieldNames = arrays.stream().map(ArrayBean::getTo).collect(Collectors.toSet());
+    return table.getJoins().stream()
+        .filter(j -> !arrayFieldNames.contains(j.getFieldName()))
+        .collect(ImmutableList.toImmutableList());
   }
 
   /** Enum used to define the type of source objects for the transformations. */

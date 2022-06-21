@@ -1,13 +1,26 @@
 package gov.cms.model.dsl.codegen.plugin.transformer;
 
-import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.*;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.EnumValueTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.IdHashTransformName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.IndexFromName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.IntStringTransformName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.LongStringTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.MessageEnumTransformName;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.NoMappingFromName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.ParentFromName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.RifTimestampTransformName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.TimestampTransformName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.anyMappingRequiresIdHasher;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.createFieldNameForErrorReporting;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.createPropertyAccessCodeBlock;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.mappingRequiresEnumExtractor;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.mappingRequiresIdHasher;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.selectTransformerForField;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.toClassName;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -21,10 +34,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import org.junit.Test;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 
 /** Unit test for {@link TransformerUtil}. */
 public class TransformerUtilTest {
+  /**
+   * Verify that {@link TransformerUtil#mappingRequiresIdHasher} can find a transform that requires
+   * an IdHasher if one is present.
+   */
   @Test
   public void testMappingRequiresIdHasher() {
     MappingBean mapping = new MappingBean();
@@ -41,6 +59,29 @@ public class TransformerUtilTest {
     assertTrue(mappingRequiresIdHasher(mapping));
   }
 
+  /**
+   * Verify that {@link TransformerUtil#anyMappingRequiresIdHasher} can find a transform that
+   * requires an IdHasher if one is present.
+   */
+  @Test
+  public void testAnyMappingRequiresIdHasher() {
+    MappingBean noHashMapping = new MappingBean();
+    noHashMapping
+        .getTransformations()
+        .add(TransformationBean.builder().from("x").transformer(IntStringTransformName).build());
+    assertFalse(mappingRequiresIdHasher(noHashMapping));
+
+    MappingBean hashMapping = new MappingBean();
+    hashMapping
+        .getTransformations()
+        .add(TransformationBean.builder().from("y").transformer(IdHashTransformName).build());
+
+    assertFalse(anyMappingRequiresIdHasher(Stream.of(noHashMapping)));
+    assertTrue(anyMappingRequiresIdHasher(Stream.of(hashMapping)));
+    assertTrue(anyMappingRequiresIdHasher(Stream.of(noHashMapping, hashMapping)));
+  }
+
+  /** Unit test for {@link TransformerUtil#mappingRequiresEnumExtractor}. */
   @Test
   public void testMappingRequiresEnumExtractor() {
     MappingBean mapping = new MappingBean();
@@ -57,6 +98,7 @@ public class TransformerUtilTest {
     assertTrue(mappingRequiresEnumExtractor(mapping));
   }
 
+  /** Unit test for {@link TransformerUtil#capitalize}. */
   @Test
   public void testCapitalize() {
     assertEquals("A", TransformerUtil.capitalize("a"));
@@ -200,11 +242,11 @@ public class TransformerUtilTest {
   private void assertTransformerInstanceOf(
       ColumnBean column, TransformationBean transformation, Class<?> klass) {
     final Optional<FieldTransformer> result = selectTransformerForField(column, transformation);
-    assertTrue("expected transformer to be found", result.isPresent());
+    assertTrue(result.isPresent(), "expected transformer to be found");
     assertTrue(
+        klass.isInstance(result.get()),
         String.format(
             "expected instance of %s but was %s",
-            klass.getName(), result.get().getClass().getName()),
-        klass.isInstance(result.get()));
+            klass.getName(), result.get().getClass().getName()));
   }
 }

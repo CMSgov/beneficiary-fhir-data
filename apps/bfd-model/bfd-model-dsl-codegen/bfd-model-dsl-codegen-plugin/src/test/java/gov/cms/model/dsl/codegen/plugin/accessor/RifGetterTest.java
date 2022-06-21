@@ -1,10 +1,10 @@
 package gov.cms.model.dsl.codegen.plugin.accessor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link RifGetter}. */
 public class RifGetterTest {

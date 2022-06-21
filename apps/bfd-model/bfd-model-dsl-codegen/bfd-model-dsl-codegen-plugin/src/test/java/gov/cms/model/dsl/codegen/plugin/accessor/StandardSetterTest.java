@@ -1,10 +1,10 @@
 package gov.cms.model.dsl.codegen.plugin.accessor;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.squareup.javapoet.CodeBlock;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link StandardSetter} */
 public class StandardSetterTest {

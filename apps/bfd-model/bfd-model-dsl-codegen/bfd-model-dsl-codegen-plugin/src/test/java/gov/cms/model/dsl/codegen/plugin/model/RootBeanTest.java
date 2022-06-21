@@ -1,9 +1,9 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link RootBean}. */
 public class RootBeanTest {

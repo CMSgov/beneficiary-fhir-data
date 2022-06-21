@@ -63,19 +63,19 @@ public class ColumnBean {
   /** Text for insertion into the generated entity as a javadoc comment on the field. */
   private String comment;
   /** Indicates whether the column in the database is nullable. */
-  private boolean nullable = true;
+  @Builder.Default private boolean nullable = true;
   /** Indicates whether the column in the database is an {@link GenerationType.IDENTITY} column. */
-  private boolean identity = false;
+  @Builder.Default private boolean identity = false;
   /**
    * Indicates whether to add the updatable argument to the {@link javax.persistence.Column}
    * annotation.
    */
-  private boolean updatable = true;
+  @Builder.Default private boolean updatable = true;
   /**
    * The {@link FieldType} for the field. Either {@link FieldType.Column} or {@link
    * FieldType.Transient}.
    */
-  private FieldType fieldType = FieldType.Column;
+  @Builder.Default private FieldType fieldType = FieldType.Column;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
   private SequenceBean sequence;
 

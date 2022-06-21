@@ -1,14 +1,15 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.io.Files;
 import com.squareup.javapoet.ClassName;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /** Unit tests for the {@link ModelUtil} class. */
 public class ModelUtilTest {
@@ -26,34 +27,25 @@ public class ModelUtilTest {
    * @throws Exception included because the methods have checked exceptions
    */
   @Test
-  public void testReadMappingsFromDisk() throws Exception {
-    final var folder = new TemporaryFolder();
-    try {
-      folder.create();
-      assertThrows(
-          IOException.class,
-          () ->
-              ModelUtil.loadModelFromYamlFileOrDirectory(folder.getRoot().getPath() + "/nothing"));
+  public void testReadMappingsFromDisk(@TempDir File folder) throws Exception {
+    assertThrows(
+        IOException.class,
+        () -> ModelUtil.loadModelFromYamlFileOrDirectory(folder.getPath() + "/nothing"));
 
-      final var file1 = folder.newFile("a.yaml");
-      Files.asCharSink(file1, StandardCharsets.UTF_8).write("mappings:\n  - id: a\n");
+    final var file1 = new File(folder, "a.yaml");
+    Files.asCharSink(file1, StandardCharsets.UTF_8).write("mappings:\n  - id: a\n");
 
-      final var file2 = folder.newFile("b.yaml");
-      Files.asCharSink(file2, StandardCharsets.UTF_8).write("mappings:\n  - id: b\n");
+    final var file2 = new File(folder, "b.yaml");
+    Files.asCharSink(file2, StandardCharsets.UTF_8).write("mappings:\n  - id: b\n");
 
-      assertEquals(
-          1,
-          ModelUtil.loadModelFromYamlFileOrDirectory(file1.getAbsolutePath()).getMappings().size());
-      assertEquals(
-          1,
-          ModelUtil.loadModelFromYamlFileOrDirectory(file2.getAbsolutePath()).getMappings().size());
-      assertEquals(
-          2,
-          ModelUtil.loadModelFromYamlFileOrDirectory(folder.getRoot().getAbsolutePath())
-              .getMappings()
-              .size());
-    } finally {
-      folder.delete();
-    }
+    assertEquals(
+        1,
+        ModelUtil.loadModelFromYamlFileOrDirectory(file1.getAbsolutePath()).getMappings().size());
+    assertEquals(
+        1,
+        ModelUtil.loadModelFromYamlFileOrDirectory(file2.getAbsolutePath()).getMappings().size());
+    assertEquals(
+        2,
+        ModelUtil.loadModelFromYamlFileOrDirectory(folder.getAbsolutePath()).getMappings().size());
   }
 }

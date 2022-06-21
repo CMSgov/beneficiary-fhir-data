@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Class containing static helper methods for implementing and finding implementations of {@link
@@ -174,6 +175,17 @@ public class TransformerUtil {
   public static boolean mappingRequiresIdHasher(MappingBean mapping) {
     return mapping.getTransformations().stream()
         .anyMatch(transform -> IdHashTransformName.equals(transform.getTransformer()));
+  }
+
+  /**
+   * Scans all of the {@link MappingBean}s looking for any that require the caller to provide a
+   * lambda to hash string values.
+   *
+   * @param mappings {@link Stream} of {@link MappingBean} to scan
+   * @return true if caller must provide a hashing function
+   */
+  public static boolean anyMappingRequiresIdHasher(Stream<MappingBean> mappings) {
+    return mappings.anyMatch(TransformerUtil::mappingRequiresIdHasher);
   }
 
   /**

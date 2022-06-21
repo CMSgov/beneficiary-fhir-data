@@ -1,13 +1,13 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TableBeanTest {
   /** Test query methods used to check various boolean conditions. */
@@ -76,5 +76,14 @@ public class TableBeanTest {
             .equalsColumn("c")
             .build();
     assertEquals(java.util.Set.of("a", "c"), bean.getColumnsForEqualsMethod());
+  }
+
+  @Test
+  public void testQuoteName() {
+    TableBean bean = TableBean.builder().build();
+    assertTrue(bean.isQuoteNames());
+    assertEquals("`benefit`", bean.quoteName("benefit"));
+    bean.setQuoteNames(false);
+    assertEquals("benefit", bean.quoteName("benefit"));
   }
 }
