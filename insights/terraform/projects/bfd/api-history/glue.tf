@@ -31,8 +31,10 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--enable-spark-ui"                  = "true"
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
+    "--sourceDatabase"                   = aws_glue_catalog_database.bfd-database.name
     "--sourceTable"                      = "${replace(local.environment, "-", "_")}_api_history"
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/${local.environment}/"
+    "--targetDatabase"                   = aws_glue_catalog_database.bfd-database.name
     "--targetTable"                      = aws_glue_catalog_table.api-requests-table.name
   }
   glue_version              = "3.0"

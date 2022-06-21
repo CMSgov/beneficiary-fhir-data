@@ -18,14 +18,18 @@ job.init(args["JOB_NAME"], args)
 
 args = getResolvedOptions(sys.argv,
                           ['JOB_NAME',
+                           'sourceDatabase',
                            'sourceTable',
+                           'targetDatabase',
                            'targetTable'])
 
-print("sourceTable is set to: ", args['sourceTable'])
-print("targetTable is set to: ", args['targetTable'])
+print("sourceDatabase is set to: ", args['sourceDatabase'])
+print("   sourceTable is set to: ", args['sourceTable'])
+print("targetDatabase is set to: ", args['targetDatabase'])
+print("   targetTable is set to: ", args['targetTable'])
 
 SourceDf = glueContext.create_dynamic_frame.from_catalog(
-    database="bfd",
+    database=args['sourceDatabase'],
     table_name=args['sourceTable'],
     transformation_ctx="SourceDf",
 )
@@ -59,7 +63,7 @@ if SourceDf.count() > 0:
     # Script generated for node Data Catalog table
     DataCatalogtable_node3 = glueContext.write_dynamic_frame.from_catalog(
         frame=OutputDy,
-        database="bfd",
+        database=args['targetDatabase'],
         table_name=args['targetTable'],
         additional_options={
             "enableUpdateCatalog": True,

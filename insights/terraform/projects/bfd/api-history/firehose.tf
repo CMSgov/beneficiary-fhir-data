@@ -2,7 +2,7 @@
 
 resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   destination    = "extended_s3"
-  name           = "bfd-${local.environment}-firehose"
+  name           = "bfd-insights-bfd-${local.environment}-firehose"
   tags = local.tags
   tags_all = local.tags
 
