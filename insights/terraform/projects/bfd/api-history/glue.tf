@@ -129,8 +129,10 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--enable-spark-ui"                  = "true"
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
+    "--sourceDatabase"                   = aws_glue_catalog_database.bfd-database.name
     "--sourceTable"                      = aws_glue_catalog_table.api-requests-table.name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${local.environment}/"
+    "--targetDatabase"                   = aws_glue_catalog_database.bfd-database.name
     "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table.name
   }
   glue_version              = "3.0"
@@ -226,8 +228,10 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
     "--initialize"                       = "True"
     "--job-bookmark-option"              = "job-bookmark-disable" # We need to process all records
     "--job-language"                     = "python"
+    "--sourceDatabase"                   = aws_glue_catalog_database.bfd-database.name
     "--sourceTable"                      = aws_glue_catalog_table.beneficiaries-table.name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/${local.environment}/"
+    "--targetDatabase"                   = aws_glue_catalog_database.bfd-database.name
     "--targetTable"                      = aws_glue_catalog_table.beneficiaries-unique-table.name
   }
   glue_version              = "3.0"

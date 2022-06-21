@@ -18,3 +18,5 @@
     - Run.
     - Wait. This step might take an hour or more, depending on the volume of logs to ingest. In testing/development, it took about 45 minutes to run two weeks' worth of prod-sbx logs.
 
+4. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiaries`
+    - Run.
