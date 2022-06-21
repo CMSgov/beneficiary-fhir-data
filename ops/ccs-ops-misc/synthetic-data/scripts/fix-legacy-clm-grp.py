@@ -88,8 +88,7 @@ def map_grp_ids(unique_id_dict):
 def replace_grp_ids(table_ids, mapped_lists, db_string):
     """
     Takes the new group id mapping and updates each of the problem entries in each table with the
-    newly remapped value, including the _line tables. This is run as a single transaction, so no
-    action is taken unless all queries succeed.
+    newly remapped value. This is run as a single transaction, so no action is taken unless all queries succeed.
     """
     conn = None
     try:
@@ -98,14 +97,8 @@ def replace_grp_ids(table_ids, mapped_lists, db_string):
             with conn.cursor() as cursor:
                 
                 replace_ids(table_ids["carrier_grp_ids"], mapped_lists["carrier_grp_ids"], "carrier_claims_new", cursor)
-                replace_ids(table_ids["carrier_grp_ids"], mapped_lists["carrier_grp_ids"], "carrier_claim_lines_new", cursor)
-            
                 replace_ids(table_ids["inpatient_grp_ids"], mapped_lists["inpatient_grp_ids"], "inpatient_claims_new", cursor)
-                replace_ids(table_ids["inpatient_grp_ids"], mapped_lists["inpatient_grp_ids"], "inpatient_claim_lines_new", cursor)
-                
                 replace_ids(table_ids["outpatient_grp_ids"], mapped_lists["outpatient_grp_ids"], "outpatient_claims_new", cursor)
-                replace_ids(table_ids["outpatient_grp_ids"], mapped_lists["outpatient_grp_ids"], "outpatient_claim_lines_new", cursor)
-                    
                 replace_ids(table_ids["pde_grp_ids"], mapped_lists["pde_grp_ids"], "partd_events", cursor)
                 
     finally:
@@ -121,8 +114,8 @@ def replace_ids(ids_to_replace, replacement_ids, table_name, cursor):
     numTotal = len(ids_to_replace)
     for old_id in ids_to_replace:
         new_id = replacement_ids[old_id[0]]
-        #query = "update " + table_name + "  set clm_grp_id = " + str(new_id) + " where clm_grp_id = " + str(old_id[0])
-        #cursor.execute(query)
+        query = "update " + table_name + "  set clm_grp_id = " + str(new_id) + " where clm_grp_id = " + str(old_id[0])
+        cursor.execute(query)
         numReplaced = numReplaced + 1
         if numReplaced % 500 == 0:
             print(f"{table_name} replacement queries run: {numReplaced} / {numTotal}")
