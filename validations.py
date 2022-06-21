@@ -108,13 +108,19 @@ def validate_resource_dir(run_config, ignore_list, recently_changed):
     files = get_fhir_resource_files(run_config.target_dir, recently_changed)
     files.sort()
     file_count = len(files)
-    print('Validating {} resources'.format(file_count))
 
-    invalid_resources = validate_resources(run_config.version, ignore_list, files)
-    for resource in invalid_resources:
-        if len(resource) == 0:
-            del invalid_resources[resource]
-    return invalid_resources
+    if file_count > 0:
+        print('Validating {} resources'.format(file_count))
+
+        invalid_resources = validate_resources(run_config.version, ignore_list, files)
+        for resource in invalid_resources:
+            if len(resource) == 0:
+                del invalid_resources[resource]
+    else:
+        print('No resources to validate')
+        invalid_resources = {}
+
+    return file_count, invalid_resources
 
 
 class RunConfig(object):
@@ -149,8 +155,10 @@ def main():
     v2_config.target_dir = 'apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2'
     v2_config.version = '4.0'
 
-    invalid_resources = validate_resource_dir(v1_config, filters, args.recent)
-    invalid_resources = dict(invalid_resources, **validate_resource_dir(v2_config, filters, args.recent))
+    v1_count, v1_invalid_resources = validate_resource_dir(v1_config, filters, args.recent)
+    v2_count, v2_invalid_resources = validate_resource_dir(v2_config, filters, args.recent)
+    total_count = v1_count + v2_count
+    invalid_resources = dict(v1_invalid_resources, **v2_invalid_resources)
 
     if invalid_resources:
         total_errors = sum(len(invalid_resources[key]) for key in invalid_resources)
@@ -160,8 +168,10 @@ def main():
             for error in invalid_resources[file_name]:
                 print(f'    {error}')
         exit(1)
+    elif total_count > 0:
+        print('{} resources validated'.format(v1_count + v2_count))
     else:
-        print('All resources validated.')
+        print('No resources were validated')
 
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ ignore_list: # (928 total errors)
     # V1 specific validation issues
     - file_pattern: .*/v1/.*\.json
       error_patterns:
-        - ".*Coding\\.system must be an absolute reference.*"                         # Coding.system reference (2 errors)
-        - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
-        - ".*ExplanationOfBenefit\\.item\\.detail\\.sequence.* minimum required.*"    # Missing field (3 errors)
-        - ".*ReferralRequest\\.intent.* minimum required.*"                           # Missing field (8 errors)
+#        - ".*Coding\\.system must be an absolute reference.*"                         # Coding.system reference (2 errors)
+#        - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
+#        - ".*ExplanationOfBenefit\\.item\\.detail\\.sequence.* minimum required.*"    # Missing field (3 errors)
+#        - ".*ReferralRequest\\.intent.* minimum required.*"                           # Missing field (8 errors)
