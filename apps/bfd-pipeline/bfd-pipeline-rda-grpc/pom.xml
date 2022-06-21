@@ -76,14 +76,12 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
             <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Adds java-8 date/time classes to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>

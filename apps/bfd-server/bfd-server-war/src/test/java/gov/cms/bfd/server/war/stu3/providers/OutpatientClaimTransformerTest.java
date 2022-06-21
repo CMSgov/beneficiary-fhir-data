@@ -152,7 +152,7 @@ public final class OutpatientClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.OUTPATIENT,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -222,8 +222,7 @@ public final class OutpatientClaimTransformerTest {
     assertTrue(1 <= eob.getItem().size(), "Expect actual item count is above 0");
     ItemComponent eobItem0 = eob.getItem().get(0);
     OutpatientClaimLine claimLine1 = claim.getLines().get(0);
-    assertEquals(
-        new Integer(claimLine1.getLineNumber().intValue()), new Integer(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 

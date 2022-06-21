@@ -11,10 +11,15 @@ import org.apache.commons.csv.CSVRecord;
  * @param <R> the record type stored in this {@link RifRecordEvent}
  */
 public final class RifRecordEvent<R extends RifRecordBase> {
+  /** The {@link RifFileEvent} that this is a child of. */
   private final RifFileEvent fileEvent;
+  /** The {@link CSVRecord}s that this was built from / represents. */
   private final List<CSVRecord> rawCsvRecords;
+  /** The RIF {@link RecordAction} indicated for the {@link #getRecord()}. */
   private final RecordAction recordAction;
+  /** The beneficiary id for this record event. */
   private final Long beneficiaryId;
+  /** The actual RIF data that the {@link RifRecordEvent} represents. */
   private final R record;
 
   /**
@@ -45,32 +50,52 @@ public final class RifRecordEvent<R extends RifRecordBase> {
     this.record = record;
   }
 
-  /** @return the {@link RifFileEvent} that this is a child of */
+  /**
+   * Gets the {@link #fileEvent}.
+   *
+   * @return the {@link RifFileEvent} that this is a child of
+   */
   public RifFileEvent getFileEvent() {
     return fileEvent;
   }
 
-  /** @return the {@link CSVRecord}s that this was built from / represents */
+  /**
+   * Gets the {@link #rawCsvRecords}.
+   *
+   * @return the {@link CSVRecord}s that this was built from / represents
+   */
   public List<CSVRecord> getRawCsvRecords() {
     return rawCsvRecords;
   }
 
-  /** @return the RIF {@link RecordAction} indicated for the {@link #getRecord()} */
+  /**
+   * Gets the {@link #recordAction}.
+   *
+   * @return the RIF {@link RecordAction} indicated for the {@link #getRecord()}
+   */
   public RecordAction getRecordAction() {
     return recordAction;
   }
 
-  /** @return the beneficiaryId */
+  /**
+   * Gets the {@link #beneficiaryId}.
+   *
+   * @return the beneficiaryId
+   */
   public Long getBeneficiaryId() {
     return beneficiaryId;
   }
 
-  /** @return the actual RIF data that the {@link RifRecordEvent} represents */
+  /**
+   * Gets the {@link #record}.
+   *
+   * @return the actual RIF data that the {@link RifRecordEvent} represents
+   */
   public R getRecord() {
     return record;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

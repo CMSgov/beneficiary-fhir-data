@@ -17,6 +17,8 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -35,6 +37,7 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
@@ -57,6 +60,12 @@ public final class DataServerLauncherApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataServerLauncherApp.class);
 
   /**
+   * Logger for the structured access log ('access.json') that has one line for every request that
+   * the server receives.
+   */
+  private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
+
+  /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
    * incomplete and/or invalid.
    */
@@ -67,6 +76,10 @@ public final class DataServerLauncherApp {
    * unhandled exception.
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
+
+  /** MDC key for the http output size in bytes */
+  public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
+      "http_access.response.output_size_in_bytes";
 
   private static Server server;
 
@@ -197,9 +210,13 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog
-     * NOTE: As of late October 2021, the access.log file is slightly different
-     * in terms of response time being in microseconds instead of milliseconds
+    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog. Available format strings are
+     * documented here: https://www.eclipse.org/jetty/javadoc/jetty-10/org/eclipse/jetty/server/CustomRequestLog.html.
+     *
+     * Response time units have varied during BFD's history as follows:
+     * Prior to Oct 28 2021 - milliseconds
+     * Oct 28 2021 - Mar 24 2022 - microseconds
+     * Since Mar 24 2022 - milliseconds
      */
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
@@ -214,8 +231,9 @@ public final class DataServerLauncherApp {
             + " \"%{BlueButton-Application}i\""
             + " %{BlueButton-UserId}i"
             + " \"%{BlueButton-User}i\""
-            + " %{BlueButton-BeneficiaryId}i";
-    final CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
+            + " %{BlueButton-BeneficiaryId}i"
+            + " %{X-Request-ID}o";
+    final BfdRequestLog requestLog = new BfdRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);
 
@@ -279,6 +297,72 @@ public final class DataServerLauncherApp {
      * Anything past this point is not guaranteed to run, as the thread may get stopped before it
      * has a chance to execute.
      */
+  }
+
+  /**
+   * BFD implementation of the Jetty {@link org.eclipse.jetty.server.RequestLog} which provides
+   * callback functionality appropriate for writing access logs which contain information for each
+   * request received by the server.
+   *
+   * <p>This implementation is responsible for writing to two different log files upon completion of
+   * each request:
+   *
+   * <ul>
+   *   <li>access.json - a structured log built from the {@link MDC}
+   *   <li>access.log - an unstructured NCSA style log that should be considered deprecated and
+   *       slated for removal
+   * </ul>
+   *
+   * TODO: BFD-1844 Remove access.log.
+   */
+  private static class BfdRequestLog extends CustomRequestLog {
+    /**
+     * Construct a BFD Request Log
+     *
+     * @param accessLogFileName filename for the unstructured log 'access.log'
+     * @param accessLogFormat format for the unstructured log 'access.log'
+     */
+    public BfdRequestLog(String accessLogFileName, String accessLogFormat) {
+      super(accessLogFileName, accessLogFormat);
+    }
+
+    /**
+     * Log a message for a request/response pair to both the access.log (via the Jetty
+     * CustomRequestLog) and the access.json (via Logback).
+     *
+     * @param request the request
+     * @param response the response
+     */
+    @Override
+    public void log(Request request, Response response) {
+      try {
+        /*
+         * Call the implementation from CustomRequestLog to write the access.log entry.
+         */
+        super.log(request, response);
+
+        /*
+         * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
+         * CustomRequestLog to write the payload size to the access.log:
+         * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
+         *
+         * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
+         * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
+         * accessible to the filter.
+         */
+        MDC.put(
+            HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
+            String.valueOf(response.getHttpOutput().getWritten()));
+
+        /*
+         * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
+         * automatically included with it is!
+         */
+        LOGGER_HTTP_ACCESS.info("response complete");
+      } finally {
+        MDC.clear();
+      }
+    }
   }
 
   /**

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -16,6 +17,7 @@ import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -750,7 +752,10 @@ public final class OutpatientClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/codesystem/adjudication",
                                 "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
                                 "Revenue Center Non-Covered Charge Amount"))))
-            .setAmount(new Money().setValue(134).setCurrency(TransformerConstants.CODED_MONEY_USD));
+            .setAmount(
+                new Money()
+                    .setValue(new BigDecimal("134.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }
@@ -1019,7 +1024,9 @@ public final class OutpatientClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/variables/rev_cntr_pmt_amt_amt",
                                 "Revenue Center (Medicare) Payment Amount"))))
             .setAmount(
-                new Money().setValue(5000).setCurrency(TransformerConstants.CODED_MONEY_USD));
+                new Money()
+                    .setValue(new BigDecimal("5000.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(adjudication));
   }
@@ -1282,6 +1289,16 @@ public final class OutpatientClaimTransformerV2Test {
     assertEquals(expectedExtensionUrl, ext.getUrl());
     assertTrue(ext.getValue() instanceof Coding);
     assertNotNull(((Coding) ext.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(111), eob.getItem());
   }
 
   /**

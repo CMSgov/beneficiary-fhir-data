@@ -259,7 +259,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
               .setHeaderEntity("PartDEvent")
-              .setHeaderTable("partd_events")
+              .setHeaderTable("partd_events_new")
               .setHeaderEntityIdField("PDE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -268,10 +268,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
               .setHeaderEntity("CarrierClaim")
-              .setHeaderTable("carrier_claims")
+              .setHeaderTable("carrier_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("carrier_claim_lines")
+              .setLineTable("carrier_claim_lines_new")
               .setLineEntityLineNumberField("LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -280,10 +280,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
               .setHeaderEntity("InpatientClaim")
-              .setHeaderTable("inpatient_claims")
+              .setHeaderTable("inpatient_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("inpatient_claim_lines")
+              .setLineTable("inpatient_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -292,10 +292,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
               .setHeaderEntity("OutpatientClaim")
-              .setHeaderTable("outpatient_claims")
+              .setHeaderTable("outpatient_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("outpatient_claim_lines")
+              .setLineTable("outpatient_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -304,10 +304,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
               .setHeaderEntity("HHAClaim")
-              .setHeaderTable("hha_claims")
+              .setHeaderTable("hha_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("hha_claim_lines")
+              .setLineTable("hha_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -316,10 +316,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
               .setHeaderEntity("DMEClaim")
-              .setHeaderTable("dme_claims")
+              .setHeaderTable("dme_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("dme_claim_lines")
+              .setLineTable("dme_claim_lines_new")
               .setLineEntityLineNumberField("LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -328,10 +328,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
               .setHeaderEntity("HospiceClaim")
-              .setHeaderTable("hospice_claims")
+              .setHeaderTable("hospice_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("hospice_claim_lines")
+              .setLineTable("hospice_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -340,10 +340,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("snf_claims")
+              .setHeaderTable("snf_claims_new")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("snf_claim_lines")
+              .setLineTable("snf_claim_lines_new")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -1312,18 +1312,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
     final List<String> futureBigIntTables =
-        Arrays.asList(
-            "beneficiaries",
-            "beneficiaries_history",
-            "medicare_beneficiaryid_history",
-            "carrier_claims",
-            "dme_claims",
-            "hha_claims",
-            "hospice_claims",
-            "inpatient_claims",
-            "outpatient_claims",
-            "snf_claims",
-            "partd_events");
+        Arrays.asList("beneficiaries", "beneficiaries_history", "medicare_beneficiaryid_history");
 
     return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
         && futureBigIntTables.contains(tableName.toLowerCase());
@@ -2292,20 +2281,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       return ClassName.get(LocalDate.class);
     } else if (type == RifColumnType.TIMESTAMP) {
       return ClassName.get(Instant.class);
-    }
-    // handle an inherited hack from the Excel spreadsheet in which a row entry
-    // was defined as a NUM and had an associated scale; for example (12,2) denotes
-    // a numeric data types of up to 12 digits, with two digits of scale (i.e., 55.45).
-    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0) {
-      return ClassName.get(BigDecimal.class);
-    }
-    // some entries in Excel spreadsheet defined as NUM with a zero scale that are
-    // not optional should be defined as a primitive integer.
-    //
-    else if (type == RifColumnType.NUM
-        && columnScale.orElse(Integer.MAX_VALUE) == 0
-        && !isColumnOptional) {
-      return TypeName.INT;
+    } else if (type == RifColumnType.NUM) {
+      if (columnScale.orElse(Integer.MAX_VALUE) > 0) {
+        return ClassName.get(BigDecimal.class);
+      } else if (columnScale.orElse(Integer.MAX_VALUE) == 0) {
+        return isColumnOptional ? ClassName.get(BigDecimal.class) : TypeName.INT;
+      }
     } else if (type == RifColumnType.SMALLINT) {
       return isColumnOptional ? ClassName.get(Short.class) : TypeName.SHORT;
     } else if (type == RifColumnType.BIGINT) {

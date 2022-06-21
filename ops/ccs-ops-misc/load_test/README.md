@@ -70,7 +70,19 @@ The tests are run with parameters that specify all the test params and test file
 
 A single-line test will look like this (placeholders to replace in brackets):
 
-    python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="<AWS_DB_host>" --databaseUsername="<db_username_from_keybase>" --databasePassword="<db_password_from_keybase>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
+    python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseUri="postgres://<db-username>:<db-password>@<db-host>:<port>/<db-name>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
+
+If you have existing configuration in `./config.yml`, you can also run the tests via:
+
+```
+python3 runtests.py --testFile="<your-test-file>"
+```
+
+Or, if you have some YAML configuration in a different file (note that these values will be saved to the root `./config.yml`, so subsequent runs can omit the `configPath` if you are not changing anything):
+
+```
+python3 runtests.py --configPath="config/<your-config-here>.yml" --testFile="<your-test-file>" <other-cli-args-here>...
+```
 
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
 
@@ -78,15 +90,13 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--clientCertPath** : (Required) : The path to the PEM file we copied/modified earlier. Should be located in your home directory like this: ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 
-**--databaseHost** : (Required) : The database host, used to pull data. Get this from the database endpoint we noted in the earlier step "Getting The Database Instance"
-
-**--databaseUsername** : (Required) : The username for connecting to the database, can be found in Keybase. Make sure to use the correct one for the environment you're connecting to.
-
-**--databasePassword** : (Required) : The password for connecting to the database, can be found in Keybase. Make sure to use the correct one for the environment you're connecting to.
+**--databaseUri** : (Required) : The URI used for connecting to the database server. Needs to include username, password (both can be found in Keybase, make sure to use the correct one for the environment you're connecting to), hostname and port.
 
 **--testHost** : (Required) : The load balancer or single node to run the tests against. The environment used here should match the same environment (test, prod-sbx, prod) as the database, so we pull the appropriate data for the environment tested against. Note that when using a single node, you should specity the Ip AND the port for the application.
 
 **--testFile** : (Required) : The path to the test file we want to run.
+
+**--configPath** : (Optional) : The path to a YAML configuration file that will be read from for the values specified here. The values in this configuration file will be merged with values from the CLI, with the CLI values taking priority. The resulting merged values will be written to the repository's root `config.yml`, so if `--configPath` is specified as a YAML file other than `config.yml` the YAML file at that path will not be modified (only read from). If not provided, defaults to `config.yml` (the root YAML configuration file). 
 
 **--serverPublicKey** : (Optional) : To allow the tests to trust the server responses, you can add the path to the public certificate here. This is not required to run the tests successfully, and may not be needed as a parameter at all. If not provided, defaults to an empty string (does not cause test issues.)
 
@@ -98,29 +108,19 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--workerThreads** : (Optional) : Controls running in distributed mode; If this is set to >1, will spawn that many worker threads to run the tests across multiple cores. If not provided, defaults to 1. See section on running in distributed mode for more info.
 
+**--tableSamplePct** : (Optional) : Determines how big a slice of the Beneficiaries table we want to use when finding endpoints for testing. Defaults to 0.25 (one-quarter of one percent), which is plenty for production databases with millions of rows. Note that this is only meant to randomize and streamline the data query, but if this option is set too small, it would act as a cap on the number of rows available. For the Test environment or local testing, it might be best to set to 100, which will effectively *not* use table sampling.
+
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
-### Data setup for contract tests
+**--storeStats**: (Optional) : Argument specifying that aggregated performance statistics should be stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified in the following format: `<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>`, where
 
-There is one special type of test that requires a data setup script to be run beforehand; this is the coverage contract test. This test runs through every list of pages for a set of contracts, but the urls for hitting all the pages of whatever contracts need to be set up before the test runs. This can be done by calling the data setup script common/write_contract_cursors.py similar to this:
-
-    python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"
-
-The script will write out the results to homePath specified in the config (and expect them there during runtime.)
-
-The following are the arguments passed to this data setup script:
-
-**--contracts** : (Required) : The list of comma separated contracts to use for writing out the test urls. You can add any number of contracts here, and the data script will loop through a search of each contract and all of its pages and write them to file.
-
-**--year** : (Required) : The year to search by for contracts. This will be applied to all contracts from --contracts. This should be in YYYY format.
-
-**--month** : (Required) : The month to search by for contracts. This will be applied to all contracts from --contracts. This must be in MM format (i.e. 01 for January, 05 for May, etc)
-
-**--count** : (Required) : How many results per page to request. A lower number means you'll get more pages with smaller sized results, higher number means less pages with larger results. This can help test various sized payloads, or give tests more urls to use.
-
-**--version** : (Required) : The endpoint version to setup the data for. The only valid values for this (at time of writing) are "v1" or "v2". The resulting file will be prepended with this version so that multiple cursor files can be set up for different endpoints.
-
-The script will output a file named after the --version in the configured home directory, where the contract tests are expecting it. Make sure you run the script again if you need to set up data for a different endpoint version.
+* `STORAGE_TYPE` is either `file` or `s3`. 
+  * Note that the `file` `STORAGE_TYPE` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. 
+* `RUNNING_ENVIRONMENT` is either `TEST` or `PROD`.
+* `TAG` can be any string that follows BFD Insights data organization standards (lower-case letters, numbers and "_").
+  * The tag is used to partition performance statistics for more accurate performance validation between corresponding runs.
+  * _Note that this argument may be deprecated in the future once a more robust means of "tagging" captured statistics is developed._
+* `PATH_OR_BUCKET`, if `STORAGE_TYPE` is `file`, must be a valid local file path. Otherwise, if `STORAGE_TYPE` is `s3`, it must be a valid AWS S3 _bucket_.
 
 ### Quick Run
 
@@ -187,7 +187,3 @@ The results will look the same whether running in distributed or non-distributed
 This is a list of some improvements that could be made to the tests moving forward:
 - (Consider) Move all tests into one script with each test being a @Task
 - Set up tests to all run at once to simulate actual load across the whole system (i.e. during big spike loads)
-- Since each test shares boilerplate setup, commonize what is inside the tasks to take the url and name of the test with any required setup params.
-- Currently, when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
-- Add the ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
-- Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common db file)

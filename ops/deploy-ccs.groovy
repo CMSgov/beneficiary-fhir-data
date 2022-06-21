@@ -36,8 +36,12 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the BFD Server service, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdServerAmiId
-}
 
+	/**
+	 * The ID of the AMI that will run the BFD DB Migrator service, or <code>null</code> if such an AMI does not yet exist.
+	 */
+    String bfdMigratorAmiId
+}
 
 /**
  * Finds the IDs of the latest BFD AMIs (if any) in the environment.
@@ -69,6 +73,13 @@ def findAmis() {
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
+    bfdMigratorAmiId: sh(
+      returnStdout: true,
+      script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-amzn2-jdk11-db-migrator-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+    ).trim(),
   )
 }
 
@@ -96,18 +107,19 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			).trim()
 
 		// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-		dir('ops/ansible/playbooks-ccs'){
+		dir('ops/ansible/playbooks-ccs') {
 			sh "packer build -color=false -var vault_password_file=${vaultPasswordFile} \
 			-var source_ami=${goldAmi} \
 			-var subnet_id=subnet-092c2a68bd18b34d1 \
 			../../packer/build_bfd-platinum.json"
 		}
-	  return new AmiIds(
+		return new AmiIds(
 			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
 			bfdServerAmiId: amiIds.bfdServerAmiId,
+			bfdMigratorAmiId: amiIds.bfdMigratorAmiId,
 		)
- 	}
+	}
 }
 
 /**
@@ -125,7 +137,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 			writeFile file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", text: """{
     "data_server_launcher": "${workspace}/${appBuildResults.dataServerLauncher}",
     "data_server_war": "${workspace}/${appBuildResults.dataServerWar}",
-    "data_pipeline_zip": "${workspace}/${appBuildResults.dataPipelineZip}"
+    "data_pipeline_zip": "${workspace}/${appBuildResults.dataPipelineZip}",
+    "db_migrator_zip": "${workspace}/${appBuildResults.dbMigratorZip}",
 }"""
 
 			// build AMIs in parallel
@@ -143,6 +156,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
 					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
+				bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
+					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
 			)
 		}
 	}
@@ -155,10 +170,9 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
  * @param gitBranchName the name of the Git branch this build is for
  * @param gitCommitId the hash/ID of the Git commit that this build is for
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
- * @param appBuildResults (not used in the CCS environment; this stuff is all baked into the AMIs there, instead)
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
-def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds) {
 	dir("${workspace}/ops/terraform/env/${environmentId}/stateless") {
 
 		// Debug output terraform version 

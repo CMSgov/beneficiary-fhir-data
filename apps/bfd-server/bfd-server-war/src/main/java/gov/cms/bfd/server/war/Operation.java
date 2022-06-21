@@ -8,8 +8,8 @@ import com.newrelic.api.agent.NewRelic;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResponseResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
@@ -69,7 +69,7 @@ public final class Operation {
     String canonicalName = getCanonicalName();
 
     // Ensure that the operation name lands in our access logs.
-    MDC.put(RequestResponseLoggingFilter.computeMdcRequestKey("operation"), canonicalName);
+    MDC.put(RequestResponsePopulateMdcFilter.computeMdcRequestKey("operation"), canonicalName);
 
     // If we got a known operation name, publish it to New Relic as the "transaction name",
     // otherwise stick with New Relic's default transaction name.
