@@ -68,7 +68,7 @@ Automating the generation and loading of Synthea data will remove a lot of error
 
   - Future Claim Data - A batch of similar size for claim data with a future date will also be generated in a similar fashion. 
 
-  - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D Event ID (PDE ID). Despite monotonically increasing other parameters i.e. bene ID, claim group ID, the value of PDE ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and Synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
+  - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D contract ID. Despite monotonically increasing other parameters i.e. bene ID, claim group ID, PDE event ID, the value of the PDE contract ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and Synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
 
 ### Automated Recurring Loading
 
@@ -79,7 +79,7 @@ Automating the generation and loading of Synthea data will remove a lot of error
 
   - Additionally, the RIF files from the previous quarterly batch of Synthea data will be pulled from AWS S3, and loaded into the database with the new batch of Synthea data.  
 
-  - Automated load testing will occur on this instance, and when complete, a script will run that modifies the new batch's generated manifest file, and uploads the RIF files, end-state properties, and manifest files to S3 via command line file transfer. This will trigger the BFD ingestion pipeline in PROD SBX or TEST so that the data is stored in the database.
+  - Once loaded, a script will run that modifies the new batch's generated manifest file, and uploads the RIF files, end-state properties, and manifest files to S3 via command line file transfer. This will trigger the BFD ingestion pipeline in TEST so that the data is stored in the database.
 
   - The separate RIF files associated with future claim data for the given release will be uploaded to a designated folder in S3 for staging until loading in the future. Updates to the pipeline application will be made to scan for these folders and trigger an incoming load job each weekend, for the claims that have "matured" that week (similar to how new claims are loaded each week in `prod`).
 
@@ -90,7 +90,7 @@ Additional testing - As of 04/21/2022, there is a plan in place to remove 6 mill
   
   - Using a m5a.24xlarge EC2 instance, it took 6 hours to generate 1 million synthetic beneficiaries. If one extrapolates from this benchmark, it would take 60 hours or a little under 3 days to generate 10 million, and 360 hours, or 15 days to generate 60 million beneficiaries.
 
-  - For the time being, a single reusable instance will be used. Pipelining multiple EC2 instances to generate data more efficiently is something to explore at a later point, as well as running the generation and load testing of large data manually every PI. 
+  - A single reusable instance will be used. 
 
 ### Required BFD Application Changes
 
@@ -103,7 +103,7 @@ Automated Generation & Load Plan:
 
 On a quarterly basis a cron job within Jenkins will be set up to start up and SSH into a provisioned AWS EC2 instance that will be turned off when not used, to run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
   - Run currently manual steps in the `Synthea Test Plan` such as accessing and comparing the latest Synthea end-properties file, running queries in PROD SBX to determine database ranges for beneficiary and claim properities, and ensuring the next batch of data will not overlap with existing data ranges.
-  - Generate batches of both synthetic current and future data
+  - Generate batch containing both synthetic historical and future data
   - Load into AWS S3 for ingestion in TEST, PROD SBX, and PROD environments.
 
 For future claims and new Synthea data to be ingested, the manifest.xml file will need additional fields for both a timestamp and whether there Synthea data. The pipeline will then check for these two fields. For future claims, the data that has been staged in S3 will be ingested once it is the date in the timestamp in the manifest. With these changes in place, on a weekly basis, future claims will be loaded into the database.
@@ -134,6 +134,8 @@ Large Synthetic Data Generation:
 
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
+
+- Pipelining multiple EC2 instances to generate data more efficiently is something to explore at a later point.
 
 ## Addendums
 [Addendums]: #addendums
