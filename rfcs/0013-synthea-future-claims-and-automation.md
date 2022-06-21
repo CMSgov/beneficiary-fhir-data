@@ -62,7 +62,7 @@ In addition to these steps, BFD follows a thorough [Synthea Test Plan](https://g
 
 ### Automated Recurring Generation
 
-To increase the benefit and quality of synthetic data to the user, data that is current, or for future use, needs to be generated on a more regular basis. The proposed plan is quarterly.
+Automating the generation and loading of Synthea data will remove a lot of error-prone manual work and also help ensure that users are regularly receiving the benefits of the ongoing improvements to Synthea. This operation will be scheduled to run once per quarter.
 
   - Quarterly - Synthetic data will be generated with a set batch size using the up-to-date master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch, which is hosted in AWS S3. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
 
