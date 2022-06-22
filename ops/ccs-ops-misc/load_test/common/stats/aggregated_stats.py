@@ -184,7 +184,12 @@ class AggregatedStats():
     def __post_init__(self):
         # Support conversion directly from a nested dictionary, such as when loading from JSON files
         # or from Athena
-        if isinstance(self.metadata, dict):
+        try:
             self.metadata = StatsMetadata(**self.metadata)
-        if isinstance(self.tasks, list) and all(isinstance(task_dict, dict) for task_dict in self.tasks):
+        except TypeError:
+            pass
+        
+        try:
             self.tasks = [TaskStats(**task_dict) for task_dict in self.tasks]
+        except TypeError:
+            pass
