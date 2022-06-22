@@ -225,12 +225,22 @@ public static void getNPIOrgNames(String outputDir, String npiFile){
 
       // TODO: Explain file format and show example
       // TODO: Extract this logic into a testable method or class
-      String lastNonEmptyOrgName = null;
-      for (String line; (line = reader.readLine()) != null; ) {
-        String[] fields = line.split(",");
+      String firstLine = reader.readLine();
+       String[] fields = firstLine.split(",");
 
         String orgName = fields[4].trim().replace("\"", "");
         String npi = fields[0].replace("\"", "");
+        out.write(npi + "\t" + orgName);
+        out.newLine();
+        orgName = null;
+        npi = null;
+        String lastNonEmptyOrgName = null;
+
+      for (String line; (line = reader.readLine()) != null; ) {
+        fields = line.split(",");
+
+        orgName = fields[4].trim().replace("\"", "");
+        npi = fields[0].replace("\"", "");
 
         if (!Strings.isNullOrEmpty(orgName)) {
           lastNonEmptyOrgName = orgName;
