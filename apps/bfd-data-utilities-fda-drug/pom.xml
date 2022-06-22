@@ -1,198 +1,163 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>gov.cms.bfd.server.data.utilities.FDADrugApp</groupId>
-  <artifactId>bfd-data-utilities</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>bfd-data-utilities-fda-drug</name>
-  <url>http://maven.apache.org</url>
-  	<properties>
-    <java.version>11</java.version>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-</properties>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-	   	<dependency>
-			<!-- Used to run our unit and integration tests. -->
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-      <version>5.8.2</version>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>gov.cms.bfd.server.data.utilities.FDADrugApp</groupId>
+	<artifactId>bfd-data-utilities</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>bfd-data-utilities-fda-drug</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<java.version>11</java.version>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter-api</artifactId>
-    <version>5.8.2</version>
-    <scope>test</scope>
-</dependency>
-		 <dependency>
-            <!-- Used to create mock objects for unit tests. -->
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>3.6.28</version>
-            <scope>test</scope>
-        </dependency>
+			<!-- Used to run our unit and integration tests. -->
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
-    <groupId>org.mockito</groupId>
-    <artifactId>mockito-inline</artifactId>
-    <version>3.6.28</version>
-    <scope>test</scope>
-</dependency>
-    <dependency>
-				<!-- Common utility classes -->
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>3.12.0</version>
-			</dependency>
-      <dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used to create mock objects for unit tests. -->
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.6.28</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<version>3.6.28</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Common utility classes -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+		<dependency>
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 			<version>1.2</version>
 		</dependency>
-    	<dependency>
+		<dependency>
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.7</version>
 		</dependency>
-    <dependency>
+		<dependency>
 			<!-- Provides some extra collections, e.g. the CircularFifoQueue being 
 				used in DataSetMonitorWorker. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
 		</dependency>
-
-    <dependency>
-				<!-- Provides a sane facade for the giant mess of incompatible logging 
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.7.7</version>
-			</dependency>
-			<dependency>
-				<!-- An implementation of the JCL API that routes everything through to
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<!-- An implementation of the JCL API that routes everything through to
 					SLF4J, instead. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>1.7.7</version>
-			</dependency>
-			<dependency>
-				<!-- An implementation of the Log4J API that routes everything through
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<!-- An implementation of the Log4J API that routes everything through
 					to SLF4J, instead. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>log4j-over-slf4j</artifactId>
-				<version>1.7.7</version>
-			</dependency>
-			 <dependency>
-            <!-- Just useful. -->
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
-        </dependency>
-			<dependency>
-				<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<!-- Just useful. -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>31.1-jre</version>
+		</dependency>
+		<dependency>
+			<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
 					to SLF4J, instead. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>jul-to-slf4j</artifactId>
-				<version>1.7.7</version>
-			</dependency>
-			 <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.6.1</version>
-            <scope>test</scope>
-        </dependency>
-		
-  </dependencies>
-  <distributionManagement>
-  <repository>
-    <id>cms-bfd-maven-central-store</id>
-    <name>cms-bfd-maven-central-store</name>
-    <url>https://cms-bfd-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/</url>
-  </repository>
-</distributionManagement>
-  <build>
-        <finalName>maven-unit-test</finalName>
-        <plugins>
-		    <plugin>
-				<!-- Launch a Java web server hosting the BFD Server prior to running this
-					project's integration tests, and stop it after the integration tests. The
-					server will serve HTTPS on a random port, and the FHIR server will be hosted
-					at the root ("/") context. Alternatively, for manual testing, manually run
-					`mvn package org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start
-					the server. -->
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>4.6.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>cms-bfd-maven-central-store</id>
+			<name>cms-bfd-maven-central-store</name>
+			<url>https://maven.bfdcloud.net/maven/maven-central-store/</url>
+		</repository>
+	</distributionManagement>
+	<build>
+		<finalName>bfd-data-utilities-fda-drug</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.1</version>
 				<executions>
-					<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
-						process. -->
 					<execution>
-						<id>download-fda-drug-data</id>
-						<phase>process-classes</phase>
+                            <phase>generate-sources</phase>
 						<goals>
-							<goal>java</goal>
+							<goal>run</goal>
 						</goals>
 						<configuration>
-							<mainClass>gov.cms.bfd.server.data.utilities.FDADrugApp.App</mainClass>
-							<arguments>
-								<argument>${project.build.outputDirectory}</argument>
-							</arguments>
-							<systemProperties>
-								<systemProperty>
-									<key>http.proxyHost</key>
-									<value>${http.proxyHost}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>http.proxyPort</key>
-									<value>${http.proxyPort}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>https.proxyHost</key>
-									<value>${https.proxyHost}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>https.proxyPort</key>
-									<value>${https.proxyPort}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>http.nonProxyHosts</key>
-									<value>${http.nonProxyHosts}</value>
-								</systemProperty>
-							</systemProperties>
-							<environmentVariables>
-								<TZ>UTC</TZ>
-							</environmentVariables>
+							<tasks>
+								<copy file="src/main/resources/fda_products_cp1252.tsv" tofile="${basedir}/target/fda_products_cp1252.tsv"/>
+							</tasks>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
-            </plugin>
-						<plugin>
-					<groupId>com.coveo</groupId>
-					<artifactId>fmt-maven-plugin</artifactId>
-					<version>2.9</version>
-				</plugin>
-				<plugin>
-					<groupId>io.github.phillipuniverse</groupId>
-					<artifactId>githook-maven-plugin</artifactId>
-					<version>1.0.4</version>
-					<configuration>
-						<hooks>
-							<pre-commit>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.0</version>
+			</plugin>
+			<plugin>
+				<groupId>com.coveo</groupId>
+				<artifactId>fmt-maven-plugin</artifactId>
+				<version>2.9</version>
+			</plugin>
+			<plugin>
+				<groupId>io.github.phillipuniverse</groupId>
+				<artifactId>githook-maven-plugin</artifactId>
+				<version>1.0.4</version>
+				<configuration>
+					<hooks>
+						<pre-commit>
 #!/usr/bin/env bash
 set -e
 
@@ -253,10 +218,9 @@ checkSecretFilesForPlainText() {
 checkSecretFilesForPlainText
 checkJavaFormat
 							</pre-commit>
-						</hooks>
-					</configuration>
-				</plugin>
-
-        </plugins>
-    </build>
+					</hooks>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

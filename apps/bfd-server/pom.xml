@@ -25,6 +25,7 @@
 		<module>bfd-server-launcher</module>
 		<module>bfd-server-war</module>
 	</modules>
+	 
 
 	<dependencyManagement>
 		<dependencies>
@@ -75,6 +76,14 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>cms-bfd-maven-central-store</id>
+			<name>cms-bfd-maven-central-store</name>
+			<url>https://maven.bfdcloud.net/maven/maven-central-store/</url>
+		</repository>
+	</repositories>
 
 	<build>
 		<pluginManagement>

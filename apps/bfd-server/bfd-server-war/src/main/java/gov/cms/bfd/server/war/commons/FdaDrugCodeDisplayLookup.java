@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.server.data.utilities.FDADrugApp.App;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,8 +135,7 @@ public class FdaDrugCodeDisplayLookup {
     try (final InputStream ndcProductStream =
             Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream(
-                    gov.cms.bfd.server.data.utilities.FDADrugApp.FDA_PRODUCTS_RESOURCE);
+                .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
         final BufferedReader ndcProductsIn =
             new BufferedReader(new InputStreamReader(ndcProductStream))) {
       /*
