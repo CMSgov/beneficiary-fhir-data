@@ -167,7 +167,7 @@ jobs:
         if: steps.run_check.outputs.skip == 'false'
         run: |
           is_valid="false"
-          if output=$(python ./validations.py) ; then is_valid="true" ; fi
+          [[ output=$(python ./validations.py) ]] && is_valid="true"
           echo ::set-output name=valid::$is_valid
           echo ::set-output name=output::$([[ $output =~ .*(Results:.*) ]] && printf "${BASH_REMATCH[1]}")
       - name: 'Job Markdown'
