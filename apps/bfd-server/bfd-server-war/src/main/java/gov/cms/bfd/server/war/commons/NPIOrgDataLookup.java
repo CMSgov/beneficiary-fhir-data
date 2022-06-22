@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.server.data.utilities.NPIApp.App;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,9 +102,7 @@ public class NPIOrgDataLookup {
    */
   private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
     try (final InputStream npiOrgStream =
-            Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream(gov.cms.bfd.server.data.utilities.NPIApp.NPI_RESOURCE);
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(App.NPI_RESOURCE);
         final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
       String line = "";
       // skip first line which is header
