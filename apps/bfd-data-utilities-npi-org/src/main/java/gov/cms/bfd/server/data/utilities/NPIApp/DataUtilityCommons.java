@@ -39,7 +39,7 @@ public class DataUtilityCommons {
 public static void getNPIOrgNames(String outputDir, String npiFile){
   Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {
-      throw new IllegalArgumentException("OUTPUT_DIR does not exist for NPI download.");
+      throw new IllegalStateException("OUTPUT_DIR does not exist for NPI download.");
     }
 
     // Create a temp directory that will be recursively deleted when we're done.
