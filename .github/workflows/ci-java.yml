@@ -167,7 +167,7 @@ jobs:
         if: steps.run_check.outputs.skip == 'false'
         run: |
           is_valid="false"
-          if output=$(python3 ./validations.py) ; then is_valid="true" ; fi
+          if output=$(python3 ./validations.py -i validations_ignorelist.yml) ; then is_valid="true" ; fi
           printf "$output"
           output=$([[ $output =~ .*(Results:.*) ]] && printf "${BASH_REMATCH[1]}")
           echo ::set-output name=valid::$is_valid
