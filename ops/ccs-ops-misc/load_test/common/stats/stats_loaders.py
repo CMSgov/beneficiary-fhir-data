@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 import json
 import os
 from typing import Any, Dict, List, Optional
-
 from common.stats.aggregated_stats import AggregatedStats, StatsMetadata, TaskStats
 from common.stats.stats_config import StatsComparisonType, StatsConfiguration, StatsStorageType
 

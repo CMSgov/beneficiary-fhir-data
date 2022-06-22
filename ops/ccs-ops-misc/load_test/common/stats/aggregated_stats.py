@@ -1,11 +1,10 @@
 """Members of this file/module should be related to the collection of performance statistics during
 a test run as well as the representation of those statistics via dataclasses or other suitable objects"""
 from dataclasses import dataclass, fields
-from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
-from locust.env import Environment
 import time
 from typing import Any, Dict, List, Optional
-
+from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
+from locust.env import Environment
 from common.stats.stats_config import StatsEnvironment
 
 
