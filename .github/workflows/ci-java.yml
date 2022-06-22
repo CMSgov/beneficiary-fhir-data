@@ -173,14 +173,15 @@ jobs:
       - name: 'Job Markdown'
         if: steps.run_check.outputs.skip == 'false'
         run: |
-          output=${{steps.validate_fhir_outputs.output}}
+          output=${{ steps.validate_fhir_outputs.output }}
           echo "$output" >> $GITHUB_STEP_SUMMARY
       - name: 'Job Outcome'
         if: steps.run_check.outputs.skip == 'false'
         run: |
-          output=${{steps.validate_fhir_outputs.output}}
+          is_valid=${{ steps.validate_fhir.outputs.valid }}
+          output=${{ steps.validate_fhir.outputs.output }}
           printf "$output\n"
-          if ${{steps.validate_fhir.outputs.valid}} == "false" ; then exit 1 ; fi
+          [[ "$is_valid" == "false" ]] && exit 1
 
   # ansible system testing
   ansible-role-bfd-pipeline:
