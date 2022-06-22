@@ -140,6 +140,7 @@ def main():
     try:
         ignore_list = yaml.safe_load(open(args.ignorefile))
     except:
+        print('Could not find ignore list file, running without filters')
         ignore_list = {'ignore_list': {}}
 
     if ignore_list is not None and 'ignore_list' in ignore_list:
