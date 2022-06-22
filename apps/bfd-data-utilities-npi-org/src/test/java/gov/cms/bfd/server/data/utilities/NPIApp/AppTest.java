@@ -19,6 +19,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
 public final class AppTest 
 {
@@ -40,10 +45,19 @@ public final class AppTest
 
    @Test
   public void npiAppThrowsIllegalStateExceptionWhenOneArgumentsPassedThatIsNotADirectory() {
-      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      Throwable exception = assertThrows(IllegalStateException.class, () -> {
    App.main(new String[]{"Argument 1"});
   });
   assertEquals("OUTPUT_DIR does not exist for NPI download.", exception.getMessage());    
   }
  
+ @Test
+  public void npiAppPassesWithValidParameters() {
+    try (MockedStatic<DataUtilityCommons> dataUtilityCommons  = Mockito.mockStatic(DataUtilityCommons.class)) {
+        String outputDir = "outputDir";
+
+        dataUtilityCommons.when(() -> DataUtilityCommons.getNPIOrgNames(any(), any())).thenAnswer((Answer<Void>) invocation -> null);
+        App.main(new String[] {outputDir});
+    }  
+  }
 }

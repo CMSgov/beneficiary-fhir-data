@@ -57,6 +57,19 @@
             <artifactId>guava</artifactId>
             <version>31.1-jre</version>
         </dependency>
+		 <dependency>
+            <!-- Used to create mock objects for unit tests. -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.6.28</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-inline</artifactId>
+    <version>3.6.28</version>
+    <scope>test</scope>
+</dependency>
     <dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
@@ -85,13 +98,14 @@
 				<artifactId>jul-to-slf4j</artifactId>
 				<version>1.7.7</version>
 			</dependency>
-       <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.6.1</version>
-            <scope>test</scope>
-        </dependency>
   </dependencies>
+  <distributionManagement>
+  <repository>
+    <id>cms-bfd-maven-central-store</id>
+    <name>cms-bfd-maven-central-store</name>
+    <url>https://cms-bfd-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/</url>
+  </repository>
+</distributionManagement>
   <build>
         <finalName>maven-unit-test</finalName>
         <plugins>

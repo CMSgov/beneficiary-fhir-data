@@ -47,7 +47,7 @@ public final class AppTest {
   }
 
   @Test
-  public void happyPathUnitTest() {
+  public void fdaAppPassesWithValidParameters() {
     try (MockedStatic<DataUtilityCommons> dataUtilityCommons  = Mockito.mockStatic(DataUtilityCommons.class)) {
         String outputDir = "outputDir";
 
