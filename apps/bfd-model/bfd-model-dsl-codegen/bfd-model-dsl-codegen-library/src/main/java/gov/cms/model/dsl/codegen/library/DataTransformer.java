@@ -532,8 +532,8 @@ public class DataTransformer {
   /**
    * Parses the string into an Instant and delivers it to the Consumer. The string value must be in
    * RIF timestamp format format ({@code "dd-MMM-yyyy HH:mm:ss"}). Valid null values are silently
-   * accepted without calling the Consumer. The timezone is assumed to be UTC as per {@link
-   * gov.cms.bfd.model.rif.parse.RifParsingUtils#parseTimestamp}.
+   * accepted without calling the Consumer. The timezone is assumed to be UTC as per {@code
+   * RifParsingUtils.parseTimestamp()}.
    *
    * @param fieldName name of the field from which the value originates
    * @param nullable true if null is a valid value
