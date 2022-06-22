@@ -164,7 +164,7 @@ public class FissClaimTransformer {
             FissClaim::getCurrStatusUnrecognized,
             FissClaimStatus.UNRECOGNIZED,
             ImmutableSet.of(),
-            ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+            ImmutableSet.of());
     RdaFissClaim_currLoc1_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrLoc1Enum,
