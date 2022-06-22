@@ -196,19 +196,19 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
 
     logger = logging.getLogger()
     stats_config = config.load_stats_config()
-    if stats_config == None:
+    if not stats_config:
         return
 
     # If --stats was set and it is valid, get the aggregated stats of the stopping test run
     stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
     stats = stats_collector.collect_stats()
 
-    if stats_config.compare != None:
+    if stats_config.compare:
         stats_loader = StatsLoader.create(stats_config, stats.metadata)
         previous_stats = stats_loader.load()
-        if previous_stats != None:
-            validation_result = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
-            if validation_result == {}:
+        if previous_stats:
+            failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
+            if not failed_stats_results:
                 logger.info(
                     'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
             else:
@@ -217,7 +217,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
                 # failing tasks along with their relative stat percents   
                 environment.process_exit_code = 1
                 logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
-                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validation_result)
+                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
         else:
             logger.warn(
                 'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)

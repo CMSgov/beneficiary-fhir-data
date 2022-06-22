@@ -104,7 +104,7 @@ def validate_aggregated_stats(previous: AggregatedStats, current: AggregatedStat
 
         deltas = get_stats_compare_results(prev_task, cur_task)
         failed_deltas = get_stats_above_threshold(deltas, threshold)
-        if failed_deltas != []:
+        if failed_deltas:
             failed_tasks_with_percents[task] = failed_deltas
 
     return failed_tasks_with_percents

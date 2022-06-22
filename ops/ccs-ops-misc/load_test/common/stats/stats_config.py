@@ -109,7 +109,7 @@ class StatsConfiguration():
                 raise ValueError(
                     '"bucket" must be specified if "store" is "s3"') from None
             # Validate that the Athena table is set if compare is set
-            if compare_type != None and not 'athena_tbl' in config_dict:
+            if compare_type and not 'athena_tbl' in config_dict:
                 raise ValueError(
                     '"athena_tbl" must be specified if "store" is "s3" and "compare" is set') from None
 
@@ -128,7 +128,7 @@ class StatsConfiguration():
         # Tags must follow the BFD Insights data convention constraints for
         # partition/folders names, as it is used as a partition folder when uploading
         # to S3
-        if re.fullmatch('[a-z0-9_]+', tag) == None or tag == '':
+        if not re.fullmatch('[a-z0-9_]+', tag) or not tag:
             raise ValueError(
                 f'"{field_name}" must only consist of lower-case letters, numbers and the "_" character') from None
 

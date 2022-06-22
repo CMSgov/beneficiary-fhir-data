@@ -276,7 +276,7 @@ def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, List[Ta
 
 
 def _get_average_task_stats(all_tasks: List[TaskStats]) -> Optional[TaskStats]:
-    if all_tasks == []:
+    if not all_tasks:
         return None
 
     if not all(x.task_name == all_tasks[0].task_name for x in all_tasks):
