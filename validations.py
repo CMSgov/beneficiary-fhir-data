@@ -139,6 +139,7 @@ def main():
 
     try:
         ignore_list = yaml.safe_load(open(args.ignorefile))
+        print('Ignore list found, using to filter results')
     except:
         print('Could not find ignore list file, running without filters')
         ignore_list = {'ignore_list': {}}
