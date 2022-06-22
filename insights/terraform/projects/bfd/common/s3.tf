@@ -1,6 +1,6 @@
 # S3 Bucket for log ingestion. This receives processed log files from Firehose
 resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
-  bucket              = "bfd-insights-${local.project}-app-logs"
+  bucket              = local.s3_bucket_name
   hosted_zone_id      = "Z3AQBSTGFYJSTF"
   object_lock_enabled = false
   policy = jsonencode(
@@ -12,7 +12,7 @@ resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
           Principal = {
             Service = "logs.us-east-1.amazonaws.com"
           }
-          Resource = "arn:aws:s3:::bfd-insights-${local.project}-app-logs"
+          Resource = "arn:aws:s3:::${local.s3_bucket_name}"
         },
         {
           Action = "s3:PutObject"
@@ -25,7 +25,7 @@ resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
           Principal = {
             Service = "logs.us-east-1.amazonaws.com"
           }
-          Resource = "arn:aws:s3:::bfd-insights-${local.project}-app-logs/*"
+          Resource = "arn:aws:s3:::${local.s3_bucket_name}/*"
         },
         {
           Action = "s3:*"
@@ -37,8 +37,8 @@ resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
           Effect    = "Deny"
           Principal = "*"
           Resource = [
-            "arn:aws:s3:::bfd-insights-${local.project}-app-logs",
-            "arn:aws:s3:::bfd-insights-${local.project}-app-logs/*",
+            "arn:aws:s3:::${local.s3_bucket_name}",
+            "arn:aws:s3:::${local.s3_bucket_name}/*",
           ]
           Sid = "AllowSSLRequestsOnly"
         },

@@ -1,4 +1,6 @@
-data "aws_iam_group" "bfd_analysts" {
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_group" "bfd-analysts" {
   group_name = "bfd-insights-analysts"
 }
 
@@ -26,7 +28,7 @@ resource "aws_iam_role" "cloudwatch_role" {
         {
           Action   = ["firehose:*"]
           Effect   = "Allow"
-          Resource = ["arn:aws:firehose:us-east-1:${local.account_id}:*"]
+          Resource = ["arn:aws:firehose:us-east-1:${data.aws_caller_identity.current.account_id}:*"]
         },
       ]
     })
@@ -165,7 +167,8 @@ resource "aws_iam_role" "firehose_role" {
           {
             Action   = "lambda:InvokeFunction"
             Effect   = "Allow"
-            Resource = "arn:aws:lambda:us-east-1:577373831711:function:bfd-cw-to-flattened-json:$LATEST"
+            Resource = "arn:aws:lambda:us-east-1:577373831711:function:bfd-prod-sbx-cw-to-flattened-json"
+            # "arn:aws:lambda:us-east-1:577373831711:function:bfd-${local.environment}-cw-to-flattened-json:$LATEST"
             Sid      = "VisualEditor0"
           },
         ]
@@ -192,7 +195,7 @@ resource "aws_iam_role" "bfd-transform-role-rlenc44a" {
   )
   force_detach_policies = false
   inline_policy {
-    name = "bfd-insights-bfd-lambda-policy"
+    name = "bfd-insights-bfd-${local.environment}-lambda-policy"
     policy = jsonencode({
       "Version": "2012-10-17",
       "Statement": [
@@ -218,14 +221,14 @@ resource "aws_iam_role" "bfd-transform-role-rlenc44a" {
                   "logs:PutLogEvents"
               ],
               "Resource": [
-                  "arn:aws:logs:us-east-1:577373831711:log-group:/aws/lambda/bfd-cw-to-flattened-json:*"
+                  "arn:aws:logs:us-east-1:577373831711:log-group:/aws/lambda/bfd-${local.environment}-cw-to-flattened-json:*"
               ]
           }
       ]
     })
   }
   max_session_duration = 3600
-  name                 = "bfd-insights-transform-role-rlenc44a"
+  name                 = "bfd-insights-bfd-${local.environment}-transform-role-rlenc44a"
   path                 = "/service-role/"
   tags                 = {}
   tags_all             = {}
@@ -234,7 +237,7 @@ resource "aws_iam_role" "bfd-transform-role-rlenc44a" {
 resource "aws_iam_role" "glue-role" {
   # arn = "arn:aws:iam::577373831711:role/bfd-insights-bfd-glue-role"
   # TODO: Make name standard (remove iam)
-  name                 = "bfd-insights-bfd-iam-glue-role"
+  name                 = "bfd-insights-bfd-${local.environment}-iam-glue-role"
   description          = "Allow the Glue service to access the Insights buckets"
   # tags                 = local.tags
   max_session_duration = 3600
@@ -268,6 +271,7 @@ data "aws_iam_policy" "glue-service-role" {
   name = "AWSGlueServiceRole"
 }
 
+# TODO: Move to common?
 resource "aws_iam_policy" "bfd-insights-bfd-glue-role-s3-access" {
   name = "bfd-insights-bfd-glue-s3-access"
   # name = "bfd-insights-bfd-glue-role-s3-access"

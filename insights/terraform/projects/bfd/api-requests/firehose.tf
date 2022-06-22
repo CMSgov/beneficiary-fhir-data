@@ -1,22 +1,20 @@
- # Firehose
+# Firehose
 
 resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
-  for_each = local.environments
-
   destination    = "extended_s3"
-  name           = "bfd-${each.key}-firehose"
+  name           = "bfd-insights-bfd-${local.environment}-firehose"
   tags = local.tags
   tags_all = local.tags
 
   extended_s3_configuration {
-    bucket_arn          = local.external.s3_insights_arn
+    bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
     buffer_interval     = 60
     buffer_size         = 128
     compression_format  = "GZIP"
-    error_output_prefix = "databases/bfd/${each.key}_api_requests_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
-    kms_key_arn         = local.external.kms_arn
-    prefix              = "databases/bfd/${each.key}_api_requests/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
-    role_arn            = aws_iam_role.firehose.arn
+    error_output_prefix = "databases/${local.environment}/api_requests_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    kms_key_arn         = data.aws_kms_key.kms_key.arn
+    prefix              = "databases/${local.environment}/api_requests/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    role_arn            = aws_iam_role.firehose_role.arn
     s3_backup_mode      = "Disabled"
 
     cloudwatch_logging_options {
@@ -57,8 +55,8 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
       schema_configuration {
         database_name = local.database
         region        = local.region
-        role_arn      = aws_iam_role.firehose.arn
-        table_name    = "bfd-${each.key}-api-requests"
+        role_arn      = aws_iam_role.firehose_role.arn
+        table_name    = "api-requests"
         version_id    = "LATEST"
       }
     }
@@ -84,11 +82,9 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "bfd-access-log-subscription" {
-  for_each = local.environments
-
-  name            = "bfd-${each.key}-access-log-subscription"
-  log_group_name  = "/bfd/${each.key}/bfd-server/access.json"
+  name            = "bfd-insights-${local.project}-${local.environment}-access-log-subscription"
+  log_group_name  = "/bfd/${local.environment}/bfd-server/access.json"
   filter_pattern  = ""
-  destination_arn = aws_kinesis_firehose_delivery_stream.bfd-firehose[each.key].arn
+  destination_arn = aws_kinesis_firehose_delivery_stream.bfd-firehose.arn
   role_arn        = aws_iam_role.cloudwatch_role.arn
 }

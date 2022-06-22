@@ -3,7 +3,7 @@ terraform {
   # Use the common terraform bucket for all of BFD's state
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "bfd-insights/bfd/api-history/terraform.tfstate"
+    key            = "bfd-insights/bfd/beneficiaries/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"
@@ -15,9 +15,16 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.12"
     }
+
+    archive = {
+      source  = "hashicorp/archive"
+      version = "2.2.0"
+    }
   }
 }
 
 provider "aws" {
   region = "us-east-1"
 }
+
+provider "archive" {}

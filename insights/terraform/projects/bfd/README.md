@@ -1,5 +1,5 @@
 # BFD Insights: BFD Dashboards
-d
+
 ## API-Requests
 
 API-Requests is the portion of the project that ingests the logs and stores them in Glue tables. Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests table.
@@ -48,6 +48,9 @@ Note: You have to replace `<environment>` with the name of your environment, suc
 
 5. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiary-unique`
     - Run.
+
+## Beneficiaries
+
 
 ## Manual Creation of QuickSight Dashboards
 

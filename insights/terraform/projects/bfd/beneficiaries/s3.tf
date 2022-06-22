@@ -1,17 +1,3 @@
-# IAM
-
-data "aws_caller_identity" "current" {}
-
-data "aws_iam_group" "bfd-analysts" {
-  group_name = "bfd-insights-analysts"
-}
-
-# data "aws_iam_role" "glue-role" {
-#   name = "bfd-insights-bfd-glue-role"
-# }
-
-# S3
-
 data "aws_s3_bucket" "bfd-app-logs" {
   bucket = "bfd-insights-bfd-app-logs"
 }
