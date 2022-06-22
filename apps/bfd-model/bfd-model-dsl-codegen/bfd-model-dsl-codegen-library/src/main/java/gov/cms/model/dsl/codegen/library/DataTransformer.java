@@ -23,12 +23,12 @@ import lombok.Data;
 import lombok.Getter;
 
 /**
- * Stateful, mutable, non-thread safe object to facilitate transformation of data from incoming RDA
- * API objects into database entity objects. Every copy method validates the field value in an
- * appropriate manner and then passes the transformed value to a Consumer (usually a setter on the
- * entity). All data validation failures are tracked in a List. Following the transformation, the
- * caller can invoke the isSuccessful method to determine if there were any errors. All copy methods
- * return this instance so that calls can be chained.
+ * Stateful, mutable, non-thread safe object to facilitate transformation of data from arbitrary
+ * data objects (such as RDA API messages or RIF-CSV objects) into database entity objects. Every
+ * copy method validates the field value in an appropriate manner and then passes the transformed
+ * value to a Consumer (usually a setter on the entity). All data validation failures are tracked in
+ * a List. Following the transformation, the caller can invoke the isSuccessful method to determine
+ * if there were any errors. All copy methods return this instance so that calls can be chained.
  */
 public class DataTransformer {
   /** {@link DateTimeFormatter} used to parse RIF 8 character date values. */
@@ -530,13 +530,14 @@ public class DataTransformer {
   }
 
   /**
-   * Parses the string into a LocalTimestamp and delivers it to the Consumer. The string value must
-   * be in ISO-8601 format (YYYY-MM-DD). Valid null values are silently accepted without calling the
-   * Consumer.
+   * Parses the string into an Instant and delivers it to the Consumer. The string value must be in
+   * RIF timestamp format format ({@code "dd-MMM-yyyy HH:mm:ss"}). Valid null values are silently
+   * accepted without calling the Consumer. The timezone is assumed to be UTC as per {@link
+   * gov.cms.bfd.model.rif.parse.RifParsingUtils#parseTimestamp}.
    *
    * @param fieldName name of the field from which the value originates
    * @param nullable true if null is a valid value
-   * @param value timestamp string in ISO-8601 format
+   * @param value timestamp string in RIF format
    * @param copier Consumer to receive the timestamp
    * @return this
    */
