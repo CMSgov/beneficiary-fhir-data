@@ -174,8 +174,8 @@ jobs:
       - name: 'Job Outcome'
         if: steps.run_check.outputs.skip == 'false'
         run: |
-          is_valid=${{ steps.validate_fhir.outputs.valid }}
-          output=${{ steps.validate_fhir.outputs.output }}
+          is_valid="${{ steps.validate_fhir.outputs.valid }}"
+          output="${{ steps.validate_fhir.outputs.output }}"
           echo "$output" >> $GITHUB_STEP_SUMMARY
           printf "$output\n"
           [[ "$is_valid" == "false" ]] && exit 1
