@@ -179,7 +179,7 @@ jobs:
           output="${{ steps.validate_fhir.outputs.output }}"
           echo "$output" >> $GITHUB_STEP_SUMMARY
           printf "$output\n"
-          [[ "$is_valid" == "false" ]] && exit 1
+          if "$is_valid" == "false" ; then exit 1 ; fi
 
   # ansible system testing
   ansible-role-bfd-pipeline:
