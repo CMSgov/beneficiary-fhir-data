@@ -1,5 +1,5 @@
 ${logic.hsql-only}  create table public.medicare_beneficiaryid_history_new (
-${logic.hsql-only}    bene_mbi_id                    bigint not null,
+${logic.hsql-only}    bene_mbi_id                    numeric not null,
 ${logic.hsql-only}    bene_id                        bigint,
 ${logic.hsql-only}    mbi_sqnc_num                   numeric,
 ${logic.hsql-only}    bene_ident_cd                  varchar(2),
@@ -51,9 +51,8 @@ ${logic.hsql-only}    updt_ts )
 --
 ${logic.psql-only} create table public.medicare_beneficiaryid_history_new as
 select 
-${logic.hsql-only}  convert(bene_mbi_id, SQL_BIGINT),
+                    bene_mbi_id,
 ${logic.hsql-only}  convert(bene_id, SQL_BIGINT),
-${logic.psql-only}  bene_mbi_id::bigint,
 ${logic.psql-only}  bene_id::bigint,
                     mbi_sqnc_num, 
                     bene_ident_cd,
