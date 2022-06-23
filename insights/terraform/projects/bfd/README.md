@@ -30,10 +30,16 @@ Note: Replace `<environment>` with the name of your environment, such as `prod` 
         - S3 Bucket Prefix: `history/<environment>/api_history`
     - Export. This took about 80 minutes for 3 weeks of prod-sbx logs.
 
-2. AWS Glue > Crawlers > `bfd-<environment>-history-crawler`
+2. S3
+    - Select bucket `bfd-insights-bfd-app-logs`
+    - Go to path `history/<environment>/api_history`
+    - Select object `aws-logs-write-test`
+    - Delete this object. Confirm.
+
+3. AWS Glue > Crawlers > `bfd-<environment>-history-crawler`
     - Run. It should finish within a couple minutes.
 
-3. AWS Glue > Jobs > `bfd-<environment>-history-ingest`
+4. AWS Glue > Jobs > `bfd-<environment>-history-ingest`
     - Run. This took about 37 minutes for 3 weeks of prod-sbx logs.
 
 
