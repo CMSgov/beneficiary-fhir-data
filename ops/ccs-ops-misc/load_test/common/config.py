@@ -2,7 +2,7 @@
 '''
 
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 import yaml
 
@@ -100,7 +100,7 @@ def load_server_public_key() -> str:
         return False
 
 
-def load_stats_config() -> StatsConfiguration:
+def load_stats_config() -> Optional[StatsConfiguration]:
     """Load the stats configuration for storing and comparing aggregated statistics.
 
     Returns:
@@ -108,7 +108,10 @@ def load_stats_config() -> StatsConfiguration:
     """
 
     config_file = load()
-    return config_file["stats"]
+    if not config_file or not 'stats' in config_file:
+        return None
+    
+    return config_file["stats"]  # type: ignore
 
 def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsConfiguration) -> yaml.nodes.ScalarNode:
     """Returns a scalar representer that instructs PyYAML how to serialize a StatsConfiguration instance

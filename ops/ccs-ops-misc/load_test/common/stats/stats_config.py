@@ -117,6 +117,7 @@ class StatsConfiguration():
                    path=config_dict.get('path') or './', bucket=config_dict.get('bucket'),
                    compare=compare_type, comp_tag=comparison_tag, athena_tbl=config_dict.get('athena_tbl'))
 
+    @staticmethod
     def __enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
         try:
             return enum_type[val.upper()]
@@ -124,6 +125,7 @@ class StatsConfiguration():
             raise ValueError(
                 f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
 
+    @staticmethod
     def __validate_tag(tag: str, field_name: str) -> str:
         # Tags must follow the BFD Insights data convention constraints for
         # partition/folders names, as it is used as a partition folder when uploading

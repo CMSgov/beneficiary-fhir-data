@@ -204,7 +204,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     stats = stats_collector.collect_stats()
 
     if stats_config.compare:
-        stats_loader = StatsLoader.create(stats_config, stats.metadata)
+        stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
         previous_stats = stats_loader.load()
         if previous_stats:
             failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
@@ -226,9 +226,11 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_config.path)
+        stats_json_writer.write(stats_config.path or '')
     elif stats_config.store == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
 
         stats_s3_writer = StatsJsonS3Writer(stats)
+        if not stats_config.bucket:
+            raise ValueError('S3 bucket must be provided when writing stats to S3')
         stats_s3_writer.write(stats_config.bucket)

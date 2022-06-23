@@ -18,6 +18,8 @@ from gevent import monkey
 monkey.patch_all()
 import boto3
 
+AthenaQueryRowResult = Dict[str, List[Dict[str, str]]]
+"""Type representing a single row result from the result of an Athena query"""
 
 class StatsLoader(ABC):
     """Loads AggregatedStats depending on what type of comparison is requested"""
@@ -72,16 +74,16 @@ class StatsLoader(ABC):
 class StatsFileLoader(StatsLoader):
     """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
 
-    def load_previous(self) -> Optional[AggregatedStats]:
+    def load_previous(self) -> Optional[AggregatedStats]:      
         # Get a list of all AggregatedStats from stats.json files under path
         stats_list = self.__load_stats_from_files()
 
         # Filter those that don't match the config and current run's metadata
         filtered_stats = [stats for stats in stats_list
-                          if self.__verify_metadata(stats.metadata)]
+                          if stats.metadata and self.__verify_metadata(stats.metadata)]
 
         # Sort them based upon timestamp, greater to lower
-        filtered_stats.sort(key=lambda stats: stats.metadata.timestamp,
+        filtered_stats.sort(key=lambda stats: stats.metadata.timestamp, # type: ignore
                             reverse=True)
 
         # Take the first item, if it exists -- this is the most recent, previous run
@@ -90,12 +92,12 @@ class StatsFileLoader(StatsLoader):
     def load_average(self) -> Optional[AggregatedStats]:
         stats_list = self.__load_stats_from_files()
         verified_stats = [stats for stats in stats_list
-                          if self.__verify_metadata(stats.metadata)]
+                          if stats.metadata and self.__verify_metadata(stats.metadata)]
 
         return _get_average_all_stats(verified_stats)
 
     def __load_stats_from_files(self, suffix: str = '.stats.json') -> List[AggregatedStats]:
-        path = self.stats_config.path
+        path = self.stats_config.path if self.stats_config and self.stats_config.path else ''
         stats_files = [os.path.join(path, file)
                        for file in os.listdir(path) if file.endswith(suffix)]
 
@@ -148,6 +150,9 @@ class StatsAthenaLoader(StatsLoader):
 
     def __get_stats_from_query(self, query: str) -> List[AggregatedStats]:
         query_result = self.__run_query(query)
+        if not query_result:
+            raise RuntimeError('Athena query result was empty or query failed')
+        
         raw_json_list = self.__get_raw_json_list(query_result)
         return self.__stats_from_json_list(raw_json_list)
 
@@ -176,14 +181,14 @@ class StatsAthenaLoader(StatsLoader):
             QueryExecutionId=query_execution_id
         )['QueryExecution']['Status']['State']
 
-    def __get_athena_query_result(self, query_execution_id: str) -> Dict[str, Any]:
+    def __get_athena_query_result(self, query_execution_id: str) -> List[AthenaQueryRowResult]:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_results
         # for the structure of the returned Dict
         return self.client.get_query_results(
             QueryExecutionId=query_execution_id
         )['ResultSet']['Rows']
 
-    def __run_query(self, query: str, max_retries: int = 10) -> Optional[Dict[str, Any]]:
+    def __run_query(self, query: str, max_retries: int = 10) -> Optional[List[AthenaQueryRowResult]]:
         start_response = self.__start_athena_query(query)
         query_execution_id = start_response['QueryExecutionId']
 
@@ -274,9 +279,9 @@ def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, List[Ta
     return tasks_by_name
 
 
-def _get_average_task_stats(all_tasks: List[TaskStats]) -> Optional[TaskStats]:
+def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
     if not all_tasks:
-        return None
+        raise ValueError('The list of tasks to average must not be empty')
 
     if not all(x.task_name == all_tasks[0].task_name for x in all_tasks):
         raise ValueError('The list of TaskStats must be for the same task')

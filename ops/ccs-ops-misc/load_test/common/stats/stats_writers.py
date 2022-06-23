@@ -32,8 +32,16 @@ class StatsJsonFileWriter(object):
 
         Args:
             path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
+            
+        Raises:
+            ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
         """
-        with open(os.path.join(path, f'{self.stats.metadata.environment.name}-{self.stats.metadata.tag}-{int(time.time())}.stats.json'), 'x') as json_file:
+        if not self.stats.metadata:
+            raise ValueError('AggregatedStats instance must have metadata to write to file')
+        
+        env_name = self.stats.metadata.environment.name
+        store_tag = self.stats.metadata.tag
+        with open(os.path.join(path, f'{env_name}-{store_tag}-{int(time.time())}.stats.json'), 'x') as json_file:
             json_file.write(json.dumps(asdict(self.stats), indent=4))
 
 
@@ -57,8 +65,16 @@ class StatsJsonS3Writer(object):
 
         Args:
             bucket (str): The S3 bucket in AWS to write the JSON to
+
+        Raises:
+            ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
         """
-        s3_path = f'databases/bfd/test_performance_stats/env={self.stats.metadata.environment.name}/tag={self.stats.metadata.tag}/{int(time.time())}.json'
+        if not self.stats.metadata:
+            raise ValueError('AggregatedStats instance must have metadata to write to S3')
+        
+        env_name = self.stats.metadata.environment.name
+        store_tag = self.stats.metadata.tag
+        s3_path = f'databases/bfd/test_performance_stats/env={env_name}/tag={store_tag}/{int(time.time())}.json'
         self.s3.put_object(Bucket=bucket,
                            Key=s3_path,
                            Body=json.dumps(asdict(self.stats)))

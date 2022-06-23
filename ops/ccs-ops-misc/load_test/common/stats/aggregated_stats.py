@@ -2,10 +2,14 @@
 a test run as well as the representation of those statistics via dataclasses or other suitable objects"""
 from dataclasses import dataclass, fields
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from locust.stats import StatsEntry, sort_stats, PERCENTILES_TO_REPORT
 from locust.env import Environment
 from common.stats.stats_config import StatsEnvironment
+
+ResponseTimePercentiles = Dict[str, Union[int, float]]
+"""A type representing a dictionary of stringified percentile keys to their integer or floating-point
+values"""
 
 
 class StatsCollector(object):
@@ -70,7 +74,7 @@ class TaskStats():
     """The average number of requests-per-second of this Taks's requests over the test run"""
     total_fails_per_sec: float
     """The average number of failures-per-second of this Task's requests over the test run"""
-    response_time_percentiles: Dict[str, int]
+    response_time_percentiles: ResponseTimePercentiles
     """A dictionary of response time percentiles indicating the percentage of requests that completed
     in a particular timeframe"""
 
@@ -115,7 +119,7 @@ class TaskStats():
         return TaskStats(**inter_dict)
 
     @classmethod
-    def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> Dict[str, int]:
+    def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> ResponseTimePercentiles:
         """Returns a dictionary of response time percentiles indicating the percentage of requests that completed
         in a particular timeframe
 
@@ -185,11 +189,11 @@ class AggregatedStats():
         # Support conversion directly from a nested dictionary, such as when loading from JSON files
         # or from Athena
         try:
-            self.metadata = StatsMetadata(**self.metadata)
+            self.metadata = StatsMetadata(**self.metadata)  # type: ignore
         except TypeError:
             pass
         
         try:
-            self.tasks = [TaskStats(**task_dict) for task_dict in self.tasks]
+            self.tasks = [TaskStats(**task_dict) for task_dict in self.tasks]  # type: ignore
         except TypeError:
             pass

@@ -2,10 +2,10 @@
 of performance statistics against a previous set of statistics or an average of all
 previous statistics"""
 from dataclasses import asdict, dataclass
-from typing import Dict, List, Set, Type, Union
-from common.stats.aggregated_stats import AggregatedStats, TaskStats
+from typing import Dict, List, Set, Union
+from common.stats.aggregated_stats import AggregatedStats, ResponseTimePercentiles, TaskStats
 
-TaskStatsOrPercentiles = type(Union[TaskStats, Dict[str, int]])
+TaskStatsOrPercentiles = Union[TaskStats, ResponseTimePercentiles]
 """Type indicating a value that is either a TaskStats instance or a response time
 percentiles dictionary"""
 
