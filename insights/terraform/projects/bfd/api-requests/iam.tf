@@ -167,8 +167,11 @@ resource "aws_iam_role" "firehose_role" {
           {
             Action   = "lambda:InvokeFunction"
             Effect   = "Allow"
-            Resource = "arn:aws:lambda:us-east-1:577373831711:function:${local.full_name}-cw-to-flattened-json"
-            Sid      = "VisualEditor0"
+            Resource = [
+              "arn:aws:lambda:us-east-1:577373831711:function:${local.full_name}-cw-to-flattened-json",
+              "arn:aws:lambda:us-east-1:577373831711:function:${local.full_name}-cw-to-flattened-json:$LATEST"
+            ]
+            Sid      = "InvokeCW2Json"
           },
         ]
         Version = "2012-10-17"
