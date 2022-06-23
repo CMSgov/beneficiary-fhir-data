@@ -136,7 +136,7 @@ try {
 				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv',
 				command: 'cat',
 				ttyEnabled: true,
-				alwaysPullImage: false, // TODO: implies that we observe immutable container tags
+				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
 				resourceRequestCpu: '8000m',
 				resourceLimitCpu: '8000m',
 				resourceLimitMemory: '16384Mi',
