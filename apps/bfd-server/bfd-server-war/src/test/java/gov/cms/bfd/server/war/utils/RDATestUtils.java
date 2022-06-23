@@ -451,9 +451,9 @@ public class RDATestUtils {
     claim.setDiagCodes(
         Set.of(
             new RdaMcsDiagnosisCode(
-                "654323", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+                "654323", (short) 0, 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654323", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654323", (short) 1, 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }
