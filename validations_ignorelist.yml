@@ -47,5 +47,5 @@ ignore_list:
     # V1 specific validation issues
     - file_pattern: .*/v1/.*\.json
       error_patterns:
-        - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
+#        - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
         - ".*ReferralRequest\\.intent.* minimum required.*"                             # Missing field (8 errors)
