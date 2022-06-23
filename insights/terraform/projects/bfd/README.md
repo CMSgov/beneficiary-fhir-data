@@ -1,5 +1,7 @@
 # BFD Insights: BFD Dashboards
 
+BFD Insights captures data in near-real-time from the EC2 instances and provides the data for analysis in QuickSight.
+
 ## API-Requests
 
 API-Requests is the portion of the project that ingests the logs and stores them in Glue tables. Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests table. Most other parts of this project will depend upon API-Requests.
@@ -14,12 +16,6 @@ flowchart TD
 
     EC2["Real-Time Logs"] --> Firehose["Kinesis Firehose"]
     Firehose -->|Lambda| APIRequests
-
-    APIRequests -->|Glue Job: Populate Beneficiaries| Beneficiaries["Glue Table: Beneficiaries"]
-    Beneficiaries -->|Glue Job: Populate Beneficiary Unique| BeneUnique["Glue Table: Beneficiary Unique"]
-    BeneUnique --> DataSet["QuickSight: DataSet"]
-    DataSet --> Analysis["QuickSight: Analysis"]
-    Analysis --> Dashboard["QuickSight: Dashboard"]
 ```
 
 ### Manual Ingestion of Log Files
@@ -43,7 +39,18 @@ Note: Replace `<environment>` with the name of your environment, such as `prod` 
 
 ## Beneficiaries
 
-Beneficiaries is the portion that selects the beneficiary and timestamp from the API-Requests table. Beneficiaries-Unique (which is included within this )
+Beneficiaries is the portion that selects the beneficiary and timestamp from the API-Requests table. Beneficiaries-Unique (which is included within this portion of BFD Insights) includes the calculations of when each beneficiary was first queried.
+
+### Structure
+
+```mermaid
+flowchart TD
+    APIRequests["Glue Table: API Requests"] -->|Glue Job: Populate Beneficiaries| Beneficiaries["Glue Table: Beneficiaries"]
+    Beneficiaries -->|Glue Job: Populate Beneficiary Unique| BeneUnique["Glue Table: Beneficiary Unique"]
+    BeneUnique --> DataSet["QuickSight: DataSet"]
+    DataSet --> Analysis["QuickSight: Analysis"]
+    Analysis --> Dashboard["QuickSight: Dashboard"]
+```
 
 ### Manual Population of Glue Tables
 
