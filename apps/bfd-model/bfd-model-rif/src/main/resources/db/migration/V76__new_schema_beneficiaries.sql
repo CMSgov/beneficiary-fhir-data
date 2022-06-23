@@ -436,7 +436,7 @@ ${logic.hsql-only}    rds_dec_ind )
 ${logic.psql-only} create table public.beneficiaries_new as
 select 
 ${logic.hsql-only}    convert(bene_id, SQL_BIGINT),
-${logic.psql-only}    bene_mbi_id::bigint,
+${logic.psql-only}    bene_id::bigint,
                       mbi_num,
                       rfrnc_yr,
                       a_mo_cnt,

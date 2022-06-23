@@ -77,3 +77,8 @@ ${logic.psql-only}     add CONSTRAINT beneficiary_monthly_new_pkey PRIMARY KEY (
 -- create an index to optimized Part D Contract by date
 CREATE INDEX IF NOT EXISTS beneficiary_monthly_new_partd_contract_year_month_bene_id_idx
     ON public.beneficiary_monthly_new (partd_contract_number_id, year_month, bene_id);
+
+-- define foreign key constraints to beneficiary table.
+ALTER TABLE IF EXISTS public.beneficiary_monthly_new
+    ADD CONSTRAINT beneficiary_monthly_new_to_benficiaries FOREIGN KEY (bene_id)
+        REFERENCES public.beneficiaries_new (bene_id);
