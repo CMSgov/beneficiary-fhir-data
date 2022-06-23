@@ -1,3 +1,21 @@
+-- NEW_SCHEMA_SKIPPED_RIF_RECORDS.SQL
+-- flyway migration for SKIPPED_RIF_RECORDS table into
+-- a new schema structure that:
+--   1) changes data type of BENE_ID from varchar to BIGINT.
+--
+-- Once current table data is migrated to new table name/structure, a 
+-- subsequent PR will be deployed that changes the ORM model(s) and
+-- operational code for Beneficiaries table.
+--
+-- HSQL differs from PSQL (postgres) in that the table defintion
+-- must be explicitly declared prior to loading data into the
+-- target table. PSQL can derive the table structure based on
+-- the data input (i.e., column name, data type). Thus, for HSQL,
+-- we need to explicitly define the table structure prior to loading data.
+--
+-- For HSQL, explicitly define/create a new SKIPPED_RIF_RECORDS_NEW table in
+-- the current PUBLIC schema
+--
 ${logic.hsql-only}  create table public.skipped_rif_records_new (
 ${logic.hsql-only}    record_id                                  bigint not null,
 ${logic.hsql-only}    bene_id                                    bigint not null,
