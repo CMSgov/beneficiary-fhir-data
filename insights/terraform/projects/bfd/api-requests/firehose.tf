@@ -2,7 +2,7 @@
 
 resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   destination    = "extended_s3"
-  name           = "bfd-insights-bfd-${local.environment}-firehose"
+  name           = "${local.full_name}-firehose"
   tags = local.tags
   tags_all = local.tags
 
@@ -82,7 +82,7 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "bfd-access-log-subscription" {
-  name            = "bfd-insights-${local.project}-${local.environment}-access-log-subscription"
+  name            = "${local.full_name}-access-log-subscription"
   log_group_name  = "/bfd/${local.environment}/bfd-server/access.json"
   filter_pattern  = ""
   destination_arn = aws_kinesis_firehose_delivery_stream.bfd-firehose.arn

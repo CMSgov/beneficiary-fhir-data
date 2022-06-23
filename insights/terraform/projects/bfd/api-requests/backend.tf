@@ -3,7 +3,7 @@ terraform {
   # Use the common terraform bucket for all of BFD's state
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "bfd-insights/bfd/api-history/terraform.tfstate"
+    key            = "bfd-insights/bfd/api-requests/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"

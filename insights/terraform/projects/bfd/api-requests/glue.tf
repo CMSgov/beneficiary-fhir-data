@@ -1,11 +1,7 @@
-# Database
-#
-# Glue database for all of the below Glue tables.
-
-resource "aws_glue_catalog_database" "bfd-database" {
-  name        = local.database
-  description = "BFD Insights database for the ${local.environment} environment"
-}
+# resource "aws_glue_catalog_database" "bfd-database" {
+#   name        = local.database
+#   description = "BFD Insights database for the ${local.environment} environment"
+# }
 
 
 # API Requests
@@ -15,8 +11,8 @@ resource "aws_glue_catalog_database" "bfd-database" {
 # Target Glue Table where ingested logs are eventually stored
 resource "aws_glue_catalog_table" "api-requests-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
-  database_name = aws_glue_catalog_database.bfd-database.name
-  name          = "api-requests"
+  database_name = module.database.name
+  name          = "${replace(local.full_name, "-", "_")}_api_requests"
   retention  = 0
   table_type = "EXTERNAL_TABLE"
 
@@ -37,7 +33,7 @@ resource "aws_glue_catalog_table" "api-requests-table" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api-requests/"
+    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     stored_as_sub_directories = false
@@ -51,7 +47,7 @@ resource "aws_glue_catalog_table" "api-requests-table" {
 # Crawler on a schedule to classify log files and ensure they are put into the Glue Table.
 resource "aws_glue_crawler" "api-requests-recurring-crawler" {
   classifiers   = []
-  database_name = aws_glue_catalog_database.bfd-database.name
+  database_name = module.database.name
   configuration = jsonencode(
     {
       CrawlerOutput = {
@@ -65,14 +61,14 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
       Version = 1
     }
   )
-  name     = "bfd-insights-bfd-${local.environment}-api-requests-recurring-crawler"
+  name     = "${local.full_name}-api-requests-recurring-crawler"
   role     = aws_iam_role.glue-role.name
   schedule = "cron(59 10 * * ? *)"
   tags     = {}
   tags_all = {}
 
   catalog_target {
-    database_name = aws_glue_catalog_database.bfd-database.name
+    database_name = module.database.name
     tables = [
       aws_glue_catalog_table.api-requests-table.name,
     ]
@@ -100,8 +96,8 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
 # Glue Catalog Table to store API History
 resource "aws_glue_catalog_table" "api-history" {
   catalog_id    = data.aws_caller_identity.current.account_id
-  database_name = aws_glue_catalog_database.bfd-database.name
-  name          = "api-history"
+  database_name = module.database.name
+  name          = "${replace(local.full_name, "-", "_")}_api_history"
   owner         = "owner"
   retention  = 0
   table_type = "EXTERNAL_TABLE"
@@ -138,11 +134,13 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   classifiers = [
     aws_glue_classifier.bfd-historicals-local.name,
   ]
-  database_name = aws_glue_catalog_database.bfd-database.name
-  name          = "bfd-insights-bfd-${local.environment}-history-crawler"
+  database_name = module.database.name
+  name          = "${local.full_name}-history-crawler"
+  description   = "Glue Crawler to ingest logs into the API History Glue Table"
   role          = aws_iam_role.glue-role.name
   tags          = {}
   tags_all      = {}
+  # table_prefix  = "${replace(local.full_name, "-", "_")}_"   # "${local.full_name}-"
 
   lineage_configuration {
     crawler_lineage_settings = "DISABLE"
@@ -152,20 +150,37 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
     recrawl_behavior = "CRAWL_EVERYTHING"
   }
 
-  s3_target {
-    exclusions = []
-    path       = aws_glue_catalog_table.api-history.storage_descriptor[0].location
+  # s3_target {
+  #   exclusions = ["aws-logs-write-test"]
+  #   path       = "s3://${data.aws_s3_bucket.bfd-app-logs.bucket}/exports/${local.database}/api_history"
+  #   # aws_glue_catalog_table.api-history.storage_descriptor[0].location
+  # }
+
+  catalog_target {
+    database_name = aws_glue_catalog_table.api-history.database_name
+    tables        = [ aws_glue_catalog_table.api-history.name ]
   }
 
   schema_change_policy {
-    delete_behavior = "DEPRECATE_IN_DATABASE"
+    delete_behavior = "LOG" # "DEPRECATE_IN_DATABASE"
     update_behavior = "UPDATE_IN_DATABASE"
   }
+
+  configuration = jsonencode(
+    {
+      "Version": 1.0,
+      "Grouping": {
+        "TableGroupingPolicy": "CombineCompatibleSchemas"
+      }
+    }
+  )
 }
+#        "TableLevelConfiguration": 3
+
 
 # Glue Classifier to read data from the data store and generate the schema
 resource "aws_glue_classifier" "bfd-historicals-local" {
-  name = "bfd-${local.environment}-historicals-local"
+  name = "${local.full_name}-historicals-local"
 
   grok_classifier {
     classification = "cw-history"
@@ -184,7 +199,7 @@ resource "aws_s3_object" "bfd-history-ingest" {
   tags               = {}
   tags_all           = {}
   source             = "glue_src/bfd_history_ingest.py"
-  etag               = filemd5("glue_src/bfd_history_ingest.py")
+  # etag               = filemd5("glue_src/bfd_history_ingest.py")
 }
 
 # Glue Job for history ingestion
@@ -200,15 +215,15 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--enable-spark-ui"                  = "true"
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
-    "--sourceDatabase"                   = aws_glue_catalog_database.bfd-database.name
+    "--sourceDatabase"                   = module.database.name
     "--sourceTable"                      = aws_glue_catalog_table.api-history.name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/${local.environment}/"
-    "--targetDatabase"                   = aws_glue_catalog_database.bfd-database.name
+    "--targetDatabase"                   = module.database.name
     "--targetTable"                      = aws_glue_catalog_table.api-requests-table.name
   }
   glue_version              = "3.0"
   max_retries               = 0
-  name                      = "bfd-insights-${local.project}-${local.environment}-history-ingest"
+  name                      = "${local.full_name}-history-ingest"
   non_overridable_arguments = {}
   number_of_workers         = 10
   role_arn                  = aws_iam_role.glue-role.arn

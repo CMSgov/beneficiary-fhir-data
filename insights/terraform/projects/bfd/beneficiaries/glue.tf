@@ -6,7 +6,7 @@
 resource "aws_glue_catalog_table" "beneficiaries-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
-  name          = "beneficiaries"
+  name          = "${local.full_name}-beneficiaries"
   owner         = "owner"
   retention  = 0
   table_type = "EXTERNAL_TABLE"
@@ -53,7 +53,7 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   tags               = {}
   tags_all           = {}
   source             = "glue_src/bfd_populate_beneficiaries.py"
-  etag               = filemd5("glue_src/bfd_populate_beneficiaries.py")
+  # etag               = filemd5("glue_src/bfd_populate_beneficiaries.py")
 }
 
 # Glue Job to populate the beneficiaries table
@@ -70,14 +70,14 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
     "--sourceDatabase"                   = local.database
-    "--sourceTable"                      = "${local.environment}-api-requests"
+    "--sourceTable"                      = "${replace(local.full_name, "-", "_")}_api_requests" # "${local.full_name}-api-requests"
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = local.database
     "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table.name
   }
   glue_version              = "3.0"
   max_retries               = 0
-  name                      = "bfd-insights-bfd-${local.environment}-populate-beneficiaries"
+  name                      = "${local.full_name}-populate-beneficiaries"
   non_overridable_arguments = {}
   number_of_workers         = 10
   role_arn                  = data.aws_iam_role.glue-role.arn
@@ -106,7 +106,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
 resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
-  name          = "beneficiaries-unique"
+  name          = "${local.full_name}-beneficiaries-unique"
   owner         = "owner"
   retention  = 0
   table_type = "EXTERNAL_TABLE"
@@ -160,7 +160,7 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   tags               = {}
   tags_all           = {}
   source             = "glue_src/bfd_populate_beneficiary_unique.py"
-  etag               = filemd5("glue_src/bfd_populate_beneficiary_unique.py")
+  # etag               = filemd5("glue_src/bfd_populate_beneficiary_unique.py")
 }
 
 # Glue Job to populate the beneficiary_unique table
@@ -185,7 +185,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   }
   glue_version              = "3.0"
   max_retries               = 0
-  name                      = "bfd-${local.environment}-populate-beneficiary-unique"
+  name                      = "${local.full_name}-populate-beneficiary-unique"
   non_overridable_arguments = {}
   number_of_workers         = 10
   role_arn                  = data.aws_iam_role.glue-role.arn
@@ -225,7 +225,7 @@ resource "aws_glue_crawler" "beneficiaries-recurring-crawler" {
       Version = 1
     }
   )
-  name     = "bfd-insights-bfd-${local.environment}-beneficiaries-recurring-crawler"
+  name     = "${local.full_name}-beneficiaries-recurring-crawler"
   role     = data.aws_iam_role.glue-role.name
   schedule = "cron(59 9 * * ? *)"
   tags     = {}

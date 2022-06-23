@@ -2,7 +2,7 @@
 
 ## API-Requests
 
-API-Requests is the portion of the project that ingests the logs and stores them in Glue tables. Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests table.
+API-Requests is the portion of the project that ingests the logs and stores them in Glue tables. Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests table. Most other parts of this project will depend upon API-Requests.
 
 ### Structure
 
@@ -24,15 +24,15 @@ flowchart TD
 
 ### Manual Ingestion of Log Files
 
-Note: You have to replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
+Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
 
 1. CloudWatch > Log Groups > `/bfd/<environment>/bfd-server/access.json`
     - Actions > Export Data to Amazon S3
         - Choose time period
         - Select Account: *This Account*
         - S3 Bucket Name: `bfd-insights-bfd-app-logs`
-        - S3 Bucket Prefix: `history/<environment>_api_history/`
-    - Execute. This took about 80 minutes for 3 weeks of prod-sbx logs.
+        - S3 Bucket Prefix: `history/<environment>/api_history`
+    - Export. This took about 80 minutes for 3 weeks of prod-sbx logs.
 
 2. AWS Glue > Crawlers > `bfd-<environment>-history-crawler`
     - Run. It should finish within a couple minutes.
@@ -40,21 +40,28 @@ Note: You have to replace `<environment>` with the name of your environment, suc
 3. AWS Glue > Jobs > `bfd-<environment>-history-ingest`
     - Run. This took about 37 minutes for 3 weeks of prod-sbx logs.
 
-4. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiaries`
-    - Run. This one took about 35 minutes for 3 weeks of prod-sbx logs.
-
-5. AWS Glue > Crawlers > `bfd-<environment>-api-requests-recurring-crawler`
-    - Run. It should finish within a couple minutes.
-
-5. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiary-unique`
-    - Run.
 
 ## Beneficiaries
+
+Beneficiaries is the portion that selects the beneficiary and timestamp from the API-Requests table. Beneficiaries-Unique (which is included within this )
+
+### Manual Population of Glue Tables
+
+Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
+
+1. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiaries`
+    - Run. This one took about 35 minutes for 3 weeks of prod-sbx logs.
+
+2. AWS Glue > Crawlers > `bfd-<environment>-api-requests-recurring-crawler`
+    - Run. It should finish within a couple minutes.
+
+3. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiary-unique`
+    - Run.
 
 
 ## Manual Creation of QuickSight Dashboards
 
-Note: You have to replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
+Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
 
 1. Go to [QuickSight](https://us-east-1.quicksight.aws.amazon.com/).
 2. Datasets. New Dataset.

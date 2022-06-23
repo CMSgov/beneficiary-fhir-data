@@ -9,7 +9,8 @@ locals {
     application = "bfd-insights",
     project     = "bfd"
   }
-  database     = "bfd-${local.environment}"
+  full_name    = "bfd-insights-${local.project}-${local.environment}"
+  database     = local.full_name
   project      = "bfd"
   region       = "us-east-1"
 }

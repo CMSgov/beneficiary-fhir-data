@@ -11,9 +11,9 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
     "x86_64",
   ]
   description                    = "Extracts and flattens JSON messages from CloudWatch log subscriptions."
-  function_name                  = "bfd-${local.environment}-cw-to-flattened-json"
+  function_name                  = "${local.full_name}-cw-to-flattened-json"
   filename                       = data.archive_file.bfd-cw-to-flattened.output_path
-  source_code_hash               = filebase64sha256("${path.module}/lambda_src/bfd-cw-to-flattened-json.zip")
+  # source_code_hash               = filebase64sha256("${path.module}/lambda_src/bfd-cw-to-flattened-json.zip")
   handler                        = "bfd-cw-to-flattened-json.lambda_handler"
   layers                         = []
   memory_size                    = 128
