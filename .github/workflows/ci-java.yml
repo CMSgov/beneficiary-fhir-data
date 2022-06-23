@@ -168,7 +168,7 @@ jobs:
         run: |
           IFS=$'\n'
           is_valid="false"
-          output=$(for output in $(python3 validations.py -i validations_ignorelist.yml) ; do [[ $output =~ (Results: .*) ]] && printf "${BASH_REMATCH[1]}" ; done)
+          output=$(for output in $(python validations.py -i validations_ignorelist.yml) ; do [[ $output =~ (Results: .*) ]] && printf "${BASH_REMATCH[1]}" ; done)
           printf "$output"
           output=$([[ $output =~ .*(Results:[^\n]*).* ]] && printf "${BASH_REMATCH[1]}")
           echo ::set-output name=valid::$is_valid
