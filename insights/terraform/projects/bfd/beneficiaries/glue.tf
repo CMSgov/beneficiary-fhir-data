@@ -53,7 +53,6 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   tags               = {}
   tags_all           = {}
   source             = "glue_src/bfd_populate_beneficiaries.py"
-  # etag               = filemd5("glue_src/bfd_populate_beneficiaries.py")
 }
 
 # Glue Job to populate the beneficiaries table
@@ -120,6 +119,10 @@ resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
     type = "string"
   }
 
+  parameters = {
+    classification = "parquet"
+  }
+
   storage_descriptor {
     bucket_columns    = []
     compressed        = false
@@ -146,6 +149,11 @@ resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
       }
       serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
     }
+
+    parameters = {
+      classification = "parquet"
+      typeOfData     = "file"
+    }
   }
 }
 
@@ -160,7 +168,6 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   tags               = {}
   tags_all           = {}
   source             = "glue_src/bfd_populate_beneficiary_unique.py"
-  # etag               = filemd5("glue_src/bfd_populate_beneficiary_unique.py")
 }
 
 # Glue Job to populate the beneficiary_unique table

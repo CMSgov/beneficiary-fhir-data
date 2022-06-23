@@ -13,13 +13,12 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
   description                    = "Extracts and flattens JSON messages from CloudWatch log subscriptions."
   function_name                  = "${local.full_name}-cw-to-flattened-json"
   filename                       = data.archive_file.bfd-cw-to-flattened.output_path
-  # source_code_hash               = filebase64sha256("${path.module}/lambda_src/bfd-cw-to-flattened-json.zip")
   handler                        = "bfd-cw-to-flattened-json.lambda_handler"
   layers                         = []
   memory_size                    = 128
   package_type                   = "Zip"
   reserved_concurrent_executions = -1
-  role                           = aws_iam_role.bfd-transform-role-rlenc44a.arn
+  role                           = aws_iam_role.firehose-lambda-role.arn
   runtime                        = "python3.8"
   tags = {
     "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python"

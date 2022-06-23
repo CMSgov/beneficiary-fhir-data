@@ -1,9 +1,3 @@
-# resource "aws_glue_catalog_database" "bfd-database" {
-#   name        = local.database
-#   description = "BFD Insights database for the ${local.environment} environment"
-# }
-
-
 # API Requests
 #
 # Target location for ingested logs, no matter the method of ingestion.
@@ -140,7 +134,6 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   role          = aws_iam_role.glue-role.name
   tags          = {}
   tags_all      = {}
-  # table_prefix  = "${replace(local.full_name, "-", "_")}_"   # "${local.full_name}-"
 
   lineage_configuration {
     crawler_lineage_settings = "DISABLE"
@@ -149,12 +142,6 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   recrawl_policy {
     recrawl_behavior = "CRAWL_EVERYTHING"
   }
-
-  # s3_target {
-  #   exclusions = ["aws-logs-write-test"]
-  #   path       = "s3://${data.aws_s3_bucket.bfd-app-logs.bucket}/exports/${local.database}/api_history"
-  #   # aws_glue_catalog_table.api-history.storage_descriptor[0].location
-  # }
 
   catalog_target {
     database_name = aws_glue_catalog_table.api-history.database_name
@@ -175,8 +162,6 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
     }
   )
 }
-#        "TableLevelConfiguration": 3
-
 
 # Glue Classifier to read data from the data store and generate the schema
 resource "aws_glue_classifier" "bfd-historicals-local" {
@@ -199,7 +184,6 @@ resource "aws_s3_object" "bfd-history-ingest" {
   tags               = {}
   tags_all           = {}
   source             = "glue_src/bfd_history_ingest.py"
-  # etag               = filemd5("glue_src/bfd_history_ingest.py")
 }
 
 # Glue Job for history ingestion
