@@ -91,38 +91,41 @@ check_endpoint() {
 ##
 # Runs test queries to verify that the server is working as expected before allowing traffic in the firewall.
 ##
+
 service_startup_check() {
-  # Reject all external traffic to port 7443 until the application has started successfully
-  sudo iptables -A INPUT -p tcp ! -i lo --dport 7443 -j REJECT
+  # Reject all external traffic to service port until the application has started successfully
+  sudo iptables -A INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
+  log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
+  sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
   while true; do
     log "Checking V1 metadata endpoint"
-    STARTUP_TESTING_CHECK_V1_METADATA=$(check_endpoint "https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
+    STARTUP_TESTING_CHECK_V1_METADATA=$(check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_V1_METADATA_EXIT=$?
 
     log "Checking V2 metadata endpoint"
-    STARTUP_TESTING_CHECK_V2_METADATA=$(check_endpoint "https://localhost:7443/v2/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
+    STARTUP_TESTING_CHECK_V2_METADATA=$(check_endpoint "https://localhost:${BFD_PORT}/v2/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_V2_METADATA_EXIT=$?
 
     log "Checking V1 Coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_V1_COVERAGE=$(check_endpoint "https://localhost:7443/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
+    STARTUP_TESTING_CHECK_V1_COVERAGE=$(check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
     STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT=$?
 
     log "Checking V2 Coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_V2_COVERAGE=$(check_endpoint "https://localhost:7443/v2/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
+    STARTUP_TESTING_CHECK_V2_COVERAGE=$(check_endpoint "https://localhost:${BFD_PORT}/v2/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
     STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT=$?
 
     log "Checking V1 EOB resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_V1_EOB=$(check_endpoint "https://localhost:7443/v1/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
+    STARTUP_TESTING_CHECK_V1_EOB=$(check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
     STARTUP_TESTING_CHECK_V1_EOB_EXIT=$?
 
     log "Checking V2 EOB resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_V2_EOB=$(check_endpoint "https://localhost:7443/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
+    STARTUP_TESTING_CHECK_V2_EOB=$(check_endpoint "https://localhost:${BFD_PORT}/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
     STARTUP_TESTING_CHECK_V2_EOB_EXIT=$?
 
     if [[ $STARTUP_TESTING_CHECK_V1_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_EOB_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_EOB_EXIT == 0 ]]; then
-      # Effectively allow traffic from external sources to reach instance port 7443
-      sudo iptables -D INPUT -p tcp ! -i lo --dport 7443 -j REJECT
+      # Effectively allow traffic from external sources to reach service port
+      sudo iptables -D INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
       log "Server started properly"
       return 0
     else

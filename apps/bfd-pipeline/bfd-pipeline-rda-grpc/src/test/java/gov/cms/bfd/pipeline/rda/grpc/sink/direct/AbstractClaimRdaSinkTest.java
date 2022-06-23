@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.MessageError;
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -217,7 +217,7 @@ public class AbstractClaimRdaSinkTest {
     }
 
     @Override
-    RdaApiClaimMessageMetaData createMetaData(RdaChange<String> change) {
+    RdaClaimMessageMetaData createMetaData(RdaChange<String> change) {
       return null;
     }
 
