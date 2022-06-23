@@ -26,6 +26,7 @@ data_server_ssl_client_certificates: []
 # The max size of the DB connection pool for the Blue Button Data Server.
 data_server_db_connections_max: 40
 
+# TODO: it's probably time to sunset this feature flag, default to true
 # Whether to enable BFD API V2
 data_server_v2_enabled: false
 
