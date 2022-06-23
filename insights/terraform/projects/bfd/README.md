@@ -14,7 +14,7 @@ flowchart TD
     S3["S3 Bucket"] -->|Crawler: History| History["Glue Table: API History"]
     History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
 
-    EC2["Real-Time Logs"] --> Firehose["Kinesis Firehose"]
+    EC2["CloudWatch Log Subscription (Real-Time)"] --> Firehose["Kinesis Firehose"]
     Firehose -->|Lambda| APIRequests
 ```
 
