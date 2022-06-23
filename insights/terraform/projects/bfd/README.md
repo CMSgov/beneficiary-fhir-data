@@ -49,14 +49,17 @@ Beneficiaries is the portion that selects the beneficiary and timestamp from the
 
 Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
 
-1. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiaries`
+1. AWS Glue > Jobs > `bfd-insights-bfd-<environment>-populate-beneficiaries`
     - Run. This one took about 35 minutes for 3 weeks of prod-sbx logs.
 
-2. AWS Glue > Crawlers > `bfd-<environment>-api-requests-recurring-crawler`
+2. AWS Glue > Crawlers > `bfd-insights-bfd-<environment>-beneficiaries-recurring-crawler`
     - Run. It should finish within a couple minutes.
 
-3. AWS Glue > Jobs > `bfd-<environment>-populate-beneficiary-unique`
+3. AWS Glue > Jobs > `bfd-insights-bfd-<environment>-populate-beneficiary-unique`
     - Run.
+
+4. AWS Glue > Crawlers > `bfd-insights-bfd-<environment>-beneficiaries-recurring-crawler`
+    - Run (again). It should finish within a couple minutes.
 
 
 ## Manual Creation of QuickSight Dashboards

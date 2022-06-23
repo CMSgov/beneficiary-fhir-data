@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
 }
 
 data "aws_iam_role" "glue-role" {
-  name = "${local.full_name}-iam-glue-role"
+  name = "${local.full_name}-glue-role"
 }
 
 data "aws_iam_policy" "athena-full-access" {
