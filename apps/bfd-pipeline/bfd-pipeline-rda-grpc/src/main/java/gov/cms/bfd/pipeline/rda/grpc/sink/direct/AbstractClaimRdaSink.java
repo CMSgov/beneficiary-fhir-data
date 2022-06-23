@@ -4,18 +4,11 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -57,18 +50,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   private static final NumericGauges GAUGES = new NumericGauges();
 
   /** Used to write out RDA messages to json strings */
-  protected static final JsonFormat.Printer writer =
+  protected static final JsonFormat.Printer protobufObjectWriter =
       JsonFormat.printer().omittingInsignificantWhitespace();
-
-  /** Used to map basic objects to json strings */
-  protected static final ObjectMapper mapper =
-      JsonMapper.builder()
-          .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
-          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-          .addModule(new Jdk8Module())
-          .addModule(new JavaTimeModule())
-          .serializationInclusion(JsonInclude.Include.NON_NULL)
-          .build();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either
@@ -239,13 +222,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Apply implementation specific logic to produce a populated {@link RdaApiClaimMessageMetaData}
+   * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
    * @param change an incoming RdaChange object from which to extract meta data
    * @return an object ready for insertion into the database
    */
-  abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+  abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
   /**
    * Helper method to generate {@link MessageError} entities from a given claim object. This is
@@ -304,7 +287,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
           var metaData = createMetaData(change);
-          entityManager.persist(metaData);
+          entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API

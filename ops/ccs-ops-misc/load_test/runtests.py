@@ -84,7 +84,7 @@ def run_with_params(argv):
 
     help_string = ('runtests.py \n--homePath="<path/to/home/directory>" (Required) '
      '\n--clientCertPath="<path/to/client/pem/file>" (Required)'
-     '\n--databaseUri="postgres://<username:password>@<database-aws-node>.rds.amazonaws.com:port/'
+     '\n--databaseUri="postgresql://<username:password>@<database-aws-node>.rds.amazonaws.com:port/'
         '<dbname>" (Required)'
      '\n--testHost="https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)'
      '\n--test_file="/<v1/v2>/test_to_run.py" (Required)'
