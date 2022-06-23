@@ -370,8 +370,8 @@ public class LoadedFilterManager {
     // Loop through all batches, filling the bloom filter and finding the lastUpdated
     Instant lastUpdated = firstUpdated;
     for (LoadedBatch batch : loadedBatches) {
-      for (String beneficiary : batch.getBeneficiariesAsList()) {
-        bloomFilter.putString(beneficiary);
+      for (Long beneficiary : batch.getBeneficiariesAsList()) {
+        bloomFilter.putString(String.valueOf(beneficiary));
       }
       if (batch.getCreated().isAfter(lastUpdated)) {
         lastUpdated = batch.getCreated();

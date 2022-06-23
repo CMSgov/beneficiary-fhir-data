@@ -704,13 +704,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
     // First, find all matching hashes from BeneficiariesHistory.
-    CriteriaQuery<String> beneHistoryMatches = builder.createQuery(String.class);
+    CriteriaQuery<Long> beneHistoryMatches = builder.createQuery(Long.class);
     Root<BeneficiaryHistory> beneHistoryMatchesRoot =
         beneHistoryMatches.from(BeneficiaryHistory.class);
     beneHistoryMatches
         .select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId))
         .where(builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
-    List<String> matchingIdsFromBeneHistory = null;
+    List<Long> matchingIdsFromBeneHistory = null;
     Long fromHistoryQueryNanoSeconds = null;
     Timer.Context beneHistoryMatchesTimer =
         metricRegistry
@@ -917,7 +917,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the matching {@link Beneficiary}s
    */
   @Trace
-  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
+  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<Long> ids) {
 
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -1061,7 +1061,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      */
 
     // Fetch the Beneficiary.id values that we will get results for.
-    List<String> ids =
+    List<Long> ids =
         queryBeneficiaryIdsByPartDContractCodeAndYearMonth(yearMonth, contractCode, paging);
     if (ids.isEmpty()) {
       return Collections.emptyList();
@@ -1121,12 +1121,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the {@link List} of matching {@link Beneficiary#getBeneficiaryId()} values
    */
   @Trace
-  private List<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
+  private List<Long> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<String> beneIdCriteria = builder.createQuery(String.class);
+    CriteriaQuery<Long> beneIdCriteria = builder.createQuery(Long.class);
     Root<BeneficiaryMonthly> beneMonthlyRoot = beneIdCriteria.from(BeneficiaryMonthly.class);
+
     beneIdCriteria.select(
         beneMonthlyRoot.get(BeneficiaryMonthly_.parentBeneficiary).get(Beneficiary_.beneficiaryId));
 
@@ -1148,7 +1149,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     beneIdCriteria.orderBy(builder.asc(beneMonthlyRoot.get(BeneficiaryMonthly_.parentBeneficiary)));
 
     // Run the query and return the results.
-    List<String> matchingBeneIds = null;
+    List<Long> matchingBeneIds = null;
     Long beneHistoryMatchesTimerQueryNanoSeconds = null;
     Timer.Context beneIdMatchesTimer =
         metricRegistry

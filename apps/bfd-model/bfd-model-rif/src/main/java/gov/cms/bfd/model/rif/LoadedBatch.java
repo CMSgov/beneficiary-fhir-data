@@ -2,7 +2,6 @@ package gov.cms.bfd.model.rif;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.*;
@@ -158,7 +157,7 @@ public class LoadedBatch {
    *
    * @return beneficiaries as list
    */
-  public List<String> getBeneficiariesAsList() {
+  public List<Long> getBeneficiariesAsList() {
     return convertToList(this.beneficiaries);
   }
 
@@ -208,9 +207,15 @@ public class LoadedBatch {
    * @param commaSeparated the {@link #SEPARATOR} separated string
    * @return the list of string values
    */
-  private static List<String> convertToList(String commaSeparated) {
-    return (commaSeparated == null || commaSeparated.isEmpty())
-        ? new ArrayList<>()
-        : Arrays.asList(commaSeparated.split(SEPARATOR, -1));
+  private static List<Long> convertToList(String commaSeparated) {
+    if (commaSeparated == null || commaSeparated.isEmpty()) {
+      return new ArrayList<Long>();
+    }
+    String[] stringArray = commaSeparated.split(SEPARATOR, -1);
+    ArrayList<Long> rslt = new ArrayList<Long>(stringArray.length);
+    for (int i = 0; i < stringArray.length; i++) {
+      rslt.add(Long.parseLong(stringArray[i]));
+    }
+    return rslt;
   }
 }
