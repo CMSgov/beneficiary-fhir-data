@@ -6,7 +6,7 @@
 resource "aws_glue_catalog_table" "beneficiaries-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
-  name          = "${local.full_name}-beneficiaries"
+  name          = "${local.full_name}-api-requests-beneficiaries"
   description   = "One row per beneficiary query, with the date of the request"
   owner         = "owner"
   retention     = 0
@@ -29,7 +29,7 @@ resource "aws_glue_catalog_table" "beneficiaries-table" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/beneficiaries/"
+    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api-requests-beneficiaries/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     stored_as_sub_directories = false
@@ -48,10 +48,10 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   bucket             = data.aws_s3_bucket.bfd-insights-bucket.id
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
-  key                = "scripts/${local.environment}/bfd_populate_beneficiaries.py"
+  key                = "scripts/${local.environment}/bfd_populate_api_requests_beneficiaries.py"
   metadata           = {}
   storage_class      = "STANDARD"
-  source             = "glue_src/bfd_populate_beneficiaries.py"
+  source             = "glue_src/bfd_populate_api_requests_beneficiaries.py"
 }
 
 # Glue Job to populate the beneficiaries table
@@ -104,7 +104,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
 resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
-  name          = "${local.full_name}-beneficiaries-unique"
+  name          = "${local.full_name}-api-requests-beneficiaries-unique"
   description   = "One row per Beneficiary and the date first seen"
   owner         = "owner"
   retention     = 0
@@ -127,7 +127,7 @@ resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
     bucket_columns    = []
     compressed        = false
     input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/beneficiaries_unique/"
+    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests_beneficiaries_unique/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     stored_as_sub_directories = false
@@ -162,10 +162,10 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   bucket             = data.aws_s3_bucket.bfd-insights-bucket.id
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
-  key                = "scripts/${local.environment}/bfd_populate_beneficiary_unique.py"
+  key                = "scripts/${local.environment}/bfd_populate_api_requests_beneficiary_unique.py"
   metadata           = {}
   storage_class      = "STANDARD"
-  source             = "glue_src/bfd_populate_beneficiary_unique.py"
+  source             = "glue_src/bfd_populate_api_requests_beneficiary_unique.py"
 }
 
 # Glue Job to populate the beneficiary_unique table
