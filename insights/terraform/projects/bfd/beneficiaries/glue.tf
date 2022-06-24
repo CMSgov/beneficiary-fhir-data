@@ -7,9 +7,10 @@ resource "aws_glue_catalog_table" "beneficiaries-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
   name          = "${local.full_name}-beneficiaries"
+  description   = "One row per beneficiary query, with the date of the request"
   owner         = "owner"
-  retention  = 0
-  table_type = "EXTERNAL_TABLE"
+  retention     = 0
+  table_type    = "EXTERNAL_TABLE"
 
   partition_keys {
     name = "year"
@@ -57,7 +58,18 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
 
 # Glue Job to populate the beneficiaries table
 resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
-  connections = []
+  name                      = "${local.full_name}-populate-beneficiaries"
+  description               = "Populate the Beneficiaries table"
+  tags                      = local.tags
+  glue_version              = "3.0"
+  max_retries               = 0
+  non_overridable_arguments = {}
+  number_of_workers         = 10
+  role_arn                  = data.aws_iam_role.glue-role.arn
+  timeout                   = 2880
+  worker_type               = "G.1X"
+  connections               = []
+
   default_arguments = {
     "--TempDir"                          = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/temporary/${local.environment}/"
     "--class"                            = "GlueApp"
@@ -74,16 +86,6 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--targetDatabase"                   = local.database
     "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table.name
   }
-  glue_version              = "3.0"
-  max_retries               = 0
-  name                      = "${local.full_name}-populate-beneficiaries"
-  non_overridable_arguments = {}
-  number_of_workers         = 10
-  role_arn                  = data.aws_iam_role.glue-role.arn
-  tags                      = {}
-  tags_all                  = {}
-  timeout                   = 2880
-  worker_type               = "G.1X"
 
   command {
     name            = "glueetl"
@@ -106,9 +108,10 @@ resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
   name          = "${local.full_name}-beneficiaries-unique"
+  description   = "One row per Beneficiary and the date first seen"
   owner         = "owner"
-  retention  = 0
-  table_type = "EXTERNAL_TABLE"
+  retention     = 0
+  table_type    = "EXTERNAL_TABLE"
 
   partition_keys {
     name = "year"

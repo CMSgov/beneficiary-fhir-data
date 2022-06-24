@@ -15,6 +15,7 @@ locals {
   region       = "us-east-1"
 }
 
+# Creates AWS Glue Database named "bfd-insights-bfd-<environment>"
 module "database" {
   source     = "../../../modules/database"
   database   = local.database

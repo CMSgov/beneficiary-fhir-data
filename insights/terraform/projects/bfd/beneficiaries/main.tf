@@ -1,3 +1,8 @@
+# Beneficiary and Beneficiary Unique tables and glue jobs to provide BFD Insights with analysis of
+# the number of beneficiaries and when they were first seen.
+#
+# NOTE: This depends on the api-requests section of BFD Insights.
+
 locals {
   environment  = terraform.workspace
   tags         = {

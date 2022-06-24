@@ -1,10 +1,10 @@
-# Firehose
-
+# Firehose Data Stream
 resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
-  destination    = "extended_s3"
   name           = "${local.full_name}-firehose"
-  tags = local.tags
-  tags_all = local.tags
+  description    = "Ingests logs in real-time to BFD Insights"
+  tags           = local.tags
+  tags_all       = local.tags_all
+  destination    = "extended_s3"
 
   extended_s3_configuration {
     bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
@@ -81,6 +81,7 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   }
 }
 
+# CloudWatch Log Subscription
 resource "aws_cloudwatch_log_subscription_filter" "bfd-access-log-subscription" {
   name            = "${local.full_name}-access-log-subscription"
   log_group_name  = "/bfd/${local.environment}/bfd-server/access.json"

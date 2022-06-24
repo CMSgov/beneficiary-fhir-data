@@ -92,9 +92,10 @@ resource "aws_glue_catalog_table" "api-history" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = module.database.name
   name          = "${replace(local.full_name, "-", "_")}_api_history"
+  description   = "Store log files from BFD for analysis in BFD Insights"
   owner         = "owner"
-  retention  = 0
-  table_type = "EXTERNAL_TABLE"
+  retention     = 0
+  table_type    = "EXTERNAL_TABLE"
 
   partition_keys {
     name = "partition_0"
@@ -125,15 +126,16 @@ resource "aws_glue_catalog_table" "api-history" {
 
 # Glue Crawler to process the ingested logs and populate the S3 target
 resource "aws_glue_crawler" "bfd-history-crawler" {
-  classifiers = [
-    aws_glue_classifier.bfd-historicals-local.name,
-  ]
   database_name = module.database.name
   name          = "${local.full_name}-history-crawler"
   description   = "Glue Crawler to ingest logs into the API History Glue Table"
   role          = aws_iam_role.glue-role.name
   tags          = {}
   tags_all      = {}
+
+  classifiers = [
+    aws_glue_classifier.bfd-historicals-local.name,
+  ]
 
   lineage_configuration {
     crawler_lineage_settings = "DISABLE"
@@ -181,14 +183,26 @@ resource "aws_s3_object" "bfd-history-ingest" {
   key                = "scripts/${local.environment}/bfd_history_ingest.py"
   metadata           = {}
   storage_class      = "STANDARD"
-  tags               = {}
-  tags_all           = {}
+  tags               = local.tags
+  tags_all           = local.tags_all
   source             = "glue_src/bfd_history_ingest.py"
 }
 
 # Glue Job for history ingestion
 resource "aws_glue_job" "bfd-history-ingest-job" {
-  connections = []
+  name                      = "${local.full_name}-history-ingest"
+  description               = "Ingest historical log data"
+  tags                      = {}
+  tags_all                  = {}
+  connections               = []
+  glue_version              = "3.0"
+  max_retries               = 0
+  non_overridable_arguments = {}
+  number_of_workers         = 10
+  role_arn                  = aws_iam_role.glue-role.arn
+  timeout                   = 2880
+  worker_type               = "G.1X"
+
   default_arguments = {
     "--TempDir"                          = "s3://${aws_s3_object.bfd-history-ingest.bucket}/temporary/${local.environment}/"
     "--class"                            = "GlueApp"
@@ -205,16 +219,6 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--targetDatabase"                   = module.database.name
     "--targetTable"                      = aws_glue_catalog_table.api-requests-table.name
   }
-  glue_version              = "3.0"
-  max_retries               = 0
-  name                      = "${local.full_name}-history-ingest"
-  non_overridable_arguments = {}
-  number_of_workers         = 10
-  role_arn                  = aws_iam_role.glue-role.arn
-  tags                      = {}
-  tags_all                  = {}
-  timeout                   = 2880
-  worker_type               = "G.1X"
 
   command {
     name            = "glueetl"
