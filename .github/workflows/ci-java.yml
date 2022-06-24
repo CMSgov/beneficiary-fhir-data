@@ -166,11 +166,10 @@ jobs:
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'
         run: |
-          IFS=$'\n'
           is_valid="false"
-          output=$(for output in $(python validations.py -i validations_ignorelist.yml) ; do [[ $output =~ (Results: .*) ]] && printf "${BASH_REMATCH[1]}" ; done)
-          printf "$output"
-          output=$([[ $output =~ .*(Results:[^\n]*).* ]] && printf "${BASH_REMATCH[1]}")
+          if output=$(python3 ./validations.py -i validations_ignorelist.yml) ; then is_valid="true" ; fi
+          echo "$output"
+          output=$([[ $output =~ .*(Results:[^$'\n']*).* ]] && echo "${BASH_REMATCH[1]}")
           echo ::set-output name=valid::$is_valid
           echo ::set-output name=output::$output
       - name: 'Job Outcome'
