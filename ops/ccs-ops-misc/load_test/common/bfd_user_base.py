@@ -18,6 +18,7 @@ from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
 
 import urllib3
+import urllib3.exceptions
 
 setup.set_locust_env(config.load())
 
@@ -81,9 +82,10 @@ class BFDUserBase(HttpUser):
         HttpUser.__init__(self, *args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
-        self.client_cert = config.get_client_cert()
-        self.server_public_key = config.load_server_public_key()
-        setup.disable_no_cert_warnings(self.server_public_key, urllib3)
+        self.client_cert = self.environment.parsed_options.client_cert_path
+        self.server_public_key = self.environment.parsed_options.server_public_key
+        if not self.server_public_key:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.last_updated = data.get_last_updated()
 
         # Initialize data / URL pools
@@ -235,7 +237,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
-    stats_config = config.load_stats_config()
+    stats_config = environment.parsed_options.stats_config
     if not stats_config:
         return
 
