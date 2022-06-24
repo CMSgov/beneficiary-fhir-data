@@ -11,7 +11,7 @@ from multiprocessing import Process
 from common import config, test_setup as setup
 from locust.main import main
 
-from common.stats import StatsStorageConfig
+from common.stats.stats_config import StatsConfiguration
 
 def parse_run_time(run_time):
     '''Parse a given run time setting (which Locust accepts as combinations of "1m", "30s", "2h",
@@ -73,7 +73,7 @@ def run_with_params(argv):
         'testNumTotalClients': "100",
         'testCreatedClientsPerSecond': "5",
         'resetStatsAfterClientSpawn': False,
-        'storeStats': None
+        'stats': None
     }
 
     # Dictionary to hold data passed in via the CLI that will be stored in the root config.yml file
@@ -98,13 +98,13 @@ def run_with_params(argv):
         '(Optional, Default 5)'
      '\n--worker_threads="<If >1 the test is run as distributed, and expects this many worker '
         'processes to start, int>" (Optional, Default 1 - non distributed mode)'
-     '\n--storeStats="<If set, stores stats in JSON to S3 or local file. Must follow format: <STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>" (Optional)'
+     '\n--stats="<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)'
      '\n--resetStats (Optional)')
 
     try:
         opts, _args = getopt.getopt(argv, "h", ["homePath=", "clientCertPath=", "databaseUri=",
         "testHost=", "serverPublicKey=", 'tableSamplePct=', "configPath=", "testRunTime=",
-        "maxClients=", "clientsPerSecond=", "testFile=", "workerThreads=", "storeStats=", "resetStats"])
+        "maxClients=", "clientsPerSecond=", "testFile=", "workerThreads=", "stats=", "resetStats"])
     except getopt.GetoptError as err:
         print(err)
         print(help_string)
@@ -138,11 +138,11 @@ def run_with_params(argv):
             test_file = arg
         elif opt == "--workerThreads":
             worker_threads = arg
-        elif opt == "--storeStats":
+        elif opt == "--stats":
             try:
-                config_data["storeStats"] = StatsStorageConfig.from_arg_str(arg)
+                config_data["stats"] = StatsConfiguration.from_key_val_str(arg)
             except ValueError as err:
-                print(f'--storeStats was invalid: {err}\n')
+                print(f'--stats was invalid: {err}\n')
                 print(help_string)
                 sys.exit()
         elif opt == "--resetStats":

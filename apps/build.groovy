@@ -21,15 +21,15 @@ class AppBuildResults implements Serializable {
 /**
  * Builds the Java applications and utilities in this directory: Data Pipeline, Data Server, etc.
  *
+ * @param verboseMaven when `false`, maven runs with `--quiet` and `--batch-mode` flags
  * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
- 
-def build(String build_env) {
+def build(boolean verboseMaven) {
 	dir ('apps') {
+		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
 
-		sh "mvn --threads 1C --update-snapshots -Dmaven.test.failure.ignore clean verify"
-
+		sh "mvn ${quietFlags} --threads 1C --update-snapshots -Dmaven.test.failure.ignore clean verify"
 		/*
 		 * Fingerprint the output artifacts and archive the test results.
 		 *
