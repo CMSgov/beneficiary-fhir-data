@@ -138,7 +138,7 @@ jobs:
         id: run_check
         # Checks if there are any modified resources in the v2 endpoint responses
         # grep returns non-zero exit code when no matches are found, so only skip if the condition fails
-        run:
+        run: |
           can_skip=$(if [[ $(git diff --name-only $GITHUB_BASE_REF... | grep apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2) ]]; then echo "false"; else echo "true"; fi)
           if [[ can_skip ]]; then echo "No modified resources found, skipping rest of job."; else echo "Found modified resources, validating..."; fi
           echo ::set-output name=skip::$can_skip
