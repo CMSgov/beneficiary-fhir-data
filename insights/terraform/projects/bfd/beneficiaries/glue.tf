@@ -78,7 +78,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
     "--sourceDatabase"                   = local.database
-    "--sourceTable"                      = "${replace(local.full_name, "-", "_")}_api_requests" # "${local.full_name}-api-requests"
+    "--sourceTable"                      = local.api_requests_table_name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = local.database
     "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table.name
@@ -92,6 +92,81 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
 
   execution_property {
     max_concurrent_runs = 1
+  }
+}
+
+resource "aws_glue_trigger" "bfd-populate-beneficiaries-job-trigger" {
+  name        = "${local.full_name}-populate-beneficiaries-job-trigger"
+  description = "Trigger to start the Populate Beneficiaries Glue Job whenever the Crawler completes successfully"
+  type        = "CONDITIONAL"
+
+  actions {
+    job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
+  }
+
+  predicate {
+    conditions {
+      crawler_name = "${local.full_name}-api-requests-recurring-crawler" # From api-requests
+      crawl_state  = "SUCCEEDED"
+    }
+  }
+}
+
+# Crawler on a schedule to classify log files and ensure they are put into the Glue Tables.
+resource "aws_glue_crawler" "beneficiaries-crawler" {
+  classifiers   = []
+  database_name = local.database
+  configuration = jsonencode(
+    {
+      CrawlerOutput = {
+        Partitions = {
+          AddOrUpdateBehavior = "InheritFromTable"
+        }
+      }
+      Grouping = {
+        TableGroupingPolicy = "CombineCompatibleSchemas"
+      }
+      Version = 1
+    }
+  )
+  name     = "${local.full_name}-beneficiaries-crawler"
+  role     = data.aws_iam_role.glue-role.name
+
+  catalog_target {
+    database_name = local.database
+    tables = [
+      aws_glue_catalog_table.beneficiaries-table.name,
+    ]
+  }
+
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING"
+  }
+
+  schema_change_policy {
+    delete_behavior = "LOG"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+resource "aws_glue_trigger" "bfd-beneficiaries-crawler-trigger" {
+  name        = "${local.full_name}-beneficiaries-crawler-trigger"
+  description = "Trigger to start the Beneficiaries Crawler whenever the Populate Beneficiaries Job completes successfully"
+  type        = "CONDITIONAL"
+
+  actions {
+    crawler_name = aws_glue_crawler.beneficiaries-crawler.name
+  }
+
+  predicate {
+    conditions {
+      job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
+      state  = "SUCCEEDED"
+    }
   }
 }
 
@@ -208,11 +283,26 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   }
 }
 
+# Trigger for Populate Beneficiaries Unique Job
+resource "aws_glue_trigger" "bfd-populate-beneficiaries-unique-job-trigger" {
+  name        = "${local.full_name}-populate-beneficiaries-unique-job-trigger"
+  description = "Trigger to start the Populate Beneficiaries Unique Job whenever the Beneficiaries Crawler completes successfully"
+  type        = "CONDITIONAL"
 
-# Crawler
-#
+  actions {
+    job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
+  }
+
+  predicate {
+    conditions {
+      crawler_name = aws_glue_crawler.beneficiaries-crawler.name
+      crawl_state  = "SUCCEEDED"
+    }
+  }
+}
+
 # Crawler on a schedule to classify log files and ensure they are put into the Glue Tables.
-resource "aws_glue_crawler" "beneficiaries-recurring-crawler" {
+resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
   classifiers   = []
   database_name = local.database
   configuration = jsonencode(
@@ -228,14 +318,12 @@ resource "aws_glue_crawler" "beneficiaries-recurring-crawler" {
       Version = 1
     }
   )
-  name     = "${local.full_name}-beneficiaries-recurring-crawler"
+  name     = "${local.full_name}-beneficiaries-unique-crawler"
   role     = data.aws_iam_role.glue-role.name
-  schedule = "cron(59 9 * * ? *)"
 
   catalog_target {
     database_name = local.database
     tables = [
-      aws_glue_catalog_table.beneficiaries-table.name,
       aws_glue_catalog_table.beneficiaries-unique-table.name
     ]
   }
@@ -251,5 +339,23 @@ resource "aws_glue_crawler" "beneficiaries-recurring-crawler" {
   schema_change_policy {
     delete_behavior = "LOG"
     update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+# Trigger for Populate Beneficiaries Unique Job
+resource "aws_glue_trigger" "bfd-beneficiaries-unique-crawler-trigger" {
+  name        = "${local.full_name}-beneficiaries-unique-crawler-trigger"
+  description = "Trigger to start the Beneficiaries Unique Crawler whenever the Populate Beneficiaries Unique Job completes successfully"
+  type        = "CONDITIONAL"
+
+  actions {
+    crawler_name = aws_glue_crawler.beneficiaries-unique-crawler.name
+  }
+
+  predicate {
+    conditions {
+      job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
+      state  = "SUCCEEDED"
+    }
   }
 }

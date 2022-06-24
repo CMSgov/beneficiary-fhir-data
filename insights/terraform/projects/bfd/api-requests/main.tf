@@ -4,15 +4,16 @@
 
 locals {
   environment  = terraform.workspace
+  full_name    = "bfd-insights-${local.project}-${local.environment}"
+  database     = local.full_name
+  project      = "bfd"
+  region       = "us-east-1"
+  api_requests_table_name = "${replace(local.full_name, "-", "_")}_api_requests"
   tags         = {
     business    = "OEDA",
     application = "bfd-insights",
     project     = "bfd"
   }
-  full_name    = "bfd-insights-${local.project}-${local.environment}"
-  database     = local.full_name
-  project      = "bfd"
-  region       = "us-east-1"
 }
 
 # Creates AWS Glue Database named "bfd-insights-bfd-<environment>"

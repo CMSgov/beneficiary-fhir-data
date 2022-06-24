@@ -6,7 +6,7 @@
 resource "aws_glue_catalog_table" "api-requests-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = module.database.name
-  name          = "${replace(local.full_name, "-", "_")}_api_requests"
+  name          = local.api_requests_table_name
   retention  = 0
   table_type = "EXTERNAL_TABLE"
 
@@ -57,7 +57,7 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
   )
   name     = "${local.full_name}-api-requests-recurring-crawler"
   role     = aws_iam_role.glue-role.name
-  schedule = "cron(59 10 * * ? *)"
+  schedule = "cron(0 4 * * ? *)" # Every day at 4am UCT
 
   catalog_target {
     database_name = module.database.name
@@ -220,5 +220,41 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
 
   execution_property {
     max_concurrent_runs = 1
+  }
+}
+
+# Trigger for History Ingest Job
+resource "aws_glue_trigger" "bfd-history-ingest-job-trigger" {
+  name        = "${local.full_name}-history-ingest-trigger"
+  description = "Trigger to start the History Ingest Glue Job whenever the Crawler completes successfully"
+  type        = "CONDITIONAL"
+
+  actions {
+    job_name = aws_glue_job.bfd-history-ingest-job.name
+  }
+
+  predicate {
+    conditions {
+      crawler_name = aws_glue_crawler.bfd-history-crawler.name
+      crawl_state  = "SUCCEEDED"
+    }
+  }
+}
+
+# Trigger for API Requests Crawler. Note that the crawler is *also* on a regular schedule.
+resource "aws_glue_trigger" "bfd-api-requests-crawler-trigger" {
+  name        = "${local.full_name}-api-requests-crawler-trigger"
+  description = "Trigger to start the API Requests Crawler whenever the History Ingest Job completes successfully"
+  type        = "CONDITIONAL"
+
+  actions {
+    crawler_name = aws_glue_crawler.api-requests-recurring-crawler.name
+  }
+
+  predicate {
+    conditions {
+      job_name = aws_glue_job.bfd-history-ingest-job.name
+      state  = "SUCCEEDED"
+    }
   }
 }

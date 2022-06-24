@@ -46,8 +46,7 @@ resource "aws_iam_role" "cloudwatch_role" {
 # Firehose Policy
 resource "aws_iam_policy" "firehose_policy" {
   description = "Allow firehose delivery to insights S3 bucket"
-  # name        = "${local.full_name}-firehose-to-s3-policy"
-  name        = "${local.full_name}-api-requests"
+  name        = "${local.full_name}-firehose-to-s3-policy"
   policy = jsonencode(
     {
       Statement = [
@@ -109,8 +108,7 @@ resource "aws_iam_policy" "firehose_policy" {
 
 # Firehose Role
 resource "aws_iam_role" "firehose_role" {
-  name                  = "${local.full_name}-api-requests"
-  # "${local.full_name}-firehose-role"
+  name                  = "${local.full_name}-firehose-role"
   description           = ""
   path                  = "/"
   force_detach_policies = false
