@@ -58,8 +58,6 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
   name     = "${local.full_name}-api-requests-recurring-crawler"
   role     = aws_iam_role.glue-role.name
   schedule = "cron(59 10 * * ? *)"
-  tags     = {}
-  tags_all = {}
 
   catalog_target {
     database_name = module.database.name
@@ -130,8 +128,6 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   name          = "${local.full_name}-history-crawler"
   description   = "Glue Crawler to ingest logs into the API History Glue Table"
   role          = aws_iam_role.glue-role.name
-  tags          = {}
-  tags_all      = {}
 
   classifiers = [
     aws_glue_classifier.bfd-historicals-local.name,
@@ -183,8 +179,6 @@ resource "aws_s3_object" "bfd-history-ingest" {
   key                = "scripts/${local.environment}/bfd_history_ingest.py"
   metadata           = {}
   storage_class      = "STANDARD"
-  tags               = local.tags
-  tags_all           = local.tags_all
   source             = "glue_src/bfd_history_ingest.py"
 }
 
@@ -192,8 +186,6 @@ resource "aws_s3_object" "bfd-history-ingest" {
 resource "aws_glue_job" "bfd-history-ingest-job" {
   name                      = "${local.full_name}-history-ingest"
   description               = "Ingest historical log data"
-  tags                      = {}
-  tags_all                  = {}
   connections               = []
   glue_version              = "3.0"
   max_retries               = 0

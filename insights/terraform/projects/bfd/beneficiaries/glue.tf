@@ -51,8 +51,6 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   key                = "scripts/${local.environment}/bfd_populate_beneficiaries.py"
   metadata           = {}
   storage_class      = "STANDARD"
-  tags               = {}
-  tags_all           = {}
   source             = "glue_src/bfd_populate_beneficiaries.py"
 }
 
@@ -60,7 +58,6 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
 resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
   name                      = "${local.full_name}-populate-beneficiaries"
   description               = "Populate the Beneficiaries table"
-  tags                      = local.tags
   glue_version              = "3.0"
   max_retries               = 0
   non_overridable_arguments = {}
@@ -168,8 +165,6 @@ resource "aws_s3_object" "bfd-populate-beneficiary-unique" {
   key                = "scripts/${local.environment}/bfd_populate_beneficiary_unique.py"
   metadata           = {}
   storage_class      = "STANDARD"
-  tags               = {}
-  tags_all           = {}
   source             = "glue_src/bfd_populate_beneficiary_unique.py"
 }
 
@@ -199,8 +194,6 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   non_overridable_arguments = {}
   number_of_workers         = 10
   role_arn                  = data.aws_iam_role.glue-role.arn
-  tags                      = {}
-  tags_all                  = {}
   timeout                   = 2880
   worker_type               = "G.1X"
 
@@ -238,8 +231,6 @@ resource "aws_glue_crawler" "beneficiaries-recurring-crawler" {
   name     = "${local.full_name}-beneficiaries-recurring-crawler"
   role     = data.aws_iam_role.glue-role.name
   schedule = "cron(59 9 * * ? *)"
-  tags     = {}
-  tags_all = {}
 
   catalog_target {
     database_name = local.database

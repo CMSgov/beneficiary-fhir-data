@@ -42,7 +42,7 @@ resource "aws_iam_role" "cloudwatch_role" {
 
 # Firehose Policy
 resource "aws_iam_policy" "firehose_policy" {
-  description = "Allow write access to BFD Insights S3 bucket and read access to associated Glue resources"
+  description = "Allow firehose delivery to insights S3 bucket"
   name        = "${local.full_name}-api-requests"
   policy = jsonencode(
     {
@@ -100,22 +100,18 @@ resource "aws_iam_policy" "firehose_policy" {
       Version = "2012-10-17"
     }
   )
-  tags     = {}
-  tags_all = {}
 }
 
 # Firehose Role
 resource "aws_iam_role" "firehose_role" {
-  name                 = "${local.full_name}-api-requests"
-  description          = ""
-  path                 = "/"
+  name                  = "${local.full_name}-api-requests"
+  description           = ""
+  path                  = "/"
   force_detach_policies = false
-  managed_policy_arns = [
+  managed_policy_arns   = [
     aws_iam_policy.firehose_policy.arn,
   ]
   max_session_duration = 3600
-  # tags = local.tags
-  # tags_all = local.tags_all
   assume_role_policy = jsonencode(
     {
       Statement = [
@@ -158,8 +154,6 @@ resource "aws_iam_role" "firehose-lambda-role" {
   description           = "Allow Lambda to create and write to its log group"
   path                  = "/service-role/"
   max_session_duration  = 3600
-  # tags                 = local.tags
-  # tags_all             = local.tags_all
   force_detach_policies = false
   assume_role_policy = jsonencode(
     {
@@ -204,8 +198,6 @@ resource "aws_iam_role" "firehose-lambda-role" {
 resource "aws_iam_role" "glue-role" {
   name                 = "${local.full_name}-glue-role"
   description          = "Allow the Glue service to access the BFD Insights S3 and Glue resources"
-  # tags                 = local.tags
-  # tags_all             = local.tags_all
   max_session_duration = 3600
   managed_policy_arns = [
     aws_iam_policy.bfd-insights-bfd-glue-role-s3-access.arn,

@@ -1,9 +1,6 @@
 # Firehose Data Stream
 resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
   name           = "${local.full_name}-firehose"
-  description    = "Ingests logs in real-time to BFD Insights"
-  tags           = local.tags
-  tags_all       = local.tags_all
   destination    = "extended_s3"
 
   extended_s3_configuration {
