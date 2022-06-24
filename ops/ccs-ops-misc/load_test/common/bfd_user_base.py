@@ -9,17 +9,57 @@ from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
-from common.stats.stats_config import StatsStorageType
+from common.stats.stats_config import StatsConfiguration, StatsStorageType
 from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
 from locust import HttpUser, events
 from locust.env import Environment
+from locust.argument_parser import LocustArgumentParser
 
 import urllib3
 
 setup.set_locust_env(config.load())
 
+@events.init_command_line_parser.add_listener
+def custom_args(parser: LocustArgumentParser):
+    parser.add_argument(
+        '--client-cert-path',
+        type=str,
+        required=True,
+        help='Specifies path to client cert, ex: "<path/to/client/pem/file>" (Required)',
+        dest='client_cert_path',
+        env_var='LOCUST_BFD_CLIENT_CERT_PATH'
+    )
+    parser.add_argument(
+        '--database-uri',
+        type=str,
+        required=True,
+        help='Specfies database URI path, ex: "https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)',
+        dest='database_uri',
+        env_var='LOCUST_BFD_DATABASE_URI'
+    )
+    parser.add_argument(
+        '--server-public-key',
+        type=str,
+        help='"<server public key>" (Optional, Default: "")',
+        dest='server_public_key',
+        env_var='LOCUST_BFD_SERVER_PUBLIC_KEY'
+    )
+    parser.add_argument(
+        '--table-sample-percent',
+        type=float,
+        help='<% of table to sample> (Optional, Default: 0.25)',
+        dest='table_sample_percent',
+        env_var='LOCUST_DATA_TABLE_SAMPLE_PERCENT'
+    )
+    parser.add_argument(
+        '--stats-config',
+        type=StatsConfiguration.from_key_val_str,
+        help='"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)',
+        dest='stats_config',
+        env_var='LOCUST_STATS_CONFIG'
+    )
 
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
