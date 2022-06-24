@@ -108,7 +108,7 @@ resource "aws_glue_catalog_table" "api-history" {
     bucket_columns    = []
     compressed        = true
     input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-app-logs.bucket}/history/${local.environment}/api_history/"
+    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_history/"
     number_of_buckets = -1
     output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     stored_as_sub_directories = false
@@ -196,7 +196,7 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   worker_type               = "G.1X"
 
   default_arguments = {
-    "--TempDir"                          = "s3://${aws_s3_object.bfd-history-ingest.bucket}/temporary/${local.environment}/"
+    "--TempDir"                          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/temporary/${local.environment}/"
     "--class"                            = "GlueApp"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-glue-datacatalog"          = "true"
@@ -207,7 +207,7 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--job-language"                     = "python"
     "--sourceDatabase"                   = module.database.name
     "--sourceTable"                      = aws_glue_catalog_table.api-history.name
-    "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-history-ingest.bucket}/sparkHistoryLogs/${local.environment}/"
+    "--spark-event-logs-path"            = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = module.database.name
     "--targetTable"                      = aws_glue_catalog_table.api-requests-table.name
   }

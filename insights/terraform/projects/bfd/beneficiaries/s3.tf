@@ -1,7 +1,3 @@
-data "aws_s3_bucket" "bfd-app-logs" {
-  bucket = "bfd-insights-bfd-app-logs"
-}
-
 data "aws_s3_bucket" "bfd-insights-bucket" {
   bucket = "bfd-insights-bfd-${data.aws_caller_identity.current.account_id}"
 }

@@ -18,6 +18,9 @@ data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
   }
 }
 
+
+# Firehose Ingestion
+
 # CloudWatch Role
 resource "aws_iam_role" "cloudwatch_role" {
   name               = "${local.full_name}-cwl2firehose-role"
@@ -43,6 +46,7 @@ resource "aws_iam_role" "cloudwatch_role" {
 # Firehose Policy
 resource "aws_iam_policy" "firehose_policy" {
   description = "Allow firehose delivery to insights S3 bucket"
+  # name        = "${local.full_name}-firehose-to-s3-policy"
   name        = "${local.full_name}-api-requests"
   policy = jsonencode(
     {
@@ -54,8 +58,8 @@ resource "aws_iam_policy" "firehose_policy" {
             "glue:GetTableVersions",
           ]
           Effect   = "Allow"
-          Resource = "*"
-          Sid      = ""
+          Resource = "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${aws_glue_catalog_table.api-requests-table.name}"
+          Sid      = "GetGlueTable"
         },
         {
           Action = [
@@ -71,7 +75,7 @@ resource "aws_iam_policy" "firehose_policy" {
             data.aws_s3_bucket.bfd-insights-bucket.arn,
             "${data.aws_s3_bucket.bfd-insights-bucket.arn}/*",
           ]
-          Sid = ""
+          Sid = "GetS3Bucket"
         },
         {
           Action = [
@@ -84,7 +88,8 @@ resource "aws_iam_policy" "firehose_policy" {
           Effect = "Allow"
           Resource = [
             data.aws_kms_key.kms_key.arn
-          ]
+          ],
+          Sid = "UseKMSKey"
         },
         {
           Action = [
@@ -92,9 +97,9 @@ resource "aws_iam_policy" "firehose_policy" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:logs:us-east-1:577373831711:log-group:/aws/kinesisfirehose/bfd-insights-bfd-api-requests:log-stream:*",
+            "arn:aws:logs:us-east-1:577373831711:log-group:/aws/kinesisfirehose/${local.full_name}-firehose:log-stream:*",
           ]
-          Sid = ""
+          Sid = "PutLogEvents"
         },
       ]
       Version = "2012-10-17"
@@ -105,6 +110,7 @@ resource "aws_iam_policy" "firehose_policy" {
 # Firehose Role
 resource "aws_iam_role" "firehose_role" {
   name                  = "${local.full_name}-api-requests"
+  # "${local.full_name}-firehose-role"
   description           = ""
   path                  = "/"
   force_detach_policies = false
@@ -194,6 +200,9 @@ resource "aws_iam_role" "firehose-lambda-role" {
   }
 }
 
+
+# Glue
+
 # Glue Role
 resource "aws_iam_role" "glue-role" {
   name                 = "${local.full_name}-glue-role"
@@ -258,7 +267,7 @@ resource "aws_iam_policy" "bfd-insights-bfd-glue-role-s3-access" {
                   "s3:GetBucketLocation"
               ],
               "Effect": "Allow",
-              "Resource": data.aws_s3_bucket.bfd-app-logs.arn,
+              "Resource": data.aws_s3_bucket.bfd-insights-bucket.arn,
               "Sid": "s3Buckets"
           },
           {
@@ -270,34 +279,8 @@ resource "aws_iam_policy" "bfd-insights-bfd-glue-role-s3-access" {
                   "s3:AbortMultipartUpload"
               ],
               "Effect": "Allow",
-              "Resource": [
-                "${data.aws_s3_bucket.bfd-app-logs.arn}/*",
-                "${data.aws_s3_bucket.bfd-insights-bucket.arn}/databases/*"
-              ],
+              "Resource": "${data.aws_s3_bucket.bfd-insights-bucket.arn}/databases/*",
               "Sid": "s3Objects"
-          },
-          {
-              "Action": [
-                  "s3:ListBucketMultipartUploads",
-                  "s3:ListBucket",
-                  "s3:HeadBucket",
-                  "s3:GetBucketLocation"
-              ],
-              "Effect": "Allow",
-              "Resource": data.aws_s3_bucket.bfd-app-logs.arn,
-              "Sid": "s3BucketsAppLogs"
-          },
-          {
-              "Action": [
-                  "s3:PutObject*",
-                  "s3:ListMultipartUploadParts",
-                  "s3:GetObject*",
-                  "s3:DeleteObject*",
-                  "s3:AbortMultipartUpload"
-              ],
-              "Effect": "Allow",
-              "Resource": "${data.aws_s3_bucket.bfd-app-logs.arn}/*",
-              "Sid": "s3ObjectsAppLogs"
           },
           {
               "Action": [
