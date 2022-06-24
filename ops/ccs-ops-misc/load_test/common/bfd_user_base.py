@@ -4,8 +4,12 @@
 import json
 import logging
 import os
-
 from typing import Callable, Dict, List, Union
+import urllib3
+import urllib3.exceptions
+from locust import HttpUser, events
+from locust.env import Environment
+from locust.argument_parser import LocustArgumentParser
 from common import config, data, test_setup as setup, validation
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
@@ -13,12 +17,7 @@ from common.stats.stats_config import StatsConfiguration, StatsStorageType
 from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
-from locust import HttpUser, events
-from locust.env import Environment
-from locust.argument_parser import LocustArgumentParser
 
-import urllib3
-import urllib3.exceptions
 
 setup.set_locust_env(config.load())
 
