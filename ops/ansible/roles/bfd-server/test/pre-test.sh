@@ -32,12 +32,15 @@ if [ ! -L "roles/${ROLE}" ]; then ln -s "$(cd .. && pwd)" "roles/${ROLE}"; fi
 if [ "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}')" != "$CONTAINER_NAME" ]; then
   docker run \
     --cap-add=SYS_ADMIN \
+    --cap-add=NET_ADMIN \
+    --cap-add=NET_RAW \
     --detach \
     --rm \
     --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
     --tmpfs /run \
     --tmpfs /run/lock \
     --name "$CONTAINER_NAME" \
+    --publish 7443:7443 \
     "ghcr.io/cmsgov/bfd-apps:${BFD_APPS_IMAGE_ID}"
 fi
 
