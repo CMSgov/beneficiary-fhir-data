@@ -15,13 +15,15 @@ class PACTestUser(BFDUserBase):
     # table?
     USE_TABLE_SAMPLE = False
 
-    @classmethod
-    def _hashed_mbis(cls):
-        if not hasattr(cls, '_cached_hashed_mbis'):
-            cls._cached_hashed_mbis = data.load_all(
-                    db.get_pac_hashed_mbis,
-                    use_table_sample=cls.USE_TABLE_SAMPLE)
-        return cls._cached_hashed_mbis
+    def _hashed_mbis(self):
+        if not hasattr(self, '_cached_hashed_mbis'):
+            self._cached_hashed_mbis = data.load_all(
+                self.database_uri,
+                db.get_pac_hashed_mbis,
+                use_table_sample=self.USE_TABLE_SAMPLE,
+                table_sample_percent=self.table_sample_percent
+            )
+        return self._cached_hashed_mbis
 
     # Helper
 

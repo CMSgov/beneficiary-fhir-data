@@ -4,25 +4,22 @@ from typing import Callable, List
 import datetime
 import os
 
-from . import config, test_setup as setup
+from . import test_setup as setup
 
 
-def load_all(load_function: Callable, *args, use_table_sample: bool = False) -> List:
-    '''Loads all of the data from the database, using the database connection from the
-    configuration file.'''
+def load_all(database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
+    '''Loads all of the data from the database, using the database connection provided.'''
 
     if setup.is_master_thread():
-        ## Don't bother loading data for the master thread, it doenst run a test
+        ## Don't bother loading data for the master thread, it doesn't run a test
         return []
 
-    config_file = config.load()
     print('Collecting test data...')
     if use_table_sample:
-        table_sample_pct = config_file.get('tableSamplePct', 0.25)
-        print(f"Table Sampling at: {table_sample_pct}")
-        results = load_function(uri=config_file['dbUri'], table_sample_pct=table_sample_pct, *args)
+        print(f"Table Sampling at: {table_sample_percent}")
+        results = load_function(uri=database_uri, table_sample_pct=table_sample_percent, *args)
     else:
-        results = load_function(uri=config_file['dbUri'], *args)
+        results = load_function(uri=database_uri, *args)
 
     print(f'Loaded {len(results)} results from the database')
     return results

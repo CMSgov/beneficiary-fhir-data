@@ -22,8 +22,12 @@ class BeneTestUser(BFDUserBase):
         '''Initialize.
         '''
         super().__init__(*args, **kwargs)
-        self.bene_ids = data.load_all(db.get_bene_ids,
-            use_table_sample=self.USE_TABLE_SAMPLE).copy()
+        self.bene_ids = data.load_all(
+            self.database_uri,
+            db.get_bene_ids,
+            use_table_sample=self.USE_TABLE_SAMPLE,
+            table_sample_percent=self.table_sample_percent
+        ).copy()
         random.shuffle(self.bene_ids)
 
 

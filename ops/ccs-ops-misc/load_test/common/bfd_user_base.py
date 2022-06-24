@@ -83,6 +83,8 @@ class BFDUserBase(HttpUser):
         # Load configuration needed for making requests to the FHIR server
         self.client_cert = self.environment.parsed_options.client_cert_path
         self.server_public_key = self.environment.parsed_options.server_public_key
+        self.database_uri = self.environment.parsed_options.database_uri
+        self.table_sample_percent = self.environment.parsed_options.table_sample_percent
         if not self.server_public_key:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.last_updated = data.get_last_updated()
