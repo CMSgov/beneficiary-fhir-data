@@ -126,12 +126,13 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   @Read(version = false)
   @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
-    if (patientId == null) throw new IllegalArgumentException();
-    if (patientId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
-
-    String beneIdText = patientId.getIdPart();
-    if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
-
+    if (patientId == null) {
+      throw new IllegalArgumentException();
+    }
+    if (patientId.getVersionIdPartAsLong() != null) {
+      throw new IllegalArgumentException();
+    }
+    Long beneId = Long.parseLong(patientId.getIdPart());
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
@@ -145,14 +146,14 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers())
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-
-    if (requestHeader.isMBIinIncludeIdentifiers())
+    }
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-
+    }
     criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
+    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
 
     Beneficiary beneficiary = null;
     Long beneByIdQueryNanoSeconds = null;
@@ -187,7 +188,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     // Add bene_id to MDC logs
-    TransformerUtils.logBeneIdToMdc(Arrays.asList(beneIdText));
+    TransformerUtils.logBeneIdToMdc(Arrays.asList(String.valueOf(beneId)));
 
     Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;

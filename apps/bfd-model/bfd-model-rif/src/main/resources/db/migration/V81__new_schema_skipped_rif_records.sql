@@ -21,7 +21,7 @@ ${logic.hsql-only}    record_id                                  bigint not null
 ${logic.hsql-only}    bene_id                                    bigint not null,
 ${logic.hsql-only}    skip_reason                                varchar(50) not null,
 ${logic.hsql-only}    rif_file_timestamp                         timestamp with time zone not null,
-${logic.hsql-only}    rif_file_type                              char(48) not null,
+${logic.hsql-only}    rif_file_type                              varchar(48) not null,
 ${logic.hsql-only}    dml_ind                                    varchar(6) not null,
 ${logic.hsql-only}    rif_data                                   ${type.text} not null,
 ${logic.hsql-only} constraint public.skipped_rif_records_new_pkey

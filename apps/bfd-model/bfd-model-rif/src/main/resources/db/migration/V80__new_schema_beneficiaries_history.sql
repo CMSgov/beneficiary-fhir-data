@@ -19,12 +19,12 @@
 ${logic.hsql-only}  create table public.beneficiaries_history_new (
 ${logic.hsql-only}    bene_history_id      bigint not null,
 ${logic.hsql-only}    bene_id              bigint not null,
-${logic.hsql-only}    hicn_unhashed        varchar(11) not null,
+${logic.hsql-only}    hicn_unhashed        varchar(11),
 ${logic.hsql-only}    mbi_num              varchar(11),
 ${logic.hsql-only}    efctv_bgn_dt         date,
 ${logic.hsql-only}    efctv_end_dt         date,
 ${logic.hsql-only}    bene_crnt_hic_num    varchar(64) not null,
-${logic.hsql-only}    mbi_hash             varchar(64) not null,
+${logic.hsql-only}    mbi_hash             varchar(64),
 ${logic.hsql-only}    bene_birth_dt        date not null,
 ${logic.hsql-only}    bene_sex_ident_cd    char(1) not null,
 ${logic.hsql-only}    last_updated         timestamp with time zone,
@@ -57,9 +57,8 @@ ${logic.hsql-only}    last_updated )
 --
 ${logic.psql-only} create table public.beneficiaries_history_new as
 select 
-${logic.hsql-only}  convert(bene_history_id, SQL_BIGINT),
+                    bene_history_id,
 ${logic.hsql-only}  convert(bene_id, SQL_BIGINT),
-${logic.psql-only}  bene_history_id::bigint,
 ${logic.psql-only}  bene_id::bigint,
                     hicn_unhashed,
                     mbi_num,
@@ -76,9 +75,7 @@ from
 ${logic.psql-only} alter table public.beneficiaries_history_new
 ${logic.psql-only}    alter column bene_history_id     SET NOT NULL,
 ${logic.psql-only}    alter column bene_id             SET NOT NULL,
-${logic.psql-only}    alter column hicn_unhashed       SET NOT NULL,
 ${logic.psql-only}    alter column bene_crnt_hic_num   SET NOT NULL,
-${logic.psql-only}    alter column mbi_hash            SET NOT NULL,
 ${logic.psql-only}    alter column bene_birth_dt       SET NOT NULL,
 ${logic.psql-only}    alter column bene_sex_ident_cd   SET NOT NULL;
 

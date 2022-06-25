@@ -131,15 +131,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (patientId == null || patientId.getVersionIdPartAsLong() != null) {
       throw new IllegalArgumentException();
     }
-    String beneIdText = patientId.getIdPart();
-    if (beneIdText == null || beneIdText.trim().isEmpty()) {
-      throw new IllegalArgumentException();
-    }
-
+    Long beneId = Long.parseLong(patientId.getIdPart());
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
-
     operation.setOption("by", "id");
     // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
@@ -152,7 +147,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
+    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
 
     Beneficiary beneficiary = null;
     Long beneByIdQueryNanoSeconds = null;
@@ -177,7 +172,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneIdText));
+    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(String.valueOf(beneId)));
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
