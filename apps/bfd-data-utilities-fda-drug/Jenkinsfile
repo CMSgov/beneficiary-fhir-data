@@ -63,6 +63,21 @@ spec:
                             env.CODEARTIFACT_AUTH_TOKEN = codeArtifactAuthToken
 
                             dir('apps/bfd-data-utilities-fda-drug/') {
+                                // inject code artifact credentials into maven ~/.m2/settings.xml
+                                sh '''
+cat <<EOF > ~/.m2/settings.xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+        <username>aws</username>
+        <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+        <id>cms-bfd-maven-central-store</id>
+        </server>
+    </servers>
+</settings>
+EOF
+'''
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
                                 sh "mvn ${quietFlags} clean install"
                                 sh """mvn ${quietFlags} exec:java \
