@@ -29,7 +29,7 @@ spec:
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
     }
     stages {
-        stage('Docker Build') {
+        stage('Maven') {
             steps {
                 script {
                     container('bfd-cbc-build') {
@@ -39,12 +39,12 @@ spec:
                         // Setup AWS Credentials
                         withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
                             withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'ROLE')]) {
-                                    env.SESSION_NAME = env.JOB_NAME
-                                    awsCredentials = sh(
-                                        returnStdout: true,
-                                        script: 'aws sts assume-role --role-arn "$ROLE" \
-                                                --role-session-name "$SESSION_NAME" \
-                                                --output text --query Credentials'
+                                env.SESSION_NAME = env.JOB_NAME
+                                awsCredentials = sh(
+                                    returnStdout: true,
+                                    script: 'aws sts assume-role --role-arn "$ROLE" \
+                                             --role-session-name "$SESSION_NAME" \
+                                             --output text --query Credentials'
                                     ).trim().split(/\s+/)
                                 env.AWS_DEFAULT_REGION = 'us-east-1'
                                 env.AWS_ACCESS_KEY_ID = awsCredentials[0]
@@ -52,18 +52,26 @@ spec:
                                 env.AWS_SESSION_TOKEN = awsCredentials[3]
                             }
                         }
+                        withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
+                            codeArtifactAuthToken = sh(
+                                returnStdout: true,
+                                script: 'aws codeartifact get-authorization-token --domain cms-bfd \
+                                        --domain-owner "$ACCOUNT_ID" \
+                                        --output text --query authorizationToken'
+                                ).trim()
+                            env.CODEARTIFACT_AUTH_TOKEN = codeArtifactAuthToken
+                        }
 
                         // Execute the existing build-push script
                         dir('apps/bfd-data-utilities-fda-drug/') {
-
-                            def quietFlags = params.verbose_mvn_logging ? '' : '--quiet --batch-mode'
-                            sh "mvn ${quietFlags} --threads 1C install"
+                            def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
+                            sh "mvn ${quietFlags} clean install"
                             sh """mvn ${quietFlags} exec:java \
 -Dexec.mainClass="gov.cms.bfd.server.data.utilities.FDADrugApp.App" \
 -Dexec.args="./src/main/resources/"
 """
-                           sh 'mvn deploy'
-
+                            sh 'mvn package'
+                            sh 'mvn deploy'
                         }
                     }
                 }
