@@ -374,8 +374,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<!-- Don't use 2.7, due to https://issues.apache.org/jira/browse/MRESOURCES-192. -->
-					<version>2.6</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>com.coveo</groupId>
