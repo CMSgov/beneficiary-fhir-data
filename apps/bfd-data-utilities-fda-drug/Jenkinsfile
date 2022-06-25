@@ -84,7 +84,7 @@ EOF
     -Dexec.mainClass="gov.cms.bfd.server.data.utilities.FDADrugApp.App" \
     -Dexec.args="./src/main/resources/"
     """
-                                sh 'mvn package'
+                                sh "mvn ${quietFlags} package"
                                 sh 'mvn deploy "-DaltDeploymentRepository=cms-bfd-maven-central-store::default::https://cms-bfd-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/"'
                             }
                         }
