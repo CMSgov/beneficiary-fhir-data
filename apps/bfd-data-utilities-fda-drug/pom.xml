@@ -123,14 +123,36 @@
 				<version>1.1</version>
 				<executions>
 					<execution>
-                            <phase>generate-sources</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
 							<tasks>
-								<copy file="src/main/resources/fda_products_cp1252.tsv" tofile="${basedir}/target/fda_products_cp1252.tsv"/>
+								<mkdir dir="${basedir}/src/main/resources"/>
 							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+							<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/resources</directory>
+								<filtering>false</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
