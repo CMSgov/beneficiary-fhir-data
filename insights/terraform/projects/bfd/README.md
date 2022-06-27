@@ -20,28 +20,28 @@ flowchart TD
 
 ### Manual Ingestion of Log Files
 
-Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
+Note: Replace `<environment>` and `<account-number>` with the name of your environment, such as
+`prod` or `prod-sbx`, and the AWS account number, respectively.
 
 1. CloudWatch > Log Groups > `/bfd/<environment>/bfd-server/access.json`
     - Actions > Export Data to Amazon S3
         - Choose time period
         - Select Account: *This Account*
         - S3 Bucket Name: `bfd-insights-bfd-app-logs`
-        - S3 Bucket Prefix: `history/<environment>/api_history`
+        - S3 Bucket Prefix: `history/temp-<environment>`.
     - Export. This took about 80 minutes for 3 weeks of prod-sbx logs.
 
 2. S3
     - Select bucket `bfd-insights-bfd-app-logs`
-    - Go to path `history/<environment>/api_history`
-    - Select object `aws-logs-write-test`
-    - Delete this object. Confirm.
+    - Go to path `history/temp-<environment>`
+    - Select all objects *except* `aws-logs-write-test`
+    - Actions > Move
+        - Bucket
+        - Destination: `bfd-insights-bfd-<account-number>/databases/bfd-insights-bfd-<environment>/api_history/`
+        - Move
 
-3. AWS Glue > Crawlers > `bfd-<environment>-history-crawler`
-    - Run. It should finish within a couple minutes.
-
-4. AWS Glue > Jobs > `bfd-<environment>-history-ingest`
-    - Run. This took about 37 minutes for 3 weeks of prod-sbx logs.
-
+3. AWS Glue > Workflows > `bfd-insights-bfd-<environment>-history-workflow`
+    - Actions > Run. The entire workflow may take a bit to run through, but you can track progress in the graph.
 
 ## Beneficiaries
 
@@ -57,23 +57,6 @@ flowchart TD
     DataSet --> Analysis["QuickSight: Analysis"]
     Analysis --> Dashboard["QuickSight: Dashboard"]
 ```
-
-### Manual Population of Glue Tables
-
-Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
-
-1. AWS Glue > Jobs > `bfd-insights-bfd-<environment>-populate-beneficiaries`
-    - Run. This one took about 35 minutes for 3 weeks of prod-sbx logs.
-
-2. AWS Glue > Crawlers > `bfd-insights-bfd-<environment>-beneficiaries-recurring-crawler`
-    - Run. It should finish within a couple minutes.
-
-3. AWS Glue > Jobs > `bfd-insights-bfd-<environment>-populate-beneficiary-unique`
-    - Run.
-
-4. AWS Glue > Crawlers > `bfd-insights-bfd-<environment>-beneficiaries-recurring-crawler`
-    - Run (again). It should finish within a couple minutes.
-
 
 ## Manual Creation of QuickSight Dashboards
 
