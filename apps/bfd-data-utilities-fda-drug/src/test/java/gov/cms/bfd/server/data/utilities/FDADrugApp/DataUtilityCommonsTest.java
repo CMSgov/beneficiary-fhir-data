@@ -23,45 +23,20 @@ public final class DataUtilityCommonsTest {
   public void getFDADrugCodesThrowsExceptionWhenFileIsNotADirectory() {
       String outputDir = "../temp/";
      Path tempDir = Paths.get(outputDir);;
-    try (MockedStatic<Paths> paths  = Mockito.mockStatic(Paths.class)) {
-      try (MockedStatic<Path> path  = Mockito.mockStatic(Path.class)) {
-        try (MockedStatic<Files> files  = Mockito.mockStatic(Files.class)) {
-
-      
-        paths.when(() -> Paths.get(any())).thenAnswer((Answer<Path>) invocation -> tempDir);
-        files.when(() -> Files.isDirectory(any())).thenAnswer((Answer<Boolean>) invocation -> false);
-              Throwable exception =
-        assertThrows(
-            IllegalStateException.class,
-            () -> {
-               DataUtilityCommons.getFDADrugCodes(outputDir, any());
-            });
-    assertEquals("OUTPUT_DIR does not exist for FDA NDC download.", exception.getMessage());
-      }
-    }  
-    }
-}
-
-//  @Test
-//   public void getFDADrugCodesThrowsExceptionWhen() {
-//       String outputDir = "../temp/";
-//       String fdaFile= "test.csv";
-//      Path tempDir = Paths.get(outputDir);
-//     try (MockedStatic<Paths> paths  = Mockito.mockStatic(Paths.class)) {
-     
-//         try (MockedStatic<Files> files  = Mockito.mockStatic(Files.class)) {
-//          try (MockedStatic<Path> path  = Mockito.mockStatic(Path.class)) {
-      
-//         paths.when(() -> Paths.get(any())).thenAnswer((Answer<Path>) invocation -> tempDir);
-//         files.when(() -> Files.isDirectory(any())).thenAnswer((Answer<Boolean>) invocation -> true);
-//         files.when(() -> Files.createTempDirectory(any())).thenAnswer((Answer<Path>) invocation -> tempDir);
-//         files.when(() -> Files.exists(any())).thenAnswer((Answer<Boolean>) invocation -> false);
-//         path.when(() -> Path.resolve(fdaFile)).thenAnswer((Answer<Path>) invocation -> tempDir);
-//       }
-//     }  
-//     }
-            
-//              DataUtilityCommons.getFDADrugCodes(outputDir, fdaFile);
-    
-// }
+      try (MockedStatic<Paths> paths  = Mockito.mockStatic(Paths.class)) {
+          try (MockedStatic<Path> path  = Mockito.mockStatic(Path.class)) {
+              try (MockedStatic<Files> files  = Mockito.mockStatic(Files.class)) {
+              paths.when(() -> Paths.get(any())).thenAnswer((Answer<Path>) invocation -> tempDir);
+              files.when(() -> Files.isDirectory(any())).thenAnswer((Answer<Boolean>) invocation -> false);
+                    Throwable exception =
+              assertThrows(
+                  IllegalStateException.class,
+                  () -> {
+                    DataUtilityCommons.getFDADrugCodes(outputDir, any());
+                  });
+              assertEquals("OUTPUT_DIR does not exist for FDA NDC download.", exception.getMessage());
+            }
+          }  
+        }
+  }
 }
