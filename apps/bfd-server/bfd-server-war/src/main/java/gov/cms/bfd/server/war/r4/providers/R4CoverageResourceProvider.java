@@ -202,7 +202,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   }
 
   /**
-   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to find a matching {@link
+   * @param beneIdStr the {@link Beneficiary#getBeneficiaryId()} value to find a matching {@link
    *     Beneficiary} for
    * @return the {@link Beneficiary} that matches the specified {@link
    *     Beneficiary#getBeneficiaryId()} value
@@ -210,10 +210,10 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    *     Beneficiary} can be found in the database.
    */
   @Trace
-  private Beneficiary findBeneficiaryById(String beneficiaryId, DateRangeParam lastUpdatedRange)
+  private Beneficiary findBeneficiaryById(String beneIdStr, DateRangeParam lastUpdatedRange)
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty
-    if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdatedRange)) {
+    if (loadedFilterManager.isResultSetEmpty(beneIdStr, lastUpdatedRange)) {
       throw new NoResultException();
     }
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -222,7 +222,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     root.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
     criteria.select(root);
     Predicate wherePredicate =
-        builder.equal(root.get(Beneficiary_.beneficiaryId), Long.parseLong(beneficiaryId));
+        builder.equal(root.get(Beneficiary_.beneficiaryId), Long.parseLong(beneIdStr));
     if (lastUpdatedRange != null) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdatedRange);
       wherePredicate = builder.and(wherePredicate, predicate);
