@@ -7,8 +7,8 @@ resource "aws_glue_catalog_table" "api-requests-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = module.database.name
   name          = local.api_requests_table_name
-  retention  = 0
-  table_type = "EXTERNAL_TABLE"
+  retention     = 0
+  table_type    = "EXTERNAL_TABLE"
 
   partition_keys {
     name = "year"
@@ -24,12 +24,12 @@ resource "aws_glue_catalog_table" "api-requests-table" {
   }
 
   storage_descriptor {
-    bucket_columns    = []
-    compressed        = false
-    input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests/"
-    number_of_buckets = -1
-    output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    bucket_columns            = []
+    compressed                = false
+    input_format              = "org.apache.hadoop.mapred.TextInputFormat"
+    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests/"
+    number_of_buckets         = -1
+    output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     stored_as_sub_directories = false
 
     ser_de_info {
@@ -104,12 +104,12 @@ resource "aws_glue_catalog_table" "api-history" {
   }
 
   storage_descriptor {
-    bucket_columns    = []
-    compressed        = true
-    input_format      = "org.apache.hadoop.mapred.TextInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_history/"
-    number_of_buckets = -1
-    output_format     = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    bucket_columns            = []
+    compressed                = true
+    input_format              = "org.apache.hadoop.mapred.TextInputFormat"
+    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_history/"
+    number_of_buckets         = -1
+    output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
     stored_as_sub_directories = false
 
     ser_de_info {

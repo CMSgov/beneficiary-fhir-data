@@ -26,12 +26,12 @@ resource "aws_glue_catalog_table" "beneficiaries-table" {
   }
 
   storage_descriptor {
-    bucket_columns    = []
-    compressed        = false
-    input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api-requests-beneficiaries/"
-    number_of_buckets = -1
-    output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+    bucket_columns            = []
+    compressed                = false
+    input_format              = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api-requests-beneficiaries/"
+    number_of_buckets         = -1
+    output_format             = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     stored_as_sub_directories = false
 
     ser_de_info {
@@ -165,12 +165,12 @@ resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
   }
 
   storage_descriptor {
-    bucket_columns    = []
-    compressed        = false
-    input_format      = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location          = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests_beneficiaries_unique/"
-    number_of_buckets = -1
-    output_format     = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+    bucket_columns            = []
+    compressed                = false
+    input_format              = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests_beneficiaries_unique/"
+    number_of_buckets         = -1
+    output_format             = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     stored_as_sub_directories = false
 
     columns {
