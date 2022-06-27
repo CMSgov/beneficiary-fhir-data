@@ -103,25 +103,33 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   @Read(version = false)
   @Trace
   public Coverage read(@IdParam IdType coverageId) {
-    if (coverageId == null) throw new IllegalArgumentException();
-    if (coverageId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (coverageId == null) {
+      throw new IllegalArgumentException();
+    }
+    if (coverageId.getVersionIdPartAsLong() != null) {
+      throw new IllegalArgumentException();
+    }
 
     String coverageIdText = coverageId.getIdPart();
-    if (coverageIdText == null || coverageIdText.trim().isEmpty())
+    if (coverageIdText == null || coverageIdText.trim().isEmpty()) {
       throw new IllegalArgumentException();
+    }
 
     Operation operation = new Operation(Operation.Endpoint.V2_COVERAGE);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    if (!coverageIdMatcher.matches())
+    if (!coverageIdMatcher.matches()) {
       throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+    }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
         MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
-    if (!coverageIdSegment.isPresent()) throw new ResourceNotFoundException(coverageId);
+    if (!coverageIdSegment.isPresent()) {
+      throw new ResourceNotFoundException(coverageId);
+    }
     String coverageIdBeneficiaryIdText = coverageIdMatcher.group(2);
 
     Beneficiary beneficiaryEntity;
@@ -213,7 +221,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
     criteria.select(root);
-    Predicate wherePredicate = builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId);
+    Predicate wherePredicate =
+        builder.equal(root.get(Beneficiary_.beneficiaryId), Long.parseLong(beneficiaryId));
     if (lastUpdatedRange != null) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdatedRange);
       wherePredicate = builder.and(wherePredicate, predicate);

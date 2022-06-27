@@ -642,8 +642,7 @@ public final class RifLoader {
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(Beneficiary_.beneficiaryId),
-              String.valueOf(newBeneficiaryRecord.getBeneficiaryId())));
+              root.get(Beneficiary_.beneficiaryId), newBeneficiaryRecord.getBeneficiaryId()));
 
       oldBeneficiaryRecord =
           Optional.ofNullable(entityManager.createQuery(criteria).getSingleResult());
