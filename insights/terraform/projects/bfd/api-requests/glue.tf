@@ -38,7 +38,7 @@ resource "aws_glue_catalog_table" "api-requests-table" {
   }
 }
 
-# Crawler on a schedule to classify log files and ensure they are put into the Glue Table.
+# Crawler for the API Requests table
 resource "aws_glue_crawler" "api-requests-recurring-crawler" {
   classifiers   = []
   database_name = module.database.name
@@ -84,7 +84,7 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
 #
 # Storage and Jobs for manually ingesting historical logs.
 
-# Glue Catalog Table to store API History
+# Glue Table to store API History
 resource "aws_glue_catalog_table" "api-history" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = module.database.name
@@ -121,7 +121,7 @@ resource "aws_glue_catalog_table" "api-history" {
   }
 }
 
-# Glue Crawler to process the ingested logs and populate the S3 target
+# Glue Crawler for the API History table
 resource "aws_glue_crawler" "bfd-history-crawler" {
   database_name = module.database.name
   name          = "${local.full_name}-history-crawler"
@@ -160,7 +160,7 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   )
 }
 
-# Glue Classifier to read data from the data store and generate the schema
+# Classifier for the History Crawler
 resource "aws_glue_classifier" "bfd-historicals-local" {
   name = "${local.full_name}-historicals-local"
 
@@ -265,7 +265,7 @@ resource "aws_glue_trigger" "bfd-history-ingest-job-trigger" {
   }
 }
 
-# Trigger for API Requests Crawler. Note that the crawler is *also* on a regular schedule.
+# Trigger for API Requests Crawler
 resource "aws_glue_trigger" "bfd-api-requests-crawler-trigger" {
   name          = "${local.full_name}-api-requests-crawler-trigger"
   description   = "Trigger to start the API Requests Crawler whenever the History Ingest Job completes successfully"

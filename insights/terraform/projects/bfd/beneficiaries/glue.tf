@@ -1,6 +1,6 @@
 # Beneficiaries
 #
-# Beneficiaries, which captures when a beneficiary is queried.
+# Beneficiaries, which captures when a beneficiary is queried
 
 # Glue Catalog Table to hold Beneficiaries
 resource "aws_glue_catalog_table" "beneficiaries-table" {
@@ -95,25 +95,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
   }
 }
 
-resource "aws_glue_trigger" "bfd-populate-beneficiaries-job-trigger" {
-  name          = "${local.full_name}-populate-beneficiaries-job-trigger"
-  description   = "Trigger to start the Populate Beneficiaries Glue Job whenever the Crawler completes successfully"
-  workflow_name = local.glue_workflow_name
-  type          = "CONDITIONAL"
-
-  actions {
-    job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
-  }
-
-  predicate {
-    conditions {
-      crawler_name = "${local.full_name}-api-requests-recurring-crawler" # From api-requests
-      crawl_state  = "SUCCEEDED"
-    }
-  }
-}
-
-# Crawler on a schedule to classify log files and ensure they are put into the Glue Tables.
+# Crawler for the Beneficiaries table
 resource "aws_glue_crawler" "beneficiaries-crawler" {
   classifiers   = []
   database_name = local.database
@@ -154,30 +136,12 @@ resource "aws_glue_crawler" "beneficiaries-crawler" {
   }
 }
 
-resource "aws_glue_trigger" "bfd-beneficiaries-crawler-trigger" {
-  name          = "${local.full_name}-beneficiaries-crawler-trigger"
-  description   = "Trigger to start the Beneficiaries Crawler whenever the Populate Beneficiaries Job completes successfully"
-  workflow_name = local.glue_workflow_name
-  type          = "CONDITIONAL"
-
-  actions {
-    crawler_name = aws_glue_crawler.beneficiaries-crawler.name
-  }
-
-  predicate {
-    conditions {
-      job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
-      state  = "SUCCEEDED"
-    }
-  }
-}
-
 
 # Beneficiary Unique
 #
 # Beneficiary Unique table to track the first time each beneficiary was queried.
 
-# Glue Catalog Table for unique beneficiaries
+# Glue Table for unique beneficiaries
 resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
   catalog_id    = data.aws_caller_identity.current.account_id
   database_name = local.database
@@ -285,7 +249,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   }
 }
 
-# Crawler to classify log files and ensure they are put into the Glue Tables.
+# Crawler for the Unique Beneficiaries table
 resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
   classifiers   = []
   database_name = local.database
@@ -331,20 +295,39 @@ resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
 #
 # Organizes the Glue jobs / crawlers and runs them in sequence
 
-# Trigger for Populate Beneficiaries Unique Job
-resource "aws_glue_trigger" "bfd-beneficiaries-unique-crawler-trigger" {
-  name          = "${local.full_name}-beneficiaries-unique-crawler-trigger"
-  description   = "Trigger to start the Beneficiaries Unique Crawler whenever the Populate Beneficiaries Unique Job completes successfully"
+# Trigger for Populate Beneficiaries Job
+resource "aws_glue_trigger" "bfd-populate-beneficiaries-job-trigger" {
+  name          = "${local.full_name}-populate-beneficiaries-job-trigger"
+  description   = "Trigger to start the Populate Beneficiaries Glue Job whenever the Crawler completes successfully"
   workflow_name = local.glue_workflow_name
   type          = "CONDITIONAL"
 
   actions {
-    crawler_name = aws_glue_crawler.beneficiaries-unique-crawler.name
+    job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
   }
 
   predicate {
     conditions {
-      job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
+      crawler_name = "${local.full_name}-api-requests-recurring-crawler" # From api-requests
+      crawl_state  = "SUCCEEDED"
+    }
+  }
+}
+
+# Trigger for Populate Beneficiaries Crawler
+resource "aws_glue_trigger" "bfd-beneficiaries-crawler-trigger" {
+  name          = "${local.full_name}-beneficiaries-crawler-trigger"
+  description   = "Trigger to start the Beneficiaries Crawler whenever the Populate Beneficiaries Job completes successfully"
+  workflow_name = local.glue_workflow_name
+  type          = "CONDITIONAL"
+
+  actions {
+    crawler_name = aws_glue_crawler.beneficiaries-crawler.name
+  }
+
+  predicate {
+    conditions {
+      job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
       state  = "SUCCEEDED"
     }
   }
@@ -365,6 +348,25 @@ resource "aws_glue_trigger" "bfd-populate-beneficiaries-unique-job-trigger" {
     conditions {
       crawler_name = aws_glue_crawler.beneficiaries-crawler.name
       crawl_state  = "SUCCEEDED"
+    }
+  }
+}
+
+# Trigger for Populate Beneficiaries Unique Crawler
+resource "aws_glue_trigger" "bfd-beneficiaries-unique-crawler-trigger" {
+  name          = "${local.full_name}-beneficiaries-unique-crawler-trigger"
+  description   = "Trigger to start the Beneficiaries Unique Crawler whenever the Populate Beneficiaries Unique Job completes successfully"
+  workflow_name = local.glue_workflow_name
+  type          = "CONDITIONAL"
+
+  actions {
+    crawler_name = aws_glue_crawler.beneficiaries-unique-crawler.name
+  }
+
+  predicate {
+    conditions {
+      job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
+      state  = "SUCCEEDED"
     }
   }
 }
