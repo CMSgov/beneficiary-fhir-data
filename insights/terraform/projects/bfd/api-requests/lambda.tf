@@ -20,9 +20,8 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
   reserved_concurrent_executions = -1
   role                           = aws_iam_role.firehose-lambda-role.arn
   runtime                        = "python3.8"
-  # TODO: The merge isn't working
+
   tags = { "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python" }
-  # tags_all = merge(local.tags, { "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python" })
   
   timeout = 300
 
