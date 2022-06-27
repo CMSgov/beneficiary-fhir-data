@@ -57,7 +57,6 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
   )
   name     = "${local.full_name}-api-requests-recurring-crawler"
   role     = aws_iam_role.glue-role.name
-  schedule = "cron(0 4 * * ? *)" # Every day at 4am UCT
 
   catalog_target {
     database_name = module.database.name
@@ -223,11 +222,28 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   }
 }
 
+resource "aws_glue_workflow" "glue-workflow" {
+  name = "${local.full_name}-api-requests-workflow"
+  max_concurrent_runs = "1"
+}
+
+resource "aws_glue_trigger" "manual-history-ingest" {
+  name          = "${local.full_name}-manual-history-ingest"
+  workflow_name = aws_glue_workflow.glue-workflow.name
+  type          = "SCHEDULED"
+  schedule      = "cron(0 4 * * ? *)" # Every day at 4am UCT
+
+  actions {
+    crawler_name = aws_glue_crawler.bfd-history-crawler.name
+  }
+}
+
 # Trigger for History Ingest Job
 resource "aws_glue_trigger" "bfd-history-ingest-job-trigger" {
-  name        = "${local.full_name}-history-ingest-trigger"
-  description = "Trigger to start the History Ingest Glue Job whenever the Crawler completes successfully"
-  type        = "CONDITIONAL"
+  name          = "${local.full_name}-history-ingest-trigger"
+  description   = "Trigger to start the History Ingest Glue Job whenever the Crawler completes successfully"
+  workflow_name = aws_glue_workflow.glue-workflow.name
+  type          = "CONDITIONAL"
 
   actions {
     job_name = aws_glue_job.bfd-history-ingest-job.name
@@ -243,9 +259,10 @@ resource "aws_glue_trigger" "bfd-history-ingest-job-trigger" {
 
 # Trigger for API Requests Crawler. Note that the crawler is *also* on a regular schedule.
 resource "aws_glue_trigger" "bfd-api-requests-crawler-trigger" {
-  name        = "${local.full_name}-api-requests-crawler-trigger"
-  description = "Trigger to start the API Requests Crawler whenever the History Ingest Job completes successfully"
-  type        = "CONDITIONAL"
+  name          = "${local.full_name}-api-requests-crawler-trigger"
+  description   = "Trigger to start the API Requests Crawler whenever the History Ingest Job completes successfully"
+  workflow_name = aws_glue_workflow.glue-workflow.name
+  type          = "CONDITIONAL"
 
   actions {
     crawler_name = aws_glue_crawler.api-requests-recurring-crawler.name

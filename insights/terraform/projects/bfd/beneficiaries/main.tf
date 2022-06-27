@@ -11,6 +11,7 @@ locals {
   account_id              = data.aws_caller_identity.current.account_id
   region                  = "us-east-1"
   api_requests_table_name = "${replace(local.full_name, "-", "_")}_api_requests"
+  glue_workflow_name      = "${local.full_name}-api-requests-workflow"
   tags         = {
     business    = "OEDA",
     application = "bfd-insights",

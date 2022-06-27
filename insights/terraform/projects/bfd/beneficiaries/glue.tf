@@ -96,9 +96,10 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
 }
 
 resource "aws_glue_trigger" "bfd-populate-beneficiaries-job-trigger" {
-  name        = "${local.full_name}-populate-beneficiaries-job-trigger"
-  description = "Trigger to start the Populate Beneficiaries Glue Job whenever the Crawler completes successfully"
-  type        = "CONDITIONAL"
+  name          = "${local.full_name}-populate-beneficiaries-job-trigger"
+  description   = "Trigger to start the Populate Beneficiaries Glue Job whenever the Crawler completes successfully"
+  workflow_name = local.glue_workflow_name
+  type          = "CONDITIONAL"
 
   actions {
     job_name = aws_glue_job.bfd-populate-beneficiaries-job.name
@@ -154,9 +155,10 @@ resource "aws_glue_crawler" "beneficiaries-crawler" {
 }
 
 resource "aws_glue_trigger" "bfd-beneficiaries-crawler-trigger" {
-  name        = "${local.full_name}-beneficiaries-crawler-trigger"
-  description = "Trigger to start the Beneficiaries Crawler whenever the Populate Beneficiaries Job completes successfully"
-  type        = "CONDITIONAL"
+  name          = "${local.full_name}-beneficiaries-crawler-trigger"
+  description   = "Trigger to start the Beneficiaries Crawler whenever the Populate Beneficiaries Job completes successfully"
+  workflow_name = local.glue_workflow_name
+  type          = "CONDITIONAL"
 
   actions {
     crawler_name = aws_glue_crawler.beneficiaries-crawler.name
@@ -283,25 +285,7 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
   }
 }
 
-# Trigger for Populate Beneficiaries Unique Job
-resource "aws_glue_trigger" "bfd-populate-beneficiaries-unique-job-trigger" {
-  name        = "${local.full_name}-populate-beneficiaries-unique-job-trigger"
-  description = "Trigger to start the Populate Beneficiaries Unique Job whenever the Beneficiaries Crawler completes successfully"
-  type        = "CONDITIONAL"
-
-  actions {
-    job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
-  }
-
-  predicate {
-    conditions {
-      crawler_name = aws_glue_crawler.beneficiaries-crawler.name
-      crawl_state  = "SUCCEEDED"
-    }
-  }
-}
-
-# Crawler on a schedule to classify log files and ensure they are put into the Glue Tables.
+# Crawler to classify log files and ensure they are put into the Glue Tables.
 resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
   classifiers   = []
   database_name = local.database
@@ -342,11 +326,14 @@ resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
   }
 }
 
+# Workflow
+
 # Trigger for Populate Beneficiaries Unique Job
 resource "aws_glue_trigger" "bfd-beneficiaries-unique-crawler-trigger" {
-  name        = "${local.full_name}-beneficiaries-unique-crawler-trigger"
-  description = "Trigger to start the Beneficiaries Unique Crawler whenever the Populate Beneficiaries Unique Job completes successfully"
-  type        = "CONDITIONAL"
+  name          = "${local.full_name}-beneficiaries-unique-crawler-trigger"
+  description   = "Trigger to start the Beneficiaries Unique Crawler whenever the Populate Beneficiaries Unique Job completes successfully"
+  workflow_name = local.glue_workflow_name
+  type          = "CONDITIONAL"
 
   actions {
     crawler_name = aws_glue_crawler.beneficiaries-unique-crawler.name
@@ -356,6 +343,25 @@ resource "aws_glue_trigger" "bfd-beneficiaries-unique-crawler-trigger" {
     conditions {
       job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
       state  = "SUCCEEDED"
+    }
+  }
+}
+
+# Trigger for Populate Beneficiaries Unique Job
+resource "aws_glue_trigger" "bfd-populate-beneficiaries-unique-job-trigger" {
+  name          = "${local.full_name}-populate-beneficiaries-unique-job-trigger"
+  description   = "Trigger to start the Populate Beneficiaries Unique Job whenever the Beneficiaries Crawler completes successfully"
+  workflow_name = local.glue_workflow_name
+  type          = "CONDITIONAL"
+
+  actions {
+    job_name = aws_glue_job.bfd-populate-beneficiary-unique-job.name
+  }
+
+  predicate {
+    conditions {
+      crawler_name = aws_glue_crawler.beneficiaries-crawler.name
+      crawl_state  = "SUCCEEDED"
     }
   }
 }
