@@ -3,14 +3,14 @@
 from typing import Callable, List
 import datetime
 import os
-
-from . import test_setup as setup
+from locust.env import Environment
+from common.locust_utils import is_locust_master, is_locust_worker
 
 
 def load_all(database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
     '''Loads all of the data from the database, using the database connection provided.'''
 
-    if setup.is_master_thread():
+    if is_master_thread():
         ## Don't bother loading data for the master thread, it doesn't run a test
         return []
 
@@ -33,11 +33,11 @@ def load_data_segment(load_function: Callable, *args) -> List:
     index of the data is dependant on which worker index calls this method.
     '''
 
-    if setup.is_master_thread():
+    if is_master_thread():
         ## Don't bother loading data for the master thread, it doenst run a test
         return []
 
-    if setup.is_worker_thread():
+    if is_worker_thread():
         worker_number = str(os.environ['LOCUST_WORKER_NUM'])
         num_workers = os.environ['LOCUST_NUM_WORKERS']
         print(f"Worker {worker_number} loading segmented data...")
