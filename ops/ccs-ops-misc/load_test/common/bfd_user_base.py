@@ -54,7 +54,7 @@ def custom_args(parser: LocustArgumentParser):
     )
     parser.add_argument(
         '--stats-config',
-        type=StatsConfiguration.from_key_val_str,
+        type=str,
         help='"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)',
         dest='stats_config',
         env_var='LOCUST_STATS_CONFIG'
@@ -228,7 +228,7 @@ class BFDUserBase(HttpUser):
             return str(os.environ['LOCUST_WORKER_NUM'])
         return None
 
-@events.test_stop.add_listener
+@events.quitting.add_listener
 def one_time_teardown(environment: Environment, **kwargs) -> None:
     """Run one-time teardown tasks after the tests have completed
 
@@ -237,8 +237,14 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
-    stats_config = environment.parsed_options.stats_config
-    if not stats_config:
+    stats_config_str = environment.parsed_options.stats_config
+    if not stats_config_str:
+        return
+    
+    try:
+        stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
+    except ValueError as e:
+        logger.warn('--stats-config was invalid: "%s" -- performance stats will not be stored or compared', e)
         return
 
     # If --stats was set and it is valid, get the aggregated stats of the stopping test run
