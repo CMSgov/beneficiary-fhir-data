@@ -11,31 +11,7 @@ resource "aws_s3_bucket" "main" {
   acl       = "private"
   tags      = merge({sensitivity = var.sensitivity}, var.tags)
 
-  policy    = jsonencode(
-    {
-      Statement = [
-        {
-          Action    = "s3:*"
-          Condition = {
-            Bool = {
-              "aws:SecureTransport" = "false"
-            }
-          }
-          Effect    = "Deny"
-          Principal = "*"
-          Resource  = [
-            "arn:aws:s3:::bfd-insights-bfd-577373831711",
-            "arn:aws:s3:::bfd-insights-bfd-577373831711/*",
-          ]
-          Sid       = "AllowSSLRequestsOnly"
-        },
-      ]
-      Version   = "2012-10-17"
-    }
-  )
-
-
-server_side_encryption_configuration {
+  server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
         sse_algorithm     = "aws:kms"
