@@ -23,12 +23,12 @@ data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
 
 # CloudWatch Role
 resource "aws_iam_role" "cloudwatch_role" {
-  name               = "${local.full_name}-cwl2firehose-role"
-  description        = "Allows access to the BFD Insights Firehose Delivery Stream"
+  name               = "${local.full_name}-cloudwatch-logs-role"
+  description        = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
   assume_role_policy = data.aws_iam_policy_document.trust_rel_assume_role_policy.json
 
   inline_policy {
-    name = "${local.full_name}-cwl2firehose-policy"
+    name = "${local.full_name}-cloudwatch-logs-policy"
 
     policy = jsonencode({
       Version = "2012-10-17"
@@ -37,7 +37,7 @@ resource "aws_iam_role" "cloudwatch_role" {
           Action   = ["firehose:*"]
           Effect   = "Allow"
           Resource = ["arn:aws:firehose:us-east-1:${data.aws_caller_identity.current.account_id}:deliverystream/${local.full_name}-firehose"]
-        },
+        }
       ]
     })
   }
