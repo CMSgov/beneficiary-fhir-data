@@ -41,14 +41,16 @@ def custom_args(parser: LocustArgumentParser):
         type=str,
         help='"<server public key>" (Optional, Default: "")',
         dest='server_public_key',
-        env_var='LOCUST_BFD_SERVER_PUBLIC_KEY'
+        env_var='LOCUST_BFD_SERVER_PUBLIC_KEY',
+        default=''
     )
     parser.add_argument(
         '--table-sample-percent',
         type=float,
         help='<% of table to sample> (Optional, Default: 0.25)',
         dest='table_sample_percent',
-        env_var='LOCUST_DATA_TABLE_SAMPLE_PERCENT'
+        env_var='LOCUST_DATA_TABLE_SAMPLE_PERCENT',
+        default=0.25
     )
     parser.add_argument(
         '--stats-config',
