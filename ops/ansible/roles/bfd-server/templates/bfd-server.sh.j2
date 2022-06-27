@@ -64,6 +64,8 @@ export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
 
 # Begin smoke testing startup routine
 STARTUP_TESTING_REQ_TIMEOUT='15'
+STARTUP_TESTING_BOOT_TIMEOUT='30'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='5'
 STARTUP_TESTING_BENE_ID='-88888888888888'
 
 ##
@@ -130,6 +132,7 @@ service_startup_check() {
       return 0
     else
       log "Server failed to start properly, retrying..."
+      sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
     fi
   done
 }
@@ -150,6 +153,3 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
   "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
-  "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
-  "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
-  >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
