@@ -111,12 +111,12 @@
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>0.5.0</version>
+			<version>0.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>telemetry-http-okhttp</artifactId>
-			<version>0.6.1</version>
+			<version>0.13.2</version>
 		</dependency>
 		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
