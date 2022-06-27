@@ -39,14 +39,14 @@ properties([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
-		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false)
+		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
+		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def awsCredentials
-def deployEnvironment
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
@@ -58,6 +58,7 @@ def currentStage
 def gitCommitId
 def gitRepoUrl
 def awsRegion = 'us-east-1'
+def verboseMaven = params.verbose_mvn_logging
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
@@ -128,10 +129,22 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 // begin pipeline
 try {
 	// See ops/jenkins/cbc-build-push.sh for this image's definition.
-	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv', command: 'cat', ttyEnabled: true, alwaysPullImage: true, resourceLimitCpu: '4000m', resourceLimitMemory: '8192Mi', resourceRequestCpu: '4000m', resourceRequestMemory: '8192Mi')], serviceAccount: 'bfd') {
+	podTemplate(
+		containers: [
+			containerTemplate(
+				name: 'bfd-cbc-build',
+				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv',
+				command: 'cat',
+				ttyEnabled: true,
+				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
+				resourceRequestCpu: '8000m',
+				resourceLimitCpu: '8000m',
+				resourceLimitMemory: '16384Mi',
+				resourceRequestMemory: '16384Mi'
+			)], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
 			stage('Prepare') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				container('bfd-cbc-build') {
 					// Grab the commit that triggered the build.
 					checkout scm
@@ -141,17 +154,7 @@ try {
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
 
-					// Unset any pre-existing session variables
-					// Set global AWS environment variables from role assumption
-					withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-						withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-							awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-							env.AWS_DEFAULT_REGION = 'us-east-1'
-							env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-							env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-							env.AWS_SESSION_TOKEN = awsCredentials[3]
-						}
-					}
+					awsAssumeRole()
 
 					// Find the most current AMI IDs (if any).
 					amiIds = null
@@ -177,7 +180,7 @@ try {
 			name during PR builds. 
 			*/
 			stage('Set Branch Name') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				script {
 					if (env.BRANCH_NAME.startsWith('PR')) {
 						gitBranchName = env.CHANGE_BRANCH
@@ -188,7 +191,7 @@ try {
 			}
 
 			stage('Build Platinum AMI') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (params.build_platinum || amiIds.platinumAmiId == null) {
 					milestone(label: 'stage_build_platinum_ami_start')
 
@@ -202,20 +205,18 @@ try {
 
 			stage('Build Apps') {
 				if (!params.use_latest_images) {
-					currentStage = "${env.STAGE_NAME}"
+					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_apps_start')
 
 					container('bfd-cbc-build') {
-						build_env = deployEnvironment
-						appBuildResults = scriptForApps.build(build_env)
+						appBuildResults = scriptForApps.build(verboseMaven)
 					}
 				}
 			}
 
-
 			stage('Build App AMIs') {
 				if (!params.use_latest_images) {
-					currentStage = "${env.STAGE_NAME}"
+					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_app_amis_test_start')
 
 					container('bfd-cbc-build') {
@@ -226,7 +227,7 @@ try {
 
 			stage('Deploy Migrator to TEST') {
 				bfdEnv = 'test'
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_migration_start')
@@ -251,29 +252,19 @@ try {
 			}
 
 			stage('Deploy to TEST') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
-						// Unset any pre-existing session variables
-						// Assume new role session for each deploy to prevent timeout
-						withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-							withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-								awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-								env.AWS_DEFAULT_REGION = 'us-east-1'
-								env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-								env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-								env.AWS_SESSION_TOKEN = awsCredentials[3]
-							}
-						}
+						awsAssumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 					}
 				}
 			}
 
 			stage('Manual Approval') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (canDeployToProdEnvs) {
 					/*
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
@@ -300,7 +291,7 @@ try {
 
 			stage('Deploy Migrator to PROD-SBX') {
 				bfdEnv = 'prod-sbx'
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_migration_start')
@@ -328,23 +319,12 @@ try {
 			}
 
 			stage('Deploy to PROD-SBX') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
-
 						container('bfd-cbc-build') {
-							// Unset any pre-existing session variables
-							// Assume new role session for each deploy to prevent timeout
-							withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-								withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-									awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-									env.AWS_DEFAULT_REGION = 'us-east-1'
-									env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-									env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-									env.AWS_SESSION_TOKEN = awsCredentials[3]
-								}
-							}
+							awsAssumeRole()
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 						}
 					}
@@ -355,7 +335,7 @@ try {
 
 			stage('Deploy Migrator to PROD') {
 				bfdEnv = 'prod'
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
@@ -384,23 +364,13 @@ try {
 			}
 
 			stage('Deploy to PROD') {
-				currentStage = "${env.STAGE_NAME}"
+				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
-							// Unset any pre-existing session variables
-							// Assume new role session for each deploy to prevent timeout
-							withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-								withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-									awsCredentials = sh(returnStdout: true, script: 'aws sts assume-role --role-arn "$awsAssumeRole" --role-session-name bfd-multibranch-and-multistage-pipeline --output text --query Credentials').trim().split(/\s+/)
-									env.AWS_DEFAULT_REGION = 'us-east-1'
-									env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-									env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-									env.AWS_SESSION_TOKEN = awsCredentials[3]
-								}
-							}
+							awsAssumeRole()
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
 						}
 					}
