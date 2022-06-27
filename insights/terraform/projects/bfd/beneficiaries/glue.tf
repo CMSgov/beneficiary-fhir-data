@@ -326,7 +326,10 @@ resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
   }
 }
 
-# Workflow
+
+# Glue Workflow
+#
+# Organizes the Glue jobs / crawlers and runs them in sequence
 
 # Trigger for Populate Beneficiaries Unique Job
 resource "aws_glue_trigger" "bfd-beneficiaries-unique-crawler-trigger" {

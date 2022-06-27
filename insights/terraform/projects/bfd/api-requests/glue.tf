@@ -222,13 +222,21 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   }
 }
 
+
+# Glue Workflow
+#
+# Organizes the Glue jobs / crawlers and runs them in sequence
+
+# Glue Workflow Object
 resource "aws_glue_workflow" "glue-workflow" {
   name = "${local.full_name}-api-requests-workflow"
   max_concurrent_runs = "1"
 }
 
-resource "aws_glue_trigger" "manual-history-ingest" {
-  name          = "${local.full_name}-manual-history-ingest"
+# Trigger for History Ingest Crawler. This will run every night at 4am UCT, but it can also be run
+# manually through the Console
+resource "aws_glue_trigger" "history-ingest-crawler-trigger" {
+  name          = "${local.full_name}-history-ingest-crawler-trigger"
   workflow_name = aws_glue_workflow.glue-workflow.name
   type          = "SCHEDULED"
   schedule      = "cron(0 4 * * ? *)" # Every day at 4am UCT
