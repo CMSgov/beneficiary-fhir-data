@@ -2,6 +2,8 @@
 
 BFD Insights captures data in near-real-time from the EC2 instances and provides the data for analysis in QuickSight.
 
+![Resource Diagram](docs/unique-bene-workflow-poc.svg)
+
 ## API-Requests
 
 API-Requests is the portion of the project that ingests the logs and stores them in Glue tables. Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests table. Most other parts of this project will depend upon API-Requests.
