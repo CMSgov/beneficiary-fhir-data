@@ -36,6 +36,10 @@ module "glue_jobs" {
   tags    = local.tags
 
   buckets = [
-    { bucket = module.bucket.arn, cmk = module.bucket.bucket_cmk_arn }
+    { bucket = module.bucket.arn, cmk = module.bucket.bucket_cmk_arn },
+
+    # CMK is not used on the App-Logs bucket, but it's a required field. By including the same one
+    # twice, no additional permissions are created.
+    { bucket = aws_s3_bucket.bfd-insights-bfd-app-logs.arn, cmk = module.bucket.bucket_cmk_arn }
   ]
 }
