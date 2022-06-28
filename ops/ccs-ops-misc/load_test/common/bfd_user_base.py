@@ -11,6 +11,7 @@ from locust import HttpUser, events
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
 from common import data, validation
+from common.locust_utils import is_distributed, is_locust_worker
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
 from common.stats.stats_config import StatsConfiguration, StatsStorageType
@@ -237,8 +238,12 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
+    
+    # Check to make sure the stats_config argument was set, and also make sure
+    # that Locust workers do not attempt to store or compare stats if Locust
+    # is running distributed
     stats_config_str = environment.parsed_options.stats_config
-    if not stats_config_str:
+    if not stats_config_str or (is_distributed(environment) and is_locust_worker(environment)):
         return
     
     try:
@@ -247,7 +252,7 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
         logger.warn('--stats-config was invalid: "%s" -- performance stats will not be stored or compared', e)
         return
 
-    # If --stats was set and it is valid, get the aggregated stats of the stopping test run
+    # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
     stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
     stats = stats_collector.collect_stats()
 
