@@ -64,8 +64,7 @@ export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
 
 # Begin smoke testing startup routine
 STARTUP_TESTING_REQ_TIMEOUT='15'
-STARTUP_TESTING_BOOT_TIMEOUT='30'
-STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='5'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='1'
 STARTUP_TESTING_BENE_ID='-88888888888888'
 
 ##
@@ -97,8 +96,6 @@ check_endpoint() {
 service_startup_check() {
   # Reject all external traffic to service port until the application has started successfully
   sudo iptables -A INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
-  log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
-  sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
   while true; do
     log "Checking V1 metadata endpoint"
@@ -153,3 +150,6 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
   "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
+  "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
+  "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
+  >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
