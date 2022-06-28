@@ -2,11 +2,11 @@
 '''
 
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 import yaml
 
-from common.stats import StatsFileStorageConfig, StatsS3StorageConfig, StatsStorageConfig
+from common.stats.stats_config import StatsConfiguration
 
 def save(file_data: Dict[str, str]):
     '''Saves a config file using the input file data.
@@ -100,41 +100,44 @@ def load_server_public_key() -> str:
         return False
 
 
-def load_stats_storage_config() -> StatsStorageConfig:
-    """Load the storage configuration for storing aggregated statistics.
+def load_stats_config() -> Optional[StatsConfiguration]:
+    """Load the stats configuration for storing and comparing aggregated statistics.
 
     Returns:
-        StatsStorageConfig: A dataclass representing the storage configuration for aggregated statistics
+        StatsConfiguration: A dataclass representing the user-specified options for comparing and loading statistics
     """
 
     config_file = load()
-    return config_file["storeStats"]
+    if not config_file or not 'stats' in config_file:
+        return None
+    
+    return config_file["stats"]  # type: ignore
 
-def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsStorageConfig) -> yaml.nodes.ScalarNode:
-    """Returns a scalar representer that instructs PyYAML how to serialize a StatsStorageConfig instance
-    to an "arg string" in the format of "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>".
+def _stats_config_representer(dumper: yaml.SafeDumper, stats_config: StatsConfiguration) -> yaml.nodes.ScalarNode:
+    """Returns a scalar representer that instructs PyYAML how to serialize a StatsConfiguration instance
+    to a key-value list seperated by semi-colons ("key1=value1;key2=value2").
 
     Args:
         dumper (yaml.SafeDumper): PyYAML's default SafeDumper instance
-        stats_config (StatsStorageConfig): An instance of StatsStorageConfig to serialize
+        stats_config (StatsConfiguration): An instance of StatsConfiguration to serialize
 
     Returns:
-        yaml.nodes.ScalarNode: A scalar YAML node representing a StatsStorageConfig instance
+        yaml.nodes.ScalarNode: A scalar YAML node representing a StatsConfiguration instance
     """
-    return dumper.represent_scalar('!StatsConfig', stats_config.to_arg_str())
+    return dumper.represent_scalar('!StatsConfig', stats_config.to_key_val_str())
 
-def _stats_config_constructor(loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> StatsStorageConfig:
-    """Returns a scalar constructor that instructs PyYAML how to deserialize a StatsStorageConfig
-    instance from an "arg string" in the format of "<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>".
+def _stats_config_constructor(loader: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> StatsConfiguration:
+    """Returns a scalar constructor that instructs PyYAML how to deserialize a StatsConfiguration
+    instance from a key-value list seperated by semi-colons ("key1=value1;key2=value2").
 
     Args:
         loader (yaml.SafeLoader): PyYAML's default SafeLoader instance
         node (yaml.nodes.ScalarNode): A YAML scalar node with a string value representing a StatsStorageConfing instance
 
     Returns:
-        StatsStorageConfig: A StatsStorageConfig instance deserialized from its string scalar representation
+        StatsConfiguration: A StatsConfiguration instance deserialized from its string scalar representation
     """
-    return StatsStorageConfig.from_arg_str(loader.construct_scalar(node))
+    return StatsConfiguration.from_key_val_str(loader.construct_scalar(node))
 
 def _get_loader() -> yaml.SafeLoader:
     """Returns a PyYAML SafeLoader with custom constructors added to it.
@@ -154,8 +157,6 @@ def _get_dumper() -> yaml.SafeDumper:
         yaml.SafeDumper: A PyYAML SafeDumper with custom representers added to it
     """
     safe_dumper = yaml.SafeDumper
-    safe_dumper.add_representer(StatsStorageConfig, _stats_config_representer)
-    safe_dumper.add_representer(StatsFileStorageConfig, _stats_config_representer)
-    safe_dumper.add_representer(StatsS3StorageConfig, _stats_config_representer)
+    safe_dumper.add_representer(StatsConfiguration, _stats_config_representer)
 
     return safe_dumper
