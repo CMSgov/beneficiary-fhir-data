@@ -8,19 +8,11 @@ locals {
   database     = local.full_name
   project      = "bfd"
   region       = "us-east-1"
+  account_id   = data.aws_caller_identity.current.account_id
   api_requests_table_name = "${replace(local.full_name, "-", "_")}_api_requests"
   tags         = {
     business    = "OEDA",
     application = "bfd-insights",
     project     = "bfd"
   }
-}
-
-# Creates AWS Glue Database named "bfd-insights-bfd-<environment>"
-module "database" {
-  source     = "../../../modules/database"
-  database   = local.database
-  bucket     = data.aws_s3_bucket.bfd-insights-bucket.bucket
-  bucket_cmk = data.aws_kms_key.kms_key.arn
-  tags       = local.tags
 }

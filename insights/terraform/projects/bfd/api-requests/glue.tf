@@ -1,3 +1,13 @@
+# Creates AWS Glue Database named "bfd-insights-bfd-<environment>"
+module "database" {
+  source     = "../../../modules/database"
+  database   = local.database
+  bucket     = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk = data.aws_kms_key.kms_key.arn
+  tags       = local.tags
+}
+
+
 # API Requests
 #
 # Target location for ingested logs, no matter the method of ingestion.

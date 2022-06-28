@@ -6,18 +6,6 @@ data "aws_iam_group" "bfd-analysts" {
   group_name = "bfd-insights-analysts"
 }
 
-# AssumeRole Policy Document
-data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["logs.us-east-1.amazonaws.com"]
-    }
-  }
-}
-
 
 # Firehose Ingestion
 
@@ -25,8 +13,21 @@ data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
 resource "aws_iam_role" "cloudwatch_role" {
   name               = "${local.full_name}-cloudwatch-logs-role"
   description        = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
-  assume_role_policy = data.aws_iam_policy_document.trust_rel_assume_role_policy.json
-
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Principal = {
+            Service = "logs.us-east-1.amazonaws.com"
+          }
+          Sid = ""
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
   inline_policy {
     name = "${local.full_name}-cloudwatch-logs-policy"
 
