@@ -21,6 +21,7 @@ class MBITestUser(BFDUserBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.hashed_mbis = data.load_all(
+            self.environment,
             self.database_uri,
             db.get_hashed_mbis,
             use_table_sample=self.USE_TABLE_SAMPLE,

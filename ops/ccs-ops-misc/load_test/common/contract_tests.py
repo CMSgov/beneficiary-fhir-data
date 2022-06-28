@@ -18,7 +18,7 @@ class ContractTestUser(BFDUserBase):
         '''
 
         super().__init__(*args, **kwargs)
-        self.contract_data = data.load_data_segment(db.get_contract_ids).copy()
+        self.contract_data = data.load_data_segment(self.environment, db.get_contract_ids).copy()
         random.shuffle(self.contract_data)
 
 

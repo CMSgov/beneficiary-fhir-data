@@ -7,10 +7,10 @@ from locust.env import Environment
 from common.locust_utils import is_locust_master, is_locust_worker
 
 
-def load_all(database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
+def load_all(locust_env: Environment, database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
     '''Loads all of the data from the database, using the database connection provided.'''
 
-    if is_master_thread():
+    if is_locust_master(locust_env):
         ## Don't bother loading data for the master thread, it doesn't run a test
         return []
 
@@ -25,7 +25,7 @@ def load_all(database_uri: str, load_function: Callable, *args, use_table_sample
     return results
 
 
-def load_data_segment(load_function: Callable, *args) -> List:
+def load_data_segment(locust_env: Environment, load_function: Callable, *args) -> List:
     '''Loads a segment of data and either returns all the data in a list if not a distributed test,
     or takes a percentage of the data to distribute to the current worker thread.
 
@@ -33,15 +33,15 @@ def load_data_segment(load_function: Callable, *args) -> List:
     index of the data is dependant on which worker index calls this method.
     '''
 
-    if is_master_thread():
+    if is_locust_master(locust_env):
         ## Don't bother loading data for the master thread, it doenst run a test
         return []
 
-    if is_worker_thread():
+    if is_locust_worker(locust_env):
         worker_number = str(os.environ['LOCUST_WORKER_NUM'])
         num_workers = os.environ['LOCUST_NUM_WORKERS']
         print(f"Worker {worker_number} loading segmented data...")
-        full_data_list = load_all(load_function, *args)
+        full_data_list = load_all(locust_env, load_function, *args)
         data_per_user = len(full_data_list) // int(num_workers)
         start_index = int(worker_number) * data_per_user
         end_index = start_index + data_per_user - 1
@@ -49,7 +49,7 @@ def load_data_segment(load_function: Callable, *args) -> List:
         return full_data_list[start_index:end_index]
 
     # This is neither master nor worker, so we must not be using multi-threading.
-    return load_all(load_function, *args)
+    return load_all(locust_env, load_function, *args)
 
 
 def get_last_updated() -> str:

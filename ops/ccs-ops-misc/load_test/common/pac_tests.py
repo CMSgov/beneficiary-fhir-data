@@ -18,6 +18,7 @@ class PACTestUser(BFDUserBase):
     def _hashed_mbis(self):
         if not hasattr(self, '_cached_hashed_mbis'):
             self._cached_hashed_mbis = data.load_all(
+                self.environment,
                 self.database_uri,
                 db.get_pac_hashed_mbis,
                 use_table_sample=self.USE_TABLE_SAMPLE,

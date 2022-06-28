@@ -23,6 +23,7 @@ class BeneTestUser(BFDUserBase):
         '''
         super().__init__(*args, **kwargs)
         self.bene_ids = data.load_all(
+            self.environment,
             self.database_uri,
             db.get_bene_ids,
             use_table_sample=self.USE_TABLE_SAMPLE,
