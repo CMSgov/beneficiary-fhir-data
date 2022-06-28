@@ -3,44 +3,32 @@
 # Beneficiaries, which captures when a beneficiary is queried
 
 # Glue Catalog Table to hold Beneficiaries
-resource "aws_glue_catalog_table" "beneficiaries-table" {
-  catalog_id    = data.aws_caller_identity.current.account_id
-  database_name = local.database
-  name          = "${local.full_name}-api-requests-beneficiaries"
-  description   = "One row per beneficiary query, with the date of the request"
-  owner         = "owner"
-  retention     = 0
-  table_type    = "EXTERNAL_TABLE"
-
-  partition_keys {
-    name = "year"
-    type = "string"
-  }
-  partition_keys {
-    name = "month"
-    type = "string"
-  }
-  partition_keys {
-    name = "day"
-    type = "string"
-  }
-
-  storage_descriptor {
-    bucket_columns            = []
-    compressed                = false
-    input_format              = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api-requests-beneficiaries/"
-    number_of_buckets         = -1
-    output_format             = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
-    stored_as_sub_directories = false
-
-    ser_de_info {
-      parameters = {
-        "serialization.format" = "1"
-      }
-      serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+module "beneficiaries-table" {
+  source      = "../../../modules/table"
+  table       = "${local.full_name}-api-requests-beneficiaries"
+  description = "One row per beneficiary query, with the date of the request"
+  database    = local.database
+  bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk  = data.aws_kms_key.kms_key.arn
+  tags        = local.tags
+  partitions  = [
+    {
+      name    = "year"
+      type    = "string"
+      comment = "Year of request"
+    },
+    {
+      name    = "month"
+      type    = "string"
+      comment = "Month of request"
+    },
+    {
+      name    = "day"
+      type    = "string"
+      comment = "Day of request"
     }
-  }
+  ]
+  columns     = []
 }
 
 # S3 Object for Glue Script
@@ -81,7 +69,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--sourceTable"                      = local.api_requests_table_name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = local.database
-    "--targetTable"                      = aws_glue_catalog_table.beneficiaries-table.name
+    "--targetTable"                      = module.beneficiaries-table.name
   }
 
   command {
@@ -113,12 +101,12 @@ resource "aws_glue_crawler" "beneficiaries-crawler" {
     }
   )
   name     = "${local.full_name}-beneficiaries-crawler"
-  role     = data.aws_iam_role.glue-role.name
+  role     = data.aws_iam_role.glue-role.arn
 
   catalog_target {
     database_name = local.database
     tables = [
-      aws_glue_catalog_table.beneficiaries-table.name,
+      module.beneficiaries-table.name,
     ]
   }
 
@@ -142,60 +130,40 @@ resource "aws_glue_crawler" "beneficiaries-crawler" {
 # Beneficiary Unique table to track the first time each beneficiary was queried.
 
 # Glue Table for unique beneficiaries
-resource "aws_glue_catalog_table" "beneficiaries-unique-table" {
-  catalog_id    = data.aws_caller_identity.current.account_id
-  database_name = local.database
-  name          = "${local.full_name}-api-requests-beneficiaries-unique"
-  description   = "One row per Beneficiary and the date first seen"
-  owner         = "owner"
-  retention     = 0
-  table_type    = "EXTERNAL_TABLE"
+module "beneficiaries-unique-table" {
+  source      = "../../../modules/table"
+  table       = "${local.full_name}-api-requests-beneficiaries-unique"
+  description = "One row per beneficiary and the date first seen"
+  database    = local.database
+  bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk  = data.aws_kms_key.kms_key.arn
+  tags        = local.tags
 
-  partition_keys {
-    name = "year"
-    type = "string"
-  }
-  partition_keys {
-    name = "month"
-    type = "string"
-  }
+  partitions  = [
+    {
+      name    = "year"
+      type    = "string"
+      comment = "Year of request"
+    },
+    {
+      name    = "month"
+      type    = "string"
+      comment = "Month of request"
+    },
+  ]
 
-  parameters = {
-    classification = "parquet"
-  }
-
-  storage_descriptor {
-    bucket_columns            = []
-    compressed                = false
-    input_format              = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests_beneficiaries_unique/"
-    number_of_buckets         = -1
-    output_format             = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
-    stored_as_sub_directories = false
-
-    columns {
-      name       = "bene_id"
-      parameters = {}
-      type       = "bigint"
+  columns     = [
+    {
+      name    = "bene_id"
+      type    = "bigint"
+      comment = "Beneficiary ID"
+    },
+    {
+      name    = "first_seen"
+      type    = "timestamp"
+      comment = "Date first seen"
     }
-    columns {
-      name       = "first_seen"
-      parameters = {}
-      type       = "timestamp"
-    }
-
-    ser_de_info {
-      parameters = {
-        "serialization.format" = "1"
-      }
-      serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
-    }
-
-    parameters = {
-      classification = "parquet"
-      typeOfData     = "file"
-    }
-  }
+  ]
 }
 
 # S3 Object for the Glue Script
@@ -224,10 +192,10 @@ resource "aws_glue_job" "bfd-populate-beneficiary-unique-job" {
     "--job-bookmark-option"              = "job-bookmark-disable" # We need to process all records
     "--job-language"                     = "python"
     "--sourceDatabase"                   = local.database
-    "--sourceTable"                      = aws_glue_catalog_table.beneficiaries-table.name
+    "--sourceTable"                      = module.beneficiaries-table.name
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiary-unique.bucket}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = local.database
-    "--targetTable"                      = aws_glue_catalog_table.beneficiaries-unique-table.name
+    "--targetTable"                      = module.beneficiaries-unique-table.name
   }
   glue_version              = "3.0"
   max_retries               = 0
@@ -267,12 +235,12 @@ resource "aws_glue_crawler" "beneficiaries-unique-crawler" {
     }
   )
   name     = "${local.full_name}-beneficiaries-unique-crawler"
-  role     = data.aws_iam_role.glue-role.name
+  role     = data.aws_iam_role.glue-role.arn
 
   catalog_target {
     database_name = local.database
     tables = [
-      aws_glue_catalog_table.beneficiaries-unique-table.name
+      module.beneficiaries-unique-table.name
     ]
   }
 

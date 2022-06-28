@@ -3,39 +3,32 @@
 # Target location for ingested logs, no matter the method of ingestion.
 
 # Target Glue Table where ingested logs are eventually stored
-resource "aws_glue_catalog_table" "api-requests-table" {
-  catalog_id    = data.aws_caller_identity.current.account_id
-  database_name = module.database.name
-  name          = local.api_requests_table_name
-  retention     = 0
-  table_type    = "EXTERNAL_TABLE"
-
-  partition_keys {
-    name = "year"
-    type = "string"
-  }
-  partition_keys {
-    name = "month"
-    type = "string"
-  }
-  partition_keys {
-    name = "day"
-    type = "string"
-  }
-
-  storage_descriptor {
-    bucket_columns            = []
-    compressed                = false
-    input_format              = "org.apache.hadoop.mapred.TextInputFormat"
-    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_requests/"
-    number_of_buckets         = -1
-    output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-    stored_as_sub_directories = false
-
-    ser_de_info {
-      serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+module "api-requests-table" {
+  source      = "../../../modules/table"
+  table       = local.api_requests_table_name
+  description = "Target Glue Table where ingested logs are eventually stored"
+  database    = module.database.name
+  bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk  = data.aws_kms_key.kms_key.arn
+  tags        = local.tags
+  partitions  = [
+    {
+      name    = "year"
+      type    = "string"
+      comment = "Year of request"
+    },
+    {
+      name    = "month"
+      type    = "string"
+      comment = "Month of request"
+    },
+    {
+      name    = "day"
+      type    = "string"
+      comment = "Day of request"
     }
-  }
+  ]
+  columns     = [] # Don't specify here, because the schema is complex and it's sufficient to allow the crawler to define the columns
 }
 
 # Crawler for the API Requests table
@@ -56,12 +49,12 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
     }
   )
   name     = "${local.full_name}-api-requests-recurring-crawler"
-  role     = aws_iam_role.glue-role.name
+  role     = data.aws_iam_role.glue-role.arn
 
   catalog_target {
     database_name = module.database.name
     tables = [
-      aws_glue_catalog_table.api-requests-table.name,
+      module.api-requests-table.name,
     ]
   }
 
@@ -85,40 +78,27 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
 # Storage and Jobs for manually ingesting historical logs.
 
 # Glue Table to store API History
-resource "aws_glue_catalog_table" "api-history" {
-  catalog_id    = data.aws_caller_identity.current.account_id
-  database_name = module.database.name
-  name          = "${replace(local.full_name, "-", "_")}_api_history"
-  description   = "Store log files from BFD for analysis in BFD Insights"
-  owner         = "owner"
-  retention     = 0
-  table_type    = "EXTERNAL_TABLE"
-
-  partition_keys {
-    name = "partition_0"
-    type = "string"
-  }
-  partition_keys {
-    name = "partition_1"
-    type = "string"
-  }
-
-  storage_descriptor {
-    bucket_columns            = []
-    compressed                = true
-    input_format              = "org.apache.hadoop.mapred.TextInputFormat"
-    location                  = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/databases/${local.database}/api_history/"
-    number_of_buckets         = -1
-    output_format             = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-    stored_as_sub_directories = false
-
-    ser_de_info {
-      parameters = {
-        "input.format" = "%%{TIMESTAMP_ISO8601:timestamp:string} %%{GREEDYDATA:message:string}"
-      }
-      serialization_library = "com.amazonaws.glue.serde.GrokSerDe"
+module "api-history-table" {
+  source      = "../../../modules/table"
+  table       = "${replace(local.full_name, "-", "_")}_api_history"
+  description = "Store log files from BFD for analysis in BFD Insights"
+  database    = module.database.name
+  bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk  = data.aws_kms_key.kms_key.arn
+  tags        = local.tags
+  partitions  = [
+    {
+      name    = "partition_0"
+      type    = "string"
+      comment = ""
+    },
+    {
+      name    = "partition_1"
+      type    = "string"
+      comment = ""
     }
-  }
+  ]
+  columns     = [] # Don't specify here, because the schema is complex and it's sufficient to allow the crawler to define the columns
 }
 
 # Glue Crawler for the API History table
@@ -126,7 +106,7 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   database_name = module.database.name
   name          = "${local.full_name}-history-crawler"
   description   = "Glue Crawler to ingest logs into the API History Glue Table"
-  role          = aws_iam_role.glue-role.name
+  role          = data.aws_iam_role.glue-role.arn
 
   classifiers = [
     aws_glue_classifier.bfd-historicals-local.name,
@@ -141,8 +121,8 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
   }
 
   catalog_target {
-    database_name = aws_glue_catalog_table.api-history.database_name
-    tables        = [ aws_glue_catalog_table.api-history.name ]
+    database_name = module.database.name
+    tables        = [ module.api-history-table.name ]
   }
 
   schema_change_policy {
@@ -190,7 +170,7 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   max_retries               = 0
   non_overridable_arguments = {}
   number_of_workers         = 10
-  role_arn                  = aws_iam_role.glue-role.arn
+  role_arn                  = data.aws_iam_role.glue-role.arn
   timeout                   = 2880
   worker_type               = "G.1X"
 
@@ -205,10 +185,10 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
     "--sourceDatabase"                   = module.database.name
-    "--sourceTable"                      = aws_glue_catalog_table.api-history.name
+    "--sourceTable"                      = module.api-history-table.name
     "--spark-event-logs-path"            = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = module.database.name
-    "--targetTable"                      = aws_glue_catalog_table.api-requests-table.name
+    "--targetTable"                      = module.api-requests-table.name
   }
 
   command {

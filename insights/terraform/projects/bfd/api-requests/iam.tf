@@ -57,7 +57,7 @@ resource "aws_iam_policy" "firehose_policy" {
             "glue:GetTableVersions",
           ]
           Effect   = "Allow"
-          Resource = "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${aws_glue_catalog_table.api-requests-table.name}"
+          Resource = "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.api-requests-table.name}"
           Sid      = "GetGlueTable"
         },
         {
@@ -201,99 +201,7 @@ resource "aws_iam_role" "firehose-lambda-role" {
 
 # Glue
 
-# Glue Role
-resource "aws_iam_role" "glue-role" {
-  name                 = "${local.full_name}-glue-role"
-  description          = "Allow the Glue service to access the BFD Insights S3 and Glue resources"
-  max_session_duration = 3600
-  managed_policy_arns = [
-    aws_iam_policy.bfd-insights-bfd-glue-role-s3-access.arn,
-    data.aws_iam_policy.athena-full-access.arn,
-    data.aws_iam_policy.glue-service-role.arn,
-  ]
-  assume_role_policy   = jsonencode(
-    {
-      Statement = [
-        {
-          Action    = "sts:AssumeRole"
-          Effect    = "Allow"
-          Principal = {
-            Service = "glue.amazonaws.com"
-          }
-          Sid       = "assume"
-        },
-      ]
-      Version   = "2012-10-17"
-    }
-  )
-}
-
-data "aws_iam_policy" "athena-full-access" {
-  name = "AmazonAthenaFullAccess"
-}
-
-data "aws_iam_policy" "glue-service-role" {
-  name = "AWSGlueServiceRole"
-}
-
-# Access Policy for S3 Access
-resource "aws_iam_policy" "bfd-insights-bfd-glue-role-s3-access" {
-  name = "${local.full_name}-glue-s3-access"
-  description = "Allow Glue Role to access insights S3 bucket"
-  policy = jsonencode(
-    {
-      "Statement": [
-          {
-              "Action": [
-                  "s3:ListBucket",
-                  "s3:HeadBucket",
-                  "s3:GetObject*",
-                  "s3:GetBucketLocation"
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                  "arn:aws:s3:::${data.aws_s3_bucket.bfd-insights-bucket.id}/*",
-                  "arn:aws:s3:::${data.aws_s3_bucket.bfd-insights-bucket.id}"
-              ],
-              "Sid": "s3BFDResources"
-          },
-          {
-              "Action": [
-                  "s3:ListBucketMultipartUploads",
-                  "s3:ListBucket",
-                  "s3:HeadBucket",
-                  "s3:GetBucketLocation"
-              ],
-              "Effect": "Allow",
-              "Resource": data.aws_s3_bucket.bfd-insights-bucket.arn,
-              "Sid": "s3Buckets"
-          },
-          {
-              "Action": [
-                  "s3:PutObject*",
-                  "s3:ListMultipartUploadParts",
-                  "s3:GetObject*",
-                  "s3:DeleteObject*",
-                  "s3:AbortMultipartUpload"
-              ],
-              "Effect": "Allow",
-              "Resource": "${data.aws_s3_bucket.bfd-insights-bucket.arn}/databases/*",
-              "Sid": "s3Objects"
-          },
-          {
-              "Action": [
-                  "kms:ReEncrypt*",
-                  "kms:GenerateDataKey*",
-                  "kms:Encrypt",
-                  "kms:DescribeKey",
-                  "kms:Decrypt"
-              ],
-              "Effect": "Allow",
-              "Resource": data.aws_kms_key.kms_key.arn
-              "Sid": "CMK"
-          }
-      ],
-      "Version": "2012-10-17"
-    }
-  )
+# Role for Glue to assume with S3 permissions
+data "aws_iam_role" "glue-role" {
+  name = "bfd-insights-bfd-glue-role"
 }
