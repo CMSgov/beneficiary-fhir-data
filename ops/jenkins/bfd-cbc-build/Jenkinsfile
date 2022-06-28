@@ -92,6 +92,7 @@ EOF
                             // inject code artifact credentials into maven ~/.m2/settings.xml
 
                         }
+                        }
 
                     }
                 }
