@@ -39,7 +39,7 @@ Note: Replace `<environment>` and `<account-number>` with the name of your envir
     - Select all objects *except* `aws-logs-write-test`
     - Actions > Move
         - Bucket
-        - Destination: `bfd-insights-bfd-<account-number>/databases/bfd-insights-bfd-<environment>/api_history/`
+        - Destination: `bfd-insights-bfd-<account-number>/databases/bfd-insights-bfd-<environment>/bfd-insights-bfd-<environment>-api_history/`
         - Move
 
 3. AWS Glue > Workflows > `bfd-insights-bfd-<environment>-history-workflow`
