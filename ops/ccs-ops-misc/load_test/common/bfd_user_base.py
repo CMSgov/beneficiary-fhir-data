@@ -1,10 +1,12 @@
 '''Base class for Locust tests run against the FHIR endpoints.
 '''
 
+from datetime import timedelta
+from math import ceil
+from typing import Callable, Dict, List, Union
 import json
 import logging
 import os
-from typing import Callable, Dict, List, Union
 import urllib3
 import urllib3.exceptions
 from locust import HttpUser, events
@@ -18,6 +20,18 @@ from common.stats.stats_config import StatsConfiguration, StatsStorageType
 from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
+
+def _adjusted_run_time(run_time: int, max_clients: int, clients_per_second: int) -> int:
+    '''Get the adjusted run time of the test to account for the time it takes to instantiate and connect
+    all the clients.
+
+    If a user specifies a one-minute test, but it's going to take thirty seconds to ramp up to full
+    clients, then we actually run for one minute and thirty seconds, so that we can have the
+    specified time with full client capacity. You can optionally reset the statistics to zero at
+    the end of this ramp-up period using the --resetStats command line flag.
+    '''
+
+    return run_time + ceil(int(max_clients) // int(clients_per_second))
 
 @events.init_command_line_parser.add_listener
 def custom_args(parser: LocustArgumentParser):
@@ -60,6 +74,21 @@ def custom_args(parser: LocustArgumentParser):
         dest='stats_config',
         env_var='LOCUST_STATS_CONFIG'
     )
+    
+@events.init.add_listener
+def locust_init(environment: Environment, **kwargs):
+    logger = logging.getLogger()
+    
+    # Adjust the runtime to account for spawn rate
+    num_users = int(environment.parsed_options.num_users)
+    spawn_rate = int(environment.parsed_options.spawn_rate)
+    init_run_time = environment.parsed_options.run_time
+    
+    adjusted_run_time = _adjusted_run_time(init_run_time, num_users, spawn_rate)
+    if adjusted_run_time != init_run_time:
+        environment.parsed_options.run_time = adjusted_run_time
+        logger.info('Run time adjusted to account for ramp-up time. New run time: '
+            f'{timedelta(seconds=environment.parsed_options.run_time)}')
 
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
