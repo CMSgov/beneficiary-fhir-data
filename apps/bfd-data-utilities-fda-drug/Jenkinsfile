@@ -36,7 +36,10 @@ spec:
                         // Address limitations resulting from CVE-2022-24767
                         sh 'git config --global --add safe.directory "$WORKSPACE"'
 
-                        // Setup AWS Credentials
+
+                            dir('apps/bfd-data-utilities-fda-drug/') {
+                                // inject code artifact credentials into maven ~/.m2/settings.xml
+                                // Setup AWS Credentials
                         withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
                             withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'ROLE')]) {
                                 env.SESSION_NAME = env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
@@ -61,9 +64,7 @@ spec:
                                 ).trim()
 
                             env.CODEARTIFACT_AUTH_TOKEN = codeArtifactAuthToken
-
-                            dir('apps/bfd-data-utilities-fda-drug/') {
-                                // inject code artifact credentials into maven ~/.m2/settings.xml
+                               
                                 sh '''
 cat <<EOF > ~/.m2/settings.xml
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -87,10 +88,9 @@ EOF
                                 sh "mvn ${quietFlags} package"
                                 sh 'mvn deploy "-DaltDeploymentRepository=cms-bfd-maven-central-store::default::https://cms-bfd-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/"'
                             }
+                            }
                         }
                     }
                 }
             }
-        }
-    }
 }
