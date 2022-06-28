@@ -31,6 +31,12 @@ public class DataUtilityCommons {
   /** Size of the buffer to read/write data */
   private static final int BUFFER_SIZE = 4096;
 
+/**
+   * Gets the fda drug codes from the fda file
+   *
+   * @param outputDir the output directory
+   * @param npiFile the npi file
+   */
   public static void getFDADrugCodes(String outputDir, String fdaFile) {
     Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {

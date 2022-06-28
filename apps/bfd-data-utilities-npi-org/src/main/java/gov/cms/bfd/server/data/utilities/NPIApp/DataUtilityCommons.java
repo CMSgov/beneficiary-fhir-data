@@ -36,6 +36,12 @@ public class DataUtilityCommons {
    /** Size of the buffer to read/write data */
   private static final int BUFFER_SIZE = 4096;
 
+/**
+   * Gets the org names from the npi file
+   *
+   * @param outputDir the output directory
+   * @param npiFile the npi file
+   */
 public static void getNPIOrgNames(String outputDir, String npiFile){
   Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {

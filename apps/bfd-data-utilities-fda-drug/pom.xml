@@ -108,12 +108,12 @@
 		</dependency>
 	</dependencies>
 	<distributionManagement>
-  <repository>
-    <id>cms-bfd-maven-central-store</id>
-    <name>cms-bfd-maven-central-store</name>
-    <url>https://cms-bfd-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/</url>
-  </repository>
-</distributionManagement>
+		<repository>
+			<id>cms-bfd-maven-central-store</id>
+			<name>cms-bfd-maven-central-store</name>
+			<url>https://cms-bfd-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/</url>
+		</repository>
+	</distributionManagement>
 	<build>
 		<finalName>bfd-data-utilities-fda-drug</finalName>
 		<plugins>

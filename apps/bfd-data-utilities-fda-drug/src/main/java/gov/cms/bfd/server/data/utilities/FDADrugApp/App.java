@@ -17,8 +17,7 @@ public class App {
    *     <p>The non-JVM command line arguments that the application was launched with. Must include:
    *     <ol>
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
-   *           should be the path to the project's <code>${project.build.outputDirectory}</code>
-   *           directory (i.e. <code>target/classes/</code>)
+   *           should be the path to the project's resource directory
    *     </ol>
    *
    * @throws IOException if there is an issue creating or iterating over the downloaded files

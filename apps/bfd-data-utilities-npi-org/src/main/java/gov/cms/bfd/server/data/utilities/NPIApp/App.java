@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 public final class App {
   private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
   /**
-   * The name of the classpath resource (for the project's main web application) for the FDA
-   * "Products" TSV file.
+   * The name of the classpath resource (for the project's main web application) for the NPI
+   * "Orgs" TSV file.
    */
   public static final String NPI_RESOURCE = "npiorgdata.tsv";
 
@@ -44,8 +44,7 @@ public final class App {
    *     <p>The non-JVM command line arguments that the application was launched with. Must include:
    *     <ol>
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
-   *           should be the path to the project's <code>${project.build.outputDirectory}</code>
-   *           directory (i.e. <code>target/classes/</code>)
+   *           should be the path to the project's rsource directory
    *     </ol>
    */
   public static void main(String[] args) {
