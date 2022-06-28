@@ -74,9 +74,7 @@ spec:
 
                         // Execute the existing build-push script
                         dir('ops/jenkins/bfd-cbc-build') {
-                            sh 'bash ./build-push.sh'
-                            // inject code artifact credentials into maven ~/.m2/settings.xml
-                                sh '''
+                                                          sh '''
 cat <<EOF > ~/.m2/settings.xml
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
@@ -90,6 +88,9 @@ xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.
 </settings>
 EOF
 '''
+                            sh 'bash ./build-push.sh'
+                            // inject code artifact credentials into maven ~/.m2/settings.xml
+
                         }
 
                     }
