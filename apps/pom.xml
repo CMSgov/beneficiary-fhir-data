@@ -86,7 +86,7 @@
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.13.2</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
-		<spring-data-jpa.version>2.7.1</spring-data-jpa.version>
+		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
@@ -188,7 +188,7 @@
 			</dependency>
 			<dependency>
 				<!-- This is the latest release compatible with the version of Spring 
-					Framework that we're using, per https://docs.spring.io/spring-data/jpa/docs/2.7.1/reference/html/#dependencies.spring-framework. -->
+					Framework that we're using, per https://docs.spring.io/spring-data/jpa/docs/2.7.0/reference/html/#dependencies.spring-framework. -->
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
 				<version>${spring-data-jpa.version}</version>
