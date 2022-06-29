@@ -77,6 +77,7 @@ public final class LoadedFilterManagerIT {
               assertFalse(filterManager.isResultSetEmpty(INVALID_BENE, testBound));
 
               // Refresh the filter list
+              filterManager.refreshFilters();
 
               // Should have zero filters
               assertTrue(
