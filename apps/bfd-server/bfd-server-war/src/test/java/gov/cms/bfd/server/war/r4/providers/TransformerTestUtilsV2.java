@@ -1194,6 +1194,39 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Helper that creates a {@link CareTeamComponent} to be used in unit tests
+   *
+   * @param sequence The sequence to set
+   * @param npi The NPI for the member
+   * @param system System defining the type of member
+   * @param code Code defining the type of member
+   * @param display Display for the type of member
+   * @param setProviderDisplay Display for the provider
+   * @return {@link CareTeamComponent}
+   */
+  static CareTeamComponent createNpiCareTeamMember(
+      int sequence,
+      String npi,
+      String system,
+      String code,
+      String display,
+      String setProviderDisplay) {
+    return new CareTeamComponent()
+        .setSequence(sequence)
+        .setProvider(
+            new Reference()
+                .setDisplay(setProviderDisplay)
+                .setIdentifier(
+                    createIdentifier(
+                        null,
+                        npi,
+                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                        "npi",
+                        "National Provider Identifier")))
+        .setRole(new CodeableConcept().setCoding(Arrays.asList(new Coding(system, code, display))));
+  }
+
+  /**
    * Finds a {@link SupportingInformationComponent} based on the value of a Code of the Category
    *
    * @param code

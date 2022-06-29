@@ -653,7 +653,8 @@ public class CarrierClaimTransformerV2Test {
             "0000000000",
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
-            "Primary provider");
+            "Primary provider",
+            "Fake Org");
 
     assertTrue(compare4.equalsDeep(member4));
   }

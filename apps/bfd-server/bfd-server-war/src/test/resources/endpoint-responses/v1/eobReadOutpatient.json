@@ -133,7 +133,8 @@
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "0000000000"
-    }
+    },
+    "display" : "Fake Org"
   },
   "facility" : {
     "extension" : [ {
@@ -147,7 +148,8 @@
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "0000000000"
-    }
+    },
+    "display" : "Fake Org"
   },
   "information" : [ {
     "sequence" : 1,

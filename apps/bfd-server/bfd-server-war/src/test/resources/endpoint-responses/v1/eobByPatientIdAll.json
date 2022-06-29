@@ -146,7 +146,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake Org"
       },
       "facility" : {
         "extension" : [ {
@@ -160,7 +161,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake Org"
       },
       "information" : [ {
         "sequence" : 1,
@@ -1812,7 +1814,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake Org"
       },
       "facility" : {
         "extension" : [ {
@@ -1826,7 +1829,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake Org"
       },
       "information" : [ {
         "sequence" : 1,
@@ -3673,7 +3677,8 @@
           "url" : "http://hl7.org/fhir/sid/us-npi",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
-            "code" : "0000000000"
+            "code" : "0000000000",
+            "display" : "Fake Org"
           }
         } ],
         "sequence" : 2,
