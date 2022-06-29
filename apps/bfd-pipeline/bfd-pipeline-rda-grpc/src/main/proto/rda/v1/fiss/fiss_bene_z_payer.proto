@@ -11,6 +11,11 @@ import "rda/v1/fiss/fiss_payers_code.proto";
 import "rda/v1/fiss/fiss_release_of_information.proto";
 
 message FissBeneZPayer {
+  // RDA Position:
+  //
+  // Indicates which position this mcs audit is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 1;
+
   oneof payers_id {
     FissPayersCode payers_id_enum = 2;
     string payers_id_unrecognized = 3;
