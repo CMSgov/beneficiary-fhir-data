@@ -233,6 +233,9 @@ def custom_args(parser: LocustArgumentParser):
     
 @events.init.add_listener
 def locust_init(environment: Environment, **kwargs):
+    if is_distributed(environment) and is_locust_worker(environment):
+        return
+    
     logger = logging.getLogger()
     
     # Adjust the runtime to account for spawn rate
