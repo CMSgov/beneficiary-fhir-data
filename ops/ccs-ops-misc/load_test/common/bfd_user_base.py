@@ -21,75 +21,6 @@ from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
 
-def _adjusted_run_time(run_time: int, max_clients: int, clients_per_second: int) -> int:
-    '''Get the adjusted run time of the test to account for the time it takes to instantiate and connect
-    all the clients.
-
-    If a user specifies a one-minute test, but it's going to take thirty seconds to ramp up to full
-    clients, then we actually run for one minute and thirty seconds, so that we can have the
-    specified time with full client capacity. You can optionally reset the statistics to zero at
-    the end of this ramp-up period using the --resetStats command line flag.
-    '''
-
-    return run_time + ceil(int(max_clients) // int(clients_per_second))
-
-@events.init_command_line_parser.add_listener
-def custom_args(parser: LocustArgumentParser):
-    parser.add_argument(
-        '--client-cert-path',
-        type=str,
-        required=True,
-        help='Specifies path to client cert, ex: "<path/to/client/pem/file>" (Required)',
-        dest='client_cert_path',
-        env_var='LOCUST_BFD_CLIENT_CERT_PATH'
-    )
-    parser.add_argument(
-        '--database-uri',
-        type=str,
-        required=True,
-        help='Specfies database URI path, ex: "https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)',
-        dest='database_uri',
-        env_var='LOCUST_BFD_DATABASE_URI'
-    )
-    parser.add_argument(
-        '--server-public-key',
-        type=str,
-        help='"<server public key>" (Optional, Default: "")',
-        dest='server_public_key',
-        env_var='LOCUST_BFD_SERVER_PUBLIC_KEY',
-        default=''
-    )
-    parser.add_argument(
-        '--table-sample-percent',
-        type=float,
-        help='<% of table to sample> (Optional, Default: 0.25)',
-        dest='table_sample_percent',
-        env_var='LOCUST_DATA_TABLE_SAMPLE_PERCENT',
-        default=0.25
-    )
-    parser.add_argument(
-        '--stats-config',
-        type=str,
-        help='"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)',
-        dest='stats_config',
-        env_var='LOCUST_STATS_CONFIG'
-    )
-    
-@events.init.add_listener
-def locust_init(environment: Environment, **kwargs):
-    logger = logging.getLogger()
-    
-    # Adjust the runtime to account for spawn rate
-    num_users = int(environment.parsed_options.num_users)
-    spawn_rate = int(environment.parsed_options.spawn_rate)
-    init_run_time = environment.parsed_options.run_time
-    
-    adjusted_run_time = _adjusted_run_time(init_run_time, num_users, spawn_rate)
-    if adjusted_run_time != init_run_time:
-        environment.parsed_options.run_time = adjusted_run_time
-        logger.info('Run time adjusted to account for ramp-up time. New run time: '
-            f'{timedelta(seconds=environment.parsed_options.run_time)}')
-
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
 
@@ -258,6 +189,63 @@ class BFDUserBase(HttpUser):
             return str(os.environ['LOCUST_WORKER_NUM'])
         return None
 
+@events.init_command_line_parser.add_listener
+def custom_args(parser: LocustArgumentParser):
+    parser.add_argument(
+        '--client-cert-path',
+        type=str,
+        required=True,
+        help='Specifies path to client cert, ex: "<path/to/client/pem/file>" (Required)',
+        dest='client_cert_path',
+        env_var='LOCUST_BFD_CLIENT_CERT_PATH'
+    )
+    parser.add_argument(
+        '--database-uri',
+        type=str,
+        required=True,
+        help='Specfies database URI path, ex: "https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)',
+        dest='database_uri',
+        env_var='LOCUST_BFD_DATABASE_URI'
+    )
+    parser.add_argument(
+        '--server-public-key',
+        type=str,
+        help='"<server public key>" (Optional, Default: "")',
+        dest='server_public_key',
+        env_var='LOCUST_BFD_SERVER_PUBLIC_KEY',
+        default=''
+    )
+    parser.add_argument(
+        '--table-sample-percent',
+        type=float,
+        help='<% of table to sample> (Optional, Default: 0.25)',
+        dest='table_sample_percent',
+        env_var='LOCUST_DATA_TABLE_SAMPLE_PERCENT',
+        default=0.25
+    )
+    parser.add_argument(
+        '--stats-config',
+        type=str,
+        help='"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)',
+        dest='stats_config',
+        env_var='LOCUST_STATS_CONFIG'
+    )
+    
+@events.init.add_listener
+def locust_init(environment: Environment, **kwargs):
+    logger = logging.getLogger()
+    
+    # Adjust the runtime to account for spawn rate
+    num_users = int(environment.parsed_options.num_users)
+    spawn_rate = int(environment.parsed_options.spawn_rate)
+    init_run_time = environment.parsed_options.run_time
+    
+    adjusted_run_time = _adjusted_run_time(init_run_time, num_users, spawn_rate)
+    if adjusted_run_time != init_run_time:
+        environment.parsed_options.run_time = adjusted_run_time
+        logger.info('Run time adjusted to account for ramp-up time. New run time: '
+            f'{timedelta(seconds=environment.parsed_options.run_time)}')
+
 @events.quitting.add_listener
 def one_time_teardown(environment: Environment, **kwargs) -> None:
     """Run one-time teardown tasks after the tests have completed
@@ -316,3 +304,15 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
         if not stats_config.bucket:
             raise ValueError('S3 bucket must be provided when writing stats to S3')
         stats_s3_writer.write(stats_config.bucket)
+        
+def _adjusted_run_time(run_time: int, max_clients: int, clients_per_second: int) -> int:
+    '''Get the adjusted run time of the test to account for the time it takes to instantiate and connect
+    all the clients.
+
+    If a user specifies a one-minute test, but it's going to take thirty seconds to ramp up to full
+    clients, then we actually run for one minute and thirty seconds, so that we can have the
+    specified time with full client capacity. You can optionally reset the statistics to zero at
+    the end of this ramp-up period using the --resetStats command line flag.
+    '''
+
+    return run_time + ceil(int(max_clients) // int(clients_per_second))
