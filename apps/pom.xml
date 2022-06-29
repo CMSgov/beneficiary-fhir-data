@@ -322,16 +322,16 @@
 			</dependency>
 
 			<dependency>
-			<groupId>com.newrelic.telemetry</groupId>
-			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>${newrelic.version}</version>
-		</dependency>
+				<groupId>com.newrelic.telemetry</groupId>
+				<artifactId>dropwizard-metrics-newrelic</artifactId>
+				<version>${newrelic.version}</version>
+			</dependency>
 
-		<dependency>
-			<groupId>com.newrelic.telemetry</groupId>
-			<artifactId>telemetry-http-okhttp</artifactId>
-			<version>${newrelicHTTP.version}</version>
-		</dependency>
+			<dependency>
+				<groupId>com.newrelic.telemetry</groupId>
+				<artifactId>telemetry-http-okhttp</artifactId>
+				<version>${newrelicHTTP.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
