@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.cms.bfd.server.data.utilities.NPIApp</groupId>
-	<artifactId>bfd-data-utilities</artifactId>
+	<artifactId>bfd-data-utilities-npi-org</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>bfd-data-utilities-npi-org</name>
