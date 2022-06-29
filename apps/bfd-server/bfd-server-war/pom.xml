@@ -63,7 +63,6 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rda</artifactId>
 		</dependency>
-
 		<dependency>
 			<!-- At least one "structures" JAR must also be included -->
 			<groupId>ca.uhn.hapi.fhir</groupId>
