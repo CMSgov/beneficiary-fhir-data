@@ -12,4 +12,9 @@ message McsAdjustment {
   optional string idr_adj_chk_wrt_dt = 5;
   optional string idr_adj_b_eomb_amt = 6;
   optional string idr_adj_p_eomb_amt = 7;
+
+  // RDA Position:
+  //
+  // Indicates which position this adjustment is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 8;
 }
