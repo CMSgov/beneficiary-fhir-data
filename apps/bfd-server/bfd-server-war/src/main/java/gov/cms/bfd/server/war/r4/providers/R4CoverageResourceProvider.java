@@ -22,7 +22,6 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -130,14 +129,13 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     if (!coverageIdSegment.isPresent()) {
       throw new ResourceNotFoundException(coverageId);
     }
-    String coverageIdBeneficiaryIdText = coverageIdMatcher.group(2);
-
+    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
     Beneficiary beneficiaryEntity;
     try {
-      beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
+      beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
-          new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
+          new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
     Coverage coverage =
@@ -178,8 +176,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
+    Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
     try {
-      Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart(), lastUpdated);
+      Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = CoverageTransformerV2.transform(metricRegistry, beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
@@ -195,7 +194,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneficiary.getIdPart()));
+    TransformerUtilsV2.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtilsV2.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
@@ -210,10 +209,10 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    *     Beneficiary} can be found in the database.
    */
   @Trace
-  private Beneficiary findBeneficiaryById(String beneIdStr, DateRangeParam lastUpdatedRange)
+  private Beneficiary findBeneficiaryById(Long beneficiaryId, DateRangeParam lastUpdatedRange)
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty
-    if (loadedFilterManager.isResultSetEmpty(beneIdStr, lastUpdatedRange)) {
+    if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdatedRange)) {
       throw new NoResultException();
     }
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -221,8 +220,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
     criteria.select(root);
-    Predicate wherePredicate =
-        builder.equal(root.get(Beneficiary_.beneficiaryId), Long.parseLong(beneIdStr));
+    Predicate wherePredicate = builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId);
     if (lastUpdatedRange != null) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdatedRange);
       wherePredicate = builder.and(wherePredicate, predicate);

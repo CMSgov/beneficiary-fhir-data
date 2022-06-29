@@ -34,8 +34,8 @@ public final class LoadedFilterManagerIT {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
-  private static final String SAMPLE_BENE = "567834";
-  private static final String INVALID_BENE = "1";
+  private static final long SAMPLE_BENE = 567834L;
+  private static final long INVALID_BENE = 1L;
 
   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
@@ -77,7 +77,6 @@ public final class LoadedFilterManagerIT {
               assertFalse(filterManager.isResultSetEmpty(INVALID_BENE, testBound));
 
               // Refresh the filter list
-              filterManager.refreshFilters();
 
               // Should have zero filters
               assertTrue(

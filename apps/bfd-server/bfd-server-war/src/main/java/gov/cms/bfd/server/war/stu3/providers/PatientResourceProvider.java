@@ -132,7 +132,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (patientId.getVersionIdPartAsLong() != null) {
       throw new IllegalArgumentException();
     }
-    Long beneId = Long.parseLong(patientId.getIdPart());
+    Long beneficiaryId = Long.parseLong(patientId.getIdPart());
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
@@ -153,7 +153,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
+    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
 
     Beneficiary beneficiary = null;
     Long beneByIdQueryNanoSeconds = null;
@@ -188,7 +188,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     // Add bene_id to MDC logs
-    TransformerUtils.logBeneIdToMdc(Arrays.asList(String.valueOf(beneId)));
+    TransformerUtils.logBeneIdToMdc(beneficiaryId);
 
     Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;
@@ -276,7 +276,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "Unsupported query parameter value: " + logicalId.getValue());
 
     List<IBaseResource> patients;
-    if (loadedFilterManager.isResultSetEmpty(logicalId.getValue(), lastUpdated)) {
+    if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
       patients = Collections.emptyList();
     } else {
       try {

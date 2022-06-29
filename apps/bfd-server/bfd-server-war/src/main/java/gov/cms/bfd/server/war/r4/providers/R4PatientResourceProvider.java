@@ -172,7 +172,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(String.valueOf(beneId)));
+    TransformerUtilsV2.logBeneIdToMdc(beneId);
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
@@ -220,7 +220,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "Unsupported query parameter value: " + logicalId.getValue());
 
     List<IBaseResource> patients;
-    if (loadedFilterManager.isResultSetEmpty(logicalId.getValue(), lastUpdated)) {
+    if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
       patients = Collections.emptyList();
     } else {
       try {

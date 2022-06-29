@@ -3,7 +3,6 @@ package gov.cms.bfd.model.rif;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.persistence.*;
 
 /** JPA class for the loaded_batches table. */
@@ -63,7 +62,7 @@ public class LoadedBatch {
    * @param created batch creation date
    */
   public LoadedBatch(
-      long loadedBatchId, long loadedFileId, List<String> beneficiaries, Instant created) {
+      long loadedBatchId, long loadedFileId, List<Long> beneficiaries, Instant created) {
     this();
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
@@ -148,7 +147,7 @@ public class LoadedBatch {
    *
    * @param beneficiaries list to convert
    */
-  public void setBeneficiaries(List<String> beneficiaries) {
+  public void setBeneficiaries(List<Long> beneficiaries) {
     this.beneficiaries = convertToString(beneficiaries);
   }
 
@@ -195,10 +194,18 @@ public class LoadedBatch {
    * @param list the list to convert
    * @return the string containing the values of the string list delimited by {@link #SEPARATOR}
    */
-  private static String convertToString(List<String> list) {
-    return (list == null || list.isEmpty())
-        ? ""
-        : list.stream().collect(Collectors.joining(SEPARATOR));
+  private static String convertToString(List<Long> list) {
+    if (list == null || list.isEmpty()) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < list.size(); i++) {
+      if (i > 0) {
+        sb.append(SEPARATOR);
+      }
+      sb.append(String.valueOf(list.get(i)));
+    }
+    return sb.toString();
   }
 
   /**
