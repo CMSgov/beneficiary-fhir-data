@@ -40,6 +40,7 @@ stage('Checkout') {
 stage('Build') {
 	node {
 		milestone(label: 'stage_build_start')
+
 		withCredentials([
 				string(credentialsId: 'proxy-host', variable: 'proxyHost'),
 				string(credentialsId: 'proxy-port', variable: 'proxyPort')
