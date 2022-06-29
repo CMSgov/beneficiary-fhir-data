@@ -45,7 +45,7 @@ public final class App {
    *     <ol>
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
    *           should be the path to the project's rsource directory
-   *     </ol>
+   *     </ol> 
    */
   public static void main(String[] args) {
     if (args.length < 1) {
