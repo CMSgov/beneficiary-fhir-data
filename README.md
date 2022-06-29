@@ -88,6 +88,35 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
 1. Install pre-commit hooks `mvn -f apps initialize`
 
+### Adding AWS Code Artifact Repository To Your settings.xml File
+1.  Add the following to your settings.xml file. Under the profiles tag add the following:
+ ```xml
+  <profile>
+    <id>cms-bfd-maven-central-store</id>
+    <activation>
+      <activeByDefault>true</activeByDefault>
+    </activation>
+    <repositories>
+      <repository>
+        <id>cms-bfd-maven-central-store</id>
+        <url>https://cms-bfd-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/</url>
+      </repository>
+    </repositories>
+  </profile>
+  ```
+2.  Add the following to your settings.xml file. Under the servers tag add the following:
+```xml  
+  <server>
+    <id>cms-bfd-maven-central-store</id>
+    <username>aws</username>
+    <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+  </server>
+```
+3.  In your .bash_profile add the following:
+```sh
+export CODEARTIFACT_AUTH_TOKEN='aws codeartifact get-authorization-token --domain cms-bfd --domain-owner 577373831711 --query authorizationToken'
+```
+
 ### Native Setup
 1. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
 2. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.

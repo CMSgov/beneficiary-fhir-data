@@ -19,7 +19,6 @@ public class App {
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
    *           should be the path to the project's resource directory
    *     </ol>
-   *
    * @throws IOException if there is an issue creating or iterating over the downloaded files
    */
   public static void main(String[] args) {
