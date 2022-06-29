@@ -193,6 +193,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
       optional(() -> adjustment.setIdrAdjChkWrtDt(randomDate()));
       optional(() -> adjustment.setIdrAdjBEombAmt(randomAmount()));
       optional(() -> adjustment.setIdrAdjPEombAmt(randomAmount()));
+      adjustment.setRdaPosition(i);
       claim.addMcsAdjustments(adjustment.build());
     }
   }
@@ -208,6 +209,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
       oneOf(
           () -> audit.setIdrJAuditDispEnum(randomEnum(McsCutbackAuditDispositionEnums)),
           () -> audit.setIdrJAuditDispUnrecognized(randomAlphaNumeric(1, 1)));
+      audit.setRdaPosition(i);
       claim.addMcsAudits(audit.build());
     }
   }
@@ -221,6 +223,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
           () -> code.setIdrDiagIcdTypeEnum(randomEnum(McsDiagnosisIcdTypeEnums)),
           () -> code.setIdrDiagIcdTypeUnrecognized(randomLetter(1, 1)));
       code.setIdrDiagCode(randomAlphaNumeric(1, 7));
+      code.setRdaPosition(i);
       claim.addMcsDiagnosisCodes(code.build());
     }
   }
@@ -292,6 +295,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
       oneOf(
           () -> location.setIdrLocActvCodeEnum(randomEnum(McsLocationActivityCodeEnums)),
           () -> location.setIdrLocActvCodeUnrecognized(randomAlphaNumeric(1, 1)));
+      location.setRdaPosition(i);
       claim.addMcsLocations(location.build());
     }
   }

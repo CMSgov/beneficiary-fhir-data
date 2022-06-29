@@ -63,10 +63,8 @@ export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
 {% endif %}
 
 # Begin smoke testing startup routine
-STARTUP_TESTING_RETRIES='3'
-STARTUP_TESTING_BOOT_TIMEOUT='10' # TODO: temporary reduction; to be fixed/removed in BFD-1813
 STARTUP_TESTING_REQ_TIMEOUT='15'
-STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='10'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='1'
 STARTUP_TESTING_BENE_ID='-88888888888888'
 
 ##
@@ -92,15 +90,14 @@ check_endpoint() {
 }
 
 ##
-# Runs test queries to verify that the server is working as expected. If not, issues a 'kill -INT' on the server's process to shut it down.
+# Runs test queries to verify that the server is working as expected before allowing traffic in the firewall.
 ##
-stop_service_if_failing() {
+
+service_startup_check() {
   # Reject all external traffic to service port until the application has started successfully
   sudo iptables -A INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
-  log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
-  sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
-  for I in $(seq $STARTUP_TESTING_RETRIES); do
+  while true; do
     log "Checking V1 metadata endpoint"
     STARTUP_TESTING_CHECK_V1_METADATA=$(check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_V1_METADATA_EXIT=$?
@@ -130,25 +127,14 @@ stop_service_if_failing() {
       sudo iptables -D INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
       log "Server started properly"
       return 0
-    elif [[ $I -lt $STARTUP_TESTING_RETRIES ]]; then
-      log "Server failed to start properly, backing off"
+    else
+      log "Server failed to start properly, retrying..."
       sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
     fi
   done
-
-  log "Server failed to start properly, shutting down"
-  STARTUP_TESTING_BFD_PID=$(ps -ef | grep 'DataServerLauncherApp' | grep -v grep | awk '{print $2}')
-  STARTUP_TESTING_BFD_PID_EXIT=$?
-
-  if [[ $STARTUP_TESTING_BFD_PID_EXIT == 0 ]] && kill -INT $STARTUP_TESTING_BFD_PID; then
-    log "Server shut down gracefully"
-  else
-    log "Error shutting down server gracefully"
-  fi
-  return 1
 }
 
-(stop_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
+(service_startup_check >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
 # End smoke testing startup routine
 
 # Set some additional variables.
