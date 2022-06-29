@@ -83,6 +83,8 @@
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
 		<metrics.version>4.1.29</metrics.version>
+		<newrelic.version>0.7.0</newrelic.version>
+		<newrelicHTTP.version>0.13.2</newrelicHTTP.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
@@ -318,6 +320,18 @@
 				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
+
+			<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>dropwizard-metrics-newrelic</artifactId>
+			<version>${newrelic.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>telemetry-http-okhttp</artifactId>
+			<version>${newrelicHTTP.version}</version>
+		</dependency>
 		</dependencies>
 	</dependencyManagement>
 

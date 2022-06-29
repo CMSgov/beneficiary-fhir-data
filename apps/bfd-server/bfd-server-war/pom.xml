@@ -204,13 +204,11 @@
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>0.7.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>telemetry-http-okhttp</artifactId>
-			<version>0.13.2</version>
 		</dependency>
 		
 		<dependency>
