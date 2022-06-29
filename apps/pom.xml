@@ -94,7 +94,7 @@
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<postgres.driver.version>42.3.5</postgres.driver.version>
+		<postgres.driver.version>42.4.0</postgres.driver.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
