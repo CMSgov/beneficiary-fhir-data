@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.cms.bfd.server.data.utilities.NPIApp</groupId>
-	<artifactId>bfd-data-utilities-npi-org</artifactId>
+	<artifactId>bfd-data-utilities</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>bfd-data-utilities-npi-org</name>
@@ -25,7 +25,26 @@
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.9.0-M1</version>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used to create mock objects for unit tests. -->
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.6.28</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<version>3.6.28</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -54,25 +73,6 @@
 			<version>4.1</version>
 		</dependency>
 		<dependency>
-			<!-- Just useful. -->
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>31.1-jre</version>
-		</dependency>
-		<dependency>
-			<!-- Used to create mock objects for unit tests. -->
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>3.6.28</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
-			<version>3.6.28</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
@@ -92,6 +92,12 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
 			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<!-- Just useful. -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>31.1-jre</version>
 		</dependency>
 		<dependency>
 			<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
@@ -117,14 +123,36 @@
 				<version>1.1</version>
 				<executions>
 					<execution>
-                        <phase>generate-sources</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
 							<tasks>
-								<copy file="src/main/resources/npiorgdata.tsv" tofile="${basedir}/target/npiorgdata.tsv"/>
+								<mkdir dir="${basedir}/src/main/resources"/>
 							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+							<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/resources</directory>
+								<filtering>false</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
@@ -135,76 +163,15 @@
 				<version>2.22.0</version>
 			</plugin>
 			<plugin>
+				<groupId>com.coveo</groupId>
+				<artifactId>fmt-maven-plugin</artifactId>
+				<version>2.9</version>
+			</plugin>
+			<plugin>
 				<groupId>io.github.phillipuniverse</groupId>
 				<artifactId>githook-maven-plugin</artifactId>
 				<version>1.0.4</version>
-				<configuration>
-					<hooks>
-						<pre-commit>
-#!/usr/bin/env bash
-set -e
-
-checkJavaFormat() {
-  echo 'Verifying Java source code format...'
-
-  if ! git diff --name-only --cached | grep -q '^apps/.*'; then
-    echo 'Verified Java source code format: no staged changes in app/.'
-    return 0
-  fi
-
-  cd apps
-
-  set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&amp;1
-  checkResult=$?
-  set -e
-
-  if [ ${checkResult} -eq 0 ]; then
-    echo 'Verified Java source code format: a-okay.'
-  else
-    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.coveo:fmt-maven-plugin:check' for details or 'mvn com.coveo:fmt-maven-plugin:format' to automatically apply the required formatting."
-  fi
-
-  return ${checkResult}
-}
-
-checkSecretFilesForPlainText() {
-  echo 'Verifying secret files are not in plaintext...'
-  set +e
-  # read list of files containing secrets
-  IFS=$'\n' read -d '' -r -a secrets &lt; .secrets
-
-  # make list of files to be committed by printing out a newline
-  # separated list of files staged for commit to a temporary file
-  # and reading it as an array
-  tmpfile=$(mktemp)
-  git diff --cached --name-only --diff-filter=ACM > $tmpfile
-  IFS=$'\n' read -d '' -r -a commits &lt; $tmpfile
-
-  # for all files to be committed which are a secret file,
-  # grep for the header "$ANSIBLE_VAULT;1.1;AES256"
-  # if it's not there, abort.
-  for commitFile in ${commits[@]}; do
-    for secretFile in ${secrets[@]}; do
-      if [ $commitFile == $secretFile ]; then
-        header=$(echo "$(git show :./$secretFile)" | grep "\$ANSIBLE_VAULT;1.1;AES256")
-        if [ -z $header ]; then
-          echo "attempting to commit an unencrypted secret: $secretFile; aborting"
-          exit 1
-        fi
-      fi
-    done
-  done
-  set -e
-}
-
-checkSecretFilesForPlainText
-checkJavaFormat
-							</pre-commit>
-					</hooks>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 </project>
-
