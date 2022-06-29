@@ -17,4 +17,9 @@ message McsAudit {
     McsCutbackAuditDisposition idr_j_audit_disp_enum = 4;
     string idr_j_audit_disp_unrecognized = 5;
   }
+
+  // RDA Position:
+  //
+  // Indicates which position this mcs audit is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 6;
 }

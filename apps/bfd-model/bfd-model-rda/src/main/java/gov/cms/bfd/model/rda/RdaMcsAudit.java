@@ -38,6 +38,9 @@ public class RdaMcsAudit {
   @EqualsAndHashCode.Include
   private short priority;
 
+  @Column(name = "rda_position", columnDefinition = "smallint")
+  private int rdaPosition;
+
   @Column(name = "last_updated")
   private Instant lastUpdated;
 

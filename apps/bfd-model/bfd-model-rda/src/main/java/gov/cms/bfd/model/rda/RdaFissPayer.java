@@ -132,6 +132,9 @@ public class RdaFissPayer {
   @Column(name = "insured_dob_text", length = 9)
   private String insuredDobText;
 
+  @Column(name = "rda_position", columnDefinition = "smallint")
+  private int rdaPosition;
+
   @Column(name = "last_updated")
   private Instant lastUpdated;
 
