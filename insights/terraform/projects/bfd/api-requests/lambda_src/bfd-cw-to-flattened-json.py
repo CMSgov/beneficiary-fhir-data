@@ -113,7 +113,6 @@ def transformLogEvent(log_event):
     
     """
     BFD modification to the blueprint to flatten the message json.
-    V1
     """
     log_event_json = json.loads(log_event['message'])
     flattened_log_event_json = flatten_json(log_event_json)
