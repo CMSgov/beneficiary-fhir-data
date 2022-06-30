@@ -35,4 +35,9 @@ message FissDiagnosisCode {
   // This field identifies a set of flags returned by DRG Grouper or Medicare Code Editor (MCE) to indicate claim
   // diagnosis errors effective with discharges on or after 10/01/07.
   optional string bit_flags = 3;
+
+  // RDA Position:
+  //
+  // Indicates which position this diagnosis code is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 5;
 }

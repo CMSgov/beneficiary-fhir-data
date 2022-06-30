@@ -20,8 +20,8 @@ data_pipeline_idempotency_required: false
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
 
-# Whether to enable BFD PreAdj Resources
-pre_adj_resources_enabled: true
+# Whether to enable BFD Partially Adjudicated Claims Resources
+pac_resources_enabled: true
 
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
@@ -50,6 +50,9 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_performance_tester
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
+
+# Enables the CCW RIF job when true; disables when false
+data_pipeline_ccw_rif_job_enabled: false # Temporarily disabled as part of BFD-1652. To be re-enabled as part of BFD-1746.
 
 # Enables the RDA API data pipline with a 1 hour retry interval.
 data_pipeline_rda_job_enabled: true

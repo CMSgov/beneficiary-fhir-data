@@ -51,6 +51,7 @@ public final class SNFClaimTransformerTest {
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
+
     assertMatches(claim, eob);
   }
 
@@ -70,7 +71,7 @@ public final class SNFClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.SNF,
-        Long.toString(claim.getClaimGroupId()),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -83,11 +84,11 @@ public final class SNFClaimTransformerTest {
     // test common benefit components between SNF and Inpatient claims are set as expected
     TransformerTestUtils.assertCommonGroupInpatientSNF(
         eob,
-        BigDecimal.valueOf(claim.getCoinsuranceDayCount()),
-        BigDecimal.valueOf(claim.getNonUtilizationDayCount()),
+        claim.getCoinsuranceDayCount(),
+        claim.getNonUtilizationDayCount(),
         claim.getDeductibleAmount(),
         claim.getPartACoinsuranceLiabilityAmount(),
-        BigDecimal.valueOf(claim.getBloodPintsFurnishedQty()),
+        claim.getBloodPintsFurnishedQty(),
         claim.getNoncoveredCharge(),
         claim.getTotalDeductionAmount(),
         claim.getClaimPPSCapitalDisproportionateShareAmt(),
@@ -127,7 +128,7 @@ public final class SNFClaimTransformerTest {
         eob,
         claim.getClaimAdmissionDate(),
         claim.getBeneficiaryDischargeDate(),
-        Optional.of(BigDecimal.valueOf(claim.getUtilizationDayCount())));
+        Optional.of(claim.getUtilizationDayCount()));
 
     // Test to ensure common group fields between Inpatient, Outpatient and SNF
     TransformerTestUtils.assertEobCommonGroupInpOutSNFEquals(
@@ -202,10 +203,7 @@ public final class SNFClaimTransformerTest {
         claimLine1.getNonCoveredChargeAmount(),
         BigDecimal.valueOf(claimLine1.getUnitCount()),
         claimControlNumber,
-        claimLine1.getNationalDrugCodeQuantity().isPresent()
-            ? Optional.of(
-                BigDecimal.valueOf(claimLine1.getNationalDrugCodeQuantity().get().longValue()))
-            : Optional.empty(),
+        claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
         1 /* index */);

@@ -38,53 +38,51 @@ import java.util.List;
 import lombok.Getter;
 
 public class McsClaimTransformer {
-  private final EnumStringExtractor<McsClaim, McsClaimType> PreAdjMcsClaim_idrClaimType_Extractor;
+  private final EnumStringExtractor<McsClaim, McsClaimType> RdaMcsClaim_idrClaimType_Extractor;
 
-  private final EnumStringExtractor<McsClaim, McsBeneficiarySex>
-      PreAdjMcsClaim_idrBeneSex_Extractor;
+  private final EnumStringExtractor<McsClaim, McsBeneficiarySex> RdaMcsClaim_idrBeneSex_Extractor;
 
-  private final EnumStringExtractor<McsClaim, McsStatusCode> PreAdjMcsClaim_idrStatusCode_Extractor;
+  private final EnumStringExtractor<McsClaim, McsStatusCode> RdaMcsClaim_idrStatusCode_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsBillingProviderIndicator>
-      PreAdjMcsClaim_idrBillProvGroupInd_Extractor;
+      RdaMcsClaim_idrBillProvGroupInd_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsBillingProviderStatusCode>
-      PreAdjMcsClaim_idrBillProvStatusCd_Extractor;
+      RdaMcsClaim_idrBillProvStatusCd_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsClaimAssignmentCode>
-      PreAdjMcsClaim_idrAssignment_Extractor;
+      RdaMcsClaim_idrAssignment_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsClaimLevelIndicator>
-      PreAdjMcsClaim_idrClmLevelInd_Extractor;
+      RdaMcsClaim_idrClmLevelInd_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsAuditIndicator>
-      PreAdjMcsClaim_idrHdrAuditInd_Extractor;
+      RdaMcsClaim_idrHdrAuditInd_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsSplitReasonCode>
-      PreAdjMcsClaim_idrUSplitReason_Extractor;
+      RdaMcsClaim_idrUSplitReason_Extractor;
 
-  private final EnumStringExtractor<McsDetail, McsDetailStatus>
-      PreAdjMcsDetail_idrDtlStatus_Extractor;
+  private final EnumStringExtractor<McsDetail, McsDetailStatus> RdaMcsDetail_idrDtlStatus_Extractor;
 
   private final EnumStringExtractor<McsDetail, McsDiagnosisIcdType>
-      PreAdjMcsDetail_idrDtlDiagIcdType_Extractor;
+      RdaMcsDetail_idrDtlDiagIcdType_Extractor;
 
-  private final EnumStringExtractor<McsDetail, McsTypeOfService> PreAdjMcsDetail_idrTos_Extractor;
+  private final EnumStringExtractor<McsDetail, McsTypeOfService> RdaMcsDetail_idrTos_Extractor;
 
   private final EnumStringExtractor<McsDetail, McsTwoDigitPlanOfService>
-      PreAdjMcsDetail_idrTwoDigitPos_Extractor;
+      RdaMcsDetail_idrTwoDigitPos_Extractor;
 
   private final EnumStringExtractor<McsDiagnosisCode, McsDiagnosisIcdType>
-      PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor;
+      RdaMcsDiagnosisCode_idrDiagIcdType_Extractor;
 
   private final EnumStringExtractor<McsAudit, McsCutbackAuditIndicator>
-      PreAdjMcsAudit_idrJAuditInd_Extractor;
+      RdaMcsAudit_idrJAuditInd_Extractor;
 
   private final EnumStringExtractor<McsAudit, McsCutbackAuditDisposition>
-      PreAdjMcsAudit_idrJAuditDisp_Extractor;
+      RdaMcsAudit_idrJAuditDisp_Extractor;
 
   private final EnumStringExtractor<McsLocation, McsLocationActivityCode>
-      PreAdjMcsLocation_idrLocActvCode_Extractor;
+      RdaMcsLocation_idrLocActvCode_Extractor;
 
   private final Clock clock;
   @Getter private final MbiCache mbiCache;
@@ -92,7 +90,7 @@ public class McsClaimTransformer {
   public McsClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
-    PreAdjMcsClaim_idrClaimType_Extractor =
+    RdaMcsClaim_idrClaimType_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrClaimTypeEnum,
             McsClaim::getIdrClaimTypeEnum,
@@ -101,7 +99,7 @@ public class McsClaimTransformer {
             McsClaimType.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrBeneSex_Extractor =
+    RdaMcsClaim_idrBeneSex_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrBeneSexEnum,
             McsClaim::getIdrBeneSexEnum,
@@ -110,7 +108,7 @@ public class McsClaimTransformer {
             McsBeneficiarySex.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrStatusCode_Extractor =
+    RdaMcsClaim_idrStatusCode_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrStatusCodeEnum,
             McsClaim::getIdrStatusCodeEnum,
@@ -119,7 +117,7 @@ public class McsClaimTransformer {
             McsStatusCode.UNRECOGNIZED,
             ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
             ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
-    PreAdjMcsClaim_idrBillProvGroupInd_Extractor =
+    RdaMcsClaim_idrBillProvGroupInd_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrBillProvGroupIndEnum,
             McsClaim::getIdrBillProvGroupIndEnum,
@@ -128,7 +126,7 @@ public class McsClaimTransformer {
             McsBillingProviderIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrBillProvStatusCd_Extractor =
+    RdaMcsClaim_idrBillProvStatusCd_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrBillProvStatusCdEnum,
             McsClaim::getIdrBillProvStatusCdEnum,
@@ -137,7 +135,7 @@ public class McsClaimTransformer {
             McsBillingProviderStatusCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrAssignment_Extractor =
+    RdaMcsClaim_idrAssignment_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrAssignmentEnum,
             McsClaim::getIdrAssignmentEnum,
@@ -146,7 +144,7 @@ public class McsClaimTransformer {
             McsClaimAssignmentCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrClmLevelInd_Extractor =
+    RdaMcsClaim_idrClmLevelInd_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrClmLevelIndEnum,
             McsClaim::getIdrClmLevelIndEnum,
@@ -155,7 +153,7 @@ public class McsClaimTransformer {
             McsClaimLevelIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrHdrAuditInd_Extractor =
+    RdaMcsClaim_idrHdrAuditInd_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrHdrAuditIndEnum,
             McsClaim::getIdrHdrAuditIndEnum,
@@ -164,7 +162,7 @@ public class McsClaimTransformer {
             McsAuditIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsClaim_idrUSplitReason_Extractor =
+    RdaMcsClaim_idrUSplitReason_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrUSplitReasonEnum,
             McsClaim::getIdrUSplitReasonEnum,
@@ -173,7 +171,7 @@ public class McsClaimTransformer {
             McsSplitReasonCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsDetail_idrDtlStatus_Extractor =
+    RdaMcsDetail_idrDtlStatus_Extractor =
         new EnumStringExtractor<>(
             McsDetail::hasIdrDtlStatusEnum,
             McsDetail::getIdrDtlStatusEnum,
@@ -182,7 +180,7 @@ public class McsClaimTransformer {
             McsDetailStatus.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsDetail_idrDtlDiagIcdType_Extractor =
+    RdaMcsDetail_idrDtlDiagIcdType_Extractor =
         new EnumStringExtractor<>(
             McsDetail::hasIdrDtlDiagIcdTypeEnum,
             McsDetail::getIdrDtlDiagIcdTypeEnum,
@@ -191,7 +189,7 @@ public class McsClaimTransformer {
             McsDiagnosisIcdType.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsDetail_idrTos_Extractor =
+    RdaMcsDetail_idrTos_Extractor =
         new EnumStringExtractor<>(
             McsDetail::hasIdrTosEnum,
             McsDetail::getIdrTosEnum,
@@ -200,7 +198,7 @@ public class McsClaimTransformer {
             McsTypeOfService.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsDetail_idrTwoDigitPos_Extractor =
+    RdaMcsDetail_idrTwoDigitPos_Extractor =
         new EnumStringExtractor<>(
             McsDetail::hasIdrTwoDigitPosEnum,
             McsDetail::getIdrTwoDigitPosEnum,
@@ -209,7 +207,7 @@ public class McsClaimTransformer {
             McsTwoDigitPlanOfService.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor =
+    RdaMcsDiagnosisCode_idrDiagIcdType_Extractor =
         new EnumStringExtractor<>(
             McsDiagnosisCode::hasIdrDiagIcdTypeEnum,
             McsDiagnosisCode::getIdrDiagIcdTypeEnum,
@@ -218,7 +216,7 @@ public class McsClaimTransformer {
             McsDiagnosisIcdType.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsAudit_idrJAuditInd_Extractor =
+    RdaMcsAudit_idrJAuditInd_Extractor =
         new EnumStringExtractor<>(
             McsAudit::hasIdrJAuditIndEnum,
             McsAudit::getIdrJAuditIndEnum,
@@ -227,7 +225,7 @@ public class McsClaimTransformer {
             McsCutbackAuditIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsAudit_idrJAuditDisp_Extractor =
+    RdaMcsAudit_idrJAuditDisp_Extractor =
         new EnumStringExtractor<>(
             McsAudit::hasIdrJAuditDispEnum,
             McsAudit::getIdrJAuditDispEnum,
@@ -236,7 +234,7 @@ public class McsClaimTransformer {
             McsCutbackAuditDisposition.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
-    PreAdjMcsLocation_idrLocActvCode_Extractor =
+    RdaMcsLocation_idrLocActvCode_Extractor =
         new EnumStringExtractor<>(
             McsLocation::hasIdrLocActvCodeEnum,
             McsLocation::getIdrLocActvCodeEnum,
@@ -314,7 +312,7 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsClaim.Fields.idrClaimType,
         false,
         1,
-        PreAdjMcsClaim_idrClaimType_Extractor.getEnumString(from),
+        RdaMcsClaim_idrClaimType_Extractor.getEnumString(from),
         to::setIdrClaimType);
     transformer.copyOptionalInt(from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt);
     transformer.copyOptionalString(
@@ -342,13 +340,13 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsClaim.Fields.idrBeneSex,
         true,
         1,
-        PreAdjMcsClaim_idrBeneSex_Extractor.getEnumString(from),
+        RdaMcsClaim_idrBeneSex_Extractor.getEnumString(from),
         to::setIdrBeneSex);
     transformer.copyEnumAsString(
         namePrefix + RdaMcsClaim.Fields.idrStatusCode,
         true,
         1,
-        PreAdjMcsClaim_idrStatusCode_Extractor.getEnumString(from),
+        RdaMcsClaim_idrStatusCode_Extractor.getEnumString(from),
         to::setIdrStatusCode);
     transformer.copyOptionalDate(
         namePrefix + RdaMcsClaim.Fields.idrStatusDate,
@@ -394,7 +392,7 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsClaim.Fields.idrBillProvGroupInd,
         true,
         1,
-        PreAdjMcsClaim_idrBillProvGroupInd_Extractor.getEnumString(from),
+        RdaMcsClaim_idrBillProvGroupInd_Extractor.getEnumString(from),
         to::setIdrBillProvGroupInd);
     transformer.copyOptionalString(
         namePrefix + RdaMcsClaim.Fields.idrBillProvPriceSpec,
@@ -436,7 +434,7 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsClaim.Fields.idrBillProvStatusCd,
         true,
         1,
-        PreAdjMcsClaim_idrBillProvStatusCd_Extractor.getEnumString(from),
+        RdaMcsClaim_idrBillProvStatusCd_Extractor.getEnumString(from),
         to::setIdrBillProvStatusCd);
     transformer.copyOptionalAmount(
         namePrefix + RdaMcsClaim.Fields.idrTotBilledAmt,
@@ -469,26 +467,26 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsClaim.Fields.idrAssignment,
         true,
         1,
-        PreAdjMcsClaim_idrAssignment_Extractor.getEnumString(from),
+        RdaMcsClaim_idrAssignment_Extractor.getEnumString(from),
         to::setIdrAssignment);
     transformer.copyEnumAsString(
         namePrefix + RdaMcsClaim.Fields.idrClmLevelInd,
         true,
         1,
-        PreAdjMcsClaim_idrClmLevelInd_Extractor.getEnumString(from),
+        RdaMcsClaim_idrClmLevelInd_Extractor.getEnumString(from),
         to::setIdrClmLevelInd);
     transformer.copyOptionalInt(from::hasIdrHdrAudit, from::getIdrHdrAudit, to::setIdrHdrAudit);
     transformer.copyEnumAsString(
         namePrefix + RdaMcsClaim.Fields.idrHdrAuditInd,
         true,
         1,
-        PreAdjMcsClaim_idrHdrAuditInd_Extractor.getEnumString(from),
+        RdaMcsClaim_idrHdrAuditInd_Extractor.getEnumString(from),
         to::setIdrHdrAuditInd);
     transformer.copyEnumAsString(
         namePrefix + RdaMcsClaim.Fields.idrUSplitReason,
         true,
         1,
-        PreAdjMcsClaim_idrUSplitReason_Extractor.getEnumString(from),
+        RdaMcsClaim_idrUSplitReason_Extractor.getEnumString(from),
         to::setIdrUSplitReason);
     transformer.copyOptionalString(
         namePrefix + RdaMcsClaim.Fields.idrJReferringProvNpi,
@@ -660,7 +658,7 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsDetail.Fields.idrDtlStatus,
         true,
         1,
-        PreAdjMcsDetail_idrDtlStatus_Extractor.getEnumString(from),
+        RdaMcsDetail_idrDtlStatus_Extractor.getEnumString(from),
         to::setIdrDtlStatus);
     transformer.copyOptionalDate(
         namePrefix + RdaMcsDetail.Fields.idrDtlFromDate,
@@ -672,7 +670,7 @@ public class McsClaimTransformer {
         from::hasIdrDtlToDate,
         from::getIdrDtlToDate,
         to::setIdrDtlToDate);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaMcsDetail.Fields.idrProcCode,
         1,
         5,
@@ -711,7 +709,7 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsDetail.Fields.idrDtlDiagIcdType,
         true,
         1,
-        PreAdjMcsDetail_idrDtlDiagIcdType_Extractor.getEnumString(from),
+        RdaMcsDetail_idrDtlDiagIcdType_Extractor.getEnumString(from),
         to::setIdrDtlDiagIcdType);
     transformer.copyOptionalString(
         namePrefix + RdaMcsDetail.Fields.idrDtlPrimaryDiagCode,
@@ -787,13 +785,13 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsDetail.Fields.idrTos,
         true,
         1,
-        PreAdjMcsDetail_idrTos_Extractor.getEnumString(from),
+        RdaMcsDetail_idrTos_Extractor.getEnumString(from),
         to::setIdrTos);
     transformer.copyEnumAsString(
         namePrefix + RdaMcsDetail.Fields.idrTwoDigitPos,
         true,
         2,
-        PreAdjMcsDetail_idrTwoDigitPos_Extractor.getEnumString(from),
+        RdaMcsDetail_idrTwoDigitPos_Extractor.getEnumString(from),
         to::setIdrTwoDigitPos);
     transformer.copyOptionalString(
         namePrefix + RdaMcsDetail.Fields.idrDtlRendType,
@@ -918,7 +916,7 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsDiagnosisCode.Fields.idrDiagIcdType,
         true,
         1,
-        PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor.getEnumString(from),
+        RdaMcsDiagnosisCode_idrDiagIcdType_Extractor.getEnumString(from),
         to::setIdrDiagIcdType);
     transformer.copyString(
         namePrefix + RdaMcsDiagnosisCode.Fields.idrDiagCode,
@@ -927,6 +925,10 @@ public class McsClaimTransformer {
         7,
         from.getIdrDiagCode(),
         to::setIdrDiagCode);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsDiagnosisCode.Fields.rdaPosition,
+        from::getRdaPosition,
+        to::setRdaPosition);
     to.setLastUpdated(now);
     return to;
   }
@@ -976,6 +978,8 @@ public class McsClaimTransformer {
         from::hasIdrAdjPEombAmt,
         from::getIdrAdjPEombAmt,
         to::setIdrAdjPEombAmt);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsAdjustment.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 
@@ -988,14 +992,16 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsAudit.Fields.idrJAuditInd,
         true,
         1,
-        PreAdjMcsAudit_idrJAuditInd_Extractor.getEnumString(from),
+        RdaMcsAudit_idrJAuditInd_Extractor.getEnumString(from),
         to::setIdrJAuditInd);
     transformer.copyEnumAsString(
         namePrefix + RdaMcsAudit.Fields.idrJAuditDisp,
         true,
         1,
-        PreAdjMcsAudit_idrJAuditDisp_Extractor.getEnumString(from),
+        RdaMcsAudit_idrJAuditDisp_Extractor.getEnumString(from),
         to::setIdrJAuditDisp);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsAudit.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 
@@ -1026,8 +1032,10 @@ public class McsClaimTransformer {
         namePrefix + RdaMcsLocation.Fields.idrLocActvCode,
         true,
         1,
-        PreAdjMcsLocation_idrLocActvCode_Extractor.getEnumString(from),
+        RdaMcsLocation_idrLocActvCode_Extractor.getEnumString(from),
         to::setIdrLocActvCode);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsLocation.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 }

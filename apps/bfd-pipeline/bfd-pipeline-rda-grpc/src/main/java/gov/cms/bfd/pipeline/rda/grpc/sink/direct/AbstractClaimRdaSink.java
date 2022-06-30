@@ -5,14 +5,17 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
+import com.google.protobuf.util.JsonFormat;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,6 +48,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
 
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
+
+  /** Used to write out RDA messages to json strings */
+  protected static final JsonFormat.Printer protobufObjectWriter =
+      JsonFormat.printer().omittingInsignificantWhitespace();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either
@@ -124,6 +131,23 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
+   * Writes out the transformation error to the database for the given message and given apiVersion.
+   *
+   * @param apiVersion The version of the api used to get the message.
+   * @param message The message that was being transformed when the error occurred.
+   * @param exception The exception that was thrown while transforming the message.
+   * @throws IOException If there was an issue writing to the database.
+   */
+  @Override
+  public void writeError(
+      String apiVersion, TMessage message, DataTransformer.TransformationException exception)
+      throws IOException {
+    entityManager.getTransaction().begin();
+    entityManager.merge(createMessageError(apiVersion, message, exception.getErrors()));
+    entityManager.getTransaction().commit();
+  }
+
+  /**
    * Writes the claims immediately and returns the number written.
    *
    * @param apiVersion value for the apiSource column of the claim record
@@ -133,8 +157,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   @Override
   public int writeMessages(String apiVersion, List<TMessage> messages) throws ProcessingException {
-    final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
-    return writeClaims(claims);
+    try {
+      final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
+      return writeClaims(claims);
+    } catch (DataTransformer.TransformationException e) {
+      throw new ProcessingException(e, 0);
+    }
   }
 
   /**
@@ -194,13 +222,29 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Apply implementation specific logic to produce a populated {@link RdaApiClaimMessageMetaData}
+   * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
    * @param change an incoming RdaChange object from which to extract meta data
    * @return an object ready for insertion into the database
    */
-  abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+  abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+
+  /**
+   * Helper method to generate {@link MessageError} entities from a given claim object. This is
+   * implementation specific logic for each claim type.
+   *
+   * @param apiVersion The version of the api the message was pulled from.
+   * @param change The claim change object that was being transformed when the error occurred.
+   * @param errors The transformation errors that occurred during the claim transformation.
+   * @return A new {@link MessageError} entity containing the details of the transformation error
+   *     and associated claim change object.
+   * @throws IOException If there was an issue writing the details to the {@link MessageError}
+   *     entity.
+   */
+  abstract MessageError createMessageError(
+      String apiVersion, TMessage change, List<DataTransformer.ErrorMessage> errors)
+      throws IOException;
 
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
@@ -214,17 +258,23 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     logger.debug("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
-  private List<RdaChange<TClaim>> transformMessages(
-      String apiVersion, Collection<TMessage> messages) throws ProcessingException {
+  @VisibleForTesting
+  List<RdaChange<TClaim>> transformMessages(String apiVersion, Collection<TMessage> messages)
+      throws ProcessingException {
     var claims = new ArrayList<RdaChange<TClaim>>();
     for (TMessage message : messages) {
       try {
         var change = transformMessage(apiVersion, message);
         metrics.transformSuccesses.mark();
         claims.add(change);
-      } catch (DataTransformer.TransformationException error) {
+      } catch (DataTransformer.TransformationException transformationException) {
         metrics.transformFailures.mark();
-        throw new ProcessingException(error, 0);
+        try {
+          writeError(apiVersion, message, transformationException);
+        } catch (IOException e) {
+          transformationException.addSuppressed(e);
+        }
+        throw transformationException;
       }
     }
     return claims;
@@ -237,7 +287,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
           var metaData = createMetaData(change);
-          entityManager.persist(metaData);
+          entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API

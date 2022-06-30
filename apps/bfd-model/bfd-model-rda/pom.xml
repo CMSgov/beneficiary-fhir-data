@@ -17,6 +17,12 @@
         Provides shared helpers and model classes related to the RDA stream data.
     </description>
 
+    <properties>
+        <!-- These models will be generated automatically in the near future;
+        ignore this project since effort here will be wasted. -->
+        <checkstyle.skip>true</checkstyle.skip>
+    </properties>
+
     <dependencies>
         <!-- Hibernate / JPA -->
         <dependency>
@@ -30,6 +36,25 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <!-- Required for JSONB support. -->
+        <dependency>
+            <!-- Used to serialize and deserialize objects to JSON. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Adds java-8 types to jackson. -->
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Adds java-8 date/time classes to jackson. -->
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <!-- Testing -->
         <dependency>

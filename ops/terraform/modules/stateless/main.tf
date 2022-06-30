@@ -224,7 +224,7 @@ module "fhir_asg" {
     # test == c5.xlarge (4 vCPUs and 8GiB mem)
     # prod and prod-sbx == c5.4xlarge (16 vCPUs and 32GiB mem )
     instance_type = var.env_config.env == "test" ? "c5.xlarge" : "c5.4xlarge"
-    volume_size   = 60 # GB
+    volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
 
@@ -387,4 +387,13 @@ module "bfd_pipeline" {
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
+}
+
+## This is where cloudwatch dashboards are managed. 
+#
+module "bfd_dashboards" {
+  source              = "../resources/bfd_cw_dashboards"
+  dashboard_name      = var.dashboard_name
+  dashboard_namespace = var.dashboard_namespace
+  asg                 = module.fhir_asg.asg_id
 }

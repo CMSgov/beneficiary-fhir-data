@@ -248,6 +248,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
             FissProcedureCode.newBuilder().setProcCd(i == 1 ? primaryCode : randomLetter(1, 7));
         optional(() -> procCode.setProcFlag(randomLetter(1, 4)));
         optional(() -> procCode.setProcDt(randomDate()));
+        procCode.setRdaPosition(i);
         claim.addFissProcCodes(procCode);
       }
     }
@@ -263,6 +264,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
               diagCode.setDiagPoaIndEnum(randomEnum(FissDiagnosisPresentOnAdmissionIndicatorEnums)),
           () -> diagCode.setDiagPoaIndUnrecognized(randomLetter(1, 1)));
       optional(() -> diagCode.setBitFlags(randomLetter(1, 4)));
+      diagCode.setRdaPosition(i);
       claim.addFissDiagCodes(diagCode);
     }
   }
@@ -270,13 +272,14 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private void addRandomPayers(FissClaim.Builder claim) {
     final int count = 1 + randomInt(MAX_PAYERS);
     for (int i = 1; i <= count; ++i) {
+      final int POSITION = i;
       FissPayer.Builder payer = FissPayer.newBuilder();
-      oneOf(() -> addBeneZPayer(payer), () -> addInsuredPayer(payer));
+      oneOf(() -> addBeneZPayer(payer, POSITION), () -> addInsuredPayer(payer, POSITION));
       claim.addFissPayers(payer.build());
     }
   }
 
-  private void addBeneZPayer(FissPayer.Builder parent) {
+  private void addBeneZPayer(FissPayer.Builder parent, int position) {
     final FissBeneZPayer.Builder payer = FissBeneZPayer.newBuilder();
 
     oneOf(
@@ -312,11 +315,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     oneOf(
         () -> payer.setInsuredRelX12Enum(randomEnum(FissPatientRelationshipCodeEnums)),
         () -> payer.setInsuredRelX12Unrecognized(randomDigit(2, 2)));
+    payer.setRdaPosition(position);
 
     parent.setBeneZPayer(payer.build());
   }
 
-  private void addInsuredPayer(FissPayer.Builder parent) {
+  private void addInsuredPayer(FissPayer.Builder parent, int position) {
     final FissInsuredPayer.Builder payer = FissInsuredPayer.newBuilder();
 
     oneOf(
@@ -353,6 +357,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
           payer.setInsuredDob(date);
           payer.setInsuredDobText(date.replace("-", "").substring(4) + date.substring(0, 4));
         });
+    payer.setRdaPosition(position);
 
     parent.setInsuredPayer(payer.build());
   }
@@ -360,17 +365,18 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private void addRandomAudits(FissClaim.Builder claim) {
     final int count = 1 + randomInt(MAX_AUDITS);
     for (int i = 1; i <= count; ++i) {
-      FissAuditTrail.Builder payer = FissAuditTrail.newBuilder();
+      FissAuditTrail.Builder audit = FissAuditTrail.newBuilder();
 
       oneOf(
-          () -> payer.setBadtStatusEnum(randomEnum(FissClaimStatusEnums)),
-          () -> payer.setBadtStatusUnrecognized(randomAlphaNumeric(1, 1)));
-      optional(() -> payer.setBadtLoc(randomAlphaNumeric(1, 5)));
-      optional(() -> payer.setBadtOperId(randomAlphaNumeric(1, 9)));
-      optional(() -> payer.setBadtReas(randomAlphaNumeric(1, 5)));
-      optional(() -> payer.setBadtCurrDateCymd(randomDate()));
+          () -> audit.setBadtStatusEnum(randomEnum(FissClaimStatusEnums)),
+          () -> audit.setBadtStatusUnrecognized(randomAlphaNumeric(1, 1)));
+      optional(() -> audit.setBadtLoc(randomAlphaNumeric(1, 5)));
+      optional(() -> audit.setBadtOperId(randomAlphaNumeric(1, 9)));
+      optional(() -> audit.setBadtReas(randomAlphaNumeric(1, 5)));
+      optional(() -> audit.setBadtCurrDateCymd(randomDate()));
+      audit.setRdaPosition(i);
 
-      claim.addFissAuditTrail(payer.build());
+      claim.addFissAuditTrail(audit.build());
     }
   }
 }

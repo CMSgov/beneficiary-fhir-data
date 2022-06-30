@@ -3,12 +3,21 @@
   yum:
     pkg:
       - java-11-openjdk-devel
+      - iptables
   become: true
 
 - name: Create Server User
   user:
     name: "{{ data_server_user }}"
     shell: /bin/false
+  become: true
+
+- name: Add server user to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: "{{ data_server_user }} ALL=(ALL) NOPASSWD: /sbin/iptables"
+    validate: /usr/sbin/visudo -cf %s
   become: true
 
 - name: Create Server Directory

@@ -58,6 +58,33 @@
         "Branch": "{{user `git_branch`}}",
         "Commit": "{{user `git_commit`}}"
       }
+    },
+    {
+      "name": "bfd-db-migrator",
+      "type": "amazon-ebs",
+      "iam_instance_profile": "bfd-packer",
+      "ssh_username": "ec2-user",
+      "instance_type": "m5.xlarge",
+      "region": "us-east-1",
+      "subnet_id": "{{user `subnet_id`}}",
+      "associate_public_ip_address": "false",
+      "source_ami": "{{user `source_ami`}}",
+      "security_group_filter": {
+        "filters": {
+          "tag:Name": "bfd-mgmt-vpn-private"
+        }
+      },
+      "ami_name": "bfd-amzn2-jdk11-db-migrator-{{isotime \"20060102030405\"}}",
+      "ssh_pty": true,
+      "tags": {
+        "Name": "bfd-amzn2-jdk11-db-migrator-{{isotime \"20060102030405\"}}",
+        "Application": "BFD",
+        "Environment": "{{user `env`}}",
+        "Function": "DB MIGRATOR",
+        "Layer": "APP",
+        "Branch": "{{user `git_branch`}}",
+        "Commit": "{{user `git_commit`}}"
+      }
     }
   ],
   "provisioners": [
@@ -99,6 +126,23 @@
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
         "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
       ]
+    },
+    {
+      "only": ["bfd-db-migrator"],
+      "type": "ansible",
+      "user": "ec2-user",
+      "playbook_file": "./build_bfd-db-migrator.yml",
+      "extra_arguments": [
+        "-e ansible_python_interpreter=/usr/bin/python",
+        "--extra-vars",
+        "@extra_vars.json",
+        "--tags",
+        "pre-ami"
+      ],
+      "ansible_env_vars": [
+        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
+        "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
+      ]
     }
   ],
   "post-processors": [
@@ -112,6 +156,12 @@
       "only": ["bfd-server"],
       "type": "manifest",
       "output": "manifest_data-server.json",
+      "strip_path": true
+    },
+    {
+      "only": ["bfd-db-migrator"],
+      "type": "manifest",
+      "output": "manifest_db-migrator.json",
       "strip_path": true
     }
   ]

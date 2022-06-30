@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
@@ -72,6 +73,31 @@ public class DataTransformer {
   }
 
   /**
+   * Checks to ensure that at least one of the two fields has a non-empty string value. If neither
+   * does an error is added to the list of errors.
+   *
+   * @param fieldName1 name of the first field
+   * @param value1 value (possibly null) of the first field
+   * @param fieldName2 name of the second field
+   * @param value2 value (possibly null) of the second field
+   * @return true if at least one of the two fields has a non-null, non-empty string value
+   */
+  public boolean validateAtLeastOneIsPresent(
+      String fieldName1, String value1, String fieldName2, String value2) {
+    final var isPresent1 = !Strings.isNullOrEmpty(value1);
+    final var isPresent2 = !Strings.isNullOrEmpty(value2);
+    final var isValid = isPresent1 || isPresent2;
+    if (!isValid) {
+      addError(
+          fieldName1,
+          "expected either %s or %s to have value but neither did",
+          fieldName1,
+          fieldName2);
+    }
+    return isValid;
+  }
+
+  /**
    * Checks the nullability and length of a string and then delivers it to the Consumer if the
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    *
@@ -126,6 +152,36 @@ public class DataTransformer {
   }
 
   /**
+   * Copies an optional field only if its value exists and is non-empty. Uses lambda expressions for
+   * the existence test as well as the value extraction. Optional fields must be nullable at the
+   * database level but must return non-null values when the supplier is called.
+   *
+   * <p>Checks the nullability and length of a string and then delivers it to the Consumer if the
+   * checks are successful. Valid null or empty string values are silently accepted without calling
+   * the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyOptionalNonEmptyString(
+      String fieldName,
+      int minLength,
+      int maxLength,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<String> copier) {
+    if (exists.getAsBoolean() && !Strings.isNullOrEmpty(value.get())) {
+      return copyString(fieldName, false, minLength, maxLength, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
    * Checks the nullability and length of a string and then delivers it to the Consumer if the
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    * Ensures that the actual value exactly matches an expected value. This is used to ensure an
@@ -156,6 +212,35 @@ public class DataTransformer {
     return this;
   }
 
+  /**
+   * Checks that the integer value of the given {@link IntSupplier} is unsigned (not negative) and
+   * small enough to fit in a {@link Short} type, and passes it to the given {@link IntConsumer}.
+   *
+   * @param fieldName The name of the field from which the value originates.
+   * @param value The value being validated / copied.
+   * @param copier The consumer to receive the value.
+   * @return this
+   */
+  public DataTransformer copyUIntToShort(
+      String fieldName, IntSupplier value, Consumer<Short> copier) {
+    int v = value.getAsInt();
+
+    if (validateUnsigned(fieldName, v) && validateShort(fieldName, v)) {
+      copier.accept((short) v);
+    }
+
+    return this;
+  }
+
+  /**
+   * If the value exists, denoted by the given {@link BooleanSupplier}, it will be copied from the
+   * given {@link IntSupplier} into the given {@link IntConsumer}.
+   *
+   * @param exists Denotes if the value exists.
+   * @param value The value to be copied, if it exists.
+   * @param copier The consumer to receive the value.
+   * @return this
+   */
   public DataTransformer copyOptionalInt(
       BooleanSupplier exists, IntSupplier value, IntConsumer copier) {
     if (exists.getAsBoolean()) {
@@ -347,6 +432,45 @@ public class DataTransformer {
   }
 
   /**
+   * Checks if the given value is unsigned (positive).
+   *
+   * @param fieldName The name of the attribute the value is associated with (for error tracking).
+   * @param value The value being validated.
+   * @return True if the value is positive (>= 0), alse otherwise.
+   */
+  private boolean validateUnsigned(String fieldName, long value) {
+    boolean isValid = true;
+
+    if (value < 0) {
+      addError(fieldName, "is signed");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  /**
+   * Checks if the given value is within the {@link Short} value range.
+   *
+   * @param fieldName The name of the attribute the value is associated with (for error tracking).
+   * @param value The value being validated.
+   * @return True if the value is within the {@link Short} value range, False otherwise.
+   */
+  private boolean validateShort(String fieldName, long value) {
+    boolean isValid = true;
+
+    if (value > Short.MAX_VALUE) {
+      addError(fieldName, "is too large");
+      isValid = false;
+    } else if (value < Short.MIN_VALUE) {
+      addError(fieldName, "is too small");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  /**
    * Used internally to stop transformation if the value is null. A null value with nullable=false
    * adds an error to the errors list.
    *
@@ -384,6 +508,15 @@ public class DataTransformer {
     return true;
   }
 
+  /**
+   * Checks that the given expectedValue matches the given actualValue for a given fieldName,
+   * tracking the error if they do not match.
+   *
+   * @param fieldName The name of the field from which the value originates.
+   * @param expectedValue The expected value of the field.
+   * @param actualValue The aal value of the field.
+   * @return True if the given expected and actual values match, False otherwise.
+   */
   private boolean valueMatches(String fieldName, String expectedValue, String actualValue) {
     final boolean matches =
         (expectedValue == null && actualValue == null)
@@ -395,11 +528,24 @@ public class DataTransformer {
     return matches;
   }
 
+  /**
+   * Adds an error to the list of tracked errors.
+   *
+   * @param fieldName The name of the field that had an error.
+   * @param errorFormat The format string for the error message.
+   * @param args The arguments for the formatted error string.
+   */
   public void addError(String fieldName, String errorFormat, Object... args) {
     final String message = String.format(errorFormat, args);
     errors.add(new ErrorMessage(fieldName, message));
   }
 
+  /**
+   * Helper method to create an {@link Instant} object from the given {@link Timestamp}.
+   *
+   * @param timestamp The {@link Timestamp} to create an {@link Instant} from.
+   * @return The created {@link Instant} object.
+   */
   public Instant instant(Timestamp timestamp) {
     return Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
   }
@@ -435,9 +581,12 @@ public class DataTransformer {
     return sb.toString();
   }
 
+  /** Helper class for tracking error messages. */
   @Data
   public static class ErrorMessage {
+    /** The name of the field the error is associated with */
     private final String fieldName;
+    /** The message that describes the error that was found */
     private final String errorMessage;
 
     @Override
@@ -446,6 +595,7 @@ public class DataTransformer {
     }
   }
 
+  /** Exception thrown to indicate that there was an issue with transforming an object. */
   @Getter
   public static class TransformationException extends RuntimeException {
     private final List<ErrorMessage> errors;

@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/** Represents missing CCW Codebook variables. */
 public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   /**
    * The {@code MBI_EFFCTV_DT}
@@ -136,10 +137,38 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *       <p>claims, representing the ICN of the original transaction now being adjusted.
    * </ul>
    */
-  FI_ORIG_CLM_CNTL_NUM;
+  FI_ORIG_CLM_CNTL_NUM,
 
+  /**
+   * The {@code REV_CNTR_UNIT_CNT}
+   *
+   * <ul>
+   *   <li><strong>Codebook:</strong> Master Beneficiary Summary File - Base With Medicare Part
+   *       A/B/D (May 2017, Version 1.0)
+   *   <li><strong>Label:</strong> Revenue Center unit count
+   *   <li><strong>Description:</strong>
+   *       <p>Revenue Center unit count
+   *   <li><strong>Short Name:</strong> REV_CNTR_UNIT_CNT
+   *   <li><strong>Long Name:</strong> REV_CNTR_UNIT_CNT
+   *   <li><strong>Type:</strong> NUM
+   *   <li><strong>Length:</strong>No Length Specified
+   *   <li><strong>Source:</strong> CWF
+   *   <li><strong>Value Format:</strong> 0-1000000
+   *   <li><strong>Coded Values?:</strong> false
+   *   <li><strong>Comment:</strong>
+   *       <p>The revenue center unit count amount.
+   * </ul>
+   */
+  REV_CNTR_UNIT_CNT;
+
+  /** The variables mapped by id. */
   private Map<String, Variable> VARIABLES_BY_ID = buildVariablesMappedById();
 
+  /**
+   * Build variables mapped by id.
+   *
+   * @return a map of ids to {@link Variable}s.
+   */
   public static Map<String, Variable> buildVariablesMappedById() {
     Map<String, Variable> variablesMappedById = new LinkedHashMap<>();
 
@@ -220,15 +249,43 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
             getValueGroup("Carrier Claim Control Number", ""),
             getList("Unique control number assigned by a carrier to a non-institutional claim.")));
 
+    variablesMappedById.put(
+        "REV_CNTR_UNIT_CNT",
+        new Variable(
+            "REV_CNTR_UNIT_CNT",
+            "Revenue Center Unit Count",
+            getList("Revenue Center Unit Count"),
+            "REV_CNTR_UNIT_CNT",
+            "REV_CNTR_UNIT_CNT",
+            VariableType.NUM,
+            0,
+            "CWF",
+            "",
+            getValueGroup("Revenue Center Unit Count", ""),
+            getList("Effective with Version G, the original Revenue Center Unit Count")));
+
     return variablesMappedById;
   }
 
+  /**
+   * Creates a new list of strings and adds the specified string to it, then returns the list.
+   *
+   * @param addString the string to add to a new list
+   * @return the list
+   */
   public static List<String> getList(String addString) {
     List<String> listOfStrings = new ArrayList<String>();
     listOfStrings.add(addString);
     return listOfStrings;
   }
 
+  /**
+   * Gets the value group for this enum, based on its code and description.
+   *
+   * @param description the description
+   * @param code the code
+   * @return the value group
+   */
   public static List<ValueGroup> getValueGroup(String description, String code) {
     List<String> descriptionList = new ArrayList<String>();
     descriptionList.add(description);
@@ -242,6 +299,8 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   }
 
   /**
+   * Looks up and returns a variable by its enum name.
+   *
    * @return the {@link Variable} data (parsed from a codebook PDF) for this {@link
    *     CcwCodebookVariable} constant
    */
