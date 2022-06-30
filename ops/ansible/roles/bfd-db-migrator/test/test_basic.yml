@@ -27,9 +27,6 @@
         migrator_monitor_enabled: false
         migrator_monitor_heartbeat_interval_seconds: 15
 
-# Verify that things worked as expected.
-- hosts: bfd-db-migrator
-  tasks:
     - name: Ensure Service Is Running
       service:
         name: bfd-db-migrator
