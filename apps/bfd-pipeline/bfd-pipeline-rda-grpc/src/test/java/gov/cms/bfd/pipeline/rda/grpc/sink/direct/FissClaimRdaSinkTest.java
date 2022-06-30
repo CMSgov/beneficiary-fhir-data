@@ -4,6 +4,7 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertGaugeRead
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -14,7 +15,10 @@ import static org.mockito.Mockito.verify;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
@@ -24,6 +28,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,9 +100,7 @@ public class FissClaimRdaSinkTest {
 
     for (RdaChange<RdaFissClaim> change : batch) {
       verify(entityManager).merge(change.getClaim());
-    }
-    for (RdaChange<RdaFissClaim> change : batch) {
-      verify(entityManager).persist(sink.createMetaData(change));
+      verify(entityManager).merge(sink.createMetaData(change));
     }
     // the merge transaction will be committed
     verify(transaction).commit();
@@ -184,6 +187,39 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
+  }
+
+  /**
+   * Verify that meta data records are properly populated by {@link
+   * FissClaimRdaSink#createMetaData(RdaChange)}.
+   */
+  @Test
+  public void testCreateMetaData() {
+    Mbi mbiRecord = Mbi.builder().mbi("mbi").hash("hash").build();
+    Instant changeDate = Instant.ofEpochSecond(1);
+    LocalDate transactionDate = LocalDate.of(1970, 2, 3);
+    Instant now = Instant.ofEpochSecond(3);
+    RdaFissClaim claim =
+        RdaFissClaim.builder()
+            .dcn("dcn")
+            .mbiRecord(mbiRecord)
+            .currStatus('A')
+            .lastUpdated(now)
+            .currLoc1('B')
+            .currLoc2("C")
+            .currTranDate(transactionDate)
+            .build();
+    RdaChange<RdaFissClaim> change =
+        new RdaChange<>(100L, RdaChange.Type.UPDATE, claim, changeDate);
+    RdaClaimMessageMetaData metaData = sink.createMetaData(change);
+    assertEquals(100L, metaData.getSequenceNumber());
+    assertEquals('F', metaData.getClaimType());
+    assertEquals("dcn", metaData.getClaimId());
+    assertSame(mbiRecord, metaData.getMbiRecord());
+    assertEquals("A", metaData.getClaimState());
+    assertEquals(now, metaData.getReceivedDate());
+    assertEquals(StringList.ofNonEmpty("B", "C"), metaData.getLocations());
+    assertEquals(transactionDate, metaData.getTransactionDate());
   }
 
   private List<FissClaimChange> messagesForBatch(List<RdaChange<RdaFissClaim>> batch) {

@@ -47,6 +47,9 @@ public class RdaFissDiagnosisCode {
   @Column(name = "bit_flags", length = 4)
   private String bitFlags;
 
+  @Column(name = "rda_position", columnDefinition = "smallint")
+  private int rdaPosition;
+
   @Column(name = "last_updated")
   private Instant lastUpdated;
 

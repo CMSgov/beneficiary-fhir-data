@@ -48,6 +48,12 @@ Why: Runs the test execution and reporting
 Install: _pip3 install locust_
 See: http://docs.locust.io/en/stable/installation.html
 
+**boto3**
+
+What: Library for interfacing with AWS services
+Why: Store and load performance stats from S3
+Install: _pip3 install boto3_
+See: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
 
 In addition to these libraries, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
 Run the following two commands on the box from your local directory:
@@ -112,15 +118,18 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--resetStats** : (Optional) : If this flag is included, the test statistics will reset to zero after clients have finished spawning. **Note:** There are many reasons why we might want to capture statistics while new load is being added. There might be performance problems accepting the connection or new connections might affect users already connected to the system.
 
-**--storeStats**: (Optional) : Argument specifying that aggregated performance statistics should be stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified in the following format: `<STORAGE_TYPE>:<RUNNING_ENVIRONMENT>:<TAG>:<PATH_OR_BUCKET>`, where
+**--stats**: (Optional) : Argument specifying that aggregated performance statistics should be collected and stored to some location. This can either be to a local file or to an S3 bucket. This argument must be specified as a list of key-value pairs seperated by semi-colons: `--stats="store=<file/s3>;env=<TEST/PROD>;store_tag=;path=;bucket=;compare=<previous/average>;comp_tag=;athena_tbl="`
 
-* `STORAGE_TYPE` is either `file` or `s3`. 
-  * Note that the `file` `STORAGE_TYPE` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. 
-* `RUNNING_ENVIRONMENT` is either `TEST` or `PROD`.
-* `TAG` can be any string that follows BFD Insights data organization standards (lower-case letters, numbers and "_").
-  * The tag is used to partition performance statistics for more accurate performance validation between corresponding runs.
-  * _Note that this argument may be deprecated in the future once a more robust means of "tagging" captured statistics is developed._
-* `PATH_OR_BUCKET`, if `STORAGE_TYPE` is `file`, must be a valid local file path. Otherwise, if `STORAGE_TYPE` is `s3`, it must be a valid AWS S3 _bucket_.
+| Key | Required? | Possible Values | Description |
+| :-: | :-: | :-: | - |
+| `store` | Yes | `file`, `s3` | Specifies where the stats are stored. Note that the `file` `store` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. 
+| `env` | Yes | `TEST`, `PROD` | Specifies which environment the test ran in.
+| `store_tag` | Yes | Must be non-empty, consisting of letters, numbers and the `_` character | A tag that is used to bucket or partition statistics for more accurate performance validation between corresponding runs.
+| `path` | No | N/A | The _local_ **parent directory** where JSON files will be written to. Used only if `store` is `file`, ignored if `store` is `s3`.
+| `bucket` | Yes, _if `store` is `s3`_ | N/A | The AWS S3 Bucket that the JSON will be written to under a predetermined path following BFD Insights data organization standards.
+| `compare` | No | `previous`, `average` | Specifies if the current run should be compared to existing statistics. These statistics will be retrieved from the same type of store as specified by `store`. If `previous` is specified, the most recent run from `comp_tag` will be compared against. If `average` is specified, the average of _all_ previous runs from `comp_tag` will be compared against. If unspecified, no comparisons will be done.
+| `comp_tag` | No | Must be non-empty, consisting of letters, numbers and the `_` character | Tag from which comparison statistics will be loaded from the given `store`. Defaults to `store_tag` if unspecified. |
+| `athena_tbl` | Yes, _if `store` is `s3` **and** `compare` is set_ | N/A | Name of the table to query using Athena if `store` is `s3` and `compare` is set. |
 
 ### Quick Run
 
