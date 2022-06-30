@@ -3,6 +3,7 @@
 
 import argparse
 import subprocess
+from typing import List
 
 
 arg_parser = argparse.ArgumentParser(
@@ -42,12 +43,17 @@ master_process = subprocess.Popen(
     stderr=subprocess.STDOUT,
 )
 
+worker_processes: List[subprocess.Popen] = []
 for i in range(int(num_workers)):
     print(f"Creating worker #{i}")
-    process = subprocess.Popen(
-        ["locust", "-f", locustfile, "--worker"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+    worker_processes.append(
+        subprocess.Popen(
+            ["locust", "-f", locustfile, "--worker"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
     )
 
 master_process.wait()
+for process in worker_processes:
+    process.terminate()
