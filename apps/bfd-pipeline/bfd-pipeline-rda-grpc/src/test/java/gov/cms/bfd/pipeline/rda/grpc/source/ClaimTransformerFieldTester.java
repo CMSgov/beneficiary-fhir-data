@@ -275,16 +275,15 @@ public abstract class ClaimTransformerFieldTester<
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
       verifyUIntFieldToShortFieldCopiedCorrectly(
           BiConsumer<TTestEntityBuilder, Integer> setter,
-          Function<TTestEntity, Integer> getter,
+          Function<TTestEntity, Short> getter,
           String fieldLabel) {
     final BiConsumer<TClaimBuilder, Integer> wrappedSetter =
         (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
-    final Function<TClaimEntity, Integer> wrappedGetter =
-        claim -> getter.apply(getTestEntity(claim));
+    final Function<TClaimEntity, Short> wrappedGetter = claim -> getter.apply(getTestEntity(claim));
     verifyFieldTransformationSucceeds(
         claimBuilder -> wrappedSetter.accept(claimBuilder, (int) Short.MAX_VALUE),
         wrappedGetter,
-        (int) Short.MAX_VALUE);
+        Short.MAX_VALUE);
     verifyFieldTransformationFails(
         claimBuilder -> wrappedSetter.accept(claimBuilder, ((int) Short.MAX_VALUE) + 1),
         getLabel(fieldLabel),
