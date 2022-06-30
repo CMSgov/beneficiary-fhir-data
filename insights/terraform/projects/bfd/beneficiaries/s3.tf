@@ -7,5 +7,5 @@ data "aws_s3_bucket" "bfd-glue-assets" {
 }
 
 data "aws_kms_key" "kms_key" {
-  key_id = "9bfd6886-7124-4229-931a-4a30ce61c0ea"
+  key_id = "alias/bfd-insights-bfd-cmk"
 }
