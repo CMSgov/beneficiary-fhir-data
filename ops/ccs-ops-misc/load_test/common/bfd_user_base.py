@@ -7,7 +7,11 @@ import os
 
 from typing import Callable, Dict, List, Union
 from common import config, data, test_setup as setup, validation
-from common.stats import StatsFileStorageConfig, AggregatedStats, StatsJsonFileWriter, PERCENTILES_TO_REPORT, StatsJsonS3Writer, StatsS3StorageConfig
+from common.stats.aggregated_stats import StatsCollector
+from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
+from common.stats.stats_config import StatsStorageType
+from common.stats.stats_loaders import StatsLoader
+from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
 from locust import HttpUser, events
 from locust.env import Environment
@@ -191,20 +195,42 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
     """
 
     logger = logging.getLogger()
-    stats_storage_config = config.load_stats_storage_config()
-    if stats_storage_config == None:
+    stats_config = config.load_stats_config()
+    if not stats_config:
         return
 
-    # If --storeStats was set and it is valid, get the aggregated stats of the stopping test run
-    stats = AggregatedStats(environment, PERCENTILES_TO_REPORT, stats_storage_config.tag, stats_storage_config.stats_environment)
+    # If --stats was set and it is valid, get the aggregated stats of the stopping test run
+    stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
+    stats = stats_collector.collect_stats()
 
-    if isinstance(stats_storage_config, StatsFileStorageConfig):
+    if stats_config.compare:
+        stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
+        previous_stats = stats_loader.load()
+        if previous_stats:
+            failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
+            if not failed_stats_results:
+                logger.info(
+                    'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+            else:
+                # If we get here, that means some tasks have stats exceeding the threshold percent
+                # between the previous/average run and the current. Fail the test run, and log the
+                # failing tasks along with their relative stat percents   
+                environment.process_exit_code = 1
+                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
+                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
+        else:
+            logger.warn(
+                'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
+
+    if stats_config.store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_storage_config.file_path)
-    elif isinstance(stats_storage_config, StatsS3StorageConfig):
+        stats_json_writer.write(stats_config.path or '')
+    elif stats_config.store == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
 
         stats_s3_writer = StatsJsonS3Writer(stats)
-        stats_s3_writer.write(stats_storage_config.bucket)
+        if not stats_config.bucket:
+            raise ValueError('S3 bucket must be provided when writing stats to S3')
+        stats_s3_writer.write(stats_config.bucket)

@@ -16,4 +16,9 @@ message McsDiagnosisCode {
 
   // Note: Not on original claim.
   string idr_diag_code = 3;
+
+  // RDA Position:
+  //
+  // Indicates which position this diagnosis code is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 5;
 }

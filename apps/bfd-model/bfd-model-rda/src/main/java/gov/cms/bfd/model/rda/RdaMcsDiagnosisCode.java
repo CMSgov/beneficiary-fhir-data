@@ -38,6 +38,9 @@ public class RdaMcsDiagnosisCode {
   @EqualsAndHashCode.Include
   private short priority;
 
+  @Column(name = "rda_position", columnDefinition = "smallint")
+  private int rdaPosition;
+
   @Column(name = "idr_diag_icd_type", length = 1)
   private String idrDiagIcdType;
 
