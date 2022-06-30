@@ -5,7 +5,7 @@
 # Glue Catalog Table to hold Beneficiaries
 module "beneficiaries-table" {
   source      = "../../../modules/table"
-  table       = "${local.full_name}-api-requests-beneficiaries"
+  table       = "${local.full_name_underscore}_api_requests_beneficiaries"
   description = "One row per beneficiary query, with the date of the request"
   database    = local.database
   bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
@@ -66,7 +66,7 @@ resource "aws_glue_job" "bfd-populate-beneficiaries-job" {
     "--job-bookmark-option"              = "job-bookmark-enable"
     "--job-language"                     = "python"
     "--sourceDatabase"                   = local.database
-    "--sourceTable"                      = local.api_requests_table_name
+    "--sourceTable"                      = "${local.full_name_underscore}_api_requests"
     "--spark-event-logs-path"            = "s3://${aws_s3_object.bfd-populate-beneficiaries.bucket}/sparkHistoryLogs/${local.environment}/"
     "--targetDatabase"                   = local.database
     "--targetTable"                      = module.beneficiaries-table.name
@@ -132,7 +132,7 @@ resource "aws_glue_crawler" "beneficiaries-crawler" {
 # Glue Table for unique beneficiaries
 module "beneficiaries-unique-table" {
   source      = "../../../modules/table"
-  table       = "${local.full_name}-api-requests-beneficiaries-unique"
+  table       = "${local.full_name_underscore}_api_requests_beneficiaries_unique"
   description = "One row per beneficiary and the date first seen"
   database    = local.database
   bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket

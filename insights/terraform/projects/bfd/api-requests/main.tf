@@ -3,14 +3,15 @@
 # NOTE: This module depends on the resources in common.
 
 locals {
-  environment  = terraform.workspace
-  full_name    = "bfd-insights-${local.project}-${local.environment}"
-  database     = local.full_name
-  project      = "bfd"
-  region       = "us-east-1"
-  account_id   = data.aws_caller_identity.current.account_id
-  api_requests_table_name = "${replace(local.full_name, "-", "_")}_api_requests"
-  tags         = {
+  environment          = terraform.workspace
+  full_name            = "bfd-insights-${local.project}-${local.environment}"
+  full_name_underscore = replace(local.full_name, "-", "_")
+  database             = local.full_name
+  project              = "bfd"
+  region               = "us-east-1"
+  account_id           = data.aws_caller_identity.current.account_id
+
+  tags = {
     business    = "OEDA",
     application = "bfd-insights",
     project     = "bfd"

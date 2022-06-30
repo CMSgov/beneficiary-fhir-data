@@ -8,9 +8,9 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
     buffer_interval     = 60
     buffer_size         = 128
     compression_format  = "GZIP"
-    error_output_prefix = "databases/${local.environment}/api_requests_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    error_output_prefix = "databases/${module.database.name}/${module.api-requests-table.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     kms_key_arn         = data.aws_kms_key.kms_key.arn
-    prefix              = "databases/${local.environment}/api_requests/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    prefix              = "databases/${module.database.name}/${module.api-requests-table.name}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     role_arn            = aws_iam_role.firehose_role.arn
     s3_backup_mode      = "Disabled"
 
@@ -53,7 +53,7 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
         database_name = local.database
         region        = local.region
         role_arn      = aws_iam_role.firehose_role.arn
-        table_name    = "api-requests"
+        table_name    = module.api-requests-table.name
         version_id    = "LATEST"
       }
     }

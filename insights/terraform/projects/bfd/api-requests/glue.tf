@@ -15,7 +15,7 @@ module "database" {
 # Target Glue Table where ingested logs are eventually stored
 module "api-requests-table" {
   source      = "../../../modules/table"
-  table       = local.api_requests_table_name
+  table       = "${local.full_name_underscore}_api_requests"
   description = "Target Glue Table where ingested logs are eventually stored"
   database    = module.database.name
   bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
@@ -42,7 +42,7 @@ module "api-requests-table" {
 }
 
 # Crawler for the API Requests table
-resource "aws_glue_crawler" "api-requests-recurring-crawler" {
+resource "aws_glue_crawler" "api-requests-crawler" {
   classifiers   = []
   database_name = module.database.name
   configuration = jsonencode(
@@ -58,7 +58,7 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
       Version = 1
     }
   )
-  name     = "${local.full_name}-api-requests-recurring-crawler"
+  name     = "${local.full_name}-api-requests-crawler"
   role     = data.aws_iam_role.glue-role.arn
 
   catalog_target {
@@ -90,7 +90,7 @@ resource "aws_glue_crawler" "api-requests-recurring-crawler" {
 # Glue Table to store API History
 module "api-history-table" {
   source      = "../../../modules/table"
-  table       = "${replace(local.full_name, "-", "_")}_api_history"
+  table       = "${local.full_name_underscore}_api_history"
   description = "Store log files from BFD for analysis in BFD Insights"
   database    = module.database.name
   bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
@@ -263,7 +263,7 @@ resource "aws_glue_trigger" "bfd-api-requests-crawler-trigger" {
   type          = "CONDITIONAL"
 
   actions {
-    crawler_name = aws_glue_crawler.api-requests-recurring-crawler.name
+    crawler_name = aws_glue_crawler.api-requests-crawler.name
   }
 
   predicate {
