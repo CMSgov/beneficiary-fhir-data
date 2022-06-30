@@ -30,7 +30,7 @@ if [ ! -L "roles/${ROLE}" ]; then ln -s "$(cd .. && pwd)" "roles/${ROLE}"; fi
 
 docker network create "$CONTAINER_NAME" || true
 
-if [ "$(docker ps -f "name=${CONTAINER_NAME}-db" --format '{{.Names}}')" != "${CONTAINER_NAME}-db" ]; then
+if [ ! "$(docker ps -f "name=${CONTAINER_NAME}-db" --format '{{.Names}}' | grep -E "^${CONTAINER_NAME}-db$")" ]; then
 docker run \
     --detach \
     "--net=${CONTAINER_NAME}" \
@@ -44,7 +44,7 @@ docker run \
 fi
 
 # Prep the Docker container that will be used (if it's not already running).
-if [ "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}')" != "$CONTAINER_NAME" ]; then
+if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E "^${CONTAINER_NAME}$")" ]; then
   docker run \
     "--net=${CONTAINER_NAME}" \
     --cap-add=SYS_ADMIN \
