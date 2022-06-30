@@ -276,7 +276,7 @@ resource "aws_glue_trigger" "bfd-populate-beneficiaries-job-trigger" {
 
   predicate {
     conditions {
-      crawler_name = "${local.full_name}-api-requests-recurring-crawler" # From api-requests
+      crawler_name = "${local.full_name}-api-requests-crawler" # From api-requests
       crawl_state  = "SUCCEEDED"
     }
   }
