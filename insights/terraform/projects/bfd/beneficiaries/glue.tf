@@ -28,7 +28,18 @@ module "beneficiaries-table" {
       comment = "Day of request"
     }
   ]
-  columns     = []
+  columns     = [
+    {
+      name    = "bene_id"
+      type    = "bigint"
+      comment = "Beneficiary ID"
+    },
+    {
+      name    = "timestamp"
+      type    = "timestamp"
+      comment = "Time of request"
+    }
+  ]
 }
 
 # S3 Object for Glue Script
