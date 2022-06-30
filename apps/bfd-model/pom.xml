@@ -38,14 +38,6 @@
 				<artifactId>slf4j-api</artifactId>
 				<version>1.7.7</version>
 			</dependency>
-
-			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>${postgres.driver.version}</version>
-				<scope>test</scope>
-			</dependency>
 			
 			<dependency>
 				<!-- Used to read the Excel file that provides the RIF column/field definitions. -->
