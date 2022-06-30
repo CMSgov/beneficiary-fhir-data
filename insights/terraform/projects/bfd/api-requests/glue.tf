@@ -223,13 +223,13 @@ resource "aws_glue_workflow" "glue-workflow" {
   max_concurrent_runs = "1"
 }
 
-# Trigger for History Ingest Crawler. This will run every night at 4am UCT, but it can also be run
+# Trigger for History Ingest Crawler. This will run every night at 4am UTC, but it can also be run
 # manually through the Console
 resource "aws_glue_trigger" "history-ingest-crawler-trigger" {
   name          = "${local.full_name}-history-ingest-crawler-trigger"
   workflow_name = aws_glue_workflow.glue-workflow.name
   type          = "SCHEDULED"
-  schedule      = "cron(0 4 * * ? *)" # Every day at 4am UCT
+  schedule      = "cron(0 4 * * ? *)" # Every day at 4am UTC
 
   actions {
     crawler_name = aws_glue_crawler.bfd-history-crawler.name
