@@ -3,6 +3,8 @@ package gov.cms.bfd.model.rif;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.*;
 
 /** JPA class for the loaded_batches table. */
@@ -198,14 +200,7 @@ public class LoadedBatch {
     if (list == null || list.isEmpty()) {
       return "";
     }
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < list.size(); i++) {
-      if (i > 0) {
-        sb.append(SEPARATOR);
-      }
-      sb.append(String.valueOf(list.get(i)));
-    }
-    return sb.toString();
+    return list.stream().map(String::valueOf).collect(Collectors.joining(SEPARATOR));
   }
 
   /**
@@ -218,11 +213,8 @@ public class LoadedBatch {
     if (commaSeparated == null || commaSeparated.isEmpty()) {
       return new ArrayList<Long>();
     }
-    String[] stringArray = commaSeparated.split(SEPARATOR, -1);
-    ArrayList<Long> rslt = new ArrayList<Long>(stringArray.length);
-    for (int i = 0; i < stringArray.length; i++) {
-      rslt.add(Long.parseLong(stringArray[i]));
-    }
-    return rslt;
+    return Stream.of(commaSeparated.split(SEPARATOR))
+        .map(Long::parseLong)
+        .collect(Collectors.toList());
   }
 }
