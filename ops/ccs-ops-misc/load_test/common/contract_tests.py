@@ -1,7 +1,7 @@
 '''Locust tests that require a pool of Contract data.'''
 
 import random
-from typing import List
+from typing import Dict, List
 from locust import events
 from locust.env import Environment
 from common.bfd_user_base import BFDUserBase
@@ -9,14 +9,14 @@ from common.url_path import create_url_path
 from common import data, db
 
 table_sample_contract_data = False
-master_contract_data: List[str] = []
+master_contract_data: List[Dict[str, str]] = []
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs):
     global master_contract_data
     master_contract_data = data.load_from_env(
         environment,
-        db.get_hashed_mbis,
+        db.get_contract_ids,
         use_table_sample=table_sample_contract_data
     )
 
