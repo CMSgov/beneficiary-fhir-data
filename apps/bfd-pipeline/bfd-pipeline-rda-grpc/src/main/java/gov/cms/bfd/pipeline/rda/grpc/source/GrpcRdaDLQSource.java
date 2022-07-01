@@ -298,7 +298,9 @@ public class GrpcRdaDLQSource<TMessage, TClaim> implements RdaSource<TMessage, T
           entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
 
       if (messageError != null) {
+        entityManager.getTransaction().begin();
         entityManager.remove(messageError);
+        entityManager.getTransaction().commit();
         return 1L;
       }
 
