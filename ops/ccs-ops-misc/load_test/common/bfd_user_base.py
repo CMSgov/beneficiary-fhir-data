@@ -2,7 +2,6 @@
 '''
 
 from datetime import timedelta
-from math import ceil
 from typing import Callable, Dict, List, Union
 import json
 import logging
@@ -12,7 +11,7 @@ import urllib3.exceptions
 from locust import HttpUser, events
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
-from common import data, validation
+from common import custom_args, data, validation
 from common.locust_utils import is_distributed, is_locust_worker
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
@@ -20,6 +19,74 @@ from common.stats.stats_config import StatsConfiguration, StatsStorageType
 from common.stats.stats_loaders import StatsLoader
 from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
 from common.url_path import create_url_path
+
+@events.init_command_line_parser.add_listener
+def _(parser: LocustArgumentParser, **kwargs):
+    custom_args.register_custom_args(parser)
+
+@events.init.add_listener
+def _(environment: Environment, **kwargs):
+    custom_args.adjust_locust_run_time(environment)
+    validation.setup_failsafe_event(environment)
+    
+@events.quitting.add_listener
+def _(environment: Environment, **kwargs) -> None:
+    """Run one-time teardown tasks after the tests have completed
+
+    Args:
+        environment (Environment): The current Locust environment
+    """
+    logger = logging.getLogger()
+    validation.check_sla_validation(environment)
+    
+    # Check to make sure the stats_config argument was set, and also make sure
+    # that Locust workers do not attempt to store or compare stats if Locust
+    # is running distributed
+    stats_config_str = environment.parsed_options.stats_config
+    if not stats_config_str or (is_distributed(environment) and is_locust_worker(environment)):
+        return
+    
+    try:
+        stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
+    except ValueError as e:
+        logger.warn('--stats-config was invalid: "%s" -- performance stats will not be stored or compared', e)
+        return
+
+    # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
+    stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
+    stats = stats_collector.collect_stats()
+
+    if stats_config.compare:
+        stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
+        previous_stats = stats_loader.load()
+        if previous_stats:
+            failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
+            if not failed_stats_results:
+                logger.info(
+                    'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+            else:
+                # If we get here, that means some tasks have stats exceeding the threshold percent
+                # between the previous/average run and the current. Fail the test run, and log the
+                # failing tasks along with their relative stat percents   
+                environment.process_exit_code = 1
+                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
+                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
+        else:
+            logger.warn(
+                'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
+
+    if stats_config.store == StatsStorageType.FILE:
+        logger.info("Writing aggregated performance statistics to file.")
+
+        stats_json_writer = StatsJsonFileWriter(stats)
+        stats_json_writer.write(stats_config.path or '')
+    elif stats_config.store == StatsStorageType.S3:
+        logger.info("Writing aggregated performance statistics to S3.")
+
+        stats_s3_writer = StatsJsonS3Writer(stats)
+        if not stats_config.bucket:
+            raise ValueError('S3 bucket must be provided when writing stats to S3')
+        stats_s3_writer.write(stats_config.bucket)
 
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
@@ -189,66 +256,6 @@ class BFDUserBase(HttpUser):
             return str(os.environ['LOCUST_WORKER_NUM'])
         return None
 
-@events.init_command_line_parser.add_listener
-def custom_args(parser: LocustArgumentParser):
-    parser.add_argument(
-        '--client-cert-path',
-        type=str,
-        required=True,
-        help='Specifies path to client cert, ex: "<path/to/client/pem/file>" (Required)',
-        dest='client_cert_path',
-        env_var='LOCUST_BFD_CLIENT_CERT_PATH'
-    )
-    parser.add_argument(
-        '--database-uri',
-        type=str,
-        required=True,
-        help='Specfies database URI path, ex: "https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)',
-        dest='database_uri',
-        env_var='LOCUST_BFD_DATABASE_URI'
-    )
-    parser.add_argument(
-        '--server-public-key',
-        type=str,
-        help='"<server public key>" (Optional, Default: "")',
-        dest='server_public_key',
-        env_var='LOCUST_BFD_SERVER_PUBLIC_KEY',
-        default=''
-    )
-    parser.add_argument(
-        '--table-sample-percent',
-        type=float,
-        help='<% of table to sample> (Optional, Default: 0.25)',
-        dest='table_sample_percent',
-        env_var='LOCUST_DATA_TABLE_SAMPLE_PERCENT',
-        default=0.25
-    )
-    parser.add_argument(
-        '--stats-config',
-        type=str,
-        help='"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)',
-        dest='stats_config',
-        env_var='LOCUST_STATS_CONFIG'
-    )
-    
-@events.init.add_listener
-def locust_init(environment: Environment, **kwargs):
-    if is_distributed(environment) and is_locust_worker(environment):
-        return
-    
-    logger = logging.getLogger()
-    
-    # Adjust the runtime to account for spawn rate
-    num_users = int(environment.parsed_options.num_users)
-    spawn_rate = int(environment.parsed_options.spawn_rate)
-    init_run_time = environment.parsed_options.run_time
-    
-    adjusted_run_time = _adjusted_run_time(init_run_time, num_users, spawn_rate)
-    if adjusted_run_time != init_run_time:
-        environment.parsed_options.run_time = adjusted_run_time
-        logger.info('Run time adjusted to account for ramp-up time. New run time: '
-            f'{timedelta(seconds=environment.parsed_options.run_time)}')
-
 @events.quitting.add_listener
 def one_time_teardown(environment: Environment, **kwargs) -> None:
     """Run one-time teardown tasks after the tests have completed
@@ -307,15 +314,3 @@ def one_time_teardown(environment: Environment, **kwargs) -> None:
         if not stats_config.bucket:
             raise ValueError('S3 bucket must be provided when writing stats to S3')
         stats_s3_writer.write(stats_config.bucket)
-        
-def _adjusted_run_time(run_time: int, max_clients: int, clients_per_second: int) -> int:
-    '''Get the adjusted run time of the test to account for the time it takes to instantiate and connect
-    all the clients.
-
-    If a user specifies a one-minute test, but it's going to take thirty seconds to ramp up to full
-    clients, then we actually run for one minute and thirty seconds, so that we can have the
-    specified time with full client capacity. You can optionally reset the statistics to zero at
-    the end of this ramp-up period using the --resetStats command line flag.
-    '''
-
-    return run_time + ceil(int(max_clients) // int(clients_per_second))
