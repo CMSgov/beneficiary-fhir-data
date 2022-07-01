@@ -1,4 +1,3 @@
 output "name" {
-  value = var.database
+  value = var.table
 }
-

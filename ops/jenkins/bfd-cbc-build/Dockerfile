@@ -4,10 +4,7 @@ ARG MAVEN_VERSION
 
 FROM maven:${MAVEN_VERSION}-openjdk-${JAVA_VERSION} AS base
 
-# NOTE: necessary duplicate entry
-ARG JAVA_VERSION
-
-COPY jdk${JAVA_VERSION}.toolchains.xml /root/.m2/toolchains.xml
+COPY toolchains.xml /root/.m2/toolchains.xml
 
 ARG ANSIBLE_VERSION
 
