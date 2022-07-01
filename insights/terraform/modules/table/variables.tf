@@ -39,6 +39,32 @@ variable "columns" {
   type        = list(object({name=string, type=string, comment=string}))
 }
 
+variable "storage_format" {
+  description = "format in which data will be stored (defaults to json)"
+  type        = string
+  default     = "json"
 
+  # Validate that we have an allowed value
+  validation {
+    condition     = contains(["json", "parquet"], var.storage_format)
+    error_message = "Allowed values for storage_format are \"json\" or \"parquet\"."
+  }
+}
 
+variable "serde_format" {
+  description = "format for serialization / deserialization (defaults to json)"
+  type        = string
+  default     = "json"
 
+  # Validate that we have an allowed value
+  validation {
+    condition     = contains(["json", "grok", "parquet"], var.serde_format)
+    error_message = "Allowed values for storage_format are \"json\" or \"parquet\"."
+  }
+}
+
+variable "serde_parameters" {
+  description = "parameters for serde (optional)"
+  type        = map
+  default     = {}
+}

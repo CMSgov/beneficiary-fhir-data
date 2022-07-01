@@ -7,7 +7,6 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
     bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
     buffer_interval     = 60
     buffer_size         = 128
-    compression_format  = "GZIP"
     error_output_prefix = "databases/${module.database.name}/${module.api-requests-table.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     kms_key_arn         = data.aws_kms_key.kms_key.arn
     prefix              = "databases/${module.database.name}/${module.api-requests-table.name}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
@@ -19,7 +18,7 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
     }
 
     data_format_conversion_configuration {
-      enabled = false
+      enabled = true
 
       input_format_configuration {
         deserializer {
@@ -34,17 +33,8 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
 
       output_format_configuration {
         serializer {
-          orc_ser_de {
-            block_size_bytes                        = 268435456
-            bloom_filter_columns                    = []
-            bloom_filter_false_positive_probability = 0.05
-            compression                             = "SNAPPY"
-            dictionary_key_threshold                = 0
-            enable_padding                          = false
-            format_version                          = "V0_12"
-            padding_tolerance                       = 0.05
-            row_index_stride                        = 10000
-            stripe_size_bytes                       = 67108864
+          parquet_ser_de {
+            compression = "SNAPPY"
           }
         }
       }

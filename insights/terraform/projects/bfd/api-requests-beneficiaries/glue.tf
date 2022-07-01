@@ -4,14 +4,17 @@
 
 # Glue Catalog Table to hold Beneficiaries
 module "beneficiaries-table" {
-  source      = "../../../modules/table"
-  table       = "${local.full_name_underscore}_api_requests_beneficiaries"
-  description = "One row per beneficiary query, with the date of the request"
-  database    = local.database
-  bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
-  bucket_cmk  = data.aws_kms_key.kms_key.arn
-  tags        = local.tags
-  partitions  = [
+  source         = "../../../modules/table"
+  table          = "${local.full_name_underscore}_api_requests_beneficiaries"
+  description    = "One row per beneficiary query, with the date of the request"
+  database       = local.database
+  bucket         = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk     = data.aws_kms_key.kms_key.arn
+  storage_format = "parquet"
+  serde_format   = "parquet"
+  tags           = local.tags
+
+  partitions = [
     {
       name    = "year"
       type    = "string"
@@ -28,7 +31,8 @@ module "beneficiaries-table" {
       comment = "Day of request"
     }
   ]
-  columns     = [
+
+  columns = [
     {
       name    = "bene_id"
       type    = "bigint"
@@ -38,7 +42,27 @@ module "beneficiaries-table" {
       name    = "timestamp"
       type    = "timestamp"
       comment = "Time of request"
-    }
+    },
+    {
+      name    = "clientssl_dn"
+      type    = "string"
+      comment = ""
+    },
+    {
+      name    = "operation"
+      type    = "string"
+      comment = "Operation requested"
+    },
+    {
+      name    = "uri"
+      type    = "string"
+      comment = "Request URI"
+    },
+    {
+      name    = "query_string"
+      type    = "string"
+      comment = "Options sent to the API via query string"
+    },
   ]
 }
 
@@ -142,15 +166,17 @@ resource "aws_glue_crawler" "beneficiaries-crawler" {
 
 # Glue Table for unique beneficiaries
 module "beneficiaries-unique-table" {
-  source      = "../../../modules/table"
-  table       = "${local.full_name_underscore}_api_requests_beneficiaries_unique"
-  description = "One row per beneficiary and the date first seen"
-  database    = local.database
-  bucket      = data.aws_s3_bucket.bfd-insights-bucket.bucket
-  bucket_cmk  = data.aws_kms_key.kms_key.arn
-  tags        = local.tags
+  source         = "../../../modules/table"
+  table          = "${local.full_name_underscore}_api_requests_beneficiaries_unique"
+  description    = "One row per beneficiary and the date first seen"
+  database       = local.database
+  bucket         = data.aws_s3_bucket.bfd-insights-bucket.bucket
+  bucket_cmk     = data.aws_kms_key.kms_key.arn
+  storage_format = "parquet"
+  serde_format   = "parquet"
+  tags           = local.tags
 
-  partitions  = [
+  partitions = [
     {
       name    = "year"
       type    = "string"
@@ -163,7 +189,7 @@ module "beneficiaries-unique-table" {
     },
   ]
 
-  columns     = [
+  columns = [
     {
       name    = "bene_id"
       type    = "bigint"
