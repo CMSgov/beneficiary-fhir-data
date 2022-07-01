@@ -243,7 +243,7 @@ public class GrpcRdaSourceIT {
         .runWithPortParam(
             port -> {
               int count;
-              GrpcRdaSource.Config config = createSourceConfig(port).build();
+              RdaSourceConfig config = createSourceConfig(port).build();
               try (GrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                   createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
@@ -263,7 +263,7 @@ public class GrpcRdaSourceIT {
         .runWithPortParam(
             port -> {
               int count;
-              GrpcRdaSource.Config config =
+              RdaSourceConfig config =
                   createSourceConfig(port).authenticationToken("secret").build();
               try (GrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                   createSource(config)) {
@@ -283,7 +283,7 @@ public class GrpcRdaSourceIT {
         .build()
         .runWithPortParam(
             port -> {
-              GrpcRdaSource.Config config = createSourceConfig(port).build();
+              RdaSourceConfig config = createSourceConfig(port).build();
               try {
                 try (GrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                     createSource(config)) {
@@ -307,7 +307,7 @@ public class GrpcRdaSourceIT {
         .build()
         .runWithPortParam(
             port -> {
-              GrpcRdaSource.Config config =
+              RdaSourceConfig config =
                   createSourceConfig(port).authenticationToken("wrong-secret").build();
               try {
                 try (GrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
@@ -401,7 +401,7 @@ public class GrpcRdaSourceIT {
                     .build()
                     .runWithPortParam(
                         port -> {
-                          GrpcRdaSource.Config config =
+                          RdaSourceConfig config =
                               createSourceConfig(port).authenticationToken(token).build();
                           try (var source = createSource(config)) {
                             source.retrieveAndProcessObjects(3, sink);
@@ -477,9 +477,9 @@ public class GrpcRdaSourceIT {
                     sequenceNumber));
   }
 
-  private GrpcRdaSource.Config.ConfigBuilder createSourceConfig(Integer port) {
-    return GrpcRdaSource.Config.builder()
-        .serverType(GrpcRdaSource.Config.ServerType.Remote)
+  private RdaSourceConfig.RdaSourceConfigBuilder createSourceConfig(Integer port) {
+    return RdaSourceConfig.builder()
+        .serverType(RdaSourceConfig.ServerType.Remote)
         .host("localhost")
         .port(port)
         .maxIdle(Duration.ofSeconds(30));
@@ -487,7 +487,7 @@ public class GrpcRdaSourceIT {
 
   @Nonnull
   private GrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
-      GrpcRdaSource.Config config) {
+      RdaSourceConfig config) {
     return new GrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
   }
 

@@ -15,7 +15,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -281,15 +280,15 @@ public class RdaLoadJobIT {
   }
 
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
-    final GrpcRdaSource.Config.ConfigBuilder rdaSourceConfig = GrpcRdaSource.Config.builder();
+    final RdaSourceConfig.RdaSourceConfigBuilder rdaSourceConfig = RdaSourceConfig.builder();
     if (serverPort > 0) {
       rdaSourceConfig
-          .serverType(GrpcRdaSource.Config.ServerType.Remote)
+          .serverType(RdaSourceConfig.ServerType.Remote)
           .host("localhost")
           .port(serverPort);
     } else {
       rdaSourceConfig
-          .serverType(GrpcRdaSource.Config.ServerType.InProcess)
+          .serverType(RdaSourceConfig.ServerType.InProcess)
           .inProcessServerName(RdaServerJob.Config.DEFAULT_SERVER_NAME);
     }
     rdaSourceConfig.maxIdle(Duration.ofMinutes(1));

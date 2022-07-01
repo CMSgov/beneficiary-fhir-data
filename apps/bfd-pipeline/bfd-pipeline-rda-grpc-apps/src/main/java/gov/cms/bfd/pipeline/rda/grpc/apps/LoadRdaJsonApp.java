@@ -11,7 +11,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -136,9 +136,9 @@ public class LoadRdaJsonApp {
               .writeThreads(writeThreads)
               .batchSize(batchSize)
               .build();
-      final GrpcRdaSource.Config grpcConfig =
-          GrpcRdaSource.Config.builder()
-              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+      final RdaSourceConfig grpcConfig =
+          RdaSourceConfig.builder()
+              .serverType(RdaSourceConfig.ServerType.Remote)
               .host("localhost")
               .port(port)
               .maxIdle(Duration.ofDays(1))

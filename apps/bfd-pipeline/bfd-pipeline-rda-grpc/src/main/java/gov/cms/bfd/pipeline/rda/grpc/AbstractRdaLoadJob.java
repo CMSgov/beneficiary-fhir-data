@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
   private final Config config;
+  private final Callable<RdaSource<TResponse, TClaim>> preJobTask;
   private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
   private final Callable<RdaSink<TResponse, TClaim>> sinkFactory;
   private final Logger logger; // each subclass provides its own logger
@@ -46,11 +47,13 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
 
   AbstractRdaLoadJob(
       Config config,
+      Callable<RdaSource<TResponse, TClaim>> preJobTask,
       Callable<RdaSource<TResponse, TClaim>> sourceFactory,
       Callable<RdaSink<TResponse, TClaim>> sinkFactory,
       MetricRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
+    this.preJobTask = Preconditions.checkNotNull(preJobTask);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
     this.logger = logger;
@@ -73,6 +76,11 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
+      try (var source = preJobTask.call();
+          var sink = sinkFactory.call()) {
+        source.retrieveAndProcessObjects(1, sink);
+      }
+
       int processedCount;
       try {
         processedCount = callRdaServiceAndStoreRecords();

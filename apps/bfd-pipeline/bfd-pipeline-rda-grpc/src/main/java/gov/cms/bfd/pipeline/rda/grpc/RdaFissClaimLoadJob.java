@@ -18,9 +18,10 @@ public class RdaFissClaimLoadJob
 
   public RdaFissClaimLoadJob(
       Config config,
+      Callable<RdaSource<FissClaimChange, RdaChange<RdaFissClaim>>> preJobTask,
       Callable<RdaSource<FissClaimChange, RdaChange<RdaFissClaim>>> sourceFactory,
       Callable<RdaSink<FissClaimChange, RdaChange<RdaFissClaim>>> sinkFactory,
       MetricRegistry appMetrics) {
-    super(config, sourceFactory, sinkFactory, appMetrics, LOGGER);
+    super(config, preJobTask, sourceFactory, sinkFactory, appMetrics, LOGGER);
   }
 }

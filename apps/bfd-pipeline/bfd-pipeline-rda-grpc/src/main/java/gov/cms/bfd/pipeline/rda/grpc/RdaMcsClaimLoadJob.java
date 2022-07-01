@@ -17,9 +17,10 @@ public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaCh
 
   public RdaMcsClaimLoadJob(
       Config config,
+      Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTask,
       Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> sourceFactory,
       Callable<RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>> sinkFactory,
       MetricRegistry appMetrics) {
-    super(config, sourceFactory, sinkFactory, appMetrics, LOGGER);
+    super(config, preJobTask, sourceFactory, sinkFactory, appMetrics, LOGGER);
   }
 }

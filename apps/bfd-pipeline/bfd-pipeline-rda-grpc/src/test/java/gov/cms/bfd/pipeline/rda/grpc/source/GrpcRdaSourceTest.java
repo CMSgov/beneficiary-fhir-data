@@ -386,9 +386,9 @@ public class GrpcRdaSourceTest {
    */
   @Test
   public void configIsSerializable() throws Exception {
-    final GrpcRdaSource.Config original =
-        GrpcRdaSource.Config.builder()
-            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+    final RdaSourceConfig original =
+        RdaSourceConfig.builder()
+            .serverType(RdaSourceConfig.ServerType.Remote)
             .host("localhost")
             .port(5432)
             .maxIdle(Duration.ofMinutes(59))
@@ -398,10 +398,10 @@ public class GrpcRdaSourceTest {
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(original);
     }
-    GrpcRdaSource.Config loaded;
+    RdaSourceConfig loaded;
     try (ObjectInputStream inp =
         new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-      loaded = (GrpcRdaSource.Config) inp.readObject();
+      loaded = (RdaSourceConfig) inp.readObject();
     }
     assertEquals(original, loaded);
   }

@@ -7,9 +7,11 @@ import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.McsClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaDLQSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.Serializable;
@@ -24,13 +26,13 @@ public class RdaLoadOptions implements Serializable {
   private static final long serialVersionUID = 7635897362336183L;
 
   private final AbstractRdaLoadJob.Config jobConfig;
-  private final GrpcRdaSource.Config grpcConfig;
+  private final RdaSourceConfig grpcConfig;
   private final RdaServerJob.Config mockServerConfig;
   private final IdHasher.Config idHasherConfig;
 
   public RdaLoadOptions(
       AbstractRdaLoadJob.Config jobConfig,
-      GrpcRdaSource.Config grpcConfig,
+      RdaSourceConfig grpcConfig,
       RdaServerJob.Config mockServerConfig,
       IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
@@ -47,12 +49,12 @@ public class RdaLoadOptions implements Serializable {
   }
 
   /** @return settings for the gRPC service caller. */
-  public GrpcRdaSource.Config getGrpcConfig() {
+  public RdaSourceConfig getGrpcConfig() {
     return grpcConfig;
   }
 
   public Optional<RdaServerJob> createRdaServerJob() {
-    if (grpcConfig.getServerType() == GrpcRdaSource.Config.ServerType.InProcess) {
+    if (grpcConfig.getServerType() == RdaSourceConfig.ServerType.InProcess) {
       return Optional.of(new RdaServerJob(mockServerConfig));
     } else {
       return Optional.empty();
@@ -68,6 +70,14 @@ public class RdaLoadOptions implements Serializable {
   public RdaFissClaimLoadJob createFissClaimsLoadJob(PipelineApplicationState appState) {
     return new RdaFissClaimLoadJob(
         jobConfig,
+        () ->
+            new GrpcRdaDLQSource<>(
+                appState.getEntityManagerFactory().createEntityManager(),
+                (seqNumber, fissClaimChange) -> seqNumber == fissClaimChange.getSeq(),
+                grpcConfig,
+                new FissClaimStreamCaller(),
+                appState.getMetrics(),
+                "fiss"),
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
@@ -97,6 +107,14 @@ public class RdaLoadOptions implements Serializable {
   public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
     return new RdaMcsClaimLoadJob(
         jobConfig,
+        () ->
+            new GrpcRdaDLQSource<>(
+                appState.getEntityManagerFactory().createEntityManager(),
+                (seqNumber, mcsClaimChange) -> seqNumber == mcsClaimChange.getSeq(),
+                grpcConfig,
+                new McsClaimStreamCaller(),
+                appState.getMetrics(),
+                "mcs"),
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,

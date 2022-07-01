@@ -1,32 +1,33 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
-import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
-import java.time.Clock;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * General RdaSource implementation that delegates actual service call and result mapping to other
@@ -40,20 +41,17 @@ import org.slf4j.LoggerFactory;
  *
  * @param <TMessage> type of objects returned by the gRPC service
  */
-public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
+@Slf4j
+public class GrpcRdaDLQSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
 
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  private final Clock clock;
+  private final DQLDao dao;
+  private final BiPredicate<Long, TMessage> sequencePredicate;
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
-  private final Optional<Long> startingSequenceNumber;
   private final Supplier<CallOptions> callOptionsFactory;
-  /** Expected time before RDA API server drops its connection when it has nothing to send. */
-  private final long minIdleMillisBeforeConnectionDrop;
-
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -65,23 +63,22 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType the claim type
-   * @param startingSequenceNumber optional hard coded sequence number
    */
-  public GrpcRdaSource(
+  public GrpcRdaDLQSource(
+      EntityManager entityManager,
+      BiPredicate<Long, TMessage> sequencePredicate,
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
       MetricRegistry appMetrics,
-      String claimType,
-      Optional<Long> startingSequenceNumber) {
+      String claimType) {
     this(
-        Clock.systemUTC(),
+        entityManager,
+        sequencePredicate,
         config.createChannel(),
         caller,
         config::createCallOptions,
         appMetrics,
-        claimType,
-        startingSequenceNumber,
-        config.getMinIdleMillisBeforeConnectionDrop());
+        claimType);
   }
 
   /**
@@ -89,36 +86,31 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * used internally by the primary constructor but is also used by unit tests to allow a mock
    * channel to be provided.
    *
-   * @param clock used to access current time
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
-   * @param startingSequenceNumber optional hard coded sequence number
    */
   @VisibleForTesting
-  GrpcRdaSource(
-      Clock clock,
+  GrpcRdaDLQSource(
+      EntityManager entityManager,
+      BiPredicate<Long, TMessage> sequencePredicate,
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
-      String claimType,
-      Optional<Long> startingSequenceNumber,
-      long minIdleMillisBeforeConnectionDrop) {
-    this.clock = clock;
+      String claimType) {
+    this.dao = new DQLDao(Preconditions.checkNotNull(entityManager));
+    this.sequencePredicate = sequencePredicate;
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
     this.callOptionsFactory = callOptionsFactory;
     this.channel = Preconditions.checkNotNull(channel);
-    this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
-    this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
     metrics = new Metrics(appMetrics, claimType);
   }
 
   /**
-   * {@inheritDoc} Calls the service through the specific implementation of GrpcStreamCaller
-   * provided to our constructor. Cancels the response stream if reading from the stream is
-   * interrupted.
+   * Calls the service through the specific implementation of GrpcStreamCaller provided to our
+   * constructor. Cancels the response stream if reading from the stream is interrupted.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
    * @param sink to receive batches of objects
@@ -132,117 +124,107 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     boolean interrupted = false;
     Exception error = null;
     int processed = 0;
-    long lastProcessedTime = clock.millis();
-    try {
-      setUptimeToRunning();
-      final long startingSequenceNumber = getStartingSequenceNumber(sink);
-      LOGGER.info(
-          "calling API for {} claims starting at sequence number {}",
-          claimType,
-          startingSequenceNumber);
-      final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
 
-      final GrpcResponseStream<TMessage> responseStream =
-          caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
-      final Map<Object, TMessage> batch = new LinkedHashMap<>();
+    MessageError.ClaimType type =
+        claimType.equalsIgnoreCase("fiss")
+            ? MessageError.ClaimType.FISS
+            : MessageError.ClaimType.MCS;
+
+    List<MessageError> messageErrors = dao.findAllMessageErrors();
+
+    Set<Long> sequenceNumbers =
+        messageErrors.stream()
+            .filter(m -> m.getClaimType() == type)
+            .map(MessageError::getSequenceNumber)
+            .collect(Collectors.toSet());
+
+    if (sequenceNumbers.isEmpty()) {
+      log.info("Found no {} claims in DLQ, skipping", claimType);
+    } else {
+      log.info(
+          "Found {} {} claims in DLQ, attempting to reprocess", sequenceNumbers.size(), claimType);
+
       try {
-        while (responseStream.hasNext()) {
-          setUptimeToReceiving();
-          final TMessage result = responseStream.next();
-          metrics.objectsReceived.mark();
-          batch.put(sink.getDedupKeyForMessage(result), result);
-          if (batch.size() >= maxPerBatch) {
-            processed += submitBatchToSink(apiVersion, sink, batch);
+        setUptimeToRunning();
+
+        final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+
+        for (final long startingSequenceNumber : sequenceNumbers) {
+          log.info(
+              "calling API for {} claims starting at sequence number {}",
+              claimType,
+              startingSequenceNumber);
+
+          final GrpcResponseStream<TMessage> responseStream =
+              caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
+          final Map<Object, TMessage> batch = new LinkedHashMap<>();
+
+          try {
+            if (responseStream.hasNext()) {
+              setUptimeToReceiving();
+              final TMessage result = responseStream.next();
+              metrics.objectsReceived.mark();
+
+              if (sequencePredicate.test(startingSequenceNumber, result)) {
+                batch.put(sink.getDedupKeyForMessage(result), result);
+                processed += submitBatchToSink(apiVersion, sink, batch);
+
+                if (processed > 0 && dao.delete(startingSequenceNumber, type) > 0) {
+                  log.info(
+                      "{} claim with sequence ({}) processed successfully, removed DLQ entry",
+                      claimType,
+                      startingSequenceNumber);
+                }
+              }
+            }
+          } catch (GrpcResponseStream.StreamInterruptedException ex) {
+            // If our thread is interrupted we cancel the stream so the server knows we're done
+            // and then shut down normally.
+            responseStream.cancelStream("shutting down due to InterruptedException");
+            interrupted = true;
+          } catch (Exception e) {
+            // If we failed to process the claim, it stays in the DLQ, nothing to do.
+            log.error(
+                "Failed to process "
+                    + claimType
+                    + " message with sequence: "
+                    + startingSequenceNumber,
+                e);
           }
-          lastProcessedTime = clock.millis();
+          sink.shutdown(Duration.ofMinutes(5));
+          processed += sink.getProcessedCount();
         }
-        if (batch.size() > 0) {
-          processed += submitBatchToSink(apiVersion, sink, batch);
+      } catch (ProcessingException ex) {
+        processed += ex.getProcessedCount();
+        error = ex;
+      } catch (Exception ex) {
+        error = ex;
+      } finally {
+        setUptimeToStopped();
+      }
+
+      if (error != null) {
+        // InterruptedException isn't really an error, so we exit normally rather than rethrowing.
+        if (isInterrupted(error)) {
+          interrupted = true;
+        } else {
+          metrics.failures.mark();
+          throw new ProcessingException(error, processed);
         }
-      } catch (GrpcResponseStream.StreamInterruptedException ex) {
-        // If our thread is interrupted we cancel the stream so the server knows we're done
-        // and then shut down normally.
-        responseStream.cancelStream("shutting down due to InterruptedException");
-        interrupted = true;
-      } catch (DroppedConnectionException ex) {
-        logOrRethrowDroppedConnectionException(lastProcessedTime, ex);
       }
-      sink.shutdown(Duration.ofMinutes(5));
-      processed += sink.getProcessedCount();
-    } catch (ProcessingException ex) {
-      processed += ex.getProcessedCount();
-      error = ex;
-    } catch (Exception ex) {
-      error = ex;
-    } finally {
-      setUptimeToStopped();
-    }
-    if (error != null) {
-      // InterruptedException isn't really an error so we exit normally rather than rethrowing.
-      if (isInterrupted(error)) {
-        interrupted = true;
-      } else {
-        metrics.failures.mark();
-        throw new ProcessingException(error, processed);
+
+      if (interrupted) {
+        log.warn("{} claim processing interrupted with processedCount {}", claimType, processed);
       }
+
+      metrics.successes.mark();
     }
-    if (interrupted) {
-      LOGGER.warn("{} claim processing interrupted with processedCount {}", claimType, processed);
-    }
-    metrics.successes.mark();
+
     return processed;
   }
 
   /**
-   * The RDA API server drops open connections abruptly when it has no data to transmit for some
-   * period of time. These closures are not clean at the protocol level so they appear as errors to
-   * gRPC but we don't want to trigger alerts when they happen since they are not unexpected.
-   *
-   * <p>This method determines if we have been idle long enough that such a drop is possible. If the
-   * drop is expected it simply logs the event but if the drop is not expected it rethrows the
-   * exception so that normal error logic can be applied to it.
-   *
-   * @param lastProcessedTime time in millis when we last processed a message from the server
-   * @param exception the exception to evaluate
-   * @throws DroppedConnectionException if not an expected drop
-   */
-  private void logOrRethrowDroppedConnectionException(
-      long lastProcessedTime, DroppedConnectionException exception)
-      throws DroppedConnectionException {
-    final long idleMillis = clock.millis() - lastProcessedTime;
-    if (idleMillis >= minIdleMillisBeforeConnectionDrop) {
-      LOGGER.info(
-          "RDA API server dropped connection after idle time: idleMillis={} message='{}'",
-          idleMillis,
-          exception.getMessage());
-    } else {
-      throw exception;
-    }
-  }
-
-  /**
-   * Uses the hard coded starting sequence number if one has been configured. Otherwise asks the
-   * sink to provide its maximum known sequence number as our starting point. When all else fails we
-   * start at the beginning.
-   *
-   * @param sink used to obtain the maximum known sequence number
-   * @return a valid RDA change sequence number
-   */
-  private long getStartingSequenceNumber(RdaSink<TMessage, TClaim> sink)
-      throws ProcessingException {
-    if (startingSequenceNumber.isPresent()) {
-      return startingSequenceNumber.get();
-    } else {
-      return sink.readMaxExistingSequenceNumber().map(seqNo -> seqNo + 1).orElse(MIN_SEQUENCE_NUM);
-    }
-  }
-
-  /**
-   * Closes the channel used to communicate with the gRPC service. Handles {@link
-   * InterruptedException} while waiting for the channel to close by retrying once, then if the
-   * second attempt is also interrupted just calling {@code shutdownNow()} and giving up on waiting.
-   * The interrupted flag is cleared when an {@link InterruptedException} is thrown so the second
-   * catch isn't strictly necessary. It's just there for safety purposes.
+   * Closes the channel used to communicate with the gRPC service.
    *
    * @throws Exception if the channel could not be closed
    */
@@ -253,18 +235,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
         channel.shutdown();
       }
       if (!channel.isTerminated()) {
-        try {
-          channel.awaitTermination(1, TimeUnit.MINUTES);
-        } catch (InterruptedException ex) {
-          LOGGER.info("caught InterruptedException while closing ManagedChannel - retrying once");
-          try {
-            channel.awaitTermination(1, TimeUnit.MINUTES);
-          } catch (InterruptedException ex2) {
-            LOGGER.info(
-                "caught second InterruptedException while closing ManagedChannel - calling shutdownNow");
-            channel.shutdownNow();
-          }
-        }
+        channel.awaitTermination(5, TimeUnit.SECONDS);
       }
       channel = null;
     }
@@ -299,7 +270,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
     final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
-    LOGGER.debug(
+    log.debug(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,
         batch.size(),
@@ -309,6 +280,30 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     metrics.objectsStored.mark(processed);
     setUptimeToRunning();
     return processed;
+  }
+
+  @RequiredArgsConstructor
+  static class DQLDao {
+
+    private final EntityManager entityManager;
+
+    public List<MessageError> findAllMessageErrors() {
+      return entityManager
+          .createQuery("select error from MessageError error", MessageError.class)
+          .getResultList();
+    }
+
+    public Long delete(Long sequenceNumber, MessageError.ClaimType type) {
+      MessageError messageError =
+          entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
+
+      if (messageError != null) {
+        entityManager.remove(messageError);
+        return 1L;
+      }
+
+      return 0L;
+    }
   }
 
   /**
@@ -345,7 +340,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     private final AtomicLong uptimeValue;
 
     private Metrics(MetricRegistry appMetrics, String claimType) {
-      final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
+      final String base = MetricRegistry.name(GrpcRdaDLQSource.class.getSimpleName(), claimType);
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
       successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
       failures = appMetrics.meter(MetricRegistry.name(base, "failures"));

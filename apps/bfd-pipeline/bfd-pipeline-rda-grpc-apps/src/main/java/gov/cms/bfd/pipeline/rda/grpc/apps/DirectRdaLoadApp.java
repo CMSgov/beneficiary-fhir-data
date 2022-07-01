@@ -8,7 +8,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -112,9 +112,9 @@ public class DirectRdaLoadApp {
             .writeThreads(options.intValue("job.writeThreads", 1));
     options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
     options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
-    final GrpcRdaSource.Config grpcConfig =
-        GrpcRdaSource.Config.builder()
-            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+    final RdaSourceConfig grpcConfig =
+        RdaSourceConfig.builder()
+            .serverType(RdaSourceConfig.ServerType.Remote)
             .host(options.stringValue("api.host", "localhost"))
             .port(options.intValue("api.port", 5003))
             .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
