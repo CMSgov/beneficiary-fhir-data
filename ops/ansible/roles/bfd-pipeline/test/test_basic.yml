@@ -13,13 +13,10 @@
         data_pipeline_s3_bucket: 'example-fake'  # Doesn't need to actually exist.
         data_pipeline_hicn_hash_iterations: '42'  # NIST recommends at least 1000
         data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
-        data_pipeline_db_url: 'jdbc:hsqldb:mem:test'
-        data_pipeline_db_username: ""
-        data_pipeline_db_password: ""
+        data_pipeline_db_url: jdbc:postgresql://db:5432/bfd
+        data_pipeline_db_username: bfd
+        data_pipeline_db_password: bfd
 
-# Verify that things worked as expected.
-- hosts: bfd-pipeline
-  tasks:
     - name: Ensure Service Is Running
       service:
         name: bfd-pipeline

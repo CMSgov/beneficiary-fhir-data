@@ -6,14 +6,6 @@
 # Apply the role.
 - hosts: bfd-server
   tasks:
-    - name: Install Prerequisites
-      package:
-        name:
-          - openssl # TODO: doesn't seem to be necessary
-          - procps # helpful for local development/debugging; missing in current solution but remedied in BFD-1813
-        state: present
-      become: true
-
     - name: Apply Role
       import_role:
         name: bfd-server
@@ -26,21 +18,15 @@
         data_server_ssl_client_certificates:
           - alias: client_foo
             certificate: "{{ lookup('file', 'files/client-trusted.cer') }}"
-        data_server_db_url: 'jdbc:hsqldb:mem:test'
+        data_server_db_url: jdbc:postgresql://db:5432/bfd
         data_server_ssl_client_certificate_test: files/client-unsecured.pem
-        data_server_db_username: ""
-        data_server_db_password: ""
+        data_server_db_username: bfd
+        data_server_db_password: bfd
         # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
         data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m -DbfdServer.db.schema.apply=true'
         data_server_dir: &data_server_dir /usr/local/bfd-server
         data_server_v2_enabled: true
 
-# Verify that things worked as expected.
-- hosts: bfd-server
-  vars:
-    data_server_dir: *data_server_dir
-
-  tasks:
     - name: Ensure Service Is Running
       service:
         name: bfd-server
