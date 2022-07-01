@@ -31,7 +31,7 @@ def load_from_env(locust_env: Environment, load_function: Callable, *args, use_t
         logging.getLogger().error('"database_uri" and/or "table_sample_percent" was not defined: %s', str(e))
         return []
     
-    return load_from_uri(database_uri, load_function, args, use_table_sample=use_table_sample, table_sample_percent=table_sample_percent)
+    return load_from_uri(database_uri, load_function, *args, use_table_sample=use_table_sample, table_sample_percent=table_sample_percent)
 
 def load_from_uri(database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
     '''Loads all of the data from the database, using the database connection provided.'''
