@@ -36,7 +36,7 @@ if [ ! "$(docker ps -f "name=${CONTAINER_NAME}-db" --format '{{.Names}}' | grep 
     --name "${CONTAINER_NAME}-db" \
     "--net=${CONTAINER_NAME}" \
     --net-alias=db \
-    -e 'POSTGRES_DB=bfd' \
+    -e 'POSTGRES_DB=fhirdb' \
     -e 'POSTGRES_USER=bfd' \
     -e 'POSTGRES_PASSWORD=bfd' \
     --rm \

@@ -35,7 +35,7 @@ docker run \
     --detach \
     "--net=${CONTAINER_NAME}" \
     --net-alias=db \
-    -e 'POSTGRES_DB=bfd' \
+    -e 'POSTGRES_DB=fhirdb' \
     -e 'POSTGRES_USER=bfd' \
     -e 'POSTGRES_PASSWORD=bfd' \
     --name "${CONTAINER_NAME}-db" \

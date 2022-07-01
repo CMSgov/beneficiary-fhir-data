@@ -30,13 +30,13 @@ cd sql/<environment>
 2. Create a record of the number of rows from each table that we will be deleting (be sure to replace the example with the target database information):
 
 ```bash
-cat count.sql | psql 'postgres://bfd:InsecureLocalDev@localhost:5432/bfd' | tee deleted_rows_$(date +%Y-%m-%d--%H-%M-%S).log
+cat count.sql | psql 'postgres://bfd:InsecureLocalDev@localhost:5432/fhirdb' | tee deleted_rows_$(date +%Y-%m-%d--%H-%M-%S).log
 ```
 
 3. Open a terminal for deleting the records (be sure to replace the example with the target database information):
 
 ```sql
-psql 'postgres://bfd:InsecureLocalDev@localhost:5432/bfd'
+psql 'postgres://bfd:InsecureLocalDev@localhost:5432/fhirdb'
 ```
 
 4. Start a transaction:
