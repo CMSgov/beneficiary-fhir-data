@@ -18,7 +18,10 @@ public class LongStringFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("idrDtlCnt").nullable(true).sqlType("char(1)").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(false).from("idrDtlCnt").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("idrDtlCnt")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")
@@ -40,7 +43,10 @@ public class LongStringFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("idrDtlCnt").nullable(true).sqlType("char(1)").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(true).from("idrDtlCnt").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.FieldAndProperty)
+            .from("idrDtlCnt")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")

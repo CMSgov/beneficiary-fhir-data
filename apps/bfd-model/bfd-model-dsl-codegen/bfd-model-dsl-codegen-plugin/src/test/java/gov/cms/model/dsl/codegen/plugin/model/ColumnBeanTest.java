@@ -31,6 +31,8 @@ public class ColumnBeanTest {
     assertEquals(0, ColumnBean.builder().sqlType("").build().computeLength());
     assertEquals(0, ColumnBean.builder().build().computeLength());
     assertEquals(0, ColumnBean.builder().sqlType("numeric(10)").build().computeLength());
+    assertEquals(1, ColumnBean.builder().build().computeMinLength(1));
+    assertEquals(3, ColumnBean.builder().minLength(3).build().computeMinLength(1));
   }
 
   /** Test computation of java type. */

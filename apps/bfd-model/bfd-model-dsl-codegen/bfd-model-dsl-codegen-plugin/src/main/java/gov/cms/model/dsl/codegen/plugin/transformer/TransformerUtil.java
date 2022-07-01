@@ -90,6 +90,12 @@ public class TransformerUtil {
   public static final String LongStringTransformName = "LongString";
 
   /**
+   * Fixed name for {@code transformer} field of {@link TransformationBean} to indicate {@link
+   * UintToShortFieldTransformer} should be used.
+   */
+  public static final String UintToShortTransformName = "UintToShort";
+
+  /**
    * Regex used to detect special values in the {@code from} field of a {@link TransformationBean}
    * that indicate there is no corresponding {@link FieldTransformer}.
    */
@@ -126,6 +132,10 @@ public class TransformerUtil {
   private static final LongStringFieldTransformer LongStringInstance =
       new LongStringFieldTransformer();
 
+  /** Shared instance of {@link UintToShortFieldTransformer}. */
+  private static final UintToShortFieldTransformer UintToShortInstance =
+      new UintToShortFieldTransformer();
+
   /** Shared instance of {@link MessageEnumFieldTransformer}. */
   private static final MessageEnumFieldTransformer MessageEnumInstance =
       new MessageEnumFieldTransformer();
@@ -153,7 +163,9 @@ public class TransformerUtil {
           IntStringTransformName,
           IntStringInstance,
           LongStringTransformName,
-          LongStringInstance);
+          LongStringInstance,
+          UintToShortTransformName,
+          UintToShortInstance);
 
   /**
    * {@link Map} used internally to recognized standard {@link TransformationBean} {@code from}

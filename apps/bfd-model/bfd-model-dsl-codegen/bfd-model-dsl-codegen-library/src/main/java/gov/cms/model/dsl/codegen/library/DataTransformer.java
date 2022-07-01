@@ -271,6 +271,40 @@ public class DataTransformer {
   }
 
   /**
+   * Checks that the integer value of the given {@link IntSupplier} is unsigned (not negative) and
+   * small enough to fit in a {@link Short} type, and passes it to the given {@link Consumer}.
+   *
+   * @param fieldName The name of the field from which the value originates.
+   * @param value The value being validated / copied.
+   * @param copier The consumer to receive the value.
+   * @return this
+   */
+  public DataTransformer copyUIntToShort(String fieldName, int value, Consumer<Short> copier) {
+    if (validateUnsigned(fieldName, value) && validateShort(fieldName, value)) {
+      copier.accept((short) value);
+    }
+    return this;
+  }
+
+  /**
+   * Checks to see if a value is present and, if it is, calls {@link copyUIntToShort} to copy the
+   * value.
+   *
+   * @param fieldName The name of the field from which the value originates.
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier The consumer to receive the value.
+   * @return this
+   */
+  public DataTransformer copyOptionalUIntToShort(
+      String fieldName, BooleanSupplier exists, IntSupplier value, Consumer<Short> copier) {
+    if (exists.getAsBoolean()) {
+      return copyUIntToShort(fieldName, value.getAsInt(), copier);
+    }
+    return this;
+  }
+
+  /**
    * RDA API 0.2 MVP has some enums that have numeric values matching the ASCII character from the
    * upstream source record. Check the integer value and copy it if it represents an ASCII character
    * or add an error otherwise.
@@ -628,6 +662,45 @@ public class DataTransformer {
   }
 
   /**
+   * Checks if the given value is unsigned (positive).
+   *
+   * @param fieldName The name of the attribute the value is associated with (for error tracking).
+   * @param value The value being validated.
+   * @return True if the value is positive (>= 0), alse otherwise.
+   */
+  private boolean validateUnsigned(String fieldName, long value) {
+    boolean isValid = true;
+
+    if (value < 0) {
+      addError(fieldName, "is signed");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  /**
+   * Checks if the given value is within the {@link Short} value range.
+   *
+   * @param fieldName The name of the attribute the value is associated with (for error tracking).
+   * @param value The value being validated.
+   * @return True if the value is within the {@link Short} value range, False otherwise.
+   */
+  private boolean validateShort(String fieldName, long value) {
+    boolean isValid = true;
+
+    if (value > Short.MAX_VALUE) {
+      addError(fieldName, "is too large");
+      isValid = false;
+    } else if (value < Short.MIN_VALUE) {
+      addError(fieldName, "is too small");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  /**
    * Used internally to stop transformation if the value is null. A null value with nullable=false
    * adds an error to the errors list.
    *
@@ -737,12 +810,12 @@ public class DataTransformer {
     return sb.toString();
   }
 
-  /** A single error message detected while transforming an object. */
+  /** Helper class for tracking error messages. */
   @Data
   public static class ErrorMessage {
-    /** Name of the field containing the error. */
+    /** The name of the field the error is associated with. */
     private final String fieldName;
-    /** Description of the error. */
+    /** The message that describes the error that was found. */
     private final String errorMessage;
 
     @Override
@@ -751,7 +824,7 @@ public class DataTransformer {
     }
   }
 
-  /** Exception class to report transformation errors. */
+  /** Exception thrown to indicate that there was an issue with transforming an object. */
   @Getter
   public static class TransformationException extends RuntimeException {
     /** Non-empty list of {@link ErrorMessage} objects. */

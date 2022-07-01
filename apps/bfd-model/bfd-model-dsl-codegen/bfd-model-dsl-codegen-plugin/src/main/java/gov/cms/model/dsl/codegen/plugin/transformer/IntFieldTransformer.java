@@ -14,7 +14,7 @@ public class IntFieldTransformer implements FieldTransformer {
    *
    * <p>Generate code to call either {@link
    * gov.cms.model.dsl.codegen.library.DataTransformer#copyOptionalInt} when the field is optional.
-   * Optional int fields are unsupported so an exception is thrown to indicate the error.
+   * Required int fields are unsupported so an exception is thrown to indicate the error.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column

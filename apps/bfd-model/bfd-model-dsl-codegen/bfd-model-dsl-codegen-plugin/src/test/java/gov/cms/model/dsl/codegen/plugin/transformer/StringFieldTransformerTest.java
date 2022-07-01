@@ -18,7 +18,10 @@ public class StringFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("hicNo").nullable(true).sqlType("varchar(12)").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(false).from("hicNo").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("hicNo")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")
@@ -52,6 +55,34 @@ public class StringFieldTransformerTest {
             mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
     assertEquals(
         "transformer.copyOptionalString(namePrefix + gov.cms.test.Entity.Fields.hicNo, 1, 12, from::hasHicNo, from::getHicNo, to::setHicNo);\n",
+        block.toString());
+  }
+
+  /**
+   * Verifies that optional fields use {@code copyOptionalString} and honor the {@link
+   * StringFieldTransformer.IgnoreEmptyStringOption} transformer option.
+   */
+  @Test
+  public void testOptionalNonEmptyField() {
+    ColumnBean column =
+        ColumnBean.builder().name("hicNo").nullable(true).sqlType("varchar(12)").build();
+    TransformationBean transformation =
+        TransformationBean.builder()
+            .from("hicNo")
+            .transformerOption(StringFieldTransformer.IgnoreEmptyStringOption, "true")
+            .build();
+    MappingBean mapping =
+        MappingBean.builder()
+            .entityClassName("gov.cms.test.Entity")
+            .transformation(transformation)
+            .build();
+
+    StringFieldTransformer generator = new StringFieldTransformer();
+    CodeBlock block =
+        generator.generateCodeBlock(
+            mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
+    assertEquals(
+        "transformer.copyOptionalNonEmptyString(namePrefix + gov.cms.test.Entity.Fields.hicNo, 1, 12, from::hasHicNo, from::getHicNo, to::setHicNo);\n",
         block.toString());
   }
 }

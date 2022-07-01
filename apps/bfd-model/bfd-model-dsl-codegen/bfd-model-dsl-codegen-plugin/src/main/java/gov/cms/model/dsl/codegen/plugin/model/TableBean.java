@@ -23,7 +23,7 @@ public class TableBean {
   /** Optional comment to be added to this table's entity class when it is generated. */
   private String comment;
   /** True if names should be quoted in the JPA annotation arguments for this table. */
-  @Builder.Default private boolean quoteNames = true;
+  @Builder.Default private boolean quoteNames = false;
   /** True if an {@code equals} method should be generated in the entity class. */
   @Builder.Default private boolean equalsNeeded = true;
   /**
@@ -42,6 +42,8 @@ public class TableBean {
   @Singular private List<ColumnBean> columns = new ArrayList<>();
   /** All of the {@link JoinBean} objects for the joins involving this table. */
   @Singular private List<JoinBean> joins = new ArrayList<>();
+  /** List of additional fields to add to the lombok generated {@code Fields} class. */
+  @Singular private List<AdditionalFieldName> additionalFieldNames = new ArrayList<>();
 
   /**
    * Finds the column with the specified name.
@@ -151,5 +153,34 @@ public class TableBean {
    */
   public String quoteName(String name) {
     return isQuoteNames() ? "`" + name + "`" : name;
+  }
+
+  /**
+   * Used to allow definition of extra field names for lombok to add to its auto-generated {@code
+   * Fields} constant in the generated entity class.
+   */
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class AdditionalFieldName {
+    /** Name of the constant added to the {@code Fields} class. */
+    private String name;
+
+    /**
+     * Optional value to use instead of {@code name} as the value of the constant in the {@code
+     * Fields} class.
+     */
+    private String value;
+
+    /**
+     * Gets the value to use in the generated constant. Defaults to the same as {@link
+     * AdditionalFieldName#name}.
+     *
+     * @return either {@link AdditionalFieldName#name} or {@link AdditionalFieldName#value}
+     */
+    public String getFieldValue() {
+      return Strings.isNullOrEmpty(value) ? name : value;
+    }
   }
 }

@@ -18,7 +18,10 @@ public class RifTimestampFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("beneDob").nullable(true).sqlType("timestamp").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(false).from("beneDob").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("beneDob")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")

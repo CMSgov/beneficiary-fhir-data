@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 public class TableBeanTest {
@@ -81,9 +83,24 @@ public class TableBeanTest {
   @Test
   public void testQuoteName() {
     TableBean bean = TableBean.builder().build();
-    assertTrue(bean.isQuoteNames());
-    assertEquals("`benefit`", bean.quoteName("benefit"));
-    bean.setQuoteNames(false);
+    assertFalse(bean.isQuoteNames());
     assertEquals("benefit", bean.quoteName("benefit"));
+    bean.setQuoteNames(true);
+    assertEquals("`benefit`", bean.quoteName("benefit"));
+  }
+
+  @Test
+  public void testAdditionalFieldNames() {
+    TableBean bean =
+        TableBean.builder()
+            .additionalFieldName(new TableBean.AdditionalFieldName("abc", ""))
+            .additionalFieldName(new TableBean.AdditionalFieldName("def", null))
+            .additionalFieldName(new TableBean.AdditionalFieldName("ghi", "GHI"))
+            .build();
+    assertEquals(
+        List.of("abc", "def", "GHI"),
+        bean.getAdditionalFieldNames().stream()
+            .map(TableBean.AdditionalFieldName::getFieldValue)
+            .collect(Collectors.toList()));
   }
 }

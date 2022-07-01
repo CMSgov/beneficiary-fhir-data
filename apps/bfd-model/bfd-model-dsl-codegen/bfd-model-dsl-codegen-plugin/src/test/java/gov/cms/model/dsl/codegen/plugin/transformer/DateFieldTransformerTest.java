@@ -17,7 +17,10 @@ public class DateFieldTransformerTest {
   public void testRequiredField() {
     ColumnBean column = ColumnBean.builder().name("beneDob").nullable(true).sqlType("date").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(false).from("beneDob").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("beneDob")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")

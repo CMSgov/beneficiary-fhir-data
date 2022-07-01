@@ -18,7 +18,11 @@ public class IdHashFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("mbi").nullable(true).sqlType("varchar(20)").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(false).from("mbi").to("mbiHash").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("mbi")
+            .to("mbiHash")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")
@@ -40,7 +44,11 @@ public class IdHashFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("mbi").nullable(true).sqlType("varchar(20)").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(true).from("mbi").to("mbiHash").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.FieldAndProperty)
+            .from("mbi")
+            .to("mbiHash")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")

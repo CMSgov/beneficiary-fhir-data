@@ -10,17 +10,22 @@ import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import org.junit.jupiter.api.Test;
 
-/** Unit test for {@link CharFieldTransformer}. */
-public class CharFieldTransformerTest {
-  /** Verifies that required fields use {@code copyCharacter}. */
+/** Unit test for {@link UintToShortFieldTransformer}. */
+public class UintToShortFieldTransformerTest {
+  /** Verifies that required fields use {@code copyUIntToShort}. */
   @Test
   public void testRequiredField() {
     ColumnBean column =
-        ColumnBean.builder().name("curr1Status").nullable(false).sqlType("char(1)").build();
+        ColumnBean.builder()
+            .name("rdaPosition")
+            .nullable(false)
+            .javaType("int")
+            .sqlType("smallint")
+            .build();
     TransformationBean transformation =
         TransformationBean.builder()
             .optionalComponents(TransformationBean.OptionalComponents.None)
-            .from("curr1Status")
+            .from("rdaPosition")
             .build();
     MappingBean mapping =
         MappingBean.builder()
@@ -28,33 +33,42 @@ public class CharFieldTransformerTest {
             .transformation(transformation)
             .build();
 
-    CharFieldTransformer generator = new CharFieldTransformer();
+    UintToShortFieldTransformer generator = new UintToShortFieldTransformer();
     CodeBlock block =
         generator.generateCodeBlock(
             mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
     assertEquals(
-        "transformer.copyCharacter(namePrefix + gov.cms.test.Entity.Fields.curr1Status, from.getCurr1Status(), to::setCurr1Status);\n",
+        "transformer.copyUIntToShort(namePrefix + gov.cms.test.Entity.Fields.rdaPosition, from.getRdaPosition(), to::setRdaPosition);\n",
         block.toString());
   }
 
-  /** Verifies that optional fields use {@code copyOptionalCharacter}. */
+  /** Verifies that optional fields throw an exception to indicate they are not supported. */
   @Test
   public void testOptionalField() {
     ColumnBean column =
-        ColumnBean.builder().name("idrDtlCnt").nullable(true).sqlType("char(1)").build();
-    TransformationBean transformation = TransformationBean.builder().from("idrDtlCnt").build();
+        ColumnBean.builder()
+            .name("rdaPosition")
+            .nullable(true)
+            .javaType("int")
+            .sqlType("smallint")
+            .build();
+    TransformationBean transformation =
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.FieldAndProperty)
+            .from("rdaPosition")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")
             .transformation(transformation)
             .build();
 
-    CharFieldTransformer generator = new CharFieldTransformer();
+    UintToShortFieldTransformer generator = new UintToShortFieldTransformer();
     CodeBlock block =
         generator.generateCodeBlock(
             mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
     assertEquals(
-        "transformer.copyOptionalCharacter(namePrefix + gov.cms.test.Entity.Fields.idrDtlCnt, from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt);\n",
+        "transformer.copyOptionalUIntToShort(namePrefix + gov.cms.test.Entity.Fields.rdaPosition, from::hasRdaPosition, from::getRdaPosition, to::setRdaPosition);\n",
         block.toString());
   }
 }

@@ -1,13 +1,16 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
+import static gov.cms.model.dsl.codegen.plugin.model.ModelUtil.mapJavaTypeToTypeName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.io.Files;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -47,5 +50,23 @@ public class ModelUtilTest {
     assertEquals(
         2,
         ModelUtil.loadModelFromYamlFileOrDirectory(folder.getAbsolutePath()).getMappings().size());
+  }
+
+  @Test
+  public void testMapJavaTypeToTypeName() {
+    assertEquals(Optional.of(TypeName.CHAR), mapJavaTypeToTypeName("char"));
+    assertEquals(Optional.of(ClassName.get(Character.class)), mapJavaTypeToTypeName("Character"));
+    assertEquals(Optional.of(TypeName.INT), mapJavaTypeToTypeName("int"));
+    assertEquals(Optional.of(ClassName.get(Integer.class)), mapJavaTypeToTypeName("Integer"));
+    assertEquals(Optional.of(TypeName.SHORT), mapJavaTypeToTypeName("short"));
+    assertEquals(Optional.of(ClassName.get(Short.class)), mapJavaTypeToTypeName("Short"));
+    assertEquals(Optional.of(TypeName.LONG), mapJavaTypeToTypeName("long"));
+    assertEquals(Optional.of(ClassName.get(Long.class)), mapJavaTypeToTypeName("Long"));
+    assertEquals(Optional.of(TypeName.INT), mapJavaTypeToTypeName("int"));
+    assertEquals(Optional.of(ClassName.get(String.class)), mapJavaTypeToTypeName("String"));
+    assertEquals(
+        Optional.of(ClassName.get(ColumnBean.class)),
+        mapJavaTypeToTypeName(ColumnBean.class.getName()));
+    assertEquals(Optional.empty(), mapJavaTypeToTypeName("undefined"));
   }
 }

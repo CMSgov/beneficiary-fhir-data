@@ -29,11 +29,13 @@ public class TransformationBean {
    */
   private String to;
   /**
-   * Specifies whether a value in the source object is optional. Optional values can be null or
-   * empty in the source without triggering an error. Transformation of missing values in
-   * non-optional fields will trigger an error.
+   * Specifies which components (if any) of the {@code from} are optional (possess a {@code has}
+   * method). Optional values can be null or empty in the source without triggering an error.
+   * Transformation of missing values in non-optional fields will trigger an error. The various
+   * values in the enum control which components of a compound field reference are optional.
    */
-  @Builder.Default private boolean optional = true;
+  @Builder.Default
+  private OptionalComponents optionalComponents = OptionalComponents.FieldAndProperty;
   /**
    * Name of the transformer to use when transforming/copying the value. Refer to {@link
    * gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil} for how this is mapped to actual
@@ -67,6 +69,16 @@ public class TransformationBean {
         return from.substring(dotIndex + 1);
       }
     }
+  }
+
+  /**
+   * Indicates that the transformation is optional and could be skipped if the value is not present
+   * in the message.
+   *
+   * @return true if the message might not contain a value
+   */
+  public boolean isOptional() {
+    return optionalComponents != OptionalComponents.None;
   }
 
   /**
@@ -121,5 +133,26 @@ public class TransformationBean {
    */
   public Optional<List<String>> transformerListOption(String optionName) {
     return transformerOption(optionName).map(value -> List.of(value.split(" *, *")));
+  }
+
+  /** Enum that defines possible values for the {@link #optionalComponents} field. */
+  public enum OptionalComponents {
+    /** The field is optional. For compound fields the property within the field is not optional. */
+    FieldOnly,
+    /**
+     * The field is not optional. For compound fields the field is not optional but the property
+     * within the field is optional.
+     */
+    PropertyOnly,
+    /**
+     * The field is optional. For compound fields both the field and the property within the field
+     * are optional.
+     */
+    FieldAndProperty,
+    /**
+     * The field is not optional. For compound fields neither the field nor the property within the
+     * field are optional.
+     */
+    None
   }
 }

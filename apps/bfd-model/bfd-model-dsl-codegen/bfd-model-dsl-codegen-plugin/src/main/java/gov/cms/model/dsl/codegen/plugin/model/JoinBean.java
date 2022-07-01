@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 /** Model object for defining JPA compatible join relationships between entities. */
 @Data
@@ -66,6 +67,12 @@ public class JoinBean {
 
   /** Value for {@code readOnly} argument to annotation. */
   @Builder.Default private boolean readOnly = false;
+
+  /**
+   * Optional list of properties to generate for single-value joins to simplify access to fields in
+   * the joined entity.
+   */
+  @Singular private List<Property> properties = new ArrayList<>();
 
   /**
    * Determine if the entity class name is valid.
@@ -192,5 +199,30 @@ public class JoinBean {
     @Getter private final ClassName interfaceName;
     /** Collection class used to create an instance for the field in the entity class. */
     @Getter private final ClassName className;
+  }
+
+  /**
+   * For single value joins we can define properties of the containing entity that are tied to a
+   * field in the joined entity. This object holds the desired name of the property, the name of the
+   * field within the joined object, and the java type of the field.
+   */
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class Property {
+    /**
+     * Name of the property in the containing entity. The generated getter name will be {@code get}
+     * followed by the capitalized {@link Property#name}.
+     */
+    private String name;
+
+    /** Name of the field in the joined object to get a value from when the getter is called. */
+    private String fieldName;
+
+    /**
+     * Indicates the java type to use for the return value of the getter. Values must be recognized
+     * by {@link ModelUtil#mapJavaTypeToTypeName}.
+     */
+    private String javaType;
   }
 }

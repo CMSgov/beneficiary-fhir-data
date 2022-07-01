@@ -18,7 +18,10 @@ public class AmountFieldTransformerTest {
     ColumnBean column =
         ColumnBean.builder().name("estAmtDue").nullable(true).sqlType("decimal(11,2)").build();
     TransformationBean transformation =
-        TransformationBean.builder().optional(false).from("estAmtDue").build();
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("estAmtDue")
+            .build();
     MappingBean mapping =
         MappingBean.builder()
             .entityClassName("gov.cms.test.Entity")

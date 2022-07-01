@@ -24,7 +24,7 @@ public class MessageEnumFieldTransformerTest {
     ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
     TransformationBean transformation =
         TransformationBean.builder()
-            .optional(false)
+            .optionalComponents(TransformationBean.OptionalComponents.None)
             .from("claimStatus")
             .transformer("MessageEnum")
             .build();
@@ -50,10 +50,10 @@ public class MessageEnumFieldTransformerTest {
         ColumnBean.builder().name("claimStatus").sqlType("char(1)").javaType("char").build();
     TransformationBean transformation =
         TransformationBean.builder()
-            .optional(false)
+            .optionalComponents(TransformationBean.OptionalComponents.None)
             .from("claimStatus")
             .transformer("MessageEnum")
-            .optional(true)
+            .optionalComponents(TransformationBean.OptionalComponents.FieldAndProperty)
             .build();
     MappingBean mapping =
         MappingBean.builder()
@@ -76,7 +76,7 @@ public class MessageEnumFieldTransformerTest {
     ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
     TransformationBean transformation =
         TransformationBean.builder()
-            .optional(false)
+            .optionalComponents(TransformationBean.OptionalComponents.None)
             .from("claimStatus")
             .transformer("MessageEnum")
             .transformerOption(ENUM_CLASS_OPT, "gov.cms.test.Value")
@@ -101,7 +101,7 @@ public class MessageEnumFieldTransformerTest {
     ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
     TransformationBean transformation =
         TransformationBean.builder()
-            .optional(false)
+            .optionalComponents(TransformationBean.OptionalComponents.None)
             .from("claimStatus")
             .transformer("MessageEnum")
             .transformerOption(ENUM_CLASS_OPT, "gov.cms.test.Value")
@@ -131,7 +131,7 @@ public class MessageEnumFieldTransformerTest {
     ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
     TransformationBean transformation =
         TransformationBean.builder()
-            .optional(false)
+            .optionalComponents(TransformationBean.OptionalComponents.None)
             .from("detail.claimStatus")
             .transformer("MessageEnum")
             .transformerOption(ENUM_CLASS_OPT, "gov.cms.test.Value")
@@ -161,7 +161,7 @@ public class MessageEnumFieldTransformerTest {
     ColumnBean column = ColumnBean.builder().name("claimStatus").sqlType("varchar(20)").build();
     TransformationBean transformation =
         TransformationBean.builder()
-            .optional(false)
+            .optionalComponents(TransformationBean.OptionalComponents.None)
             .from("claimStatus")
             .transformer("MessageEnum")
             .transformerOption(ENUM_CLASS_OPT, "gov.cms.test.Value")

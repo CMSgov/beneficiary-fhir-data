@@ -76,6 +76,11 @@ public class ColumnBean {
    * FieldType.Transient}.
    */
   @Builder.Default private FieldType fieldType = FieldType.Column;
+  /**
+   * Minimum allowed length for non-null string value. Negative value means no column specific
+   * number has been set.
+   */
+  @Builder.Default private int minLength = -1;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
   private SequenceBean sequence;
 
@@ -99,6 +104,17 @@ public class ColumnBean {
    */
   public String getColumnName() {
     return Strings.isNullOrEmpty(dbName) ? name : dbName;
+  }
+
+  /**
+   * Gets the value to use for minimum column length value in transformations. If no column specific
+   * value has been set the provided default value is returned.
+   *
+   * @param defaultValue value to return if no column specific value has been set
+   * @return minimum length for this column
+   */
+  public int computeMinLength(int defaultValue) {
+    return minLength >= 0 ? minLength : defaultValue;
   }
 
   /**
@@ -331,32 +347,10 @@ public class ColumnBean {
    * @return an appropriate {@link TypeName}
    */
   private static TypeName mapJavaTypeToTypeName(String javaType, String name) {
-    try {
-      switch (javaType) {
-        case "char":
-          return TypeName.CHAR;
-        case "Character":
-          return ClassName.get(Character.class);
-        case "int":
-          return TypeName.INT;
-        case "Integer":
-          return ClassName.get(Integer.class);
-        case "short":
-          return TypeName.SHORT;
-        case "Short":
-          return ClassName.get(Short.class);
-        case "long":
-          return TypeName.LONG;
-        case "Long":
-          return ClassName.get(Long.class);
-        case "String":
-          return ClassName.get(String.class);
-        default:
-          return ClassName.get(Class.forName(javaType));
-      }
-    } catch (ClassNotFoundException ex) {
-      throw new RuntimeException(
-          "no java class exists for javaType " + javaType + " and field " + name);
-    }
+    return ModelUtil.mapJavaTypeToTypeName(javaType)
+        .orElseThrow(
+            () ->
+                new RuntimeException(
+                    "no java class exists for javaType " + javaType + " and field " + name));
   }
 }

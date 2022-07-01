@@ -10,6 +10,7 @@ import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.NoMap
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.ParentFromName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.RifTimestampTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.TimestampTransformName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.UintToShortTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.anyMappingRequiresIdHasher;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.createFieldNameForErrorReporting;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.createPropertyAccessCodeBlock;
@@ -135,6 +136,9 @@ public class TransformerUtilTest {
 
     transformation.setTransformer(LongStringTransformName);
     assertTransformerInstanceOf(column, transformation, LongStringFieldTransformer.class);
+
+    transformation.setTransformer(UintToShortTransformName);
+    assertTransformerInstanceOf(column, transformation, UintToShortFieldTransformer.class);
   }
 
   /** Verify the java and/or sql type can be used to map the expected {@link FieldTransformer}. */

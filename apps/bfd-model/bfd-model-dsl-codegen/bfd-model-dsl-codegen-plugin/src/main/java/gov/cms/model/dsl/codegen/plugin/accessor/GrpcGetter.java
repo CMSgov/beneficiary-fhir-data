@@ -26,14 +26,23 @@ public class GrpcGetter implements Getter {
     return createPropertyAccessCodeBlock(
         transformation,
         fieldName -> CodeBlock.of("$L::has$L", FieldTransformer.SOURCE_VAR, fieldName),
-        (fieldName, propertyName) ->
-            CodeBlock.of(
-                "() -> $L.has$L() && $L.get$L().has$L()",
-                FieldTransformer.SOURCE_VAR,
-                fieldName,
-                FieldTransformer.SOURCE_VAR,
-                fieldName,
-                propertyName));
+        (fieldName, propertyName) -> {
+          switch (transformation.getOptionalComponents()) {
+            case FieldOnly:
+              return CodeBlock.of("() -> $L.has$L()", FieldTransformer.SOURCE_VAR, fieldName);
+            case PropertyOnly:
+              return CodeBlock.of(
+                  "() -> $L.get$L().has$L()", FieldTransformer.SOURCE_VAR, fieldName, propertyName);
+            default:
+              return CodeBlock.of(
+                  "() -> $L.has$L() && $L.get$L().has$L()",
+                  FieldTransformer.SOURCE_VAR,
+                  fieldName,
+                  FieldTransformer.SOURCE_VAR,
+                  fieldName,
+                  propertyName);
+          }
+        });
   }
 
   /**
@@ -46,14 +55,23 @@ public class GrpcGetter implements Getter {
     return createPropertyAccessCodeBlock(
         transformation,
         fieldName -> CodeBlock.of("$L.has$L()", FieldTransformer.SOURCE_VAR, fieldName),
-        (fieldName, propertyName) ->
-            CodeBlock.of(
-                "($L.has$L() && $L.get$L().has$L())",
-                FieldTransformer.SOURCE_VAR,
-                fieldName,
-                FieldTransformer.SOURCE_VAR,
-                fieldName,
-                propertyName));
+        (fieldName, propertyName) -> {
+          switch (transformation.getOptionalComponents()) {
+            case FieldOnly:
+              return CodeBlock.of("$L.has$L()", FieldTransformer.SOURCE_VAR, fieldName);
+            case PropertyOnly:
+              return CodeBlock.of(
+                  "$L.get$L().has$L()", FieldTransformer.SOURCE_VAR, fieldName, propertyName);
+            default:
+              return CodeBlock.of(
+                  "($L.has$L() && $L.get$L().has$L())",
+                  FieldTransformer.SOURCE_VAR,
+                  fieldName,
+                  FieldTransformer.SOURCE_VAR,
+                  fieldName,
+                  propertyName);
+          }
+        });
   }
 
   /**

@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /** Utility methods for use by and with the various model classes. */
 public class ModelUtil {
@@ -104,5 +106,42 @@ public class ModelUtil {
       }
     }
     return combinedRoot;
+  }
+
+  /**
+   * Compute the appropriate {@link TypeName} to use for the given {@code javaType}.
+   *
+   * @param javaType either {@link ColumnBean#javaType} or {@link ColumnBean#javaAccessorType}
+   * @return an {@link Optional} containing an appropriate {@link TypeName} or empty if no mapping
+   *     could be found
+   */
+  public static Optional<TypeName> mapJavaTypeToTypeName(String javaType) {
+    switch (javaType) {
+      case "char":
+        return Optional.of(TypeName.CHAR);
+      case "Character":
+        return Optional.of(ClassName.get(Character.class));
+      case "int":
+        return Optional.of(TypeName.INT);
+      case "Integer":
+        return Optional.of(ClassName.get(Integer.class));
+      case "short":
+        return Optional.of(TypeName.SHORT);
+      case "Short":
+        return Optional.of(ClassName.get(Short.class));
+      case "long":
+        return Optional.of(TypeName.LONG);
+      case "Long":
+        return Optional.of(ClassName.get(Long.class));
+      case "String":
+        return Optional.of(ClassName.get(String.class));
+      default:
+        try {
+          return Optional.of(ClassName.get(Class.forName(javaType)));
+        } catch (ClassNotFoundException ex) {
+          // just report that no valid mapping was found
+          return Optional.empty();
+        }
+    }
   }
 }

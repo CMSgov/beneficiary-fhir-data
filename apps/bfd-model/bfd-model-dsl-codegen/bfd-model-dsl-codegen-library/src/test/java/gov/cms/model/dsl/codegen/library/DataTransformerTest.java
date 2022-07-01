@@ -523,4 +523,28 @@ public class DataTransformerTest {
       assertEquals(ex.getErrors(), transformer.getErrors());
     }
   }
+
+  /**
+   * Tests the {@link DataTransformer#copyUIntToShort} and {@link
+   * DataTransformer#copyOptionalUIntToShort} methods.
+   */
+  @Test
+  public void testCopyUIntToShort() {
+    transformer
+        .copyUIntToShort("ok-zero", 0, copied::add)
+        .copyUIntToShort("ok-max", Short.MAX_VALUE, copied::add)
+        .copyUIntToShort("negative", -1, copied::add)
+        .copyUIntToShort("too-large", Short.MAX_VALUE + 1, copied::add)
+        .copyOptionalUIntToShort("opt-present", () -> true, () -> 100, copied::add)
+        .copyOptionalUIntToShort("opt-not-present", () -> false, () -> 250, copied::add)
+        .copyOptionalUIntToShort(
+            "opt-too-large", () -> true, () -> Short.MAX_VALUE + 1, copied::add);
+    assertEquals(ImmutableList.of((short) 0, Short.MAX_VALUE, (short) 100), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("negative", "is signed"),
+            new DataTransformer.ErrorMessage("too-large", "is too large"),
+            new DataTransformer.ErrorMessage("opt-too-large", "is too large")),
+        transformer.getErrors());
+  }
 }
