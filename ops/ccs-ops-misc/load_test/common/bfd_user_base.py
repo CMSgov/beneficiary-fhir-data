@@ -179,8 +179,7 @@ class BFDUserBase(HttpUser):
             # If no URL is found, then this test isn't counted in statistics
 
             # Should we also terminate future tests?
-            worker_num = self.__get_worker_number()
-
+            worker_num = self.environment.runner.client_id
             if self.END_ON_NO_DATA:
                 if worker_num is None:
                     self.logger.error("Ran out of data, stopping test...")
@@ -220,12 +219,4 @@ class BFDUserBase(HttpUser):
         for link in parsed_payload.get("link", {}):
             if "relation" in link and link["relation"] == "next":
                 return link.get("url", None)
-        return None
-
-
-    def __get_worker_number(self):
-        '''Find the number of the Locust worker for this instance.'''
-
-        if 'LOCUST_WORKER_NUM' in os.environ:
-            return str(os.environ['LOCUST_WORKER_NUM'])
         return None
