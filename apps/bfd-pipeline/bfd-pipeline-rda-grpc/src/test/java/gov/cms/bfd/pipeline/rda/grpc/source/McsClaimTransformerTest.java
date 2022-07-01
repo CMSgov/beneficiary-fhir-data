@@ -429,12 +429,11 @@ public class McsClaimTransformerTest {
             RdaMcsClaim::getIdrStatusCode,
             McsStatusCode.STATUS_CODE_DENIED_E,
             "E")
-        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
-            McsClaim.Builder::setIdrStatusCodeUnrecognized, RdaMcsClaim.Fields.idrStatusCode, "ZZZ")
-        .verifyEnumFieldTransformationRejectsSpecificValues(
-            McsClaim.Builder::setIdrStatusCodeEnum,
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrStatusCodeUnrecognized,
+            claim -> String.valueOf(claim.getIdrStatusCode()),
             RdaMcsClaim.Fields.idrStatusCode,
-            McsStatusCode.STATUS_CODE_NOT_USED);
+            1);
   }
 
   @Test
