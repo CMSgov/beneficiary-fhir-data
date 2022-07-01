@@ -155,7 +155,7 @@ class BFDUserBase(HttpUser):
             # If no URL is found, then this test isn't counted in statistics
 
             # Should we also terminate future tests?
-            worker_num = self.environment.runner.client_id
+            worker_num = self.environment.runner.client_id if is_locust_worker(self.environment) else None
             if self.END_ON_NO_DATA:
                 if worker_num is None:
                     self.logger.error("Ran out of data, stopping test...")
