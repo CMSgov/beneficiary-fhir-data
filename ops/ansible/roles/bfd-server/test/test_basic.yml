@@ -18,7 +18,7 @@
         data_server_ssl_client_certificates:
           - alias: client_foo
             certificate: "{{ lookup('file', 'files/client-trusted.cer') }}"
-        data_server_db_url: jdbc:postgresql://db:5432/bfd
+        data_server_db_url: jdbc:postgresql://db:5432/fhirdb
         data_server_ssl_client_certificate_test: files/client-unsecured.pem
         data_server_db_username: bfd
         data_server_db_password: bfd
