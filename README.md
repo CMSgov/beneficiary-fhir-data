@@ -95,7 +95,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     docker run \
       -d \
       --name 'bfd-db' \
-      -e 'POSTGRES_DB=bfd' \
+      -e 'POSTGRES_DB=fhirdb' \
       -e 'POSTGRES_USER=bfd' \
       -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
       -p '5432:5432' \
@@ -120,16 +120,16 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 ### Loading Beneficiary
 1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
     ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify
     ```
     This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with:
     ```
-    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "bene_id" FROM "beneficiaries" LIMIT 1;'
+    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/fhirdb' -c 'SELECT "bene_id" FROM "beneficiaries" LIMIT 1;'
     ```
 1. Run `export BFD_PORT=6500`. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later. This can be set in your shell profile but note that when running the integration tests through maven, the BFD_PORT needs to be unset from the environment.
 1. Now it's time to start the server up. Change to `apps/bfd-server` and run:
     ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
     ```
     After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`
 1. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command:
@@ -139,7 +139,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
 1. Total success (probably)!. You have a working call. To stop the server run this from the `apps/bfd-server` directory:
     ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
     ```
 
 ### Certificates
