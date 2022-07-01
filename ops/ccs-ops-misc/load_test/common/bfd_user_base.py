@@ -11,8 +11,7 @@ import urllib3.exceptions
 from locust import HttpUser, events
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
-from common import data, validation
-from common.custom_args import adjust_locust_run_time, register_custom_args
+from common import custom_args, data, validation
 from common.locust_utils import is_distributed, is_locust_worker
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
@@ -23,11 +22,11 @@ from common.url_path import create_url_path
 
 @events.init_command_line_parser.add_listener
 def _(parser: LocustArgumentParser, **kwargs):
-    register_custom_args(parser)
+    custom_args.register_custom_args(parser)
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs):
-    adjust_locust_run_time(environment)
+    custom_args.adjust_locust_run_time(environment)
     validation.setup_failsafe_event(environment)
     
 @events.quitting.add_listener
