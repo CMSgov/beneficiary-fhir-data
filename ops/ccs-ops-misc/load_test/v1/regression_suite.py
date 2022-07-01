@@ -6,11 +6,13 @@ this test suite, all tests in this suite will be run in parallel, with
 equal weighting being applied to each.
 '''
 
+from locust import task
+from common import validation
 from common.bene_tests import BeneTestUser
 from common.contract_tests import ContractTestUser
 from common.mbi_tests import MBITestUser
-from common.validation import SLA_V1_BASELINE
-from locust import task
+
+validation.set_validation_goal(validation.ValidationGoal.SLA_V1_BASELINE)
 
 class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     '''Regression test suite for V1 BFD Server endpoints.
@@ -20,11 +22,7 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     this test suite, all tests in this suite will be run in parallel, with
     equal weighting being applied to each.
     '''
-
-    # The goals against which to measure these results. Note that they also include the Failsafe
-    # cutoff, which will default to the V2 cutoff time if not set.
-    VALIDATION_GOALS = SLA_V1_BASELINE
-
+    
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
 

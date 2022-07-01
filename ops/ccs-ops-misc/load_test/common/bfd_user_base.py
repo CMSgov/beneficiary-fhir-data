@@ -28,6 +28,7 @@ def _(parser: LocustArgumentParser, **kwargs):
 @events.init.add_listener
 def _(environment: Environment, **kwargs):
     adjust_locust_run_time(environment)
+    validation.setup_failsafe_event(environment)
     
 @events.quitting.add_listener
 def _(environment: Environment, **kwargs) -> None:
@@ -37,6 +38,7 @@ def _(environment: Environment, **kwargs) -> None:
         environment (Environment): The current Locust environment
     """
     logger = logging.getLogger()
+    validation.check_sla_validation(environment)
     
     # Check to make sure the stats_config argument was set, and also make sure
     # that Locust workers do not attempt to store or compare stats if Locust
@@ -96,10 +98,6 @@ class BFDUserBase(HttpUser):
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
 
-    # The goals against which to measure these results. Note that they also include the Failsafe
-    # cutoff, which will default to the V2 cutoff time if not set.
-    VALIDATION_GOALS = None
-
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = True
 
@@ -123,28 +121,6 @@ class BFDUserBase(HttpUser):
 
         self.logger = logging.getLogger()
         self.has_reported_no_data = []
-
-
-    def on_start(self):
-        '''Run once when a BFDUser is initialized by Locust.
-        '''
-
-        # Is this either the first worker or the only worker?
-        worker_number = self.__get_worker_number()
-        if worker_number is None or str(worker_number) == '0':
-            # Adds a global failsafe check to ensure that if this test overwhelms
-            # the database, we bail out and stop hitting the server
-            if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
-                validation.setup_failsafe_event(self.environment, self.VALIDATION_GOALS)
-            else:
-                validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
-
-    def on_stop(self):
-        '''Run tear-down tasks after the tests have completed.'''
-
-        # Report the various response time percentiles against the SLA
-        if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
-            validation.check_sla_validation(self.environment, self.VALIDATION_GOALS)
 
     def get_by_url(self, url: str, headers: Dict[str, str] = None,
             name: str = ''):
