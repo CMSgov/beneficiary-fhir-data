@@ -18,7 +18,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.placeholders.logic.hsql-only=-- >> /flyway/conf/flyway.conf \
     && echo flyway.table=schema_version >> /flyway/conf/flyway.conf \
     && echo flyway.schemas=public >> /flyway/conf/flyway.conf \
-    && echo flyway.url=jdbc:postgresql://db:5432/bfd >> /flyway/conf/flyway.conf \
+    && echo flyway.url=jdbc:postgresql://db:5432/fhirdb >> /flyway/conf/flyway.conf \
     && echo flyway.password=bfd >> /flyway/conf/flyway.conf \
     && echo flyway.user=bfd >> /flyway/conf/flyway.conf
 
