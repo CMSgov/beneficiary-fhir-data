@@ -1,7 +1,21 @@
+from typing import List
+from locust import events
+from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.url_path import create_url_path
 
+table_sample_pac_mbis = True
+master_pac_mbis: List[str] = []
+
+@events.init.add_listener
+def _(environment: Environment, **kwargs):
+    global master_pac_mbis
+    master_pac_mbis = data.load_from_env(
+        environment,
+        db.get_pac_hashed_mbis,
+        use_table_sample=table_sample_pac_mbis
+    )
 
 class PACTestUser(BFDUserBase):
     SERVICE_DATE = {'service-date': 'gt2020-01-05'}
@@ -11,20 +25,8 @@ class PACTestUser(BFDUserBase):
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
 
-    # Should we use the Table Sample feature of Postgres to query only against a portion of the
-    # table?
-    USE_TABLE_SAMPLE = False
-
     def _hashed_mbis(self):
-        if not hasattr(self, '_cached_hashed_mbis'):
-            self._cached_hashed_mbis = data.load_all(
-                self.environment,
-                self.database_uri,
-                db.get_pac_hashed_mbis,
-                use_table_sample=self.USE_TABLE_SAMPLE,
-                table_sample_percent=self.table_sample_percent
-            )
-        return self._cached_hashed_mbis
+        return master_pac_mbis
 
     # Helper
 

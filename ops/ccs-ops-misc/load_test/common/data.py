@@ -1,19 +1,40 @@
 '''Set up data for use in the tests.'''
 
+import logging
 from typing import Callable, List
 import datetime
-import os
 from locust.env import Environment
-from common.locust_utils import is_locust_master, is_locust_worker
+from common.locust_utils import is_distributed, is_locust_master
 
+def load_from_env(locust_env: Environment, load_function: Callable, *args, use_table_sample: bool = False) -> List:
+    """Loads data from the database given the database load function provided. Gets the database URI and the
+    table sampling percent from Locust's parsed options. Returns an empty dataset if the current runner is the master
+    runner, or if database URI and/or table sample percent are undefined
 
-def load_all(locust_env: Environment, database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
-    '''Loads all of the data from the database, using the database connection provided.'''
+    Args:
+        locust_env (Environment): The current Locust environment
+        load_function (Callable): A database load function that will query the database to get the desired data
+        use_table_sample (bool, optional): Whether or not to use Postgres's table sampling to randomly sample a given table's data. Defaults to False.
 
-    if is_locust_master(locust_env):
-        ## Don't bother loading data for the master thread, it doesn't run a test
+    Returns:
+        List: A list of data returned by the load function
+    """
+    if is_distributed(locust_env) and is_locust_master(locust_env):
+        # Don't bother loading data for the master runner, it doesn't run a test
         return []
+    
+    config = vars(locust_env.parsed_options)
+    try:
+        database_uri = config['database_uri']
+        table_sample_percent = config['table_sample_percent']
+    except KeyError as e:
+        logging.getLogger().error('"database_uri" and/or "table_sample_percent" was not defined: %s', str(e))
+        return []
+    
+    return load_from_uri(database_uri, load_function, args, use_table_sample=use_table_sample, table_sample_percent=table_sample_percent)
 
+def load_from_uri(database_uri: str, load_function: Callable, *args, use_table_sample: bool = False, table_sample_percent: float = 0.25) -> List:
+    '''Loads all of the data from the database, using the database connection provided.'''
     print('Collecting test data...')
     if use_table_sample:
         print(f"Table Sampling at: {table_sample_percent}")
@@ -23,34 +44,6 @@ def load_all(locust_env: Environment, database_uri: str, load_function: Callable
 
     print(f'Loaded {len(results)} results from the database')
     return results
-
-
-def load_data_segment(locust_env: Environment, load_function: Callable, *args) -> List:
-    '''Loads a segment of data and either returns all the data in a list if not a distributed test,
-    or takes a percentage of the data to distribute to the current worker thread.
-
-    The percentage of the data in distributed mode depends on the total number of workers and the
-    index of the data is dependant on which worker index calls this method.
-    '''
-
-    if is_locust_master(locust_env):
-        ## Don't bother loading data for the master thread, it doenst run a test
-        return []
-
-    if is_locust_worker(locust_env):
-        worker_number = str(os.environ['LOCUST_WORKER_NUM'])
-        num_workers = os.environ['LOCUST_NUM_WORKERS']
-        print(f"Worker {worker_number} loading segmented data...")
-        full_data_list = load_all(locust_env, load_function, *args)
-        data_per_user = len(full_data_list) // int(num_workers)
-        start_index = int(worker_number) * data_per_user
-        end_index = start_index + data_per_user - 1
-        print(f"Worker {worker_number} using data from indexes {start_index} to {end_index}")
-        return full_data_list[start_index:end_index]
-
-    # This is neither master nor worker, so we must not be using multi-threading.
-    return load_all(locust_env, load_function, *args)
-
 
 def get_last_updated() -> str:
     '''Gets a sample last_updated field for testing. Uses a date two weeks before when the script

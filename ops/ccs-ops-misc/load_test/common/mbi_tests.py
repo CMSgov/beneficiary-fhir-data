@@ -1,11 +1,24 @@
 '''Locust tests that require a pool of MBIs.'''
 
 import random
-
+from typing import List
+from locust import events
+from locust.env import Environment
 from common.bfd_user_base import BFDUserBase
 from common.url_path import create_url_path
 from common import data, db
 
+table_sample_hashed_mbis = True
+master_hashed_mbis: List[str] = []
+
+@events.init.add_listener
+def _(environment: Environment, **kwargs):
+    global master_hashed_mbis
+    master_hashed_mbis = data.load_from_env(
+        environment,
+        db.get_hashed_mbis,
+        use_table_sample=table_sample_hashed_mbis
+    )
 
 class MBITestUser(BFDUserBase):
     '''Locust tests that require a pool of hashed MBIs.'''
@@ -13,20 +26,9 @@ class MBITestUser(BFDUserBase):
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
 
-    # Should we use the Table Sample feature of Postgres to query only against a portion of the
-    # table?
-    USE_TABLE_SAMPLE = True
-
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.hashed_mbis = data.load_all(
-            self.environment,
-            self.database_uri,
-            db.get_hashed_mbis,
-            use_table_sample=self.USE_TABLE_SAMPLE,
-            table_sample_percent=self.table_sample_percent
-        ).copy()
+        self.hashed_mbis = master_hashed_mbis.copy()
         random.shuffle(self.hashed_mbis)
 
 
