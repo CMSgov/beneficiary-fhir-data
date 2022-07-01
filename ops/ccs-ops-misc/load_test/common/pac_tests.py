@@ -5,7 +5,7 @@ from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.url_path import create_url_path
 
-table_sample_pac_mbis = True
+table_sample_pac_mbis = False
 master_pac_mbis: List[str] = []
 
 @events.init.add_listener
