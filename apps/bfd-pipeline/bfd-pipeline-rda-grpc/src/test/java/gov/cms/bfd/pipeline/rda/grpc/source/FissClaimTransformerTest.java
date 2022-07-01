@@ -563,8 +563,11 @@ public class FissClaimTransformerTest {
             claim -> String.valueOf(claim.getCurrStatus()),
             FissClaimStatus.CLAIM_STATUS_MOVE,
             "M")
-        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
-            FissClaim.Builder::setCurrStatusUnrecognized, RdaFissClaim.Fields.currStatus, "ZZZ");
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setCurrStatusUnrecognized,
+            claim -> String.valueOf(claim.getCurrStatus()),
+            RdaFissClaim.Fields.currStatus,
+            1);
   }
 
   @Test
