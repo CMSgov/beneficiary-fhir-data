@@ -221,11 +221,12 @@ public class DataTransformer {
    * @param copier The consumer to receive the value.
    * @return this
    */
-  public DataTransformer copyUIntToShort(String fieldName, IntSupplier value, IntConsumer copier) {
+  public DataTransformer copyUIntToShort(
+      String fieldName, IntSupplier value, Consumer<Short> copier) {
     int v = value.getAsInt();
 
     if (validateUnsigned(fieldName, v) && validateShort(fieldName, v)) {
-      copier.accept(v);
+      copier.accept((short) v);
     }
 
     return this;

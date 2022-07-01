@@ -106,7 +106,7 @@ docker run \
      postgres:12`
 
 6. Go to `/apps/bfd-pipeline/bfd-pipeline-ccw-rif` in a new terminal window and run: 
-`mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSyntheaData clean install`
+`mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSyntheaData clean install`
 
 7. If the data loads without error, you must sanity check to see if any collisions are possible with previously generated data locally, which requires loading both the new and old datasets into the local DB. Download the most recent synthea RIF files located in S3, and move them into `apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea`. Make sure to remove the database docker container, so there is no hold over data by running:
 
