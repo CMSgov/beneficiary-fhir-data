@@ -11,7 +11,8 @@ import urllib3.exceptions
 from locust import HttpUser, events
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
-from common import custom_args, data, validation
+from common import data, validation
+from common.custom_args import adjust_locust_run_time, register_custom_args
 from common.locust_utils import is_distributed, is_locust_worker
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
@@ -22,12 +23,11 @@ from common.url_path import create_url_path
 
 @events.init_command_line_parser.add_listener
 def _(parser: LocustArgumentParser, **kwargs):
-    custom_args.register_custom_args(parser)
+    register_custom_args(parser)
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs):
-    custom_args.adjust_locust_run_time(environment)
-    validation.setup_failsafe_event(environment)
+    adjust_locust_run_time(environment)
     
 @events.quitting.add_listener
 def _(environment: Environment, **kwargs) -> None:
@@ -37,7 +37,6 @@ def _(environment: Environment, **kwargs) -> None:
         environment (Environment): The current Locust environment
     """
     logger = logging.getLogger()
-    validation.check_sla_validation(environment)
     
     # Check to make sure the stats_config argument was set, and also make sure
     # that Locust workers do not attempt to store or compare stats if Locust
@@ -255,62 +254,3 @@ class BFDUserBase(HttpUser):
         if 'LOCUST_WORKER_NUM' in os.environ:
             return str(os.environ['LOCUST_WORKER_NUM'])
         return None
-
-@events.quitting.add_listener
-def one_time_teardown(environment: Environment, **kwargs) -> None:
-    """Run one-time teardown tasks after the tests have completed
-
-    Args:
-        environment (Environment): The current Locust environment
-    """
-
-    logger = logging.getLogger()
-    
-    # Check to make sure the stats_config argument was set, and also make sure
-    # that Locust workers do not attempt to store or compare stats if Locust
-    # is running distributed
-    stats_config_str = environment.parsed_options.stats_config
-    if not stats_config_str or (is_distributed(environment) and is_locust_worker(environment)):
-        return
-    
-    try:
-        stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
-    except ValueError as e:
-        logger.warn('--stats-config was invalid: "%s" -- performance stats will not be stored or compared', e)
-        return
-
-    # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
-    stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
-    stats = stats_collector.collect_stats()
-
-    if stats_config.compare:
-        stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
-        previous_stats = stats_loader.load()
-        if previous_stats:
-            failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
-            if not failed_stats_results:
-                logger.info(
-                    'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
-            else:
-                # If we get here, that means some tasks have stats exceeding the threshold percent
-                # between the previous/average run and the current. Fail the test run, and log the
-                # failing tasks along with their relative stat percents   
-                environment.process_exit_code = 1
-                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
-                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
-        else:
-            logger.warn(
-                'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
-
-    if stats_config.store == StatsStorageType.FILE:
-        logger.info("Writing aggregated performance statistics to file.")
-
-        stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_config.path or '')
-    elif stats_config.store == StatsStorageType.S3:
-        logger.info("Writing aggregated performance statistics to S3.")
-
-        stats_s3_writer = StatsJsonS3Writer(stats)
-        if not stats_config.bucket:
-            raise ValueError('S3 bucket must be provided when writing stats to S3')
-        stats_s3_writer.write(stats_config.bucket)
