@@ -83,16 +83,20 @@
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
 		<metrics.version>4.1.29</metrics.version>
+		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
+		<telemetry-http-okhttp.version>0.13.2</telemetry-http-okhttp.version>
+		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
+		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
-		<jackson.version>2.13.2</jackson.version>
+		<jackson.version>2.13.3</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
 		<newrelicAgent.version>7.5.0</newrelicAgent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<postgres.driver.version>42.3.5</postgres.driver.version>
+		<postgres.driver.version>42.4.0</postgres.driver.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -175,19 +179,19 @@
 			<dependency>
 				<!-- Lock & harmonize the versions of the various Spring Framework modules. 
 					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir-base:pom:5.7.2
-					uses the 5.3.18 version of the Spring Framework. -->
+					uses the 5.3.20 version of the Spring Framework. -->
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>5.3.18</version>
+				<version>5.3.20</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<!-- This is the latest release compatible with the version of Spring 
-					Framework that we're using, per http://docs.spring.io/spring-data/jpa/docs/1.11.4.RELEASE/reference/html/#dependencies.spring-framework. -->
+					Framework that we're using, per https://docs.spring.io/spring-data/jpa/docs/2.7.0/reference/html/#dependencies.spring-framework. -->
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.11.23.RELEASE</version>
+				<version>${spring-data-jpa.version}</version>
 			</dependency>
 
 			<dependency>
@@ -195,7 +199,7 @@
 					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-bom</artifactId>
-				<version>1.11.434</version>
+				<version>${aws-java-sdk-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -317,6 +321,18 @@
 				<artifactId>junit-jupiter-params</artifactId>
 				<version>${junit.version}</version>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.newrelic.telemetry</groupId>
+				<artifactId>dropwizard-metrics-newrelic</artifactId>
+				<version>${dropwizard-metrics-newrelic.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.newrelic.telemetry</groupId>
+				<artifactId>telemetry-http-okhttp</artifactId>
+				<version>${telemetry-http-okhttp.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

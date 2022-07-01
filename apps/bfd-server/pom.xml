@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>5.7.2</hapi-fhir.version>
+		<hapi-fhir.version>6.0.2</hapi-fhir.version>
 		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
 
