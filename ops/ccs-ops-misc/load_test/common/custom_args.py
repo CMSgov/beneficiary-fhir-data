@@ -49,8 +49,11 @@ def register_custom_args(parser: LocustArgumentParser):
     )
 
 
-def adjust_locust_run_time(environment: Environment):
+def adjust_parsed_run_time(environment: Environment):
     logger = logging.getLogger()
+    if not environment.parsed_options:
+        logger.warn('Cannot adjust runtime when running Locust as library')
+        return
 
     # Adjust the runtime to account for spawn rate
     num_users = int(environment.parsed_options.num_users)

@@ -128,12 +128,10 @@ class StatsConfiguration():
             Optional[StatsConfiguration]: A StatsConfiguration instance if "stats_config" is valid, None otherwise
         """
         # Check to make sure that stats_config was passed-in -- if not, return
-        config = vars(parsed_opts)
-        try:
-            stats_config_str = config['stats_config']
-        except KeyError:
+        if not parsed_opts.stats_config:
             return None
         
+        stats_config_str = str(parsed_opts.stats_config)
         try:
             stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
         except ValueError as e:
