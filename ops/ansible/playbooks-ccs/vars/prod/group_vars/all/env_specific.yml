@@ -60,4 +60,4 @@ data_pipeline_rda_job_enabled: true
 # Sets the pipeline manager to ensure the rda job is running every 5 mins
 data_pipeline_rda_job_interval_seconds: 300
 # Sets the job to use 1 thread to load data
-data_pipeline_rda_job_write_threads: 1
+data_pipeline_rda_job_write_threads: 5
