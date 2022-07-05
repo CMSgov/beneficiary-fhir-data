@@ -5,3 +5,6 @@ db_migrator_user: bb-migrator
 db_migrator_tmp_dir: /tmp
 migrator_monitor_enabled: true
 migrator_monitor_heartbeat_interval_seconds: 300
+
+# Making sure that Ansible is using the python3 interpreter
+interpreter_python: /usr/bin/python3

@@ -17,6 +17,8 @@
     - name: Enable java11 repository
       command: amazon-linux-extras enable java-openjdk11
     - name: Install dependencies
+      vars:
+        ansible_python_interpreter: /usr/bin/python # The yum module only works on python2 (ref: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_module.html)  
       yum:
         name:
           - java-11-openjdk-devel

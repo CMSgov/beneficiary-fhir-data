@@ -3,6 +3,8 @@
 # Install Java (JKD and JRE)
 ##
 - name: Install latest version of Java (openjdk-devel)
+  vars:
+    ansible_python_interpreter: /usr/bin/python # The yum module only works on python2 (ref: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_module.html)
   yum:
     name: java-1.8.0-openjdk-devel
     state: latest

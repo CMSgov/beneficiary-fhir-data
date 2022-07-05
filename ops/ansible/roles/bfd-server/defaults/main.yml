@@ -32,3 +32,6 @@ data_server_v2_enabled: false
 
 # Whether or not partially adjudicated claims data resources are enabled.
 pac_resources_enabled: false
+
+# Making sure that Ansible is using the python3 interpreter
+interpreter_python: /usr/bin/python3
