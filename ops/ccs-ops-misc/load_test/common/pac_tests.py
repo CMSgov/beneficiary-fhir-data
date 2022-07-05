@@ -3,6 +3,7 @@ from locust import events
 from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
+from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 
 table_sample_pac_mbis = False
@@ -10,9 +11,13 @@ master_pac_mbis: List[str] = []
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs):
+    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+        # Don't bother loading data for the master runner, it doesn't run a test
+        return
+    
     global master_pac_mbis
-    master_pac_mbis = data.load_from_env(
-        environment,
+    master_pac_mbis = data.load_from_parsed_opts(
+        environment.parsed_options,
         db.get_pac_hashed_mbis,
         use_table_sample=table_sample_pac_mbis
     )

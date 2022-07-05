@@ -10,7 +10,7 @@ from locust import HttpUser, events
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
 from common import custom_args, data, validation
-from common.locust_utils import is_distributed, is_locust_worker
+from common.locust_utils import is_distributed, is_locust_master, is_locust_worker
 from common.stats import stats_compare, stats_writers
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_config import StatsConfiguration
@@ -22,6 +22,9 @@ def _(parser: LocustArgumentParser, **kwargs) -> None:
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs) -> None:
+    if is_distributed(environment) and is_locust_worker(environment):
+        return
+    
     custom_args.adjust_locust_run_time(environment)
     validation.setup_failsafe_event(environment)
     
@@ -32,11 +35,12 @@ def _(environment: Environment, **kwargs) -> None:
     Args:
         environment (Environment): The current Locust environment
     """
+    if is_distributed(environment) and is_locust_worker(environment):
+        return
+    
     validation.check_sla_validation(environment)
 
-    # Check to make sure tha Locust workers do not attempt to store or compare stats if Locust
-    # is running distributed
-    if is_distributed(environment) and is_locust_worker(environment) or not environment.parsed_options:
+    if not environment.parsed_options:
         return
        
     stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)

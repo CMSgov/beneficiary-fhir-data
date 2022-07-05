@@ -1,29 +1,24 @@
 '''Set up data for use in the tests.'''
 
+from argparse import Namespace
 import logging
 from typing import Callable, List
 import datetime
-from locust.env import Environment
-from common.locust_utils import is_distributed, is_locust_master
 
-def load_from_env(locust_env: Environment, load_function: Callable, *args, use_table_sample: bool = False) -> List:
+def load_from_parsed_opts(parsed_opts: Namespace, load_function: Callable, *args, use_table_sample: bool = False) -> List:
     """Loads data from the database given the database load function provided. Gets the database URI and the
-    table sampling percent from Locust's parsed options. Returns an empty dataset if the current runner is the master
-    runner, or if database URI and/or table sample percent are undefined
+    table sampling percent from the given parsed options. Returns an empty list if database URI and/or table sample percent are not
+    set in the given parsed options
 
     Args:
-        locust_env (Environment): The current Locust environment
+        parsed_opts (Namespace): A collection of parsed options that includes the database URI and table sampling percentage
         load_function (Callable): A database load function that will query the database to get the desired data
         use_table_sample (bool, optional): Whether or not to use Postgres's table sampling to randomly sample a given table's data. Defaults to False.
 
     Returns:
         List: A list of data returned by the load function
     """
-    if is_distributed(locust_env) and is_locust_master(locust_env):
-        # Don't bother loading data for the master runner, it doesn't run a test
-        return []
-    
-    config = vars(locust_env.parsed_options)
+    config = vars(parsed_opts)
     try:
         database_uri = config['database_uri']
         table_sample_percent = config['table_sample_percent']

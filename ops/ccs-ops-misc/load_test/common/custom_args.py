@@ -50,9 +50,6 @@ def register_custom_args(parser: LocustArgumentParser):
 
 
 def adjust_locust_run_time(environment: Environment):
-    if is_distributed(environment) and is_locust_worker(environment):
-        return
-
     logger = logging.getLogger()
 
     # Adjust the runtime to account for spawn rate

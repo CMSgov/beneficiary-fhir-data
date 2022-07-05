@@ -49,9 +49,6 @@ def setup_failsafe_event(environment: Environment) -> None:
     Args:
         environment (Environment): The current Locust environment
     """
-    if is_distributed(environment) and is_locust_worker(environment):
-        return
-    
     logging.getLogger().info("Setting up failsafe event")
     fail_time_ms = _validation_goal.sla_failsafe if _validation_goal else _DEFAULT_SLA_FAILSAFE
     gevent.spawn(_check_global_fail, environment, fail_time_ms)
@@ -60,7 +57,7 @@ def check_sla_validation(environment: Environment) -> None:
     '''Checks the SLA numbers for various percentiles based on the given sla category name. This
     function is ignored unless it is the main test thread or a non-distributed test.
     '''
-    if is_distributed(environment) and is_locust_worker(environment) or not _validation_goal:
+    if not _validation_goal:
         return
     
     logger = logging.getLogger()

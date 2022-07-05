@@ -5,6 +5,7 @@ from typing import List
 from locust import events
 from locust.env import Environment
 from common.bfd_user_base import BFDUserBase
+from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common import data, db
 
@@ -13,9 +14,12 @@ master_bene_ids: List[str] = []
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs):
+    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+        return
+    
     global master_bene_ids
-    master_bene_ids = data.load_from_env(
-        environment,
+    master_bene_ids = data.load_from_parsed_opts(
+        environment.parsed_options,
         db.get_bene_ids,
         use_table_sample=table_sample_bene_ids
     )
