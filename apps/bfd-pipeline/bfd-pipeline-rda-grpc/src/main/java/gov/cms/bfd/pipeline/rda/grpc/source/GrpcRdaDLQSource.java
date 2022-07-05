@@ -30,7 +30,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * General RdaSource implementation that delegates actual service call and result mapping to other
+ * DLQ specific RdaSource implementation that checks for failed messages in the {@link MessageError}
+ * table and re-queries them, then delegates actual service call and result mapping to other
  * objects. This class has no dependency on a particular RPC or data type. It does maintain the
  * ManagedChannel used to communicate with the gRPC service. The constructor creates the channel and
  * the close() method closes the channel.
@@ -47,7 +48,7 @@ public class GrpcRdaDLQSource<TMessage, TClaim> implements RdaSource<TMessage, T
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  private final DQLDao dao;
+  private final DLQDao dao;
   private final BiPredicate<Long, TMessage> sequencePredicate;
   private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
@@ -99,7 +100,7 @@ public class GrpcRdaDLQSource<TMessage, TClaim> implements RdaSource<TMessage, T
       Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType) {
-    this.dao = new DQLDao(Preconditions.checkNotNull(entityManager));
+    this.dao = new DLQDao(Preconditions.checkNotNull(entityManager));
     this.sequencePredicate = sequencePredicate;
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
@@ -109,8 +110,9 @@ public class GrpcRdaDLQSource<TMessage, TClaim> implements RdaSource<TMessage, T
   }
 
   /**
-   * Calls the service through the specific implementation of GrpcStreamCaller provided to our
-   * constructor. Cancels the response stream if reading from the stream is interrupted.
+   * Checks for {@link MessageError}s in the database, then calls the service through the specific
+   * implementation of GrpcStreamCaller provided to our constructor. Cancels the response stream if
+   * reading from the stream is interrupted.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
    * @param sink to receive batches of objects
@@ -282,8 +284,9 @@ public class GrpcRdaDLQSource<TMessage, TClaim> implements RdaSource<TMessage, T
     return processed;
   }
 
+  /** Utility Data Access Object (DAO) class for querying the database. */
   @RequiredArgsConstructor
-  static class DQLDao {
+  private static class DLQDao {
 
     private final EntityManager entityManager;
 

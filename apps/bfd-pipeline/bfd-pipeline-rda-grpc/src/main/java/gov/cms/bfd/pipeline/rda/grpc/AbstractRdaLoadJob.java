@@ -76,8 +76,8 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
-      try (var source = preJobTask.call();
-          var sink = sinkFactory.call()) {
+      try (RdaSource<TResponse, TClaim> source = preJobTask.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
         source.retrieveAndProcessObjects(1, sink);
       }
 
