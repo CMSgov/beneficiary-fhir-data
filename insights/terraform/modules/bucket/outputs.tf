@@ -13,3 +13,7 @@ output "bucket_cmk" {
 output "bucket_cmk_arn" {
   value = aws_kms_key.main.arn
 }
+
+output "iam_full_policy_body" {
+  value = aws_iam_policy.full.policy
+}

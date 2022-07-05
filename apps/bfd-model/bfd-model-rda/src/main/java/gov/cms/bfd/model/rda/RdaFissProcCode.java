@@ -48,6 +48,9 @@ public class RdaFissProcCode {
   @Column(name = "proc_date")
   private LocalDate procDate;
 
+  @Column(name = "rda_position")
+  private short rdaPosition;
+
   @Column(name = "last_updated")
   private Instant lastUpdated;
 

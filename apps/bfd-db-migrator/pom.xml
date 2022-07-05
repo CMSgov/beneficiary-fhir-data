@@ -14,7 +14,7 @@
 	<description>An application integrated with Flyway and Hibernate responsible for executing database migrations and validations against BFD datastores.</description>
 
 	<properties>
-		<flyway.version>7.8.1</flyway.version>
+		<flyway.version>8.5.13</flyway.version>
 		<reflections.version>0.10.2</reflections.version>
 	</properties>
 
@@ -111,12 +111,10 @@
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>0.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>telemetry-http-okhttp</artifactId>
-			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.

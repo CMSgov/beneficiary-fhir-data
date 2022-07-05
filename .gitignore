@@ -1,6 +1,7 @@
 # Ignore hidden files, except for known config files that we want to track.
 # This covers most Eclipse, VSCode, etc.  metadata, which is nice.
 .*
+!.dockerignore
 !.gitignore
 !.gitattributes
 !.github
@@ -14,3 +15,5 @@
 *.ipr
 *.iws
 *.pid
+**/__pycache__
+**/*.stats.json

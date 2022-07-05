@@ -6,34 +6,27 @@
 # Apply the role.
 - hosts: bfd-server
   tasks:
-    - name: Install Prerequisites
-      package:
-        name:
-          - openssl
-        state: present
-      become: true
-
     - name: Apply Role
       import_role:
         name: bfd-server
       vars:
-        data_server_appserver_https_port: "443"
+        # TODO: data_server_appserver_https_port anchor to be used in subsequent verification step, e.g. external curl
+        data_server_appserver_https_port: &data_server_appserver_https_port "7443"
         data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
         data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
-        data_server_appserver_keystore: 'files/server-fake.pem'
-        #data_server_ssl_server_genkeypair_args: '-keyalg RSA -keysize 4096 -dname cn=localhost -validity 3650'
+        data_server_appserver_keystore: files/server-keystore.jks
         data_server_ssl_client_certificates:
           - alias: client_foo
-            certificate: "{{ lookup('file', 'files/client-foo.crt.pem') }}"
-        data_server_db_url: 'jdbc:hsqldb:mem:test'
-        data_server_ssl_client_certificate_test: 'files/client-foo.crt.pem'
-        data_server_db_username: ""
-        data_server_db_password: ""
-        data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m'
+            certificate: "{{ lookup('file', 'files/client-trusted.cer') }}"
+        data_server_db_url: jdbc:postgresql://db:5432/fhirdb
+        data_server_ssl_client_certificate_test: files/client-unsecured.pem
+        data_server_db_username: bfd
+        data_server_db_password: bfd
+        # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
+        data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m -DbfdServer.db.schema.apply=true'
+        data_server_dir: &data_server_dir /usr/local/bfd-server
+        data_server_v2_enabled: true
 
-# Verify that things worked as expected.
-- hosts: bfd-server
-  tasks:
     - name: Ensure Service Is Running
       service:
         name: bfd-server
@@ -42,11 +35,10 @@
       changed_when: false
       become: true
 
-    - name: Check Log Content
-      find:
-        paths: /usr/local/bfd-server/
-        patterns: bluebutton-server-app-log.json
-        contains: Started Jetty. Server available at
-      register: modified
+    - name: Check bfd-server-startup.log Content
+      shell: |
+        grep 'Server started properly' {{ data_server_dir }}/bfd-server-startup.log
+      register: check_result
+      until: "check_result is not failed"
       retries: 20
       delay: 5

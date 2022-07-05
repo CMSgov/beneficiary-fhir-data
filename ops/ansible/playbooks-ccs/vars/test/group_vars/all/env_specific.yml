@@ -57,6 +57,8 @@ data_pipeline_ccw_rif_job_enabled: false # Temporarily disabled as part of BFD-1
 # Enables the RDA API data pipline with a 1 hour retry interval.
 data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 3600
+# Sets the job to use 5 threads to load data
+data_pipeline_rda_job_write_threads: 5
 
 # Only define this variable if you want to force the RDA API pipeline to always request a specific
 # starting sequence number for FISS claims from the RDA API.  Normally this variable should be 

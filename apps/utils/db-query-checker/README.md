@@ -24,7 +24,7 @@ Then, run these commands to build and run the application:
 
 ```shell
 $ cd beneficiary-fhir-data.git/apps/utils/db-query-checker/
-$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
+$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/fhirdb \
     DB_QUERIES_CONNECTIONS=10 \
     DB_QUERIES_OUTPUT=results/db_query_checker_$(date +"%Y-%m-%d-%H-%M").csv \
     cargo run --release
@@ -41,7 +41,7 @@ running the checker with a specified end year plus the default start_year would 
 
 ```shell
 $ cd beneficiary-fhir-data.git/apps/utils/db-query-checker/
-$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
+$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/fhirdb \
     DB_QUERIES_CONNECTIONS=10 \
     DB_QUERIES_END_YEAR=2019 \
     DB_QUERIES_OUTPUT=results/db_query_checker_$(date +"%Y-%m-%d-%H-%M").csv \
@@ -120,7 +120,7 @@ That binary can then be copied to whatever RHEL 7 server you wish to run it from
   and can then executed, as follows:
 
 ```shell
-$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
+$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/fhirdb \
     DB_QUERIES_CONNECTIONS=10 \
     DB_QUERIES_OUTPUT=results/db_query_checker_2021-07-07-T14-31.csv \
     db-query-checker

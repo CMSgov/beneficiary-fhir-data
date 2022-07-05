@@ -54,6 +54,9 @@ public class RdaFissAuditTrail {
   @Column(name = "badt_curr_date")
   private LocalDate badtCurrDate;
 
+  @Column(name = "rda_position")
+  private short rdaPosition;
+
   @Column(name = "last_updated")
   private Instant lastUpdated;
 
