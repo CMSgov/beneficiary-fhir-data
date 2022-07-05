@@ -1,38 +1,11 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
-import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.CarrierClaim;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
-import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.model.rif.DMEClaim;
-import gov.cms.bfd.model.rif.DMEClaimColumn;
-import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.model.rif.HHAClaim;
-import gov.cms.bfd.model.rif.HHAClaimColumn;
-import gov.cms.bfd.model.rif.HHAClaimLine;
-import gov.cms.bfd.model.rif.HospiceClaim;
-import gov.cms.bfd.model.rif.HospiceClaimLine;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.InpatientClaimColumn;
-import gov.cms.bfd.model.rif.InpatientClaimLine;
-import gov.cms.bfd.model.rif.OutpatientClaim;
-import gov.cms.bfd.model.rif.OutpatientClaimColumn;
-import gov.cms.bfd.model.rif.OutpatientClaimLine;
-import gov.cms.bfd.model.rif.SNFClaim;
-import gov.cms.bfd.model.rif.SNFClaimColumn;
-import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -61,7 +34,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,50 +47,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Coverage;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
-import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
-import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -3369,8 +3301,8 @@ public final class TransformerUtils {
     return bundle;
   }
 
-  public static void logBeneIdToMdc(Collection<String> beneIds) {
-    if (!beneIds.isEmpty()) {
+  public static void logBeneIdToMdc(Long ... beneIds) {
+    if (beneIds.length != 0) {
       MDC.put("bene_id", String.join(", ", beneIds));
     }
   }
