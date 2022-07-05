@@ -95,33 +95,40 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   @Read(version = false)
   @Trace
   public Coverage read(@IdParam IdType coverageId) {
-    if (coverageId == null) throw new IllegalArgumentException();
-    if (coverageId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (coverageId == null) {
+      throw new IllegalArgumentException();
+    }
+    if (coverageId.getVersionIdPartAsLong() != null) {
+      throw new IllegalArgumentException();
+    }
 
     String coverageIdText = coverageId.getIdPart();
-    if (coverageIdText == null || coverageIdText.trim().isEmpty())
+    if (coverageIdText == null || coverageIdText.trim().isEmpty()) {
       throw new IllegalArgumentException();
+    }
 
     Operation operation = new Operation(Operation.Endpoint.V2_COVERAGE);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    if (!coverageIdMatcher.matches())
+    if (!coverageIdMatcher.matches()) {
       throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+    }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
         MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
-    if (!coverageIdSegment.isPresent()) throw new ResourceNotFoundException(coverageId);
-    String coverageIdBeneficiaryIdText = coverageIdMatcher.group(2);
-
+    if (!coverageIdSegment.isPresent()) {
+      throw new ResourceNotFoundException(coverageId);
+    }
+    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
     Beneficiary beneficiaryEntity;
     try {
-      beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
+      beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
-          new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
+          new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
     Coverage coverage =
@@ -162,8 +169,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
+    Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
     try {
-      Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart(), lastUpdated);
+      Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = CoverageTransformerV2.transform(metricRegistry, beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
@@ -179,7 +187,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(beneficiary.getIdPart());
+    TransformerUtilsV2.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtilsV2.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
@@ -194,7 +202,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    *     Beneficiary} can be found in the database.
    */
   @Trace
-  private Beneficiary findBeneficiaryById(String beneficiaryId, DateRangeParam lastUpdatedRange)
+  private Beneficiary findBeneficiaryById(Long beneficiaryId, DateRangeParam lastUpdatedRange)
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdatedRange)) {
