@@ -2,9 +2,9 @@ package gov.cms.bfd.model.rif;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.*;
 
 /** JPA class for the loaded_batches table. */
@@ -64,7 +64,7 @@ public class LoadedBatch {
    * @param created batch creation date
    */
   public LoadedBatch(
-      long loadedBatchId, long loadedFileId, List<String> beneficiaries, Instant created) {
+      long loadedBatchId, long loadedFileId, List<Long> beneficiaries, Instant created) {
     this();
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
@@ -149,7 +149,7 @@ public class LoadedBatch {
    *
    * @param beneficiaries list to convert
    */
-  public void setBeneficiaries(List<String> beneficiaries) {
+  public void setBeneficiaries(List<Long> beneficiaries) {
     this.beneficiaries = convertToString(beneficiaries);
   }
 
@@ -158,7 +158,7 @@ public class LoadedBatch {
    *
    * @return beneficiaries as list
    */
-  public List<String> getBeneficiariesAsList() {
+  public List<Long> getBeneficiariesAsList() {
     return convertToList(this.beneficiaries);
   }
 
@@ -196,10 +196,11 @@ public class LoadedBatch {
    * @param list the list to convert
    * @return the string containing the values of the string list delimited by {@link #SEPARATOR}
    */
-  private static String convertToString(List<String> list) {
-    return (list == null || list.isEmpty())
-        ? ""
-        : list.stream().collect(Collectors.joining(SEPARATOR));
+  private static String convertToString(List<Long> list) {
+    if (list == null || list.isEmpty()) {
+      return "";
+    }
+    return list.stream().map(String::valueOf).collect(Collectors.joining(SEPARATOR));
   }
 
   /**
@@ -208,9 +209,12 @@ public class LoadedBatch {
    * @param commaSeparated the {@link #SEPARATOR} separated string
    * @return the list of string values
    */
-  private static List<String> convertToList(String commaSeparated) {
-    return (commaSeparated == null || commaSeparated.isEmpty())
-        ? new ArrayList<>()
-        : Arrays.asList(commaSeparated.split(SEPARATOR, -1));
+  private static List<Long> convertToList(String commaSeparated) {
+    if (commaSeparated == null || commaSeparated.isEmpty()) {
+      return new ArrayList<Long>();
+    }
+    return Stream.of(commaSeparated.split(SEPARATOR))
+        .map(Long::parseLong)
+        .collect(Collectors.toList());
   }
 }
