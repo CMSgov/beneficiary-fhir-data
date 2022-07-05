@@ -72,7 +72,6 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>4.1.1</version>
 		</dependency>
 		<dependency>
 			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
