@@ -1,5 +1,7 @@
+from argparse import Namespace
 import dataclasses
 from enum import Enum
+import logging
 import re
 from dataclasses import dataclass
 from typing import Optional, Type, TypeVar
@@ -116,6 +118,30 @@ class StatsConfiguration():
         return cls(store=storage_type, env=stats_environment, store_tag=storage_tag,
                    path=config_dict.get('path') or './', bucket=config_dict.get('bucket'),
                    compare=compare_type, comp_tag=comparison_tag, athena_tbl=config_dict.get('athena_tbl'))
+        
+    @classmethod
+    def from_parsed_opts(cls, parsed_opts: Namespace) -> Optional['StatsConfiguration']:
+        """Constructs an instance of StatsConfiguration from a parsed options Namespace, specifically
+        from a "stats_config" option. This will typically be the Locust Environment.parsed_options Namespace.
+
+        Returns:
+            Optional[StatsConfiguration]: A StatsConfiguration instance if "stats_config" is valid, None otherwise
+        """
+        # Check to make sure that stats_config was passed-in -- if not, return
+        config = vars(parsed_opts)
+        try:
+            stats_config_str = config['stats_config']
+        except KeyError:
+            return None
+        
+        try:
+            stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
+        except ValueError as e:
+            logger = logging.getLogger()
+            logger.warn('--stats-config was invalid: "%s"', e)
+            return None
+        
+        return stats_config
 
     @staticmethod
     def __enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:

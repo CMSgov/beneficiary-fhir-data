@@ -34,7 +34,12 @@ def _(environment: Environment, **kwargs) -> None:
     """
     validation.check_sla_validation(environment)
 
-    stats_config = _get_stats_config_from_opts(environment)
+    # Check to make sure tha Locust workers do not attempt to store or compare stats if Locust
+    # is running distributed
+    if is_distributed(environment) and is_locust_worker(environment) or not environment.parsed_options:
+        return
+       
+    stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
     if stats_config:
         # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
         stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
@@ -42,29 +47,6 @@ def _(environment: Environment, **kwargs) -> None:
 
         stats_compare.do_stats_comparison(environment, stats_config, stats)
         stats_writers.write_stats(stats_config, stats)
-    
-def _get_stats_config_from_opts(environment: Environment) -> Optional[StatsConfiguration]:
-    logger = logging.getLogger()
-    
-    # Check to make sure tha Locust workers do not attempt to store or compare stats if Locust
-    # is running distributed
-    if is_distributed(environment) and is_locust_worker(environment):
-        return
-    
-    # Check to make sure that stats_config was passed-in -- if not, return
-    config = vars(environment.parsed_options)
-    try:
-        stats_config_str = config['stats_config']
-    except KeyError:
-        return
-    
-    try:
-        stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
-    except ValueError as e:
-        logger.warn('--stats-config was invalid: "%s" -- performance stats will not be stored or compared', e)
-        return
-    
-    return stats_config
 
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
