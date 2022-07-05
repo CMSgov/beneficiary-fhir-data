@@ -83,14 +83,14 @@ Automating the generation and loading of Synthea data will remove a lot of error
 
   - The separate RIF files associated with future claim data for the given release will be uploaded to a designated folder in S3 for staging until loading in the future. Updates to the pipeline application will be made to scan for these folders and trigger an incoming load job each weekend, for the claims that have "matured" that week (similar to how new claims are loaded each week in `prod`).
 
-Additional testing - As of 04/21/2022, there is a plan in place to remove 6 million de-duped non-synthetic benes, along with ~10-15 3 digit benes that were used for some other testing in the past. The cleanup will be removing the 6 million non-negative non-synthetic benes, along with the 3 digit benes, but will be leaving the existing 50k Synthea benes. Claim data from this cleanup is largely responsible for the certain parameter collisions that have taken place in the past, when loading new Synthea data. Beneficiary id however will still have potential for collision, as most of the data being removed has non-negative beneficiary ids. Outside of setting beneficiary id ranges, once this data is permenantly removed, it will likely take many years for there to be enough data to cause overlap. The amount and queries and checks in the script that automates the Synthea test plan will not have to be as thorough. 
+Additional testing - As of 07/05/2022, 6 million de-duped non-synthetic benes, along with ~10-15 3 digit benes that were used for some other testing in the past have been removed. The cleanup removed the 6 million non-negative non-synthetic benes, along with the 3 digit benes, and left the existing 50k Synthea benes. Claim data from this cleanup was largely responsible for the certain parameter collisions that have taken place in the past, when loading new Synthea data. There's also ongoing efforts to clean up other data ranges to avoid all future collisions, with properties such as claim group id. Beneficiary id, claim group id, and other properties will still have potential for collision, as most of the data that remains will have distinct Synthea characteristics i.e. negative beneficiary ids. With these cleanups in place, it will likely take many years for there to be enough data to cause overlap. The amount and queries and checks in the script that automates the Synthea test plan will not have to be as thorough. 
 
 ### Large Synthetic Data Generation
   - Each PI (Program Increment), approximately every 8 weeks, 10 - 60 million Synthea beneficiaries will be generated and available for on-demand performance and load testing on TEST and PROD SBX databases. The number of beneficiaries in the dataset size is meant to reflect the size and shape of production. The process will be similar to that of automated recurring generation, however the memory and computational power of the AWS instance will be larger for time and cost effectiveness. 
   
   - Using a m5a.24xlarge EC2 instance, it took 6 hours to generate 1 million synthetic beneficiaries. If one extrapolates from this benchmark, it would take 60 hours or a little under 3 days to generate 10 million, and 360 hours, or 15 days to generate 60 million beneficiaries.
 
-  - A single reusable instance will be used. 
+  - A new instance will be spun up with Terraform and Jenkins to avoid introducing security vulnerbilities and patching with a reusuable instance. 
 
 ### Required BFD Application Changes
 
@@ -101,7 +101,7 @@ Additional testing - As of 04/21/2022, there is a plan in place to remove 6 mill
 
 Automated Generation & Load Plan:
 
-On a quarterly basis a cron job within Jenkins will be set up to start up and SSH into a provisioned AWS EC2 instance that will be turned off when not used, to run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
+On a quarterly basis a cron job within Jenkins will be set up to spin up and SSH into a provisioned AWS EC2 instance, and run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
   - Run currently manual steps in the `Synthea Test Plan` such as accessing and comparing the latest Synthea end-properties file, running queries in PROD SBX to determine database ranges for beneficiary and claim properities, and ensuring the next batch of data will not overlap with existing data ranges.
   - Generate batch containing both synthetic historical and future data
   - Load into AWS S3 for ingestion in TEST, PROD SBX, and PROD environments.
@@ -111,7 +111,7 @@ For future claims and new Synthea data to be ingested, the manifest.xml file wil
 Large Synthetic Data Generation:
   - Every PI, a m5a.24xlarge, or more powerful instance will be spun up to generate 10 - 60 million beneficiaries. 
   - In order to distiguish load test data when stored in TEST or PROD SBX, the beneficiary ID range will start 1 million less than the smallest released Synthea beneficary ID 
-  - After the load tests are complete, and data is reported, for beneficiary and claim data to be re-generated with future versions of Synthea, there needs to be a tool for deleting this data that generates and executes DELETE and SELECT statements in the database environments. This tool will take the upper and lower bounds of the benficiary, claim, claim group, and PDE ID ranges found in the RIF files that were loaded as an input. To ensure the data is properly deleted, SELECT statements with the ranges used to delete the data will be run, and the final output of the tool will be the counts of beneficiary and various claim tables. The counts in the output should be zero to indicate the data cannot be found.
+  - After the load tests are complete, and data is reported, the data will persist in the database. If at some point Synthea's codebase involves major changes to beneficiary and claim data properties, this data will need be deleted and re-generated the newer version of Synthea. There needs to be a tool for deleting this data that generates and executes DELETE and SELECT statements in the database environments. This tool will take the upper and lower bounds of the benficiary, claim, claim group, and PDE ID ranges found in the RIF files that were loaded as an input. To ensure the data is properly deleted, SELECT statements with the ranges used to delete the data will be run, and the final output of the tool will be the counts of beneficiary and various claim tables. The counts in the output should be zero to indicate the data cannot be found.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
@@ -124,7 +124,7 @@ Large Synthetic Data Generation:
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
-- The need for regular TEST, PROD SBX, and PROD backups will be imperative in case issues arise with loading and removing data to prevent overlap.
+- The need for regular TEST, PROD SBX, and PROD backups will be imperative in case issues arise with loading and removing data to prevent overlap, and when running in idempotent mode with the pipeline does not work.
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
