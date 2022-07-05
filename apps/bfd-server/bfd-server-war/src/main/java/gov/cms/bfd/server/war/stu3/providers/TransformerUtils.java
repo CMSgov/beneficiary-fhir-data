@@ -3301,7 +3301,7 @@ public final class TransformerUtils {
     return bundle;
   }
 
-  public static void logBeneIdToMdc(Long ... beneIds) {
+  public static void logBeneIdToMdc(Long... beneIds) {
     if (beneIds.length != 0) {
       MDC.put("bene_id", String.join(", ", beneIds));
     }
