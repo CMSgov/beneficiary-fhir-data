@@ -47,15 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -1539,7 +1531,7 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    Set<String> beneIds = new HashSet<String>();
+    List<Long> beneIds = new ArrayList<>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
@@ -1551,13 +1543,13 @@ public final class TransformerUtilsV2 {
             && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
           String reference = eob.getPatient().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
+            beneIds.add(Long.parseLong(reference));
           }
         }
       } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(patient.getId());
+          beneIds.add(Long.parseLong(patient.getId()));
         }
 
       } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
@@ -1567,25 +1559,27 @@ public final class TransformerUtilsV2 {
             && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
           String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
+            beneIds.add(Long.parseLong(reference));
           }
         }
       }
     }
 
-    logBeneIdToMdc(beneIds);
+    logBeneIdToMdc(beneIds.toArray(new Long[0]));
 
     return bundle;
   }
 
   /**
-   * Output beneficiary ID to the MDC logging
+   * Output list of benefificiary IDs to MDC logging
    *
-   * @param beneId the {@link Long} beneficiary ID to log
+   * @param beneIds the {@link Long} of beneficiary IDs top log
    */
   public static void logBeneIdToMdc(Long... beneIds) {
     if (beneIds.length > 0) {
-      MDC.put("bene_id", String.join(", ", beneIds));
+      String beneIDStream =
+          Arrays.stream(beneIds).map(String::valueOf).collect(Collectors.joining(", "));
+      MDC.put("bene_id", beneIDStream);
     }
   }
 

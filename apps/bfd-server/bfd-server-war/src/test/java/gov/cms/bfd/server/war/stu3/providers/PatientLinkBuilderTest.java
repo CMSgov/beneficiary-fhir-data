@@ -105,7 +105,7 @@ public class PatientLinkBuilderTest {
 
     Bundle bundle = new Bundle();
     TransformerUtils.addResourcesToBundle(
-        bundle, Collections.singletonList(new Patient().setId("Id")));
+        bundle, Collections.singletonList(new Patient().setId("567834")));
     assertTrue(bundle.getLink().isEmpty());
     paging.addLinks(bundle);
     assertNotNull(bundle.getLink(Constants.LINK_SELF));
@@ -118,7 +118,7 @@ public class PatientLinkBuilderTest {
     bundle = new Bundle();
     TransformerUtils.addResourcesToBundle(
         bundle,
-        Collections.singletonList(new Coverage().setBeneficiary(new Reference("Patient/Id"))));
+        Collections.singletonList(new Coverage().setBeneficiary(new Reference("Patient/567834"))));
     assertTrue(bundle.getLink().isEmpty());
     paging.addLinks(bundle);
     assertNotNull(bundle.getLink(Constants.LINK_SELF));
@@ -132,7 +132,7 @@ public class PatientLinkBuilderTest {
     TransformerUtils.addResourcesToBundle(
         bundle,
         Collections.singletonList(
-            new ExplanationOfBenefit().setPatient(new Reference("Patient/Id"))));
+            new ExplanationOfBenefit().setPatient(new Reference("Patient/567834"))));
     assertTrue(bundle.getLink().isEmpty());
     paging.addLinks(bundle);
     assertNotNull(bundle.getLink(Constants.LINK_SELF));
