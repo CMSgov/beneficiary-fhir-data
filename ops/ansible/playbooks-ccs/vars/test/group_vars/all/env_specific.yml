@@ -73,4 +73,3 @@ data_pipeline_rda_job_starting_fiss_seq_num: 0
 # sequence number in the database.
 # In TEST this is being forced to zero so we can evaluate pipeline ingestion rate.
 data_pipeline_rda_job_starting_mcs_seq_num: 0
-
