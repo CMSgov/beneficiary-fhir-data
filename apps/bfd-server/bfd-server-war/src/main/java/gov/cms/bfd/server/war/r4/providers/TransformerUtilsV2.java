@@ -1531,7 +1531,7 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    List<Long> beneIds = new ArrayList<>();
+    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
@@ -1543,13 +1543,13 @@ public final class TransformerUtilsV2 {
             && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
           String reference = eob.getPatient().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(Long.parseLong(reference));
+            beneIds.add(reference);
           }
         }
       } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(Long.parseLong(patient.getId()));
+          beneIds.add(patient.getId());
         }
 
       } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
@@ -1559,13 +1559,13 @@ public final class TransformerUtilsV2 {
             && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
           String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(Long.parseLong(reference));
+            beneIds.add(reference);
           }
         }
       }
     }
 
-    logBeneIdToMdc(beneIds.toArray(new Long[0]));
+    logBeneIdToMdc(beneIds.stream().map(Long::valueOf).toArray(Long[]::new));
 
     return bundle;
   }
@@ -1577,9 +1577,9 @@ public final class TransformerUtilsV2 {
    */
   public static void logBeneIdToMdc(Long... beneIds) {
     if (beneIds.length > 0) {
-      String beneIDStream =
+      String beneIdEntry =
           Arrays.stream(beneIds).map(String::valueOf).collect(Collectors.joining(", "));
-      MDC.put("bene_id", beneIDStream);
+      MDC.put("bene_id", beneIdEntry);
     }
   }
 
