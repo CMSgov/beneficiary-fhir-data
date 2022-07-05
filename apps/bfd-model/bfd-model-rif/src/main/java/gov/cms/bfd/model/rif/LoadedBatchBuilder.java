@@ -7,7 +7,7 @@ import java.util.List;
 /** Class to build a LoadedBatch. Thread safe. */
 public class LoadedBatchBuilder {
   /** The beneficiaries in this batch. */
-  private final List<String> beneficiaries;
+  private final List<Long> beneficiaries;
   /** The loaded file's identifier. */
   private final long loadedFileId;
   /** The batch creation timestamp. */
@@ -34,7 +34,7 @@ public class LoadedBatchBuilder {
     if (beneficiaryId == null) {
       throw new IllegalArgumentException("Null or empty beneficiary");
     }
-    beneficiaries.add(beneficiaryId.toString());
+    beneficiaries.add(beneficiaryId);
   }
 
   /**

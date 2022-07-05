@@ -3,6 +3,9 @@ ARG BASE_ANSIBLE_TAG=master
 FROM ghcr.io/cmsgov/bfd-ansible:$BASE_ANSIBLE_TAG
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
+# flyway migrations for test harness setup
+COPY bfd-model/bfd-model-rif/src/main/resources/db/migration /flyway/sql
+
 # bfd-server assets
 COPY bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT.zip /.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip
 COPY bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war /.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war
