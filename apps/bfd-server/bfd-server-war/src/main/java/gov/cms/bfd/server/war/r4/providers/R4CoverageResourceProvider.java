@@ -201,7 +201,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   }
 
   /**
-   * @param beneIdStr the {@link Beneficiary#getBeneficiaryId()} value to find a matching {@link
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to find a matching {@link
    *     Beneficiary} for
    * @return the {@link Beneficiary} that matches the specified {@link
    *     Beneficiary#getBeneficiaryId()} value
