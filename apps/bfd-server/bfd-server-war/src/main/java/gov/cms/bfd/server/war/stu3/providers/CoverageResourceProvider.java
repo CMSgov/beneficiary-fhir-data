@@ -10,10 +10,8 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
@@ -34,15 +32,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Coverage;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link Coverage} resources, derived
@@ -123,13 +116,17 @@ public final class CoverageResourceProvider implements IResourceProvider {
     if (!coverageIdSegment.isPresent()) throw new ResourceNotFoundException(coverageId);
     String coverageIdBeneficiaryIdText = coverageIdMatcher.group(2);
 
+    Long beneficiaryId = Long.parseLong(coverageIdBeneficiaryIdText);
     Beneficiary beneficiaryEntity;
     try {
-      beneficiaryEntity = findBeneficiaryById(Long.parseLong(coverageIdBeneficiaryIdText), null);
+      beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
     }
+
+    // Add bene_id to MDC logs
+    TransformerUtils.logBeneIdToMdc(beneficiaryId);
 
     Coverage coverage =
         CoverageTransformer.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);

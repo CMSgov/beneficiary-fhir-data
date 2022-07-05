@@ -1537,7 +1537,7 @@ public final class TransformerUtilsV2 {
    * @param beneId the {@link Long} beneficiary ID to log
    */
   public static void logBeneIdToMdc(Long... beneIds) {
-    if (beneIds.length != 0) {
+    if (beneIds.length > 0) {
       MDC.put("bene_id", String.join(", ", beneIds));
     }
   }

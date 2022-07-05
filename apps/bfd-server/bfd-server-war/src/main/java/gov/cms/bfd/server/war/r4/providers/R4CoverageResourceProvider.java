@@ -131,6 +131,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
+    // Add bene_id to MDC logs
+    TransformerUtilsV2.logBeneIdToMdc(beneficiaryId);
+
     Coverage coverage =
         CoverageTransformerV2.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
     return coverage;
