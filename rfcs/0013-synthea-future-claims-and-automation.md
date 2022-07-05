@@ -64,9 +64,7 @@ In addition to these steps, BFD follows a thorough [Synthea Test Plan](https://g
 
 Automating the generation and loading of Synthea data will remove a lot of error-prone manual work and also help ensure that users are regularly receiving the benefits of the ongoing improvements to Synthea. This operation will be scheduled to run once per quarter.
 
-  - Quarterly - Synthetic data will be generated with a set batch size using the up-to-date master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch, which is hosted in AWS S3. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
-
-  - Future Claim Data - A batch of similar size for claim data with a future date will also be generated in a similar fashion. 
+  - Quarterly - Synthetic data for current and future claims will be generated with a set batch size using the up-to-date master branch of the Synthea codebase in a hosted cloud instance, along with the Synthea end-state properties file from the most recent generated batch, which is hosted in AWS S3. The end-state properties file is critical for making sure the next batch of Synthea data will not overlap with released Synthea data.
 
   - Special data parameters of interest: One parameter, which has not changed in previous releases of Synthea is Part D contract ID. Despite monotonically increasing other parameters i.e. bene ID, claim group ID, PDE event ID, the value of the PDE contract ID will not need to change on a regular basis, unless there is a specific customer use case presented. Other parameters of interest, are in the end-state properties, and Synthea.properties files i.e. claim id, claim group id starts, etc, which do change, and can cause collisions. 
 
@@ -75,9 +73,7 @@ Automating the generation and loading of Synthea data will remove a lot of error
   - The synthetic data will be tested in isolation by (on the same system that was used to generate the data):
     1. Cloning the latest version of BFD from GitHub.
     2. Launching a local PostgreSQL database via Docker.
-    3. Running the BFD build and integration tests, using the newly generated Synthea data, to verify that it loads as expected.
-
-  - Additionally, the RIF files from the previous quarterly batch of Synthea data will be pulled from AWS S3, and loaded into the database with the new batch of Synthea data.  
+    3. Downloaing the RIF files from the previous quarterly batch of Synthea data from AWS S3, and running the BFD build and integration tests, using the newly generated Synthea data and previous batch data, to verify that the data loads as expected.
 
   - Once loaded, a script will run that modifies the new batch's generated manifest file, and uploads the RIF files, end-state properties, and manifest files to S3 via command line file transfer. This will trigger the BFD ingestion pipeline in TEST so that the data is stored in the database.
 
@@ -94,14 +90,19 @@ Additional testing - As of 07/05/2022, 6 million de-duped non-synthetic benes, a
 
 ### Required BFD Application Changes
 
-- When CCW data is ingested by the BFD pipeline, the application has filter logic for beneficiary UPDATEs with reference years prior to the current year by default. However, Synthea data must be able to UPDATE prior years. Additionally, future claims that are staged in S3 will need to be automatically ingested by the pipeline. For both Synthea and CCW data to be ingested by the pipeline application, the back-dated beneficiary filtering will have to be turned off for Synthea data, and a timestamp for future claims needs to be recognized. 
+The following changes to existing behavior will be implemented:
+	
+	1. RIF manifests will be updated with optional attributes to indicate:
+	    1. When a data set should have back-dated beneficiary filtering disabled.
+	    2. When a data set has a "do not process until" date.
+	2. The BFD Pipeline application will be updated to accept, parse, and honor those attributes.
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
 Automated Generation & Load Plan:
 
-On a quarterly basis a cron job within Jenkins will be set up to spin up and SSH into a provisioned AWS EC2 instance, and run an Ansible script that takes a batch size and randomly generated year between 1 and 5 and will execute other scripts that:
+On a quarterly basis a cron job within Jenkins will be set up to spin up and SSH into a provisioned AWS EC2 instance, and run an Ansible script that takes a batch size and generation year, and will execute other scripts that:
   - Run currently manual steps in the `Synthea Test Plan` such as accessing and comparing the latest Synthea end-properties file, running queries in PROD SBX to determine database ranges for beneficiary and claim properities, and ensuring the next batch of data will not overlap with existing data ranges.
   - Generate batch containing both synthetic historical and future data
   - Load into AWS S3 for ingestion in TEST, PROD SBX, and PROD environments.
