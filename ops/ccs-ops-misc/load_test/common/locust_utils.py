@@ -3,7 +3,7 @@
 
 import os
 from locust.env import Environment
-from locust.runners import WorkerRunner, MasterRunner
+from locust.runners import DistributedRunner, WorkerRunner, MasterRunner
 
 
 def is_locust_worker(env: Environment) -> bool:
@@ -41,4 +41,4 @@ def is_distributed(env: Environment) -> bool:
     Returns:
         bool: True if the Locust is running in distributed mode, False otherwise
     """
-    return is_locust_master(env) or is_locust_worker(env)
+    return isinstance(env.runner, DistributedRunner)
