@@ -26,9 +26,6 @@
 -- than 100ms, then the script will exit/fail.
 ${logic.psql-only} set lock_timeout = 100;
 
--- Wrap in a transaction; acquiring a lock can only be done inside a transaction.
-${logic.psql-only} begin;
-
 -- alter table creates an exclusive lock while it validates the data for the
 -- table on which the constraint is being defined. We'll create the constraint
 -- in 'NOT VALID' mode which allows the constraint to created but not validated,
@@ -42,13 +39,23 @@ ${logic.psql-only} begin;
 --      the necessity to alter the constraint names once we rename all the
 --      _new tables back to their original name(s).
 --
+-- Wrap in a transaction; acquiring a lock can only be done inside a transaction.
+-- We are explicitly starting a transaction to minimize exclusive lock duration;
+-- doing an ALTER TABLE implicitly acquires an EXCLUSIVE LOCK on the table and in
+-- theory, the lock would last only as long as the ALTER TABLE operation(s) were
+-- in progress. However, the flyway .conf file for this script turns off flyway
+-- transaction processing to allow this script to be in complete control of the
+-- transaction and its associated commit (which releases the lock).
+
+${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.carrier_claims_new
+${logic.psql-only}    drop constraint if exists carrier_claims_bene_id_to_beneficiaries;
 alter table if exists public.carrier_claims_new
     add constraint carrier_claims_bene_id_to_beneficiaries
     foreign key (bene_id)
 ${logic.hsql-only} references public.beneficiaries_new (bene_id);
 ${logic.psql-only} references public.beneficiaries_new not valid;
-
--- release the lock
+-- release the lock by either a commit or rollback of the transaction.
 ${logic.psql-only} commit;
 
 -- The remaining constraint defintion(s) follows the pattern from above; wrap
@@ -57,6 +64,8 @@ ${logic.psql-only} commit;
 -- the next section of this Flyway script.
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.dme_claims_new
+${logic.psql-only}    drop constraint if exists dme_claims_bene_id_to_beneficiaries;
 alter table if exists public.dme_claims_new 
    add constraint dme_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -65,6 +74,8 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.hha_claims_new
+${logic.psql-only}    drop constraint if exists hha_claims_bene_id_to_beneficiaries;
 alter table if exists public.hha_claims_new 
    add constraint hha_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -73,6 +84,8 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.hospice_claims_new
+${logic.psql-only}    drop constraint if exists hospice_claims_bene_id_to_beneficiaries;
 alter table if exists public.hospice_claims_new 
    add constraint hospice_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -81,6 +94,8 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.inpatient_claims_new
+${logic.psql-only}    drop constraint if exists inpatient_claims_bene_id_to_beneficiaries;
 alter table if exists public.inpatient_claims_new 
    add constraint inpatient_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -89,6 +104,8 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.outpatient_claims_new
+${logic.psql-only}    drop constraint if exists outpatient_claims_bene_id_to_beneficiaries;
 alter table if exists public.outpatient_claims_new 
    add constraint outpatient_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -97,6 +114,8 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.partd_events_new
+${logic.psql-only}    drop constraint if exists partd_events_bene_id_to_beneficiaries;
 alter table if exists public.partd_events_new
    add constraint partd_events_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -105,6 +124,8 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
+${logic.psql-only} alter table if exists public.snf_claims_new
+${logic.psql-only}    drop constraint if exists snf_claims_bene_id_to_beneficiaries;
 alter table if exists public.snf_claims_new 
    add constraint snf_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -114,7 +135,9 @@ ${logic.psql-only} commit;
 
 -- the rest of the processing will be wrapped in a transaction; a validation
 -- of a constraint operates in shared access mode (i.e. allows read/select),
--- so no need to have any further table locking.
+-- so no need to have any further table locking. However, since we've turned
+-- off flyway transaction processing, we are now responsible for committing
+-- the changes.
 ${logic.psql-only} begin;
 
 ${logic.psql-only} alter table public.carrier_claims_new
