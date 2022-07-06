@@ -1,7 +1,6 @@
 """Set up Locust tests from the configuration.
 """
 
-import os
 from locust.env import Environment
 from locust.runners import DistributedRunner, WorkerRunner, MasterRunner
 

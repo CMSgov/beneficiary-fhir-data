@@ -10,7 +10,7 @@ from locust import HttpUser, events
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
 from common import custom_args, data, validation
-from common.locust_utils import is_distributed, is_locust_master, is_locust_worker
+from common.locust_utils import is_distributed, is_locust_worker
 from common.stats import stats_compare, stats_writers
 from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_config import StatsConfiguration

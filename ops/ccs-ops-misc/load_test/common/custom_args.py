@@ -4,7 +4,6 @@ from math import ceil
 import logging
 from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
-from common.locust_utils import is_distributed, is_locust_worker
 
 
 def register_custom_args(parser: LocustArgumentParser):

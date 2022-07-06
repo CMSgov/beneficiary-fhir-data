@@ -4,7 +4,6 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
-from common.url_path import create_url_path
 
 table_sample_pac_mbis = False
 master_pac_mbis: List[str] = []

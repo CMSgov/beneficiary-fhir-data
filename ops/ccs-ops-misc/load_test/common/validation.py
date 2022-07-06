@@ -1,5 +1,4 @@
 '''Validate tests against target SLIs'''
-from dataclasses import dataclass
 from enum import Enum
 import logging
 import time
@@ -7,7 +6,6 @@ from typing import Optional
 import gevent
 from locust.runners import STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP, WorkerRunner
 from locust.env import Environment
-from common.locust_utils import is_distributed, is_locust_worker
 
 _DEFAULT_SLA_FAILSAFE = 10000
 """Default failsafe, in ms, that the test's response time should not exceed.
