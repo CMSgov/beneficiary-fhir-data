@@ -29,6 +29,9 @@ data_pipeline_rda_job_interval_seconds: 300
 # How many claims to store per transaction.
 data_pipeline_rda_job_batch_size: 20
 
+# How many threads to use to load data
+data_pipeline_rda_job_write_threads: 1
+
 # How long to allow the RDA API stream to be idle before closing the connection.
 data_pipeline_rda_grpc_max_idle_seconds: 600
 
