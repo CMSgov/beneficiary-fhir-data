@@ -79,16 +79,16 @@ public final class LoadedFilterTest {
   public void testMightContain() {
     // Very small test on the Guava implementation of BloomFilters. Assume this package works.
     final BloomFilter smallFilter = LoadedFileFilter.createFilter(10);
-    smallFilter.putString("1");
-    smallFilter.putString("100");
-    smallFilter.putString("100");
+    smallFilter.putLong(1L);
+    smallFilter.putLong(100L);
+    smallFilter.putLong(200L);
 
     final LoadedFileFilter filter1 =
         new LoadedFileFilter(
             1, 1, Instant.now().minusSeconds(10), Instant.now().minusSeconds(5), smallFilter);
 
-    assertTrue(filter1.mightContain("1"));
-    assertFalse(filter1.mightContain("888"));
-    assertFalse(filter1.mightContain("BAD"));
+    assertTrue(filter1.mightContain(1L));
+    assertFalse(filter1.mightContain(888L));
+    assertFalse(filter1.mightContain(2L));
   }
 }
