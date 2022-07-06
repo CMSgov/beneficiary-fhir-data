@@ -2,7 +2,7 @@
 """Utility module for executing database queries.
 """
 
-from typing import List
+from typing import List, Optional
 
 import psycopg2
 
@@ -27,7 +27,7 @@ def _execute(uri: str, query: str) -> List:
     return results
 
 
-def get_bene_ids(uri: str, table_sample_pct: float = None) -> List:
+def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
     """
     Return a list of bene IDs from the adjudicated beneficiary table
     """
@@ -44,7 +44,7 @@ def get_bene_ids(uri: str, table_sample_pct: float = None) -> List:
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_hashed_mbis(uri: str, table_sample_pct: float = None) -> List:
+def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     """
     Return a list of unique hashed MBIs from the adjudicated beneficiary table
     """
@@ -62,14 +62,21 @@ def get_hashed_mbis(uri: str, table_sample_pct: float = None) -> List:
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_contract_ids(uri: str) -> List:
+def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
     """
     Return a list of contract id / reference year pairs from the beneficiary
     table
     """
+    
+    if table_sample_pct is None:
+        table_sample_text = ''
+    else:
+        table_sample_text = f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
+    
     contract_id_query = (
         'SELECT DISTINCT "partd_contract_number_id", "year_month" '
         'FROM "beneficiary_monthly" '
+        f'{table_sample_text}'
         'WHERE "partd_contract_number_id" IS NOT NULL '
         f'LIMIT {LIMIT}'
     )
