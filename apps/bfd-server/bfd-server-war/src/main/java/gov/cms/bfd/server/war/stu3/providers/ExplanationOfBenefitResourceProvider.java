@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
@@ -193,6 +194,15 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
                 new TransformerContext(
                     metricRegistry, Optional.of(includeTaxNumbers), drugCodeDisplayLookup),
                 claimEntity);
+
+     // Add bene_id to MDC logs
+     if (eob.getPatient() != null
+            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+       String beneficiaryId = eob.getPatient().getReference().replace("Patient/", "");
+       if (!Strings.isNullOrEmpty(beneficiaryId)) {
+         LoggingUtils.logBeneIdToMdc(Long.parseLong(beneficiaryId));
+       }
+     }
     return eob;
   }
 
