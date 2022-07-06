@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.slf4j.MDC;
 
+/** A set of methods for various logging purposes i.e. MDC */
 public class LoggingUtils {
   /**
    * Output list of benefificiary IDs to MDC logging
