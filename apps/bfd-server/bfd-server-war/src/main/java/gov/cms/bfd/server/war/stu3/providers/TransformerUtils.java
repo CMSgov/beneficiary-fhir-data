@@ -47,6 +47,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import gov.cms.bfd.sharedutils.logging.MDCFormatter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -3405,14 +3406,15 @@ public final class TransformerUtils {
    */
   public static void recordQueryInMdc(
       String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query.%s", queryId);
     MDC.put(
-        String.format("%s.duration_nanoseconds", keyPrefix),
+        MDCFormatter.formatMDCField(new String[] {"jpa_query", queryId, "duration_nanoseconds"}),
         Long.toString(queryDurationNanoseconds));
     MDC.put(
-        String.format("%s.duration_milliseconds", keyPrefix),
+        MDCFormatter.formatMDCField(new String[] {"jpa_query", queryId, "duration_milliseconds"}),
         Long.toString(queryDurationNanoseconds / 1000000));
-    MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+    MDC.put(
+        MDCFormatter.formatMDCField(new String[] {"jpa_query", queryId, "record_count"}),
+        Long.toString(recordCount));
   }
 
   /**

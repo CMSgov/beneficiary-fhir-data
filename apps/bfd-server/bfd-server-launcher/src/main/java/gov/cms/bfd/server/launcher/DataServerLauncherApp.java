@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import gov.cms.bfd.sharedutils.logging.MDCFormatter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -78,8 +79,9 @@ public final class DataServerLauncherApp {
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
   /** MDC key for the http output size in bytes */
-  public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
-      "http_access.response.output_size_in_bytes";
+  public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES[] = {
+    "http_access", "response", "output_size_in_bytes"
+  };
 
   private static Server server;
 
@@ -308,7 +310,7 @@ public final class DataServerLauncherApp {
    * each request:
    *
    * <ul>
-   *   <li>access.json - a structured log built from the {@link MDC}
+   *   <li>access.json - a structured log built from the {@link gov.cms.bfd.server.launcher.MDC}
    *   <li>access.log - an unstructured NCSA style log that should be considered deprecated and
    *       slated for removal
    * </ul>
@@ -351,7 +353,7 @@ public final class DataServerLauncherApp {
          * accessible to the filter.
          */
         MDC.put(
-            HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
+            MDCFormatter.formatMDCField(HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES),
             String.valueOf(response.getHttpOutput().getWritten()));
 
         /*

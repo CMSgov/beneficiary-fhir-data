@@ -99,6 +99,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
+    // TODO: Fix delimiter
     return String.format("%s.%s", "http_access", keySuffix);
   }
 
@@ -108,6 +109,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    *     related to the HTTP request
    */
   public static String computeMdcRequestKey(String keySuffix) {
+    // TODO: Fix delimiter
     return String.format("%s.%s", computeMdcKey("request"), keySuffix);
   }
 

@@ -32,6 +32,7 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.logging.MDCFormatter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
@@ -168,10 +169,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_id.include_%s",
-              String.join(
-                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
+          MDCFormatter.formatMDCField(
+              new String[] {
+                "bene_by_id",
+                String.format(
+                    "include_%s",
+                    String.join(
+                        "_",
+                        (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS)))
+              }),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }

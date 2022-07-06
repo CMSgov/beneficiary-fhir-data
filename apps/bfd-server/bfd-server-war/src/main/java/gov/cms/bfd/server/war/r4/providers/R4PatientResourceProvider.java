@@ -32,6 +32,7 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.logging.MDCFormatter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
@@ -786,7 +787,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+      MDC.put(
+          MDCFormatter.formatMDCField(
+              new String[] {"database_query", "by_hash.collision", "distinct_bene_ids"}),
+          Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
