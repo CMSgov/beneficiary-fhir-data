@@ -922,7 +922,7 @@ public class McsClaimTransformer {
     transformer.copyString(
         namePrefix + RdaMcsDiagnosisCode.Fields.idrDiagCode,
         false,
-        1,
+        0,
         7,
         from.getIdrDiagCode(),
         to::setIdrDiagCode);
