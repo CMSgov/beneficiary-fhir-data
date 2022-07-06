@@ -199,8 +199,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
                 claimEntity);
 
     // Add bene_id to MDC logs
-    if (eob.getPatient() != null
-            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+    if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
       String beneficiaryId = eob.getPatient().getReference().replace("Patient/", "");
       if (!Strings.isNullOrEmpty(beneficiaryId)) {
         LoggingUtils.logBeneIdToMdc(Long.parseLong(beneficiaryId));
