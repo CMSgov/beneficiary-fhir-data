@@ -37,15 +37,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -225,6 +217,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       patients = Collections.emptyList();
     } else {
       try {
+        // Add bene_id to MDC logs
+        LoggingUtils.logBeneIdToMdc(Long.parseLong(logicalId.getValue()));
+
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                 .filter(
@@ -1002,6 +997,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiariesByContractAndYearMonth(coverageId, yearMonth, paging);
+    Set<Long> beneIds = new HashSet<Long>();
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -1010,8 +1006,17 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(b -> BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader))
+            .map(
+                b -> {
+                  // Collect bene_ids for logging
+                  beneIds.add(b.getBeneficiaryId());
+
+                  return BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader);
+                })
             .collect(Collectors.toList());
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
