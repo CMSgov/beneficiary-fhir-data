@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -348,7 +349,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    TransformerUtils.logBeneIdToMdc(beneficiaryId);
+    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }

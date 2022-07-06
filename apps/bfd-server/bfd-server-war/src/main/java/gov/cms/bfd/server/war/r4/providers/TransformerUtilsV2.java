@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -1573,22 +1574,9 @@ public final class TransformerUtilsV2 {
       }
     }
 
-    logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
+    LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     return bundle;
-  }
-
-  /**
-   * Output list of benefificiary IDs to MDC logging
-   *
-   * @param beneIds the {@link Long} of beneficiary IDs top log
-   */
-  public static void logBeneIdToMdc(Long... beneIds) {
-    if (beneIds.length > 0) {
-      String beneIdEntry =
-          Arrays.stream(beneIds).map(String::valueOf).collect(Collectors.joining(", "));
-      MDC.put("bene_id", beneIdEntry);
-    }
   }
 
   /**

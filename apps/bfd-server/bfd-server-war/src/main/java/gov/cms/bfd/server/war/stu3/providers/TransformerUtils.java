@@ -41,6 +41,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -3363,22 +3364,9 @@ public final class TransformerUtils {
       }
     }
 
-    logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
+    LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     return bundle;
-  }
-
-  /**
-   * Output list of benefificiary IDs to MDC logging
-   *
-   * @param beneIds the {@link Long} of beneficiary IDs top log
-   */
-  public static void logBeneIdToMdc(Long... beneIds) {
-    if (beneIds.length > 0) {
-      String beneIdEntry =
-          Arrays.stream(beneIds).map(String::valueOf).collect(Collectors.joining(", "));
-      MDC.put("bene_id", beneIdEntry);
-    }
   }
 
   /**
