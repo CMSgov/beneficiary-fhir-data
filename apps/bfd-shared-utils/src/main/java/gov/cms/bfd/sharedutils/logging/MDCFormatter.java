@@ -6,7 +6,7 @@ import java.util.Iterator;
 public class MDCFormatter {
 
   /** Delimiter to be used to separate the parts of MDC field names. */
-  public static final String FIELD_DELIMITER = "-";
+  public static final String FIELD_DELIMITER = "_";
 
   /**
    * Format an identifier for an MDC field.
