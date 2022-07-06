@@ -1531,7 +1531,7 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    Set<String> beneIds = new HashSet<String>();
+    Set<Long> beneIds = new HashSet<Long>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
@@ -1543,13 +1543,13 @@ public final class TransformerUtilsV2 {
             && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
           String reference = eob.getPatient().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
+            beneIds.add(Long.parseLong(reference));
           }
         }
       } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(patient.getId());
+          beneIds.add(Long.parseLong(patient.getId()));
         }
 
       } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
@@ -1559,13 +1559,13 @@ public final class TransformerUtilsV2 {
             && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
           String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
+            beneIds.add(Long.parseLong(reference));
           }
         }
       }
     }
 
-    logBeneIdToMdc(beneIds.stream().map(Long::valueOf).toArray(Long[]::new));
+    logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     return bundle;
   }
