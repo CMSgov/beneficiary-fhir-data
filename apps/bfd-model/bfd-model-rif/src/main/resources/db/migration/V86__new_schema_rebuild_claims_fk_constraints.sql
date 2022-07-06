@@ -1,4 +1,26 @@
--- Set a short lock timeout...no one should be updating table (yet);
+-- REBUILD_CLAIMS_FK_CONSTRAINTS.SQL
+--
+-- This flyway script (re-) implements foreign key (FK) constraints between
+-- parent claims tables (i.e., carrier_claims) and the beneficiaries table
+-- on the column bene_id.
+--
+-- The script does this operation 'in-place' meaning that the constraints
+-- are created on active database(s) (i.e., prod, prod-sbx, test). Normally
+-- an ALTER TABLE, ADD CONSTRAINT requires an EXCLUSIVE LOCK on a table
+-- because the db engine has to validate the integrity of the column value(s)
+-- used in the constraint. While there is no getting around the necessity for
+-- an EXCLUSIVE LOCK, we can minimize the duration of the lock by using a
+-- 2-step pattern:
+--
+--   1) creating the constraint as NOT VALID; this allows a constraint to be
+--      created (a meta-data operation) without verifying the column data. This
+--      limits the exclusive lock duration to be milli-seconds.
+--
+--   2) then the 2nd step performs the actual validation of the table column
+--      data; however, that operation only requires a SHARED LOCK on a table,
+--      meaining that things like READ (select) operations can function normally.
+--
+-- Set a short lock timeout...no one should be updating a table (yet);
 -- lock requests are queued, so we don't want to hang around if some other
 -- process currently has a lock. If we don't get the requested lock in less
 -- than 100ms, then the script will exit/fail.
@@ -9,7 +31,7 @@ ${logic.psql-only} begin;
 
 -- alter table creates an exclusive lock while it validates the data for the
 -- table on which the constraint is being defined. We'll create the constraint
--- in 'not valid' mode which allows the constraint to created but not validated,
+-- in 'NOT VALID' mode which allows the constraint to created but not validated,
 -- resulting in a very fast meta-data only change.
 --
 -- A side note for reviewers; the BFD standard naming convention calls for
@@ -31,8 +53,8 @@ ${logic.psql-only} commit;
 
 -- The remaining constraint defintion(s) follows the pattern from above; wrap
 -- things in a transaction, add the constraint using 'not valid' mode, and then
--- committing the transaction. We'll validate all out 'invalid' constraints at
--- the end of this Flyway scropt.
+-- committing the transaction. We'll validate all our 'invalid' constraints in
+-- the next section of this Flyway script.
 
 ${logic.psql-only} begin;
 alter table if exists public.dme_claims_new 
