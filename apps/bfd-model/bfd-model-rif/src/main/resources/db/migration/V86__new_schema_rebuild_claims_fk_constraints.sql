@@ -48,8 +48,6 @@ ${logic.psql-only} set lock_timeout = 100;
 -- transaction and its associated commit (which releases the lock).
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.carrier_claims_new
-${logic.psql-only}    drop constraint if exists carrier_claims_bene_id_to_beneficiaries;
 alter table if exists public.carrier_claims_new
     add constraint carrier_claims_bene_id_to_beneficiaries
     foreign key (bene_id)
@@ -64,8 +62,6 @@ ${logic.psql-only} commit;
 -- the next section of this Flyway script.
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.dme_claims_new
-${logic.psql-only}    drop constraint if exists dme_claims_bene_id_to_beneficiaries;
 alter table if exists public.dme_claims_new 
    add constraint dme_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -74,8 +70,6 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.hha_claims_new
-${logic.psql-only}    drop constraint if exists hha_claims_bene_id_to_beneficiaries;
 alter table if exists public.hha_claims_new 
    add constraint hha_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -84,8 +78,6 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.hospice_claims_new
-${logic.psql-only}    drop constraint if exists hospice_claims_bene_id_to_beneficiaries;
 alter table if exists public.hospice_claims_new 
    add constraint hospice_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -94,8 +86,6 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.inpatient_claims_new
-${logic.psql-only}    drop constraint if exists inpatient_claims_bene_id_to_beneficiaries;
 alter table if exists public.inpatient_claims_new 
    add constraint inpatient_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -104,8 +94,6 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.outpatient_claims_new
-${logic.psql-only}    drop constraint if exists outpatient_claims_bene_id_to_beneficiaries;
 alter table if exists public.outpatient_claims_new 
    add constraint outpatient_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -114,8 +102,6 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.partd_events_new
-${logic.psql-only}    drop constraint if exists partd_events_bene_id_to_beneficiaries;
 alter table if exists public.partd_events_new
    add constraint partd_events_bene_id_to_beneficiaries
    foreign key (bene_id) 
@@ -124,8 +110,6 @@ ${logic.psql-only} references public.beneficiaries_new not valid;
 ${logic.psql-only} commit;
 
 ${logic.psql-only} begin;
-${logic.psql-only} alter table if exists public.snf_claims_new
-${logic.psql-only}    drop constraint if exists snf_claims_bene_id_to_beneficiaries;
 alter table if exists public.snf_claims_new 
    add constraint snf_claims_bene_id_to_beneficiaries
    foreign key (bene_id) 
