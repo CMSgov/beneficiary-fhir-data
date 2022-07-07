@@ -308,6 +308,7 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-shared-test-utils</artifactId>
 			<version>${project.version}</version>
+			<!-- Scope cannot be test due to SpringConfiguration using test classes, fix that to properly scope this -->
 		</dependency>
 	</dependencies>
 

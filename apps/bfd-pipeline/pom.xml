@@ -55,6 +55,7 @@
 				<groupId>gov.cms.bfd</groupId>
 				<artifactId>bfd-shared-test-utils</artifactId>
 				<version>${project.version}</version>
+				<!-- Scope cannot be test due to PipelineTestUtils, fix that to properly scope this -->
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
