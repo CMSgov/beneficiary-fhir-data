@@ -17,6 +17,8 @@ def _(environment: Environment, **kwargs):
     if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
         return
     
+    # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
+    # for Locust's documentation on the test data management pattern used here
     global master_bene_ids
     master_bene_ids = data.load_from_parsed_opts(
         environment.parsed_options,

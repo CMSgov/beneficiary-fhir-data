@@ -14,6 +14,8 @@ def _(environment: Environment, **kwargs):
         # Don't bother loading data for the master runner, it doesn't run a test
         return
     
+    # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
+    # for Locust's documentation on the test data management pattern used here
     global master_pac_mbis
     master_pac_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
