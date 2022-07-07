@@ -594,10 +594,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               "Unsupported identifier system: " + identifier.getSystem());
       }
 
-      patients =
-          QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
-              ? Collections.singletonList(patient)
-              : Collections.emptyList();
+      if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
+        // Add bene_id to MDC logs
+        LoggingUtils.logBeneIdToMdc(Long.parseLong(patient.getId()));
+        patients = Collections.singletonList(patient);
+      } else {
+        patients = Collections.emptyList();
+      }
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
