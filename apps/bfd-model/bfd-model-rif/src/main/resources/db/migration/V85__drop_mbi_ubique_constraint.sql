@@ -3,3 +3,6 @@
 -- without leaking sensitive information to the logs
 
 drop index rda.mbi_cache_mbi_idx;
+
+-- Create new index without unique constraint
+create index mbi_cache_mbi_idx on rda.mbi_cache(mbi);
