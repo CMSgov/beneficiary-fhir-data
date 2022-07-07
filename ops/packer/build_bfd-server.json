@@ -34,7 +34,6 @@
       "type": "ansible",
       "playbook_file": "./build_bfd-server.yml",
       "extra_arguments": [
-        "-e ansible_python_interpreter=/usr/bin/python3",
         "--extra-vars",
         "@extra_vars.json",
         "--tags",
