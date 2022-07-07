@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war;
 
+import gov.cms.bfd.sharedutils.logging.MDCFormatter;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -99,8 +100,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    // TODO: Fix delimiter
-    return String.format("%s.%s", "http_access", keySuffix);
+    return MDCFormatter.formatMdcField(String.format("%s.%s", "http_access", keySuffix));
   }
 
   /**
@@ -109,8 +109,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    *     related to the HTTP request
    */
   public static String computeMdcRequestKey(String keySuffix) {
-    // TODO: Fix delimiter
-    return String.format("%s.%s", computeMdcKey("request"), keySuffix);
+    return MDCFormatter.formatMdcField(String.format("%s.%s", "http_access.request", keySuffix));
   }
 
   /**

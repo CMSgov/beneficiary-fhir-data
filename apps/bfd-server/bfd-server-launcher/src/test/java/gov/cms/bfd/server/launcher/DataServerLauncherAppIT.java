@@ -233,7 +233,7 @@ public final class DataServerLauncherAppIT {
       assertTrue(
           Files.readString(accessLogJson)
               .contains(
-                  MDCFormatter.formatMDCField(
+                  MDCFormatter.formatMdcField(
                       DataServerLauncherApp.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES)));
 
       // Stop the application.

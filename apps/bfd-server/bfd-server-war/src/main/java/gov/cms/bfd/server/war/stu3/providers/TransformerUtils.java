@@ -3407,13 +3407,16 @@ public final class TransformerUtils {
   public static void recordQueryInMdc(
       String queryId, long queryDurationNanoseconds, long recordCount) {
     MDC.put(
-        MDCFormatter.formatMDCField(new String[] {"jpa_query", queryId, "duration_nanoseconds"}),
+        MDCFormatter.formatMdcField(
+            String.format("%s.%s.%s", "jpa_query", queryId, "duration_nanoseconds")),
         Long.toString(queryDurationNanoseconds));
     MDC.put(
-        MDCFormatter.formatMDCField(new String[] {"jpa_query", queryId, "duration_milliseconds"}),
+        MDCFormatter.formatMdcField(
+            String.format("%s.%s.%s", "jpa_query", queryId, "duration_milliseconds")),
         Long.toString(queryDurationNanoseconds / 1000000));
     MDC.put(
-        MDCFormatter.formatMDCField(new String[] {"jpa_query", queryId, "record_count"}),
+        MDCFormatter.formatMdcField(
+            String.format("%s.%s.%s", "jpa_query", queryId, "record_count")),
         Long.toString(recordCount));
   }
 

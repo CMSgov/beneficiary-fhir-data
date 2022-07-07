@@ -788,8 +788,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
       MDC.put(
-          MDCFormatter.formatMDCField(
-              new String[] {"database_query", "by_hash", "collision", "distinct_bene_ids"}),
+          MDCFormatter.formatMdcField("database_query.by_hash.collision.distinct_bene_ids"),
           Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));

@@ -169,15 +169,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          MDCFormatter.formatMDCField(
-              new String[] {
-                "bene_by_id",
-                String.format(
-                    "include_%s",
-                    String.join(
-                        "_",
-                        (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS)))
-              }),
+          MDCFormatter.formatMdcField(
+              String.format(
+                  "bene_by_id.include_%s",
+                  String.join(
+                      "_",
+                      (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS)))),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
