@@ -3408,15 +3408,13 @@ public final class TransformerUtils {
       String queryId, long queryDurationNanoseconds, long recordCount) {
     String keyPrefix = String.format("jpa_query.%s", queryId);
     MDC.put(
-        MDCFormatter.formatMdcField(
-            String.format("%s.%s", "jpa_query", keyPrefix, "duration_nanoseconds")),
+        MDCFormatter.formatMdcField(String.format("%s.duration_nanoseconds", keyPrefix)),
         Long.toString(queryDurationNanoseconds));
     MDC.put(
-        MDCFormatter.formatMdcField(
-            String.format("%s.%s", "jpa_query", keyPrefix, "duration_milliseconds")),
+        MDCFormatter.formatMdcField(String.format("%s.duration_milliseconds", keyPrefix)),
         Long.toString(queryDurationNanoseconds / 1000000));
     MDC.put(
-        MDCFormatter.formatMdcField(String.format("%s.%s", "jpa_query", keyPrefix, "record_count")),
+        MDCFormatter.formatMdcField(String.format("%s.record_count", keyPrefix)),
         Long.toString(recordCount));
   }
 
