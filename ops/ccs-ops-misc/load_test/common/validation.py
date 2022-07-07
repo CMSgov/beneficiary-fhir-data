@@ -22,7 +22,7 @@ class ValidationGoal(Enum):
     SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000, 6000)
     SLA_V1_BASELINE = (10, 325, 550, 10000)
     SLA_V2_BASELINE = (10, 325, 550, 10000)
-    
+
     def __init__(self, sla_50: int, sla_95: int, sla_99: int, sla_failsafe: int) -> None:
         self.sla_50 = sla_50
         self.sla_95 = sla_95
@@ -57,7 +57,7 @@ def check_sla_validation(environment: Environment) -> None:
     '''
     if not _validation_goal:
         return
-    
+
     logger = logging.getLogger()
 
     logger.info('Checking SLAs...')

@@ -17,7 +17,7 @@ def _(environment: Environment, **kwargs):
     if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
         # Don't bother loading data for the master runner, it doesn't run a test
         return
-    
+
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
     global master_contract_data

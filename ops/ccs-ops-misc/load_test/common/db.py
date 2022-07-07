@@ -67,12 +67,12 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
     Return a list of contract id / reference year pairs from the beneficiary
     table
     """
-    
+
     if table_sample_pct is None:
         table_sample_text = ''
     else:
         table_sample_text = f'TABLESAMPLE SYSTEM ({table_sample_pct}) '
-    
+
     contract_id_query = (
         'SELECT DISTINCT "partd_contract_number_id", "year_month" '
         'FROM "beneficiary_monthly" '

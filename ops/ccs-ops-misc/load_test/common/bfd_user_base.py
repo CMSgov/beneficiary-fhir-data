@@ -24,10 +24,10 @@ def _(parser: LocustArgumentParser, **kwargs) -> None:
 def _(environment: Environment, **kwargs) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
-    
+
     custom_args.adjust_parsed_run_time(environment)
     validation.setup_failsafe_event(environment)
-    
+
 @events.quitting.add_listener
 def _(environment: Environment, **kwargs) -> None:
     """Run one-time teardown tasks after the tests have completed
@@ -37,12 +37,12 @@ def _(environment: Environment, **kwargs) -> None:
     """
     if is_distributed(environment) and is_locust_worker(environment):
         return
-    
+
     validation.check_sla_validation(environment)
 
     if not environment.parsed_options:
         return
-       
+
     stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
     if stats_config:
         # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run

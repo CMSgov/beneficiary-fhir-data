@@ -21,7 +21,7 @@ def load_from_parsed_opts(parsed_opts: Namespace, load_function: Callable, *args
     if not parsed_opts.database_uri:
         logging.getLogger().error('"database_uri" was not defined in parsed options')
         return []
-    
+
     database_uri = str(parsed_opts.database_uri)
     table_sample_percent = float(parsed_opts.table_sample_percent)
     return load_from_uri(database_uri, load_function, *args, use_table_sample=use_table_sample, table_sample_percent=table_sample_percent)
