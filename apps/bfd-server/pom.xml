@@ -42,12 +42,6 @@
 				<artifactId>bfd-model-rda</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<!-- Includes a formatter around MDC for logging purposes -->
-				<groupId>gov.cms.bfd</groupId>
-				<artifactId>bfd-shared-utils</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
-			</dependency>
 
 			<dependency>
 				<groupId>javax.servlet</groupId>

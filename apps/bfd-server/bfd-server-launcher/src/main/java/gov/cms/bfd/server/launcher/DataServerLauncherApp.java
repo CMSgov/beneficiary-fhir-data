@@ -352,7 +352,7 @@ public final class DataServerLauncherApp {
          * accessible to the filter.
          */
         MDC.put(
-            MDCFormatter.formatMdcField(HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES),
+            MDCFormatter.formatMdcKey(HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES),
             String.valueOf(response.getHttpOutput().getWritten()));
 
         /*

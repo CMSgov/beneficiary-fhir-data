@@ -46,7 +46,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- Includes a formatter for logging to MDC -->
+			<!-- BFD Shared Utilities include a formatter for logging to MDC -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-shared-utils</artifactId>
 			<version>1.0.0-SNAPSHOT</version>

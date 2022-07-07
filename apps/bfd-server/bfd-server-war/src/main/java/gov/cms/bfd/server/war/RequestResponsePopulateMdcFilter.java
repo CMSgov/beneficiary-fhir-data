@@ -100,7 +100,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    return MDCFormatter.formatMdcField(String.format("%s.%s", "http_access", keySuffix));
+    return MDCFormatter.formatMdcKey(String.format("%s.%s", "http_access", keySuffix));
   }
 
   /**
@@ -109,7 +109,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    *     related to the HTTP request
    */
   public static String computeMdcRequestKey(String keySuffix) {
-    return MDCFormatter.formatMdcField(String.format("%s.%s", "http_access.request", keySuffix));
+    return computeMdcKey(String.format("request.%s", keySuffix));
   }
 
   /**

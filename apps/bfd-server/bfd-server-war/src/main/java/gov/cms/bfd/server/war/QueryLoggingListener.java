@@ -101,7 +101,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    return MDCFormatter.formatMdcField(String.format("%s.%s", "database_query", keySuffix));
+    return MDCFormatter.formatMdcKey(String.format("%s.%s", "database_query", keySuffix));
   }
 
   /**
