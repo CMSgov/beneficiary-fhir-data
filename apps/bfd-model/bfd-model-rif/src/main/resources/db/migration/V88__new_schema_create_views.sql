@@ -1,3 +1,15 @@
+-- NEW_SCHEMA_CREATE_VIEWS.SQL
+--
+-- This flyway script creates db views over new shema _new tables. This
+-- allows the BFD services code, in particular the generated entity beans,
+-- to point to updatable views instead of actual tables. This slight of hand
+-- allows us to introduce a subsequent flyway script which will then get the
+-- entire schema back to original table names, FK constraint names, index names,
+-- etc. without any db downtime.
+--
+-- NOTE: for psql (Postgres) we create the view 'with check option' which
+--       enables the view to be updatable.
+
 -- carrier_claims and carrier_claim_lines
 create view carrier_claim_lines as
   select * from carrier_claim_lines_new
