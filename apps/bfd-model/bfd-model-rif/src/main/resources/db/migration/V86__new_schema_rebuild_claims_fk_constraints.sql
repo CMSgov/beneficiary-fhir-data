@@ -18,7 +18,7 @@
 --
 --   2) then the 2nd step performs the actual validation of the table column
 --      data; however, that operation only requires a SHARED LOCK on a table,
---      meaining that things like READ (select) operations can function normally.
+--      meaning that things like READ (select) operations can function normally.
 --
 -- Set a short lock timeout...no one should be updating a table (yet);
 -- lock requests are queued, so we don't want to hang around if some other
