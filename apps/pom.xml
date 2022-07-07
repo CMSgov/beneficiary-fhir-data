@@ -98,6 +98,11 @@
 		<logback.classic.version>1.2.11</logback.classic.version>
 		<postgres.driver.version>42.4.0</postgres.driver.version>
 
+        <!-- Dependencies required for connecting to a gRPC API -->
+        <grpc_java.version>1.47.0</grpc_java.version>
+        <protoc.version>3.21.2</protoc.version>
+        <protobuf.version>3.21.2</protobuf.version>
+
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
