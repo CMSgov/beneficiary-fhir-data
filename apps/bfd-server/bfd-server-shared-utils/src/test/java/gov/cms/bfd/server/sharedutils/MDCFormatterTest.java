@@ -1,4 +1,4 @@
-package gov.cms.bfd.sharedutils.logging;
+package gov.cms.bfd.server.sharedutils;
 
 import static org.junit.jupiter.api.Assertions.*;
 

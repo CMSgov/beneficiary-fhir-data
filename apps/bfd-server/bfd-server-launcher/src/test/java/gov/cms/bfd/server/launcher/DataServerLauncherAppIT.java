@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
-import gov.cms.bfd.sharedutils.logging.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDCFormatter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

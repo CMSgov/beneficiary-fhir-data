@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war;
 
-import gov.cms.bfd.sharedutils.logging.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDCFormatter;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;

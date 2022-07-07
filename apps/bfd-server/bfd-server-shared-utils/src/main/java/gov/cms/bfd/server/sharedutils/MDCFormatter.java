@@ -1,4 +1,4 @@
-package gov.cms.bfd.sharedutils.logging;
+package gov.cms.bfd.server.sharedutils;
 
 /** Formatter for logging to the MDC class. */
 public class MDCFormatter {

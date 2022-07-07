@@ -5,7 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import gov.cms.bfd.sharedutils.logging.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDCFormatter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;

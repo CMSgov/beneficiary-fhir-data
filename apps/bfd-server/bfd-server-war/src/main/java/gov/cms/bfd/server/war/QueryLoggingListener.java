@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war;
 
-import gov.cms.bfd.sharedutils.logging.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDCFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
