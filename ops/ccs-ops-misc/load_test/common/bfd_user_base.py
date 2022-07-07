@@ -1,7 +1,7 @@
 '''Base class for Locust tests run against the FHIR endpoints.
 '''
 
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Union
 import json
 import logging
 import urllib3

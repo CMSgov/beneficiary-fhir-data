@@ -4,7 +4,7 @@ import logging
 import time
 from typing import Optional
 import gevent
-from locust.runners import STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP, WorkerRunner
+from locust.runners import STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP
 from locust.env import Environment
 
 _DEFAULT_SLA_FAILSAFE = 10000
