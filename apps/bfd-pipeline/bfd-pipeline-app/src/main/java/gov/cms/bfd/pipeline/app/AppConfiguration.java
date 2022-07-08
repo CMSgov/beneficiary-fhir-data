@@ -12,8 +12,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.SimpleGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
@@ -70,11 +70,11 @@ public final class AppConfiguration implements Serializable {
   /**
    * The name of the environment variable that should be used to provide an integer size for the
    * in-memory cache of computed hicn/mbi hash values. Used to set the {@link
-   * IdHasher.Config#getCachSize()}.
+   * IdHasher.Config#getCacheSize()}.
    */
   private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
 
-  /** Default value for {@link IdHasher.Config#getCachSize()}. */
+  /** Default value for {@link IdHasher.Config#getCacheSize()}. */
   private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
 
   /**
@@ -243,8 +243,8 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMinIdleTimeBeforeConnectionDrop()} value.
-   * This variable value should be in seconds.
+   * #getRdaLoadOptions()} {@link SimpleGrpcRdaSource#minIdleMillisBeforeConnectionDrop} value. This
+   * variable value should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
       "RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP";

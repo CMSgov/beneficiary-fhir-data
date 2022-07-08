@@ -16,6 +16,7 @@ import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -304,12 +305,16 @@ public class RdaLoadJobIT {
   }
 
   private MessageSource.Factory<FissClaimChange> fissJsonSource(List<String> claimJson) {
+    // resource - This is a factory method, resource handling is done later
+    //noinspection resource
     return sequenceNumber ->
         new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange)
             .skip(sequenceNumber);
   }
 
   private MessageSource.Factory<McsClaimChange> mcsJsonSource(List<String> claimJson) {
+    // resource - This is a factory method, resource handling is done later
+    //noinspection resource
     return sequenceNumber ->
         new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange)
             .skip(sequenceNumber);

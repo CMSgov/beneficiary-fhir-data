@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -32,6 +33,7 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
 public class AbstractRdaLoadJobTest {
+  @Mock private Callable<RdaSource<Integer, Integer>> preJobTask;
   @Mock private Callable<RdaSource<Integer, Integer>> sourceFactory;
   @Mock private Callable<RdaSink<Integer, Integer>> sinkFactory;
   @Mock private RdaSource<Integer, Integer> source;
@@ -40,16 +42,23 @@ public class AbstractRdaLoadJobTest {
   private MetricRegistry appMetrics;
   private Config config;
 
+  private AutoCloseable closeable;
+
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
+    closeable = MockitoAnnotations.openMocks(this);
     config =
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(10))
             .batchSize(3)
             .build();
     appMetrics = new MetricRegistry();
-    job = new TestingLoadJob(config, sourceFactory, sinkFactory, appMetrics);
+    job = new TestingLoadJob(config, preJobTask, sourceFactory, sinkFactory, appMetrics);
+  }
+
+  @AfterEach
+  public void tearDown() throws Exception {
+    closeable.close();
   }
 
   @Test
@@ -65,6 +74,8 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void openSourceFails() throws Exception {
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doThrow(new IOException("oops")).when(sourceFactory).call();
     try {
       job.callRdaServiceAndStoreRecords();
@@ -82,7 +93,11 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void openSinkFails() throws Exception {
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(source).when(sourceFactory).call();
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doThrow(new IOException("oops")).when(sinkFactory).call();
     try {
       job.callRdaServiceAndStoreRecords();
@@ -100,7 +115,11 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void sourceFails() throws Exception {
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(source).when(sourceFactory).call();
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(sink).when(sinkFactory).call();
     doThrow(new ProcessingException(new IOException("oops"), 7))
         .when(source)
@@ -126,7 +145,14 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void nothingToDo() throws Exception {
+    // resource - This is a mock, not an invocation
+    //noinspection resource
+    doReturn(mock(RdaSource.class)).when(preJobTask).call();
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(source).when(sourceFactory).call();
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(sink).when(sinkFactory).call();
     doReturn(0).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
@@ -136,7 +162,7 @@ public class AbstractRdaLoadJobTest {
       fail("job should NOT have thrown exception");
     }
     verify(source).close();
-    verify(sink).close();
+    verify(sink, times(2)).close();
     assertMeterReading(1, "calls", job.getMetrics().getCalls());
     assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
     assertMeterReading(0, "failures", job.getMetrics().getFailures());
@@ -145,7 +171,14 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void workDone() throws Exception {
+    // resource - This is a mock, not an invocation
+    //noinspection resource
+    doReturn(mock(RdaSource.class)).when(preJobTask).call();
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(source).when(sourceFactory).call();
+    // resource - This is a mock, not an invocation
+    //noinspection resource
     doReturn(sink).when(sinkFactory).call();
     doReturn(25_000).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
@@ -155,7 +188,7 @@ public class AbstractRdaLoadJobTest {
       fail("job should NOT have thrown exception");
     }
     verify(source).close();
-    verify(sink).close();
+    verify(sink, times(2)).close();
     assertMeterReading(1, "calls", job.getMetrics().getCalls());
     assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
     assertMeterReading(0, "failures", job.getMetrics().getFailures());
@@ -174,9 +207,11 @@ public class AbstractRdaLoadJobTest {
     final CountDownLatch waitForCompletion = new CountDownLatch(1);
 
     // A test job that waits for the second job to complete before doing any work itself.
+    //noinspection unchecked
     job =
         new TestingLoadJob(
             config,
+            () -> mock(RdaSource.class),
             () -> {
               // lets the main thread know we've acquired the semaphore
               waitForStartup.countDown();
@@ -198,11 +233,13 @@ public class AbstractRdaLoadJobTest {
       Future<PipelineJobOutcome> secondCall = pool.submit(() -> job.call());
       assertEquals(PipelineJobOutcome.NOTHING_TO_DO, secondCall.get());
 
-      // now allow the first call to proceed and it should reflect that it has done some work
+      // now allow the first call to proceed, and it should reflect that it has done some work
       waitForCompletion.countDown();
       assertEquals(PipelineJobOutcome.WORK_DONE, firstCall.get());
     } finally {
       pool.shutdown();
+      // ResultOfMethodCallIgnored - We don't care if it was graceful
+      //noinspection ResultOfMethodCallIgnored
       pool.awaitTermination(5, TimeUnit.SECONDS);
     }
     assertMeterReading(1, "calls", job.getMetrics().getCalls());
@@ -233,11 +270,13 @@ public class AbstractRdaLoadJobTest {
   private static class TestingLoadJob extends AbstractRdaLoadJob<Integer, Integer> {
     public TestingLoadJob(
         Config config,
+        Callable<RdaSource<Integer, Integer>> preJobTask,
         Callable<RdaSource<Integer, Integer>> sourceFactory,
         Callable<RdaSink<Integer, Integer>> sinkFactory,
         MetricRegistry appMetrics) {
       super(
           config,
+          preJobTask,
           sourceFactory,
           sinkFactory,
           appMetrics,

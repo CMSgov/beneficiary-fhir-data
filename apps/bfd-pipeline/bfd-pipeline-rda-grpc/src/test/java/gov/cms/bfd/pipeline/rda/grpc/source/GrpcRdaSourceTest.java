@@ -30,11 +30,7 @@ import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -46,12 +42,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-/** Unit tests for the {@link GrpcRdaSource} class. */
+/** Unit tests for the {@link SimpleGrpcRdaSource} class. */
 public class GrpcRdaSourceTest {
   /**
    * We need a starting time for the {@link Clock} used to compute idle time. The time and date are
@@ -59,7 +56,9 @@ public class GrpcRdaSourceTest {
    */
   private static final Instant BASE_TIME_FOR_TEST =
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
-  /** Configuration setting for {@link GrpcRdaSource.Config#minIdleTimeBeforeConnectionDrop}. */
+  /** Configuration setting for {@link SimpleGrpcRdaSource#minIdleMillisBeforeConnectionDrop}. */
+  // JavadocReference - Just for documentation
+  @SuppressWarnings("JavadocReference")
   private static final long MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP =
       Duration.ofMinutes(2).toMillis();
 
@@ -92,12 +91,11 @@ public class GrpcRdaSourceTest {
   /** A mock response stream used to simulate claims arriving from the RDA API server. */
   @Mock private GrpcResponseStream<Integer> mockResponseStream;
   /** The object we are testing. */
-  private GrpcRdaSource<Integer, Integer> source;
-  /**
-   * Shortcut for accessing the {@link gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource.Metrics}
-   * object.
-   */
-  private GrpcRdaSource.Metrics metrics;
+  private SimpleGrpcRdaSource<Integer, Integer> source;
+  /** Shortcut for accessing the {@link SimpleGrpcRdaSource.Metrics} object. */
+  private SimpleGrpcRdaSource.Metrics metrics;
+
+  private AutoCloseable closeable;
 
   /**
    * Establishes a baseline configuration consisting of mocks and real objects in the unit test
@@ -107,11 +105,11 @@ public class GrpcRdaSourceTest {
    */
   @BeforeEach
   public void setUp() throws Exception {
-    MockitoAnnotations.openMocks(this);
+    closeable = MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     source =
         spy(
-            new GrpcRdaSource<>(
+            new SimpleGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -126,18 +124,23 @@ public class GrpcRdaSourceTest {
     doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
   }
 
+  @AfterEach
+  public void tearDown() throws Exception {
+    closeable.close();
+  }
+
   /** Verify that all expected metrics are defined and have expected names. */
   @Test
   public void metricNames() {
     assertEquals(
         Arrays.asList(
-            "GrpcRdaSource.ints.batches",
-            "GrpcRdaSource.ints.calls",
-            "GrpcRdaSource.ints.failures",
-            "GrpcRdaSource.ints.objects.received",
-            "GrpcRdaSource.ints.objects.stored",
-            "GrpcRdaSource.ints.successes",
-            "GrpcRdaSource.ints.uptime"),
+            "SimpleGrpcRdaSource.ints.batches",
+            "SimpleGrpcRdaSource.ints.calls",
+            "SimpleGrpcRdaSource.ints.failures",
+            "SimpleGrpcRdaSource.ints.objects.received",
+            "SimpleGrpcRdaSource.ints.objects.stored",
+            "SimpleGrpcRdaSource.ints.successes",
+            "SimpleGrpcRdaSource.ints.uptime"),
         new ArrayList<>(appMetrics.getNames()));
   }
 
@@ -182,7 +185,7 @@ public class GrpcRdaSourceTest {
   public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
     source =
         spy(
-            new GrpcRdaSource<>(
+            new SimpleGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -192,7 +195,7 @@ public class GrpcRdaSourceTest {
                 Optional.of(18L),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
-    doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
+    doReturn(1).when(sink).writeMessages(VERSION, List.of(CLAIM_1));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
     assertEquals(1, result);
@@ -262,11 +265,13 @@ public class GrpcRdaSourceTest {
   public void testHandlesExceptionFromCaller() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
+    // unchecked - This is fine for making a mock.
+    //noinspection unchecked
     final GrpcStreamCaller<Integer> caller = mock(GrpcStreamCaller.class);
     doThrow(error).when(caller).callService(any(), any(), anyLong());
     source =
         spy(
-            new GrpcRdaSource<>(
+            new SimpleGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -341,6 +346,8 @@ public class GrpcRdaSourceTest {
   public void testHandlesInterruptFromStream() throws Exception {
     doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
     // Creates a response with 3 valid values followed by an interrupt.
+    // unchecked - This is fine for making a mock.
+    //noinspection unchecked
     final GrpcResponseStream<Integer> response = mock(GrpcResponseStream.class);
     when(response.next()).thenReturn(CLAIM_1, CLAIM_2, CLAIM_3);
     when(response.hasNext())
@@ -376,34 +383,6 @@ public class GrpcRdaSourceTest {
     source.close(); // second call does nothing
     verify(channel, times(1)).shutdown();
     verify(channel, times(1)).awaitTermination(anyLong(), any(TimeUnit.class));
-  }
-
-  /**
-   * Verify the {@link gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource.Config} class is
-   * serializable.
-   *
-   * @throws Exception required in signature because tested method has checked exceptions
-   */
-  @Test
-  public void configIsSerializable() throws Exception {
-    final RdaSourceConfig original =
-        RdaSourceConfig.builder()
-            .serverType(RdaSourceConfig.ServerType.Remote)
-            .host("localhost")
-            .port(5432)
-            .maxIdle(Duration.ofMinutes(59))
-            .authenticationToken("secret")
-            .build();
-    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-      out.writeObject(original);
-    }
-    RdaSourceConfig loaded;
-    try (ObjectInputStream inp =
-        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-      loaded = (RdaSourceConfig) inp.readObject();
-    }
-    assertEquals(original, loaded);
   }
 
   /**
@@ -533,7 +512,7 @@ public class GrpcRdaSourceTest {
 
   /**
    * Verifies that if an InterruptedException is thrown while waiting for the {@link ManagedChannel}
-   * to close and again when we retry that we punt and call {@link shutdownNow}.
+   * to close and again when we retry that we punt and call {@link ManagedChannel#shutdownNow()}.
    *
    * @throws Exception required since method being tested has checked exceptions
    */

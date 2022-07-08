@@ -119,6 +119,7 @@ public class RdaSourceConfig implements Serializable {
    */
   public CallOptions createCallOptions() {
     CallOptions answer = CallOptions.DEFAULT;
+
     if (authenticationToken != null) {
       /*
        * The RDA API uses a JWT token for authentication, by design this is set to expire X days
@@ -147,19 +148,8 @@ public class RdaSourceConfig implements Serializable {
     } else {
       log.warn("authenticationToken has not been set - calling server with no token");
     }
-    return answer;
-  }
 
-  /**
-   * Used to specify the maximum amount of time to wait for responses to arrive in the response
-   * stream. This is an inter-message time, not an overall connection time. For example if maxIdle
-   * is set for five minutes the stream would be kept open forever as long as messages arrive within
-   * 5 minutes of each other.
-   *
-   * @return the maximum idle time for the rRPC service's response stream.
-   */
-  public Duration getMaxIdle() {
-    return maxIdle;
+    return answer;
   }
 
   private ManagedChannelBuilder<?> createRemoteChannelBuilder() {

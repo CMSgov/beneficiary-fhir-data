@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

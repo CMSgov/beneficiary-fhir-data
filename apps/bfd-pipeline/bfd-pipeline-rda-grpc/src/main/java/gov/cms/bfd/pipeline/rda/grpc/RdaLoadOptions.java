@@ -5,13 +5,13 @@ import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.McsClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.source.DLQGrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaDLQSource;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.SimpleGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.Serializable;
@@ -71,7 +71,7 @@ public class RdaLoadOptions implements Serializable {
     return new RdaFissClaimLoadJob(
         jobConfig,
         () ->
-            new GrpcRdaDLQSource<>(
+            new DLQGrpcRdaSource<>(
                 appState.getEntityManagerFactory().createEntityManager(),
                 (seqNumber, fissClaimChange) -> seqNumber == fissClaimChange.getSeq(),
                 grpcConfig,
@@ -79,7 +79,7 @@ public class RdaLoadOptions implements Serializable {
                 appState.getMetrics(),
                 "fiss"),
         () ->
-            new GrpcRdaSource<>(
+            new SimpleGrpcRdaSource<>(
                 grpcConfig,
                 new FissClaimStreamCaller(),
                 appState.getMetrics(),
@@ -108,7 +108,7 @@ public class RdaLoadOptions implements Serializable {
     return new RdaMcsClaimLoadJob(
         jobConfig,
         () ->
-            new GrpcRdaDLQSource<>(
+            new DLQGrpcRdaSource<>(
                 appState.getEntityManagerFactory().createEntityManager(),
                 (seqNumber, mcsClaimChange) -> seqNumber == mcsClaimChange.getSeq(),
                 grpcConfig,
@@ -116,7 +116,7 @@ public class RdaLoadOptions implements Serializable {
                 appState.getMetrics(),
                 "mcs"),
         () ->
-            new GrpcRdaSource<>(
+            new SimpleGrpcRdaSource<>(
                 grpcConfig,
                 new McsClaimStreamCaller(),
                 appState.getMetrics(),
