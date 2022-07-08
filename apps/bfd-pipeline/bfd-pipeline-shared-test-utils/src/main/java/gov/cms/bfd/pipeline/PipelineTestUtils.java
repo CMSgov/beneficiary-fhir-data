@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.pipeline;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
@@ -30,6 +30,7 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;

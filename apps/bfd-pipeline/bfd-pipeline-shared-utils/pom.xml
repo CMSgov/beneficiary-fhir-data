@@ -72,13 +72,13 @@
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 
-                <!-- Compile time only -->
-                <dependency>
-                        <!-- this allows the construction of POJOs without a lot of boilerplate code -->
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                        <scope>provided</scope>
-                </dependency>
+		<!-- Compile time only -->
+		<dependency>
+			<!-- this allows the construction of POJOs without a lot of boilerplate code -->
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
@@ -86,11 +86,6 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-test-utils</artifactId>
-			<!-- Scope cannot be test due to PipelineTestUtils, fix that to properly scope this -->
-        </dependency>
     </dependencies>
 
 	<build>
