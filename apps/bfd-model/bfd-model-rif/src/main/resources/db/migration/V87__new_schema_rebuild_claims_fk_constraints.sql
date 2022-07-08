@@ -142,7 +142,7 @@ ${logic.psql-only} validate constraint inpatient_claims_bene_id_to_beneficiaries
 ${logic.psql-only} alter table if exists public.outpatient_claims_new 
 ${logic.psql-only} validate constraint outpatient_claims_bene_id_to_beneficiaries;
 
-${logic.psql-only} alter table if exists public.partd_Events_new
+${logic.psql-only} alter table if exists public.partd_events_new
 ${logic.psql-only} validate constraint partd_events_bene_id_to_beneficiaries;
 
 ${logic.psql-only} alter table if exists public.snf_claims_new 
