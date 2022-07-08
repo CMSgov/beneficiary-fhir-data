@@ -2,10 +2,12 @@ import argparse
 import glob
 import re
 import subprocess
+from typing import List, Tuple
+
 import yaml
 
 
-def get_fhir_resource_files(base_dir, recently_changed):
+def get_fhir_resource_files(base_dir: str, recently_changed: bool) -> List[str]:
     if recently_changed is True:
         git_call = subprocess.run(['git', 'diff', '--name-only', 'master...'], check=True, capture_output=True)
         grep_call = subprocess.run(['grep', base_dir], input=git_call.stdout, capture_output=True)
@@ -18,42 +20,41 @@ def get_fhir_resource_files(base_dir, recently_changed):
         return glob.glob(f'{base_dir}/*.json')
 
 
-def any_filters_match(patterns, error):
+def any_filters_match(patterns: List[str], error: str) -> bool:
     return any(re.match(regex, error) for regex in patterns)
 
 
-def get_global_filter(ignore_list):
+def get_global_filter(ignore_list: dict) -> List[str]:
     global_filters = []
 
-    if type(ignore_list) is dict:
-        if 'global_filter' in ignore_list and type(ignore_list['global_filter']) is dict:
-            global_filter = ignore_list['global_filter']
+    if 'global_filter' in ignore_list and isinstance(ignore_list['global_filter'], dict):
+        global_filter = ignore_list['global_filter']
 
-            if 'error_patterns' in global_filter and type(global_filter['error_patterns']) is list:
-                global_filters = global_filter['error_patterns']
+        if 'error_patterns' in global_filter and isinstance(global_filter['error_patterns'], list):
+            global_filters = global_filter['error_patterns']
 
     return global_filters
 
 
-def get_file_filter(ignore_list, file_path):
+def get_file_filter(ignore_list: dict, file_path: str) -> List[str]:
     filters = []
 
     if type(ignore_list) is dict:
         if 'file_filter' in ignore_list and ignore_list['file_filter'] is not None:
             for file_filter in ignore_list['file_filter']:
                 if re.search(file_filter['file_pattern'], file_path):
-                    if 'error_patterns' in file_filter and type(file_filter['error_patterns']) is list:
+                    if 'error_patterns' in file_filter and isinstance(file_filter['error_patterns'], list):
                         filters = filters + file_filter['error_patterns']
 
     return filters
 
 
-def filter_errors(ignore_list, errors_per_file):
+def filter_errors(ignore_list: dict, errors_per_file: dict) -> dict:
     global_filters = get_global_filter(ignore_list)
 
     filtered_errors_per_file = {}
 
-    for file_name in list(errors_per_file.keys()):
+    for file_name in errors_per_file.keys():
         file_filters = get_file_filter(ignore_list, file_name)
 
         for error in errors_per_file[file_name]:
@@ -63,7 +64,7 @@ def filter_errors(ignore_list, errors_per_file):
     return filtered_errors_per_file
 
 
-def validate_resources(version, ignore_list, files):
+def validate_resources(version: str, ignore_list: dict, files: List[str]) -> dict:
     java_commands = ['java', '-Xmx3G', '-Xms2G', '-jar', 'validator_cli.jar']
 
     for file_name in files:
@@ -77,11 +78,11 @@ def validate_resources(version, ignore_list, files):
     error_output = java_call.stderr.decode('utf-8')
     if java_call.returncode != 0:
         if output == '':
-            print('Validation of \'{}\' failed, but no output was generated.'.format(file_path))
+            print('Validation failed, but no output was generated.')
         elif error_output != '':
             print(error_output)
             print('There was an issue processing the request.')
-            exit(1)
+        exit(1)
     output_lines = output.split('\n')
 
     file_name = "loading_output"
@@ -103,7 +104,13 @@ def validate_resources(version, ignore_list, files):
     return filter_errors(ignore_list, errors_per_file)
 
 
-def validate_resource_dir(run_config, ignore_list, recently_changed):
+class RunConfig(object):
+    def __init__(self):
+        self.target_dir = ''
+        self.version = ''
+
+
+def validate_resource_dir(run_config: RunConfig, ignore_list: dict, recently_changed: bool) -> Tuple[int, dict]:
     print('Checking directory {}'.format(run_config.target_dir))
     files = get_fhir_resource_files(run_config.target_dir, recently_changed)
     files.sort()
@@ -123,12 +130,6 @@ def validate_resource_dir(run_config, ignore_list, recently_changed):
     return file_count, invalid_resources
 
 
-class RunConfig(object):
-    def __init__(self):
-        self.target_dir = ''
-        self.version = ''
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--ignorefile',
@@ -140,7 +141,7 @@ def main():
     try:
         ignore_list = yaml.safe_load(open(args.ignorefile))
         print('Ignore list found, using to filter results')
-    except:
+    except FileNotFoundError:
         print('Could not find ignore list file, running without filters')
         ignore_list = {'ignore_list': {}}
 
