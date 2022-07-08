@@ -1,4 +1,17 @@
 locals {
+  # TODO: temporary work around to support dynamic az resolution of the appropriate rds writer...
+  #       node. This would be more reasonably encoded as inputs to the parent module however the
+  #       disconnect between so-called stateful and stateless modules makes this less clear.
+  #       Near-term adoption of a terraservices strategy will make this more obvious.
+  environments = {
+    test = {
+      rds_cluster_identifier = "bfd-1652-v70-pre-synthea-load" # TODO: Temporary. To be removed after BFD-1746
+    }
+    prod-sbx = {}
+    prod     = {}
+  }
+  rds_cluster_identifier = lookup(local.environments[var.env_config.env], "rds_cluster_identifier", "bfd-${var.env_config.env}-aurora-cluster")
+
   is_prod = var.env_config.env == "prod"
 
   log_groups = {
@@ -227,6 +240,17 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
   policy_arn = aws_iam_policy.aws_cli.arn
 }
 
+data "aws_rds_cluster" "rds" {
+  cluster_identifier = local.rds_cluster_identifier
+}
+
+data "external" "rds" {
+  program = [
+    "${path.module}/rds-cluster-config.sh",     # helper script
+    data.aws_rds_cluster.rds.cluster_identifier # verified, positional argument to script
+  ]
+}
+
 # EC2 Instance to run the BFD Pipeline app.
 module "ec2_instance" {
   source = "../ec2"
@@ -234,7 +258,8 @@ module "ec2_instance" {
   env_config = var.env_config
   role       = "etl"
   layer      = "data"
-  az         = "us-east-1a" # Same as the master db
+  # az         = "us-east-1a" # Same as the master db
+  az         = data.external.rds.result["WriterAZ"]
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
