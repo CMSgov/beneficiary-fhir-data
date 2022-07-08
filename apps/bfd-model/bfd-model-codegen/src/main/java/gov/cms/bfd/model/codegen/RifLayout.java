@@ -100,12 +100,12 @@ public final class RifLayout {
       RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
       @SuppressWarnings("deprecation")
       Optional<Integer> rifColumnLength =
-          row.getCell(2).getCellTypeEnum() == CellType.NUMERIC
+          row.getCell(2).getCellType() == CellType.NUMERIC
               ? Optional.of((int) row.getCell(2).getNumericCellValue())
               : Optional.empty();
       @SuppressWarnings("deprecation")
       Optional<Integer> rifColumnScale =
-          row.getCell(3).getCellTypeEnum() == CellType.NUMERIC
+          row.getCell(3).getCellType() == CellType.NUMERIC
               ? Optional.of((int) row.getCell(3).getNumericCellValue())
               : Optional.empty();
 
@@ -151,7 +151,7 @@ public final class RifLayout {
    */
   @SuppressWarnings("deprecation")
   private static boolean parseBoolean(Cell cell) {
-    if (cell.getCellTypeEnum() == CellType.BOOLEAN) return cell.getBooleanCellValue();
+    if (cell.getCellType() == CellType.BOOLEAN) return cell.getBooleanCellValue();
     else
       /*
        * I had some trouble with actual Boolean values stored in the
@@ -332,6 +332,7 @@ public final class RifLayout {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String toString() {
       StringBuilder sb = new StringBuilder("RifField: { ");
       sb.append("columnName=")

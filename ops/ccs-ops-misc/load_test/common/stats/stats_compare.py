@@ -1,9 +1,13 @@
 """Members of this file/module are related to the comparison and subsequent validation 
 of performance statistics against a previous set of statistics or an average of all
 previous statistics"""
+import logging
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Set, Union
+from locust.env import Environment
 from common.stats.aggregated_stats import AggregatedStats, ResponseTimePercentiles, TaskStats
+from common.stats.stats_config import StatsConfiguration
+from common.stats.stats_loaders import StatsLoader
 
 TaskStatsOrPercentiles = Union[TaskStats, ResponseTimePercentiles]
 """Type indicating a value that is either a TaskStats instance or a response time
@@ -28,6 +32,29 @@ class StatCompareResult:
     """The value of the stat that the stat's current value is being compared against"""
     current: Union[float, int]
     """The value of the stat from the current test run"""
+
+def do_stats_comparison(environment: Environment, stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    if not stats_config.compare:
+        return
+    
+    logger = logging.getLogger()
+    stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
+    previous_stats = stats_loader.load()
+    if previous_stats:
+        failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
+        if not failed_stats_results:
+            logger.info(
+                'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+        else:
+            # If we get here, that means some tasks have stats exceeding the threshold percent
+            # between the previous/average run and the current. Fail the test run, and log the
+            # failing tasks along with their relative stat percents   
+            environment.process_exit_code = 1
+            logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
+                        stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
+    else:
+        logger.warn(
+            'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
 
 
 def get_stats_compare_results(previous: TaskStats, current: TaskStats) -> List[StatCompareResult]:

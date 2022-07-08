@@ -31,8 +31,8 @@ public final class LoadedFilterManagerTest {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
-  private static final String SAMPLE_BENE = "567834";
-  private static final String INVALID_BENE = "1";
+  private static final long SAMPLE_BENE = 567834L;
+  private static final long INVALID_BENE = 1L;
   private static final LoadedBatch[] preBatches = new LoadedBatch[8];
   private static final Instant[] preDates = new Instant[preBatches.length * 5];
 
@@ -43,7 +43,7 @@ public final class LoadedFilterManagerTest {
     for (int i = 0; i < preDates.length; i++) {
       preDates[i] = now.plusSeconds(i);
     }
-    List<String> beneficiaries = Collections.singletonList(SAMPLE_BENE);
+    List<Long> beneficiaries = Collections.singletonList(SAMPLE_BENE);
     for (int i = 0; i < preBatches.length; i++) {
       preBatches[i] = new LoadedBatch(i + 1, (i / 2) + 1, beneficiaries, preDates[i * 5 + 4]);
     }

@@ -16,14 +16,7 @@
     </description>
 
     <properties>
-        <!-- Version of gRPC related dependencies -->
-        <grpc_java.version>1.37.0</grpc_java.version>
-        <!-- Version of the plugin used to build the gRPC stubs from the Health.proto file. -->
-        <protoc.version>3.15.8</protoc.version>
-        <hibernate.version>5.4.31.Final</hibernate.version>
         <jpa.version>1.0.2.Final</jpa.version>
-        <postgresql.version>42.2.20</postgresql.version>
-        <hsqldb.version>2.6.0</hsqldb.version>
         <slf4j.version>1.7.7</slf4j.version>
         <hikari.version>4.0.3</hikari.version>
     </properties>
@@ -137,7 +130,6 @@
             <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
 
         <dependency>
