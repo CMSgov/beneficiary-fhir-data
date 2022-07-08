@@ -1,7 +1,8 @@
-# Config file created by these load tests, depending on command line options
-config.yml
-
 # Python cache files
-common/__pycache__
-v1/__pycache__
-v2/__pycache__
+**/__pycache__
+
+# Local performance statistics
+**/*.stats.json
+
+# Repository Locust configuration
+locust.conf
