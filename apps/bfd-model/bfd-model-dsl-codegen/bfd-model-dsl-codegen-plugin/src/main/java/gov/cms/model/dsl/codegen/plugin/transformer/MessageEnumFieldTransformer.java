@@ -95,10 +95,11 @@ public class MessageEnumFieldTransformer implements FieldTransformer {
           setter.createSetRef(column));
     } else {
       builder.addStatement(
-          "$L.copyEnumAsString($L, $L, 0, $L, $L.getEnumString($L), $L)",
+          "$L.copyEnumAsString($L, $L, $L, $L, $L.getEnumString($L), $L)",
           TRANSFORMER_VAR,
           TransformerUtil.createFieldNameForErrorReporting(mapping, column),
           column.isNullable(),
+          column.computeMinLength(0),
           column.computeLength(),
           extractorName(mapping, transformation),
           SOURCE_VAR,

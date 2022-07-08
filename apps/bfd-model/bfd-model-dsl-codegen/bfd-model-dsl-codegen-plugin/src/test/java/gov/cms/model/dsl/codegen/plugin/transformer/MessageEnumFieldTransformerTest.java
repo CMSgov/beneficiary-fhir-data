@@ -43,6 +43,35 @@ public class MessageEnumFieldTransformerTest {
         block.toString());
   }
 
+  /**
+   * Verify String fields with defined minimum length are copied using {@code copyEnumAsString}
+   * correctly.
+   */
+  @Test
+  public void testStringFieldWithMinLength() {
+    ColumnBean column =
+        ColumnBean.builder().name("claimStatus").sqlType("varchar(8)").minLength(1).build();
+    TransformationBean transformation =
+        TransformationBean.builder()
+            .optionalComponents(TransformationBean.OptionalComponents.None)
+            .from("claimStatus")
+            .transformer("MessageEnum")
+            .build();
+    MappingBean mapping =
+        MappingBean.builder()
+            .entityClassName("gov.cms.test.Entity")
+            .transformation(transformation)
+            .build();
+
+    var generator = new MessageEnumFieldTransformer();
+    CodeBlock block =
+        generator.generateCodeBlock(
+            mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
+    assertEquals(
+        "transformer.copyEnumAsString(namePrefix + gov.cms.test.Entity.Fields.claimStatus, true, 1, 8, Entity_claimStatus_Extractor.getEnumString(from), to::setClaimStatus);\n",
+        block.toString());
+  }
+
   /** Verify char fields are copied using {@code copyEnumAsCharacter}. */
   @Test
   public void testCharacterField() {
