@@ -12,8 +12,8 @@
 	<packaging>jar</packaging>
 
 	<description>
-		A Java JAR and assembly zip that packages up shared utilities used by
-		the FHIR Server and Launcher.
+		A Java JAR that packages up shared utilities used by the FHIR Server
+		and Launcher.
 	</description>
 
 	<dependencies>
