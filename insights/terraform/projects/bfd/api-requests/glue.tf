@@ -168,6 +168,7 @@ resource "aws_s3_object" "bfd-history-ingest" {
   key                = "scripts/${local.environment}/bfd_history_ingest.py"
   metadata           = {}
   storage_class      = "STANDARD"
+  etag               = filemd5("glue_src/bfd_history_ingest.py")
   source             = "glue_src/bfd_history_ingest.py"
 }
 

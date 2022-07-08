@@ -34,9 +34,11 @@ SourceDf = glueContext.create_dynamic_frame.from_catalog(
     transformation_ctx="SourceDf",
 )
 
+record_count = SourceDf.count()
+
 # With bookmarks enabled, we have to make sure that there is data to be processed
-if SourceDf.count() > 0:
-    print("here is the schema from the source")
+if record_count > 0:
+    print("Here is the schema from the source")
     SourceDf.toDF().printSchema()
 
     NextNode = DynamicFrame.fromDF(
@@ -48,17 +50,25 @@ if SourceDf.count() > 0:
         's3://bfd-insights-bfd-577373831711/databases/bfd/temp/'
         ).select('root')
 
-    print("here is the schema from the relationalize")
-    RelationalizeBeneNode.toDF().printSchema()
-
-    output = (
+    relationalized = (
         RelationalizeBeneNode.toDF()
         .withColumn('year', SqlFuncs.substring('timestamp', 1,4))
         .withColumn('month', SqlFuncs.substring('timestamp', 6,2))
         .withColumn('day', SqlFuncs.substring('timestamp', 9,2))
         )
+    
+    # construct renaming mapping for ApplyMapping
+    mappings = list()
+    for field in relationalized.schema.fields:
+        if field.name:
+            dtype = field.dataType.typeName()
+            mappings.append((field.name, dtype, field.name.replace('.', '_'), dtype))
 
-    OutputDy = DynamicFrame.fromDF(output, glueContext, "initializeNode")
+    # apply mapping
+    OutputDy = DynamicFrame.fromDF(relationalized, glueContext, "makeOutput").apply_mapping(mappings=mappings)
+
+    print("Here is the output schema:")
+    OutputDy.toDF().printSchema()
 
     # Script generated for node Data Catalog table
     DataCatalogtable_node3 = glueContext.write_dynamic_frame.from_catalog(
@@ -74,3 +84,5 @@ if SourceDf.count() > 0:
     )
 
 job.commit()
+
+print("Job complete. %d records processed." % record_count)
