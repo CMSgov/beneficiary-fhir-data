@@ -1,8 +1,8 @@
 locals {
-  # TODO: temporary work around to support dynamic az resolution of the appropriate rds writer...
-  #       node. This would be more reasonably encoded as inputs to the parent module however the
-  #       disconnect between so-called stateful and stateless modules makes this less clear.
-  #       Near-term adoption of a terraservices strategy will make this more obvious.
+  # TODO: temporary work around to support dynamic rds writer node resolution.
+  #       This would be more reasonably encoded as inputs to the parent module, but that's less
+  #       clear with the disconnect between stateful and stateless modules. Near-term adoption of
+  #       a terraservices strategy will make this more obvious.
   environments = {
     test = {
       rds_cluster_identifier = "bfd-1652-v70-pre-synthea-load" # TODO: Temporary. To be removed after BFD-1746
@@ -240,10 +240,12 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
   policy_arn = aws_iam_policy.aws_cli.arn
 }
 
+# Locate general RDS cluster configuration
 data "aws_rds_cluster" "rds" {
   cluster_identifier = local.rds_cluster_identifier
 }
 
+# Generate detailed RDS cluster configuration, including Writer AZ
 data "external" "rds" {
   program = [
     "${path.module}/rds-cluster-config.sh",     # helper script
@@ -258,7 +260,6 @@ module "ec2_instance" {
   env_config = var.env_config
   role       = "etl"
   layer      = "data"
-  # az         = "us-east-1a" # Same as the master db
   az         = data.external.rds.result["WriterAZ"]
 
   launch_config = {
