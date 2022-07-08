@@ -1,10 +1,12 @@
 """Members of this file/module are related to writing performance statistics to a user-specified
 data "store" (such as to file or AWS S3)"""
 from dataclasses import asdict
+import logging
 import time
 import os
 import json
 from common.stats.aggregated_stats import AggregatedStats
+from common.stats.stats_config import StatsConfiguration, StatsStorageType
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
@@ -13,6 +15,20 @@ from gevent import monkey
 monkey.patch_all()
 import boto3
 
+def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    logger = logging.getLogger()
+    if stats_config.store == StatsStorageType.FILE:
+        logger.info("Writing aggregated performance statistics to file.")
+
+        stats_json_writer = StatsJsonFileWriter(stats)
+        stats_json_writer.write(stats_config.path or '')
+    elif stats_config.store == StatsStorageType.S3:
+        logger.info("Writing aggregated performance statistics to S3.")
+
+        stats_s3_writer = StatsJsonS3Writer(stats)
+        if not stats_config.bucket:
+            raise ValueError('S3 bucket must be provided when writing stats to S3')
+        stats_s3_writer.write(stats_config.bucket)
 
 class StatsJsonFileWriter(object):
     """Writes an AggegratedStats instance to a specified directory path in JSON format"""
