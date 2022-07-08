@@ -20,7 +20,7 @@ import javax.persistence.Table;
  * <p>Added as part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>.
  */
 @Entity
-@Table(name = "skipped_rif_records_new")
+@Table(name = "skipped_rif_records")
 public class SkippedRifRecord {
   /** The unique (sequence-generated) ID for this {@link SkippedRifRecord} instance. */
   @Id
