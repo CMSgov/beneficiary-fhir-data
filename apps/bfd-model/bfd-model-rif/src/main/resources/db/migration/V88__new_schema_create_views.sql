@@ -1,6 +1,6 @@
 -- NEW_SCHEMA_CREATE_VIEWS.SQL
 --
--- This flyway script creates db views over new shema _new tables. This
+-- This flyway script creates db views over the schema _new tables. This
 -- allows the BFD services code, in particular the generated entity beans,
 -- to point to updatable views instead of actual tables. This slight of hand
 -- allows us to introduce a subsequent flyway script which will then get the
