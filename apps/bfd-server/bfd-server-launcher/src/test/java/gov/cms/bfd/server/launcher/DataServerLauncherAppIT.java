@@ -137,10 +137,15 @@ public final class DataServerLauncherAppIT {
   }
 
   /**
-   * Creates a regex pattern for all resource provider methods to ensure bene_id is logged in mdc in
+   * Creates a regex pattern for any resource provider method to ensure bene_id is logged in mdc in
    * our access json entries
+   *
+   * @param endpoint the endpoint type being hit by API call
+   * @param param the property to search by in read/search methods
+   * @param isQuery boolean for whether mdc log starts jpa or http entry
+   * @return the regex pattern to match access log entry for a read/search method
    */
-  public String createBeneIdMdcPattern(String endpoint, String query, Boolean isQuery) {
+  public String createBeneIdMdcPattern(String endpoint, String param, Boolean isQuery) {
     // Duration that distinguishes various search and read methods
     String duration =
         (isQuery) ? ".*(\\{\\\"jpa_query)" : ".*(http_access.response.duration_milliseconds)";
@@ -148,7 +153,7 @@ public final class DataServerLauncherAppIT {
     String mdcPattern =
         new StringBuilder(duration)
             .append(".*((/[a-z]+[1-2]{1}/[a-z]+/" + endpoint + "))") // API URL
-            .append(".*((by=" + query + "))") // Query parameter
+            .append(".*((by=" + param + "))") // Query parameter
             .append(".*((bene_id\\\":\\\"567834\\\"))") // mdc bene_id
             .append(",\\\".*") // remaining log
             .toString();
