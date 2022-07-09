@@ -314,9 +314,7 @@ public class McsClaimTransformerTest {
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
-              new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
-              new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+              new DataTransformer.ErrorMessage("idrClaimType", "no value set"));
 
       String expectedMessage =
           String.format(
@@ -993,7 +991,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDiagnosisCodeIdrDiagCode() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDiagnosisCode.Builder::setIdrDiagCode,
             RdaMcsDiagnosisCode::getIdrDiagCode,
             RdaMcsDiagnosisCode.Fields.idrDiagCode,

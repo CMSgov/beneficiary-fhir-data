@@ -1,11 +1,31 @@
 '''Locust tests that require a pool of Contract data.'''
 
 import random
-
+from typing import Dict, List
+from locust import events
+from locust.env import Environment
 from common.bfd_user_base import BFDUserBase
+from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common import data, db
 
+table_sample_contract_data = False
+master_contract_data: List[Dict[str, str]] = []
+
+@events.init.add_listener
+def _(environment: Environment, **kwargs):
+    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+        # Don't bother loading data for the master runner, it doesn't run a test
+        return
+
+    # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
+    # for Locust's documentation on the test data management pattern used here
+    global master_contract_data
+    master_contract_data = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db.get_contract_ids,
+        use_table_sample=table_sample_contract_data
+    )
 
 class ContractTestUser(BFDUserBase):
     '''Locust tests that require a pool of contract data.'''
@@ -18,7 +38,7 @@ class ContractTestUser(BFDUserBase):
         '''
 
         super().__init__(*args, **kwargs)
-        self.contract_data = data.load_data_segment(db.get_contract_ids).copy()
+        self.contract_data = master_contract_data.copy()
         random.shuffle(self.contract_data)
 
 
