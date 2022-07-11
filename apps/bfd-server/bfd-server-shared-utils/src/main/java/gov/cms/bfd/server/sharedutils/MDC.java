@@ -33,7 +33,7 @@ public class MDC {
    *
    * @param adapter The MDC Adapter to use.
    */
-  public static void setMdcAdapter(MDCAdapter adapter) {
+  public static void setMDCAdapter(MDCAdapter adapter) {
     mdcAdapter = adapter;
   }
 
@@ -55,7 +55,7 @@ public class MDC {
    * @param key Fields to concatenate into the final key that we'll put into MDC
    * @return Text of the key that we'll put into MDC
    */
-  public static String formatMdcKey(String key) {
+  public static String formatMDCKey(String key) {
     return key.replace(FROM_DELIMITER, TO_DELIMITER);
   }
 
@@ -66,7 +66,7 @@ public class MDC {
    * @param value Value put into MDC
    */
   public static void put(String key, String value) {
-    getMDCAdapter().put(formatMdcKey(key), value);
+    getMDCAdapter().put(formatMDCKey(key), value);
   }
 
   /** Wrapper for {@link org.slf4j.MDC#clear()}. */

@@ -12,14 +12,12 @@
 	<packaging>jar</packaging>
 
 	<description>
-		A Java JAR that packages up shared utilities used by the FHIR Server
-		and Launcher.
+		Shared utilities used by the FHIR Server and Launcher.
 	</description>
 
 	<dependencies>
 		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging
-				frameworks in Java. -->
+			<!-- Facade for logging frameworks. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>

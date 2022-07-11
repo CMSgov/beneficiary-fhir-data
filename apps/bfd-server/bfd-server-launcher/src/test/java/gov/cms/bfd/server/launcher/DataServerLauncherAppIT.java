@@ -234,7 +234,7 @@ public final class DataServerLauncherAppIT {
       assertTrue(
           Files.readString(accessLogJson)
               .contains(
-                  MDC.formatMdcKey(
+                  MDC.formatMDCKey(
                       DataServerLauncherApp.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES)));
 
       // Stop the application.

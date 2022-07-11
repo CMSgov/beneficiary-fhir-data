@@ -21,15 +21,14 @@ public final class MDCIT {
   @BeforeEach
   public void beforeEach() {
     mdcMock.clear();
-    MDC.setMdcAdapter(mdcMock);
+    MDC.setMDCAdapter(mdcMock);
     Mockito.reset(mdcMock);
   }
 
-  /** Test whether {@link MDC#formatMdcKey(String)} replaces "." with "_". */
+  /** Test whether {@link MDC#formatMDCKey(String)} replaces "." with "_". */
   @Test
   public void convertsPeriodsToUnderscore() {
-    assertEquals(
-        "http_access_request_header_foo", MDC.formatMdcKey("http_access.request.header.foo"));
+    assertEquals("key_that_needs_formatting", MDC.formatMDCKey("key.that.needs.formatting"));
   }
 
   /**
@@ -37,9 +36,10 @@ public final class MDCIT {
    * org.slf4j.MDC#put(String, String)} method.
    */
   @Test
-  public void putsToMdc() {
-    MDC.put("http_access_response_key", "bar");
-    Mockito.verify(mdcMock).put("http_access_response_key", "bar");
+  public void putsToMDC() {
+    MDC.put("key_that_does_not_need_formatting", "This key should be inserted as-is.");
+    Mockito.verify(mdcMock)
+        .put("key_that_does_not_need_formatting", "This key should be inserted as-is.");
     Mockito.verifyNoMoreInteractions(mdcMock);
   }
 
@@ -48,10 +48,10 @@ public final class MDCIT {
    * org.slf4j.MDC#put(String, String)} method, after first replacing "." characters with "_".
    */
   @Test
-  public void putsToMdcAndFormats() {
-    String mdcValue = "This should be retrievable by the reformatted key";
-    MDC.put("http_access.response.dot_separated.key", mdcValue);
-    Mockito.verify(mdcMock).put("http_access_response_dot_separated_key", mdcValue);
+  public void putsToMDCAndFormats() {
+    MDC.put("dot.separated.key", "This key needs to be reformatted to change . into _");
+    Mockito.verify(mdcMock)
+        .put("dot_separated_key", "This key needs to be reformatted to change . into _");
     Mockito.verifyNoMoreInteractions(mdcMock);
   }
 
@@ -60,8 +60,6 @@ public final class MDCIT {
    */
   @Test
   public void clearsMDC() {
-    MDC.put("test_string", "This should disappear when we clear the MDC.");
-    Mockito.verify(mdcMock).put("test_string", "This should disappear when we clear the MDC.");
     MDC.clear();
     Mockito.verify(mdcMock).clear();
     Mockito.verifyNoMoreInteractions(mdcMock);
