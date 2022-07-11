@@ -5,7 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +38,6 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
@@ -352,7 +351,7 @@ public final class DataServerLauncherApp {
          * accessible to the filter.
          */
         MDC.put(
-            MDCFormatter.formatMdcKey(HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES),
+            HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
             String.valueOf(response.getHttpOutput().getWritten()));
 
         /*

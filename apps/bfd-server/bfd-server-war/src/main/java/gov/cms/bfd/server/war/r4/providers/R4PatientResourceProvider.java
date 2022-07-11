@@ -24,7 +24,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -65,7 +65,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -787,9 +786,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      MDC.put(
-          MDCFormatter.formatMdcKey("database_query.by_hash.collision.distinct_bene_ids"),
-          Long.toString(distinctBeneIds));
+      MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {

@@ -24,7 +24,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -64,7 +64,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -169,12 +168,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          MDCFormatter.formatMdcKey(
-              String.format(
-                  "bene_by_id.include_%s",
-                  String.join(
-                      "_",
-                      (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS)))),
+          String.format(
+              "bene_by_id.include_%s",
+              String.join(
+                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }

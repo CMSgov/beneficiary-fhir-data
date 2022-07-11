@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -101,7 +100,10 @@ public final class QueryLoggingListener implements QueryExecutionListener {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    return MDCFormatter.formatMdcKey(String.format("%s.%s", "database_query", keySuffix));
+    // We have to compute this here instead of in the wrapper because this
+    // class uses a different MDC class (org.jboss.logging.MDC)
+    return gov.cms.bfd.server.sharedutils.MDC.formatMdcKey(
+        String.format("%s.%s", "database_query", keySuffix));
   }
 
   /**

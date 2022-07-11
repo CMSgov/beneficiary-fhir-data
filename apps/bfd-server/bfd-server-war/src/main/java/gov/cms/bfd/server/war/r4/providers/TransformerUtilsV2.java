@@ -13,7 +13,7 @@ import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
@@ -100,7 +100,6 @@ import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.util.Assert;
 
 /**
@@ -1618,14 +1617,12 @@ public final class TransformerUtilsV2 {
       String queryId, long queryDurationNanoseconds, long recordCount) {
     String keyPrefix = String.format("jpa_query.%s", queryId);
     MDC.put(
-        MDCFormatter.formatMdcKey(String.format("%s.duration_nanoseconds", keyPrefix)),
+        String.format("%s.duration_nanoseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds));
     MDC.put(
-        MDCFormatter.formatMdcKey(String.format("%s.duration_milliseconds", keyPrefix)),
+        String.format("%s.duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
-    MDC.put(
-        MDCFormatter.formatMdcKey(String.format("%s.record_count", keyPrefix)),
-        Long.toString(recordCount));
+    MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**

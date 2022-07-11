@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war;
 
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDC;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Ensure that every request-response pair adds data to the logging {@link MDC} which will be
@@ -100,7 +99,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    return MDCFormatter.formatMdcKey(String.format("%s.%s", "http_access", keySuffix));
+    return String.format("%s.%s", "http_access", keySuffix);
   }
 
   /**
@@ -109,7 +108,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    *     related to the HTTP request
    */
   public static String computeMdcRequestKey(String keySuffix) {
-    return computeMdcKey(String.format("request.%s", keySuffix));
+    return String.format("%s.%s", computeMdcKey("request"), keySuffix);
   }
 
   /**

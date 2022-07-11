@@ -34,7 +34,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.sharedutils.MDCFormatter;
+import gov.cms.bfd.server.sharedutils.MDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -119,7 +119,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -3408,14 +3407,12 @@ public final class TransformerUtils {
       String queryId, long queryDurationNanoseconds, long recordCount) {
     String keyPrefix = String.format("jpa_query.%s", queryId);
     MDC.put(
-        MDCFormatter.formatMdcKey(String.format("%s.duration_nanoseconds", keyPrefix)),
+        String.format("%s.duration_nanoseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds));
     MDC.put(
-        MDCFormatter.formatMdcKey(String.format("%s.duration_milliseconds", keyPrefix)),
+        String.format("%s.duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
-    MDC.put(
-        MDCFormatter.formatMdcKey(String.format("%s.record_count", keyPrefix)),
-        Long.toString(recordCount));
+    MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**
