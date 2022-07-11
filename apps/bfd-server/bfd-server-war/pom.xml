@@ -46,7 +46,7 @@
 			<!-- Includes a formatter around MDC for logging purposes -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-server-shared-utils</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Hibernate's JPA implementation is used to read data from the BFD database. -->

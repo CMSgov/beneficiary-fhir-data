@@ -49,7 +49,7 @@
 			<!-- BFD Shared Utilities include a formatter for logging to MDC -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-server-shared-utils</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
