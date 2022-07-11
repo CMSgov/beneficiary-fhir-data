@@ -22,7 +22,7 @@ public class MDC {
   public static final String TO_DELIMITER = "_";
 
   /**
-   * MDC Adapter explicitly set in {@link #setMdcAdapter(MDCAdapter)} (if any). Unless this is set,
+   * MDC Adapter explicitly set in {@link #setMDCAdapter(MDCAdapter)} (if any). Unless this is set,
    * use the MDC class's adapter. You normally wouldn't set this explicitly, but it can be useful
    * for mocked test MDC adapters, for example.
    */
