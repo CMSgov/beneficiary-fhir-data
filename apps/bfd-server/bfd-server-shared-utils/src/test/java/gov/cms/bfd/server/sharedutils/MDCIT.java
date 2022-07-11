@@ -10,18 +10,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.spi.MDCAdapter;
 
-/** Unit tests for {@link gov.cms.bfd.server.sharedutils.MDC}. */
+/** Unit tests for {@link MDC}. */
 @ExtendWith(MockitoExtension.class)
 public final class MDCIT {
 
+  /** A mocked MDC adapter for use in the tests. */
   @Mock MDCAdapter mdcMock;
 
-  @Test
-  public void convertsPeriodsToUnderscore() {
-    assertEquals(
-        "http_access_request_header_foo", MDC.formatMdcKey("http_access.request.header.foo"));
-  }
-
+  /** Set up tests with a mocked MDC adapter and make sure the MDC context is clear. */
   @BeforeEach
   public void beforeEach() {
     mdcMock.clear();
@@ -29,6 +25,17 @@ public final class MDCIT {
     Mockito.reset(mdcMock);
   }
 
+  /** Test whether {@link MDC#formatMdcKey(String)} replaces "." with "_". */
+  @Test
+  public void convertsPeriodsToUnderscore() {
+    assertEquals(
+        "http_access_request_header_foo", MDC.formatMdcKey("http_access.request.header.foo"));
+  }
+
+  /**
+   * Test whether {@link MDC#put(String, String)} calls the underlying {@link
+   * org.slf4j.MDC#put(String, String)} method.
+   */
   @Test
   public void putsToMdc() {
     MDC.put("http_access_response_key", "bar");
@@ -36,6 +43,10 @@ public final class MDCIT {
     Mockito.verifyNoMoreInteractions(mdcMock);
   }
 
+  /**
+   * Test whether {@link MDC#put(String, String)} calls the underlying {@link
+   * org.slf4j.MDC#put(String, String)} method, after first replacing "." characters with "_".
+   */
   @Test
   public void putsToMdcAndFormats() {
     String mdcValue = "This should be retrievable by the reformatted key";
@@ -44,6 +55,9 @@ public final class MDCIT {
     Mockito.verifyNoMoreInteractions(mdcMock);
   }
 
+  /**
+   * Test whether {@link MDC#clear()} calls the underlying {@link org.slf4j.MDC#clear()} function.
+   */
   @Test
   public void clearsMDC() {
     MDC.put("test_string", "This should disappear when we clear the MDC.");
