@@ -131,47 +131,51 @@ public class FdaDrugCodeDisplayLookup {
    * @param includeFakeDrugCode
    */
   private Map<String, String> readFDADrugCodeFile(boolean includeFakeDrugCode) {
-    try (final InputStream ndcProductStream =
-            Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
-        final BufferedReader ndcProductsIn =
-            new BufferedReader(new InputStreamReader(ndcProductStream))) {
-      /*
-       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
-       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
-       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
-       * SUBSTANCENAME
-       */
-      String line = "";
-      ndcProductsIn.readLine();
-      while ((line = ndcProductsIn.readLine()) != null) {
-        String ndcProductColumns[] = line.split("\t");
-        try {
-          String nationalDrugCodeManufacturer =
-              StringUtils.leftPad(
-                  ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-          String nationalDrugCodeIngredient =
-              StringUtils.leftPad(
-                  ndcProductColumns[1].substring(
-                      ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                  4,
-                  '0');
-          // ndcProductColumns[3] - Proprietary Name
-          // ndcProductColumns[13] - Substance Name
-          ndcProductHashMap.put(
-              String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-              ndcProductColumns[3] + " - " + ndcProductColumns[13]);
-        } catch (StringIndexOutOfBoundsException e) {
-          continue;
-        }
 
-        if (includeFakeDrugCode) {
-          ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
+    InputStream stream = App.class.getClassLoader().getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+
+    if (stream != null) {
+      try (final InputStream ndcProductStream =
+              Thread.currentThread()
+                  .getContextClassLoader()
+                  .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+          final BufferedReader ndcProductsIn =
+              new BufferedReader(new InputStreamReader(ndcProductStream))) {
+        /*
+         * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
+         * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
+         * retrieval to get the display value which is a combination of PROPRIETARYNAME &
+         * SUBSTANCENAME
+         */
+        String line = "";
+        ndcProductsIn.readLine();
+        while ((line = ndcProductsIn.readLine()) != null) {
+          String ndcProductColumns[] = line.split("\t");
+          try {
+            String nationalDrugCodeManufacturer =
+                StringUtils.leftPad(
+                    ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+            String nationalDrugCodeIngredient =
+                StringUtils.leftPad(
+                    ndcProductColumns[1].substring(
+                        ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
+                    4,
+                    '0');
+            // ndcProductColumns[3] - Proprietary Name
+            // ndcProductColumns[13] - Substance Name
+            ndcProductHashMap.put(
+                String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+                ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+          } catch (StringIndexOutOfBoundsException e) {
+            continue;
+          }
         }
+      } catch (IOException e) {
+        throw new UncheckedIOException("Unable to read NDC code data.", e);
       }
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NDC code data.", e);
+    }
+    if (includeFakeDrugCode) {
+      ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
     }
     return ndcProductHashMap;
   }

@@ -47,13 +47,4 @@ public class FDADrugUtilsTest {
         drugUtils.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertNotEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
-
-  /** Return Drug Code Display for a real drug code when parameter is true */
-  @Test
-  public void shouldReturnKnownDrugCodeDisplayWhenConstructorSetToTrue() {
-    FdaDrugCodeDisplayLookup drugUtils =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
-    String drugCodeDisplay = drugUtils.retrieveFDADrugCodeDisplay(Optional.of("294851887"));
-    assertEquals("TYLENOL Acetaminophen Extra Strength - ACETAMINOPHEN", drugCodeDisplay);
-  }
 }

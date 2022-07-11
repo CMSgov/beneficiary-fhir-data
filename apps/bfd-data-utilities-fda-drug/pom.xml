@@ -3,17 +3,22 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
 	<groupId>gov.cms.bfd.data.utilities.FDADrug</groupId>
 	<artifactId>bfd-data-utilities-fda-drug</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0-SNAPSHOT</version>
-	<name>bfd-data-utilities-fda-drug</name>
-	<url>http://maven.apache.org</url>
-	<properties>
-		<java.version>11</java.version>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-	</properties>
+
+	<description>
+		FDA Drug code lookup jar
+	</description>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>

@@ -25,13 +25,14 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Provides an FDA Drug Code file */
 public class DataUtilityCommons {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataUtilityCommons.class);
 
   /** Size of the buffer to read/write data */
   private static final int BUFFER_SIZE = 4096;
 
-/**
+  /**
    * Gets the fda drug codes from the fda file
    *
    * @param outputDir the output directory

@@ -2,6 +2,7 @@ package gov.cms.bfd.data.utilities.FDADrug;
 
 import java.io.IOException;
 
+/** Provides an FDA Drug Code file to download */
 public class App {
   /**
    * The name of the classpath resource (for the project's main web application) for the FDA
@@ -19,6 +20,7 @@ public class App {
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
    *           should be the path to the project's resource directory
    *     </ol>
+   *
    * @throws IOException if there is an issue creating or iterating over the downloaded files
    */
   public static void main(String[] args) {

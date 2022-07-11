@@ -2,14 +2,10 @@ package gov.cms.bfd.data.utilities.FDADrug;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
 public final class AppTest {
@@ -48,11 +44,14 @@ public final class AppTest {
 
   @Test
   public void fdaAppPassesWithValidParameters() {
-    try (MockedStatic<DataUtilityCommons> dataUtilityCommons  = Mockito.mockStatic(DataUtilityCommons.class)) {
-        String outputDir = "outputDir";
+    try (MockedStatic<DataUtilityCommons> dataUtilityCommons =
+        Mockito.mockStatic(DataUtilityCommons.class)) {
+      String outputDir = "outputDir";
 
-        dataUtilityCommons.when(() -> DataUtilityCommons.getFDADrugCodes(any(), any())).thenAnswer((Answer<Void>) invocation -> null);
-        App.main(new String[] {outputDir});
-    }  
+      dataUtilityCommons
+          .when(() -> DataUtilityCommons.getFDADrugCodes(any(), any()))
+          .thenAnswer((Answer<Void>) invocation -> null);
+      App.main(new String[] {outputDir});
+    }
   }
 }
