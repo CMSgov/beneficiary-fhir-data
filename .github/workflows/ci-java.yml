@@ -96,7 +96,7 @@ jobs:
         working-directory: ./apps/
       
       - name: 'Run Maven Build on FDA Drug Utility'
-        run: mvn clean install
+        run: mvn verify
         working-directory: ./apps/bfd-data-utilities-fda-drug
 
       - name: Login to GitHub Container Registry
