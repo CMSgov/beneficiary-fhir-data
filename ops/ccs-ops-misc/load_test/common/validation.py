@@ -1,16 +1,17 @@
-'''Validate tests against target SLIs'''
-from enum import Enum
+"""Validate tests against target SLIs"""
 import logging
 import time
+from enum import Enum
 from typing import Optional
+
 import gevent
-from locust.runners import STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP
 from locust.env import Environment
+from locust.runners import STATE_CLEANUP, STATE_STOPPED, STATE_STOPPING
 
 _DEFAULT_SLA_FAILSAFE = 10000
 """Default failsafe, in ms, that the test's response time should not exceed.
 Used only if _VALIDATION_GOAL is unset."""
-_validation_goal: Optional['ValidationGoal'] = None
+_validation_goal: Optional["ValidationGoal"] = None
 """The goals against which to measure these results. Note that if unset the failsafe
 validation will default to 10000ms"""
 
@@ -29,6 +30,7 @@ class ValidationGoal(Enum):
         self.sla_99 = sla_99
         self.sla_failsafe = sla_failsafe
 
+
 def set_validation_goal(validation_goal: ValidationGoal) -> None:
     """Sets the validation goal that will be validated against once the test run is
     complete. Should be called prior to any work being done in a Locustfile
@@ -38,6 +40,7 @@ def set_validation_goal(validation_goal: ValidationGoal) -> None:
     """
     global _validation_goal
     _validation_goal = validation_goal
+
 
 def setup_failsafe_event(environment: Environment) -> None:
     """Adds a listener that will add a repeating check for the global failsafe response time in
@@ -51,43 +54,47 @@ def setup_failsafe_event(environment: Environment) -> None:
     fail_time_ms = _validation_goal.sla_failsafe if _validation_goal else _DEFAULT_SLA_FAILSAFE
     gevent.spawn(_check_global_fail, environment, fail_time_ms)
 
+
 def check_sla_validation(environment: Environment) -> None:
-    '''Checks the SLA numbers for various percentiles based on the given sla category name. This
+    """Checks the SLA numbers for various percentiles based on the given sla category name. This
     function is ignored unless it is the main test thread or a non-distributed test.
-    '''
+    """
     if not _validation_goal:
         return
 
     logger = logging.getLogger()
 
-    logger.info('Checking SLAs...')
+    logger.info("Checking SLAs...")
     sla_50 = _validation_goal.sla_50
     sla_95 = _validation_goal.sla_95
     sla_99 = _validation_goal.sla_99
 
     if environment.stats.total.fail_ratio > 0:
-        logger.error('Test failed due to request failure ratio > 0%')
+        logger.error("Test failed due to request failure ratio > 0%")
         environment.process_exit_code = 1
     elif environment.stats.total.get_response_time_percentile(0.50) > sla_50:
-        logger.error('Test failed due to 50th percentile response time > %d ms', sla_50)
+        logger.error("Test failed due to 50th percentile response time > %d ms", sla_50)
         environment.process_exit_code = 1
     elif environment.stats.total.get_response_time_percentile(0.95) > sla_95:
-        logger.error('Test failed due to 95th percentile response time > %d ms', sla_95)
+        logger.error("Test failed due to 95th percentile response time > %d ms", sla_95)
         environment.process_exit_code = 1
     elif environment.stats.total.get_response_time_percentile(0.99) > sla_99:
-        logger.error('Test failed due to 99th percentile response time > %d ms', sla_99)
+        logger.error("Test failed due to 99th percentile response time > %d ms", sla_99)
         environment.process_exit_code = 1
     else:
         logger.info("SLAs within acceptable bounds")
 
+
 def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:
-    '''Checks if the test response time is too long (in the event the database is being
+    """Checks if the test response time is too long (in the event the database is being
     overwhelmed) and if so, we stop the test.
-    '''
+    """
     while not environment.runner.state in [STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP]:
         time.sleep(1)
         if environment.stats.total.avg_response_time > fail_time_ms:
-            logging.getLogger().warning('WARNING: Test aborted due to triggering test failsafe '
-                '(average response time ratio > %d ms)', fail_time_ms)
+            logging.getLogger().warning(
+                "WARNING: Test aborted due to triggering test failsafe " "(average response time ratio > %d ms)",
+                fail_time_ms,
+            )
             environment.runner.quit()
             return

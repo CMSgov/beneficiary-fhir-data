@@ -5,7 +5,6 @@ import argparse
 import subprocess
 from typing import List
 
-
 arg_parser = argparse.ArgumentParser(
     description="Script to run Locust tests locally in distributed, headless mode. Arguments unspecified by this script are passed to Locustfile.",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,

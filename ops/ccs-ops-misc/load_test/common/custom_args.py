@@ -1,9 +1,10 @@
 """Code in this file is related to defining and registering custom Locust arguments for testing"""
+import logging
 from datetime import timedelta
 from math import ceil
-import logging
-from locust.env import Environment
+
 from locust.argument_parser import LocustArgumentParser
+from locust.env import Environment
 
 
 def register_custom_args(parser: LocustArgumentParser):
@@ -51,7 +52,7 @@ def register_custom_args(parser: LocustArgumentParser):
 def adjust_parsed_run_time(environment: Environment):
     logger = logging.getLogger()
     if not environment.parsed_options:
-        logger.warn('Cannot adjust runtime when running Locust as library')
+        logger.warn("Cannot adjust runtime when running Locust as library")
         return
 
     # Adjust the runtime to account for spawn rate

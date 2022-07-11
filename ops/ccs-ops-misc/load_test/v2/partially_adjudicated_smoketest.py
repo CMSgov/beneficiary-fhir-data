@@ -1,4 +1,5 @@
-from locust import HttpUser, task, tag
+from locust import HttpUser, tag, task
+
 from common.pac_tests import PACTestUser
 
 
@@ -6,7 +7,7 @@ class PACUser(PACTestUser):
 
     """
     Tests for Partially Adjudicated Claims endpoints to error check the transformers
-    
+
     Copies are made of the MBI list so that both the claim and claimResponse object is checked
     for every MBI.
     """
@@ -15,7 +16,7 @@ class PACUser(PACTestUser):
     def _hashed_mbis(cls):
         return super()._hashed_mbis().copy()
 
-    @tag('claim')
+    @tag("claim")
     @task
     def get_claim(self):
         """Get single Claim"""
