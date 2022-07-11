@@ -100,8 +100,8 @@ public enum ClaimType {
       SNFClaim_.lines);
 
   private final Class<?> entityClass;
-  private final SingularAttribute<?, ?> entityIdAttribute;
-  private final SingularAttribute<?, ?> entityBeneficiaryIdAttribute;
+  private final SingularAttribute<?, Long> entityIdAttribute;
+  private final SingularAttribute<?, Long> entityBeneficiaryIdAttribute;
   private final Function<Object, LocalDate> serviceEndAttributeFunction;
   private final ClaimTypeTransformer transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
@@ -118,8 +118,8 @@ public enum ClaimType {
    */
   private ClaimType(
       Class<?> entityClass,
-      SingularAttribute<?, ?> entityIdAttribute,
-      SingularAttribute<?, ?> entityBeneficiaryIdAttribute,
+      SingularAttribute<?, Long> entityIdAttribute,
+      SingularAttribute<?, Long> entityBeneficiaryIdAttribute,
       Function<Object, LocalDate> serviceEndAttributeFunction,
       ClaimTypeTransformer transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
@@ -143,7 +143,7 @@ public enum ClaimType {
   }
 
   /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
-  public SingularAttribute<?, ?> getEntityIdAttribute() {
+  public SingularAttribute<?, Long> getEntityIdAttribute() {
     return entityIdAttribute;
   }
 
@@ -151,7 +151,7 @@ public enum ClaimType {
    * @return the JPA {@link Entity} field that is a (foreign keyed) reference to {@link
    *     Beneficiary#getBeneficiaryId()}
    */
-  public SingularAttribute<?, ?> getEntityBeneficiaryIdAttribute() {
+  public SingularAttribute<?, Long> getEntityBeneficiaryIdAttribute() {
     return entityBeneficiaryIdAttribute;
   }
 

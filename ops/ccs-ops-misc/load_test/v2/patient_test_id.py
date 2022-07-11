@@ -1,16 +1,13 @@
 '''Single Locust test for BFD endpoint'''
 
-from common.bene_tests import BeneTestUser
-from common.validation import SLA_PATIENT
 from locust import task
+from common import validation
+from common.bene_tests import BeneTestUser
+
+validation.set_validation_goal(validation.ValidationGoal.SLA_PATIENT)
 
 class BFDUser(BeneTestUser):
     '''Single Locust test for BFD endpoint'''
-
-    # The goals against which to measure these results. Note that they also include the Failsafe
-    # cutoff, which will default to the V2 cutoff time if not set.
-    VALIDATION_GOALS = SLA_PATIENT
-
 
     @task
     def patient_test_id(self):
