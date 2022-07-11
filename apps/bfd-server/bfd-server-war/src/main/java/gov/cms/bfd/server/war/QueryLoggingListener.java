@@ -1,12 +1,12 @@
 package gov.cms.bfd.server.war;
 
+import gov.cms.bfd.server.sharedutils.MDC;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.QueryExecutionListener;
-import org.jboss.logging.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,15 +81,23 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       if (queryInfoList.size() > 1) queries.append(']');
       MDC.put(computeMdcKey(String.format("%s.queries", mdcKeyPrefix)), queries.toString());
     }
-    MDC.put(computeMdcKey(String.format("%s.size", mdcKeyPrefix)), queryInfoList.size());
+    MDC.put(
+        computeMdcKey(String.format("%s.size", mdcKeyPrefix)),
+        String.valueOf(queryInfoList.size()));
 
     MDC.put(
         computeMdcKey(String.format("%s.duration_milliseconds", mdcKeyPrefix)),
-        execInfo.getElapsedTime());
-    MDC.put(computeMdcKey(String.format("%s.success", mdcKeyPrefix)), execInfo.isSuccess());
-    MDC.put(computeMdcKey(String.format("%s.type", mdcKeyPrefix)), execInfo.getStatementType());
-    MDC.put(computeMdcKey(String.format("%s.batch", mdcKeyPrefix)), execInfo.isBatch());
-    MDC.put(computeMdcKey(String.format("%s.batch_size", mdcKeyPrefix)), execInfo.getBatchSize());
+        String.valueOf(execInfo.getElapsedTime()));
+    MDC.put(
+        computeMdcKey(String.format("%s.success", mdcKeyPrefix)),
+        String.valueOf(execInfo.isSuccess()));
+    MDC.put(
+        computeMdcKey(String.format("%s.type", mdcKeyPrefix)), execInfo.getStatementType().name());
+    MDC.put(
+        computeMdcKey(String.format("%s.batch", mdcKeyPrefix)), String.valueOf(execInfo.isBatch()));
+    MDC.put(
+        computeMdcKey(String.format("%s.batch_size", mdcKeyPrefix)),
+        String.valueOf(execInfo.getBatchSize()));
     MDC.put(
         computeMdcKey(String.format("%s.datasource_name", mdcKeyPrefix)),
         execInfo.getDataSourceName());
@@ -100,10 +108,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
    * @return the key to use for {@link MDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    // We have to compute this here instead of in the wrapper because this
-    // class uses a different MDC class (org.jboss.logging.MDC)
-    return gov.cms.bfd.server.sharedutils.MDC.formatMdcKey(
-        String.format("%s.%s", "database_query", keySuffix));
+    return String.format("%s.%s", "database_query", keySuffix);
   }
 
   /**
