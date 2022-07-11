@@ -1,7 +1,27 @@
+from typing import List
+from locust import events
+from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
-from common.url_path import create_url_path
+from common.locust_utils import is_distributed, is_locust_master
 
+table_sample_pac_mbis = False
+master_pac_mbis: List[str] = []
+
+@events.init.add_listener
+def _(environment: Environment, **kwargs):
+    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+        # Don't bother loading data for the master runner, it doesn't run a test
+        return
+
+    # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
+    # for Locust's documentation on the test data management pattern used here
+    global master_pac_mbis
+    master_pac_mbis = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db.get_pac_hashed_mbis,
+        use_table_sample=table_sample_pac_mbis
+    )
 
 class PACTestUser(BFDUserBase):
     SERVICE_DATE = {'service-date': 'gt2020-01-05'}
@@ -11,17 +31,8 @@ class PACTestUser(BFDUserBase):
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
 
-    # Should we use the Table Sample feature of Postgres to query only against a portion of the
-    # table?
-    USE_TABLE_SAMPLE = False
-
-    @classmethod
-    def _hashed_mbis(cls):
-        if not hasattr(cls, '_cached_hashed_mbis'):
-            cls._cached_hashed_mbis = data.load_all(
-                    db.get_pac_hashed_mbis,
-                    use_table_sample=cls.USE_TABLE_SAMPLE)
-        return cls._cached_hashed_mbis
+    def _hashed_mbis(self):
+        return master_pac_mbis
 
     # Helper
 

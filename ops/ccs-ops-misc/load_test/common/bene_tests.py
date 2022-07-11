@@ -1,11 +1,30 @@
 '''Locust tests that require a pool of beneficiary IDs.'''
 
 import random
-
+from typing import List
+from locust import events
+from locust.env import Environment
 from common.bfd_user_base import BFDUserBase
+from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common import data, db
 
+table_sample_bene_ids = True
+master_bene_ids: List[str] = []
+
+@events.init.add_listener
+def _(environment: Environment, **kwargs):
+    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+        return
+
+    # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
+    # for Locust's documentation on the test data management pattern used here
+    global master_bene_ids
+    master_bene_ids = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db.get_bene_ids,
+        use_table_sample=table_sample_bene_ids
+    )
 
 class BeneTestUser(BFDUserBase):
     '''Locust tests that require a pool of beneficiary IDs.'''
@@ -13,17 +32,11 @@ class BeneTestUser(BFDUserBase):
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
 
-    # Should we use the Table Sample feature of Postgres to query only against a portion of the
-    # table?
-    USE_TABLE_SAMPLE = True
-
-
     def __init__(self, *args, **kwargs):
         '''Initialize.
         '''
         super().__init__(*args, **kwargs)
-        self.bene_ids = data.load_all(db.get_bene_ids,
-            use_table_sample=self.USE_TABLE_SAMPLE).copy()
+        self.bene_ids = master_bene_ids.copy()
         random.shuffle(self.bene_ids)
 
 
