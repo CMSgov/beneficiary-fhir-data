@@ -70,7 +70,7 @@
 	<dependencies>
 		<dependency>
 			<!-- Provides utility code and dependencies that are shared by (more or
-			     	less) all of the other BFD modules. -->
+				less) all of the other BFD modules. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-shared-utils</artifactId>
 			<version>${project.version}</version>
