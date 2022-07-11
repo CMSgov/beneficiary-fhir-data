@@ -230,6 +230,7 @@ public final class DataServerLauncherAppIT {
               .resolve("access.json");
       assertTrue(Files.isReadable(accessLogJson));
       assertTrue(Files.size(accessLogJson) > 0);
+      // We have to check against the reformatted MDC key, because we intercept and change the key.
       assertTrue(
           Files.readString(accessLogJson)
               .contains(

@@ -2,7 +2,11 @@ package gov.cms.bfd.server.sharedutils;
 
 import org.slf4j.spi.MDCAdapter;
 
-/** Wrapper for to the {@link org.slf4j.MDC} class (used in logging). */
+/**
+ * Wrapper for to the {@link org.slf4j.MDC} class (used in logging). Historically, we have used "."
+ * to delimit parts of the MDC keys, such as "http_access.request.header". For AWS CloudWatch
+ * Metrics, though, the "." character is not supported, so we need to change these to "_".
+ */
 public class MDC {
 
   /**
@@ -17,7 +21,11 @@ public class MDC {
    */
   public static final String TO_DELIMITER = "_";
 
-  /** MDC Adapter being used. Unless this is set, use the MDC class's adapter. */
+  /**
+   * MDC Adapter explicitly set in {@link #setMdcAdapter(MDCAdapter)} (if any). Unless this is set,
+   * use the MDC class's adapter. You normally wouldn't set this explicitly, but it can be useful
+   * for mocked test MDC adapters, for example.
+   */
   private static MDCAdapter mdcAdapter = null;
 
   /**
@@ -42,9 +50,7 @@ public class MDC {
   }
 
   /**
-   * Format an identifier for an {@link org.slf4j.MDC} key. Historically, we have used "." to
-   * delimit parts of the MDC keys, such as "http_access.request.header". For AWS CloudWatch
-   * Metrics, though, the "." character is not supported, so we need to change these to "_".
+   * Format an identifier for an {@link org.slf4j.MDC} key.
    *
    * @param key Fields to concatenate into the final key that we'll put into MDC
    * @return Text of the key that we'll put into MDC

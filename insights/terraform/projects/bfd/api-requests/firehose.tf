@@ -82,7 +82,8 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
 resource "aws_cloudwatch_log_subscription_filter" "bfd-access-log-subscription" {
   name            = "${local.full_name}-access-log-subscription"
   # Set the log group name so that if we use an environment ending in "-dev", it will get logs from
-  # the "real" log group for that environment.
+  # the "real" log group for that environment. So we could make an environment "prod-sbx-dev" that
+  # we can use for development, and it will read from the "prod-sbx" environment.
   log_group_name  = "/bfd/${replace(local.environment, "-dev", "")}/bfd-server/access.json"
   filter_pattern  = ""
   destination_arn = aws_kinesis_firehose_delivery_stream.bfd-firehose.arn
