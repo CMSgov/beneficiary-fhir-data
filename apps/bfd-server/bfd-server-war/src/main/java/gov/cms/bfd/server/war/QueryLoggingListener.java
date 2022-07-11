@@ -118,7 +118,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_OMIT_IDENTIFIERS(
         "bene_by_id.omit_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from beneficiaries_new ")
                 && s.contains("bene_id=")
                 && !s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
@@ -126,38 +126,38 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_INCLUDE_IDENTIFIERS(
         "bene_by_id.include_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from beneficiaries_new ")
                 && s.contains("bene_id=")
                 && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_MBI_HISTORY(
         "bene_by_mbi.mbis_from_beneficiarieshistory",
-        (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
+        (s -> s.contains(" from beneficiaries_history_new ") && s.contains("mbi_hash="))),
 
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn.hicns_from_beneficiarieshistory",
-        (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
+        (s -> s.contains(" from beneficiaries_history_new ") && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_OMIT_IDENTIFIERS(
         "bene_by_hicn.bene_by_hicn_or_id.omit_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from beneficiaries_new ")
                 && !s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_INCLUDE_IDENTIFIERS(
         "bene_by_hicn.bene_by_hicn_or_id.include_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from beneficiaries_new ")
                 && s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_COVERAGE(
         "bene_by_coverage",
         (s ->
-            s.contains(" from beneficiaries ")
-                && s.contains("where beneficiar0_.\"partDContractNumber"))),
+            s.contains(" from beneficiaries_new ")
+                && s.contains("where beneficiar0_.ptd_cntrct_"))),
 
     EOBS_BY_BENE_ID_CARRIER(
         "eobs_by_bene_id.carrier", (s -> s.contains(" from carrier_claims_new "))),

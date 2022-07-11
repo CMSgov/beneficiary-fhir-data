@@ -1,25 +1,56 @@
 '''Base class for Locust tests run against the FHIR endpoints.
 '''
 
+from typing import Callable, Dict, List, Union
 import json
 import logging
-import os
-
-from typing import Callable, Dict, List, Union
-from common import config, data, test_setup as setup, validation
-from common.stats.aggregated_stats import StatsCollector
-from common.stats.stats_compare import DEFAULT_DEVIANCE_FAILURE_THRESHOLD, validate_aggregated_stats
-from common.stats.stats_config import StatsStorageType
-from common.stats.stats_loaders import StatsLoader
-from common.stats.stats_writers import StatsJsonFileWriter, StatsJsonS3Writer
-from common.url_path import create_url_path
+import urllib3
+import urllib3.exceptions
 from locust import HttpUser, events
 from locust.env import Environment
+from locust.argument_parser import LocustArgumentParser
+from common import custom_args, data, validation
+from common.locust_utils import is_distributed, is_locust_worker
+from common.stats import stats_compare, stats_writers
+from common.stats.aggregated_stats import StatsCollector
+from common.stats.stats_config import StatsConfiguration
+from common.url_path import create_url_path
 
-import urllib3
+@events.init_command_line_parser.add_listener
+def _(parser: LocustArgumentParser, **kwargs) -> None:
+    custom_args.register_custom_args(parser)
 
-setup.set_locust_env(config.load())
+@events.init.add_listener
+def _(environment: Environment, **kwargs) -> None:
+    if is_distributed(environment) and is_locust_worker(environment):
+        return
 
+    custom_args.adjust_parsed_run_time(environment)
+    validation.setup_failsafe_event(environment)
+
+@events.quitting.add_listener
+def _(environment: Environment, **kwargs) -> None:
+    """Run one-time teardown tasks after the tests have completed
+
+    Args:
+        environment (Environment): The current Locust environment
+    """
+    if is_distributed(environment) and is_locust_worker(environment):
+        return
+
+    validation.check_sla_validation(environment)
+
+    if not environment.parsed_options:
+        return
+
+    stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
+    if stats_config:
+        # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
+        stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
+        stats = stats_collector.collect_stats()
+
+        stats_compare.do_stats_comparison(environment, stats_config, stats)
+        stats_writers.write_stats(stats_config, stats)
 
 class BFDUserBase(HttpUser):
     '''Base Class for Locust tests against BFD.
@@ -30,10 +61,6 @@ class BFDUserBase(HttpUser):
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
 
-    # The goals against which to measure these results. Note that they also include the Failsafe
-    # cutoff, which will default to the V2 cutoff time if not set.
-    VALIDATION_GOALS = None
-
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = True
 
@@ -41,9 +68,10 @@ class BFDUserBase(HttpUser):
         HttpUser.__init__(self, *args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
-        self.client_cert = config.get_client_cert()
-        self.server_public_key = config.load_server_public_key()
-        setup.disable_no_cert_warnings(self.server_public_key, urllib3)
+        self.client_cert = self.environment.parsed_options.client_cert_path
+        self.server_public_key = self.environment.parsed_options.server_public_key
+        if not self.server_public_key:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.last_updated = data.get_last_updated()
 
         # Initialize data / URL pools
@@ -54,28 +82,6 @@ class BFDUserBase(HttpUser):
 
         self.logger = logging.getLogger()
         self.has_reported_no_data = []
-
-
-    def on_start(self):
-        '''Run once when a BFDUser is initialized by Locust.
-        '''
-
-        # Is this either the first worker or the only worker?
-        worker_number = self.__get_worker_number()
-        if worker_number is None or str(worker_number) == '0':
-            # Adds a global failsafe check to ensure that if this test overwhelms
-            # the database, we bail out and stop hitting the server
-            if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
-                validation.setup_failsafe_event(self.environment, self.VALIDATION_GOALS)
-            else:
-                validation.setup_failsafe_event(self.environment, validation.SLA_V2_BASELINE)
-
-    def on_stop(self):
-        '''Run tear-down tasks after the tests have completed.'''
-
-        # Report the various response time percentiles against the SLA
-        if hasattr(self, 'VALIDATION_GOALS') and self.VALIDATION_GOALS:
-            validation.check_sla_validation(self.environment, self.VALIDATION_GOALS)
 
     def get_by_url(self, url: str, headers: Dict[str, str] = None,
             name: str = ''):
@@ -135,8 +141,7 @@ class BFDUserBase(HttpUser):
             # If no URL is found, then this test isn't counted in statistics
 
             # Should we also terminate future tests?
-            worker_num = self.__get_worker_number()
-
+            worker_num = self.environment.runner.client_id if is_locust_worker(self.environment) else None
             if self.END_ON_NO_DATA:
                 if worker_num is None:
                     self.logger.error("Ran out of data, stopping test...")
@@ -177,60 +182,3 @@ class BFDUserBase(HttpUser):
             if "relation" in link and link["relation"] == "next":
                 return link.get("url", None)
         return None
-
-
-    def __get_worker_number(self):
-        '''Find the number of the Locust worker for this instance.'''
-
-        if 'LOCUST_WORKER_NUM' in os.environ:
-            return str(os.environ['LOCUST_WORKER_NUM'])
-        return None
-
-@events.test_stop.add_listener
-def one_time_teardown(environment: Environment, **kwargs) -> None:
-    """Run one-time teardown tasks after the tests have completed
-
-    Args:
-        environment (Environment): The current Locust environment
-    """
-
-    logger = logging.getLogger()
-    stats_config = config.load_stats_config()
-    if not stats_config:
-        return
-
-    # If --stats was set and it is valid, get the aggregated stats of the stopping test run
-    stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
-    stats = stats_collector.collect_stats()
-
-    if stats_config.compare:
-        stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
-        previous_stats = stats_loader.load()
-        if previous_stats:
-            failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
-            if not failed_stats_results:
-                logger.info(
-                    'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
-            else:
-                # If we get here, that means some tasks have stats exceeding the threshold percent
-                # between the previous/average run and the current. Fail the test run, and log the
-                # failing tasks along with their relative stat percents   
-                environment.process_exit_code = 1
-                logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
-                            stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
-        else:
-            logger.warn(
-                'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
-
-    if stats_config.store == StatsStorageType.FILE:
-        logger.info("Writing aggregated performance statistics to file.")
-
-        stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_config.path or '')
-    elif stats_config.store == StatsStorageType.S3:
-        logger.info("Writing aggregated performance statistics to S3.")
-
-        stats_s3_writer = StatsJsonS3Writer(stats)
-        if not stats_config.bucket:
-            raise ValueError('S3 bucket must be provided when writing stats to S3')
-        stats_s3_writer.write(stats_config.bucket)
