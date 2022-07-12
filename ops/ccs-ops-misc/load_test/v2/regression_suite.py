@@ -5,13 +5,14 @@ from typing import Dict, List
 from locust import events, tag, task
 from locust.env import Environment
 
-from common import data, db, mbi_tests, validation
+from common import data, db, validation
+from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
-from common.mbi_tests import MBITestUser
 from common.url_path import create_url_path
 
 master_bene_ids: List[str] = []
 master_contract_data: List[Dict[str, str]] = []
+master_hashed_mbis: List[str] = []
 
 
 @events.init.add_listener
@@ -35,11 +36,18 @@ def _(environment: Environment, **kwargs):
         use_table_sample=False,
     )
 
+    global master_hashed_mbis
+    master_hashed_mbis = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db.get_hashed_mbis,
+        use_table_sample=False,
+    )
+
 
 validation.set_validation_goal(validation.ValidationGoal.SLA_V2_BASELINE)
 
 
-class RegressionV2User(MBITestUser):
+class RegressionV2User(BFDUserBase):
     """Regression test suite for V2 BFD Server endpoints.
 
     The tests within this Locust test suite hit various endpoints that were determined to be
@@ -54,6 +62,7 @@ class RegressionV2User(MBITestUser):
         super().__init__(*args, **kwargs)
         self.bene_ids = master_bene_ids.copy()
         self.contract_data = master_contract_data.copy()
+        self.hashed_mbis = master_hashed_mbis.copy()
 
     @tag("coverage", "coverage_test_id_count")
     @task
@@ -156,7 +165,20 @@ class RegressionV2User(MBITestUser):
     @task
     def patient_test_hashed_mbi(self):
         """Patient search by hashed MBI, include identifiers"""
-        self._test_v2_patient_test_hashed_mbi()
+
+        def make_url():
+            return create_url_path(
+                f"/v2/fhir/Patient/",
+                {
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                    "_IncludeIdentifiers": "mbi",
+                },
+            )
+
+        self.run_task(
+            name=f"/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
+            url_callback=make_url,
+        )
 
     @tag("patient", "patient_test_id_include_mbi_last_updated")
     @task
