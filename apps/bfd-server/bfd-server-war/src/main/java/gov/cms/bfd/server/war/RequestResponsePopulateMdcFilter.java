@@ -75,7 +75,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
       BfdMDC.put(computeMdcRequestKey("uri"), servletRequest.getRequestURI());
       BfdMDC.put(computeMdcRequestKey("query_string"), servletRequest.getQueryString());
       BfdMDC.put(
-          computeMdcRequestKey("clientSSL.DN"),
+          computeMdcRequestKey("clientSSL_DN"),
           getClientSslPrincipalDistinguishedName(servletRequest));
 
       // Record the request headers.
@@ -83,10 +83,10 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
       while (headerNames.hasMoreElements()) {
         String headerName = headerNames.nextElement();
         List<String> headerValues = Collections.list(servletRequest.getHeaders(headerName));
-        if (headerValues.isEmpty()) BfdMDC.put(computeMdcRequestKey("header." + headerName), "");
+        if (headerValues.isEmpty()) BfdMDC.put(computeMdcRequestKey("header_" + headerName), "");
         else if (headerValues.size() == 1)
-          BfdMDC.put(computeMdcRequestKey("header." + headerName), headerValues.get(0));
-        else BfdMDC.put(computeMdcRequestKey("header." + headerName), headerValues.toString());
+          BfdMDC.put(computeMdcRequestKey("header_" + headerName), headerValues.get(0));
+        else BfdMDC.put(computeMdcRequestKey("header_" + headerName), headerValues.toString());
       }
     }
 
@@ -99,7 +99,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @return the key to use for {@link BfdMDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    return String.format("%s.%s", "http_access", keySuffix);
+    return String.format("%s_%s", "http_access", keySuffix);
   }
 
   /**
@@ -108,7 +108,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    *     related to the HTTP request
    */
   public static String computeMdcRequestKey(String keySuffix) {
-    return String.format("%s.%s", computeMdcKey("request"), keySuffix);
+    return String.format("%s_%s", computeMdcKey("request"), keySuffix);
   }
 
   /**
@@ -153,17 +153,17 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
     if (response instanceof HttpServletResponse) {
       HttpServletResponse servletResponse = (HttpServletResponse) response;
 
-      BfdMDC.put(computeMdcKey("response.status"), Integer.toString(servletResponse.getStatus()));
+      BfdMDC.put(computeMdcKey("response_status"), Integer.toString(servletResponse.getStatus()));
 
       // Record the response headers.
       Collection<String> headerNames = servletResponse.getHeaderNames();
       for (String headerName : headerNames) {
         Collection<String> headerValues = servletResponse.getHeaders(headerName);
-        if (headerValues.isEmpty()) BfdMDC.put(computeMdcKey("response.header." + headerName), "");
+        if (headerValues.isEmpty()) BfdMDC.put(computeMdcKey("response_header_" + headerName), "");
         else if (headerValues.size() == 1)
           BfdMDC.put(
-              computeMdcKey("response.header." + headerName), headerValues.iterator().next());
-        else BfdMDC.put(computeMdcKey("response.header." + headerName), headerValues.toString());
+              computeMdcKey("response_header_" + headerName), headerValues.iterator().next());
+        else BfdMDC.put(computeMdcKey("response_header_" + headerName), headerValues.toString());
       }
     }
 
@@ -171,7 +171,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
     Long requestStartMilliseconds = (Long) request.getAttribute(REQUEST_ATTRIB_START);
     if (requestStartMilliseconds != null)
       BfdMDC.put(
-          computeMdcKey("response.duration_milliseconds"),
+          computeMdcKey("response_duration_milliseconds"),
           Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
   }
 

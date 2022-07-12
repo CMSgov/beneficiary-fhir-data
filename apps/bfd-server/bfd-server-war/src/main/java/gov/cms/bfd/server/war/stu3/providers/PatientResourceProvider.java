@@ -169,7 +169,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       TransformerUtils.recordQueryInMdc(
           String.format(
-              "bene_by_id.include_%s",
+              "bene_by_id_include_%s",
               String.join(
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
@@ -774,7 +774,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     } finally {
       hicnsFromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
       TransformerUtils.recordQueryInMdc(
-          "bene_by_" + hashType + "." + hashType + "s_from_beneficiarieshistory",
+          "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           hicnsFromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
     }
@@ -817,7 +817,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       TransformerUtils.recordQueryInMdc(
           String.format(
-              "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
+              "bene_by_" + hashType + "_bene_by_" + hashType + "_or_id_include_%s",
               String.join(
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
@@ -836,7 +836,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
       BfdMDC.put(
-          "database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+          "database_query_by_hash_collision.distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {

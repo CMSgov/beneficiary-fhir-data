@@ -1615,14 +1615,14 @@ public final class TransformerUtilsV2 {
    */
   public static void recordQueryInMdc(
       String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query.%s", queryId);
+    String keyPrefix = String.format("jpa_query_%s", queryId);
     BfdMDC.put(
-        String.format("%s.duration_nanoseconds", keyPrefix),
+        String.format("%s_duration_nanoseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds));
     BfdMDC.put(
-        String.format("%s.duration_milliseconds", keyPrefix),
+        String.format("%s_duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
-    BfdMDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**

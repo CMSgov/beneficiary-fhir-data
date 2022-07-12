@@ -53,7 +53,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
       if (logFullQuery)
         BfdMDC.put(
-            computeMdcKey(String.format("%s.query", mdcKeyPrefix)),
+            computeMdcKey(String.format("%s_query", mdcKeyPrefix)),
             queryInfoList.get(0).getQuery());
     } else {
       mdcKeyPrefix = "group";
@@ -68,7 +68,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       if (queryIds.charAt(queryIds.length() - 1) == ',')
         queryIds.deleteCharAt(queryIds.length() - 1);
       if (queryInfoList.size() > 1) queryIds.append(']');
-      BfdMDC.put(computeMdcKey(String.format("%s.ids", mdcKeyPrefix)), queryIds.toString());
+      BfdMDC.put(computeMdcKey(String.format("%s_ids", mdcKeyPrefix)), queryIds.toString());
 
       StringBuilder queries = new StringBuilder();
       if (queryInfoList.size() > 1) queries.append('[');
@@ -79,27 +79,27 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       }
       if (queries.charAt(queries.length() - 1) == ',') queries.deleteCharAt(queries.length() - 1);
       if (queryInfoList.size() > 1) queries.append(']');
-      BfdMDC.put(computeMdcKey(String.format("%s.queries", mdcKeyPrefix)), queries.toString());
+      BfdMDC.put(computeMdcKey(String.format("%s_queries", mdcKeyPrefix)), queries.toString());
     }
     BfdMDC.put(
-        computeMdcKey(String.format("%s.size", mdcKeyPrefix)),
+        computeMdcKey(String.format("%s_size", mdcKeyPrefix)),
         String.valueOf(queryInfoList.size()));
 
     BfdMDC.put(
-        computeMdcKey(String.format("%s.duration_milliseconds", mdcKeyPrefix)),
+        computeMdcKey(String.format("%s_duration_milliseconds", mdcKeyPrefix)),
         String.valueOf(execInfo.getElapsedTime()));
     BfdMDC.put(
-        computeMdcKey(String.format("%s.success", mdcKeyPrefix)),
+        computeMdcKey(String.format("%s_success", mdcKeyPrefix)),
         String.valueOf(execInfo.isSuccess()));
     BfdMDC.put(
-        computeMdcKey(String.format("%s.type", mdcKeyPrefix)), execInfo.getStatementType().name());
+        computeMdcKey(String.format("%s_type", mdcKeyPrefix)), execInfo.getStatementType().name());
     BfdMDC.put(
-        computeMdcKey(String.format("%s.batch", mdcKeyPrefix)), String.valueOf(execInfo.isBatch()));
+        computeMdcKey(String.format("%s_batch", mdcKeyPrefix)), String.valueOf(execInfo.isBatch()));
     BfdMDC.put(
-        computeMdcKey(String.format("%s.batch_size", mdcKeyPrefix)),
+        computeMdcKey(String.format("%s_batch_size", mdcKeyPrefix)),
         String.valueOf(execInfo.getBatchSize()));
     BfdMDC.put(
-        computeMdcKey(String.format("%s.datasource_name", mdcKeyPrefix)),
+        computeMdcKey(String.format("%s_datasource_name", mdcKeyPrefix)),
         execInfo.getDataSourceName());
   }
 
@@ -108,7 +108,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
    * @return the key to use for {@link BfdMDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
-    return String.format("%s.%s", "database_query", keySuffix);
+    return String.format("%s_%s", "database_query", keySuffix);
   }
 
   /**
@@ -124,7 +124,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
   /** Enumerates the various query types. */
   static enum QueryType {
     BENE_BY_ID_OMIT_IDENTIFIERS(
-        "bene_by_id.omit_hicns_and_mbis",
+        "bene_by_id_omit_hicns_and_mbis",
         (s ->
             s.contains(" from beneficiaries ")
                 && s.contains("bene_id=")
@@ -132,7 +132,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && !s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_ID_INCLUDE_IDENTIFIERS(
-        "bene_by_id.include_hicns_and_mbis",
+        "bene_by_id_include_hicns_and_mbis",
         (s ->
             s.contains(" from beneficiaries ")
                 && s.contains("bene_id=")
@@ -140,22 +140,22 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && !s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_MBI_HISTORY(
-        "bene_by_mbi.mbis_from_beneficiarieshistory",
+        "bene_by_mbi_mbis_from_beneficiarieshistory",
         (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
 
     BENE_BY_HICN_HISTORY(
-        "bene_by_hicn.hicns_from_beneficiarieshistory",
+        "bene_by_hicn_hicns_from_beneficiarieshistory",
         (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_OMIT_IDENTIFIERS(
-        "bene_by_hicn.bene_by_hicn_or_id.omit_hicns_and_mbis",
+        "bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis",
         (s ->
             s.contains(" from beneficiaries ")
                 && !s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_INCLUDE_IDENTIFIERS(
-        "bene_by_hicn.bene_by_hicn_or_id.include_hicns_and_mbis",
+        "bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis",
         (s ->
             s.contains(" from beneficiaries ")
                 && s.contains(" join ")
@@ -168,24 +168,24 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains("where beneficiar0_.\"partDContractNumber"))),
 
     EOBS_BY_BENE_ID_CARRIER(
-        "eobs_by_bene_id.carrier", (s -> s.contains(" from carrier_claims_new "))),
+        "eobs_by_bene_id_carrier", (s -> s.contains(" from carrier_claims_new "))),
 
-    EOBS_BY_BENE_ID_DME("eobs_by_bene_id.dme", (s -> s.contains(" from dme_claims_new "))),
+    EOBS_BY_BENE_ID_DME("eobs_by_bene_id_dme", (s -> s.contains(" from dme_claims_new "))),
 
-    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id.hha", (s -> s.contains(" from hha_claims_new "))),
+    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id_hha", (s -> s.contains(" from hha_claims_new "))),
 
     EOBS_BY_BENE_ID_HOSPICE(
-        "eobs_by_bene_id.hospice", (s -> s.contains(" from hospice_claims_new "))),
+        "eobs_by_bene_id_hospice", (s -> s.contains(" from hospice_claims_new "))),
 
     EOBS_BY_BENE_ID_INPATIENT(
-        "eobs_by_bene_id.inpatient", (s -> s.contains(" from inpatient_claims_new "))),
+        "eobs_by_bene_id_inpatient", (s -> s.contains(" from inpatient_claims_new "))),
 
     EOBS_BY_BENE_ID_OUTPATIENT(
-        "eobs_by_bene_id.outpatient", (s -> s.contains(" from outpatient_claims_new "))),
+        "eobs_by_bene_id_outpatient", (s -> s.contains(" from outpatient_claims_new "))),
 
-    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id.pde", (s -> s.contains(" from partd_events_new "))),
+    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id_pde", (s -> s.contains(" from partd_events_new "))),
 
-    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id.snf", (s -> s.contains(" from snf_claims_new "))),
+    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from snf_claims_new "))),
 
     FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
 
