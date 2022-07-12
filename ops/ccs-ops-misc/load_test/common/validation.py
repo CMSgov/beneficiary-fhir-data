@@ -17,18 +17,17 @@ validation will default to 10000ms"""
 
 # TODO: Pull these values from production metrics (i.e. New Relic)
 class ValidationGoal(Enum):
-    SLA_COVERAGE = (10, 100, 250, 500)
-    SLA_PATIENT = (1000, 3000, 5000, 8000)
-    SLA_EOB_WITH_SINCE = (100, 250, 1000, 3000)
-    SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000, 6000)
-    SLA_V1_BASELINE = (10, 325, 550, 10000)
-    SLA_V2_BASELINE = (10, 325, 550, 10000)
+    SLA_COVERAGE = (10, 100, 250)
+    SLA_PATIENT = (1000, 3000, 5000)
+    SLA_EOB_WITH_SINCE = (100, 250, 1000)
+    SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000)
+    SLA_V1_BASELINE = (10, 325, 550)
+    SLA_V2_BASELINE = (10, 325, 550)
 
-    def __init__(self, sla_50: int, sla_95: int, sla_99: int, sla_failsafe: int) -> None:
+    def __init__(self, sla_50: int, sla_95: int, sla_99: int) -> None:
         self.sla_50 = sla_50
         self.sla_95 = sla_95
         self.sla_99 = sla_99
-        self.sla_failsafe = sla_failsafe
 
 
 def set_validation_goal(validation_goal: ValidationGoal) -> None:
@@ -51,8 +50,7 @@ def setup_failsafe_event(environment: Environment) -> None:
         environment (Environment): The current Locust environment
     """
     logging.getLogger().info("Setting up failsafe event")
-    fail_time_ms = _validation_goal.sla_failsafe if _validation_goal else _DEFAULT_SLA_FAILSAFE
-    gevent.spawn(_check_global_fail, environment, fail_time_ms)
+    gevent.spawn(_check_global_fail, environment, _DEFAULT_SLA_FAILSAFE)
 
 
 def check_sla_validation(environment: Environment) -> None:
@@ -89,11 +87,16 @@ def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:
     """Checks if the test response time is too long (in the event the database is being
     overwhelmed) and if so, we stop the test.
     """
-    while not environment.runner.state in [STATE_STOPPING, STATE_STOPPED, STATE_CLEANUP]:
+    while not environment.runner.state in [
+        STATE_STOPPING,
+        STATE_STOPPED,
+        STATE_CLEANUP,
+    ]:
         time.sleep(1)
         if environment.stats.total.avg_response_time > fail_time_ms:
             logging.getLogger().warning(
-                "WARNING: Test aborted due to triggering test failsafe " "(average response time ratio > %d ms)",
+                "WARNING: Test aborted due to triggering test failsafe "
+                "(average response time ratio > %d ms)",
                 fail_time_ms,
             )
             environment.runner.quit()
