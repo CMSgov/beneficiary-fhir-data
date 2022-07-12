@@ -1,9 +1,9 @@
 # RFC Proposal
 [RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: `0000-centralized-configuration-management` <!-- TODO: (fill me in with a unique ident) -->
+* RFC Proposal ID: `0015-centralized-configuration-management`
 * Start Date: 2022-07-05
-* RFC PR: [beneficiary-fhir-data/rfcs#0000](https://github.com/CMSgov/beneficiary-fhir-data/pull/1193)
+* RFC PR: [beneficiary-fhir-data/rfcs#0015](https://github.com/CMSgov/beneficiary-fhir-data/pull/1193)
 * JIRA Ticket(s):
     * [BFD-1641](https://jira.cms.gov/browse/BFD-1641)
 
@@ -14,7 +14,7 @@ This RFC proposes BFD's adoption of:
 ## Status
 [Status]: #status
 
-* Status: Proposed
+* Status: Approved
 * Implementation JIRA Ticket(s):
     * [BFD-1639](https://jira.cms.gov/browse/BFD-1639)
 
@@ -228,7 +228,7 @@ Together, the queried SSM hierarchies, environmental yaml, and any locally-defin
 
 The happy path is depicted in the following sequence diagram:
 
-![happy path ssm deployments with jenkins](./resources/0000-proposed-ssm-deployment.svg) <!-- TODO: rename/relocate svg -->
+![happy path ssm deployments with jenkins](./resources/0015-proposed-ssm-deployment.svg)
 
 #### Access Controls
 
@@ -384,7 +384,7 @@ While this process doesn't make those exceptional OOB changes any harder, it doe
 
 With AWS SSM Parameter Store engaged, we may be able to optimize for the OOB updates and make them more attractive to be done in a more observable, automated way.
 Using something like AWS SSM Documents, AWS SSM Run Command, and signaling via AWS EventBridge, we could craft automated routines to run on changes to specific parameters in AWS SSM Parameter Store.
-Another area of investiagation would be incorporation of AWS SSM AppConfig, potentially a logical next step in configuration management for BFD.
+Another area of investigation would be incorporation of AWS SSM AppConfig, potentially a logical next step in configuration management for BFD.
 
 ## Addendums
 [Addendums]: #addendums
