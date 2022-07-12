@@ -51,6 +51,16 @@ public class BfdMDC {
   }
 
   /**
+   * Compute a key for {@link MDC} from several parts.
+   *
+   * @param keys Pieces of the key to be joined together
+   * @return The final key
+   */
+  public static String computeMDCKey(String... keys) {
+    return String.join("_", keys);
+  }
+
+  /**
    * Format an identifier for an {@link MDC} key.
    *
    * @param key Fields to concatenate into the final key that we'll put into MDC
