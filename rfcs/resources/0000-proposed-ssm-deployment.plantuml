@@ -5,7 +5,7 @@ database "github"
 participant jenkins
 database "parameter-store"
 participant "ec2-bfd-services"
-note over jenkins,"parameter-store": additional jenkins config sources:\ncredentials plugin, ssm:/bfd/mgmt/jenkins/* for
+note over jenkins,"parameter-store": additional jenkins config sources:\ncredentials plugin, ssm:/bfd/mgmt/jenkins/*
 operator -> github: Submit change set
 github --> operator
 operator -> jenkins: Trigger Deployment

@@ -64,9 +64,9 @@ Instead, the sprawling configuration has historically discouraged us from adopti
 
 AWS Systems Manager (SSM) Parameter Store is a hierarchical, key-value data store typically used for centrally managed sensitive and nonsensitive configuration data.
 In addition to the AWS Console, the Parameter Store is accessed through the Parameter Store API, and can be even more accessible through various tools, including:
-- the AWS CLI via `aws ssm` sub-command
-- terraform resources and data sources with the aws provider
-- ansible workflows through the `community.aws.aws_ssm_parameter_store` module
+- the AWS CLI via `aws ssm` ([single parameter](https://docs.aws.amazon.com/cli/latest/reference/ssm/get-parameter.html) and [path lookups](https://docs.aws.amazon.com/cli/latest/reference/ssm/get-parameters-by-path.html)) sub-command
+- terraform resources and data sources ([single parameter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) and [path lookups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path)) with the aws provider
+- ansible workflows through the [`aws_ssm` lookup plugin](https://docs.ansible.com/ansible/2.9/plugins/lookup/aws_ssm.html)
 
 ### Parameter Formatting
 
@@ -269,6 +269,18 @@ As result, personas regularly reading _or_ writing sensitive hierarchies also re
 
 Access not just to *this* tfstate file, used by the base environment definition, but any tfstate file that uses a sensitive value in pursuing infrastructure-level changes needs to be restricted to personas executing terraform.
 
+#### Adoption and Parameter Precedence
+
+So long as the configuration strategy for a given group or service is consistent across environments, even partial adoption of AWS SSM Parameter Store provides value.
+However, to reduce confusion and potential complexity, once we've started the process of transitioning, we endeavor to complete the transition as quickly as feasible.
+
+For this solution's adoption and implementation to be most obvious, we must have a clear stance on hierarchical configuration data and precedence at the tool level.
+This is especially important for `ansible` with its [support for >20 levels of _variable precedence_](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable) as well as `terraform` where we have an number of required input variables.
+The desired end state is thus: **automation tools and their respective configuration data are primarily informed by values derived from AWS SSM Parameter Store.**
+This entails that this configuration strategy will have the following characteristics when fully implemented:
+- `ansible`: variables files defined as defaults in roles or variable files in playbooks no longer exist
+- `terraform`: required, non-null terraform variables are used only by exception
+
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
@@ -379,6 +391,6 @@ Another area of investiagation would be incorporation of AWS SSM AppConfig, pote
 
 The following addendums are required reading before voting on this proposal:
 
-* (none at this time)
+* [AWS Naming and Tagging Conventions](https://confluence.cms.gov/pages/viewpage.action?spaceKey=ODI&title=AWS+Naming+and+Tagging+Conventions)
 
 Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
