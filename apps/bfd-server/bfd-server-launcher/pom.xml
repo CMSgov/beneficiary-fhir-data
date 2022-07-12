@@ -49,7 +49,7 @@
 			<!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-server-shared-utils</artifactId>
-			<version>${parent.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
