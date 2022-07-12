@@ -295,7 +295,7 @@ public enum StaticRifResource {
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
-  private int recordCount;
+  private final int recordCount;
 
   private URL resourceUrl;
 
@@ -304,13 +304,18 @@ public enum StaticRifResource {
    *
    * @param resourceUrlSupplier the value to use for {@link #getResourceSupplier()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
-   * @param recordCount the value to use for {@link #getRecordCount()}
+   * @param recordCount the value to use for {@link #getRecordCount()}. If the supplied value is
+   *     negative the size will be computed by scanning the file.
    */
   private StaticRifResource(
       Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, int recordCount) {
     this.resourceUrlSupplier = resourceUrlSupplier;
     this.rifFileType = rifFileType;
-    this.recordCount = recordCount;
+    if (recordCount < 0) {
+      this.recordCount = computeRecordCount();
+    } else {
+      this.recordCount = recordCount;
+    }
   }
 
   /** @return the {@link URL} to the resource's contents */
@@ -327,38 +332,42 @@ public enum StaticRifResource {
 
   /** @return the number of beneficiaries/claims/drug events in the RIF file excluding line items */
   public int getRecordCount() {
-    if (recordCount == -1) {
-      synchronized (this) {
-        if (recordCount == -1) {
-          RifFile file = toRifFile();
-          String idColumn = null;
-          if (getRifFileType().getIdColumn() != null) {
-            idColumn = getRifFileType().getIdColumn().toString();
-          }
-          try {
-            Iterable<CSVRecord> records =
-                CSVFormat.RFC4180
-                    .withDelimiter('|')
-                    .withHeader()
-                    .parse(new InputStreamReader(file.open(), file.getCharset()));
-            Set<String> uniqueIds = new HashSet<>();
-            int i = 0;
-            for (CSVRecord record : records) {
-              if (idColumn != null) {
-                uniqueIds.add(record.get(idColumn));
-              } else {
-                uniqueIds.add(Integer.toString(i++));
-              }
-            }
-            this.recordCount = uniqueIds.size();
-          } catch (IOException e) {
-            throw new UncheckedIOException(
-                "Unable to open resource: " + resourceUrlSupplier.get().toString(), e);
-          }
+    return recordCount;
+  }
+
+  /**
+   * Compute the number of records in the RIF file. Takes account of the configured id column so
+   * that, e.g., the count would return the count of claims rather than the count of all claim
+   * lines.
+   *
+   * @return the count of records
+   */
+  private int computeRecordCount() {
+    RifFile file = toRifFile();
+    String idColumn = null;
+    if (getRifFileType().getIdColumn() != null) {
+      idColumn = getRifFileType().getIdColumn().toString();
+    }
+    try {
+      Iterable<CSVRecord> records =
+          CSVFormat.RFC4180
+              .withDelimiter('|')
+              .withHeader()
+              .parse(new InputStreamReader(file.open(), file.getCharset()));
+      Set<String> uniqueIds = new HashSet<>();
+      int i = 0;
+      for (CSVRecord record : records) {
+        if (idColumn != null) {
+          uniqueIds.add(record.get(idColumn));
+        } else {
+          uniqueIds.add(Integer.toString(i++));
         }
       }
+      return uniqueIds.size();
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Unable to open resource: " + resourceUrlSupplier.get().toString(), e);
     }
-    return recordCount;
   }
 
   /** @return a {@link RifFile} based on this {@link StaticRifResource} */
