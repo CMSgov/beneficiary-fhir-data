@@ -55,7 +55,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
       if (logFullQuery)
         BfdMDC.put(
-            BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "query", mdcKeyPrefix),
+            BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "query"),
             queryInfoList.get(0).getQuery());
     } else {
       mdcKeyPrefix = "group";
@@ -70,7 +70,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       if (queryIds.charAt(queryIds.length() - 1) == ',')
         queryIds.deleteCharAt(queryIds.length() - 1);
       if (queryInfoList.size() > 1) queryIds.append(']');
-      BfdMDC.put(BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "ids", mdcKeyPrefix), queryIds.toString());
+      BfdMDC.put(BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "ids"), queryIds.toString());
 
       StringBuilder queries = new StringBuilder();
       if (queryInfoList.size() > 1) queries.append('[');
@@ -81,29 +81,29 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       }
       if (queries.charAt(queries.length() - 1) == ',') queries.deleteCharAt(queries.length() - 1);
       if (queryInfoList.size() > 1) queries.append(']');
-      BfdMDC.put(BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "queries", mdcKeyPrefix), queries.toString());
+      BfdMDC.put(BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "queries"), queries.toString());
     }
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "size", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "size"),
         String.valueOf(queryInfoList.size()));
 
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "duration_milliseconds", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "duration_milliseconds"),
         String.valueOf(execInfo.getElapsedTime()));
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "success", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "success"),
         String.valueOf(execInfo.isSuccess()));
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "type", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "type"),
         execInfo.getStatementType().name());
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "batch", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "batch"),
         String.valueOf(execInfo.isBatch()));
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "batch_size", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "batch_size"),
         String.valueOf(execInfo.getBatchSize()));
     BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, "datasource_name", mdcKeyPrefix),
+        BfdMDC.computeMDCKey(MDC_KEY_PREFIX, mdcKeyPrefix, "datasource_name"),
         execInfo.getDataSourceName());
   }
 
