@@ -47,6 +47,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
@@ -1750,6 +1751,7 @@ public final class PatientResourceProviderIT {
    * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
    * as expected when multiple benes are returned.
    */
+  @Disabled
   @Test
   public void searchForExistingPatientsByPartDContractNum() throws IOException {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_SYNTHEA_BENES2011));

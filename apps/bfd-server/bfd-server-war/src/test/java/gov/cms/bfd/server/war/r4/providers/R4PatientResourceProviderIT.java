@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public final class R4PatientResourceProviderIT {
@@ -938,6 +939,7 @@ public final class R4PatientResourceProviderIT {
     assertEquals(1, searchResults.getEntry().size());
   }
 
+  @Disabled
   @Test
   public void searchForExistingPatientsByPartDContractNum() throws IOException {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_SYNTHEA_BENES2011));
