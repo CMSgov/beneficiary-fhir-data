@@ -3,7 +3,7 @@
 
 import json
 import logging
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import urllib3
 import urllib3.exceptions
@@ -89,7 +89,7 @@ class BFDUserBase(HttpUser):
         self.logger = logging.getLogger()
         self.has_reported_no_data = []
 
-    def get_by_url(self, url: str, headers: Dict[str, str] = None, name: str = ""):
+    def get_by_url(self, url: str, headers: Optional[Dict[str, str]] = None, name: str = ""):
         """Send one GET request and parse the response for pagination.
 
         This method extends Locust's HttpUser::client.get() method to make creating the requests
@@ -105,8 +105,8 @@ class BFDUserBase(HttpUser):
             cert=self.client_cert,
             verify=self.server_public_key,
             headers={**safe_headers, "Cache-Control": "no-store, no-cache"},
-            name=name,
-            catch_response=True,
+            name=name,  # type: ignore -- known Locust argument
+            catch_response=True,  # type: ignore -- known Locust argument
         ) as response:
             if response.status_code != 200:
                 response.failure(f"Status Code: {response.status_code}")
@@ -118,7 +118,12 @@ class BFDUserBase(HttpUser):
                         self.url_pools[name] = []
                     self.url_pools[name].append(next_url)
 
-    def run_task(self, url_callback: Callable, headers: Dict[str, str] = None, name: str = ""):
+    def run_task(
+        self,
+        url_callback: Callable,
+        headers: Optional[Dict[str, str]] = None,
+        name: str = "",
+    ):
         """Figure out which URL we should query next and query the server.
 
         Note that the Data Pools (Bene ID, MBI, etc.) are limited and we don't want to grab a value
@@ -163,8 +168,8 @@ class BFDUserBase(HttpUser):
     def run_task_by_parameters(
         self,
         base_path: str,
-        params: Dict[str, Union[str, List]] = None,
-        headers: Dict[str, str] = None,
+        params: Optional[Dict[str, Union[str, int, List]]] = None,
+        headers: Optional[Dict[str, str]] = None,
         name: str = "",
     ):
         """Run a task using a base path and parameters"""
@@ -180,7 +185,7 @@ class BFDUserBase(HttpUser):
     # Helper Functions
 
     @staticmethod
-    def __get_next_url(payload: str) -> str:
+    def __get_next_url(payload: str) -> Optional[str]:
         """Parse the JSON response and return the "next" URL if it exists"""
 
         parsed_payload = json.loads(payload)
