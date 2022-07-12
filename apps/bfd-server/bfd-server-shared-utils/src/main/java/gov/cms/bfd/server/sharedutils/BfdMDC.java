@@ -61,9 +61,9 @@ public class BfdMDC {
   }
 
   /**
-   * Format an identifier for an {@link MDC} key.
+   * Reformat an identifier for an {@link MDC} key, replacing "." with "_".
    *
-   * @param key Key to format into the final key that we'll put into MDC
+   * @param key Key to reformat
    * @return Text of the key that we'll put into MDC
    */
   public static String formatMDCKey(String key) {
