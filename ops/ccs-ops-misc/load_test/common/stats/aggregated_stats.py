@@ -5,7 +5,7 @@ from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Union
 
 from locust.env import Environment
-from locust.stats import PERCENTILES_TO_REPORT, StatsEntry, sort_stats
+from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
 
 from common.stats.stats_config import StatsEnvironment
 
@@ -37,14 +37,25 @@ class StatsCollector(object):
         self.stats_tag = stats_tag
         self.running_env = running_env
 
-    def _get_task_stats_list(self) -> List["TaskStats"]:
+    def __sort_stats(self, stats: Dict[Any, StatsEntry]) -> List[StatsEntry]:
+        """Extracts a sorted list of StatsEntrys from a dictionary of StatsEntrys
+
+        Args:
+            stats (Dict[Any, StatsEntry]): Dictionary of Locust StatsEntrys
+
+        Returns:
+            List[StatsEntry]: A sorted list of Locust StatsEntrys
+        """
+        return [stats[key] for key in sorted(stats.keys())]
+
+    def __get_task_stats_list(self) -> List["TaskStats"]:
         """Returns a list of TaskStats representing the performance statistics of _all_ Locust tasks that ran
 
         Returns:
             List[TaskStats]: A List of TaskStats that represent the performance statistics of all Locust tasks
         """
         stats = self.locust_env.stats
-        return [TaskStats.from_stats_entry(stats_entry) for stats_entry in sort_stats(stats.entries)]
+        return [TaskStats.from_stats_entry(stats_entry) for stats_entry in self.__sort_stats(stats.entries)]
 
     def collect_stats(self) -> "AggregatedStats":
         """A method that returns an AggregatedStats instance representing a snapshot of the aggregated performance
@@ -60,7 +71,7 @@ class StatsCollector(object):
                 environment=self.running_env,
                 locust_env=self.locust_env,
             ),
-            tasks=self._get_task_stats_list(),
+            tasks=self.__get_task_stats_list(),
         )
 
 
@@ -153,7 +164,7 @@ class TaskStats:
         if not stats_entry.num_requests:
             # If there were no requests made, simply return a dictionary with 0
             # for each of its values
-            return {k: 0 for k in PERCENTILES_TO_REPORT}
+            return {str(k): 0 for k in PERCENTILES_TO_REPORT}
 
         return {
             str(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0)
@@ -197,9 +208,18 @@ class StatsMetadata:
             environment (StatsEnvironment): The environment that the test run was started in
             locust_env (Environment): The current Locust environment
 
+        Raises:
+            ValueError: If no parsed_options exist on locust_env, or if there is no last_request_timestamp
+
         Returns:
             StatsMetadata: A StatsMetadata instance encapsulating all of the necessary metadata to store and compare statistics
         """
+        if not locust_env.parsed_options:
+            raise ValueError("Parsed options did not exist on Locust environment -- is Locust being ran as a library?")
+
+        if not locust_env.stats.last_request_timestamp:
+            raise ValueError("No requests were ran, stats cannot be aggregated")
+
         return cls(
             timestamp,
             tag,
