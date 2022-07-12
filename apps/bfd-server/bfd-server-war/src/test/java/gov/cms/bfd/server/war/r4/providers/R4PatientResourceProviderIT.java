@@ -450,7 +450,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient
             .search()
             .forResource(Patient.class)
-            .where(Patient.RES_ID.exactly().systemAndIdentifier(null, "foo"))
+            .where(Patient.RES_ID.exactly().systemAndIdentifier(null, "7777777"))
             .returnBundle(Bundle.class)
             .execute();
 

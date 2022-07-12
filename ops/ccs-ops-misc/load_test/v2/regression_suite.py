@@ -1,10 +1,17 @@
 '''Regression test suite for V2 BFD Server endpoints.'''
 
+from locust import task
+from common import bene_tests, contract_tests, mbi_tests, validation
 from common.bene_tests import BeneTestUser
 from common.contract_tests import ContractTestUser
 from common.mbi_tests import MBITestUser
-from common.validation import SLA_V2_BASELINE
-from locust import task
+
+# Regression suite needs consistent data so we turn off table sampling prior to the
+# imported modules loading their respective data from the database
+bene_tests.table_sample_bene_ids = False
+contract_tests.table_sample_contract_data = False
+mbi_tests.table_sample_hashed_mbis = False
+validation.set_validation_goal(validation.ValidationGoal.SLA_V2_BASELINE)
 
 class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     '''Regression test suite for V2 BFD Server endpoints.
@@ -14,16 +21,8 @@ class BFDUser(BeneTestUser, MBITestUser, ContractTestUser):
     suite will be run in parallel, with equal weighting being applied to each.
     '''
 
-    # The goals against which to measure these results. Note that they also include the Failsafe
-    # cutoff, which will default to the V2 cutoff time if not set.
-    VALIDATION_GOALS = SLA_V2_BASELINE
-
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
-
-    # No Table Sample for the Regression Suite, because we want to keep the tests more consistent.
-    USE_TABLE_SAMPLE = False
-
 
     @task
     def coverage_test_id_count(self):

@@ -115,8 +115,8 @@ public class McsClaimTransformer {
             McsClaim::hasIdrStatusCodeUnrecognized,
             McsClaim::getIdrStatusCodeUnrecognized,
             McsStatusCode.UNRECOGNIZED,
-            ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
-            ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+            ImmutableSet.of(),
+            ImmutableSet.of());
     RdaMcsClaim_idrBillProvGroupInd_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrBillProvGroupIndEnum,
@@ -345,6 +345,7 @@ public class McsClaimTransformer {
     transformer.copyEnumAsString(
         namePrefix + RdaMcsClaim.Fields.idrStatusCode,
         true,
+        1,
         1,
         RdaMcsClaim_idrStatusCode_Extractor.getEnumString(from),
         to::setIdrStatusCode);
@@ -921,7 +922,7 @@ public class McsClaimTransformer {
     transformer.copyString(
         namePrefix + RdaMcsDiagnosisCode.Fields.idrDiagCode,
         false,
-        1,
+        0,
         7,
         from.getIdrDiagCode(),
         to::setIdrDiagCode);

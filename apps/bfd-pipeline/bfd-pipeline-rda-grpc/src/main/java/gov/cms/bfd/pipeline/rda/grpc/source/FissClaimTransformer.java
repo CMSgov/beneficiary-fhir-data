@@ -164,7 +164,7 @@ public class FissClaimTransformer {
             FissClaim::getCurrStatusUnrecognized,
             FissClaimStatus.UNRECOGNIZED,
             ImmutableSet.of(),
-            ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+            ImmutableSet.of());
     RdaFissClaim_currLoc1_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrLoc1Enum,
@@ -1122,11 +1122,6 @@ public class FissClaimTransformer {
         from::getRdaPosition,
         to::setRdaPosition);
     to.setLastUpdated(now);
-
-    // At least one of these two fields must have a value for the object to be valid.
-    transformer.validateAtLeastOneIsPresent(
-        namePrefix + RdaFissDiagnosisCode.Fields.diagCd2, from.getDiagCd2(),
-        namePrefix + RdaFissDiagnosisCode.Fields.bitFlags, from.getBitFlags());
     return to;
   }
 

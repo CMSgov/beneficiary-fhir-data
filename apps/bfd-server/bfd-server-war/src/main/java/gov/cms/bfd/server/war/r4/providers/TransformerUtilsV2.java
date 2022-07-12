@@ -1579,9 +1579,25 @@ public final class TransformerUtilsV2 {
     return bundle;
   }
 
+  /**
+   * Output list of benefificiary IDs to MDC logging
+   *
+   * @param beneIds the {@link Collection} beneficiary IDs to log
+   */
   public static void logBeneIdToMdc(Collection<String> beneIds) {
     if (!beneIds.isEmpty()) {
       BfdMDC.put("bene_id", String.join(", ", beneIds));
+    }
+  }
+
+  /**
+   * Output beneficiary ID to the MDC logging
+   *
+   * @param beneId the {@link Long} beneficiary ID to log
+   */
+  public static void logBeneIdToMdc(Long beneId) {
+    if (beneId != null) {
+      MDC.put("bene_id", String.valueOf(beneId));
     }
   }
 
