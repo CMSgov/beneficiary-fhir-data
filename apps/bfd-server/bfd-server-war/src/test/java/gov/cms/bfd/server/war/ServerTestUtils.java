@@ -38,6 +38,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
@@ -441,5 +443,39 @@ public final class ServerTestUtils {
       fhirClient.registerInterceptor(extraParamsInterceptor);
     }
     return fhirClient;
+  }
+
+  /** @return whether bene_id is logged in MDC for a given read/search method via Regex matching */
+  public static Boolean checkMdcForBeneId() throws IOException {
+    String beneIdPattern = ".*(\\\"bene_id\\\":(\\\"-?\\d{1,}\\\"|(\\\"-?\\d{1,},))).*";
+
+    Path accessLogJson =
+        ServerTestUtils.getServerProjectDirectory()
+            .resolve("target")
+            .resolve("server-work")
+            .resolve("access.json");
+
+    // Check that the access json lines follow the desired regex pattern
+    List<String> lines = Files.readAllLines(accessLogJson);
+    Pattern p = Pattern.compile(beneIdPattern);
+    Matcher m = p.matcher(lines.get(lines.size() - 1));
+
+    return m.matches();
+  }
+
+  /** @return the local {@link Path} that the project can be found in */
+  public static Path getServerProjectDirectory() {
+    try {
+      /*
+       * The working directory for tests will either be the module directory or their parent
+       * directory. With that knowledge, we're searching for the project directory.
+       */
+      Path projectDir = Paths.get(".");
+      if (!Files.isDirectory(projectDir) && projectDir.toRealPath().endsWith("bfd-server-war"))
+        throw new IllegalStateException();
+      return projectDir;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }

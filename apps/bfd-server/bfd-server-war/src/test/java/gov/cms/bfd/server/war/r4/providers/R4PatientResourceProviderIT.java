@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -64,7 +65,7 @@ public final class R4PatientResourceProviderIT {
    * works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void readExistingPatient() {
+  public void readExistingPatient() throws IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -81,6 +82,9 @@ public final class R4PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     comparePatient(beneficiary, patient);
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -257,7 +261,7 @@ public final class R4PatientResourceProviderIT {
    * works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void searchForExistingPatientByLogicalId() {
+  public void searchForExistingPatientByLogicalId() throws IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -295,6 +299,9 @@ public final class R4PatientResourceProviderIT {
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     comparePatient(beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -465,7 +472,7 @@ public final class R4PatientResourceProviderIT {
    * <p>works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void searchForExistingPatientByMbiHash() {
+  public void searchForExistingPatientByMbiHash() throws IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -519,6 +526,9 @@ public final class R4PatientResourceProviderIT {
 
     assertEquals(
         beneficiary.getMedicareBeneficiaryId().get(), mbiIdentifier, "mbiHash identifier exists");
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -900,7 +910,7 @@ public final class R4PatientResourceProviderIT {
   }
 
   @Test
-  public void searchForExistingPatientByPartDContractNum() {
+  public void searchForExistingPatientByPartDContractNum() throws IOException {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
@@ -926,6 +936,38 @@ public final class R4PatientResourceProviderIT {
 
     assertNotNull(searchResults);
     assertEquals(1, searchResults.getEntry().size());
+  }
+
+  @Test
+  public void searchForExistingPatientsByPartDContractNum() throws IOException {
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_SYNTHEA_BENES2011));
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
+                        "Z1000"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
+                        "2011"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    assertNotNull(searchResults);
+    assertEquals(695, searchResults.getEntry().size());
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   @Test

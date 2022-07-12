@@ -36,6 +36,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingCarrierClaim() throws FHIRException {
+  public void readEobForExistingCarrierClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -108,6 +109,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     assertNotNull(eob);
     CarrierClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -544,7 +548,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatient() throws FHIRException {
+  public void searchForEobsByExistingPatient() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -663,6 +667,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
     SNFClaimTransformerTest.assertMatches(
         snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**

@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -15,6 +13,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -57,7 +56,7 @@ public final class R4CoverageResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readCoveragesForExistingBeneficiary() throws FHIRException {
+  public void readCoveragesForExistingBeneficiary() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -93,6 +92,9 @@ public final class R4CoverageResourceProviderIT {
             .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary))
             .execute();
     CoverageTransformerV2Test.assertPartDMatches(beneficiary, partDCoverage);
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -180,7 +182,7 @@ public final class R4CoverageResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchByExistingBeneficiary() throws FHIRException {
+  public void searchByExistingBeneficiary() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -260,6 +262,9 @@ public final class R4CoverageResourceProviderIT {
             .findFirst()
             .get();
     CoverageTransformerV2Test.assertPartDMatches(beneficiary, partDCoverageFromSearchResult);
+
+    // check for bene_id in MDC
+    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
