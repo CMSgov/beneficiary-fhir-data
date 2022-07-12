@@ -1597,7 +1597,7 @@ public final class TransformerUtilsV2 {
    */
   public static void logBeneIdToMdc(Long beneId) {
     if (beneId != null) {
-      MDC.put("bene_id", String.valueOf(beneId));
+      BfdMDC.put("bene_id", String.valueOf(beneId));
     }
   }
 
