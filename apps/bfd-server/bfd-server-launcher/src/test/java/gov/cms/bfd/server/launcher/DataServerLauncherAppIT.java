@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
-import gov.cms.bfd.server.sharedutils.MDC;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -234,7 +234,7 @@ public final class DataServerLauncherAppIT {
       assertTrue(
           Files.readString(accessLogJson)
               .contains(
-                  MDC.formatMDCKey(
+                  BfdMDC.formatMDCKey(
                       DataServerLauncherApp.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES)));
 
       // Stop the application.

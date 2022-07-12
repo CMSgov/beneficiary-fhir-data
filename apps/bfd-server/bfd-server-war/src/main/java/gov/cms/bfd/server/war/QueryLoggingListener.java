@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war;
 
-import gov.cms.bfd.server.sharedutils.MDC;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -10,7 +10,7 @@ import net.ttddyy.dsproxy.listener.QueryExecutionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** This {@link QueryExecutionListener} records query performance data in {@link MDC}. */
+/** This {@link QueryExecutionListener} records query performance data in {@link BfdMDC}. */
 public final class QueryLoggingListener implements QueryExecutionListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryLoggingListener.class);
 
@@ -52,7 +52,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       }
 
       if (logFullQuery)
-        MDC.put(
+        BfdMDC.put(
             computeMdcKey(String.format("%s.query", mdcKeyPrefix)),
             queryInfoList.get(0).getQuery());
     } else {
@@ -68,7 +68,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       if (queryIds.charAt(queryIds.length() - 1) == ',')
         queryIds.deleteCharAt(queryIds.length() - 1);
       if (queryInfoList.size() > 1) queryIds.append(']');
-      MDC.put(computeMdcKey(String.format("%s.ids", mdcKeyPrefix)), queryIds.toString());
+      BfdMDC.put(computeMdcKey(String.format("%s.ids", mdcKeyPrefix)), queryIds.toString());
 
       StringBuilder queries = new StringBuilder();
       if (queryInfoList.size() > 1) queries.append('[');
@@ -79,33 +79,33 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       }
       if (queries.charAt(queries.length() - 1) == ',') queries.deleteCharAt(queries.length() - 1);
       if (queryInfoList.size() > 1) queries.append(']');
-      MDC.put(computeMdcKey(String.format("%s.queries", mdcKeyPrefix)), queries.toString());
+      BfdMDC.put(computeMdcKey(String.format("%s.queries", mdcKeyPrefix)), queries.toString());
     }
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.size", mdcKeyPrefix)),
         String.valueOf(queryInfoList.size()));
 
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.duration_milliseconds", mdcKeyPrefix)),
         String.valueOf(execInfo.getElapsedTime()));
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.success", mdcKeyPrefix)),
         String.valueOf(execInfo.isSuccess()));
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.type", mdcKeyPrefix)), execInfo.getStatementType().name());
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.batch", mdcKeyPrefix)), String.valueOf(execInfo.isBatch()));
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.batch_size", mdcKeyPrefix)),
         String.valueOf(execInfo.getBatchSize()));
-    MDC.put(
+    BfdMDC.put(
         computeMdcKey(String.format("%s.datasource_name", mdcKeyPrefix)),
         execInfo.getDataSourceName());
   }
 
   /**
    * @param keySuffix the suffix to build a full key for
-   * @return the key to use for {@link MDC#put(String, String)}
+   * @return the key to use for {@link BfdMDC#put(String, String)}
    */
   private static String computeMdcKey(String keySuffix) {
     return String.format("%s.%s", "database_query", keySuffix);

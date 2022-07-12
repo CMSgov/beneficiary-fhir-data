@@ -5,6 +5,7 @@ import com.codahale.metrics.servlets.MetricsServlet;
 import com.codahale.metrics.servlets.PingServlet;
 import com.codahale.metrics.servlets.ThreadDumpServlet;
 import com.newrelic.api.agent.NewRelic;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -17,7 +18,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
-import org.slf4j.MDC;
 
 /**
  * Models the canonical "operations" supported by this application, such that each meaningfully
@@ -62,14 +62,14 @@ public final class Operation {
   }
 
   /**
-   * Publish the {@link #getCanonicalName()} value to the logging {@link MDC} and to {@link
+   * Publish the {@link #getCanonicalName()} value to the logging {@link BfdMDC} and to {@link
    * NewRelic} as the transaction name.
    */
   public void publishOperationName() {
     String canonicalName = getCanonicalName();
 
     // Ensure that the operation name lands in our access logs.
-    MDC.put(RequestResponsePopulateMdcFilter.computeMdcRequestKey("operation"), canonicalName);
+    BfdMDC.put(RequestResponsePopulateMdcFilter.computeMdcRequestKey("operation"), canonicalName);
 
     // If we got a known operation name, publish it to New Relic as the "transaction name",
     // otherwise stick with New Relic's default transaction name.

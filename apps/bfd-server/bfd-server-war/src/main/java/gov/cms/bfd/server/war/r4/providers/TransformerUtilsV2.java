@@ -13,7 +13,7 @@ import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.sharedutils.MDC;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
@@ -1581,7 +1581,7 @@ public final class TransformerUtilsV2 {
 
   public static void logBeneIdToMdc(Collection<String> beneIds) {
     if (!beneIds.isEmpty()) {
-      MDC.put("bene_id", String.join(", ", beneIds));
+      BfdMDC.put("bene_id", String.join(", ", beneIds));
     }
   }
 
@@ -1607,7 +1607,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Records the JPA query details in {@link MDC}.
+   * Records the JPA query details in {@link BfdMDC}.
    *
    * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
    * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
@@ -1616,13 +1616,13 @@ public final class TransformerUtilsV2 {
   public static void recordQueryInMdc(
       String queryId, long queryDurationNanoseconds, long recordCount) {
     String keyPrefix = String.format("jpa_query.%s", queryId);
-    MDC.put(
+    BfdMDC.put(
         String.format("%s.duration_nanoseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds));
-    MDC.put(
+    BfdMDC.put(
         String.format("%s.duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
-    MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+    BfdMDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**
@@ -3733,7 +3733,7 @@ public final class TransformerUtilsV2 {
 
   public static void logMbiHashToMdc(String mbiHash) {
     if (!Strings.isNullOrEmpty(mbiHash)) {
-      MDC.put("mbi_hash", mbiHash);
+      BfdMDC.put("mbi_hash", mbiHash);
     }
   }
 }

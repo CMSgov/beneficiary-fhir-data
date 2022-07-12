@@ -1,13 +1,14 @@
 package gov.cms.bfd.server.sharedutils;
 
+import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
 
 /**
- * Wrapper for to the {@link org.slf4j.MDC} class (used in logging). Historically, we have used "."
- * to delimit parts of the MDC keys, such as "http_access.request.header". For AWS CloudWatch
- * Metrics, though, the "." character is not supported, so we need to change these to "_".
+ * Wrapper for to the {@link MDC} class (used in logging). Historically, we have used "." to delimit
+ * parts of the MDC keys, such as "http_access.request.header". For AWS CloudWatch Metrics, though,
+ * the "." character is not supported, so we need to change these to "_".
  */
-public class MDC {
+public class BfdMDC {
 
   /**
    * Delimiter that used to be used to separate the parts of MDC field names; we want to replace
@@ -38,19 +39,19 @@ public class MDC {
   }
 
   /**
-   * Get the MDC Adapter, generally via {@link org.slf4j.MDC#getMDCAdapter()}.
+   * Get the MDC Adapter, generally via {@link MDC#getMDCAdapter()}.
    *
    * @return The MDC Adapter being used.
    */
   public static MDCAdapter getMDCAdapter() {
     if (mdcAdapter == null) {
-      return org.slf4j.MDC.getMDCAdapter();
+      return MDC.getMDCAdapter();
     }
     return mdcAdapter;
   }
 
   /**
-   * Format an identifier for an {@link org.slf4j.MDC} key.
+   * Format an identifier for an {@link MDC} key.
    *
    * @param key Fields to concatenate into the final key that we'll put into MDC
    * @return Text of the key that we'll put into MDC
@@ -60,7 +61,7 @@ public class MDC {
   }
 
   /**
-   * Wrapper for {@link org.slf4j.MDC#put(String,String)}, except that we format the key.
+   * Wrapper for {@link MDC#put(String,String)}, except that we format the key.
    *
    * @param key Key for later finding the value
    * @param value Value put into MDC

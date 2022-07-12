@@ -24,7 +24,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.sharedutils.MDC;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -835,7 +835,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+      BfdMDC.put(
+          "database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
