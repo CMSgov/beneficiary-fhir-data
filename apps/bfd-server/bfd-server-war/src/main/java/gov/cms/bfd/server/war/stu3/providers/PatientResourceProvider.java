@@ -836,7 +836,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
       BfdMDC.put(
-          "database_query_by_hash_collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+          "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {

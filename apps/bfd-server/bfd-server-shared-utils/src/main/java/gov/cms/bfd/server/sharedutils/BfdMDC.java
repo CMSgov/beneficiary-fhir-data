@@ -63,7 +63,7 @@ public class BfdMDC {
   /**
    * Format an identifier for an {@link MDC} key.
    *
-   * @param key Fields to concatenate into the final key that we'll put into MDC
+   * @param key Key to format into the final key that we'll put into MDC
    * @return Text of the key that we'll put into MDC
    */
   public static String formatMDCKey(String key) {
