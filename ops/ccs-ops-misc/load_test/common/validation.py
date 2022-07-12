@@ -87,6 +87,9 @@ def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:
     """Checks if the test response time is too long (in the event the database is being
     overwhelmed) and if so, we stop the test.
     """
+    if not environment.runner:
+        return
+
     while not environment.runner.state in [
         STATE_STOPPING,
         STATE_STOPPED,
