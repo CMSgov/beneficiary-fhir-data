@@ -21,7 +21,8 @@ def _execute(uri: str, query: str) -> List:
                 cursor.execute(query)
                 results = cursor.fetchall()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return results
 
@@ -78,7 +79,11 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
     )
 
     return [
-        {"id": str(result[0]), "month": f"{result[1].month:02}", "year": str(result[1].year)}
+        {
+            "id": str(result[0]),
+            "month": f"{result[1].month:02}",
+            "year": str(result[1].year),
+        }
         for result in _execute(uri, contract_id_query)
     ]
 
