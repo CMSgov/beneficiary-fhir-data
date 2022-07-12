@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
@@ -116,6 +117,14 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
+  /**
+   * Gets the associated {@link ClaimResponse.ClaimResponseStatus} for the given {@link RdaMcsClaim}
+   * object's status code.
+   *
+   * @param claimGroup The {@link RdaMcsClaim} object to get the status from.
+   * @return The {@link ClaimResponse.ClaimResponseStatus} associated with the given data's status
+   *     code.
+   */
   private static ClaimResponse.ClaimResponseStatus getStatus(RdaMcsClaim claimGroup) {
     ClaimResponse.ClaimResponseStatus status;
 
@@ -132,21 +141,37 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return status;
   }
 
+  /**
+   * Gets the associated {@link ClaimResponse.RemittanceOutcome} for the given {@link RdaMcsClaim}
+   * object's status code.
+   *
+   * @param claimGroup The {@link RdaMcsClaim} object to get the status from.
+   * @return The {@link ClaimResponse.RemittanceOutcome} associated with the given data's status
+   *     code.
+   */
   private static ClaimResponse.RemittanceOutcome getOutcome(RdaMcsClaim claimGroup) {
     ClaimResponse.RemittanceOutcome outcome;
 
     if (claimGroup.getIdrStatusCode() == null) {
-      outcome = ClaimResponse.RemittanceOutcome.QUEUED;
+      outcome = ClaimResponse.RemittanceOutcome.PARTIAL;
     } else {
-      // If it's not mapped, we assume it's QUEUED
+      // If it's not mapped, we assume it's PARTIAL
       outcome =
           OUTCOME_MAP.getOrDefault(
-              claimGroup.getIdrStatusCode().toLowerCase(), ClaimResponse.RemittanceOutcome.QUEUED);
+              claimGroup.getIdrStatusCode().toLowerCase(), ClaimResponse.RemittanceOutcome.PARTIAL);
     }
 
     return outcome;
   }
 
+  /**
+   * Returns a {@link Patient} {@link Resource} if the associated data is present in the given
+   * {@link RdaMcsClaim}.
+   *
+   * @param claimGroup The {@link RdaMcsClaim} to pull associated data from.
+   * @return A {@link Patient} object built from the associated data in the given {@link
+   *     RdaMcsClaim}, or null if the appropriate data wasn't present.
+   */
   private static Resource getContainedPatient(RdaMcsClaim claimGroup) {
     PatientInfo patientInfo =
         new PatientInfo(
@@ -159,6 +184,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
 
+  /**
+   * Builds a list of {@link Extension} objects using data from the given {@link RdaMcsClaim}.
+   *
+   * @param claimGroup The {@link RdaMcsClaim} to pull associated data from.
+   * @return A list of {@link Extension} objects build from the given {@link RdaMcsClaim} data.
+   */
   private static List<Extension> getExtension(RdaMcsClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
 
@@ -185,6 +216,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return List.copyOf(extensions);
   }
 
+  /**
+   * Builds a list of {@link Identifier} objects using data from the given {@link RdaMcsClaim}.
+   *
+   * @param claimGroup The {@link RdaMcsClaim} to pull associated data from.
+   * @return A list of {@link Identifier} objects build from the given {@link RdaMcsClaim} data.
+   */
   private static List<Identifier> getIdentifier(RdaMcsClaim claimGroup) {
     return List.of(
         new Identifier()
@@ -200,6 +237,11 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
             .setValue(claimGroup.getIdrClmHdIcn()));
   }
 
+  /**
+   * Builds a {@link CodeableConcept} object containing type information for this claim type.
+   *
+   * @return A {@link CodeableConcept} object containing type information for this claim type.
+   */
   private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(

@@ -239,7 +239,7 @@ public class RDATestUtils {
             .sequenceNumber(2L)
             .dcn("123457")
             .hicNo("hicnumbe2")
-            .currStatus('t')
+            .currStatus('\0')
             .currLoc1('r')
             .currLoc2("Somdb")
             .medaProvId("meda12346")
