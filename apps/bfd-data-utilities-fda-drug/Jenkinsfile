@@ -1,0 +1,100 @@
+#!/usr/bin/env groovy
+
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv # TODO: make sure this is coming from somewhere sane
+    command:
+    - sleep
+    args:
+    - 99d
+    resources:
+      limits:
+        memory: 8192Mi
+        cpu: 4000m
+      requests:
+        memory: 8192Mi
+        cpu: 4000m
+"""
+        }
+    }
+     triggers {
+        cron('0 0 28 * *')
+    }
+    parameters {
+        booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
+    }
+    stages {
+        stage('Maven') {
+            steps {
+                script {
+                    container('bfd-cbc-build') {
+                        // Address limitations resulting from CVE-2022-24767
+                        sh 'git config --global --add safe.directory "$WORKSPACE"'
+
+
+                            dir('apps/bfd-data-utilities-fda-drug/') {
+                                // inject code artifact credentials into maven ~/.m2/settings.xml
+                                // Setup AWS Credentials
+                        withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
+                            withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'ROLE')]) {
+                                env.SESSION_NAME = env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
+                                awsCredentials = sh(
+                                    returnStdout: true,
+                                    script: 'aws sts assume-role --role-arn "$ROLE" \
+                                             --role-session-name "$SESSION_NAME" \
+                                             --output text --query Credentials'
+                                    ).trim().split(/\s+/)
+                                env.AWS_DEFAULT_REGION = 'us-east-1'
+                                env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+                                env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+                                env.AWS_SESSION_TOKEN = awsCredentials[3]
+                            }
+                        }
+                        withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
+                            codeArtifactAuthToken = sh(
+                                returnStdout: true,
+                                script: 'aws codeartifact get-authorization-token --domain cms-bfd \
+                                        --domain-owner "$ACCOUNT_ID" \
+                                        --output text --query authorizationToken'
+                                ).trim()
+
+                            env.CODEARTIFACT_AUTH_TOKEN = codeArtifactAuthToken
+                               
+                                sh '''
+cat <<EOF > ~/.m2/settings.xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+        <username>aws</username>
+        <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+        <id>cms-bfd-maven-central-store</id>
+        </server>
+    </servers>
+</settings>
+EOF
+'''
+                                def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
+                                sh "mvn ${quietFlags} clean install"
+                                sh """mvn ${quietFlags} exec:java \
+    -Dexec.mainClass="gov.cms.bfd.data.utilities.FDADrug.App" \
+    -Dexec.args="./src/main/resources/"
+    """
+                                sh "mvn ${quietFlags} package"
+                                sh 'mvn deploy "-DaltDeploymentRepository=cms-bfd-maven-central-store::default::https://cms-bfd-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/"'
+                            }
+                            }
+                        }
+                    }
+                }
+            }
+    }
+}
