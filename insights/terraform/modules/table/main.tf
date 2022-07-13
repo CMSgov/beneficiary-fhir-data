@@ -37,6 +37,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
     location      = "s3://${data.aws_s3_bucket.main.id}/databases/${var.database}/${var.table}"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    compressed    = true
 
     dynamic "columns" {
       for_each = var.columns
