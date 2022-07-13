@@ -10,7 +10,7 @@ from common.locust_utils import is_distributed, is_locust_master
 master_pac_mbis: List[str] = []
 
 
-@events.init.add_listener
+@events.test_start.add_listener
 def _(environment: Environment, **kwargs):
     if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
         # Don't bother loading data for the master runner, it doesn't run a test
