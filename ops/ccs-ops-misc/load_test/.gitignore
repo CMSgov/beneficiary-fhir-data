@@ -16,5 +16,8 @@ locust.conf
 !/.vscode/settings.json
 !/.vscode/extensions.json
 
-#Un-ignore root .editorconfig
+# Un-ignore root .editorconfig
 !.editorconfig
+
+# Un-ignore root .pylintrc
+!.pylintrc
