@@ -19,12 +19,11 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
-import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.MetricOptions;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Clock;
 import java.util.Optional;
@@ -117,23 +116,9 @@ public final class PipelineApplication {
     registerShutdownHook(appMetrics, pipelineManager);
     LOGGER.info("Job processing started.");
 
-    // Create a pooled data source for use by the DatabaseSchemaUpdateJob.
+    // Create a pooled data source for use by any registered jobs.
     final HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
-
-    /*
-     * Register and wait for the database schema job to run, so that we don't have to worry about
-     * declaring it as a dependency (since it is for pretty much everything right now).
-     */
-    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(pooledDataSource));
-    PipelineJobRecord<NullPipelineJobArguments> dbSchemaJobRecord =
-        jobRecordStore.submitPendingJob(DatabaseSchemaUpdateJob.JOB_TYPE, null);
-    try {
-      jobRecordStore.waitForJobs(dbSchemaJobRecord);
-    } catch (InterruptedException e) {
-      pooledDataSource.close();
-      throw new InterruptedException();
-    }
 
     /*
      * Create and register the other jobs.

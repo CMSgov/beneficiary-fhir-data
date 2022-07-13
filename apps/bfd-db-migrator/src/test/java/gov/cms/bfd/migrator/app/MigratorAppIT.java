@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.migrator.util.DatabaseTestUtils;
-import gov.cms.bfd.migrator.util.DatabaseTestUtils.DataSourceComponents;
+import gov.cms.bfd.DataSourceComponents;
+import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.ProcessOutputConsumer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import javax.sql.DataSource;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.awaitility.core.ConditionTimeoutException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -57,9 +59,15 @@ public final class MigratorAppIT {
     }
   }
 
-  /** Cleans up the database after each test. */
+  /** Cleans up the database before each test. */
   @BeforeEach
-  public void teardown() {
+  public void setup() {
+    DatabaseTestUtils.get().dropSchemaForDataSource();
+  }
+
+  /** Cleans up the schema after the test. */
+  @AfterAll
+  public static void teardown() {
     DatabaseTestUtils.get().dropSchemaForDataSource();
   }
 
@@ -95,7 +103,7 @@ public final class MigratorAppIT {
       assertEquals(
           0,
           appProcess.exitValue(),
-          "Did not get expected error code, \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
+          "Did not get expected exit code, \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
 
       // Test the migrations occurred by checking the log output
       boolean hasExpectedMigrationLine =
@@ -336,6 +344,8 @@ public final class MigratorAppIT {
     appRunBuilder.redirectErrorStream(true);
 
     DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
+    // Clear the schema before this test
+    DatabaseTestUtils.get().dropSchemaForDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     appRunBuilder
@@ -349,7 +359,7 @@ public final class MigratorAppIT {
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "1");
     Path testFilePath =
-        Path.of(".", "src", "test", "resources", "db", "migration", "error-scenarios");
+        Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");
     String testFileDir = testFilePath.toAbsolutePath().toString();
     // If real we'll use the default flyway path, else use the test path
     if (testDirectory != TestDirectory.REAL) {
