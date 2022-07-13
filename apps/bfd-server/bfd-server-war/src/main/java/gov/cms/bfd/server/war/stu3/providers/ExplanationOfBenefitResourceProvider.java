@@ -199,7 +199,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
       String beneficiaryId = eob.getPatient().getReference().replace("Patient/", "");
       if (!Strings.isNullOrEmpty(beneficiaryId)) {
-        LoggingUtils.logBeneIdToMdc(Long.parseLong(beneficiaryId));
+        LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
     return eob;

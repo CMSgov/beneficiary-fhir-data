@@ -3343,13 +3343,13 @@ public final class TransformerUtils {
             && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
           String reference = eob.getPatient().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(Long.parseLong(reference));
+            addBeneIdsToSet(beneIds, reference);
           }
         }
       } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(Long.parseLong(patient.getId()));
+          addBeneIdsToSet(beneIds, patient.getId());
         }
       } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
         Coverage coverage = ((Coverage) entry.getResource());
@@ -3358,7 +3358,7 @@ public final class TransformerUtils {
             && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
           String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
           if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(Long.parseLong(reference));
+            addBeneIdsToSet(beneIds, reference);
           }
         }
       }
@@ -3367,6 +3367,15 @@ public final class TransformerUtils {
     LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     return bundle;
+  }
+
+  private static boolean addBeneIdsToSet(Set<Long> beneIds, String beneId) {
+    try {
+      return beneIds.add(Long.parseLong(beneId));
+    } catch (NumberFormatException e) {
+      LOGGER.warn("Could not parse long from bene_id: " + beneId);
+    }
+    return false;
   }
 
   /**

@@ -284,7 +284,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     } else {
       try {
         // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(Long.parseLong(logicalId.getValue()));
+        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
 
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
@@ -673,7 +673,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
         // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(Long.parseLong(patient.getId()));
+        LoggingUtils.logBeneIdToMdc(patient.getId());
         patients = Collections.singletonList(patient);
       } else {
         patients = Collections.emptyList();
