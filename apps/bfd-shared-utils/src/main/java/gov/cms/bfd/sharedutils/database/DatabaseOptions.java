@@ -1,15 +1,19 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd.sharedutils.database;
+
+import java.io.Serializable;
 
 /** The user-configurable options that specify how to access the application's database. */
-public final class DatabaseOptions {
+public final class DatabaseOptions implements Serializable {
+  /** Serialization UID. */
+  private static final long serialVersionUID = 1L;
 
-  /** The JDBC URL of the database to load into. */
+  /** The JDBC URL of the database. */
   private final String databaseUrl;
-  /** The database username to connect as when loading data. */
+  /** The username for the database. */
   private final String databaseUsername;
-  /** The database password to connect with when loading data. */
+  /** The password for the database. */
   private final String databasePassword;
-  /** The maximum size of the DB connection pool that the application will create. */
+  /** The maximum size of the database connection pool. */
   private final int maxPoolSize;
 
   /**

@@ -10,6 +10,10 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.MetricOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -78,7 +82,7 @@ public final class MigratorApp {
 
   /**
    * Provides an external signal of the migrator app's exit state in the form of the exit code
-   * written to the {@link #PID_FILE}.
+   * written to the {@link #PID_FILENAME}.
    *
    * @param exitCode the code corresponding to the application's exit state
    */
@@ -132,7 +136,8 @@ public final class MigratorApp {
 
     // run migration
     boolean migrationSuccess =
-        DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource, appConfig);
+        DatabaseSchemaManager.createOrUpdateSchema(
+            pooledDataSource, appConfig.getFlywayScriptLocationOverride());
 
     if (!migrationSuccess) {
       LOGGER.error("Migration failed, shutting down");
