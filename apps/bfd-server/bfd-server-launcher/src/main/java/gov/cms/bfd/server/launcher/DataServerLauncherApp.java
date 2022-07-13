@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,6 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
@@ -79,7 +79,7 @@ public final class DataServerLauncherApp {
 
   /** MDC key for the http output size in bytes */
   public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
-      "http_access.response.output_size_in_bytes";
+      "http_access_response_output_size_in_bytes";
 
   private static Server server;
 
@@ -308,7 +308,7 @@ public final class DataServerLauncherApp {
    * each request:
    *
    * <ul>
-   *   <li>access.json - a structured log built from the {@link MDC}
+   *   <li>access.json - a structured log built from the {@link BfdMDC}
    *   <li>access.log - an unstructured NCSA style log that should be considered deprecated and
    *       slated for removal
    * </ul>
@@ -350,7 +350,7 @@ public final class DataServerLauncherApp {
          * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
          * accessible to the filter.
          */
-        MDC.put(
+        BfdMDC.put(
             HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
             String.valueOf(response.getHttpOutput().getWritten()));
 
@@ -360,7 +360,7 @@ public final class DataServerLauncherApp {
          */
         LOGGER_HTTP_ACCESS.info("response complete");
       } finally {
-        MDC.clear();
+        BfdMDC.clear();
       }
     }
   }

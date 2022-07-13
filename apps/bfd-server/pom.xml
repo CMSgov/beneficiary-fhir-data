@@ -23,6 +23,7 @@
 	<modules>
 		<module>bfd-server-launcher-sample</module>
 		<module>bfd-server-launcher</module>
+		<module>bfd-server-shared-utils</module>
 		<module>bfd-server-war</module>
 	</modules>
 
