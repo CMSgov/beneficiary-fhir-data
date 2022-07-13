@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -67,7 +68,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -167,7 +167,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
       TransformerUtilsV2.recordQueryInMdc(
           String.format(
-              "bene_by_id.include_%s",
+              "bene_by_id_include_%s",
               String.join(
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
@@ -730,7 +730,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     } finally {
       fromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          "bene_by_" + hashType + "." + hashType + "s_from_beneficiarieshistory",
+          "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           fromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
     }
@@ -772,7 +772,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
       TransformerUtilsV2.recordQueryInMdc(
           String.format(
-              "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
+              "bene_by_" + hashType + "_bene_by_" + hashType + "_or_id_include_%s",
               String.join(
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
@@ -790,7 +790,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+      BfdMDC.put(
+          "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
