@@ -26,7 +26,7 @@ public class LoggingUtils {
   /**
    * ensure a valid Long type benefificiary ID to log to MDC
    *
-   * @param beneId the {@link Long} of beneficiary IDs top log
+   * @param beneId the {@link String} of beneficiary IDs top log
    */
   public static void logBeneIdToMdc(String beneId) {
     try {
