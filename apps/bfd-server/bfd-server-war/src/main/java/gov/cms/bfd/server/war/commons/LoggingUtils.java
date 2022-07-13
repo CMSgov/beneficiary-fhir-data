@@ -11,7 +11,7 @@ public class LoggingUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoggingUtils.class);
 
   /**
-   * Output list of benefificiary IDs to MDC logging
+   * Log a list of beneficiary IDs to the BfdMDC under the 'bene_id' key.
    *
    * @param beneIds the {@link Long} of beneficiary IDs top log
    */
@@ -24,7 +24,8 @@ public class LoggingUtils {
   }
 
   /**
-   * ensure a valid Long type benefificiary ID to log to MDC
+   * Log a beneficiary ID to the BfdMDC under the 'bene_id' key if the ID supplied can be parsed as
+   * a long.
    *
    * @param beneId the {@link String} of beneficiary IDs top log
    */
