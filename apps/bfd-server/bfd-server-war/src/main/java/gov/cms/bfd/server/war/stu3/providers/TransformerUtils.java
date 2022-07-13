@@ -3375,7 +3375,7 @@ public final class TransformerUtils {
    * @param beneIds the collection of beneIds logged to MDC.
    * @param beneId beneficiaryId to add to beneId collection.
    */
-  private static boolean addBeneIdsToSet(Set<Long> beneIds, String beneId) {
+  private static void addBeneIdsToSet(Set<Long> beneIds, String beneId) {
     try {
       beneIds.add(Long.parseLong(beneId));
     } catch (NumberFormatException e) {
