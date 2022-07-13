@@ -122,7 +122,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_OMIT_IDENTIFIERS(
         "bene_by_id_omit_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries_new ")
+            s.contains(" from beneficiaries ")
                 && s.contains("bene_id=")
                 && !s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
@@ -130,58 +130,54 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_INCLUDE_IDENTIFIERS(
         "bene_by_id_include_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries_new ")
+            s.contains(" from beneficiaries ")
                 && s.contains("bene_id=")
                 && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_MBI_HISTORY(
         "bene_by_mbi_mbis_from_beneficiarieshistory",
-        (s -> s.contains(" from beneficiaries_history_new ") && s.contains("mbi_hash="))),
+        (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
 
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn_hicns_from_beneficiarieshistory",
-        (s -> s.contains(" from beneficiaries_history_new ") && s.contains("bene_crnt_hic_num="))),
+        (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_OMIT_IDENTIFIERS(
         "bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries_new ")
+            s.contains(" from beneficiaries ")
                 && !s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_HICN_OR_ID_INCLUDE_IDENTIFIERS(
         "bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries_new ")
+            s.contains(" from beneficiaries ")
                 && s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
 
     BENE_BY_COVERAGE(
         "bene_by_coverage",
-        (s ->
-            s.contains(" from beneficiaries_new ")
-                && s.contains("where beneficiar0_.ptd_cntrct_"))),
+        (s -> s.contains(" from beneficiaries ") && s.contains("where beneficiar0_.ptd_cntrct_"))),
 
-    EOBS_BY_BENE_ID_CARRIER(
-        "eobs_by_bene_id_carrier", (s -> s.contains(" from carrier_claims_new "))),
+    EOBS_BY_BENE_ID_CARRIER("eobs_by_bene_id_carrier", (s -> s.contains(" from carrier_claims "))),
 
-    EOBS_BY_BENE_ID_DME("eobs_by_bene_id_dme", (s -> s.contains(" from dme_claims_new "))),
+    EOBS_BY_BENE_ID_DME("eobs_by_bene_id_dme", (s -> s.contains(" from dme_claims "))),
 
-    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id_hha", (s -> s.contains(" from hha_claims_new "))),
+    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id_hha", (s -> s.contains(" from hha_claims "))),
 
-    EOBS_BY_BENE_ID_HOSPICE(
-        "eobs_by_bene_id_hospice", (s -> s.contains(" from hospice_claims_new "))),
+    EOBS_BY_BENE_ID_HOSPICE("eobs_by_bene_id_hospice", (s -> s.contains(" from hospice_claims "))),
 
     EOBS_BY_BENE_ID_INPATIENT(
-        "eobs_by_bene_id_inpatient", (s -> s.contains(" from inpatient_claims_new "))),
+        "eobs_by_bene_id_inpatient", (s -> s.contains(" from inpatient_claims "))),
 
     EOBS_BY_BENE_ID_OUTPATIENT(
-        "eobs_by_bene_id_outpatient", (s -> s.contains(" from outpatient_claims_new "))),
+        "eobs_by_bene_id_outpatient", (s -> s.contains(" from outpatient_claims "))),
 
-    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id_pde", (s -> s.contains(" from partd_events_new "))),
+    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id_pde", (s -> s.contains(" from partd_events "))),
 
-    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from snf_claims_new "))),
+    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from snf_claims "))),
 
     FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
 
