@@ -114,10 +114,25 @@ resource "aws_s3_bucket_policy" "logs" {
     {
       "Effect": "Allow",
       "Principal": {
-          "AWS": ["${data.aws_elb_service_account.main.arn}"]
+          "AWS": "${data.aws_elb_service_account.main.arn}"
       },
       "Action": "s3:PutObject",
       "Resource": "arn:aws:s3:::${var.log_bucket}/*"
+    },
+    {
+      "Sid": "AllowSSLRequestsOnly",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+          "arn:aws:s3:::${var.log_bucket}",
+          "arn:aws:s3:::${var.log_bucket}/*"
+      ],
+      "Condition": {
+          "Bool": {
+              "aws:SecureTransport": "false"
+          }
+      }
     }
   ]
 }
