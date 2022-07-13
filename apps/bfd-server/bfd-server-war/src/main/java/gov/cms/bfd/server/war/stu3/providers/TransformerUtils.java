@@ -3369,13 +3369,18 @@ public final class TransformerUtils {
     return bundle;
   }
 
+  /**
+   * Parses Sting beneficiary ID to Long and adds to List to log to MDC.
+   *
+   * @param beneIds the collection of beneIds logged to MDC.
+   * @param beneId beneficiaryId to add to beneId collection.
+   */
   private static boolean addBeneIdsToSet(Set<Long> beneIds, String beneId) {
     try {
-      return beneIds.add(Long.parseLong(beneId));
+      beneIds.add(Long.parseLong(beneId));
     } catch (NumberFormatException e) {
       LOGGER.warn("Could not parse long from bene_id: " + beneId);
     }
-    return false;
   }
 
   /**
