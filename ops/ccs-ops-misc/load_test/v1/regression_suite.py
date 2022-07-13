@@ -30,23 +30,17 @@ def _(environment: Environment, **kwargs):
     # for Locust's documentation on the test data management pattern used here
     global master_bene_ids
     master_bene_ids = data.load_from_parsed_opts(
-        environment.parsed_options,
-        db.get_bene_ids,
-        use_table_sample=False,
+        environment.parsed_options, db.get_bene_ids, use_table_sample=False, data_type_name="bene_ids"
     )
 
     global master_contract_data
     master_contract_data = data.load_from_parsed_opts(
-        environment.parsed_options,
-        db.get_contract_ids,
-        use_table_sample=False,
+        environment.parsed_options, db.get_contract_ids, use_table_sample=False, data_type_name="contract_data"
     )
 
     global master_hashed_mbis
     master_hashed_mbis = data.load_from_parsed_opts(
-        environment.parsed_options,
-        db.get_hashed_mbis,
-        use_table_sample=False,
+        environment.parsed_options, db.get_hashed_mbis, use_table_sample=False, data_type_name="hashed_mbis"
     )
 
 

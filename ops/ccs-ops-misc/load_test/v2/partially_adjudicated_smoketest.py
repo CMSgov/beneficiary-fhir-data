@@ -20,9 +20,7 @@ def _(environment: Environment, **kwargs):
     # for Locust's documentation on the test data management pattern used here
     global master_pac_mbis
     master_pac_mbis = data.load_from_parsed_opts(
-        environment.parsed_options,
-        db.get_pac_hashed_mbis,
-        use_table_sample=False,
+        environment.parsed_options, db.get_pac_hashed_mbis, use_table_sample=False, data_type_name="pac_mbis"
     )
 
 
