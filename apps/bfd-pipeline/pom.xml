@@ -20,6 +20,7 @@
 		<module>bfd-pipeline-rda-grpc</module>
 		<module>bfd-pipeline-rda-grpc-apps</module>
 		<module>bfd-pipeline-shared-utils</module>
+		<module>bfd-pipeline-shared-test-utils</module>
 		<module>bfd-pipeline-app</module>
 		<module>bfd-pipeline-rda-bridge</module>
 	</modules>
