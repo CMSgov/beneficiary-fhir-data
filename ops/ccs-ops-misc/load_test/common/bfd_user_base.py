@@ -71,7 +71,7 @@ class BFDUserBase(HttpUser):
     END_ON_NO_DATA = True
 
     def __init__(self, *args, **kwargs):
-        HttpUser.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
         self.client_cert = self.environment.parsed_options.client_cert_path
@@ -80,10 +80,7 @@ class BFDUserBase(HttpUser):
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.last_updated = data.get_last_updated()
 
-        # Initialize data / URL pools
-        self.bene_ids = []
-        self.mbis = []
-        self.contract_ids = []
+        # Initialize URL pools
         self.url_pools = {}
 
         self.logger = logging.getLogger()
