@@ -21,8 +21,8 @@ class ValidationGoal(Enum):
     SLA_PATIENT = (1000, 3000, 5000)
     SLA_EOB_WITH_SINCE = (100, 250, 1000)
     SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000)
-    SLA_V1_BASELINE = (10, 325, 550)
-    SLA_V2_BASELINE = (10, 325, 550)
+    SLA_V1_BASELINE = (500, 700, 1000)
+    SLA_V2_BASELINE = (500, 700, 1000)
 
     def __init__(self, sla_50: int, sla_95: int, sla_99: int) -> None:
         self.sla_50 = sla_50
@@ -98,8 +98,7 @@ def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:
         time.sleep(1)
         if environment.stats.total.avg_response_time > fail_time_ms:
             logging.getLogger().warning(
-                "WARNING: Test aborted due to triggering test failsafe "
-                "(average response time ratio > %d ms)",
+                "WARNING: Test aborted due to triggering test failsafe (average response time ratio > %d ms)",
                 fail_time_ms,
             )
             environment.runner.quit()
