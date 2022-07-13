@@ -1,0 +1,8 @@
+---
+id: rif_beneficiaries
+name: 'RIF: Beneficiaries'
+type: rif
+fields:
+  ungrouped:
+    # TODO: Should I use field IDs here or the real column names? The latter, I think.
+    - ccw_bene_id
