@@ -1,15 +1,29 @@
-package gov.cms.bfd.model.rda;
+package gov.cms.bfd.migrator.app;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.DataSourceComponents;
+import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.ProcessOutputConsumer;
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.RdaFissPayer;
+import gov.cms.bfd.model.rda.RdaFissProcCode;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.RdaMcsDetail;
+import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.StringList;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,33 +40,59 @@ import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.sql.DataSource;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
+import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.tool.schema.Action;
-import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests to ensure basic functioning of the RDA API related JPA entity classes. */
-public class SchemaMigrationIT {
+public class RdaSchemaMigrationIT {
+
+  /** The datasource used throughout the test. */
+  private static DataSource dataSource;
+
+  /** The name for persistence units. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
-  private Connection dbLifetimeConnection;
-  private EntityManagerFactory entityManagerFactory;
-  private EntityManager entityManager;
+  /** The entity manager used for querying the database in the tests. */
+  private static EntityManager entityManager;
 
-  @BeforeEach
-  public void setUp() throws SQLException {
-    final String dbUrl = "jdbc:hsqldb:mem:" + getClass().getSimpleName();
+  /**
+   * Running the migrator once cuts the test time down significantly; however
+   * the @BeforeAll/@AfterAll annotation requires static methods, thus the static entityManager and
+   * datasource as well.
+   *
+   * @throws IOException the io exception
+   */
+  @BeforeAll
+  public static void setUp() throws IOException {
 
-    // the HSQLDB database will be destroyed when this connection is closed
-    dbLifetimeConnection = DriverManager.getConnection(dbUrl + ";shutdown=true", "", "");
+    ProcessBuilder appRunBuilder = createAppProcessBuilder();
+    appRunBuilder.redirectErrorStream(true);
+    Process appProcess = appRunBuilder.start();
 
-    final JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl(dbUrl);
-    dataSource.setUser("");
-    dataSource.setPassword("");
+    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+    Thread appRunConsumerThread = new Thread(appRunConsumer);
+    appRunConsumerThread.start();
 
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
+    // Await start/finish of application
+    try {
+      Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> !appProcess.isAlive());
+    } catch (ConditionTimeoutException e) {
+      throw new RuntimeException(
+          "Migration application failed to start within timeout, STDOUT:\n"
+              + appRunConsumer.getStdoutContents(),
+          e);
+    }
+
+    assertEquals(
+        0,
+        appProcess.exitValue(),
+        "Migration failed during test setup. \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
 
     final Map<String, Object> hibernateProperties =
         ImmutableMap.of(
@@ -63,27 +103,68 @@ public class SchemaMigrationIT {
             org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE,
             10);
 
-    entityManagerFactory =
+    EntityManagerFactory entityManagerFactory =
         Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
     entityManager = entityManagerFactory.createEntityManager();
   }
 
-  @AfterEach
-  public void tearDown() throws SQLException {
+  /**
+   * Tears down the test, and removes a specific type that is not removed as part of flyway's
+   * cleanup.
+   */
+  @AfterAll
+  public static void tearDown() {
+    DatabaseTestUtils.get().dropSchemaForDataSource();
     if (entityManager != null && entityManager.isOpen()) {
-      if (entityManager.getTransaction().isActive()) {
-        entityManager.getTransaction().rollback();
-      }
       entityManager.close();
       entityManager = null;
     }
-    if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-      entityManagerFactory.close();
-      entityManagerFactory = null;
-    }
-    if (dbLifetimeConnection != null) {
-      dbLifetimeConnection.close();
-      dbLifetimeConnection = null;
+    dataSource = null;
+  }
+
+  /**
+   * Creates a ProcessBuilder for the migrator tests to be run with.
+   *
+   * @return ProcessBuilder ready with common values set
+   */
+  private static ProcessBuilder createAppProcessBuilder() {
+    String[] command = createCommandForMigratorApp();
+    ProcessBuilder appRunBuilder = new ProcessBuilder(command);
+    appRunBuilder.redirectErrorStream(true);
+
+    dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
+    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
+
+    appRunBuilder
+        .environment()
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    appRunBuilder
+        .environment()
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+    appRunBuilder
+        .environment()
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "1");
+
+    return appRunBuilder;
+  }
+
+  /**
+   * Create command for the migrator script to be run.
+   *
+   * @return the command array for the migrator app
+   */
+  private static String[] createCommandForMigratorApp() {
+    try {
+      Path assemblyDirectory =
+          Files.list(Paths.get(".", "target", "db-migrator"))
+              .filter(f -> f.getFileName().toString().startsWith("bfd-db-migrator-"))
+              .findFirst()
+              .orElse(Path.of(""));
+      Path pipelineAppScript = assemblyDirectory.resolve("bfd-db-migrator.sh");
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -170,7 +251,7 @@ public class SchemaMigrationIT {
 
     List<RdaFissClaim> claims =
         entityManager
-            .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+            .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
             .getResultList();
     assertEquals(1, claims.size());
 
@@ -196,7 +277,7 @@ public class SchemaMigrationIT {
     entityManager.getTransaction().commit();
     resultClaim =
         entityManager
-            .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+            .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
             .getResultList()
             .get(0);
     assertEquals("0:H", summarizeFissProcCodes(resultClaim));
@@ -332,7 +413,7 @@ public class SchemaMigrationIT {
     final List<String> mbis = new ArrayList<>();
     final String hashSuffix = "-hash";
     long seqNo = 1;
-    for (int mbiNumber = 1; mbiNumber <= 10; mbiNumber += 1) {
+    for (int mbiNumber = 11; mbiNumber <= 20; mbiNumber += 1) {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
       entityManager.getTransaction().begin();
@@ -437,7 +518,7 @@ public class SchemaMigrationIT {
   }
 
   /**
-   * Create a minimally populated {@link RdaMcsDiagCode} object for use in tests.
+   * Create a minimally populated {@link RdaMcsDiagnosisCode} object for use in tests.
    *
    * @param claim parent claim
    * @param priority column value
