@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-/** Unit tests for the {@link SimpleGrpcRdaSource} class. */
+/** Unit tests for the {@link StandardGrpcRdaSource} class. */
 public class GrpcRdaSourceTest {
   /**
    * We need a starting time for the {@link Clock} used to compute idle time. The time and date are
@@ -56,7 +56,7 @@ public class GrpcRdaSourceTest {
    */
   private static final Instant BASE_TIME_FOR_TEST =
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
-  /** Configuration setting for {@link SimpleGrpcRdaSource#minIdleMillisBeforeConnectionDrop}. */
+  /** Configuration setting for {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop}. */
   // JavadocReference - Just for documentation
   @SuppressWarnings("JavadocReference")
   private static final long MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP =
@@ -91,9 +91,9 @@ public class GrpcRdaSourceTest {
   /** A mock response stream used to simulate claims arriving from the RDA API server. */
   @Mock private GrpcResponseStream<Integer> mockResponseStream;
   /** The object we are testing. */
-  private SimpleGrpcRdaSource<Integer, Integer> source;
-  /** Shortcut for accessing the {@link SimpleGrpcRdaSource.Metrics} object. */
-  private SimpleGrpcRdaSource.Metrics metrics;
+  private StandardGrpcRdaSource<Integer, Integer> source;
+  /** Shortcut for accessing the {@link StandardGrpcRdaSource.Metrics} object. */
+  private StandardGrpcRdaSource.Metrics metrics;
 
   private AutoCloseable closeable;
 
@@ -109,7 +109,7 @@ public class GrpcRdaSourceTest {
     appMetrics = new MetricRegistry();
     source =
         spy(
-            new SimpleGrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -134,13 +134,13 @@ public class GrpcRdaSourceTest {
   public void metricNames() {
     assertEquals(
         Arrays.asList(
-            "SimpleGrpcRdaSource.ints.batches",
-            "SimpleGrpcRdaSource.ints.calls",
-            "SimpleGrpcRdaSource.ints.failures",
-            "SimpleGrpcRdaSource.ints.objects.received",
-            "SimpleGrpcRdaSource.ints.objects.stored",
-            "SimpleGrpcRdaSource.ints.successes",
-            "SimpleGrpcRdaSource.ints.uptime"),
+            "StandardGrpcRdaSource.ints.batches",
+            "StandardGrpcRdaSource.ints.calls",
+            "StandardGrpcRdaSource.ints.failures",
+            "StandardGrpcRdaSource.ints.objects.received",
+            "StandardGrpcRdaSource.ints.objects.stored",
+            "StandardGrpcRdaSource.ints.successes",
+            "StandardGrpcRdaSource.ints.uptime"),
         new ArrayList<>(appMetrics.getNames()));
   }
 
@@ -185,7 +185,7 @@ public class GrpcRdaSourceTest {
   public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
     source =
         spy(
-            new SimpleGrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -271,7 +271,7 @@ public class GrpcRdaSourceTest {
     doThrow(error).when(caller).callService(any(), any(), anyLong());
     source =
         spy(
-            new SimpleGrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,

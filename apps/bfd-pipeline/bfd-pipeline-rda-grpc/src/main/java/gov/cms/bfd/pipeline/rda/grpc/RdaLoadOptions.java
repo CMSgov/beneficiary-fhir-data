@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -11,9 +13,12 @@ import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
-import gov.cms.bfd.pipeline.rda.grpc.source.SimpleGrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,23 +84,45 @@ public class RdaLoadOptions implements Serializable {
                 appState.getMetrics(),
                 "fiss"),
         () ->
-            new SimpleGrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 grpcConfig,
                 new FissClaimStreamCaller(),
                 appState.getMetrics(),
                 "fiss",
                 jobConfig.getStartingFissSeqNum()),
-        () ->
+        createFissSinkFactory(appState),
+        appState.getMetrics());
+  }
+
+  /**
+   * Helper method to define a FISS sink factory
+   *
+   * @param appState the shared {@link PipelineApplicationState}
+   * @return A FISS sink factory that creates {@link RdaSink} objects.
+   */
+  private ThrowingFunction<
+          RdaSink<FissClaimChange, RdaChange<RdaFissClaim>>,
+          AbstractRdaLoadJob.SinkTypePreference,
+          Exception>
+      createFissSinkFactory(PipelineApplicationState appState) {
+    return (AbstractRdaLoadJob.SinkTypePreference sinkTypePreference) -> {
+      RdaSink<FissClaimChange, RdaChange<RdaFissClaim>> sink;
+      FissClaimTransformer transformer =
+          new FissClaimTransformer(appState.getClock(), MbiCache.computedCache(idHasherConfig));
+
+      if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
+        sink = new FissClaimRdaSink(appState, transformer, true);
+      } else {
+        sink =
             ConcurrentRdaSink.createSink(
                 jobConfig.getWriteThreads(),
                 jobConfig.getBatchSize(),
                 autoUpdateSequenceNumbers ->
-                    new FissClaimRdaSink(
-                        appState,
-                        new FissClaimTransformer(
-                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
-                        autoUpdateSequenceNumbers)),
-        appState.getMetrics());
+                    new FissClaimRdaSink(appState, transformer, autoUpdateSequenceNumbers));
+      }
+
+      return sink;
+    };
   }
 
   /**
@@ -116,23 +143,45 @@ public class RdaLoadOptions implements Serializable {
                 appState.getMetrics(),
                 "mcs"),
         () ->
-            new SimpleGrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 grpcConfig,
                 new McsClaimStreamCaller(),
                 appState.getMetrics(),
                 "mcs",
                 jobConfig.getStartingMcsSeqNum()),
-        () ->
+        createMcsSinkFactory(appState),
+        appState.getMetrics());
+  }
+
+  /**
+   * Helper method to define an MCS sink factory
+   *
+   * @param appState the shared {@link PipelineApplicationState}
+   * @return An MCS sink factory that creates {@link RdaSink} objects.
+   */
+  private ThrowingFunction<
+          RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>,
+          AbstractRdaLoadJob.SinkTypePreference,
+          Exception>
+      createMcsSinkFactory(PipelineApplicationState appState) {
+    return (AbstractRdaLoadJob.SinkTypePreference sinkTypePreference) -> {
+      RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>> sink;
+      McsClaimTransformer transformer =
+          new McsClaimTransformer(appState.getClock(), MbiCache.computedCache(idHasherConfig));
+
+      if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
+        sink = new McsClaimRdaSink(appState, transformer, true);
+      } else {
+        sink =
             ConcurrentRdaSink.createSink(
                 jobConfig.getWriteThreads(),
                 jobConfig.getBatchSize(),
                 autoUpdateSequenceNumbers ->
-                    new McsClaimRdaSink(
-                        appState,
-                        new McsClaimTransformer(
-                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
-                        autoUpdateSequenceNumbers)),
-        appState.getMetrics());
+                    new McsClaimRdaSink(appState, transformer, autoUpdateSequenceNumbers));
+      }
+
+      return sink;
+    };
   }
 
   @Override

@@ -47,7 +47,14 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     this.metrics = new Metrics(getClass(), appMetrics, claimType);
   }
 
-  protected int tryRetrieveAndProcessObjects(SomeInterface logic) throws ProcessingException {
+  /**
+   * Method to perform basic error handling when executing the given {@link Processor} logic.
+   *
+   * @param logic The logic to execute to retrieve and process objects.
+   * @return The number of objects that were processed successfully.
+   * @throws ProcessingException If there was an issue processing the objects.
+   */
+  protected int tryRetrieveAndProcessObjects(Processor logic) throws ProcessingException {
     metrics.getCalls().mark();
     boolean interrupted = false;
     Exception error = null;
@@ -83,10 +90,19 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     return processed;
   }
 
-  protected interface SomeInterface {
+  /** Functional interface to define logic to be executed. */
+  @FunctionalInterface
+  protected interface Processor {
+    /**
+     * Consumer defined process that executes logic and returns a {@link ProcessResult}.
+     *
+     * @return A {@link ProcessResult} with details of the execution result.
+     * @throws Exception If the processing encounters an unexpected issue.
+     */
     ProcessResult process() throws Exception;
   }
 
+  /** Data class for holding processing results. */
   @Data
   protected static class ProcessResult {
     private boolean wasInterrupted = false;

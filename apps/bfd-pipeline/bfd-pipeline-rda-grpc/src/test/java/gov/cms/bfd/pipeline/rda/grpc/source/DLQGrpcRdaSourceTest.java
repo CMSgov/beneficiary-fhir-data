@@ -60,7 +60,7 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(mockChannel).when(mockConfig).createChannel();
 
-    AbstractGrpcRdaSource.SomeInterface mockLogic = mock(AbstractGrpcRdaSource.SomeInterface.class);
+    AbstractGrpcRdaSource.Processor mockLogic = mock(AbstractGrpcRdaSource.Processor.class);
 
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
@@ -71,7 +71,7 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(-1)
         .when(sourceSpy)
-        .tryRetrieveAndProcessObjects(any(AbstractGrpcRdaSource.SomeInterface.class));
+        .tryRetrieveAndProcessObjects(any(AbstractGrpcRdaSource.Processor.class));
 
     doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
@@ -104,7 +104,7 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(mockChannel).when(mockConfig).createChannel();
 
-    AbstractGrpcRdaSource.SomeInterface mockLogic = mock(AbstractGrpcRdaSource.SomeInterface.class);
+    AbstractGrpcRdaSource.Processor mockLogic = mock(AbstractGrpcRdaSource.Processor.class);
 
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
@@ -115,7 +115,7 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(-1)
         .when(sourceSpy)
-        .tryRetrieveAndProcessObjects(any(AbstractGrpcRdaSource.SomeInterface.class));
+        .tryRetrieveAndProcessObjects(any(AbstractGrpcRdaSource.Processor.class));
 
     doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
@@ -214,7 +214,7 @@ public class DLQGrpcRdaSourceTest {
 
     // We're testing the lambda logic in this test, so have to grab it first from the method that
     // returns it
-    AbstractGrpcRdaSource.SomeInterface logic =
+    AbstractGrpcRdaSource.Processor logic =
         sourceSpy.dlqProcessingLogic(mockSink, type, Set.of(5L, 15L));
     AbstractGrpcRdaSource.ProcessResult actualResult = logic.process();
 

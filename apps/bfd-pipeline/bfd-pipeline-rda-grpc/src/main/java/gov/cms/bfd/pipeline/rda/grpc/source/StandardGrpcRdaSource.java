@@ -31,7 +31,8 @@ import lombok.extern.slf4j.Slf4j;
  * @param <TMessage> type of objects returned by the gRPC service
  */
 @Slf4j
-public class SimpleGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TMessage, TClaim> {
+public class StandardGrpcRdaSource<TMessage, TClaim>
+    extends AbstractGrpcRdaSource<TMessage, TClaim> {
 
   private final Clock clock;
   private final Optional<Long> startingSequenceNumber;
@@ -48,7 +49,7 @@ public class SimpleGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource
    * @param claimType the claim type
    * @param startingSequenceNumber optional hard coded sequence number
    */
-  public SimpleGrpcRdaSource(
+  public StandardGrpcRdaSource(
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
       MetricRegistry appMetrics,
@@ -77,7 +78,7 @@ public class SimpleGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource
    * @param startingSequenceNumber optional hard coded sequence number
    */
   @VisibleForTesting
-  SimpleGrpcRdaSource(
+  StandardGrpcRdaSource(
       Clock clock,
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,

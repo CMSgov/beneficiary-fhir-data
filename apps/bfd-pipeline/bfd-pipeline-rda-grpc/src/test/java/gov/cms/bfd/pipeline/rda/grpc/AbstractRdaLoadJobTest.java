@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,18 +36,23 @@ import org.slf4j.LoggerFactory;
 public class AbstractRdaLoadJobTest {
   @Mock private Callable<RdaSource<Integer, Integer>> preJobTask;
   @Mock private Callable<RdaSource<Integer, Integer>> sourceFactory;
-  @Mock private Callable<RdaSink<Integer, Integer>> sinkFactory;
+
+  @Mock
+  private ThrowingFunction<
+          RdaSink<Integer, Integer>, AbstractRdaLoadJob.SinkTypePreference, Exception>
+      sinkFactory;
+
   @Mock private RdaSource<Integer, Integer> source;
   @Mock private RdaSink<Integer, Integer> sink;
   private TestingLoadJob job;
   private MetricRegistry appMetrics;
   private Config config;
 
-  private AutoCloseable closeable;
+  private AutoCloseable mocksClosable;
 
   @BeforeEach
   public void setUp() {
-    closeable = MockitoAnnotations.openMocks(this);
+    mocksClosable = MockitoAnnotations.openMocks(this);
     config =
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(10))
@@ -58,7 +64,7 @@ public class AbstractRdaLoadJobTest {
 
   @AfterEach
   public void tearDown() throws Exception {
-    closeable.close();
+    mocksClosable.close();
   }
 
   @Test
@@ -98,7 +104,9 @@ public class AbstractRdaLoadJobTest {
     doReturn(source).when(sourceFactory).call();
     // resource - This is a mock, not an invocation
     //noinspection resource
-    doThrow(new IOException("oops")).when(sinkFactory).call();
+    doThrow(new IOException("oops"))
+        .when(sinkFactory)
+        .apply(any(AbstractRdaLoadJob.SinkTypePreference.class));
     try {
       job.callRdaServiceAndStoreRecords();
       fail("job should have thrown exception");
@@ -120,7 +128,7 @@ public class AbstractRdaLoadJobTest {
     doReturn(source).when(sourceFactory).call();
     // resource - This is a mock, not an invocation
     //noinspection resource
-    doReturn(sink).when(sinkFactory).call();
+    doReturn(sink).when(sinkFactory).apply(AbstractRdaLoadJob.SinkTypePreference.NONE);
     doThrow(new ProcessingException(new IOException("oops"), 7))
         .when(source)
         .retrieveAndProcessObjects(anyInt(), same(sink));
@@ -153,7 +161,7 @@ public class AbstractRdaLoadJobTest {
     doReturn(source).when(sourceFactory).call();
     // resource - This is a mock, not an invocation
     //noinspection resource
-    doReturn(sink).when(sinkFactory).call();
+    doReturn(sink).when(sinkFactory).apply(AbstractRdaLoadJob.SinkTypePreference.NONE);
     doReturn(0).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
@@ -162,7 +170,7 @@ public class AbstractRdaLoadJobTest {
       fail("job should NOT have thrown exception");
     }
     verify(source).close();
-    verify(sink, times(2)).close();
+    verify(sink, times(1)).close();
     assertMeterReading(1, "calls", job.getMetrics().getCalls());
     assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
     assertMeterReading(0, "failures", job.getMetrics().getFailures());
@@ -179,7 +187,7 @@ public class AbstractRdaLoadJobTest {
     doReturn(source).when(sourceFactory).call();
     // resource - This is a mock, not an invocation
     //noinspection resource
-    doReturn(sink).when(sinkFactory).call();
+    doReturn(sink).when(sinkFactory).apply(AbstractRdaLoadJob.SinkTypePreference.NONE);
     doReturn(25_000).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
@@ -188,7 +196,7 @@ public class AbstractRdaLoadJobTest {
       fail("job should NOT have thrown exception");
     }
     verify(source).close();
-    verify(sink, times(2)).close();
+    verify(sink, times(1)).close();
     assertMeterReading(1, "calls", job.getMetrics().getCalls());
     assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
     assertMeterReading(0, "failures", job.getMetrics().getFailures());
@@ -219,7 +227,7 @@ public class AbstractRdaLoadJobTest {
               waitForCompletion.await();
               return source;
             },
-            () -> sink,
+            (preference) -> sink,
             appMetrics);
     final ExecutorService pool = Executors.newCachedThreadPool();
     try {
@@ -272,7 +280,7 @@ public class AbstractRdaLoadJobTest {
         Config config,
         Callable<RdaSource<Integer, Integer>> preJobTask,
         Callable<RdaSource<Integer, Integer>> sourceFactory,
-        Callable<RdaSink<Integer, Integer>> sinkFactory,
+        ThrowingFunction<RdaSink<Integer, Integer>, SinkTypePreference, Exception> sinkFactory,
         MetricRegistry appMetrics) {
       super(
           config,

@@ -36,7 +36,7 @@ import javax.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SimpleGrpcRdaSourceIT {
+public class StandardGrpcRdaSourceIT {
   private static final String SOURCE_CLAIM_1 =
       "{"
           + "  \"dcn\": \"63843470\","
@@ -232,7 +232,7 @@ public class SimpleGrpcRdaSourceIT {
             port -> {
               int count;
               RdaSourceConfig config = createSourceConfig(port).build();
-              try (SimpleGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+              try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                   createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
@@ -253,7 +253,7 @@ public class SimpleGrpcRdaSourceIT {
               int count;
               RdaSourceConfig config =
                   createSourceConfig(port).authenticationToken("secret").build();
-              try (SimpleGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+              try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                   createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
@@ -273,7 +273,7 @@ public class SimpleGrpcRdaSourceIT {
             port -> {
               RdaSourceConfig config = createSourceConfig(port).build();
               try {
-                try (SimpleGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+                try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                     createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
@@ -298,7 +298,7 @@ public class SimpleGrpcRdaSourceIT {
               RdaSourceConfig config =
                   createSourceConfig(port).authenticationToken("wrong-secret").build();
               try {
-                try (SimpleGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+                try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
                     createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
@@ -332,9 +332,9 @@ public class SimpleGrpcRdaSourceIT {
   }
 
   @Nonnull
-  private SimpleGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
+  private StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
       RdaSourceConfig config) {
-    return new SimpleGrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
+    return new StandardGrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
   }
 
   private class JsonCaptureSink implements RdaSink<FissClaimChange, RdaChange<RdaFissClaim>> {

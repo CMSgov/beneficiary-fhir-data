@@ -13,7 +13,7 @@ import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
-import gov.cms.bfd.pipeline.rda.grpc.source.SimpleGrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
@@ -243,8 +243,8 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link SimpleGrpcRdaSource#minIdleMillisBeforeConnectionDrop} value. This
-   * variable value should be in seconds.
+   * #getRdaLoadOptions()} {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop} value.
+   * This variable value should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
       "RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP";

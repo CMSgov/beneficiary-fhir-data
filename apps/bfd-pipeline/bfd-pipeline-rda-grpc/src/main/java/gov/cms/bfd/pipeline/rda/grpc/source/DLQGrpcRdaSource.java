@@ -135,7 +135,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
   }
 
   @VisibleForTesting
-  SomeInterface dlqProcessingLogic(
+  Processor dlqProcessingLogic(
       RdaSink<TMessage, TClaim> sink, MessageError.ClaimType type, Set<Long> sequenceNumbers) {
     return () -> {
       ProcessResult processResult = new ProcessResult();

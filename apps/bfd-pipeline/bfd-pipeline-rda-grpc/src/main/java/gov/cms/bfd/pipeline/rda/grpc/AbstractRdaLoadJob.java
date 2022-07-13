@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -35,10 +36,17 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
+  public enum SinkTypePreference {
+    NONE,
+    SYNCHRONOUS,
+    ASYNCHRONOUS
+  }
+
   private final Config config;
-  private final Callable<RdaSource<TResponse, TClaim>> preJobTask;
+  private final Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory;
   private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
-  private final Callable<RdaSink<TResponse, TClaim>> sinkFactory;
+  private final ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception>
+      sinkFactory;
   private final Logger logger; // each subclass provides its own logger
   private final Metrics metrics;
   // This is used to enforce that this job can only be executed by a single thread at any given
@@ -47,13 +55,13 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
 
   AbstractRdaLoadJob(
       Config config,
-      Callable<RdaSource<TResponse, TClaim>> preJobTask,
+      Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory,
       Callable<RdaSource<TResponse, TClaim>> sourceFactory,
-      Callable<RdaSink<TResponse, TClaim>> sinkFactory,
+      ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception> sinkFactory,
       MetricRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
-    this.preJobTask = Preconditions.checkNotNull(preJobTask);
+    this.preJobTaskFactory = Preconditions.checkNotNull(preJobTaskFactory);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
     this.logger = logger;
@@ -76,8 +84,8 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
-      try (RdaSource<TResponse, TClaim> source = preJobTask.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
+      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.SYNCHRONOUS)) {
         source.retrieveAndProcessObjects(1, sink);
       }
 
@@ -109,7 +117,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     try {
       metrics.calls.mark();
       try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {

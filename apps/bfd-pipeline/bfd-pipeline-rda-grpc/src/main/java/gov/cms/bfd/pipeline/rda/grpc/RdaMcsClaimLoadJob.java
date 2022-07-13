@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
@@ -17,10 +18,12 @@ public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaCh
 
   public RdaMcsClaimLoadJob(
       Config config,
-      Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTask,
+      Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTaskFactory,
       Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> sourceFactory,
-      Callable<RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>> sinkFactory,
+      ThrowingFunction<
+              RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>, SinkTypePreference, Exception>
+          sinkFactory,
       MetricRegistry appMetrics) {
-    super(config, preJobTask, sourceFactory, sinkFactory, appMetrics, LOGGER);
+    super(config, preJobTaskFactory, sourceFactory, sinkFactory, appMetrics, LOGGER);
   }
 }
