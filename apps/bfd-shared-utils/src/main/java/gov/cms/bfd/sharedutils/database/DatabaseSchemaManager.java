@@ -1,6 +1,5 @@
-package gov.cms.bfd.model.rif.schema;
+package gov.cms.bfd.sharedutils.database;
 
-import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedSqlException;
 import java.sql.Connection;
@@ -9,7 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.MigrationState;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.flywaydb.core.internal.sqlscript.FlywaySqlScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,37 +21,68 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This uses <a href="http://www.liquibase.org/">Liquibase</a> to manage the schema. The main
  * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
- *
- * <p>TODO This is no longer only used by the CCW job, and so should be moved to a different module
- * and package
  */
 public final class DatabaseSchemaManager {
+  /** Logger for writing messages. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
 
   /**
-   * Creates or updates, as appropriate, the Blue Button API backend database schema for the
-   * specified database. The Flyway migration scripts are stored in <code>
-   * src/main/resources/db/migration</code>.
+   * Creates or updates, as appropriate, the backend database schema for the specified database.
    *
    * @param dataSource the JDBC {@link DataSource} for the database whose schema should be created
    *     or updated
+   * @return {@code true} if the migration was successful
    */
-  public static void createOrUpdateSchema(DataSource dataSource) {
-    LOGGER.info("Schema create/upgrade: running...");
-
-    Flyway flyway = createFlyway(dataSource);
-    flyway.migrate();
-
-    LOGGER.info("Schema create/upgrade: complete.");
+  public static boolean createOrUpdateSchema(DataSource dataSource) {
+    return createOrUpdateSchema(dataSource, null);
   }
 
   /**
-   * Creates a {@link Flyway} instance that can be used for the specified {@link DataSource}.
+   * Creates or updates, as appropriate, the Blue Button API backend database schema for the
+   * specified database.
+   *
+   * @param dataSource the JDBC {@link DataSource} for the database whose schema should be created
+   *     or updated
+   * @param flywayScriptLocationOverride the flyway script location override, can be null if no
+   *     override
+   * @return {@code true} if the migration was successful
+   */
+  public static boolean createOrUpdateSchema(
+      DataSource dataSource, String flywayScriptLocationOverride) {
+    LOGGER.info("Schema create/upgrade: running...");
+
+    Flyway flyway;
+    try {
+      flyway = createFlyway(dataSource, flywayScriptLocationOverride);
+      flyway.migrate();
+    } catch (FlywaySqlScriptException sqlException) {
+      LOGGER.error("SQL Exception when running migration: ", sqlException);
+      return false;
+    } catch (FlywayException flywayException) {
+      LOGGER.error("Flyway Exception when running migration: ", flywayException);
+      return false;
+    } catch (Exception ex) {
+      LOGGER.error("Unexpected Exception when running migration: ", ex);
+      return false;
+    }
+
+    LOGGER.info("Schema create/upgrade: complete.");
+    // Ensure the final migration was a success to return true
+    MigrationInfoService flywayInfo = flyway.info();
+    return flywayInfo != null
+        && flywayInfo.current() != null
+        && flywayInfo.current().getState() == MigrationState.SUCCESS;
+  }
+
+  /**
+   * Create flyway using the specified parameters.
    *
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
-   * @return a {@link Flyway} instance
+   * @param flywayScriptLocationOverride the flyway script location override, can be null if no
+   *     override
+   * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
-  private static Flyway createFlyway(DataSource dataSource) {
+  private static Flyway createFlyway(DataSource dataSource, String flywayScriptLocationOverride) {
     FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
     flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 
@@ -62,8 +96,13 @@ public final class DatabaseSchemaManager {
     // We need to specify the original table name for backwards compatibility.
     flywayBuilder.table("schema_version");
 
-    Flyway flyway = flywayBuilder.load();
-    return flyway;
+    // If we want to point at a specific location for the migration scripts
+    // Useful for testing
+    if (flywayScriptLocationOverride != null && flywayScriptLocationOverride.length() > 0) {
+      flywayBuilder.locations(flywayScriptLocationOverride);
+    }
+
+    return flywayBuilder.load();
   }
 
   /**
@@ -71,7 +110,7 @@ public final class DatabaseSchemaManager {
    *
    * @param dataSource the {@link DataSource} that the replacements will be used for
    * @return the {@link Map} of key-value replacements to use for {@link
-   *     Flyway#setPlaceholders(Map)}
+   *     FluentConfiguration#placeholders(Map)}
    */
   private static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
     Map<String, String> placeholders = new HashMap<>();

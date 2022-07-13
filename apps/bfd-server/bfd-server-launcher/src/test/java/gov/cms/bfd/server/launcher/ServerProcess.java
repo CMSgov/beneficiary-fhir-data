@@ -2,11 +2,8 @@ package gov.cms.bfd.server.launcher;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedReader;
+import gov.cms.bfd.ProcessOutputConsumer;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -54,7 +51,7 @@ public final class ServerProcess implements AutoCloseable {
     }
 
     // Read the app's output.
-    this.appRunConsumer = new ProcessOutputConsumer(appProcess, Optional.empty());
+    this.appRunConsumer = new ProcessOutputConsumer(appProcess);
     this.appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
 
@@ -257,72 +254,6 @@ public final class ServerProcess implements AutoCloseable {
    */
   static boolean hasWarStarted(ProcessOutputConsumer appRunConsumer) {
     return appRunConsumer.getStdoutContents().toString().contains(LOG_MESSAGE_WAR_STARTED);
-  }
-
-  /**
-   * Managing external processes is tricky: at the OS level, all processes' output is sent to a
-   * buffer. If that buffer fills up (because you're not reading the output), the process will block
-   * -- forever. To avoid that, it's best to always have a separate thread running that consumes a
-   * process' output. This {@link ProcessOutputConsumer} is designed to allow for just that.
-   */
-  public static final class ProcessOutputConsumer implements Runnable {
-    private final BufferedReader stdoutReader;
-    private final StringBuffer stdoutContents;
-    private final Optional<PrintStream> teeTarget;
-
-    /**
-     * Constructs a new {@link ProcessOutputConsumer} instance.
-     *
-     * @param process the {@link ProcessOutputConsumer} whose output should be consumed
-     */
-    public ProcessOutputConsumer(Process process) {
-      this(process, Optional.empty());
-    }
-
-    /**
-     * Constructs a new {@link ProcessOutputConsumer} instance.
-     *
-     * @param process the {@link ProcessOutputConsumer} whose output should be consumed
-     * @param teeTarget the teeTarget
-     */
-    public ProcessOutputConsumer(Process process, Optional<PrintStream> teeTarget) {
-      /*
-       * Note: we're only grabbing STDOUT, because we're assuming that STDERR has been piped
-       * to/merged with it. If that's not the case, you'd need a separate thread consuming that
-       * stream, too.
-       */
-
-      InputStream stdout = process.getInputStream();
-      this.stdoutReader = new BufferedReader(new InputStreamReader(stdout));
-      this.stdoutContents = new StringBuffer();
-      this.teeTarget = teeTarget;
-    }
-
-    /** @see java.lang.Runnable#run() */
-    @Override
-    public void run() {
-      /*
-       * Note: This will naturally stop once the process exits (due to the null check below).
-       */
-
-      try {
-        String line;
-        while ((line = stdoutReader.readLine()) != null) {
-          stdoutContents.append(line);
-          stdoutContents.append('\n');
-
-          if (teeTarget.isPresent()) teeTarget.get().println(line);
-        }
-      } catch (IOException e) {
-        LOGGER.warn("Error reading server process output.", e);
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    /** @return a {@link StringBuffer} that contains the <code>STDOUT</code> contents so far */
-    public StringBuffer getStdoutContents() {
-      return stdoutContents;
-    }
   }
 
   /** Models the <code>suspend=<y/n></code> option is JVM debug settings. */

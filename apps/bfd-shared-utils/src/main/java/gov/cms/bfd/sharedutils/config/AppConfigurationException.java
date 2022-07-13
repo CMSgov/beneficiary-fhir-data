@@ -1,8 +1,8 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd.sharedutils.config;
 
 /**
  * A {@link RuntimeException} that indicates that the application was not launched with correct
- * configuration. TODO: BFD-1558 Move this class into a common location to be used here and pipeline
+ * configuration.
  */
 public final class AppConfigurationException extends RuntimeException {
   private static final long serialVersionUID = -7541188402652747741L;
