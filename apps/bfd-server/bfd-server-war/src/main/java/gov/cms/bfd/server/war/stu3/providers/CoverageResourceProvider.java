@@ -231,7 +231,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     } finally {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
       TransformerUtils.recordQueryInMdc(
-          "bene_by_id.include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
+          "bene_by_id_include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }
     return beneficiary;
   }
