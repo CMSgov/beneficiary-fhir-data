@@ -111,7 +111,7 @@
         "request": {
           "reference": "Claim/m-654323"
         },
-        "outcome": "queued"
+        "outcome": "partial"
       }
     }
   ]
