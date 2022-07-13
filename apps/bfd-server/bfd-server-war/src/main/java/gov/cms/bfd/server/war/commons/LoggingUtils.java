@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import org.slf4j.MDC;
 
 /** A set of methods for various logging purposes i.e. MDC */
 public class LoggingUtils {
@@ -15,7 +15,7 @@ public class LoggingUtils {
     if (beneIds.length > 0) {
       String beneIdEntry =
           Arrays.stream(beneIds).map(String::valueOf).collect(Collectors.joining(", "));
-      MDC.put("bene_id", beneIdEntry);
+      BfdMDC.put("bene_id", beneIdEntry);
     }
   }
 }
