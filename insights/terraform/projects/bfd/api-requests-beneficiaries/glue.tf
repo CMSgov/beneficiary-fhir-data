@@ -50,6 +50,7 @@ resource "aws_s3_object" "bfd-populate-beneficiaries" {
   key                = "scripts/${local.environment}/bfd_populate_api_requests_beneficiaries.py"
   metadata           = {}
   storage_class      = "STANDARD"
+  etag               = filemd5("glue_src/bfd_populate_api_requests_beneficiaries.py")
   source             = "glue_src/bfd_populate_api_requests_beneficiaries.py"
 }
 
