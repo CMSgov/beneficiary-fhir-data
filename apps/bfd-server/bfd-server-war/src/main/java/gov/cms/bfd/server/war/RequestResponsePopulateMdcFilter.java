@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war;
 
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -17,22 +18,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
- * Ensure that every request-response pair adds data to the logging {@link MDC} which will be
+ * Ensure that every request-response pair adds data to the logging {@link BfdMDC} which will be
  * present on all log messages, particularly the log messages written to the access log via Jetty.
  * This {@link Filter} must be declared before all others in the {@code web.xml}.
  *
  * <p>(Note: We don't use or extend Logback's builtin <code>MDCInsertingServletFilter</code>, as it
- * includes more properties than we really need. It also doesn't fully clear the {@link MDC} after
- * each request, only partially.)
+ * includes more properties than we really need. It also doesn't fully clear the {@link BfdMDC}
+ * after each request, only partially.)
  */
 public final class RequestResponsePopulateMdcFilter implements Filter {
   private static final Logger LOGGER_MISC =
       LoggerFactory.getLogger(RequestResponsePopulateMdcFilter.class);
 
-  private static final String REQUEST_ATTRIB_START = computeMdcKey("request_start_milliseconds");
+  private static final String MDC_PREFIX = "http_access";
+
+  private static final String REQUEST_PREFIX = "request";
+
+  private static final String RESPONSE_PREFIX = "response";
+
+  private static final String REQUEST_START_KEY =
+      BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
 
   /**
    * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse,
@@ -45,7 +52,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
      * This should be cleared by Jetty via the request log handling but just in case we have a situation where
      * that handler does not fire (say, due to a Jetty defect) clear it now before the request starts.
      */
-    MDC.clear();
+    BfdMDC.clear();
 
     handleRequest(request);
     try {
@@ -55,12 +62,12 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
     }
   }
 
-  /** @param request the {@link ServletRequest} to record the standard {@link MDC} entries for */
+  /** @param request the {@link ServletRequest} to record the standard {@link BfdMDC} entries for */
   private static void handleRequest(ServletRequest request) {
-    request.setAttribute(REQUEST_ATTRIB_START, System.currentTimeMillis());
+    request.setAttribute(REQUEST_START_KEY, System.currentTimeMillis());
 
     // Record the request type.
-    MDC.put(computeMdcKey("request_type"), request.getClass().getName());
+    BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, "request_type"), request.getClass().getName());
 
     // Set the default Operation (will hopefully be customized further in specific handler methods).
     Operation operation = new Operation(Operation.Endpoint.OTHER);
@@ -70,12 +77,19 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
 
       // Record the basic request components.
       operation = new Operation(Operation.Endpoint.matchByHttpUri(servletRequest));
-      MDC.put(computeMdcRequestKey("http_method"), servletRequest.getMethod());
-      MDC.put(computeMdcRequestKey("url"), servletRequest.getRequestURL().toString());
-      MDC.put(computeMdcRequestKey("uri"), servletRequest.getRequestURI());
-      MDC.put(computeMdcRequestKey("query_string"), servletRequest.getQueryString());
-      MDC.put(
-          computeMdcRequestKey("clientSSL.DN"),
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "http_method"),
+          servletRequest.getMethod());
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "url"),
+          servletRequest.getRequestURL().toString());
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri"), servletRequest.getRequestURI());
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"),
+          servletRequest.getQueryString());
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "clientSSL", "DN"),
           getClientSslPrincipalDistinguishedName(servletRequest));
 
       // Record the request headers.
@@ -83,32 +97,21 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
       while (headerNames.hasMoreElements()) {
         String headerName = headerNames.nextElement();
         List<String> headerValues = Collections.list(servletRequest.getHeaders(headerName));
-        if (headerValues.isEmpty()) MDC.put(computeMdcRequestKey("header." + headerName), "");
+        if (headerValues.isEmpty())
+          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName), "");
         else if (headerValues.size() == 1)
-          MDC.put(computeMdcRequestKey("header." + headerName), headerValues.get(0));
-        else MDC.put(computeMdcRequestKey("header." + headerName), headerValues.toString());
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName),
+              headerValues.get(0));
+        else
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName),
+              headerValues.toString());
       }
     }
 
     // Publish the Operation name for monitoring systems.
     operation.publishOperationName();
-  }
-
-  /**
-   * @param keySuffix the suffix to build a full key for
-   * @return the key to use for {@link MDC#put(String, String)}
-   */
-  private static String computeMdcKey(String keySuffix) {
-    return String.format("%s.%s", "http_access", keySuffix);
-  }
-
-  /**
-   * @param keySuffix the suffix to build a full MDC key for
-   * @return the key to use for {@link MDC#put(String, String)}, for an access log entry that's
-   *     related to the HTTP request
-   */
-  public static String computeMdcRequestKey(String keySuffix) {
-    return String.format("%s.%s", computeMdcKey("request"), keySuffix);
   }
 
   /**
@@ -146,31 +149,39 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
   }
 
   /**
-   * @param request the {@link ServletRequest} to record the standard {@link MDC} entries for
-   * @param response the {@link ServletResponse} to record the standard {@link MDC} entries for
+   * @param request the {@link ServletRequest} to record the standard {@link BfdMDC} entries for
+   * @param response the {@link ServletResponse} to record the standard {@link BfdMDC} entries for
    */
   private void handleResponse(ServletRequest request, ServletResponse response) {
     if (response instanceof HttpServletResponse) {
       HttpServletResponse servletResponse = (HttpServletResponse) response;
 
-      MDC.put(computeMdcKey("response.status"), Integer.toString(servletResponse.getStatus()));
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
+          Integer.toString(servletResponse.getStatus()));
 
       // Record the response headers.
       Collection<String> headerNames = servletResponse.getHeaderNames();
       for (String headerName : headerNames) {
         Collection<String> headerValues = servletResponse.getHeaders(headerName);
-        if (headerValues.isEmpty()) MDC.put(computeMdcKey("response.header." + headerName), "");
+        if (headerValues.isEmpty())
+          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
         else if (headerValues.size() == 1)
-          MDC.put(computeMdcKey("response.header." + headerName), headerValues.iterator().next());
-        else MDC.put(computeMdcKey("response.header." + headerName), headerValues.toString());
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.iterator().next());
+        else
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.toString());
       }
     }
 
     // Record the response duration.
-    Long requestStartMilliseconds = (Long) request.getAttribute(REQUEST_ATTRIB_START);
+    Long requestStartMilliseconds = (Long) request.getAttribute(REQUEST_START_KEY);
     if (requestStartMilliseconds != null)
-      MDC.put(
-          computeMdcKey("response.duration_milliseconds"),
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_milliseconds"),
           Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
   }
 

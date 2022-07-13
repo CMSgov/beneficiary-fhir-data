@@ -442,7 +442,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     } finally {
       eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
+          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
     }
