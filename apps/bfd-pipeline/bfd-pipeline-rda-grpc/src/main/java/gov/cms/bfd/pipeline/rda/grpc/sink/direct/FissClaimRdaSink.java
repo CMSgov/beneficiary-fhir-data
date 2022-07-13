@@ -40,7 +40,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
 
   @Nonnull
   @Override
-  public RdaChange<RdaFissClaim> transformMessage(String apiVersion, FissClaimChange message) {
+  RdaChange<RdaFissClaim> transformMessageImpl(String apiVersion, FissClaimChange message) {
     var change = transformer.transformClaim(message);
     change.getClaim().setApiSource(apiVersion);
     return change;
