@@ -2,7 +2,6 @@
   "recommendations": [
     "ms-python.python",
     "ms-python.vscode-pylance",
-    "ms-python.isort",
     "kevinrose.vsc-python-indent",
     "EditorConfig.EditorConfig"
   ]
