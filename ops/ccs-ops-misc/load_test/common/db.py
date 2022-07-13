@@ -37,7 +37,7 @@ def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
     else:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
-    bene_query = f'SELECT "bene_id" FROM "beneficiaries" {table_sample_text} LIMIT {LIMIT}'
+    bene_query = f'SELECT "bene_id" FROM "beneficiaries_new" {table_sample_text} LIMIT {LIMIT}'
 
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
@@ -53,7 +53,7 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
     bene_query = (
-        f'SELECT "mbi_hash" FROM "beneficiaries" {table_sample_text} WHERE "mbi_hash" IS NOT NULL ' f"LIMIT {LIMIT}"
+        f'SELECT "mbi_hash" FROM "beneficiaries_new" {table_sample_text} WHERE "mbi_hash" IS NOT NULL ' f"LIMIT {LIMIT}"
     )
 
     return [str(r[0]) for r in _execute(uri, bene_query)]
@@ -72,7 +72,7 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
 
     contract_id_query = (
         'SELECT DISTINCT "partd_contract_number_id", "year_month" '
-        'FROM "beneficiary_monthly" '
+        'FROM "beneficiary_monthly_new" '
         f"{table_sample_text}"
         'WHERE "partd_contract_number_id" IS NOT NULL '
         f"LIMIT {LIMIT}"
