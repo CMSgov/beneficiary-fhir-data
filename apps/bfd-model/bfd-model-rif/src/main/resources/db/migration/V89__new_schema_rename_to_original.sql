@@ -4,19 +4,21 @@
 -- table names, index names, and constraint names. It also removed (dropped)
 -- current db views so that BFD services will now point to actual db tables.
 --
--- BFD services app previously deployed code pointing to db view(s) that used a
--- naming convention of:
+-- BFD services app previously deployed code with entity beans pointing to
+-- db view(s) that followed a naming convention of:
 --
 --   : current db "[table_name]_new" and drop the "_new" suffix.
 --   : change BFD services entity beans to point to the db view name
 --
 -- In theory, we should not need to make any code changes since the current
 -- BFD app services are pointing to db views that match the same name as
--- this script's table renames. However, there is some minor code in the
--- PipelineTestUtils.java (marked by a TODO) that needs to be removed; the
--- code deals with TRUNCATE TABLE invocation, where we needed to construct the
--- table name (which was pointing to a view name) to the actual table name by
--- appending "_new".
+-- this script's table renames. However, there is a minor bit of code in the
+-- PipelineTestUtils.java (marked by a TODO) that needed to be removed; prior
+-- code would construct a table name by deriving it from the entity bean class.
+-- However, since the entity beans were pointing to views, the code had to
+-- construct an actual table name by appending "_new" to the name in order for
+-- the TRUNCATE TABLE invocation to work. So that code was removed (basically
+-- reverting back to its original state/name).
 
 -- =====================
 -- beneficiaries
