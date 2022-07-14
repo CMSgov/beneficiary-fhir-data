@@ -220,7 +220,7 @@ public class DataTransformer {
    * contain a masked version of the string rather than the string itself. A masked string contains
    * '.' to indicate characters that match, '+' to indicate an extra character at the end of the
    * string, '-' to indicate a missing character at the end of the string, '#' to indicate a
-   * mismatching character. {@see #maskString} for more details.
+   * mismatching character. {@link #maskString} for more details.
    *
    * @param fieldName name of the field from which the value originates
    * @param nullable true if null is a valid value
