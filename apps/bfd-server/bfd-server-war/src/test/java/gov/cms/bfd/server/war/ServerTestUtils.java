@@ -445,7 +445,12 @@ public final class ServerTestUtils {
     return fhirClient;
   }
 
-  /** @return whether bene_id is logged in MDC for a given read/search method via Regex matching */
+  /**
+   * helper
+   *
+   * <p>/** @return whether bene_id is logged in MDC for a given read/search method via Regex
+   * matching
+   */
   public static Boolean checkMdcForBeneId() throws IOException {
     String beneIdPattern = ".*(\\\"bene_id\\\":(\\\"-?\\d{1,}\\\"|(\\\"-?\\d{1,},))).*";
 
@@ -463,7 +468,11 @@ public final class ServerTestUtils {
     return m.matches();
   }
 
-  /** @return the local {@link Path} that the project can be found in */
+  /**
+   * helper
+   *
+   * <p>/** @return the local {@link Path} that the project can be found in
+   */
   public static Path getServerProjectDirectory() {
     try {
       /*

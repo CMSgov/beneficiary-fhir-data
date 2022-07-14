@@ -939,6 +939,14 @@ public final class R4PatientResourceProviderIT {
     assertEquals(1, searchResults.getEntry().size());
   }
 
+  /**
+   * Verifies that {@link
+   * R4PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
+   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
+   * as expected when multiple beneficiaries are returned. To test with multiple beneficiaries, this
+   * test uses Synthea RIF files, and is disabled to avoid failure in environments that have not
+   * downloaded the files from S3.
+   */
   @Disabled
   @Test
   public void searchForExistingPatientsByPartDContractNum() throws IOException {
