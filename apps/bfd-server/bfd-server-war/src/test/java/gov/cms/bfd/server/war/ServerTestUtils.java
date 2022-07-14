@@ -446,7 +446,7 @@ public final class ServerTestUtils {
   }
 
   /**
-   * helper
+   * helper for testing bene_id presence in MDC log entries.
    *
    * <p>/** @return whether bene_id is logged in MDC for a given read/search method via Regex
    * matching
@@ -469,7 +469,7 @@ public final class ServerTestUtils {
   }
 
   /**
-   * helper
+   * helper for resolving the project directory mainly for parsing log files.
    *
    * <p>/** @return the local {@link Path} that the project can be found in
    */
