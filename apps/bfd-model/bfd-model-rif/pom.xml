@@ -61,13 +61,13 @@
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.7</version>
+			<version>${commons.io}</version>
 		</dependency>
 		<dependency>
 			<!-- Used to parse and read the RIF data files. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
+			<version>${commons.csv}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
