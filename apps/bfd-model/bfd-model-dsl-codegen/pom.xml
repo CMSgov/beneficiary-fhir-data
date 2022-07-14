@@ -20,44 +20,6 @@
         <module>bfd-model-dsl-codegen-library</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!-- Provides a sane facade for the giant mess of incompatible logging
-                        frameworks in Java. -->
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.7.7</version>
-            </dependency>
-
-            <dependency>
-                <!-- The test framework used for unit and integration tests. -->
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>9.4.1208</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <!-- Provides utility code and dependencies that are shared by (more or
-                    less) all of the other BFD modules. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-
     <build>
         <pluginManagement>
             <plugins>
