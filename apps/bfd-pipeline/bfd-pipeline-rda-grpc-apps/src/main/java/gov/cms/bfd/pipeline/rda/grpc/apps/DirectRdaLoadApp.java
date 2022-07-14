@@ -4,16 +4,15 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.google.common.base.Strings;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -60,7 +59,6 @@ public class DirectRdaLoadApp {
         PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
     System.out.printf("thread count is %d%n", jobConfig.getJobConfig().getWriteThreads());
     System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
-    DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
     try (PipelineApplicationState appState =
         new PipelineApplicationState(
             metrics,

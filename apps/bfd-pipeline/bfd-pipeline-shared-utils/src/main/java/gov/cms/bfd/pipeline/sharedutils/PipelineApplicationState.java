@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
@@ -157,10 +158,8 @@ public final class PipelineApplicationState implements AutoCloseable {
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
     /*
-     * Hibernate validation is being disabled in the applications so that
-     * validation failures do not prevent the pipeline from starting.
-     * With the implementation of RFC-0011 this validation will be moved
-     * to a more appropriate stage of the deployment.
+     * Hibernate validation is done in the validator app, so leave HBM2DDL_AUTO disabled here.
+     * This defaults to NONE, but just explicitly noting this.
      */
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.NONE);
     hibernateProperties.put(
