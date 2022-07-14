@@ -1,6 +1,5 @@
 package gov.cms.bfd.data.fda.utility;
 
-
 /** Provides an FDA Drug Code file to download. */
 public class App {
   /**
