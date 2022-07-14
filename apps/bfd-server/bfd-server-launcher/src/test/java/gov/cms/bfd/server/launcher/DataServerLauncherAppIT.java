@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
@@ -156,8 +157,7 @@ public final class DataServerLauncherAppIT {
     Process appProcess = appRunBuilder.start();
 
     // Read the app's output.
-    ServerProcess.ProcessOutputConsumer appRunConsumer =
-        new ServerProcess.ProcessOutputConsumer(appProcess);
+    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
     Thread appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
 

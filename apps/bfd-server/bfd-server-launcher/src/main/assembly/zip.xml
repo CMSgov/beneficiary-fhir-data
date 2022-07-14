@@ -26,6 +26,34 @@
 			<outputDirectory>lib</outputDirectory>
 			<excludes>
 				<exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>
+				<!-- Exclude unused test dependencies; if you need these, remove exclusion -->
+				<exclude>org.jetbrains:annotations:jar:*</exclude>
+				<exclude>com.github.ben-manes.caffeine:caffeine:jar:*</exclude>
+				<exclude>com.fasterxml:classmate:jar:*</exclude>
+				<exclude>io.dropwizard:dropwizard-jackson:jar:*</exclude>
+				<exclude>io.dropwizard:dropwizard-lifecycle:jar:*</exclude>
+				<exclude>jakarta.servlet:jakarta.servlet-api:jar:*</exclude>
+				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:*</exclude>
+				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-guava:jar:*</exclude>
+				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:*</exclude>
+				<exclude>com.fasterxml.jackson.module:jackson-module-parameter-names:jar:*</exclude>
+				<exclude>com.fasterxml.jackson.module:jackson-module-blackbird:jar:*</exclude>
+				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-joda:jar:*</exclude>
+				<exclude>joda-time:joda-time:jar:*</exclude>
+				<exclude>io.dropwizard:dropwizard-util:jar:*</exclude>
+				<exclude>io.dropwizard:dropwizard-validation:jar:*</exclude>
+				<exclude>org.hibernate.validator:hibernate-validator:*</exclude>
+				<exclude>org.jboss.logging:jboss-logging:*</exclude>
+				<exclude>org.glassfish:jakarta.el:jar:*</exclude>
+				<exclude>jakarta.validation:jakarta.validation-api:*</exclude>
+				<exclude>com.squareup.okio:okio:jar:*</exclude>
+				<exclude>com.squareup.okhttp3:okhttp:jar:*</exclude>
+				<exclude>com.newrelic.telemetry:telemetry-http-okhttp:*</exclude>
+				<exclude>org.jetbrains.kotlin:kotlin-stdlib:jar:*</exclude>
+				<exclude>org.jetbrains.kotlin:kotlin-stdlib-common:jar:*</exclude>
+				<exclude>io.dropwizard:dropwizard-metrics:jar:*</exclude>
+				<exclude>com.newrelic.telemetry:dropwizard-metrics-newrelic:jar:*</exclude>
+				<exclude>com.newrelic.telemetry:telemetry-core:jar:*</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>
