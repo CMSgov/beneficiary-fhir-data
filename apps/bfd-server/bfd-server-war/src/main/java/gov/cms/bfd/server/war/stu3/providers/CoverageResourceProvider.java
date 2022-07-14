@@ -128,13 +128,13 @@ public final class CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
     }
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     Coverage coverage =
         CoverageTransformer.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
@@ -178,6 +178,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
@@ -190,9 +193,6 @@ public final class CoverageResourceProvider implements IResourceProvider {
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
