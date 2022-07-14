@@ -38,7 +38,8 @@ class StatsComparisonType(str, Enum):
 
 @dataclass
 class StatsConfiguration:
-    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared"""
+    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared
+    """
 
     store: StatsStorageType
     """The storage type that the stats will be written to"""
@@ -176,7 +177,8 @@ class StatsConfiguration:
         # to S3
         if not re.fullmatch("[a-z0-9_]+", tag) or not tag:
             raise ValueError(
-                f'"{field_name}" must only consist of lower-case letters, numbers and the "_" character'
+                f'"{field_name}" must only consist of lower-case letters, numbers and the "_"'
+                " character"
             ) from None
 
         return tag

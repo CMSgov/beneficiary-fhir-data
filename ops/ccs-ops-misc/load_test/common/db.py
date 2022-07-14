@@ -107,9 +107,8 @@ def get_pac_hashed_mbis(uri: str) -> List:
     selects FISS records only from the last N days
     """
     fiss_sub_query = (
-        "select * "
-        "from rda.fiss_claims "
-        f"where last_updated > current_date - interval '{sub_select_day_age}' day and mbi_id is not null "
+        "select * from rda.fiss_claims where last_updated > current_date - interval"
+        f" '{sub_select_day_age}' day and mbi_id is not null "
     )
 
     """
@@ -134,9 +133,8 @@ def get_pac_hashed_mbis(uri: str) -> List:
     selects MCS records only from the last N days
     """
     mcs_sub_query = (
-        "select * "
-        "from rda.mcs_claims "
-        f"where last_updated > current_date - interval '{sub_select_day_age}' day and mbi_id is not null "
+        "select * from rda.mcs_claims where last_updated > current_date - interval"
+        f" '{sub_select_day_age}' day and mbi_id is not null "
     )
 
     """

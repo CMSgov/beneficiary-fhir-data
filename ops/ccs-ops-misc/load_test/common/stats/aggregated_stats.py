@@ -177,7 +177,8 @@ class TaskStats:
 
 @dataclass
 class StatsMetadata:
-    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated performance stats"""
+    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated performance stats
+    """
 
     timestamp: int
     """A timestamp indicating the time a stats snapshot was collected"""
@@ -219,7 +220,8 @@ class StatsMetadata:
         """
         if not locust_env.parsed_options:
             raise ValueError(
-                "Parsed options did not exist on Locust environment -- is Locust being ran as a library?"
+                "Parsed options did not exist on Locust environment -- is Locust being ran as a"
+                " library?"
             )
 
         if not locust_env.stats.last_request_timestamp:

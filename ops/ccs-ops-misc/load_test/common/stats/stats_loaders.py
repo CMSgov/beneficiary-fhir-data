@@ -83,7 +83,8 @@ class StatsLoader(ABC):
 
 
 class StatsFileLoader(StatsLoader):
-    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
+    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files
+    """
 
     def load_previous(self) -> Optional[AggregatedStats]:
         # Get a list of all AggregatedStats from stats.json files under path
@@ -183,7 +184,9 @@ class StatsAthenaLoader(StatsLoader):
             # path defined in the BFD Insights data organization standards to
             # store query results
             ResultConfiguration={
-                "OutputLocation": f"s3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stats/"
+                "OutputLocation": (
+                    f"s3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stats/"
+                )
             },
             # The workgroup should also always be "bfd" if we're targeting the "bfd"
             # database

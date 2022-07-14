@@ -20,7 +20,10 @@ def register_custom_args(parser: LocustArgumentParser):
         "--database-uri",
         type=str,
         required=True,
-        help='Specfies database URI path, ex: "https://<nodeIp>:7443 or https://<environment>.bfd.cms.gov" (Required)',
+        help=(
+            'Specfies database URI path, ex: "https://<nodeIp>:7443 or'
+            ' https://<environment>.bfd.cms.gov" (Required)'
+        ),
         dest="database_uri",
         env_var="LOCUST_BFD_DATABASE_URI",
     )
@@ -43,7 +46,10 @@ def register_custom_args(parser: LocustArgumentParser):
     parser.add_argument(
         "--stats-config",
         type=str,
-        help='"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by semi-colons. See README.>" (Optional)',
+        help=(
+            '"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by'
+            ' semi-colons. See README.>" (Optional)'
+        ),
         dest="stats_config",
         env_var="LOCUST_STATS_CONFIG",
     )

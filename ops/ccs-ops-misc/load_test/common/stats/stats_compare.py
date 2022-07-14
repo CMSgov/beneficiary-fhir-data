@@ -66,7 +66,8 @@ def do_stats_comparison(
             # failing tasks along with their relative stat percents
             environment.process_exit_code = 1
             logger.error(
-                'Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s',
+                'Comparison against %s stats under "%s" tag failed; following tasks had stats that'
+                " exceeded %.2f%% of the baseline: %s",
                 stats_config.compare.value,
                 stats_config.comp_tag,
                 DEFAULT_DEVIANCE_FAILURE_THRESHOLD,
