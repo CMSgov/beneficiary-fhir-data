@@ -142,9 +142,6 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneficiaryId);
-
     Coverage coverage =
         CoverageTransformerV2.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
     return coverage;
@@ -187,7 +184,6 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = CoverageTransformerV2.transform(metricRegistry, beneficiaryEntity);
-
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
