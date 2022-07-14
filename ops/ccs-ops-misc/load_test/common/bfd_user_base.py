@@ -3,11 +3,10 @@
 
 import json
 import logging
+import ssl
 from typing import Callable, Dict, List, Optional, Union
 
-import urllib3
-import urllib3.exceptions
-from locust import HttpUser, events
+from locust import FastHttpUser, events
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 
@@ -58,11 +57,14 @@ def _(environment: Environment, **kwargs) -> None:
         stats_writers.write_stats(stats_config, stats)
 
 
-class BFDUserBase(HttpUser):
+class BFDUserBase(FastHttpUser):
     """Base Class for Locust tests against BFD.
 
     This class should automatically handle most of the common tasks that our load tests require.
     """
+
+    # Disables certificate verification for FastHttpUser requests
+    insecure = True
 
     # Mark this class as abstract so Locust knows it doesn't contain Tasks
     abstract = True
@@ -76,8 +78,6 @@ class BFDUserBase(HttpUser):
         # Load configuration needed for making requests to the FHIR server
         self.client_cert = self.environment.parsed_options.client_cert_path
         self.server_public_key = self.environment.parsed_options.server_public_key
-        if not self.server_public_key:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.last_updated = data.get_last_updated()
 
         # Initialize URL pools
@@ -85,6 +85,21 @@ class BFDUserBase(HttpUser):
 
         self.logger = logging.getLogger()
         self.has_reported_no_data = []
+
+    def ssl_context_factory(self) -> ssl.SSLContext:
+        """Configures the SSLContext for FastHttpUser requests. Specifically, the context returned
+        by this method sets the PEM cert to the cert provided via configuration or the CLI.
+
+        Returns:
+            ssl.SSLContext: An SSLContext that authenticates the Locust tests against the BFD Server
+        """
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        context.load_cert_chain(certfile=self.client_cert)
+        if self.server_public_key:
+            context.load_verify_locations(cafile=self.server_public_key)
+        return context
 
     def get_by_url(self, url: str, headers: Optional[Dict[str, str]] = None, name: str = ""):
         """Send one GET request and parse the response for pagination.
@@ -99,15 +114,13 @@ class BFDUserBase(HttpUser):
 
         with self.client.get(
             url,
-            cert=self.client_cert,
-            verify=self.server_public_key,
             headers={**safe_headers, "Cache-Control": "no-store, no-cache"},
             name=name,  # type: ignore -- known Locust argument
             catch_response=True,  # type: ignore -- known Locust argument
         ) as response:
             if response.status_code != 200:
                 response.failure(f"Status Code: {response.status_code}")
-            else:
+            elif response.text:
                 # Check for valid "next" URLs that we can add to a URL pool.
                 next_url = BFDUserBase.__get_next_url(response.text)
                 if next_url is not None:
