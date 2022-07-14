@@ -14,14 +14,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Provides an FDA Drug Code to FDA Drug Code Display lookup */
+/** Provides an FDA Drug Code to FDA Drug Code Display lookup. */
 public class FdaDrugCodeDisplayLookup {
   private static final Logger LOGGER = LoggerFactory.getLogger(FdaDrugCodeDisplayLookup.class);
 
-  /** A fake drug code used for testing */
+  /** A fake drug code used for testing. */
   public static final String FAKE_DRUG_CODE = "00000-0000";
 
-  /** A fake drug code display that is associated with the FAKE_DRUG_CODE */
+  /** A fake drug code display that is associated with the FAKE_DRUG_CODE. */
   public static final String FAKE_DRUG_CODE_DISPLAY = "Fake Diluent - WATER";
 
   /**
@@ -35,13 +35,13 @@ public class FdaDrugCodeDisplayLookup {
 
   /**
    * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't
-   * have to construct it over and over in the unit tests
+   * have to construct it over and over in the unit tests.
    */
   private static FdaDrugCodeDisplayLookup drugCodeLookupForTesting;
 
   /**
    * Cached copy of the production version of the {@link FdaDrugCodeDisplayLookup} so that we don't
-   * have to construct it over and over in the unit tests
+   * have to construct it over and over in the unit tests.
    */
   private static FdaDrugCodeDisplayLookup drugCodeLookupForProduction;
 
@@ -74,7 +74,7 @@ public class FdaDrugCodeDisplayLookup {
   }
 
   /**
-   * Constructs an {@link FdaDrugCodeDisplayLookup}
+   * Constructs an {@link FdaDrugCodeDisplayLookup}.
    *
    * @param includeFakeDrugCode whether to include the fake testing drug code or not
    */
@@ -127,8 +127,8 @@ public class FdaDrugCodeDisplayLookup {
    *
    * <p>See {@link gov.cms.bfd.server.war.FDADrugDataUtilityApp} for details.
    *
-   * @return a map with drug codes and fields
-   * @param includeFakeDrugCode
+   * @return a map with drug codes and fields.
+   * @param includeFakeDrugCode is whether to incliude fake drug code.
    */
   private Map<String, String> readFDADrugCodeFile(boolean includeFakeDrugCode) {
 

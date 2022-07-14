@@ -2,7 +2,7 @@ package gov.cms.bfd.data.utilities.FDADrug;
 
 import java.io.IOException;
 
-/** Provides an FDA Drug Code file to download */
+/** Provides an FDA Drug Code file to download. */
 public class App {
   /**
    * The name of the classpath resource (for the project's main web application) for the FDA

@@ -25,18 +25,18 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Provides an FDA Drug Code file */
+/** Provides an FDA Drug Code file. */
 public class DataUtilityCommons {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataUtilityCommons.class);
 
-  /** Size of the buffer to read/write data */
+  /** Size of the buffer to read/write data. */
   private static final int BUFFER_SIZE = 4096;
 
   /**
-   * Gets the fda drug codes from the fda file
+   * Gets the fda drug codes from the fda file.
    *
-   * @param outputDir the output directory
-   * @param npiFile the npi file
+   * @param outputDir the output directory.
+   * @param fdaFile the fda file.
    */
   public static void getFDADrugCodes(String outputDir, String fdaFile) {
     Path outputPath = Paths.get(outputDir);
@@ -66,9 +66,9 @@ public class DataUtilityCommons {
   /**
    * Creates the file in the specified location.
    *
-   * @param convertedNdcDataFile the output file/resource to produce
-   * @param workingDir a directory that temporary/working files can be written to
-   * @throws IOException (any errors encountered will be bubbled up)
+   * @param convertedNdcDataFile the output file/resource to produce.
+   * @param workingDir a directory that temporary/working files can be written to.
+   * @throws IOException (any errors encountered will be bubbled up).
    */
   public static void buildProductsResource(Path convertedNdcDataFile, Path workingDir)
       throws IOException {
@@ -118,7 +118,7 @@ public class DataUtilityCommons {
 
   /**
    * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
-   * (will be created if does not exists)
+   * (will be created if does not exists).
    *
    * @param zipFilePath the zip file path
    * @param destDirectory the destination directory
@@ -146,7 +146,7 @@ public class DataUtilityCommons {
   }
 
   /**
-   * Extracts a zip entry (file entry)
+   * Extracts a zip entry (file entry).
    *
    * @param zipIn the zip file coming in
    * @param filePath the file path for the file
@@ -163,7 +163,11 @@ public class DataUtilityCommons {
     bos.close();
   }
 
-  /** @param tempDir */
+  /**
+   * Recursively delete temp directory.
+   *
+   * @param tempDir is the temp directory.
+   */
   private static void recursivelyDelete(Path tempDir) {
     // Recursively delete the working dir.
     try {
