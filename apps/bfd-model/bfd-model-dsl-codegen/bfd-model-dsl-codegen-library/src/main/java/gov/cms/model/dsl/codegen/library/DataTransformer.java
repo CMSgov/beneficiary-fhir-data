@@ -53,9 +53,9 @@ public class DataTransformer {
   private final List<ErrorMessage> errors = new ArrayList<>();
 
   /**
-   * Determines if all of the transoformations were successful.
+   * Determines if all of the transformations were successful.
    *
-   * @return true if all transofmrations were successful, false otherwise
+   * @return true if all transformations were successful, false otherwise
    */
   public boolean isSuccessful() {
     return errors.isEmpty();
@@ -211,10 +211,16 @@ public class DataTransformer {
   }
 
   /**
-   * Checks the nullability and length of a string and then delivers it to the Consumer if the
-   * checks are successful. Valid null values are silently accepted without calling the Consumer.
-   * Ensures that the actual value exactly matches an expected value. This is used to ensure an
-   * invariant is being followed in the source data.
+   * Checks the nullability, length, and value of a string and then delivers it to the Consumer if
+   * the checks are successful. Valid null values are silently accepted without calling the
+   * Consumer. Ensures that the actual value exactly matches an expected value. This is used to
+   * ensure an invariant is being followed in the source data.
+   *
+   * <p>For security reasons when the strings do not match the resulting {@link ErrorMessage} will
+   * contain a masked version of the string rather than the string itself. A masked string contains
+   * '.' to indicate characters that match, '+' to indicate an extra character at the end of the
+   * string, '-' to indicate a missing character at the end of the string, '#' to indicate a
+   * mismatching character. {@see #maskString} for more details.
    *
    * @param fieldName name of the field from which the value originates
    * @param nullable true if null is a valid value
@@ -666,7 +672,7 @@ public class DataTransformer {
    *
    * @param fieldName The name of the attribute the value is associated with (for error tracking).
    * @param value The value being validated.
-   * @return True if the value is positive (>= 0), alse otherwise.
+   * @return true if the value is non-negative, false otherwise.
    */
   private boolean validateUnsigned(String fieldName, long value) {
     boolean isValid = true;
