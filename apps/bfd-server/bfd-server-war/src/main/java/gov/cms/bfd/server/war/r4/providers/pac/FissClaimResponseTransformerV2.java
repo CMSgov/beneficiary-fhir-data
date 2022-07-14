@@ -65,6 +65,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
+   * Transforms an {@link RdaFissClaim} to a FHIR {@link ClaimResponse}.
+   *
    * @param claimGroup the {@link RdaFissClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
    *     RdaFissClaim}
@@ -174,7 +176,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
-   * Maps the given status code to an associated {@link ClaimResponse.RemittanceOutcome}.
+   * Maps the given status code to an associated {@link ClaimResponse.RemittanceOutcome}. Unknown
+   * status codes are mapped to {@link ClaimResponse.RemittanceOutcome#PARTIAL}.
    *
    * @param statusCode The statusCode from the {@link RdaFissClaim}.
    * @return The {@link ClaimResponse.RemittanceOutcome} associated with the given status code.

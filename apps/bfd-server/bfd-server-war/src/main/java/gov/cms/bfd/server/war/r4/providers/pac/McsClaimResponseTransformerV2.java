@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
@@ -143,7 +144,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
   /**
    * Gets the associated {@link ClaimResponse.RemittanceOutcome} for the given {@link RdaMcsClaim}
-   * object's status code.
+   * object's status code. Empty or null values are mapped to {@link
+   * ClaimResponse.RemittanceOutcome#QUEUED} while unknown status codes are mapped to {@link
+   * ClaimResponse.RemittanceOutcome#PARTIAL}.
    *
    * @param claimGroup The {@link RdaMcsClaim} object to get the status from.
    * @return The {@link ClaimResponse.RemittanceOutcome} associated with the given data's status
@@ -152,8 +155,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private static ClaimResponse.RemittanceOutcome getOutcome(RdaMcsClaim claimGroup) {
     ClaimResponse.RemittanceOutcome outcome;
 
-    if (claimGroup.getIdrStatusCode() == null) {
-      outcome = ClaimResponse.RemittanceOutcome.PARTIAL;
+    if (Strings.isNullOrEmpty(claimGroup.getIdrStatusCode())) {
+      outcome = ClaimResponse.RemittanceOutcome.QUEUED;
     } else {
       // If it's not mapped, we assume it's PARTIAL
       outcome =
