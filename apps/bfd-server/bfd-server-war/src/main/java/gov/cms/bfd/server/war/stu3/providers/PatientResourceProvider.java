@@ -166,6 +166,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(patientId);
     } finally {
@@ -189,9 +192,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (!requestHeader.isMBIinIncludeIdentifiers()) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;

@@ -160,6 +160,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneId);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(patientId);
     } finally {
@@ -173,9 +176,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneId);
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
