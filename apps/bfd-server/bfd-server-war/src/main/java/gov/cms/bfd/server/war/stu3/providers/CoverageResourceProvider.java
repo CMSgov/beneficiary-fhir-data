@@ -178,6 +178,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
@@ -190,9 +193,6 @@ public final class CoverageResourceProvider implements IResourceProvider {
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
