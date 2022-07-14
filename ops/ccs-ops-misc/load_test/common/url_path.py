@@ -3,7 +3,9 @@ from typing import Dict, List, Optional, Union
 from urllib.parse import urlencode
 
 
-def create_url_path(path: str, query_params: Optional[Dict[str, Union[str, int, List]]] = None) -> str:
+def create_url_path(
+    path: str, query_params: Optional[Dict[str, Union[str, int, List]]] = None
+) -> str:
     """Creates a query path from a base path (i.e. /v2/fhir/Coverage) and a dictionary of query
     parameters."""
     if not query_params:

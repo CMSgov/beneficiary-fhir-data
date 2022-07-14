@@ -10,8 +10,8 @@ good-names=i,
            e
 
 [FORMAT]
-# Set to match the 120 line-length configured in pyproject.toml
-max-line-length=120
+# Set to match the 100 line-length configured in pyproject.toml
+max-line-length=100
 
 [MESSAGES CONTROL]
 # Reasoning for disabling these:

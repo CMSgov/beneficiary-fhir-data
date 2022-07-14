@@ -160,7 +160,9 @@ class BFDUserBase(FastHttpUser):
             # If no URL is found, then this test isn't counted in statistics
 
             # Should we also terminate future tests?
-            worker_num = self.environment.runner.client_id if is_locust_worker(self.environment) else None
+            worker_num = (
+                self.environment.runner.client_id if is_locust_worker(self.environment) else None
+            )
             if self.END_ON_NO_DATA:
                 if worker_num is None:
                     self.logger.error("Ran out of data, stopping test...")
@@ -173,7 +175,9 @@ class BFDUserBase(FastHttpUser):
                 if worker_num is None:
                     self.logger.warning('Test "%s" has run out of data', name)
                 else:
-                    self.logger.warning('Test "%s" for worker %s has run out of data', name, worker_num)
+                    self.logger.warning(
+                        'Test "%s" for worker %s has run out of data', name, worker_num
+                    )
 
     def run_task_by_parameters(
         self,

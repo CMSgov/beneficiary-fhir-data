@@ -66,7 +66,12 @@ class StatsConfiguration:
         """
         as_dict = dataclasses.asdict(self)
         dict_non_empty = {k: v for k, v in as_dict.items() if v is not None and v != ""}
-        return ";".join([f"{k}={str(v) if not isinstance(v, Enum) else v.name}" for k, v in dict_non_empty.items()])
+        return ";".join(
+            [
+                f"{k}={str(v) if not isinstance(v, Enum) else v.name}"
+                for k, v in dict_non_empty.items()
+            ]
+        )
 
     @classmethod
     def from_key_val_str(cls, key_val_str: str) -> "StatsConfiguration":
@@ -86,7 +91,9 @@ class StatsConfiguration:
         # Create a dictionary from the list of split key-value pairs by parsing each
         # "key=value" string in the list into {'key': 'value'}.
         # Empty values are simply considered to be empty strings.
-        config_dict = {k: str(v or "") for k, v in (key_val.split("=") for key_val in key_vals_list)}
+        config_dict = {
+            k: str(v or "") for k, v in (key_val.split("=") for key_val in key_vals_list)
+        }
 
         # Check for required parameters, like type, tag, environment
         if not set(["store", "store_tag", "env"]).issubset(set(config_dict.keys())):
@@ -104,7 +111,9 @@ class StatsConfiguration:
         # Validate all of the tags passed in
         storage_tag = cls.__validate_tag(config_dict["store_tag"], "store_tag")
         comparison_tag = (
-            cls.__validate_tag(config_dict["comp_tag"], "comp_tag") if "comp_tag" in config_dict else storage_tag
+            cls.__validate_tag(config_dict["comp_tag"], "comp_tag")
+            if "comp_tag" in config_dict
+            else storage_tag
         )
 
         # Validate necessary parameters if S3 is specified
@@ -114,7 +123,9 @@ class StatsConfiguration:
                 raise ValueError('"bucket" must be specified if "store" is "s3"') from None
             # Validate that the Athena table is set if compare is set
             if compare_type and not "athena_tbl" in config_dict:
-                raise ValueError('"athena_tbl" must be specified if "store" is "s3" and "compare" is set') from None
+                raise ValueError(
+                    '"athena_tbl" must be specified if "store" is "s3" and "compare" is set'
+                ) from None
 
         return cls(
             store=storage_type,
@@ -154,7 +165,9 @@ class StatsConfiguration:
         try:
             return enum_type[val.upper()]
         except KeyError:
-            raise ValueError(f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}') from None
+            raise ValueError(
+                f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}'
+            ) from None
 
     @staticmethod
     def __validate_tag(tag: str, field_name: str) -> str:

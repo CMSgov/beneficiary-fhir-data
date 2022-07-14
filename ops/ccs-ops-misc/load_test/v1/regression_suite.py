@@ -23,24 +23,37 @@ master_hashed_mbis: List[str] = []
 
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
-    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+    if (
+        is_distributed(environment)
+        and is_locust_master(environment)
+        or not environment.parsed_options
+    ):
         return
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
     global master_bene_ids
     master_bene_ids = data.load_from_parsed_opts(
-        environment.parsed_options, db.get_bene_ids, use_table_sample=False, data_type_name="bene_ids"
+        environment.parsed_options,
+        db.get_bene_ids,
+        use_table_sample=False,
+        data_type_name="bene_ids",
     )
 
     global master_contract_data
     master_contract_data = data.load_from_parsed_opts(
-        environment.parsed_options, db.get_contract_ids, use_table_sample=False, data_type_name="contract_data"
+        environment.parsed_options,
+        db.get_contract_ids,
+        use_table_sample=False,
+        data_type_name="contract_data",
     )
 
     global master_hashed_mbis
     master_hashed_mbis = data.load_from_parsed_opts(
-        environment.parsed_options, db.get_hashed_mbis, use_table_sample=False, data_type_name="hashed_mbis"
+        environment.parsed_options,
+        db.get_hashed_mbis,
+        use_table_sample=False,
+        data_type_name="hashed_mbis",
     )
 
 

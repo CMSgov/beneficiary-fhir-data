@@ -55,7 +55,10 @@ class StatsCollector(object):
             List[TaskStats]: A List of TaskStats that represent the performance statistics of all Locust tasks
         """
         stats = self.locust_env.stats
-        return [TaskStats.from_stats_entry(stats_entry) for stats_entry in self.__sort_stats(stats.entries)]
+        return [
+            TaskStats.from_stats_entry(stats_entry)
+            for stats_entry in self.__sort_stats(stats.entries)
+        ]
 
     def collect_stats(self) -> "AggregatedStats":
         """A method that returns an AggregatedStats instance representing a snapshot of the aggregated performance
@@ -215,7 +218,9 @@ class StatsMetadata:
             StatsMetadata: A StatsMetadata instance encapsulating all of the necessary metadata to store and compare statistics
         """
         if not locust_env.parsed_options:
-            raise ValueError("Parsed options did not exist on Locust environment -- is Locust being ran as a library?")
+            raise ValueError(
+                "Parsed options did not exist on Locust environment -- is Locust being ran as a library?"
+            )
 
         if not locust_env.stats.last_request_timestamp:
             raise ValueError("No requests were ran, stats cannot be aggregated")

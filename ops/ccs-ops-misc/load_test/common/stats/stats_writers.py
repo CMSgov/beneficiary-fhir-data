@@ -61,7 +61,9 @@ class StatsJsonFileWriter(object):
 
         env_name = self.stats.metadata.environment.name
         store_tag = self.stats.metadata.tag
-        with open(os.path.join(path, f"{env_name}-{store_tag}-{int(time.time())}.stats.json"), "x") as json_file:
+        with open(
+            os.path.join(path, f"{env_name}-{store_tag}-{int(time.time())}.stats.json"), "x"
+        ) as json_file:
             json_file.write(json.dumps(asdict(self.stats), indent=4))
 
 

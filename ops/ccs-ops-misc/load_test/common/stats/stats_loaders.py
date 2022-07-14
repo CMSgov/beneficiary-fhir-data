@@ -90,7 +90,11 @@ class StatsFileLoader(StatsLoader):
         stats_list = self.__load_stats_from_files()
 
         # Filter those that don't match the config and current run's metadata
-        filtered_stats = [stats for stats in stats_list if stats.metadata and self.__verify_metadata(stats.metadata)]
+        filtered_stats = [
+            stats
+            for stats in stats_list
+            if stats.metadata and self.__verify_metadata(stats.metadata)
+        ]
 
         # Sort them based upon timestamp, greater to lower
         filtered_stats.sort(key=lambda stats: stats.metadata.timestamp, reverse=True)  # type: ignore
@@ -100,13 +104,19 @@ class StatsFileLoader(StatsLoader):
 
     def load_average(self) -> Optional[AggregatedStats]:
         stats_list = self.__load_stats_from_files()
-        verified_stats = [stats for stats in stats_list if stats.metadata and self.__verify_metadata(stats.metadata)]
+        verified_stats = [
+            stats
+            for stats in stats_list
+            if stats.metadata and self.__verify_metadata(stats.metadata)
+        ]
 
         return _get_average_all_stats(verified_stats)
 
     def __load_stats_from_files(self, suffix: str = ".stats.json") -> List[AggregatedStats]:
         path = self.stats_config.path if self.stats_config and self.stats_config.path else ""
-        stats_files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(suffix)]
+        stats_files = [
+            os.path.join(path, file) for file in os.listdir(path) if file.endswith(suffix)
+        ]
 
         aggregated_stats_list = []
         for stats_file in stats_files:
@@ -183,14 +193,20 @@ class StatsAthenaLoader(StatsLoader):
     def __get_athena_query_status(self, query_execution_id: str) -> str:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_execution
         # for the structure of the returned Dict
-        return self.client.get_query_execution(QueryExecutionId=query_execution_id)["QueryExecution"]["Status"]["State"]
+        return self.client.get_query_execution(QueryExecutionId=query_execution_id)[
+            "QueryExecution"
+        ]["Status"]["State"]
 
     def __get_athena_query_result(self, query_execution_id: str) -> List[AthenaQueryRowResult]:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_results
         # for the structure of the returned Dict
-        return self.client.get_query_results(QueryExecutionId=query_execution_id)["ResultSet"]["Rows"]
+        return self.client.get_query_results(QueryExecutionId=query_execution_id)["ResultSet"][
+            "Rows"
+        ]
 
-    def __run_query(self, query: str, max_retries: int = 10) -> Optional[List[AthenaQueryRowResult]]:
+    def __run_query(
+        self, query: str, max_retries: int = 10
+    ) -> Optional[List[AthenaQueryRowResult]]:
         start_response = self.__start_athena_query(query)
         query_execution_id = start_response["QueryExecutionId"]
 
@@ -213,7 +229,9 @@ class StatsAthenaLoader(StatsLoader):
         # equality check being auto-generated as they either should not be checked
         # (i.e. timestamp) or require a different type of check
         fields_to_exclude = ["timestamp", "tag", "total_runtime"]
-        filtered_fields = [field for field in fields(StatsMetadata) if not field.name in fields_to_exclude]
+        filtered_fields = [
+            field for field in fields(StatsMetadata) if not field.name in fields_to_exclude
+        ]
         # Automatically generate a list of equality checks for all of the fields that are
         # necessary to validate to ensure that stats can be compared
         generated_checks = [self.__generate_check_str(field) for field in filtered_fields]
@@ -256,11 +274,16 @@ class StatsAthenaLoader(StatsLoader):
         # The serialization from a TaskStats array will give a list of values, so the serialized
         # list will be a list of lists of lists (in inner to outer order:
         # TaskStats -> AggregatedStats -> List[AggregatedStats])
-        serialized_list: List[List[List[Any]]] = [json.loads(json_str) for json_str in raw_json_list]
+        serialized_list: List[List[List[Any]]] = [
+            json.loads(json_str) for json_str in raw_json_list
+        ]
         # The metadata is unnecessary here since by the time we've gotten here the metadata for each of the
         # tasks we're serializing here has already been checked
         return [
-            AggregatedStats(metadata=None, tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list])
+            AggregatedStats(
+                metadata=None,
+                tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list],
+            )
             for agg_tasks_list in serialized_list
         ]
 
@@ -287,20 +310,28 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
     # Exclude fields that are not statistics and the response time percentiles
     # dict which will be handled on its own later
     fields_to_exclude = ["task_name", "request_method", "response_time_percentiles"]
-    stats_to_average = [field.name for field in fields(TaskStats) if not field.name in fields_to_exclude]
+    stats_to_average = [
+        field.name for field in fields(TaskStats) if not field.name in fields_to_exclude
+    ]
     # Calculate the mean automatically for every matching stat in the list of
     # all stats, and then put the mean in a dict
-    avg_task_stats = {stat_name: mean(getattr(task, stat_name) for task in all_tasks) for stat_name in stats_to_average}
+    avg_task_stats = {
+        stat_name: mean(getattr(task, stat_name) for task in all_tasks)
+        for stat_name in stats_to_average
+    }
 
     # Get the common keys between all of the response time percentile dicts in
     # the list of task stats
     common_percents = reduce(
-        lambda prev, next: prev & next, (task.response_time_percentiles.keys() for task in all_tasks)
+        lambda prev, next: prev & next,
+        (task.response_time_percentiles.keys() for task in all_tasks),
     )
     # Do the same thing as above but for each entry in each response time percentile dict --
     # get the mean of each percentile across all tasks and make it the value of a new
     # percentile dict
-    avg_task_percents = {p: mean(task.response_time_percentiles[p] for task in all_tasks) for p in common_percents}
+    avg_task_percents = {
+        p: mean(task.response_time_percentiles[p] for task in all_tasks) for p in common_percents
+    }
 
     return TaskStats(
         task_name=all_tasks[0].task_name,

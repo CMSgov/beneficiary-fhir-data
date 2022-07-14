@@ -13,7 +13,11 @@ master_pac_mbis: List[str] = []
 
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
-    if is_distributed(environment) and is_locust_master(environment) or not environment.parsed_options:
+    if (
+        is_distributed(environment)
+        and is_locust_master(environment)
+        or not environment.parsed_options
+    ):
         # Don't bother loading data for the master runner, it doesn't run a test
         return
 
@@ -21,7 +25,10 @@ def _(environment: Environment, **kwargs):
     # for Locust's documentation on the test data management pattern used here
     global master_pac_mbis
     master_pac_mbis = data.load_from_parsed_opts(
-        environment.parsed_options, db.get_pac_hashed_mbis, use_table_sample=False, data_type_name="pac_mbis"
+        environment.parsed_options,
+        db.get_pac_hashed_mbis,
+        use_table_sample=False,
+        data_type_name="pac_mbis",
     )
 
 

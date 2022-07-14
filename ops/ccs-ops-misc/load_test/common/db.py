@@ -53,7 +53,8 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
     bene_query = (
-        f'SELECT "mbi_hash" FROM "beneficiaries" {table_sample_text} WHERE "mbi_hash" IS NOT NULL ' f"LIMIT {LIMIT}"
+        f'SELECT "mbi_hash" FROM "beneficiaries" {table_sample_text} WHERE "mbi_hash" IS NOT NULL '
+        f"LIMIT {LIMIT}"
     )
 
     return [str(r[0]) for r in _execute(uri, bene_query)]
@@ -160,7 +161,8 @@ def get_pac_hashed_mbis(uri: str) -> List:
     Selects the distinct mbis from both fiss and mcs subqueries
     """
     distinct_type_status_mbis = (
-        "select distinct type_status.mbi_id " f"from ({fiss_mbi_sub_query} union {mcs_mbi_sub_query}) as type_status "
+        "select distinct type_status.mbi_id "
+        f"from ({fiss_mbi_sub_query} union {mcs_mbi_sub_query}) as type_status "
     )
 
     mbi_query = (
