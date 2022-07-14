@@ -672,9 +672,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       }
 
       if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
+        patients = Collections.singletonList(patient);
+
         // Add bene_id to MDC logs
         LoggingUtils.logBeneIdToMdc(patient.getId());
-        patients = Collections.singletonList(patient);
       } else {
         patients = Collections.emptyList();
       }

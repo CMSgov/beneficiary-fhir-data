@@ -227,9 +227,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       patients = Collections.emptyList();
     } else {
       try {
-        // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
-
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                 .filter(
@@ -237,6 +234,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                         QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
+
+        // Add bene_id to MDC logs
+        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
       } catch (ResourceNotFoundException e) {
         patients = Collections.emptyList();
       }
@@ -605,9 +605,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       }
 
       if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
+        patients = Collections.singletonList(patient);
+
         // Add bene_id to MDC logs
         LoggingUtils.logBeneIdToMdc(patient.getId());
-        patients = Collections.singletonList(patient);
       } else {
         patients = Collections.emptyList();
       }
