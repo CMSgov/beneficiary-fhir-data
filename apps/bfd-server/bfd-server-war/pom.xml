@@ -43,6 +43,12 @@
 
 	<dependencies>
 		<dependency>
+			<!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-server-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -297,6 +303,18 @@
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sketch_2.12</artifactId>
 			<version>2.4.7</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-test-utils</artifactId>
+			<version>${project.version}</version>
+			<!-- Scope cannot be test due to SpringConfiguration using test classes, fix that to properly scope this -->
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-shared-test-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
