@@ -7,19 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
@@ -42,13 +30,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Unit tests for the {@link StandardGrpcRdaSource} class. */
+@ExtendWith(MockitoExtension.class)
 public class GrpcRdaSourceTest {
   /**
    * We need a starting time for the {@link Clock} used to compute idle time. The time and date are
@@ -95,8 +84,6 @@ public class GrpcRdaSourceTest {
   /** Shortcut for accessing the {@link StandardGrpcRdaSource.Metrics} object. */
   private StandardGrpcRdaSource.Metrics metrics;
 
-  private AutoCloseable closeable;
-
   /**
    * Establishes a baseline configuration consisting of mocks and real objects in the unit test
    * methods.
@@ -105,7 +92,6 @@ public class GrpcRdaSourceTest {
    */
   @BeforeEach
   public void setUp() throws Exception {
-    closeable = MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     source =
         spy(
@@ -118,15 +104,10 @@ public class GrpcRdaSourceTest {
                 "ints",
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
-    doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
-    doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
+    lenient().doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
+    lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
-    doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
-  }
-
-  @AfterEach
-  public void tearDown() throws Exception {
-    closeable.close();
+    lenient().doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
   }
 
   /** Verify that all expected metrics are defined and have expected names. */

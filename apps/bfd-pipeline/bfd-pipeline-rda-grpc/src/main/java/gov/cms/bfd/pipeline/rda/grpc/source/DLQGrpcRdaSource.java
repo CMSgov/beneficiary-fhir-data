@@ -108,10 +108,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       throws ProcessingException {
     int totalProcessed = 0;
 
-    MessageError.ClaimType type =
-        claimType.equalsIgnoreCase("fiss")
-            ? MessageError.ClaimType.FISS
-            : MessageError.ClaimType.MCS;
+    MessageError.ClaimType type = MessageError.ClaimType.valueOf(claimType.toUpperCase());
 
     List<MessageError> messageErrors = dao.findAllMessageErrors();
 

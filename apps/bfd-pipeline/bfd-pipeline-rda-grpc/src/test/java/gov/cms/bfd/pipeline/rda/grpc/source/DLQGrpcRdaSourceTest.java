@@ -25,10 +25,34 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import utils.TestUtils;
 
+@ExtendWith(MockitoExtension.class)
 public class DLQGrpcRdaSourceTest {
+
+  @Mock private RdaSink<Long, Long> mockSink;
+
+  @Mock private EntityManager mockManager;
+
+  @Mock private ManagedChannel mockChannel;
+
+  @Mock private RdaSourceConfig mockConfig;
+
+  @Mock private GrpcStreamCaller<Long> mockCaller;
+
+  @Mock private MetricRegistry mockMetrics;
+
+  @Mock private DLQGrpcRdaSource.DLQDao mockDao;
+
+  @BeforeEach
+  public void setUp() {
+    doReturn(mockChannel).when(mockConfig).createChannel();
+  }
 
   private static final List<MessageError> MOCK_MESSAGE_ERRORS =
       List.of(
@@ -45,20 +69,7 @@ public class DLQGrpcRdaSourceTest {
   void shouldInvokeLogicLambdaFISS()
       throws NoSuchFieldException, IllegalAccessException, ProcessingException {
     final String claimType = "fiss";
-    // unchecked - This is fine for a mock.
-    //noinspection unchecked
-    final RdaSink<Long, Long> mockSink = mock(RdaSink.class);
     final MessageError.ClaimType type = MessageError.ClaimType.FISS;
-    final EntityManager mockManager = mock(EntityManager.class);
-    final ManagedChannel mockChannel = mock(ManagedChannel.class);
-    final RdaSourceConfig mockConfig = mock(RdaSourceConfig.class);
-    // unchecked - This is fine for a mock.
-    //noinspection unchecked
-    final GrpcStreamCaller<Long> mockCaller = mock(GrpcStreamCaller.class);
-    final MetricRegistry mockMetrics = mock(MetricRegistry.class);
-    final DLQGrpcRdaSource.DLQDao mockDao = mock(DLQGrpcRdaSource.DLQDao.class);
-
-    doReturn(mockChannel).when(mockConfig).createChannel();
 
     AbstractGrpcRdaSource.Processor mockLogic = mock(AbstractGrpcRdaSource.Processor.class);
 
@@ -68,10 +79,6 @@ public class DLQGrpcRdaSourceTest {
                 mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
 
     doReturn(mockLogic).when(sourceSpy).dlqProcessingLogic(mockSink, type, Set.of(5L, 15L));
-
-    doReturn(-1)
-        .when(sourceSpy)
-        .tryRetrieveAndProcessObjects(any(AbstractGrpcRdaSource.Processor.class));
 
     doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
@@ -89,20 +96,7 @@ public class DLQGrpcRdaSourceTest {
   void shouldInvokeLogicLambdaForMCS()
       throws NoSuchFieldException, IllegalAccessException, ProcessingException {
     final String claimType = "mcs";
-    // unchecked - This is fine for a mock.
-    //noinspection unchecked
-    final RdaSink<Long, Long> mockSink = mock(RdaSink.class);
     final MessageError.ClaimType type = MessageError.ClaimType.MCS;
-    final EntityManager mockManager = mock(EntityManager.class);
-    final ManagedChannel mockChannel = mock(ManagedChannel.class);
-    final RdaSourceConfig mockConfig = mock(RdaSourceConfig.class);
-    // unchecked - This is fine for a mock.
-    //noinspection unchecked
-    final GrpcStreamCaller<Long> mockCaller = mock(GrpcStreamCaller.class);
-    final MetricRegistry mockMetrics = mock(MetricRegistry.class);
-    final DLQGrpcRdaSource.DLQDao mockDao = mock(DLQGrpcRdaSource.DLQDao.class);
-
-    doReturn(mockChannel).when(mockConfig).createChannel();
 
     AbstractGrpcRdaSource.Processor mockLogic = mock(AbstractGrpcRdaSource.Processor.class);
 
@@ -112,10 +106,6 @@ public class DLQGrpcRdaSourceTest {
                 mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
 
     doReturn(mockLogic).when(sourceSpy).dlqProcessingLogic(mockSink, type, Set.of(7L, 9L));
-
-    doReturn(-1)
-        .when(sourceSpy)
-        .tryRetrieveAndProcessObjects(any(AbstractGrpcRdaSource.Processor.class));
 
     doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
@@ -136,25 +126,12 @@ public class DLQGrpcRdaSourceTest {
   @Test
   void shouldReprocessDLQ() throws Exception {
     final String claimType = "fiss";
-    // unchecked - This is fine for a mock.
-    //noinspection unchecked
-    final RdaSink<Long, Long> mockSink = mock(RdaSink.class);
     final MessageError.ClaimType type = MessageError.ClaimType.FISS;
-    final EntityManager mockManager = mock(EntityManager.class);
-    final ManagedChannel mockChannel = mock(ManagedChannel.class);
-    final RdaSourceConfig mockConfig = mock(RdaSourceConfig.class);
-    // unchecked - This is fine for a mock.
-    //noinspection unchecked
-    final GrpcStreamCaller<Long> mockCaller = mock(GrpcStreamCaller.class);
-    final MetricRegistry mockMetrics = mock(MetricRegistry.class);
-    final DLQGrpcRdaSource.DLQDao mockDao = mock(DLQGrpcRdaSource.DLQDao.class);
     final CallOptions mockCallOptions = mock(CallOptions.class);
     final Meter mockMeter = mock(Meter.class);
 
     // Set up sink mocks, needs to return fake DCNs and process count
     doReturn("A").when(mockSink).getDedupKeyForMessage(5L);
-
-    doReturn("B").when(mockSink).getDedupKeyForMessage(15L);
 
     doReturn(0).when(mockSink).getProcessedCount();
 
@@ -163,8 +140,6 @@ public class DLQGrpcRdaSourceTest {
 
     // Set up config mocks, needs to return fake call options and channel
     doReturn(mockCallOptions).when(mockConfig).createCallOptions();
-
-    doReturn(mockChannel).when(mockConfig).createChannel();
 
     // Create our spy for the class we're testing, so we can mock sibling methods
     DLQGrpcRdaSource<Long, Long> sourceSpy =
