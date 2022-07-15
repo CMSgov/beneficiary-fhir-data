@@ -59,7 +59,7 @@ variable "serde_format" {
   # Validate that we have an allowed value
   validation {
     condition     = contains(["json", "grok", "parquet"], var.serde_format)
-    error_message = "Allowed values for storage_format are \"json\" or \"parquet\"."
+    error_message = "Allowed values for serde_format are \"json\", \"grok\", or \"parquet\"."
   }
 }
 

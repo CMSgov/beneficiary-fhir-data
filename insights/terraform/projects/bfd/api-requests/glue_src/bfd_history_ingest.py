@@ -82,14 +82,8 @@ if record_count > 0:
         "Relationalize"
         )
 
-    print("Here is the relationalized schema:")
-    relationalized.printSchema()
-
     OutputDy = Map.apply(frame = relationalized,
             f = format_field_names, transformation_ctx = 'Reformat_Field_Names')
-    
-    print("Here is the output schema:")
-    OutputDy.printSchema()
 
     # Script generated for node Data Catalog table
     DataCatalogtable_node3 = glueContext.write_dynamic_frame.from_catalog(
