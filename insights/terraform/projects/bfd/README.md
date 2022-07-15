@@ -21,7 +21,7 @@ flowchart TD
     History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
 
     EC2["CloudWatch Log Subscription (Real-Time)"] --> Firehose["Kinesis Firehose"]
-    Firehose -->|Lambda| APIRequests
+    Firehose -->|Lambda| History
 ```
 
 ### Manual Ingestion of Log Files
