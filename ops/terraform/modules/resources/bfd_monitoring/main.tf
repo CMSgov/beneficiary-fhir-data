@@ -40,7 +40,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
     namespace     = local.namespace
     value         = "1"
     default_value = "0"
-    unit          = "Count"
   }
 }
 
@@ -56,7 +55,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency" {
     namespace     = local.namespace
     value         = "$.mdc.http_access_response_duration_milliseconds"
     default_value = null
-    unit          = "Milliseconds"
   }
 }
 
@@ -72,7 +70,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
     namespace     = local.namespace
     value         = "1"
     default_value = "0"
-    unit          = "Count"
   }
 }
 
@@ -88,7 +85,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-not-2xx" {
     namespace     = local.namespace
     value         = "1"
     default_value = "0"
-    unit          = "Count"
   }
 }
 
