@@ -4,6 +4,11 @@
 
 from typing import List, Optional
 
+import psycogreen.gevent
+
+# We need to patch psycopg2 to support green threads
+psycogreen.gevent.patch_psycopg()
+
 import psycopg2
 
 LIMIT = 100000  # global limit on the number of records to return
