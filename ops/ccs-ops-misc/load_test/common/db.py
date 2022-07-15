@@ -77,21 +77,22 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
     contract_id_query = (
-        'SELECT DISTINCT "partd_contract_number_id", "year_month" '
+        'SELECT "partd_contract_number_id", "year_month" '
         'FROM "beneficiary_monthly" '
         f"{table_sample_text}"
-        'WHERE "partd_contract_number_id" IS NOT NULL '
         f"LIMIT {LIMIT}"
     )
 
-    return [
+    unfiltered_contracts = [
         {
-            "id": str(result[0]),
+            "id": str(result[0]) if result[0] else None,
             "month": f"{result[1].month:02}",
             "year": str(result[1].year),
         }
         for result in _execute(uri, contract_id_query)
     ]
+
+    return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
 def get_pac_hashed_mbis(uri: str) -> List:
