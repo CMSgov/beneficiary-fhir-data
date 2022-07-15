@@ -7,45 +7,15 @@ resource "aws_kinesis_firehose_delivery_stream" "bfd-firehose" {
     bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
     buffer_interval     = 60
     buffer_size         = 128
-    error_output_prefix = "databases/${module.database.name}/${module.api-requests-table.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    error_output_prefix = "databases/${module.database.name}/${module.api-history-table.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     kms_key_arn         = data.aws_kms_key.kms_key.arn
-    prefix              = "databases/${module.database.name}/${module.api-requests-table.name}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    prefix              = "databases/${module.database.name}/${module.api-history-table.name}/firehose:year=!{timestamp:yyyy};month=!{timestamp:MM}/day:!{timestamp:dd}/"
     role_arn            = aws_iam_role.firehose_role.arn
     s3_backup_mode      = "Disabled"
+    compression_format  = "GZIP"
 
     cloudwatch_logging_options {
       enabled = false
-    }
-
-    data_format_conversion_configuration {
-      enabled = true
-
-      input_format_configuration {
-        deserializer {
-
-          open_x_json_ser_de {
-            case_insensitive                         = true
-            column_to_json_key_mappings              = {}
-            convert_dots_in_json_keys_to_underscores = false
-          }
-        }
-      }
-
-      output_format_configuration {
-        serializer {
-          parquet_ser_de {
-            compression = "SNAPPY"
-          }
-        }
-      }
-
-      schema_configuration {
-        database_name = local.database
-        region        = local.region
-        role_arn      = aws_iam_role.firehose_role.arn
-        table_name    = module.api-requests-table.name
-        version_id    = "LATEST"
-      }
     }
 
     processing_configuration {

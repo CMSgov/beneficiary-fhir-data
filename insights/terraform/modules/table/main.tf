@@ -26,7 +26,6 @@ locals {
     json = {
       library = "org.apache.hive.hcatalog.data.JsonSerDe"
       params  = length(var.serde_parameters) == 0 ? {
-        "paths" = join(",", var.columns[*].name),
         "ignore.malformed.json" = true,
         "dots.in.keys" = true,
         "timestamp.formats" = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z',yyyy-MM-dd'T'HH:mm:ss.SSS'Z',yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -35,7 +34,6 @@ locals {
     grok = {
       library = "com.amazonaws.glue.serde.GrokSerDe"
       params  = length(var.serde_parameters) == 0 ? {
-        "paths" = join(",", var.columns[*].name),
         "ignore.malformed.json" = true,
         "dots.in.keys" = true,
         "timestamp.formats" = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z',yyyy-MM-dd'T'HH:mm:ss.SSS'Z',yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -44,7 +42,6 @@ locals {
     parquet = {
       library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
       params  = length(var.serde_parameters) == 0 ? {
-        "paths" = join(",", var.columns[*].name),
         "serialization.format" = 1
       } : var.serde_parameters
     }
@@ -55,7 +52,8 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
   name          = var.table
   database_name = var.database
   description   = var.description
-  table_type = "EXTERNAL_TABLE"
+  table_type    = "EXTERNAL_TABLE"
+  owner         = "owner"
 
   parameters = {
     classification          = var.storage_format == "parquet" ? "parquet" : null
@@ -94,5 +92,14 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
       serialization_library = local.serde_options[var.serde_format].library
       parameters            = local.serde_options[var.serde_format].params
     }
+  }
+
+  # These things get changed by the Crawler (if there is one), and we don't
+  # need to undo whatever changes the Crawler makes
+  lifecycle {
+    ignore_changes = [
+      storage_descriptor,
+      parameters
+    ]
   }
 }

@@ -4,10 +4,32 @@ import sys
 from awsglue.context import GlueContext
 from awsglue.dynamicframe import DynamicFrame
 from awsglue.job import Job
-from awsglue.transforms import Unbox
+from awsglue.transforms import Unbox, Map
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from pyspark.sql import functions as SqlFuncs
+
+
+def format_field_names(record):
+    ''' Format field names within a record to remove "." characters and lowercase. '''
+
+    try:
+        # Make a new record, because we can't iterate over the old one AND change the keys
+        record_copy = {}
+
+        for field_id in record.keys():
+            record_copy[field_id.lower().replace('.', '_')] = record[field_id]
+
+        return record_copy
+
+    except Exception as e:
+        # AWS Glue jobs are not good at providing error output from these
+        # Mapping functions, which get outsourced to separate threads
+        print('BFD_ERROR: {0}'.format(e))
+        raise e
+
+
+# Main
 
 args = getResolvedOptions(sys.argv, ["JOB_NAME"])
 sc = SparkContext()
@@ -18,6 +40,7 @@ job.init(args["JOB_NAME"], args)
 
 args = getResolvedOptions(sys.argv,
                           ['JOB_NAME',
+                           'tempLocation',
                            'sourceDatabase',
                            'sourceTable',
                            'targetDatabase',
@@ -47,28 +70,26 @@ if record_count > 0:
 
     RelationalizeBeneNode = NextNode.relationalize(
         'root',
-        's3://bfd-insights-bfd-577373831711/databases/bfd/temp/'
+        args['tempLocation']
         ).select('root')
 
-    relationalized = (
+    relationalized = DynamicFrame.fromDF(
         RelationalizeBeneNode.toDF()
         .withColumn('year', SqlFuncs.substring('timestamp', 1,4))
         .withColumn('month', SqlFuncs.substring('timestamp', 6,2))
-        .withColumn('day', SqlFuncs.substring('timestamp', 9,2))
+        .withColumn('day', SqlFuncs.substring('timestamp', 9,2)),
+        glueContext,
+        "Relationalize"
         )
 
-    # construct renaming mapping for ApplyMapping
-    mappings = list()
-    for field in relationalized.schema.fields:
-        if field.name:
-            dtype = field.dataType.typeName()
-            mappings.append((field.name, dtype, field.name.replace('.', '_'), dtype))
+    print("Here is the relationalized schema:")
+    relationalized.printSchema()
 
-    # apply mapping
-    OutputDy = DynamicFrame.fromDF(relationalized, glueContext, "makeOutput").apply_mapping(mappings=mappings)
-
+    OutputDy = Map.apply(frame = relationalized,
+            f = format_field_names, transformation_ctx = 'Reformat_Field_Names')
+    
     print("Here is the output schema:")
-    OutputDy.toDF().printSchema()
+    OutputDy.printSchema()
 
     # Script generated for node Data Catalog table
     DataCatalogtable_node3 = glueContext.write_dynamic_frame.from_catalog(

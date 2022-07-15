@@ -1,7 +1,7 @@
 # Zip File containing Lambda script
 data "archive_file" "bfd-cw-to-flattened" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_src/"
+  source_file  = "${path.module}/lambda_src/bfd-cw-to-flattened-json.py"
   output_path = "${path.module}/lambda_src/${local.environment}/bfd-cw-to-flattened-json.zip"
 }
 
@@ -20,6 +20,7 @@ resource "aws_lambda_function" "bfd-cw-to-flattened-json" {
   reserved_concurrent_executions = -1
   role                           = aws_iam_role.firehose-lambda-role.arn
   runtime                        = "python3.8"
+  source_code_hash               = data.archive_file.bfd-cw-to-flattened.output_base64sha256
 
   tags = { "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python" }
   

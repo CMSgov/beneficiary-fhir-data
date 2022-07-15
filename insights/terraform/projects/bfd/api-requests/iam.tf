@@ -59,7 +59,7 @@ resource "aws_iam_policy" "firehose_policy" {
           ]
           Effect   = "Allow"
           Resource = [
-            "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.api-requests-table.name}",
+            "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.api-history-table.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:database/${module.database.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:catalog"
           ]
