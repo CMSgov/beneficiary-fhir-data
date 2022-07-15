@@ -35,16 +35,16 @@ SourceDyf = glueContext.create_dynamic_frame.from_catalog(database=args['sourceD
 if SourceDyf.count() > 0:
     TransformedDf = (
         SourceDyf.toDF()
-        .filter(SqlFuncs.col("`mdc.http_access.response.status`") == "200")
-        .withColumn("bene_id", SqlFuncs.expr("""explode(transform(split(`mdc.bene_id`,","), x -> bigint(x)))"""))
+        .filter(SqlFuncs.col("`mdc_http_access_response_status`") == "200")
+        .withColumn("bene_id", SqlFuncs.expr("""explode(transform(split(`mdc_bene_id`,","), x -> bigint(x)))"""))
         .withColumn("timestamp", SqlFuncs.to_timestamp(SqlFuncs.col("timestamp")))
         .select(
             SqlFuncs.col("bene_id"),
             SqlFuncs.col("timestamp"),
-            SqlFuncs.col("`mdc.http_access.request.clientssl.dn`").alias("clientssl_dn"),
-            SqlFuncs.col("`mdc.http_access.request.operation`").alias("operation"),
-            SqlFuncs.col("`mdc.http_access.request.uri`").alias("uri"),
-            SqlFuncs.col("`mdc.http_access.request.query_string`").alias("query_string"),
+            SqlFuncs.col("`mdc_http_access_request_clientssl.dn`").alias("clientssl_dn"),
+            SqlFuncs.col("`mdc_http_access_request_operation`").alias("operation"),
+            SqlFuncs.col("`mdc_http_access_request_uri`").alias("uri"),
+            SqlFuncs.col("`mdc_http_access_request_query_string`").alias("query_string"),
             SqlFuncs.col("year"),
             SqlFuncs.col("month"),
             SqlFuncs.col("day")
