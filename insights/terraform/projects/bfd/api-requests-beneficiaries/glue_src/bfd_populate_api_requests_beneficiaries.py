@@ -41,7 +41,7 @@ if SourceDyf.count() > 0:
         .select(
             SqlFuncs.col("bene_id"),
             SqlFuncs.col("timestamp"),
-            SqlFuncs.col("`mdc_http_access_request_clientssl.dn`").alias("clientssl_dn"),
+            SqlFuncs.col("`mdc_http_access_request_clientssl_dn`").alias("clientssl_dn"),
             SqlFuncs.col("`mdc_http_access_request_operation`").alias("operation"),
             SqlFuncs.col("`mdc_http_access_request_uri`").alias("uri"),
             SqlFuncs.col("`mdc_http_access_request_query_string`").alias("query_string"),
