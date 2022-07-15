@@ -1,16 +1,5 @@
 locals {
-  # TODO: temporary work around to support dynamic rds writer node resolution.
-  #       This would be more reasonably encoded as inputs to the parent module, but that's less
-  #       clear with the disconnect between stateful and stateless modules. Near-term adoption of
-  #       a terraservices strategy will make this more obvious.
-  environments = {
-    test = {
-      rds_cluster_identifier = "bfd-1652-v70-pre-synthea-load" # TODO: Temporary. To be removed after BFD-1746
-    }
-    prod-sbx = {}
-    prod     = {}
-  }
-  rds_cluster_identifier = lookup(local.environments[var.env_config.env], "rds_cluster_identifier", "bfd-${var.env_config.env}-aurora-cluster")
+  rds_cluster_identifier = "bfd-${var.env_config.env}-aurora-cluster"
 
   is_prod = var.env_config.env == "prod"
 
