@@ -3,6 +3,7 @@
   yum:
     pkg:
       - java-11-openjdk-devel
+      - iptables
   become: true
 
 - name: Create Server User

@@ -251,7 +251,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
      * later.
      */
 
-    String beneficiaryId = patient.getIdPart();
+    Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimTypeV2> claimTypes = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
@@ -368,7 +368,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneficiaryId));
+    TransformerUtilsV2.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -408,7 +408,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @Trace
   private <T> List<T> findClaimTypeByPatient(
       ClaimTypeV2 claimType,
-      String patientId,
+      Long patientId,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -417,18 +417,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
     criteria.select(root).distinct(true);
 
-    // Search for a beneficiary's records. Use lastUpdated if present
-    // TODO - BFD-1596
-    // while we gradually convert entity beans to use long data type for patientId,
-    // we may need to change the expected type for beneficiaryId in the entity Predicate.
-    // Once all claims have been migrated we can modify the ClaimTypeV2 to specifically
-    // return a long data type and this extra data type checking can be removed.
-    java.lang.Class javaClass = claimType.getEntityBeneficiaryIdAttribute().getJavaType();
-
     Predicate wherePredicate =
-        builder.equal(
-            root.get(claimType.getEntityBeneficiaryIdAttribute()),
-            javaClass.getName().equals("long") ? Long.parseLong(patientId) : patientId);
+        builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId);
 
     if (lastUpdated != null && !lastUpdated.isEmpty()) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdated);
@@ -452,7 +442,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     } finally {
       eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
+          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
     }

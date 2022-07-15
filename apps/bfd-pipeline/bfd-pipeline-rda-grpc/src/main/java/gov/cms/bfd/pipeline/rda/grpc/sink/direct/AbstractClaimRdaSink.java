@@ -4,18 +4,11 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -31,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -57,18 +51,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   private static final NumericGauges GAUGES = new NumericGauges();
 
   /** Used to write out RDA messages to json strings */
-  protected static final JsonFormat.Printer writer =
+  protected static final JsonFormat.Printer protobufObjectWriter =
       JsonFormat.printer().omittingInsignificantWhitespace();
-
-  /** Used to map basic objects to json strings */
-  protected static final ObjectMapper mapper =
-      JsonMapper.builder()
-          .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
-          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-          .addModule(new Jdk8Module())
-          .addModule(new JavaTimeModule())
-          .serializationInclusion(JsonInclude.Include.NON_NULL)
-          .build();
 
   /**
    * Constructs an instance using the provided appState and claimType. Sequence numbers can either
@@ -239,13 +223,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Apply implementation specific logic to produce a populated {@link RdaApiClaimMessageMetaData}
+   * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
    * @param change an incoming RdaChange object from which to extract meta data
    * @return an object ready for insertion into the database
    */
-  abstract RdaApiClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
+  abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
 
   /**
    * Helper method to generate {@link MessageError} entities from a given claim object. This is
@@ -275,28 +259,76 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     logger.debug("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
+  /**
+   * Transforms all of the messages in the collection into {@link RdaChange} objects and returns a
+   * {@link List} of the converted changes.
+   *
+   * @param apiVersion appropriate string for the apiSource column of the claim table
+   * @param messages collection of RDA API message objects of the correct type for this sync
+   * @return the converted claims
+   * @throws DataTransformer.TransformationException if any message in the collection is invalid
+   */
   @VisibleForTesting
   List<RdaChange<TClaim>> transformMessages(String apiVersion, Collection<TMessage> messages)
-      throws ProcessingException {
+      throws DataTransformer.TransformationException {
     var claims = new ArrayList<RdaChange<TClaim>>();
     for (TMessage message : messages) {
-      try {
-        var change = transformMessage(apiVersion, message);
-        metrics.transformSuccesses.mark();
-        claims.add(change);
-      } catch (DataTransformer.TransformationException transformationException) {
-        metrics.transformFailures.mark();
-        try {
-          writeError(apiVersion, message, transformationException);
-        } catch (IOException e) {
-          transformationException.addSuppressed(e);
-        }
-        throw transformationException;
-      }
+      claims.add(transformMessage(apiVersion, message));
     }
     return claims;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Delegates the actual transformation to derived classes by calling their {@link
+   * #transformMessageImpl} method. Takes care of tracking transformations and errors in {@link
+   * #metrics}.
+   *
+   * @param apiVersion appropriate string for the apiSource column of the claim table
+   * @param message an RDA API message object of the correct type for this sync
+   * @return the converted claim
+   * @throws DataTransformer.TransformationException if the message is invalid
+   */
+  @Nonnull
+  @Override
+  public RdaChange<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws DataTransformer.TransformationException {
+    try {
+      var change = transformMessageImpl(apiVersion, message);
+      metrics.transformSuccesses.mark();
+      return change;
+    } catch (DataTransformer.TransformationException transformationException) {
+      metrics.transformFailures.mark();
+      try {
+        writeError(apiVersion, message, transformationException);
+      } catch (IOException e) {
+        transformationException.addSuppressed(e);
+      }
+      throw transformationException;
+    }
+  }
+
+  /**
+   * Called by {@link #transformMessage} to perform just the message transformation step that is
+   * specific to a particular message/claim combination.
+   *
+   * @param apiVersion appropriate string for the apiSource column of the claim table
+   * @param message an RDA API message object of the correct type for this sync
+   * @return an appropriate entity object containing the data from the message
+   * @throws DataTransformer.TransformationException if the message is invalid
+   */
+  @Nonnull
+  abstract RdaChange<TClaim> transformMessageImpl(String apiVersion, TMessage message)
+      throws DataTransformer.TransformationException;
+
+  /**
+   * Uses {@link EntityManager#merge} to write each claim and its associated meta data to the
+   * database.
+   *
+   * @param maxSeq highest sequence number from claims in the collection
+   * @param changes collection of claims to write to the database
+   */
   private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
     boolean commit = false;
     try {
@@ -304,7 +336,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
           var metaData = createMetaData(change);
-          entityManager.persist(metaData);
+          entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
@@ -325,6 +357,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
   }
 
+  /**
+   * Finds the highest sequence number in a collection of claims.
+   *
+   * @param claims claims to search
+   * @return highest sequence number
+   */
   private long maxSequenceInBatch(Collection<RdaChange<TClaim>> claims) {
     OptionalLong value = claims.stream().mapToLong(RdaChange::getSequenceNumber).max();
     if (!value.isPresent()) {
@@ -336,25 +374,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Used by sub-classes to read the highest known sequenceNumber for claims in the database.
+   * Updates the latency metric by adding the age of each claim to the histogram.
    *
-   * @param query JPAQL query string
-   * @return result of the query or empty if no records matched
-   * @throws ProcessingException the processing exception
+   * @param claims claims to process
    */
-  protected Optional<Long> readMaxExistingSequenceNumber(String query) throws ProcessingException {
-    try {
-      logger.info("running query to find max sequence number");
-      Long sequenceNumber = entityManager.createQuery(query, Long.class).getSingleResult();
-      final Optional<Long> answer = Optional.ofNullable(sequenceNumber);
-      logger.info(
-          "max sequence number result is {}", answer.map(n -> Long.toString(n)).orElse("none"));
-      return answer;
-    } catch (Exception ex) {
-      throw new ProcessingException(ex, 0);
-    }
-  }
-
   private void updateLatencyMetric(Collection<RdaChange<TClaim>> claims) {
     for (RdaChange<TClaim> claim : claims) {
       final long nowMillis = clock.millis();
@@ -395,6 +418,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
 
+    /**
+     * Initializes all of the metrics.
+     *
+     * @param klass used to derive metric names
+     * @param appMetrics where to store the metrics
+     */
     private Metrics(Class<?> klass, MetricRegistry appMetrics) {
       final String base = klass.getSimpleName();
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
@@ -412,6 +441,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
     }
 
+    /**
+     * Sets the {@link #latestSequenceNumber}
+     *
+     * @param value value to set
+     */
     @VisibleForTesting
     void setLatestSequenceNumber(long value) {
       latestSequenceNumberValue.set(value);

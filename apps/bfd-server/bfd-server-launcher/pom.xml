@@ -46,6 +46,12 @@
 		</dependency>
 
 		<dependency>
+			<!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-server-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
@@ -135,7 +141,13 @@
 			<version>2.0.0</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-shared-test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<pluginManagement>

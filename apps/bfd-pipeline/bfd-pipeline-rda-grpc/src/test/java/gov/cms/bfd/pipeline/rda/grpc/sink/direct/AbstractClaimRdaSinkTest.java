@@ -1,39 +1,68 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.MessageError;
-import gov.cms.bfd.model.rda.RdaApiClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class AbstractClaimRdaSinkTest {
+  private static final String VERSION = "version";
+
+  private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+
+  @Mock private HikariDataSource dataSource;
+  @Mock private EntityManagerFactory entityManagerFactory;
+  @Mock private EntityManager entityManager;
+  @Mock private EntityTransaction transaction;
+  private MetricRegistry appMetrics;
+  private TestClaimRdaSink sink;
+
+  @BeforeEach
+  public void setUp() {
+    MockitoAnnotations.openMocks(this);
+    appMetrics = new MetricRegistry();
+    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
+    doReturn(transaction).when(entityManager).getTransaction();
+    doReturn(true).when(entityManager).isOpen();
+    PipelineApplicationState appState =
+        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
+    sink = spy(new TestClaimRdaSink(appState, RdaApiProgress.ClaimType.FISS, true));
+    sink.getMetrics().setLatestSequenceNumber(0);
+  }
 
   /**
    * Checks that claims are processed successfully when no exceptions were thrown by the {@link
@@ -43,39 +72,14 @@ public class AbstractClaimRdaSinkTest {
    */
   @Test
   void shouldTransformValidClaimsSuccessfully() throws IOException {
-    MetricRegistry mockMetricRegistry = mock(MetricRegistry.class);
-    Meter mockMeter = mock(Meter.class);
-    EntityManagerFactory mockEntityManagerFactory = mock(EntityManagerFactory.class);
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    Clock mockClock = mock(Clock.class);
-    PipelineApplicationState mockPipelineApplicationState = mock(PipelineApplicationState.class);
-
-    doReturn(mockEntityManager).when(mockEntityManagerFactory).createEntityManager();
-
-    doReturn(mockEntityManagerFactory).when(mockPipelineApplicationState).getEntityManagerFactory();
-
-    doReturn(mockMeter).when(mockMetricRegistry).meter(anyString());
-
-    doReturn(mockMetricRegistry).when(mockPipelineApplicationState).getMetrics();
-
-    doReturn(mockClock).when(mockPipelineApplicationState).getClock();
-
-    AbstractClaimRdaSink<String, String> sinkSpy =
-        spy(
-            new TestClaimRdaSink(
-                mockPipelineApplicationState, RdaApiProgress.ClaimType.FISS, true));
-
-    final String apiVersion = "version";
     final List<String> messages = List.of("message1", "message2", "message3");
 
     for (String message : messages) {
-      doReturn(createChangeClaimFromMessage(message))
-          .when(sinkSpy)
-          .transformMessage(apiVersion, message);
+      doReturn(createChangeClaimFromMessage(message)).when(sink).transformMessage(VERSION, message);
     }
 
     doNothing()
-        .when(sinkSpy)
+        .when(sink)
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
     List<RdaChange<String>> expected =
@@ -83,10 +87,10 @@ public class AbstractClaimRdaSinkTest {
 
     AtomicReference<List<RdaChange<String>>> wrapper = new AtomicReference<>();
 
-    assertDoesNotThrow(() -> wrapper.set(sinkSpy.transformMessages(apiVersion, messages)));
+    assertDoesNotThrow(() -> wrapper.set(sink.transformMessages(VERSION, messages)));
 
     assertClaimChangesEquals(expected, wrapper.get());
-    verify(sinkSpy, times(0))
+    verify(sink, times(0))
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
   }
 
@@ -101,54 +105,62 @@ public class AbstractClaimRdaSinkTest {
   void shouldNotTransformInvalidClaimsSuccessfully() throws IOException {
     final String badMessage = "message2";
 
-    MetricRegistry mockMetricRegistry = mock(MetricRegistry.class);
-    Meter mockMeter = mock(Meter.class);
-    EntityManagerFactory mockEntityManagerFactory = mock(EntityManagerFactory.class);
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    Clock mockClock = mock(Clock.class);
-    PipelineApplicationState mockPipelineApplicationState = mock(PipelineApplicationState.class);
-
-    doReturn(mockEntityManager).when(mockEntityManagerFactory).createEntityManager();
-
-    doReturn(mockEntityManagerFactory).when(mockPipelineApplicationState).getEntityManagerFactory();
-
-    doReturn(mockMeter).when(mockMetricRegistry).meter(anyString());
-
-    doReturn(mockMetricRegistry).when(mockPipelineApplicationState).getMetrics();
-
-    doReturn(mockClock).when(mockPipelineApplicationState).getClock();
-
-    AbstractClaimRdaSink<String, String> sinkSpy =
-        spy(
-            new TestClaimRdaSink(
-                mockPipelineApplicationState, RdaApiProgress.ClaimType.FISS, true));
-
-    final String apiVersion = "version";
     final List<String> messages = List.of("message1", badMessage, "message3");
 
     for (String message : messages) {
       if (message.equals(badMessage)) {
         doThrow(DataTransformer.TransformationException.class)
-            .when(sinkSpy)
-            .transformMessage(apiVersion, message);
+            .when(sink)
+            .transformMessageImpl(VERSION, message);
       } else {
         doReturn(createChangeClaimFromMessage(message))
-            .when(sinkSpy)
-            .transformMessage(apiVersion, message);
+            .when(sink)
+            .transformMessageImpl(VERSION, message);
       }
     }
 
     doNothing()
-        .when(sinkSpy)
+        .when(sink)
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
     assertThrows(
         DataTransformer.TransformationException.class,
-        () -> sinkSpy.transformMessages(apiVersion, messages));
+        () -> sink.transformMessages(VERSION, messages));
 
-    verify(sinkSpy, times(1))
+    verify(sink, times(1))
         .writeError(
-            eq(apiVersion), eq(badMessage), any(DataTransformer.TransformationException.class));
+            eq(VERSION), eq(badMessage), any(DataTransformer.TransformationException.class));
+  }
+
+  /** Verify that {@link RdaSink#transformMessage} success updates success metric. */
+  @Test
+  public void testSingleMessageTransformSuccessUpdatesMetric() {
+    sink.transformMessage(VERSION, "message");
+
+    final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading(1, "transform successes", metrics.getTransformSuccesses());
+    assertMeterReading(0, "transform failures", metrics.getTransformFailures());
+  }
+
+  /** Verify that {@link RdaSink#transformMessage} failure updates failure metric. */
+  @Test
+  public void testSingleMessageTransformFailureUpdatesMetric() {
+    doThrow(
+            new DataTransformer.TransformationException(
+                "oops", List.of(new DataTransformer.ErrorMessage("field", "oops!"))))
+        .when(sink)
+        .transformMessageImpl(any(), any());
+
+    try {
+      sink.transformMessage(VERSION, "message");
+      fail("should have thrown");
+    } catch (DataTransformer.TransformationException error) {
+      assertEquals("oops", error.getMessage());
+    }
+
+    final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading(0, "transform successes", metrics.getTransformSuccesses());
+    assertMeterReading(1, "transform failures", metrics.getTransformFailures());
   }
 
   /**
@@ -212,12 +224,12 @@ public class AbstractClaimRdaSinkTest {
 
     @Nonnull
     @Override
-    public RdaChange<String> transformMessage(String apiVersion, String s) {
-      return null;
+    RdaChange<String> transformMessageImpl(String apiVersion, String s) {
+      return new RdaChange<>(1L, RdaChange.Type.UPDATE, s, Instant.now());
     }
 
     @Override
-    RdaApiClaimMessageMetaData createMetaData(RdaChange<String> change) {
+    RdaClaimMessageMetaData createMetaData(RdaChange<String> change) {
       return null;
     }
 

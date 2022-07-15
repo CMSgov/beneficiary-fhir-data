@@ -314,9 +314,7 @@ public class McsClaimTransformerTest {
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
-              new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
-              new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+              new DataTransformer.ErrorMessage("idrClaimType", "no value set"));
 
       String expectedMessage =
           String.format(
@@ -429,12 +427,11 @@ public class McsClaimTransformerTest {
             RdaMcsClaim::getIdrStatusCode,
             McsStatusCode.STATUS_CODE_DENIED_E,
             "E")
-        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
-            McsClaim.Builder::setIdrStatusCodeUnrecognized, RdaMcsClaim.Fields.idrStatusCode, "ZZZ")
-        .verifyEnumFieldTransformationRejectsSpecificValues(
-            McsClaim.Builder::setIdrStatusCodeEnum,
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrStatusCodeUnrecognized,
+            claim -> String.valueOf(claim.getIdrStatusCode()),
             RdaMcsClaim.Fields.idrStatusCode,
-            McsStatusCode.STATUS_CODE_NOT_USED);
+            1);
   }
 
   @Test
@@ -928,6 +925,15 @@ public class McsClaimTransformerTest {
             RdaMcsAdjustment.Fields.idrAdjPEombAmt);
   }
 
+  @Test
+  public void testAdjustmentRdaPosition() {
+    new AdjustmentFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            McsAdjustment.Builder::setRdaPosition,
+            RdaMcsAdjustment::getRdaPosition,
+            RdaMcsAdjustment.Fields.rdaPosition);
+  }
+
   // endregion McsAdjustments
 
   // region McsAudit
@@ -969,6 +975,15 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  @Test
+  public void testAuditRdaPosition() {
+    new AuditFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            McsAudit.Builder::setRdaPosition,
+            RdaMcsAudit::getRdaPosition,
+            RdaMcsAudit.Fields.rdaPosition);
+  }
+
   // endregion McsAudit
 
   // region McsDiagnosisCode
@@ -976,7 +991,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDiagnosisCodeIdrDiagCode() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDiagnosisCode.Builder::setIdrDiagCode,
             RdaMcsDiagnosisCode::getIdrDiagCode,
             RdaMcsDiagnosisCode.Fields.idrDiagCode,
@@ -996,6 +1011,15 @@ public class McsClaimTransformerTest {
             RdaMcsDiagnosisCode::getIdrDiagIcdType,
             RdaMcsDiagnosisCode.Fields.idrDiagIcdType,
             1);
+  }
+
+  @Test
+  public void testDiagnosisCodeRdaPosition() {
+    new DiagCodeFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            McsDiagnosisCode.Builder::setRdaPosition,
+            RdaMcsDiagnosisCode::getRdaPosition,
+            RdaMcsDiagnosisCode.Fields.rdaPosition);
   }
 
   // endregion McsDiagnosisCode
@@ -1435,6 +1459,15 @@ public class McsClaimTransformerTest {
             RdaMcsLocation::getIdrLocActvCode,
             RdaMcsLocation.Fields.idrLocActvCode,
             1);
+  }
+
+  @Test
+  public void testLocationRdaPosition() {
+    new LocationFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            McsLocation.Builder::setRdaPosition,
+            RdaMcsLocation::getRdaPosition,
+            RdaMcsLocation.Fields.rdaPosition);
   }
 
   // endregion McsLocation

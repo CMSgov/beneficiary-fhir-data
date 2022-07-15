@@ -15,6 +15,10 @@
 			A parent POM for the bfd-model-* projects, which provide shared/library code for the BFD applications.
 	</description>
 
+	<properties>
+		<poi.version>5.2.2</poi.version>
+	</properties>
+
 	<modules>
 		<module>bfd-model-codebook-extractor</module>
 		<module>bfd-model-codebook-data</module>
@@ -32,15 +36,19 @@
 					frameworks in Java. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.7</version>
+				<version>${slf4j.version}</version>
 			</dependency>
-
+			
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>9.4.1208</version>
-				<scope>test</scope>
+				<!-- Used to read the Excel file that provides the RIF column/field definitions. -->
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>${poi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${poi.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

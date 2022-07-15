@@ -1,0 +1,21 @@
+[BASIC]
+# "e" is a typical name for Errors, but is not accepted by default by
+# Pylint
+good-names=i,
+           j,
+           k,
+           ex,
+           Run,
+           _,
+           e
+
+[FORMAT]
+# Set to match the 100 line-length configured in pyproject.toml
+max-line-length=100
+
+[MESSAGES CONTROL]
+# Reasoning for disabling these:
+# 1. "global-statement" -- Globals are used to load one-time, global test data per-process instead of per-Locust user.
+# 2. "unused-argument" -- "kwargs" are used as a way to guard against breaking changes in Locust's event listeners
+disable = global-statement,
+          unused-argument

@@ -33,9 +33,6 @@ public class LoadedFilterManager {
   // A date before the lastUpdate feature was rolled out
   private static final Instant BEFORE_LAST_UPDATED_FEATURE = Instant.parse("2020-01-01T00:00:00Z");
 
-  // The size of the beneficiaryId column
-  private static final int BENE_ID_SIZE = 15;
-
   // The connection to the DB
   private EntityManager entityManager;
 
@@ -153,8 +150,8 @@ public class LoadedFilterManager {
    * @return true if the results set is empty. false if the result set *may* contain items.
    */
   public synchronized boolean isResultSetEmpty(
-      String beneficiaryId, DateRangeParam lastUpdatedRange) {
-    if (beneficiaryId == null || beneficiaryId.isEmpty()) throw new IllegalArgumentException();
+      Long beneficiaryId, DateRangeParam lastUpdatedRange) {
+    if (beneficiaryId == null) throw new IllegalArgumentException();
 
     if (!isInBounds(lastUpdatedRange)) {
       // Out of bounds has to be treated as unknown result
@@ -360,8 +357,8 @@ public class LoadedFilterManager {
     if (batchCount == 0) {
       throw new IllegalArgumentException("Batches cannot be empty for a filter");
     }
-    final int batchSize =
-        (loadedBatches.get(0).getBeneficiaries().length() + BENE_ID_SIZE) / BENE_ID_SIZE;
+    final String[] loadedBatchBenes = loadedBatches.get(0).getBeneficiaries().split(",");
+    final int batchSize = loadedBatchBenes.length;
 
     // It is important to get a good estimate of the number of entries for
     // an accurate FFP and minimal memory size. This one assumes that all batches are of equal size.
@@ -370,8 +367,8 @@ public class LoadedFilterManager {
     // Loop through all batches, filling the bloom filter and finding the lastUpdated
     Instant lastUpdated = firstUpdated;
     for (LoadedBatch batch : loadedBatches) {
-      for (String beneficiary : batch.getBeneficiariesAsList()) {
-        bloomFilter.putString(beneficiary);
+      for (Long beneficiary : batch.getBeneficiariesAsList()) {
+        bloomFilter.putLong(beneficiary);
       }
       if (batch.getCreated().isAfter(lastUpdated)) {
         lastUpdated = batch.getCreated();

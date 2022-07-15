@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
 import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
@@ -12,7 +13,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
-import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
