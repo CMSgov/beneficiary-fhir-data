@@ -397,3 +397,9 @@ module "bfd_dashboards" {
   dashboard_namespace = var.dashboard_namespace
   asg                 = module.fhir_asg.asg_id
 }
+
+module "bfd_monitoring" {
+  source = "../resources/bfd_monitoring"
+  env    = var.env_config.env
+  asg_id = module.fhir_asg.asg_id
+}
