@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.utils;
 
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
@@ -8,7 +9,6 @@ import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

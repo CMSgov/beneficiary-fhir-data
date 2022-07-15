@@ -59,6 +59,7 @@
 
 	<modules>
 		<module>bfd-shared-utils</module>
+		<module>bfd-shared-test-utils</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
@@ -83,6 +84,7 @@
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
 		<metrics.version>4.1.29</metrics.version>
+		<newrelic.version>0.5.0</newrelic.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.13.2</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
@@ -91,6 +93,11 @@
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
+		<postgresql.version>42.2.20</postgresql.version>
+		<hsqldb.version>2.6.0</hsqldb.version>
+		<slf4j.version>1.7.7</slf4j.version>
+		<hikari.version>4.0.3</hikari.version>
+		<flyway.version>8.5.13</flyway.version>
 		<newrelicAgent.version>7.5.0</newrelicAgent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
@@ -133,28 +140,28 @@
 					frameworks in Java. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.7</version>
+				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<!-- An implementation of the JCL API that routes everything through to
 					SLF4J, instead. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
-				<version>1.7.7</version>
+				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<!-- An implementation of the Log4J API that routes everything through
 					to SLF4J, instead. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
-				<version>1.7.7</version>
+				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
 					to SLF4J, instead. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>jul-to-slf4j</artifactId>
-				<version>1.7.7</version>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<dependency>

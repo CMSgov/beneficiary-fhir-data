@@ -1,4 +1,4 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd.sharedutils.config;
 
 import java.io.Serializable;
 import java.util.Optional;

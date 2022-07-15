@@ -1,7 +1,8 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.pipeline;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -29,7 +30,8 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.InputStream;
@@ -67,7 +69,7 @@ public final class PipelineTestUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineTestUtils.class);
 
-  /** The singleton {@link RifLoaderTestUtils} instance to use everywhere. */
+  /** The singleton {@link PipelineTestUtils} instance to use everywhere. */
   private static PipelineTestUtils SINGLETON;
 
   /**
@@ -77,12 +79,12 @@ public final class PipelineTestUtils {
   private final PipelineApplicationState pipelineApplicationState;
 
   /**
-   * Constructs a new {@link RifLoaderTestUtils} instance. Marked <code>private</code>; use {@link
+   * Constructs a new {@link PipelineTestUtils} instance. Marked <code>private</code>; use {@link
    * #get()}, instead.
    */
   private PipelineTestUtils() {
     MetricRegistry testMetrics = new MetricRegistry();
-    DatabaseTestUtils.get().createOrUpdateSchemaForDataSource();
+    DatabaseSchemaManager.createOrUpdateSchema(DatabaseTestUtils.initUnpooledDataSource());
     this.pipelineApplicationState =
         new PipelineApplicationState(
             testMetrics,
@@ -151,7 +153,7 @@ public final class PipelineTestUtils {
       // Disable auto-commit and remember the default schema name.
       connection.setAutoCommit(false);
       Optional<String> defaultSchemaName = Optional.ofNullable(connection.getSchema());
-      if (!defaultSchemaName.isPresent()) {
+      if (defaultSchemaName.isEmpty()) {
         throw new BadCodeMonkeyException("Unable to determine default schema name.");
       }
 
@@ -161,7 +163,7 @@ public final class PipelineTestUtils {
             Optional.ofNullable(entityType.getAnnotation(Table.class));
 
         // First, make sure we found an @Table annotation.
-        if (!entityTableAnnotation.isPresent()) {
+        if (entityTableAnnotation.isEmpty()) {
           throw new BadCodeMonkeyException(
               "Unable to determine table metadata for entity: " + entityType.getCanonicalName());
         }
@@ -188,7 +190,22 @@ public final class PipelineTestUtils {
          * Finally, run the TRUNCATE. On Postgres the cascade option is required due to the
          * presence of FK constraints.
          */
-        String truncateTableSql = String.format("TRUNCATE TABLE %s", tableNameSpecifier);
+
+        // TODO - BFD-1933
+        // revert this section as part of the PR that will subsequently drop the views
+        // and rename the _new table names by dropping the '_new' from the table.
+
+        boolean noUnderscoreNew =
+            (entityType == LoadedBatch.class
+                || entityType == LoadedFile.class
+                || entityType == RdaFissClaim.class
+                || entityType == RdaFissProcCode.class);
+
+        String tableName = noUnderscoreNew ? tableNameSpecifier : tableNameSpecifier + "_new";
+        String truncateTableSql = String.format("TRUNCATE TABLE %s", tableName);
+
+        // end of temp modifcations that will be cleaned up
+
         if (DatabaseUtils.isPostgresConnection(connection)) {
           truncateTableSql = truncateTableSql + " CASCADE";
         }
