@@ -79,10 +79,11 @@ def validate_resources(version: str, ignore_list: dict, files: List[str]) -> dic
     if java_call.returncode != 0:
         if output == '':
             print('Validation failed, but no output was generated.')
+            exit(1)
         elif error_output != '':
             print(error_output)
             print('There was an issue processing the request.')
-        exit(1)
+            exit(1)
     output_lines = output.split('\n')
 
     file_name = "loading_output"
@@ -132,9 +133,12 @@ def validate_resource_dir(run_config: RunConfig, ignore_list: dict, recently_cha
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--directory',
+                        default='apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses',
+                        help='path to the directory containing the resource version folders')
     parser.add_argument('-i', '--ignorefile',
                         default='validations_ignorelist.yml',
-                        help='path to the ignore list yaml file', )
+                        help='path to the ignore list yaml file')
     parser.add_argument('-r', '--recent', action='store_const', const=True, help="Recent changes")
     args = parser.parse_args()
 
@@ -151,11 +155,11 @@ def main():
         filters = {'ignore_list': {}}
 
     v1_config = RunConfig()
-    v1_config.target_dir = 'apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v1'
+    v1_config.target_dir = args.directory + '/v1'
     v1_config.version = '3.0'
 
     v2_config = RunConfig()
-    v2_config.target_dir = 'apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/v2'
+    v2_config.target_dir = args.directory + '/v2'
     v2_config.version = '4.0'
 
     v1_count, v1_invalid_resources = validate_resource_dir(v1_config, filters, args.recent)
