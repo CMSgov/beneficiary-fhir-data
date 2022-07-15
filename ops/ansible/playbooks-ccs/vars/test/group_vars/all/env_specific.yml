@@ -27,11 +27,6 @@ pac_resources_enabled: true
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_server_new_relic_metric_path: '/metric/v1'
 
-# app server instance type
-# c5.xlarge == 4 vcpu's /w 8GiB mem
-data_server_num_cores: 4
-data_server_ec2_instance_type_mem_mib: "{{ 8 * 1024 }}"
-
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
 data_server_ssl_client_certificate_test: 'files/client_data_server_local_test_env_test_keypair.pem'
@@ -52,7 +47,7 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
 
 # Enables the CCW RIF job when true; disables when false
-data_pipeline_ccw_rif_job_enabled: false # Temporarily disabled as part of BFD-1652. To be re-enabled as part of BFD-1746.
+data_pipeline_ccw_rif_job_enabled: true
 
 # Enables the RDA API data pipline with a 1 hour retry interval.
 data_pipeline_rda_job_enabled: true
