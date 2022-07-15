@@ -407,7 +407,7 @@ public class RDATestUtils {
             .idrBeneFirstInit("J")
             .idrBeneMidInit("D")
             .idrBeneSex("M")
-            .idrStatusCode(null)
+            .idrStatusCode("notvalid")
             .idrStatusDate(LocalDate.ofEpochDay(2))
             .idrBillProvNpi("9876789102")
             .idrBillProvNum("4444422222")
