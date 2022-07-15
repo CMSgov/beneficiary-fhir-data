@@ -395,6 +395,7 @@ public class RDATestUtils {
    * @return The MCS test claim B
    */
   private RdaMcsClaim mcsTestDataB(Mbi mbi) {
+    final String NOT_VALID_CODE = "?";
     RdaMcsClaim claim =
         RdaMcsClaim.builder()
             .sequenceNumber(1L)
@@ -407,7 +408,7 @@ public class RDATestUtils {
             .idrBeneFirstInit("J")
             .idrBeneMidInit("D")
             .idrBeneSex("M")
-            .idrStatusCode("notvalid")
+            .idrStatusCode(NOT_VALID_CODE)
             .idrStatusDate(LocalDate.ofEpochDay(2))
             .idrBillProvNpi("9876789102")
             .idrBillProvNum("4444422222")
