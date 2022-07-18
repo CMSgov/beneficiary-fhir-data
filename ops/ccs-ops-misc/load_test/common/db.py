@@ -57,12 +57,19 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     else:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
-    bene_query = (
-        f'SELECT "mbi_hash" FROM "beneficiaries" {table_sample_text} WHERE "mbi_hash" IS NOT NULL '
+    # Handle possible hash collisions from duplicate hashes in beneficiaries_history
+    # by only taking MBI hashes that are distinct in both beneficiaries _and_
+    # benficiaries_history
+    mbi_query = (
+        f"SELECT beneficiaries.mbi_hash FROM beneficiaries {table_sample_text} "
+        "    INNER JOIN beneficiaries_history "
+        "        ON beneficiaries.mbi_hash = beneficiaries_history.mbi_hash "
+        "    GROUP BY beneficiaries.mbi_hash "
+        "    HAVING count(beneficiaries_history.mbi_hash) = 1 "
         f"LIMIT {LIMIT}"
     )
 
-    return [str(r[0]) for r in _execute(uri, bene_query)]
+    return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
 def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
