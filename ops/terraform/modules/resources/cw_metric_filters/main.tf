@@ -47,6 +47,32 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-eob" {
   }
 }
 
+resource "aws_cloudwatch_log_metric_filter" "http-requests-count-claim" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/count/claim"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/Claim*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/count/claim"
+    namespace     = "bfd-${var.env}/bfd-server"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "http-requests-count-claimresponse" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/count/claimresponse"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/ClaimResponse*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/count/claimresponse"
+    namespace     = "bfd-${var.env}/bfd-server"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
 resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
   name           = "bfd-${var.env}/bfd-server/http-requests/count/http-500"
   pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request, query_string, status_code = 500, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
@@ -158,6 +184,45 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-eob" {
 
   metric_transformation {
     name          = "http-requests/latency/fhir/eob"
+    namespace     = "bfd-${var.env}/bfd-server"
+    value         = "$duration_milliseconds"
+    default_value = null
+  }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-eob" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/fhir/eob"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/ExplanationOfBenefit*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/latency/fhir/eob"
+    namespace     = "bfd-${var.env}/bfd-server"
+    value         = "$duration_milliseconds"
+    default_value = null
+  }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-claim" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/fhir/claim"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/Claim*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/latency/fhir/claim"
+    namespace     = "bfd-${var.env}/bfd-server"
+    value         = "$duration_milliseconds"
+    default_value = null
+  }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-claimresponse" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/fhir/claimresponse"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/ClaimResponse*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/latency/fhir/claimresponse"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
