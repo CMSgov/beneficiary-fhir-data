@@ -461,10 +461,13 @@ public final class ServerTestUtils {
             .resolve("access.json");
 
     // Check that the access json lines follow the desired regex pattern
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+    }
     List<String> lines = Files.readAllLines(accessLogJson);
     Pattern p = Pattern.compile(beneIdPattern);
     String input = lines.get(lines.size() - 1);
-    System.out.println("MDC ENTRY: " + input);
     Matcher m = p.matcher(input);
 
     return m.matches();
