@@ -225,7 +225,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       patients = Collections.emptyList();
     } else {
       try {
-        // TODO: handle empty list (no MDC)
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                 .filter(
@@ -258,6 +257,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    if (patients.size() > 0) {
+      LoggingUtils.logBenesToMdc(bundle);
+    }
+
     return bundle;
   }
 
@@ -605,9 +610,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
       if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
         patients = Collections.singletonList(patient);
-
-        // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(patient.getId());
       } else {
         patients = Collections.emptyList();
       }
@@ -616,8 +618,16 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
-    return TransformerUtilsV2.createBundle(
-        paging, patients, loadedFilterManager.getTransactionTime());
+
+    Bundle bundle =
+        TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    if (patients.size() > 0) {
+      LoggingUtils.logBenesToMdc(bundle);
+    }
+
+    return bundle;
   }
 
   /**
@@ -1025,8 +1035,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
 
-    LoggingUtils.logBenesToMdc(bundle);
     TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
+
+    // Add bene_id to MDC logs
+    if (patients.size() > 0) {
+      LoggingUtils.logBenesToMdc(bundle);
+    }
+
     return bundle;
   }
 

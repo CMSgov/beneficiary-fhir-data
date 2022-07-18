@@ -42,13 +42,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -283,7 +281,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       patients = Collections.emptyList();
     } else {
       try {
-        // TODO: handle empty list (no MDC)
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                 .filter(
@@ -291,9 +288,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                         QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
-
-        // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
+        ;
       } catch (ResourceNotFoundException e) {
         patients = Collections.emptyList();
       }
@@ -316,6 +311,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    if (patients.size() > 0) {
+      LoggingUtils.logBenesToMdc(bundle);
+    }
+
     return bundle;
   }
 
@@ -345,7 +346,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiariesByContractAndYearMonth(coverageId, yearMonth, paging);
-    Set<Long> beneIds = new HashSet<Long>();
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -354,21 +354,18 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(
-                b -> {
-                  // Collect bene_ids for logging
-                  beneIds.add(b.getBeneficiaryId());
-
-                  return BeneficiaryTransformer.transform(metricRegistry, b, requestHeader);
-                })
+            .map(b -> BeneficiaryTransformer.transform(metricRegistry, b, requestHeader))
             .collect(Collectors.toList());
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     Bundle bundle =
         TransformerUtils.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
     TransformerUtils.workAroundHAPIIssue1585(requestDetails);
+
+    // Add bene_id to MDC logs
+    if (patients.size() > 0) {
+      LoggingUtils.logBenesToMdc(bundle);
+    }
+
     return bundle;
   }
 
@@ -674,9 +671,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
         patients = Collections.singletonList(patient);
-
-        // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(patient.getId());
       } else {
         patients = Collections.emptyList();
       }
@@ -687,6 +681,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    if (patients.size() > 0) {
+      LoggingUtils.logBenesToMdc(bundle);
+    }
+
     return bundle;
   }
 

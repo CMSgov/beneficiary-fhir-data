@@ -17,7 +17,6 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
-import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -93,7 +92,6 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
@@ -1546,7 +1544,6 @@ public final class TransformerUtilsV2 {
     }
     return bundle;
   }
-
 
   /**
    * @param currencyIdentifier the {@link CurrencyIdentifier} indicating the currency of an {@link
