@@ -22,7 +22,7 @@ class UserInitAwareLoadShape(LoadTestShape):
         self.target_runtime: int
 
         self.logger = logging.getLogger()
-        self.time_active = False
+        self.has_time_activated = False
         self.has_ticked = False
 
     def __first_tick(self) -> bool:
@@ -44,9 +44,13 @@ class UserInitAwareLoadShape(LoadTestShape):
 
         self.target_users = self.environment.parsed_options.num_users or 1
         self.target_spawn_rate = self.environment.parsed_options.spawn_rate or 1
-        self.target_runtime = self.environment.parsed_options.tests_runtime
-        if not self.target_runtime:
-            self.logger.info("--tests-runtime not specified, tests will run indefinitely.")
+        self.target_runtime = self.environment.parsed_options.spawned_runtime
+        if self.target_runtime == 0:
+            self.logger.info(
+                "--spawned-runtime is 0, test run will stop once all users have spawned."
+            )
+        if self.target_runtime is None:
+            self.logger.info("--spawned-runtime not specified, tests will run indefinitely.")
 
         return True
 
@@ -60,20 +64,34 @@ class UserInitAwareLoadShape(LoadTestShape):
 
         users = self.get_current_user_count()
         if self.target_users == users:
-            if not self.time_active:
-                self.logger.info(
-                    "The %d requested users have finished spawning,"
-                    " %d second test runtime limit is now active",
-                    self.target_users,
-                    self.target_runtime,
-                )
-                self.reset_time()
-                self.time_active = True
+            if not self.has_time_activated:
+                if self.target_runtime:
+                    self.logger.info(
+                        "The %d requested users have finished spawning,"
+                        " %d second test runtime limit is now active",
+                        self.target_users,
+                        self.target_runtime,
+                    )
+                elif self.target_runtime == 0:
+                    self.logger.info(
+                        "The %d requested users have finished spawning, the test run will now end",
+                        self.target_users,
+                    )
+                elif self.target_runtime is None:
+                    self.logger.info(
+                        "The %d requested users have finished spawning,"
+                        " tests will continue to run indefinitely until manually stopped",
+                        self.target_users,
+                    )
 
-            if self.target_runtime and self.get_run_time() > self.target_runtime:
+                self.reset_time()
+                self.has_time_activated = True
+
+            if not self.target_runtime is None and self.get_run_time() > self.target_runtime:
                 return None
 
         self.logger.debug("Current runtime: %f", self.get_run_time())
         self.logger.debug("Current user count: %d", self.get_current_user_count())
+        self.logger.debug("Has runtime reset: %s", self.has_time_activated)
 
         return (self.target_users, self.target_spawn_rate)

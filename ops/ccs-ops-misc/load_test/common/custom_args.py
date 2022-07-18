@@ -25,16 +25,19 @@ def register_custom_args(parser: LocustArgumentParser):
         env_var="LOCUST_BFD_DATABASE_URI",
     )
     parser.add_argument(
-        "--tests-runtime",
+        "--spawned-runtime",
         type=parse_timespan,
         help=(
-            "Specifies the test runtime when running tests with the custom UserInitAwareLoadShape"
-            " load shape, which should be all of the tests in this repository. If unspecified,"
-            " tests run indefinitely. This is not the same option as --run-time, which handles the"
-            " total runtime limit for the Locust run including non-test tasks"
+            "Specifies the test runtime limit that begins after all users have spawned when running"
+            " tests with the custom UserInitAwareLoadShape load shape, which should be all of the"
+            " tests in this repository. If unspecified, tests run indefinitely even after all users"
+            ' have spawned. Specifying "0<s/h/m>" will stop the tests immediately once all users'
+            " have spawned. Note that this is not the same option as --run-time, which handles the"
+            " total runtime limit for the Locust run including non-test tasks and does not"
+            " compensate for spawn rate."
         ),
-        dest="tests_runtime",
-        env_var="LOCUST_TESTS_RUNTIME_LIMIT",
+        dest="spawned_runtime",
+        env_var="LOCUST_USERS_SPAWNED_RUNTIME",
     )
     parser.add_argument(
         "--server-public-key",
