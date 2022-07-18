@@ -378,6 +378,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
+    // TODO: Only do this if we have EOBs to pass back
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());

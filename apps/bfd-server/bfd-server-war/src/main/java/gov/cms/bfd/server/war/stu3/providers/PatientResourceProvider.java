@@ -283,9 +283,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       patients = Collections.emptyList();
     } else {
       try {
-        // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
-
+        // TODO: handle empty list (no MDC)
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                 .filter(
@@ -293,6 +291,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                         QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
+
+        // Add bene_id to MDC logs
+        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
       } catch (ResourceNotFoundException e) {
         patients = Collections.emptyList();
       }

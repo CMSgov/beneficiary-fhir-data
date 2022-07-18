@@ -1540,58 +1540,13 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    Set<Long> beneIds = new HashSet<Long>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
-
-      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
-        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
-        if (eob != null
-            && eob.getPatient() != null
-            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
-          String reference = eob.getPatient().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            addBeneIdsToSet(beneIds, reference);
-          }
-        }
-      } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
-        Patient patient = ((Patient) entry.getResource());
-        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          addBeneIdsToSet(beneIds, patient.getId());
-        }
-
-      } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
-        Coverage coverage = ((Coverage) entry.getResource());
-        if (coverage != null
-            && coverage.getBeneficiary() != null
-            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
-          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            addBeneIdsToSet(beneIds, reference);
-          }
-        }
-      }
     }
-
-    LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
-
     return bundle;
   }
 
-  /**
-   * Parses Sting beneficiary ID to Long and adds to List to log to MDC.
-   *
-   * @param beneIds the collection of beneIds logged to MDC.
-   * @param beneId beneficiaryId to add to beneId collection.
-   */
-  private static void addBeneIdsToSet(Set<Long> beneIds, String beneId) {
-    try {
-      beneIds.add(Long.parseLong(beneId));
-    } catch (NumberFormatException e) {
-      LOGGER.warn("Could not parse long from bene_id: " + beneId);
-    }
-  }
 
   /**
    * @param currencyIdentifier the {@link CurrencyIdentifier} indicating the currency of an {@link

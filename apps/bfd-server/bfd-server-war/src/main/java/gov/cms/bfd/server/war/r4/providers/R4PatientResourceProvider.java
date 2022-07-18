@@ -42,13 +42,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -227,6 +225,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       patients = Collections.emptyList();
     } else {
       try {
+        // TODO: handle empty list (no MDC)
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                 .filter(
@@ -1012,7 +1011,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiariesByContractAndYearMonth(coverageId, yearMonth, paging);
-    Set<Long> beneIds = new HashSet<Long>();
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -1021,20 +1019,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(
-                b -> {
-                  // Collect bene_ids for logging
-                  beneIds.add(b.getBeneficiaryId());
-
-                  return BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader);
-                })
+            .map(b -> BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader))
             .collect(Collectors.toList());
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBeneIdToMdc(beneIds.stream().toArray(Long[]::new));
 
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
+
+    LoggingUtils.logBenesToMdc(bundle);
     TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
     return bundle;
   }
