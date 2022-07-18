@@ -188,7 +188,7 @@ ${logic.psql-only}    rename to carrier_claim_lines_pkey;
 ${logic.hsql-only} alter table public.carrier_claim_lines_new
 ${logic.hsql-only}     drop constraint public.carrier_claim_lines_new_pkey cascade;
 ${logic.hsql-only} alter table public.carrier_claim_lines_new
-${logic.hsql-only}     add constraint carrier_claim_lines_new_pkey primary key (clm_id, line_num);
+${logic.hsql-only}     add constraint carrier_claim_lines_pkey primary key (clm_id, line_num);
 
 -- =====================
 -- dme_claims
@@ -218,7 +218,7 @@ ${logic.psql-only}    rename to dme_claim_lines_pkey;
 ${logic.hsql-only} alter table public.dme_claim_lines_new
 ${logic.hsql-only}     drop constraint public.dme_claim_lines_new_pkey;
 ${logic.hsql-only} alter table public.dme_claim_lines_new
-${logic.hsql-only}     add constraint dme_claim_liness_new_pkey primary key (clm_id, line_num);
+${logic.hsql-only}     add constraint dme_claim_lines_pkey primary key (clm_id, line_num);
 
 -- =====================
 -- hha_claims
@@ -248,7 +248,7 @@ ${logic.psql-only}    rename to hha_claim_lines_pkey;
 ${logic.hsql-only} alter table public.hha_claim_lines_new
 ${logic.hsql-only}     drop constraint public.hha_claim_lines_new_pkey;
 ${logic.hsql-only} alter table public.hha_claim_lines_new
-${logic.hsql-only}     add constraint hha_claim_lines_new_pkey primary key (clm_id, clm_line_num);
+${logic.hsql-only}     add constraint hha_claim_lines_pkey primary key (clm_id, clm_line_num);
 
 -- =====================
 -- hospice_claims
@@ -278,7 +278,7 @@ ${logic.psql-only}    rename to hospice_claim_lines_pkey;
 ${logic.hsql-only} alter table public.hospice_claim_lines_new
 ${logic.hsql-only}     drop constraint public.hospice_claim_lines_new_pkey;
 ${logic.hsql-only} alter table public.hospice_claim_lines_new
-${logic.hsql-only}     add constraint hospice_claim_lines_new_pkey primary key (clm_id, clm_line_num);
+${logic.hsql-only}     add constraint hospice_claim_lines_pkey primary key (clm_id, clm_line_num);
 
 -- =====================
 -- inpatient_claims
@@ -308,7 +308,7 @@ ${logic.psql-only}    rename to inpatient_claim_lines_pkey;
 ${logic.hsql-only} alter table public.inpatient_claim_lines_new
 ${logic.hsql-only}     drop constraint public.inpatient_claim_lines_new_pkey;
 ${logic.hsql-only} alter table public.inpatient_claim_lines_new
-${logic.hsql-only}     add constraint inpatient_claim_lines_new_pkey primary key (clm_id, clm_line_num);
+${logic.hsql-only}     add constraint inpatient_claim_lines_pkey primary key (clm_id, clm_line_num);
 
 -- =====================
 -- outpatient_claims
@@ -338,7 +338,7 @@ ${logic.psql-only}    rename to outpatient_claim_lines_pkey;
 ${logic.hsql-only} alter table public.outpatient_claim_lines_new
 ${logic.hsql-only}     drop constraint public.outpatient_claim_lines_new_pkey;
 ${logic.hsql-only} alter table public.outpatient_claim_lines_new
-${logic.hsql-only}     add constraint outpatient_claim_lines_new_pkey primary key (clm_id, clm_line_num);
+${logic.hsql-only}     add constraint outpatient_claim_lines_pkey primary key (clm_id, clm_line_num);
 
 -- =====================
 -- partd_events
@@ -385,7 +385,7 @@ ${logic.psql-only}    rename to snf_claim_lines_pkey;
 ${logic.hsql-only} alter table public.snf_claim_lines_new
 ${logic.hsql-only}     drop constraint public.snf_claim_lines_new_pkey;
 ${logic.hsql-only} alter table public.snf_claim_lines_new
-${logic.hsql-only}     add constraint snf_claim_lines_new_pkey primary key (clm_id, clm_line_num);
+${logic.hsql-only}     add constraint snf_claim_lines_pkey primary key (clm_id, clm_line_num);
 
 -- ========================================================================
 -- final fixup:
