@@ -1,19 +1,22 @@
 """Members of this file/module are related to writing performance statistics to a user-specified
 data "store" (such as to file or AWS S3)"""
-from dataclasses import asdict
-import logging
-import time
-import os
 import json
+import logging
+import os
+import time
+from dataclasses import asdict
+
+from gevent import monkey
+
 from common.stats.aggregated_stats import AggregatedStats
 from common.stats.stats_config import StatsConfiguration, StatsStorageType
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
-from gevent import monkey
 monkey.patch_all()
 import boto3
+
 
 def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
     logger = logging.getLogger()
@@ -21,14 +24,15 @@ def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
         logger.info("Writing aggregated performance statistics to file.")
 
         stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_config.path or '')
+        stats_json_writer.write(stats_config.path or "")
     elif stats_config.store == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
 
         stats_s3_writer = StatsJsonS3Writer(stats)
         if not stats_config.bucket:
-            raise ValueError('S3 bucket must be provided when writing stats to S3')
+            raise ValueError("S3 bucket must be provided when writing stats to S3")
         stats_s3_writer.write(stats_config.bucket)
+
 
 class StatsJsonFileWriter(object):
     """Writes an AggegratedStats instance to a specified directory path in JSON format"""
@@ -43,21 +47,23 @@ class StatsJsonFileWriter(object):
 
         self.stats = stats
 
-    def write(self, path: str = '') -> None:
+    def write(self, path: str = "") -> None:
         """Writes the JSON-formatted statistics to the given path
 
         Args:
             path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
-            
+
         Raises:
             ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
         """
         if not self.stats.metadata:
-            raise ValueError('AggregatedStats instance must have metadata to write to file')
-        
+            raise ValueError("AggregatedStats instance must have metadata to write to file")
+
         env_name = self.stats.metadata.environment.name
         store_tag = self.stats.metadata.tag
-        with open(os.path.join(path, f'{env_name}-{store_tag}-{int(time.time())}.stats.json'), 'x') as json_file:
+        with open(
+            os.path.join(path, f"{env_name}-{store_tag}-{int(time.time())}.stats.json"), "x"
+        ) as json_file:
             json_file.write(json.dumps(asdict(self.stats), indent=4))
 
 
@@ -73,7 +79,7 @@ class StatsJsonS3Writer(object):
         super().__init__()
 
         self.stats = stats
-        self.s3 = boto3.client('s3')
+        self.s3 = boto3.client("s3")
 
     def write(self, bucket: str) -> None:
         """Writes the JSON-formatted statistics to the given S3 bucket to a pre-determined path
@@ -86,11 +92,9 @@ class StatsJsonS3Writer(object):
             ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
         """
         if not self.stats.metadata:
-            raise ValueError('AggregatedStats instance must have metadata to write to S3')
-        
+            raise ValueError("AggregatedStats instance must have metadata to write to S3")
+
         env_name = self.stats.metadata.environment.name
         store_tag = self.stats.metadata.tag
-        s3_path = f'databases/bfd/test_performance_stats/env={env_name}/tag={store_tag}/{int(time.time())}.json'
-        self.s3.put_object(Bucket=bucket,
-                           Key=s3_path,
-                           Body=json.dumps(asdict(self.stats)))
+        s3_path = f"databases/bfd/test_performance_stats/env={env_name}/tag={store_tag}/{int(time.time())}.json"
+        self.s3.put_object(Bucket=bucket, Key=s3_path, Body=json.dumps(asdict(self.stats)))
