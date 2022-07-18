@@ -36,7 +36,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -88,7 +87,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingCarrierClaim() throws FHIRException, IOException {
+  public void readEobForExistingCarrierClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -545,7 +544,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatient() throws FHIRException, IOException {
+  public void searchForEobsByExistingPatient() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

@@ -13,7 +13,6 @@ import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -56,7 +55,7 @@ public final class R4CoverageResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readCoveragesForExistingBeneficiary() throws FHIRException, IOException {
+  public void readCoveragesForExistingBeneficiary() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -179,7 +178,7 @@ public final class R4CoverageResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchByExistingBeneficiary() throws FHIRException, IOException {
+  public void searchByExistingBeneficiary() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

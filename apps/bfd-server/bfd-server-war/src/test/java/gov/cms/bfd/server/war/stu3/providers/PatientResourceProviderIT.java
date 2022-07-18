@@ -28,7 +28,6 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
@@ -47,7 +46,6 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
@@ -76,7 +74,7 @@ public final class PatientResourceProviderIT {
    * works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void readExistingPatient() throws IOException {
+  public void readExistingPatient() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -367,7 +365,7 @@ public final class PatientResourceProviderIT {
    * works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void searchForExistingPatientByLogicalId() throws IOException {
+  public void searchForExistingPatientByLogicalId() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -583,7 +581,7 @@ public final class PatientResourceProviderIT {
    * works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void searchForExistingPatientByHicnHash() throws IOException {
+  public void searchForExistingPatientByHicnHash() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1062,7 +1060,7 @@ public final class PatientResourceProviderIT {
    * <p>works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
-  public void searchForExistingPatientByMbiHash() throws IOException {
+  public void searchForExistingPatientByMbiHash() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1734,44 +1732,6 @@ public final class PatientResourceProviderIT {
                         .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
             .collect(Collectors.toSet())
             .size());
-  }
-
-  /**
-   * Verifies that {@link
-   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
-   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
-   * as expected when multiple beneficiaries are returned. To test with multiple beneficiaries, this
-   * test uses Synthea RIF files, and is disabled to avoid failure in environments that have not
-   * downloaded the files from S3.
-   */
-  @Disabled
-  @Test
-  public void searchForExistingPatientsByPartDContractNum() throws IOException {
-    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_SYNTHEA_BENES2011));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
-                        "Z1000"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
-                        "2011"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(695, searchResults.getEntry().size());
   }
 
   /**
