@@ -94,9 +94,6 @@ public final class CoverageResourceProviderIT {
             .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary))
             .execute();
     CoverageTransformerTest.assertPartDMatches(beneficiary, partDCoverage);
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -249,9 +246,6 @@ public final class CoverageResourceProviderIT {
             .findFirst()
             .get();
     CoverageTransformerTest.assertPartDMatches(beneficiary, partDCoverageFromSearchResult);
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**

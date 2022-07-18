@@ -83,9 +83,6 @@ public final class R4PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     comparePatient(beneficiary, patient);
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -300,9 +297,6 @@ public final class R4PatientResourceProviderIT {
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     comparePatient(beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -527,9 +521,6 @@ public final class R4PatientResourceProviderIT {
 
     assertEquals(
         beneficiary.getMedicareBeneficiaryId().get(), mbiIdentifier, "mbiHash identifier exists");
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -975,9 +966,6 @@ public final class R4PatientResourceProviderIT {
 
     assertNotNull(searchResults);
     assertEquals(695, searchResults.getEntry().size());
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   @Test

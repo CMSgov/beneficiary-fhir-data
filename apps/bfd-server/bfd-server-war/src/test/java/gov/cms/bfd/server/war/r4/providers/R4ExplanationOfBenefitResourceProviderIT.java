@@ -123,9 +123,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     // Compare result to transformed EOB
     compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords);
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -654,9 +651,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
      */
 
     assertEachEob(searchResults, loadedRecords);
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**

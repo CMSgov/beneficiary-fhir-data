@@ -109,9 +109,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     assertNotNull(eob);
     CarrierClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -667,9 +664,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .get();
     SNFClaimTransformerTest.assertMatches(
         snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**

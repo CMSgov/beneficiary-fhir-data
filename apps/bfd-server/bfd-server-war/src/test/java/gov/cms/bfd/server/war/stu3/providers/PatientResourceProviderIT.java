@@ -94,9 +94,6 @@ public final class PatientResourceProviderIT {
     assertNotNull(patient);
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patient, getRHwithIncldAddrFldHdr("false"));
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -407,9 +404,6 @@ public final class PatientResourceProviderIT {
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(
         beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -1117,9 +1111,6 @@ public final class PatientResourceProviderIT {
             .get()
             .getValue();
     assertEquals(beneficiary.getMbiHash().get(), mbiHashIdentifier, "mbiHash identifier exists");
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
@@ -1781,9 +1772,6 @@ public final class PatientResourceProviderIT {
 
     assertNotNull(searchResults);
     assertEquals(695, searchResults.getEntry().size());
-
-    // check for bene_id in MDC
-    assertTrue(ServerTestUtils.checkMdcForBeneId());
   }
 
   /**
