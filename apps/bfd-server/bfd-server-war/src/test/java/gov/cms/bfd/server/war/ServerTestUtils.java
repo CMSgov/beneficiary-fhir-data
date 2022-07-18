@@ -464,7 +464,7 @@ public final class ServerTestUtils {
     List<String> lines = Files.readAllLines(accessLogJson);
     Pattern p = Pattern.compile(beneIdPattern);
     String input = lines.get(lines.size() - 1);
-    LOGGER.info("MDC ENTRY: ", input);
+    System.out.println("MDC ENTRY: " + input);
     Matcher m = p.matcher(input);
 
     return m.matches();
