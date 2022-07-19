@@ -73,7 +73,7 @@ public class LoggingUtilsTest {
 
   /**
    * Test to see that {@link LoggingUtils#findBeneIds(org.hl7.fhir.dstu3.model.Bundle)} returns
-   * multiple beneficiaryIds to log to BfdMdc v1.
+   * multiple beneficiaryIds to log to BfdMdc in v1.
    */
   @Test
   public void testMdcLogsForMultiBundleV1() {
