@@ -288,7 +288,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                         QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
-        ;
       } catch (ResourceNotFoundException e) {
         patients = Collections.emptyList();
       }
