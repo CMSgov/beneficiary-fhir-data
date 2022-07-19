@@ -112,7 +112,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>bfd-data-utilities-fda-drug</finalName>
+		<finalName>bfd-data-fda</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
