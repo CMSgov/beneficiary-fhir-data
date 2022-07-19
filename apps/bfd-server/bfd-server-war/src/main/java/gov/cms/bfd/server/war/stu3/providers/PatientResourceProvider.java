@@ -664,11 +664,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
               "Unsupported identifier system: " + identifier.getSystem());
       }
 
-      if (QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)) {
-        patients = Collections.singletonList(patient);
-      } else {
-        patients = Collections.emptyList();
-      }
+      patients =
+          QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
+              ? Collections.singletonList(patient)
+              : Collections.emptyList();
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
