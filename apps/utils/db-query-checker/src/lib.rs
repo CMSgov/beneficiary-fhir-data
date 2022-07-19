@@ -7,6 +7,11 @@
 //!
 //! See the `README.md` file for further details.
 
+//! TODO
+//! a temp 'fix' was applied to this file as well as to a couple of the .SQL files
+//! that allow the checker to run/complete. However, a ticket needs to be created
+//! to perform changes that allow bene_id to be treated as a LONG instead of String.
+
 use std::{
     sync::{atomic::AtomicU32, Arc},
     time::Duration,
@@ -400,7 +405,7 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
         csv_serializer,
         DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
         format!(
-            "partd_contract_id='{}', year_month='{}', min_bene_id='{}'",
+            "partd_contract_id='{}', year_month='{}', min_bene_id={}",
             partd_contract_id, year_month, min_bene_id
         ),
         bene_ids_query,
@@ -429,7 +434,7 @@ async fn select_bene_records_by_bene_ids(
      *
      * Reference: <https://www.reddit.com/r/rust/comments/ip4a0q/sql_x_how_do_you_parameterize_an_in_statement_or/>
      */
-    let bene_ids_param: Vec<String> = bene_ids.iter().map(|i| format!("'{}'", i)).collect();
+    let bene_ids_param: Vec<String> = bene_ids.iter().map(|i| format!("{}", i)).collect();
     let bene_ids_param = bene_ids_param.join(",");
 
     // Create the query.
