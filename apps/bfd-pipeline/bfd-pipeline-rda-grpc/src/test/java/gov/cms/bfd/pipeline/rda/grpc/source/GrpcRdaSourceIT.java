@@ -474,7 +474,7 @@ public class GrpcRdaSourceIT {
                 WrappedClaimSource.wrapFissClaims(
                     new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
                     clock,
-                    sequenceNumber));
+                    sequenceNumber - 1));
   }
 
   private GrpcRdaSource.Config.ConfigBuilder createSourceConfig(Integer port) {
