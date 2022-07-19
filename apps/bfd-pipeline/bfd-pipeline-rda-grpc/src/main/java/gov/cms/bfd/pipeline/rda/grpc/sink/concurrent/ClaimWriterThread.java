@@ -117,6 +117,7 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
       LOGGER.error("terminating due to uncaught exception: ex={}", ex.getMessage(), ex);
       reportError(ex);
     }
+    drainQueueUntilStoppedFlagIsSet();
     LOGGER.info("stopped");
     return 0;
   }
@@ -161,6 +162,23 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
       keepRunning = false;
     }
     return keepRunning;
+  }
+
+  /**
+   * Ensure that our {@link WriterThreadPool} does not block trying to add records to our queue
+   * after we shut down. This eliminates a possible race condition where we report an error to the
+   * {@link WriterThreadPool} but it keeps adding messages to our queue for a while before it sees
+   * the reported error. If we just exit immediately our queue might fill and prevent the {@link
+   * WriterThreadPool} from seeing the error. Since we are no longer processing any messages we can
+   * simply ignore any that are added to the queue.
+   */
+  private void drainQueueUntilStoppedFlagIsSet() throws InterruptedException {
+    if (!stopped.get()) {
+      LOGGER.info("waiting for stop signal");
+      do {
+        takeEntryFromInputQueue();
+      } while (!stopped.get());
+    }
   }
 
   /**
