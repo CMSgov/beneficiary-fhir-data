@@ -40,10 +40,9 @@ public class LoggingUtils {
     }
   }
   /**
-   * Log beneIDs to mdc for v1 bundle
+   * Log beneIDs from a bundle to BfdMDC in v1
    *
    * @param bundle
-   * @return
    */
   public static void logBenesToMdc(org.hl7.fhir.dstu3.model.Bundle bundle) {
     Set<Long> beneIds = findBeneIds(bundle);
@@ -51,10 +50,9 @@ public class LoggingUtils {
   }
 
   /**
-   * Log beneIDs to mdc for v2 bundle
+   * Log beneIDs from a bundle to BfdMDC in v2
    *
    * @param bundle
-   * @return
    */
   public static void logBenesToMdc(org.hl7.fhir.r4.model.Bundle bundle) {
     Set<Long> beneIds = findBeneIds(bundle);
@@ -62,8 +60,9 @@ public class LoggingUtils {
   }
 
   /**
+   * Finds beneIds in a bundle in v1
+   *
    * @param bundle
-   * @return
    */
   static Set<Long> findBeneIds(org.hl7.fhir.dstu3.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();
@@ -106,8 +105,9 @@ public class LoggingUtils {
   }
 
   /**
+   * Finds beneIds in a bundle in v2
+   *
    * @param bundle
-   * @return
    */
   static Set<Long> findBeneIds(org.hl7.fhir.r4.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();
