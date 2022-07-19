@@ -24,8 +24,8 @@ To summarize, terraform reads encrypted **and** plaintext yaml-encoded _key:valu
 ### Formatting and Validation
 
 As of mid July 2022, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
-- hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/nonsensitive/${leaf}` format
-- `${env}` must be one of `test`, `prod-sbx`, or `prod` <!-- NOTE: _(full ephemeral environment support is forthcoming)_ -->
+- hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/sensitive/${leaf}` format <!-- NOTE: _nonsensitive support is forthcoming_ -->
+- `${env}` must be one of `test`, `prod-sbx`, or `prod` <!-- NOTE: _full ephemeral environment support is forthcoming_ -->
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
 - `${leaf}` _should_ be lower_snake_case formatted
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)

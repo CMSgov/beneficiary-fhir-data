@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# This is very a simple script that assists with operators with editing values
-# encrypted yaml files. As of this writing, this targets the ansible-vault
-# encryption mechanism, and depends on access to the appropriate SSM
-# Parameter Store hierarchy to resolve the password.
+# This is a simple script that assists operators with editing values stored
+# in encrypted yaml files. As of this writing, this targets the ansible-vault
+# encryption mechanism, and depends on access to the appropriate SSM Parameter
+# Store hierarchy to resolve the password.
 # This is intended for use in local development.
 #
 # Globals:
@@ -21,11 +21,11 @@ aws ssm get-parameter \
     --output text \
     --with-decryption \
     --query 'Parameter.Value' \
-    --name /bfd/mgmt/jenkins/sensitive/ansible_vault_password > ansible-vault-password
+    --name "$SSM_VAULT_PASSWORD_PATH" > vault.password
 
 # open a desired eyaml file from a temporary, decrypted, user-owned location on disk
 # in the user's desired `$EDITOR`
-ansible-vault edit --vault-password-file ansible-vault-password "values/${EYAML_FILE}"
+ansible-vault edit --vault-password-file vault.password "values/${EYAML_FILE}"
 
 #######################################
 # Ensure temporary ansible-vault password file is destroyed.
@@ -33,6 +33,6 @@ ansible-vault edit --vault-password-file ansible-vault-password "values/${EYAML_
 # `trap [action] [signal]` as below.
 #######################################
 cleanup() {
-    rm -rf ansible-vault-password
+    rm -rf vault.password
 }
 trap cleanup EXIT

@@ -23,16 +23,16 @@ aws ssm get-parameter \
     --output text \
     --with-decryption \
     --query 'Parameter.Value' \
-    --name "$SSM_VAULT_PASSWORD_PATH" > ansible-vault-password
+    --name "$SSM_VAULT_PASSWORD_PATH" > vault.password
 
 # decrypt desired eyaml file to stdout, reformat as JSON, and explicitly cast all values to strings
-ansible-vault decrypt --vault-password-file ansible-vault-password "values/${EYAML_FILE}" --output - | yq eval -o=j | jq 'with_entries(.value |= tostring)'
+ansible-vault decrypt --vault-password-file vault.password "values/${EYAML_FILE}" --output - | yq eval -o=j | jq 'with_entries(.value |= tostring)'
 
 #######################################
 # Ensure temporary ansible-vault password file is destroyed.
 # To be called as the action in `trap [action] [signal]`.
 #######################################
 cleanup() {
-    rm -rf ansible-vault-password
+    rm -rf vault.password
 }
 trap cleanup EXIT
