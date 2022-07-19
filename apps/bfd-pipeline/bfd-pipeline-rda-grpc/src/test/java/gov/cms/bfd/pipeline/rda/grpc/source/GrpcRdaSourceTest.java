@@ -438,7 +438,7 @@ public class GrpcRdaSourceTest {
     doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
 
     try {
-      source.retrieveAndProcessObjects(2, sink);
+      source.retrieveAndProcessObjects(3, sink);
       fail("should have thrown an exception");
     } catch (ProcessingException error) {
       assertEquals(2, error.getProcessedCount());
