@@ -3,7 +3,7 @@ import psycopg2
 import re
 from pathlib import Path
 
-def update_synthea_props(args):
+def validate_and_update(args):
     """
     Validates (unless specified to skip) and then updates the
     synthea.properties file with the specified end state data.
@@ -22,7 +22,7 @@ def update_synthea_props(args):
     #Validate the ranges - number to be generated
     ranges_good = True if skip_validation else check_ranges(end_state_properties_file, generated_benes, db_string)
     if ranges_good == True:
-        update_synthea_props(end_state_properties_file, synthea_prop_filepath)
+        update_property_file(end_state_properties_file, synthea_prop_filepath)
         print("Updated synthea properties")
         return 0
     else:
@@ -156,12 +156,13 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     return ranges_good
 
 
-def update_synthea_props(end_state_file_data, synthea_props_file_location):
+def update_property_file(end_state_file_data, synthea_props_file_location):
     """
     Updates the synthea properties file to prepare
     for the next batch creation.
     """
     
+    ## TODO: Update props file with the end state data using find/replace in specified file
     
     return False
     
@@ -196,4 +197,4 @@ if __name__ == "__main__":
     # arg3: file system location of synthea properties file to edit
     # arg4: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
     # arg5: (optional) skip validation, useful if re-generating a bad batch, True or False
-    update_synthea_props(sys.argv[1:])
+    validate_and_update(sys.argv[1:])
