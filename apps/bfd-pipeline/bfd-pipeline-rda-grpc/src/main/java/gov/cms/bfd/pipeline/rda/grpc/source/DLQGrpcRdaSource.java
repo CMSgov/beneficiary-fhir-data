@@ -207,17 +207,21 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
     }
 
     public Long delete(Long sequenceNumber, MessageError.ClaimType type) {
+      long entitiesAffected = 0L;
+
+      entityManager.getTransaction().begin();
+
       MessageError messageError =
           entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
 
       if (messageError != null) {
-        entityManager.getTransaction().begin();
         entityManager.remove(messageError);
-        entityManager.getTransaction().commit();
-        return 1L;
+        entitiesAffected = 1L;
       }
 
-      return 0L;
+      entityManager.getTransaction().commit();
+
+      return entitiesAffected;
     }
   }
 }
