@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -59,6 +61,21 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    */
   default int writeMessage(String dataVersion, TMessage object) throws ProcessingException {
     return writeMessages(dataVersion, List.of(object));
+  }
+
+  /**
+   * Writes out the transformation error for the given message and given apiVersion. The logic for
+   * this method is defined by the implementing child.
+   *
+   * @param apiVersion The version of the api used to get the message.
+   * @param message The message that was being transformed when the error occurred.
+   * @param exception The exception that was thrown while transforming the message.
+   * @throws IOException If there was an issue writing out the error.
+   */
+  default void writeError(
+      String apiVersion, TMessage message, DataTransformer.TransformationException exception)
+      throws IOException {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -122,9 +139,11 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param message an RDA API message object of the correct type for this sync
    * @return an appropriate entity object containing the data from the message
+   * @throws DataTransformer.TransformationException if the message is invalid
    */
   @Nonnull
-  TClaim transformMessage(String apiVersion, TMessage message);
+  TClaim transformMessage(String apiVersion, TMessage message)
+      throws DataTransformer.TransformationException;
 
   /**
    * Write the specified collection of entity objects to the database. This write could happen in

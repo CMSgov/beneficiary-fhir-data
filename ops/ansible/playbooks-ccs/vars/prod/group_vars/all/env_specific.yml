@@ -15,17 +15,12 @@ data_pipeline_idempotency_required: false
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
 
-# Whether to enable BFD PreAdj Resources
-pre_adj_resources_enabled: false
+# Whether to enable BFD Partially Adjudicated Claims Resources
+pac_resources_enabled: false
 
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_server_new_relic_metric_path: '/metric/v1'
-
-# app server instance type
-# c5.4xlarge == 16 vcpu's /w 32GiB mem
-data_server_num_cores: 16
-data_server_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
@@ -51,3 +46,13 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_certificate.pem') }}"
   - alias: client_ab2d_prod_validation
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_validation_certificate.pem') }}"
+
+# Enables the CCW RIF job when true; disables when false
+data_pipeline_ccw_rif_job_enabled: true
+
+# Enables the RDA API data pipeline
+data_pipeline_rda_job_enabled: true
+# Sets the pipeline manager to ensure the rda job is running every 5 mins
+data_pipeline_rda_job_interval_seconds: 300
+# Sets the job to use 20 threads to load data
+data_pipeline_rda_job_write_threads: 20

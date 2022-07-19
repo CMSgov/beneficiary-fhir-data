@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="1085px" preserveAspectRatio="none" style="width:750px;height:1085px;background:#FFFFFF;" version="1.1" viewBox="0 0 750 1085" width="750px" zoomAndPan="magnify"><defs/><g><!--MD5=[c2dc1ddc239802de9bd2388d9adbf8a8]
+cluster Glue Catalog--><g id="cluster_Glue Catalog"><path d="M6,463.5 C6,453.5 199.5,453.5 199.5,453.5 C199.5,453.5 393,453.5 393,463.5 L393,826.5 C393,836.5 199.5,836.5 199.5,836.5 C199.5,836.5 6,836.5 6,826.5 L6,463.5 " style="stroke:#181818;stroke-width:1.0;fill:none;"/><path d="M6,463.5 C6,473.5 199.5,473.5 199.5,473.5 C199.5,473.5 393,473.5 393,463.5 " fill="none" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="92" x="153.5" y="489.0352">Glue Catalog</text></g><!--MD5=[227da6eda29c9985c7a36fc9f1032b07]
+cluster Cloud Watch--><g id="cluster_Cloud Watch"><path d="M124.5,6 L215.5,6 A3.75,3.75 0 0 1 218,8.5 L225,28.4883 L306.5,28.4883 A2.5,2.5 0 0 1 309,30.9883 L309,266 A2.5,2.5 0 0 1 306.5,268.5 L124.5,268.5 A2.5,2.5 0 0 1 122,266 L122,8.5 A2.5,2.5 0 0 1 124.5,6 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="122" x2="225" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="90" x="126" y="21.5352">Cloud Watch</text></g><!--MD5=[597f9708cc769570a190f2fde345cab4]
+cluster Kinesis FIrehose--><g id="cluster_Kinesis FIrehose"><path d="M182.5,329 L302.5,329 A3.75,3.75 0 0 1 305,331.5 L312,351.4883 L312.5,351.4883 A2.5,2.5 0 0 1 315,353.9883 L315,406.5 A2.5,2.5 0 0 1 312.5,409 L182.5,409 A2.5,2.5 0 0 1 180,406.5 L180,331.5 A2.5,2.5 0 0 1 182.5,329 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="180" x2="312" y1="351.4883" y2="351.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="119" x="184" y="344.5352">Kinesis FIrehose</text></g><!--MD5=[0f1402dd4ba50f92b20010225714ea74]
+cluster Analysis--><g id="cluster_Analysis"><path d="M270.5,869.5 L332.5,869.5 A3.75,3.75 0 0 1 335,872 L342,891.9883 L419.5,891.9883 A2.5,2.5 0 0 1 422,894.4883 L422,1076 A2.5,2.5 0 0 1 419.5,1078.5 L270.5,1078.5 A2.5,2.5 0 0 1 268,1076 L268,872 A2.5,2.5 0 0 1 270.5,869.5 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="268" x2="342" y1="891.9883" y2="891.9883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="61" x="272" y="885.0352">Analysis</text></g><!--MD5=[1f9199ffb6a15c85b735bf0447fd8d88]
+entity api_history--><g id="elem_api_history"><rect fill="#F1F1F1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="115" x="22.5" y="503.5"/><path d="M60.8333,503.5 L60.8333,508.5 L53.8333,515.5 L22.5,515.5 " fill="none" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="75" x="37.5" y="537.0352">api_history</text></g><!--MD5=[0c0421921575f52d5e605439b27fa137]
+entity api_requests--><g id="elem_api_requests"><rect fill="#F1F1F1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="127" x="249.5" y="503.5"/><path d="M291.8333,503.5 L291.8333,508.5 L284.8333,515.5 L249.5,515.5 " fill="none" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="87" x="264.5" y="537.0352">api_requests</text></g><!--MD5=[f9f01024fe1202179498f460cb527c70]
+entity benes--><g id="elem_benes"><rect fill="#F1F1F1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="81" x="270.5" y="639"/><path d="M297.5,639 L297.5,644 L290.5,651 L270.5,651 " fill="none" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="41" x="285.5" y="672.5352">benes</text></g><!--MD5=[43fbdc16647b34eaa5ad2af6239e0b0a]
+entity benes_unique--><g id="elem_benes_unique"><rect fill="#F1F1F1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="136" x="191" y="774.5"/><path d="M236.3333,774.5 L236.3333,779.5 L229.3333,786.5 L191,786.5 " fill="none" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="96" x="206" y="808.0352">benes_unique</text></g><!--MD5=[1200cabd2a84086424de0b397dfd2f71]
+entity L--><g id="elem_L"><rect fill="#F1F1F1" height="62.9766" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="131" x="149.5" y="41"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="260.5" y="46"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="258.5" y="48"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="258.5" y="52"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="72" x="168.5" y="74.5352">Log Group</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="87" x="164.5" y="91.0234">(access.json)</text></g><!--MD5=[4f8ceaf617da225fb01a8e9682419e55]
+entity Export--><g id="elem_Export"><ellipse cx="147" cy="223.5" fill="#F1F1F1" rx="8" ry="8" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="46" x="124" y="254.0352">Export</text></g><!--MD5=[4a52932e87c05afea63f6d60a0835fd7]
+entity Subscription--><g id="elem_Subscription"><ellipse cx="242" cy="223.5" fill="#F1F1F1" rx="8" ry="8" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="86" x="199" y="254.0352">Subscription</text></g><g id="elem_Lambda"><ellipse cx="247.7967" cy="378.6909" fill="#F1F1F1" rx="49.7967" ry="14.6909" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="54" x="218.354" y="382.5922">Lambda</text></g><!--MD5=[770389ab9df153645bc6ef28055eb2b5]
+entity A--><g id="elem_A"><rect fill="#F1F1F1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="97" x="302.5" y="904.5"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="379.5" y="909.5"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="377.5" y="911.5"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="377.5" y="915.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="49" x="321.5" y="938.0352">Athena</text></g><!--MD5=[00ec4551a9636032c33b95aee0b982ec]
+entity  QuickSight --><g id="elem_ QuickSight "><rect fill="#F1F1F1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="122" x="284" y="1016.5"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="386" y="1021.5"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="384" y="1023.5"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="384" y="1027.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="74" x="303" y="1050.0352">QuickSight</text></g><g id="elem_GMN22"><path d="M412,514 L412,539.3105 L710,539.3105 L710,524 L700,514 L412,514 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M700,514 L700,524 L710,524 L700,514 " fill="#FEFFDD" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="277" x="418" y="531.5684">unified historical and incoming raw api data</text></g><g id="elem_GMN25"><path d="M409.5,626.5 L409.5,697.7422 L730.5,697.7422 L730.5,636.5 L720.5,626.5 L409.5,626.5 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M720.5,626.5 L720.5,636.5 L730.5,636.5 L720.5,626.5 " fill="#FEFFDD" style="stroke:#181818;stroke-width:1.0;"/><ellipse cx="421" cy="639.3105" fill="#000000" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:0.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="122" x="426.5" y="644.0684">filter out non-200s</text><ellipse cx="421" cy="654.6211" fill="#000000" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:0.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="142" x="426.5" y="659.3789">reduce field selections</text><ellipse cx="421" cy="669.9316" fill="#000000" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:0.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="289" x="426.5" y="674.6895">pivot out bene_id arrays (one bene per record)</text><ellipse cx="421" cy="685.2422" fill="#000000" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:0.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="260" x="426.5" y="690">stored in Parquet format (columnar store)</text></g><g id="elem_GMN28"><path d="M433,777 L433,817.6211 L743,817.6211 L743,787 L733,777 L433,777 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M733,777 L733,787 L743,787 L733,777 " fill="#FEFFDD" style="stroke:#181818;stroke-width:1.0;"/><ellipse cx="444.5" cy="789.8105" fill="#000000" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:0.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="142" x="450" y="794.5684">reduce field selections</text><ellipse cx="444.5" cy="805.1211" fill="#000000" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:0.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="278" x="450" y="809.8789">only stores the "first seen" record for a bene</text></g><g id="elem_GMN38"><path d="M328,165 L328,282.1738 L644,282.1738 L644,175 L634,165 L328,165 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M634,165 L634,175 L644,175 L634,165 " fill="#FEFFDD" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="277" x="334" y="182.5684">CW Exports have a very inconvenient format</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="270" x="334" y="197.8789">that do not match the subscription format.</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="263" x="334" y="213.1895">Furthermore they cannot be exported into</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="281" x="334" y="228.5">S3 buckets that use KMS, so we have to have</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="295" x="334" y="243.8105">a separate process to ingest them. This should</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="294" x="334" y="259.1211">be an infrequent operation to initially populate</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="94" x="334" y="274.4316">historical data.</text></g><g id="elem_GMN45"><path d="M333,350.5 L333,374.5 L298.2,378.5 L333,382.5 L333,406.4316 A0,0 0 0 0 333,406.4316 L571,406.4316 A0,0 0 0 0 571,406.4316 L571,360.5 L561,350.5 L333,350.5 A0,0 0 0 0 333,350.5 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M561,350.5 L561,360.5 L571,360.5 L561,350.5 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="202" x="339" y="368.0684">Flatten the JSON schema so that</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="217" x="339" y="383.3789">we have one column for each MDC</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="93" x="339" y="398.6895">structure field.</text></g><g id="elem_GMN57"><path d="M438,899.5 L438,923.5 L399.56,927.5 L438,931.5 L438,955.4316 A0,0 0 0 0 438,955.4316 L708,955.4316 A0,0 0 0 0 708,955.4316 L708,909.5 L698,899.5 L438,899.5 A0,0 0 0 0 438,899.5 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M698,899.5 L698,909.5 L708,909.5 L698,899.5 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="239" x="444" y="917.0684">dahboards can be built on either table</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="249" x="444" y="932.3789">for the use case but queries against the</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="215" x="444" y="947.6895">benes table may become unwieldy</text></g><!--MD5=[a0087904db56f1e892d88e463530388e]
+link api_requests to GMN22--><g id="link_api_requests_GMN22"><path d="M376.94,526.5 C388.56,526.5 400.18,526.5 411.81,526.5 " fill="none" id="api_requests-GMN22" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/></g><!--MD5=[44cc571c88053a0cfedbf1bc7e25568e]
+link benes to GMN25--><g id="link_benes_GMN25"><path d="M351.72,662 C370.91,662 390.09,662 409.28,662 " fill="none" id="benes-GMN25" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/></g><!--MD5=[ee0b2d6571d30bc1727c4add34f43124]
+link benes_unique to GMN28--><g id="link_benes_unique_GMN28"><path d="M327.11,797.5 C362.36,797.5 397.6,797.5 432.84,797.5 " fill="none" id="benes_unique-GMN28" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/></g><!--MD5=[13d3850150c6d7eb9c77f8bedc1ebe53]
+link L to Export--><g id="link_L_Export"><path d="M201.08,104.01 C186.26,136.47 163.54,186.27 152.89,209.6 " fill="none" id="L-to-Export" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="150.69,214.42,158.0634,207.8906,152.7644,209.8706,150.7844,204.5716,150.69,214.42" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[854e1f18926935238859158b6cd60da2]
+link Export to api_history--><g id="link_Export_api_history"><path d="M145.21,232.55 C136.75,270.56 100.61,432.93 86.08,498.19 " fill="none" id="Export-to-api_history" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="84.91,503.45,90.772,495.5357,85.9977,498.5697,82.9636,493.7954,84.91,503.45" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[7d62cf6410dc5ab0b027549eac00cede]
+link L to Subscription--><g id="link_L_Subscription"><path d="M220.53,104.01 C226.39,136.33 235.36,185.85 239.61,209.31 " fill="none" id="L-to-Subscription" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="240.54,214.42,242.885,204.8544,239.6556,209.4988,235.0112,206.2694,240.54,214.42" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[76425016b951c8d31303e6f2fb52eeb6]
+link GMN38 to Export--><g id="link_GMN38_Export"><path d="M379.56,164.92 C351.71,152.38 321.16,140.96 291.5,134.5 C248.07,125.04 229.96,112.23 191.5,134.5 C162.05,151.56 151.57,195.07 148.31,214.21 " fill="none" id="GMN38-Export" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/></g><!--MD5=[81a849ca3791a4a54d46d7afc6f4aea5]
+link Subscription to Lambda--><g id="link_Subscription_Lambda"><path d="M242.32,232.73 C243.25,256.41 245.95,325.21 247.26,358.72 " fill="none" id="Subscription-to-Lambda" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="247.46,363.78,251.096,354.6269,247.2596,358.784,243.1025,354.9476,247.46,363.78" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[0eacc5fe3bd22f785a86d33c91773850]
+link Lambda to api_requests--><g id="link_Lambda_api_requests"><path d="M254,392.97 C264.65,416.9 287.05,467.21 300.98,498.49 " fill="none" id="Lambda-to-api_requests" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="303.14,503.35,303.1457,493.5011,301.112,498.7798,295.8333,496.746,303.14,503.35" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[1f08c5f95f32c0ec27f6efdca93208fe]
+link api_history to api_requests--><g id="link_api_history_api_requests"><path d="M137.6,526.5 C169.7,526.5 209.91,526.5 243.73,526.5 " fill="none" id="api_history-to-api_requests" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="249.1,526.5,240.1,522.5,244.1,526.5,240.1,530.5,249.1,526.5" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="75" x="156" y="520.0684">Glue:Flatten</text></g><!--MD5=[7604c24c973536cf7c437776e851313f]
+link api_requests to benes--><g id="link_api_requests_benes"><path d="M312.67,549.54 C312.32,572.64 311.78,608.94 311.41,633.8 " fill="none" id="api_requests-to-benes" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="311.33,638.92,315.4582,629.9781,311.4014,633.9205,307.459,629.8638,311.33,638.92" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="86" x="313" y="593.0684">Glue:Populate</text></g><!--MD5=[4def35a06e9c6394278dbe053da46f8a]
+link benes to benes_unique--><g id="link_benes_benes_unique"><path d="M283.97,689.08 C274.52,699.97 265.03,713.37 260,727.5 C255.29,740.75 254.69,756.36 255.42,769.38 " fill="none" id="benes-benes_unique" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="255.77,774.42,259.1449,765.1674,255.4279,769.4317,251.1637,765.7147,255.77,774.42" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="287.44,685.19,278.4624,689.2401,284.1102,688.9199,284.4303,694.5677,287.44,685.19" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="92" x="261" y="741.0684">Glue: Combine</text></g><!--MD5=[c58130d1eb586e0c9e061c6597e577f0]
+link A to  QuickSight --><g id="link_A_ QuickSight "><path d="M349.79,950.76 C348.83,968.2 347.51,992.56 346.49,1011.18 " fill="none" id="A-to- QuickSight " style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="346.21,1016.27,350.6933,1007.5008,346.4818,1011.2774,342.7052,1007.0659,346.21,1016.27" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[ea7cd6f22882a65ab72c62460cb5d1b1]
+link benes to A--><g id="link_benes_A"><path d="M332.59,685.18 C342.38,696.78 352.89,711.82 358,727.5 C377.16,786.33 366.11,860.16 357.72,899.27 " fill="none" id="benes-to-A" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="356.61,904.32,362.445,896.3857,357.681,899.4361,354.6307,894.6721,356.61,904.32" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[045754c7f025b8276b8fd4c17f85c55c]
+link benes_unique to A--><g id="link_benes_unique_A"><path d="M274.82,820.5 C290.68,842.58 315.12,876.58 332.02,900.09 " fill="none" id="benes_unique-to-A" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="335.08,904.35,333.0719,894.708,332.1604,900.291,326.5774,899.3795,335.08,904.35" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[80ffd05597492964771c9c5ef68f6458]
+@startuml
+database "Glue Catalog" {
+  frame "api_history" as api_history {
+  }
+  frame "api_requests" as api_requests {
+  }
+  frame "benes" as benes {
+  }
+  frame "benes_unique" as benes_unique {
+  }
+}
+
+note right of api_requests
+  unified historical and incoming raw api data
+end note
+
+note right of benes
+  * filter out non-200s
+  * reduce field selections
+  * pivot out bene_id arrays (one bene per record)
+  * stored in Parquet format (columnar store)
+end note
+
+note right of benes_unique
+  * reduce field selections
+  * only stores the "first seen" record for a bene
+end note
+
+package "Cloud Watch" {
+  [ Log Group\n(access.json) ] as L
+  L - -> () Export
+  Export - -> api_history
+  L - -> () Subscription
+}
+
+note left of Export
+   CW Exports have a very inconvenient format
+   that do not match the subscription format.
+   Furthermore they cannot be exported into
+   S3 buckets that use KMS, so we have to have
+   a separate process to ingest them. This should
+   be an infrequent operation to initially populate
+   historical data.
+end note
+
+package "Kinesis FIrehose" {
+(Lambda)
+}
+
+Subscription - -> (Lambda)
+Lambda - -> api_requests
+
+note right of Lambda
+  Flatten the JSON schema so that
+  we have one column for each MDC
+  structure field.
+end note
+
+api_history -> api_requests : Glue:Flatten
+
+api_requests - -> benes : Glue:Populate
+benes <- -> benes_unique : Glue: Combine
+
+package "Analysis" {
+  [ Athena ] as A
+  A - -> [ QuickSight ]
+  benes - -> A
+  benes_unique - -> A
+}
+
+note right of A
+  dahboards can be built on either table
+  for the use case but queries against the
+  benes table may become unwieldy
+end note
+
+@enduml
+
+PlantUML version 1.2022.5(Sat Apr 30 06:55:52 EDT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

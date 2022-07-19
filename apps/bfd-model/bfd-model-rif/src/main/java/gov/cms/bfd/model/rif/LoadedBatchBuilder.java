@@ -6,12 +6,15 @@ import java.util.List;
 
 /** Class to build a LoadedBatch. Thread safe. */
 public class LoadedBatchBuilder {
-  private final List<String> beneficiaries;
+  /** The beneficiaries in this batch. */
+  private final List<Long> beneficiaries;
+  /** The loaded file's identifier. */
   private final long loadedFileId;
+  /** The batch creation timestamp. */
   private final Instant timestamp;
 
   /**
-   * Create a builder from a particular file event
+   * Create a builder from a particular file event.
    *
    * @param loadedFileId to start building
    * @param capacityIncrement to use for this batch
@@ -23,7 +26,7 @@ public class LoadedBatchBuilder {
   }
 
   /**
-   * Associate a beneficiaryId with this LoadedFile
+   * Associate a beneficiaryId with this LoadedFile.
    *
    * @param beneficiaryId to put in the filter
    */
@@ -31,11 +34,11 @@ public class LoadedBatchBuilder {
     if (beneficiaryId == null) {
       throw new IllegalArgumentException("Null or empty beneficiary");
     }
-    beneficiaries.add(beneficiaryId.toString());
+    beneficiaries.add(beneficiaryId);
   }
 
   /**
-   * Create a LoadedBatch from the data in the builder
+   * Create a LoadedBatch from the data in the builder.
    *
    * @return a new LoadedBatch
    */
@@ -48,7 +51,7 @@ public class LoadedBatchBuilder {
   }
 
   /**
-   * Return the Batch's timestamp
+   * Gets the {@link #timestamp}.
    *
    * @return the timestamp of the batch
    */

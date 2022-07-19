@@ -1,78 +1,107 @@
-import urllib3
+import random
+from typing import List
 
-from locust import HttpUser, task, tag
+from locust import events, tag, task
+from locust.env import Environment
 
-from common import config, data, errors, test_setup as setup
+from common import data, db
+from common.bfd_user_base import BFDUserBase
+from common.locust_utils import is_distributed, is_locust_master
 
-server_public_key = setup.loadServerPublicKey()
-
-'''
-If there is no server cert, the warnings are disabled because thousands will
-appear in the logs and make it difficult to see anything else.
-'''
-if not server_public_key:
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-mbis = data.load_pa_mbis()
-client_cert = setup.getClientCert()
-setup.set_locust_env(config.load())
+master_pac_mbis: List[str] = []
 
 
-class BFDUser(HttpUser):
-    SERVICE_DATE = 'service-date=gt2020-01-05'
-    LAST_UPDATED = '_lastUpdated=gt2020-05-05'
+@events.test_start.add_listener
+def _(environment: Environment, **kwargs):
+    if (
+        is_distributed(environment)
+        and is_locust_master(environment)
+        or not environment.parsed_options
+    ):
+        # Don't bother loading data for the master runner, it doesn't run a test
+        return
 
-    def _mbi(self):
-        if len(mbis) == 0:
-            errors.no_data_stop_test(self)
-        return mbis.pop()
+    # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
+    # for Locust's documentation on the test data management pattern used here
+    global master_pac_mbis
+    master_pac_mbis = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db.get_pac_hashed_mbis,
+        use_table_sample=False,
+        data_type_name="pac_mbis",
+    )
 
-    def _get(self, query, name):
-        self.client.get(query, cert=client_cert, verify=server_public_key, name=name)
 
-    @tag('claim')
+class PACUser(BFDUserBase):
+    """
+    Tests for Partially Adjudicated Claims endpoints to test their performance
+
+    The MBI list is randomly shuffled to get better sampling in sequential testing.
+    """
+
+    SERVICE_DATE = {"service-date": "gt2020-01-05"}
+    LAST_UPDATED = {"_lastUpdated": "gt2020-05-05"}
+    SERVICE_DATE_LAST_UPDATED = dict(SERVICE_DATE, **LAST_UPDATED)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hashed_mbis = master_pac_mbis.copy()
+        random.shuffle(self.hashed_mbis)
+
+    def __get(self, resource, name, parameters=None):
+        params = {} if parameters is None else parameters
+        params["mbi"] = self.hashed_mbis.pop()
+
+        self.run_task_by_parameters(base_path=f"/v2/fhir/{resource}", params=params, name=name)
+
+    @tag("claim")
     @task
-    def _get_claim(self):
-        self._get(f'/v2/fhir/Claim?mbi={self._mbi()}', 'claim')
+    def get_claim(self):
+        """Get single Claim"""
+        self.__get("Claim", "claim")
 
-    @tag('claim', 'service-date')
+    @tag("claim", "service-date")
     @task
-    def _get_claim_with_service_date(self):
-        self._get(f'/v2/fhir/Claim?mbi={self._mbi()}&{self.SERVICE_DATE}',
-                  'claimServiceDate')
+    def get_claim_with_service_date(self):
+        """Get single Claim with service date"""
+        self.__get("Claim", "claimServiceDate", self.SERVICE_DATE)
 
-    @tag('claim', 'last-updated')
+    @tag("claim", "last-updated")
     @task
-    def _get_claim_with_last_updated(self):
-        self._get(f'/v2/fhir/Claim?mbi={self._mbi()}&{self.LAST_UPDATED}',
-                  'claimLastUpdated')
+    def get_claim_with_last_updated(self):
+        """Get single Claim with last updated"""
+        self.__get("Claim", "claimLastUpdated", self.LAST_UPDATED)
 
-    @tag('claim', 'service-date', 'last-updated')
+    @tag("claim", "service-date", "last-updated")
     @task
-    def _get_claim_with_service_date_and_last_updated(self):
-        self._get(f'/v2/fhir/Claim?mbi={self._mbi()}&{self.LAST_UPDATED}&{self.SERVICE_DATE}',
-                  'claimServiceDateLastUpdated')
+    def get_claim_with_service_date_and_last_updated(self):
+        """Get single Claim with last updated and service date"""
+        self.__get("Claim", "claimServiceDateLastUpdated", self.SERVICE_DATE_LAST_UPDATED)
 
     @tag("claim-response")
     @task
-    def _get_claim_response(self):
-        self._get(f'/v2/fhir/ClaimResponse?mbi={self._mbi()}',
-                  'claimResponse')
+    def get_claim_response(self):
+        """Get single ClaimResponse"""
+        self.__get("ClaimResponse", "claimResponse")
 
-    @tag('claim-response', 'service-date')
+    @tag("claim-response", "service-date")
     @task
-    def _get_claim_response_with_service_date(self):
-        self._get(f'/v2/fhir/ClaimResponse?mbi={self._mbi()}&{self.SERVICE_DATE}',
-                  'claimResponseServiceDate')
+    def get_claim_response_with_service_date(self):
+        """Get single ClaimResponse with service date"""
+        self.__get("ClaimResponse", "claimResponseServiceDate", self.SERVICE_DATE)
 
-    @tag('claim-response', 'last-updated')
+    @tag("claim-response", "last-updated")
     @task
-    def _get_claim_response_with_last_updated(self):
-        self._get(f'/v2/fhir/ClaimResponse?mbi={self._mbi()}&{self.LAST_UPDATED}',
-                  'claimResponseLastUpdated')
+    def get_claim_response_with_last_updated(self):
+        """Get single ClaimResponse with last updated"""
+        self.__get("ClaimResponse", "claimResponseLastUpdated", self.LAST_UPDATED)
 
-    @tag('claim-response', 'service-date', 'last-updated')
+    @tag("claim-response", "service-date", "last-updated")
     @task
-    def _get_claim_response_with_service_date_and_last_updated(self):
-        self._get(f'/v2/fhir/ClaimResponse?mbi={self._mbi()}&{self.LAST_UPDATED}&{self.SERVICE_DATE}',
-                  'claimResponseServiceDateLastUpdated')
+    def get_claim_response_with_service_date_and_last_updated(self):
+        """Get single ClaimResponse with last updated and service date"""
+        self.__get(
+            "ClaimResponse",
+            "claimResponseServiceDateLastUpdated",
+            self.SERVICE_DATE_LAST_UPDATED,
+        )

@@ -12,7 +12,9 @@ import java.util.List;
  * Models a RIF file event, in which a new set of RIF files have been made available for processing.
  */
 public final class RifFilesEvent {
+  /** The timestamp that this event was fired at. */
   private final Instant timestamp;
+  /** The {@link RifFileEvent}s contained in this {@link RifFilesEvent}. */
   private final List<RifFileEvent> fileEvents;
 
   /**
@@ -74,17 +76,25 @@ public final class RifFilesEvent {
     this(timestamp, Arrays.asList(files));
   }
 
-  /** @return the timestamp that this event was fired at */
+  /**
+   * Gets the {@link #timestamp}.
+   *
+   * @return the timestamp that this event was fired at
+   */
   public Instant getTimestamp() {
     return timestamp;
   }
 
-  /** @return the {@link RifFileEvent}s contained in this {@link RifFilesEvent} */
+  /**
+   * Gets the {@link #fileEvents}.
+   *
+   * @return the {@link RifFileEvent}s contained in this {@link RifFilesEvent}
+   */
   public List<RifFileEvent> getFileEvents() {
     return fileEvents;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

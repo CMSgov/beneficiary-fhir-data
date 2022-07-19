@@ -22,6 +22,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "skipped_rif_records")
 public class SkippedRifRecord {
+  /** The unique (sequence-generated) ID for this {@link SkippedRifRecord} instance. */
   @Id
   @Column(name = "record_id", nullable = false)
   @GeneratedValue(
@@ -33,21 +34,35 @@ public class SkippedRifRecord {
       allocationSize = 1)
   private long recordId;
 
+  /** The timestamp associated with the CCW data set manifest that this record is from. */
   @Column(name = "rif_file_timestamp", nullable = false)
   private Instant rifFileTimestamp;
 
+  /**
+   * The {@link SkipReasonCode} that identifies why this {@link SkippedRifRecord} was skipped in the
+   * first place.
+   */
   @Column(name = "skip_reason", nullable = false)
   private String skipReason;
 
+  /** The {@link RifFileType} of the RIF file that this record is from. */
   @Column(name = "rif_file_type", nullable = false)
   private String rifFileType;
 
+  /** The {@link RecordAction} of the RIF record(s). */
   @Column(name = "dml_ind", nullable = false)
   private String dmlInd;
 
+  /**
+   * The {@link Beneficiary}{@link #getBeneId()} of the {@link Beneficiary} that this record is of /
+   * associated with.
+   */
   @Column(name = "bene_id", nullable = false)
-  private String beneId;
+  private long beneId;
 
+  /**
+   * The RIF/CSV row or rows representing the record (i.e. beneficiary or claim) that was skipped.
+   */
   @Column(name = "rif_data", nullable = false)
   private String rifData;
 
@@ -69,7 +84,7 @@ public class SkippedRifRecord {
       SkipReasonCode skipReason,
       String rifFileType,
       RecordAction dmlInd,
-      String beneId,
+      long beneId,
       String rifData) {
     this.rifFileTimestamp = rifFileTimestamp;
     this.skipReason = skipReason.name();
@@ -79,12 +94,18 @@ public class SkippedRifRecord {
     this.rifData = rifData;
   }
 
-  /** @return the unique (sequence-generated) ID for this {@link SkippedRifRecord} instance */
+  /**
+   * Gets the {@link #recordId}.
+   *
+   * @return the unique (sequence-generated) ID for this {@link SkippedRifRecord} instance
+   */
   public long getRecordId() {
     return recordId;
   }
 
   /**
+   * Gets the {@link #skipReason}.
+   *
    * @return the {@link SkipReasonCode} that identifies why this {@link SkippedRifRecord} was
    *     skipped in the first place
    */
@@ -92,30 +113,46 @@ public class SkippedRifRecord {
     return SkipReasonCode.valueOf(skipReason);
   }
 
-  /** @return the timestamp associated with the CCW data set manifest that this record is from */
+  /**
+   * Gets the {@link #rifFileTimestamp}.
+   *
+   * @return the timestamp associated with the CCW data set manifest that this record is from
+   */
   public Instant getRifFileTimestamp() {
     return rifFileTimestamp;
   }
 
-  /** @return the {@link RifFileType} of the RIF file that this record is from */
+  /**
+   * Gets the {@link #rifFileType}.
+   *
+   * @return the {@link RifFileType} of the RIF file that this record is from
+   */
   public String getRifFileType() {
     return rifFileType;
   }
 
-  /** @return the {@link RecordAction} of the RIF record(s) */
+  /**
+   * Gets the {@link #dmlInd}.
+   *
+   * @return the {@link RecordAction} of the RIF record(s)
+   */
   public RecordAction getDmlInd() {
     return RecordAction.match(dmlInd);
   }
 
   /**
+   * Gets the {@link #beneId}.
+   *
    * @return the {@link Beneficiary}{@link #getBeneId()} of the {@link Beneficiary} that this record
    *     is of / associated with
    */
-  public String getBeneId() {
+  public long getBeneId() {
     return beneId;
   }
 
   /**
+   * Gets the {@link #rifData}.
+   *
    * @return the RIF/CSV row or rows representing the record (i.e. beneficiary or claim) that was
    *     skipped
    */

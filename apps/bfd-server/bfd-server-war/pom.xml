@@ -43,6 +43,12 @@
 
 	<dependencies>
 		<dependency>
+			<!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-server-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -204,20 +210,17 @@
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>0.5.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>telemetry-http-okhttp</artifactId>
-			<version>0.6.1</version>
 		</dependency>
 		
 		<dependency>
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
 		</dependency>
 
 		<dependency>
@@ -299,6 +302,18 @@
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sketch_2.12</artifactId>
 			<version>2.4.7</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-test-utils</artifactId>
+			<version>${project.version}</version>
+			<!-- Scope cannot be test due to SpringConfiguration using test classes, fix that to properly scope this -->
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-shared-test-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -421,9 +436,9 @@
 								<argument>-e</argument>
 								<argument>${local.v2.enabled}</argument>
 								<argument>-p</argument>
-								<argument>${local.preadj.enabled}</argument>
+								<argument>${local.pac.enabled}</argument>
 								<argument>-o</argument>
-								<argument>${local.preadj.oldMbiHash.enabled}</argument>
+								<argument>${local.pac.oldMbiHash.enabled}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
@@ -56,6 +57,7 @@ public final class DataServerLauncherAppIT {
           .add("([0-9]+|-)") // BlueButton-UserId
           .add("\"([^\"]*)\"") // BlueButton-User
           .add("(\\S+)") // BlueButton-BeneficiaryId
+          .add("(\\S+)") // Response Header X-Request-ID
           .toString();
 
   /**
@@ -76,6 +78,7 @@ public final class DataServerLauncherAppIT {
             .add("200 26 22000")
             .add("- - [-] -")
             .add("\"-\" - \"-\" - \"-\" -\"")
+            .add("LEyn5pEykWydcbZR")
             .toString();
 
     // Access log entry for test/prod sbx environments
@@ -93,6 +96,7 @@ public final class DataServerLauncherAppIT {
             .add("200 2103 23")
             .add("3b3e2b30-232f-11ec-9b9f-0a006c0cb407 1 [2021-10-02 03:10:01.104125] 11770")
             .add("\"-\" 32 \"Evidation on behalf of Heartline\" 79696 \"-\" patientId:587940319")
+            .add("LEyn5pEykWydcbZR")
             .toString();
 
     // Invalid log entry with request timestamp enclosed by double brackets
@@ -107,6 +111,7 @@ public final class DataServerLauncherAppIT {
             .add("200 26 22000")
             .add("- - [-] -")
             .add("\"-\" - \"-\" - \"-\" -\"")
+            .add("LEyn5pEykWydcbZR")
             .toString();
 
     // Invalid log entry with HTTP status code having more than 3 digits
@@ -121,6 +126,7 @@ public final class DataServerLauncherAppIT {
             .add("2004 26 22000")
             .add("- - [-] -")
             .add("\"-\" - \"-\" - \"-\" -\"")
+            .add("LEyn5pEykWydcbZR")
             .toString();
 
     Pattern p = Pattern.compile(accessLogPattern);
@@ -151,8 +157,7 @@ public final class DataServerLauncherAppIT {
     Process appProcess = appRunBuilder.start();
 
     // Read the app's output.
-    ServerProcess.ProcessOutputConsumer appRunConsumer =
-        new ServerProcess.ProcessOutputConsumer(appProcess);
+    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
     Thread appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
 
@@ -224,6 +229,9 @@ public final class DataServerLauncherAppIT {
               .resolve("access.json");
       assertTrue(Files.isReadable(accessLogJson));
       assertTrue(Files.size(accessLogJson) > 0);
+      assertTrue(
+          Files.readString(accessLogJson)
+              .contains(DataServerLauncherApp.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
 
       // Stop the application.
       serverProcess.close();

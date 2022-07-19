@@ -1,5 +1,77 @@
 # API Changelog
 
+## BFD-1620: Add Total Slices for CARIN Compliance
+
+Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.
+
+C4BBAdjudication example:
+```json
+  "resource" : {
+    "resourceType" : "ExplanationOfBenefit",
+    ...
+      "item" : [ {
+        ...
+          "total" : [ {
+              "category" : {
+                "coding" : [ {
+                  "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                  "code" : "drugcost",
+                  "display" : "Drug Cost"
+                } ]
+              },
+              "amount" : {
+                "value" : 550.0,
+                "currency" : "USD"
+              }
+        }
+        ...
+      }
+    ...
+  }
+```
+        
+
+C4BBPayerAdjudicationStatus example:
+```json
+  "resource" : {
+    "resourceType" : "ExplanationOfBenefit",
+    ...
+      "item" : [ {
+        ...
+        "adjudication" : [ {
+            ...
+            "category" : {
+              "coding" : [ {
+                "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+                "code" : "other",
+                "display" : "Other"
+              } ]
+            },
+            "amount" : {
+              "value" : 0,
+              "currency" : "USD"
+            }
+          }
+        ...
+      }
+    ...
+  }
+```
+
+## BFD-1519: Map Revenue Center Unit Count in V2
+
+This extension was not previously available in the v2 claims for revenue center unit count. The
+following claim types will have this extension available: Inpatient, Outpatient, HHA, Hospice, and SNF claims.  Since we already mapped drug code to eob.item.quantity in v2 and we can't cause a backwards-incompatible change, we solved this by making a new extension and assigning claimLine.getUnitCount to valueQuantity in the extension. 
+```json
+  "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 1
+          }
+        } ],
+```
+
 ## BFD-1672: Add FI_DOC_CLM_CNTL_NUM extension to v2 adjudicated institutional claims
 
 This extension was not previously available in the v2 claims for institutional based ExplanationOfBenefit resources.  This

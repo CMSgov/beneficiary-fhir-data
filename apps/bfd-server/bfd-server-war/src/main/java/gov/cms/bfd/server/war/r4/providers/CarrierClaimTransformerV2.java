@@ -84,7 +84,7 @@ public class CarrierClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.CARRIER,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -175,7 +175,7 @@ public class CarrierClaimTransformerV2 {
     for (CarrierClaimLine line : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       // LINE_NUM => ExplanationOfBenefit.item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRF_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       Optional<CareTeamComponent> performing =

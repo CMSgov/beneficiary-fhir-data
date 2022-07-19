@@ -115,8 +115,8 @@ public class McsClaimTransformer {
             McsClaim::hasIdrStatusCodeUnrecognized,
             McsClaim::getIdrStatusCodeUnrecognized,
             McsStatusCode.UNRECOGNIZED,
-            ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
-            ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+            ImmutableSet.of(),
+            ImmutableSet.of());
     RdaMcsClaim_idrBillProvGroupInd_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrBillProvGroupIndEnum,
@@ -345,6 +345,7 @@ public class McsClaimTransformer {
     transformer.copyEnumAsString(
         namePrefix + RdaMcsClaim.Fields.idrStatusCode,
         true,
+        1,
         1,
         RdaMcsClaim_idrStatusCode_Extractor.getEnumString(from),
         to::setIdrStatusCode);
@@ -670,7 +671,7 @@ public class McsClaimTransformer {
         from::hasIdrDtlToDate,
         from::getIdrDtlToDate,
         to::setIdrDtlToDate);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaMcsDetail.Fields.idrProcCode,
         1,
         5,
@@ -921,10 +922,14 @@ public class McsClaimTransformer {
     transformer.copyString(
         namePrefix + RdaMcsDiagnosisCode.Fields.idrDiagCode,
         false,
-        1,
+        0,
         7,
         from.getIdrDiagCode(),
         to::setIdrDiagCode);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsDiagnosisCode.Fields.rdaPosition,
+        from::getRdaPosition,
+        to::setRdaPosition);
     to.setLastUpdated(now);
     return to;
   }
@@ -974,6 +979,8 @@ public class McsClaimTransformer {
         from::hasIdrAdjPEombAmt,
         from::getIdrAdjPEombAmt,
         to::setIdrAdjPEombAmt);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsAdjustment.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 
@@ -994,6 +1001,8 @@ public class McsClaimTransformer {
         1,
         RdaMcsAudit_idrJAuditDisp_Extractor.getEnumString(from),
         to::setIdrJAuditDisp);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsAudit.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 
@@ -1026,6 +1035,8 @@ public class McsClaimTransformer {
         1,
         RdaMcsLocation_idrLocActvCode_Extractor.getEnumString(from),
         to::setIdrLocActvCode);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsLocation.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     return to;
   }
 }

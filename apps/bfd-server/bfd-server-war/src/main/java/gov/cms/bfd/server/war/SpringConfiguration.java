@@ -11,26 +11,19 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResponseResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -40,7 +33,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -115,145 +107,29 @@ public class SpringConfiguration {
       MetricRegistry metricRegistry) {
     HikariDataSource poolingDataSource;
     if (url.startsWith(DatabaseTestUtils.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
-      poolingDataSource = createTestDatabaseIfNeeded(url, connectionsMaxText, metricRegistry);
+      poolingDataSource =
+          (HikariDataSource)
+              DatabaseTestUtils.createTestDatabase(
+                  url,
+                  PROP_DB_URL,
+                  PROP_DB_USERNAME,
+                  PROP_DB_PASSWORD,
+                  connectionsMaxText,
+                  metricRegistry);
     } else {
       poolingDataSource = new HikariDataSource();
       poolingDataSource.setJdbcUrl(url);
       if (username != null && !username.isEmpty()) poolingDataSource.setUsername(username);
       if (password != null && !password.isEmpty()) poolingDataSource.setPassword(password);
-      configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
+      DatabaseUtils.configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
     }
 
     // Wrap the pooled DataSource in a proxy that records performance data.
-    ProxyDataSource proxyDataSource =
-        ProxyDataSourceBuilder.create(poolingDataSource)
-            .name("BFD-Data")
-            .listener(new QueryLoggingListener())
-            .proxyResultSet()
-            .build();
-
-    // Create/upgrade the DB schema, if specified.
-    boolean schemaApply = Boolean.parseBoolean(schemaApplyText);
-    if (schemaApply) {
-      DatabaseSchemaManager.createOrUpdateSchema(proxyDataSource);
-    }
-
-    return proxyDataSource;
-  }
-
-  /**
-   * Some of the DBs we support using in local development and testing require special handling.
-   * This method takes care of that.
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  private static HikariDataSource createTestDatabaseIfNeeded(
-      String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    /*
-     * Note: Eventually, we may add support for other test DB types, but
-     * right now only in-memory HSQL DBs are supported.
-     */
-    if (url.endsWith(":hsqldb:mem")) {
-      return createTestDatabaseIfNeededForHsql(url, connectionsMaxText, metricRegistry);
-    } else {
-      throw new BadCodeMonkeyException("Unsupported test URL: " + url);
-    }
-  }
-
-  /**
-   * Handles {@link #createTestDatabaseIfNeeded(String, String, MetricRegistry)} for HSQL. We need
-   * to special-case the HSQL DBs that are supported by our tests, so that they get handled
-   * correctly. Specifically, we need to ensure that the HSQL Server is started up, so that our test
-   * code can access the DB directly. In addition, we need to ensure that connection details to that
-   * HSQL server get written out somewhere that the test code can find it.
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  private static HikariDataSource createTestDatabaseIfNeededForHsql(
-      String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    /*
-     * Grab the path for the DB server properties, and remove it if found, as it'll be from an older
-     * run. We'll (re-)create it later in this method.
-     */
-    Path testDbPropsPath = DatabaseTestUtils.findTestDatabaseProperties();
-    if (Files.isReadable(testDbPropsPath)) {
-      try {
-        Files.delete(testDbPropsPath);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
-    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
-    DatabaseTestUtils.get().createOrUpdateSchemaForDataSource();
-
-    // Create the DataSource to connect to that shiny new DB.
-    HikariDataSource dataSourcePool = new HikariDataSource();
-    dataSourcePool.setDataSource(dataSource);
-    configureDataSource(dataSourcePool, connectionsMaxText, metricRegistry);
-
-    /*
-     * Write out the DB properties for <code>ServerTestUtils</code> to use.
-     */
-    Properties testDbProps = new Properties();
-    testDbProps.setProperty(PROP_DB_URL, dataSourceComponents.getUrl());
-    testDbProps.setProperty(PROP_DB_USERNAME, dataSourceComponents.getUsername());
-    testDbProps.setProperty(PROP_DB_PASSWORD, dataSourceComponents.getPassword());
-    try {
-      testDbProps.store(new FileWriter(testDbPropsPath.toFile()), null);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-
-    return dataSourcePool;
-  }
-
-  /**
-   * @param poolingDataSource the {@link HikariDataSource} to be configured, which must already have
-   *     its basic connection properties (URL, username, password) configured
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  private static void configureDataSource(
-      HikariDataSource poolingDataSource,
-      String connectionsMaxText,
-      MetricRegistry metricRegistry) {
-    int connectionsMax;
-    try {
-      connectionsMax = Integer.parseInt(connectionsMaxText);
-    } catch (NumberFormatException e) {
-      connectionsMax = -1;
-    }
-    if (connectionsMax < 1) {
-      // Assign a reasonable default value, if none was specified.
-      connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
-    }
-
-    poolingDataSource.setMaximumPoolSize(connectionsMax);
-
-    /*
-     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-     * strongly worded letter instructing it to avoid sequential scans whenever
-     * possible.
-     */
-    if (poolingDataSource.getJdbcUrl() != null
-        && poolingDataSource.getJdbcUrl().contains("postgre"))
-      poolingDataSource.setConnectionInitSql(
-          "set application_name = 'bfd-server'; set enable_seqscan = false;");
-
-    poolingDataSource.setRegisterMbeans(true);
-    poolingDataSource.setMetricRegistry(metricRegistry);
-
-    /*
-     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-     * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
-     */
-    poolingDataSource.setLeakDetectionThreshold(60 * 1000);
+    return ProxyDataSourceBuilder.create(poolingDataSource)
+        .name("BFD-Data")
+        .listener(new QueryLoggingListener())
+        .proxyResultSet()
+        .build();
   }
 
   /**
@@ -355,28 +231,28 @@ public class SpringConfiguration {
   }
 
   /**
-   * Determines if the fhir resources related to pre adj claim data should be accessible via the
-   * fhir api service.
+   * Determines if the fhir resources related to partially adjudicated claims data should be
+   * accessible via the fhir api service.
    *
    * @return True if the resources should be available to consume, False otherwise.
    */
-  private static boolean isPreAdjResourcesEnabled() {
+  private static boolean isPacResourcesEnabled() {
     return Boolean.TRUE
         .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.enabled", "false"));
+        .equalsIgnoreCase(System.getProperty("bfdServer.pac.enabled", "false"));
   }
 
   /**
-   * Determines if the fhir resources related to pre adj claim data will accept {@link
-   * gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when enabled
-   * will simplify rotation of hash values.
+   * Determines if the fhir resources related to partially adjudicated claims data will accept
+   * {@link gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when
+   * enabled will simplify rotation of hash values.
    *
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
-  public static boolean isPreAdjOldMbiHashEnabled() {
+  public static boolean isPacOldMbiHashEnabled() {
     return Boolean.TRUE
         .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.oldMbiHash.enabled", "false"));
+        .equalsIgnoreCase(System.getProperty("bfdServer.pac.oldMbiHash.enabled", "false"));
   }
 
   /**
@@ -401,7 +277,7 @@ public class SpringConfiguration {
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
-    if (isPreAdjResourcesEnabled()) {
+    if (isPacResourcesEnabled()) {
       r4ResourceProviders.add(r4ClaimResourceProvider);
       r4ResourceProviders.add(r4ClaimResponseResourceProvider);
     }

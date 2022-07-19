@@ -34,6 +34,16 @@ public final class QueryLoggingListenerTest {
     assertEquals(QueryType.BENE_BY_ID_INCLUDE_IDENTIFIERS, QueryType.computeQueryType(queryInfo));
   }
 
+  /** Verifies that {@link QueryType#BENE_BY_MBI_HISTORY} works as expected. */
+  @Test
+  public void computeQueryType_BENE_BY_MBI_HISTORY() {
+    QueryInfo queryInfo =
+        new QueryInfo(
+            "select beneficiar0_.bene_id as col_0_0_ from beneficiaries_history beneficiar0_ where beneficiar0_.mbi_hash=?");
+
+    assertEquals(QueryType.BENE_BY_MBI_HISTORY, QueryType.computeQueryType(queryInfo));
+  }
+
   /** Verifies that {@link QueryType#BENE_BY_HICN_HISTORY} works as expected. */
   @Test
   public void computeQueryType_BENE_BY_HICN_HISTORY() {

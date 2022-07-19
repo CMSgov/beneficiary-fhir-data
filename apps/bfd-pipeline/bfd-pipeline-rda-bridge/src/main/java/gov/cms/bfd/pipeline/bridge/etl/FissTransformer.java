@@ -15,6 +15,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
+import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Instant;
 import java.util.Map;
@@ -27,7 +28,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
+  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id */
   private final Map<String, BeneficiaryData> mbiMap;
+  /** Constant value used within the code */
+  private static final String MEDICARE = "MEDICARE";
 
   /**
    * Transforms the given {@link Parser.Data} into RDA {@link FissClaimChange} data.
@@ -154,6 +158,9 @@ public class FissTransformer extends AbstractTransformer {
           payerBuilder.setBeneSexEnumValue(enumValue);
         });
     consumeIfNotNull(mbiMap.get(beneId).getDob(), payerBuilder::setBeneDob);
+
+    payerBuilder.setPayersIdEnum(FissPayersCode.PAYERS_CODE_MEDICARE); // 'Z'
+    payerBuilder.setPayersName(MEDICARE);
 
     claimBuilder.addFissPayers(FissPayer.newBuilder().setBeneZPayer(payerBuilder.build()).build());
 

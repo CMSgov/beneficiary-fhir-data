@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.utils;
 
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
@@ -8,7 +9,6 @@ import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -382,9 +382,9 @@ public class RDATestUtils {
     claim.setDiagCodes(
         Set.of(
             new RdaMcsDiagnosisCode(
-                "654321", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+                "654321", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654321", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654321", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }
@@ -451,9 +451,9 @@ public class RDATestUtils {
     claim.setDiagCodes(
         Set.of(
             new RdaMcsDiagnosisCode(
-                "654323", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+                "654323", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654323", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654323", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }
