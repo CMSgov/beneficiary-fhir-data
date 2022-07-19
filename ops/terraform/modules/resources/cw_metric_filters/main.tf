@@ -49,7 +49,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-eob" {
 
 resource "aws_cloudwatch_log_metric_filter" "http-requests-count-claim" {
   name           = "bfd-${var.env}/bfd-server/http-requests/count/claim"
-  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/Claim*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/Claim*\" && request != \"*/ClaimResponse*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
   log_group_name = local.log_groups.access
 
   metric_transformation {
@@ -192,7 +192,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-eob" {
 
 resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-claim" {
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/fhir/claim"
-  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/Claim*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/Claim*\" && request != \"*/ClaimResponse*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
   log_group_name = local.log_groups.access
 
   metric_transformation {
