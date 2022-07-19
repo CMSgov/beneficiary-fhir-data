@@ -195,9 +195,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
         TransformerUtils.createBundle(paging, coverages, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    if (coverages.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }

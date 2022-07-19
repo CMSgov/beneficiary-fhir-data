@@ -313,9 +313,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    if (patients.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }
@@ -362,9 +360,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     TransformerUtils.workAroundHAPIIssue1585(requestDetails);
 
     // Add bene_id to MDC logs
-    if (patients.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }
@@ -683,9 +679,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    if (patients.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }

@@ -232,9 +232,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                         QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
-
-        // Add bene_id to MDC logs
-        LoggingUtils.logBeneIdToMdc(logicalId.getValue());
       } catch (ResourceNotFoundException e) {
         patients = Collections.emptyList();
       }
@@ -259,9 +256,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    if (patients.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }
@@ -623,9 +618,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    if (patients.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }
@@ -1038,9 +1031,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
 
     // Add bene_id to MDC logs
-    if (patients.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }

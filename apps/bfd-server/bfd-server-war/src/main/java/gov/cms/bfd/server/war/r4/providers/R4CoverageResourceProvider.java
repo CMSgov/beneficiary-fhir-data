@@ -202,9 +202,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
             paging, coverages, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    if (coverages.size() > 0) {
-      LoggingUtils.logBenesToMdc(bundle);
-    }
+    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }
