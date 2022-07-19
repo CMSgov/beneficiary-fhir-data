@@ -95,6 +95,21 @@ public enum StaticRifResource {
 
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
+  /**
+   * The ({@code SAMPLE_SYNTHEA_*}) set of test fixture files were generated using <a
+   * href="https://github.com/synthetichealth/synthea/wiki/Getting-Started">Synthea</a>. To recreate
+   * these files, perform the following steps after installing Synthea as per the developer
+   * instructions in the linked site above:
+   *
+   * <ol>
+   *   <li>Generate the files: {@code ./run_synthea -s 1010 -cs 0 -r 20210520 -e 20210520 -p 20
+   *       --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10
+   *       --generate.only_alive_patients=true -a 70-80}
+   *   <li>Minimize the files: {@code ./gradlew rifMinimize}
+   *   <li>Copy the files to the bfd resource dir: {@code cp output/bfd_min/*
+   *       $BFD_HOME/apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea}
+   * </ol>
+   */
   SAMPLE_SYNTHEA_BENES2011(
       resourceUrl("rif-synthea/beneficiary_2011.csv"), RifFileType.BENEFICIARY, -1),
   SAMPLE_SYNTHEA_BENES2012(
