@@ -6,10 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gov.cms.bfd.DataSourceComponents;
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
+import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

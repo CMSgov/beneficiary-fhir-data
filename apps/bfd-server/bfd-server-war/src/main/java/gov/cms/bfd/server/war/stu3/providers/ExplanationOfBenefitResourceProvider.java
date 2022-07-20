@@ -248,7 +248,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
      * later.
      */
 
-    String beneficiaryId = patient.getIdPart();
+    Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimType> claimTypes = parseTypeParam(type);
     Boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
@@ -341,12 +341,14 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup));
 
-    if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
+    if (Boolean.parseBoolean(excludeSamhsa)) {
+      filterSamhsa(eobs);
+    }
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    TransformerUtils.logBeneIdToMdc(Arrays.asList(beneficiaryId));
+    TransformerUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -385,10 +387,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
   private <T> List<T> findClaimTypeByPatient(
-      ClaimType claimType,
-      String patientId,
-      DateRangeParam lastUpdated,
-      DateRangeParam serviceDate) {
+      ClaimType claimType, Long patientId, DateRangeParam lastUpdated, DateRangeParam serviceDate) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
     Root root = criteria.from(claimType.getEntityClass());
@@ -404,9 +403,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     java.lang.Class javaClass = claimType.getEntityBeneficiaryIdAttribute().getJavaType();
 
     Predicate wherePredicate =
-        builder.equal(
-            root.get(claimType.getEntityBeneficiaryIdAttribute()),
-            javaClass.getName().equals("long") ? Long.parseLong(patientId) : patientId);
+        builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId);
     if (lastUpdated != null && !lastUpdated.isEmpty()) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdated);
       wherePredicate = builder.and(wherePredicate, predicate);
@@ -429,7 +426,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     } finally {
       eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtils.recordQueryInMdc(
-          String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
+          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
     }

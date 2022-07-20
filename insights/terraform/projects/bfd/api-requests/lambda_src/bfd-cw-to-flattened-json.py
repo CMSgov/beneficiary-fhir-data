@@ -81,7 +81,6 @@ import boto3
 from datetime import datetime # BFD modification
 
 
-
 def transformLogEvent(log_event):
     """Transform each log event.
 

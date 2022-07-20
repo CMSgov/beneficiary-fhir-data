@@ -314,9 +314,7 @@ public class McsClaimTransformerTest {
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
-              new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
-              new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0"));
+              new DataTransformer.ErrorMessage("idrClaimType", "no value set"));
 
       String expectedMessage =
           String.format(
@@ -429,12 +427,11 @@ public class McsClaimTransformerTest {
             RdaMcsClaim::getIdrStatusCode,
             McsStatusCode.STATUS_CODE_DENIED_E,
             "E")
-        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
-            McsClaim.Builder::setIdrStatusCodeUnrecognized, RdaMcsClaim.Fields.idrStatusCode, "ZZZ")
-        .verifyEnumFieldTransformationRejectsSpecificValues(
-            McsClaim.Builder::setIdrStatusCodeEnum,
+        .verifyStringFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrStatusCodeUnrecognized,
+            claim -> String.valueOf(claim.getIdrStatusCode()),
             RdaMcsClaim.Fields.idrStatusCode,
-            McsStatusCode.STATUS_CODE_NOT_USED);
+            1);
   }
 
   @Test
@@ -994,7 +991,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDiagnosisCodeIdrDiagCode() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyOK(
             McsDiagnosisCode.Builder::setIdrDiagCode,
             RdaMcsDiagnosisCode::getIdrDiagCode,
             RdaMcsDiagnosisCode.Fields.idrDiagCode,

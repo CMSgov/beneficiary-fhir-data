@@ -1,3 +1,13 @@
+data "aws_caller_identity" "current" {}
+
+locals {
+  service = var.name == "fhir" ? "server" : "pipeline" # NOTE: with this, the iam module is only capable of supporting the server and pipeline services
+}
+
+data "aws_kms_key" "master_key" {
+  key_id = "alias/bfd-${var.env_config.env}-cmk"
+}
+
 data "aws_iam_policy" "cloudwatch_agent_policy" {
   arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
@@ -55,4 +65,45 @@ resource "aws_iam_role_policy" "s3_policy" {
 resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
   role       = aws_iam_role.instance.id
   policy_arn = data.aws_iam_policy.cloudwatch_agent_policy.arn
+}
+
+
+resource "aws_iam_policy" "ssm" {
+  name        = "bfd-${var.env_config.env}-${local.service}-ssm-parameters"
+  description = "Permissions to /bfd/${var.env_config.env}/common/nonsensitive, /bfd/${var.env_config.env}/${local.service} SSM hierarchies"
+  policy      = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParametersByPath",
+        "ssm:GetParameters",
+        "ssm:GetParameter"
+      ],
+      "Resource": [
+
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/nonsensitive/*",
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/${local.service}/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Resource": [
+        "${data.aws_kms_key.master_key.arn}"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+# attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.ssm.arn
 }

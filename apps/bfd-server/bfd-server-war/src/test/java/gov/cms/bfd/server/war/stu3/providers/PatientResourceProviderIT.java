@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -567,7 +567,7 @@ public final class PatientResourceProviderIT {
         fhirClient
             .search()
             .forResource(Patient.class)
-            .where(Patient.RES_ID.exactly().systemAndIdentifier(null, "foo"))
+            .where(Patient.RES_ID.exactly().systemAndIdentifier(null, "7777777"))
             .returnBundle(Bundle.class)
             .execute();
 

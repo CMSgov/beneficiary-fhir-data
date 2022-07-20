@@ -58,7 +58,7 @@ public class SkippedRifRecord {
    * associated with.
    */
   @Column(name = "bene_id", nullable = false)
-  private String beneId;
+  private long beneId;
 
   /**
    * The RIF/CSV row or rows representing the record (i.e. beneficiary or claim) that was skipped.
@@ -84,7 +84,7 @@ public class SkippedRifRecord {
       SkipReasonCode skipReason,
       String rifFileType,
       RecordAction dmlInd,
-      String beneId,
+      long beneId,
       String rifData) {
     this.rifFileTimestamp = rifFileTimestamp;
     this.skipReason = skipReason.name();
@@ -146,7 +146,7 @@ public class SkippedRifRecord {
    * @return the {@link Beneficiary}{@link #getBeneId()} of the {@link Beneficiary} that this record
    *     is of / associated with
    */
-  public String getBeneId() {
+  public long getBeneId() {
     return beneId;
   }
 

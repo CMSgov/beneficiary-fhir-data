@@ -1,0 +1,21 @@
+{
+  "files.insertFinalNewline": true,
+  "python.formatting.provider": "black",
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "python.sortImports.args": ["--profile", "black"],
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true,
+  // There appears to be issues with Pylint+VSCode resolving module paths for local
+  // directories, especially when using virutal environments. This is not
+  // disabled in .pylintrc, so running pylint manually will check imports.
+  // See https://github.com/Microsoft/vscode-python/issues/3840 and
+  // https://github.com/Microsoft/python-language-server/issues/887.
+  // None of the proposed solutions seemed to work, other than disabling this
+  // linting error
+  "python.linting.pylintArgs": ["--disable=import-error"]
+}

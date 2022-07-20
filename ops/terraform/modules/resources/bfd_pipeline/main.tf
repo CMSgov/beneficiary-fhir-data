@@ -1,4 +1,6 @@
 locals {
+  rds_cluster_identifier = "bfd-${var.env_config.env}-aurora-cluster"
+
   is_prod = var.env_config.env == "prod"
 
   log_groups = {
@@ -227,6 +229,19 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
   policy_arn = aws_iam_policy.aws_cli.arn
 }
 
+# Locate general RDS cluster configuration
+data "aws_rds_cluster" "rds" {
+  cluster_identifier = local.rds_cluster_identifier
+}
+
+# Generate detailed RDS cluster configuration, including Writer AZ
+data "external" "rds" {
+  program = [
+    "${path.module}/rds-cluster-config.sh",     # helper script
+    data.aws_rds_cluster.rds.cluster_identifier # verified, positional argument to script
+  ]
+}
+
 # EC2 Instance to run the BFD Pipeline app.
 module "ec2_instance" {
   source = "../ec2"
@@ -234,7 +249,7 @@ module "ec2_instance" {
   env_config = var.env_config
   role       = "etl"
   layer      = "data"
-  az         = "us-east-1a" # Same as the master db
+  az         = data.external.rds.result["WriterAZ"]
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110

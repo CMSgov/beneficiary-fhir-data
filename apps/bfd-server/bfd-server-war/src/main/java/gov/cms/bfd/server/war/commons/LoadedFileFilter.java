@@ -102,7 +102,7 @@ public class LoadedFileFilter {
    * @param beneficiaryId to test
    * @return true if the filter may contain the beneficiary
    */
-  public boolean mightContain(String beneficiaryId) {
+  public boolean mightContain(Long beneficiaryId) {
     return updatedBeneficiaries.mightContain(beneficiaryId);
   }
 
