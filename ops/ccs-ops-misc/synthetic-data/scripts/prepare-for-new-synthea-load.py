@@ -20,8 +20,8 @@ def validate_and_update(args):
     synthea_prop_filepath = args[1]
         
     #Validate the ranges - number to be generated
-    ranges_good = True if skip_validation else check_ranges(end_state_properties_file, generated_benes, db_string)
-    if ranges_good == True:
+    overall_validation_result = True if skip_validation else check_ranges(end_state_properties_file, generated_benes, db_string)
+    if overall_validation_result == True:
         update_property_file(end_state_properties_file, synthea_prop_filepath)
         print("Updated synthea properties")
         return 0
@@ -36,125 +36,128 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     existing items beyond the starting value for each field.
     """
     
-    ranges_good = True
+    ## This will be updated with each validation; if False it will stay false
+    overall_validation_result = True
     
     clm_id_start = re.findall("exporter.bfd.clm_id_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from carrier_claims where clm_id <= {clm_id_start}"
     result = _execute_single_count_query(db_string, query)
-    if result > 0:
-        print(f"Carrier claims id range invalid, {result} values past starting id {clm_id_start}")
-        ranges_good = False
-    else:
-        print("Carrier claims id range is valid")
+    overall_validation_result = field_has_room_in_table(clm_id_start, "carrier_claims", "clm_id", result, overall_validation_result)
         
     bene_id_start = re.findall("exporter.bfd.bene_id_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     bene_id_end = int(bene_id_start) - int(number_of_benes_to_generate)
-    query = f"select count(*) from beneficiaries where bene_id::bigint <= {bene_id_start} and bene_id::bigint > {bene_id_end}"
+    query = f"select count(*) from beneficiaries where bene_id <= {bene_id_start} and bene_id > {bene_id_end}"
     result = _execute_single_count_query(db_string, query)
-    if result > 0:
-        print(f"Beneficiary id range invalid, {result} values in this range")
-        ranges_good = False
-    else:
-        print("Beneficiary id range is valid")
+    overall_validation_result = field_has_room_in_table(bene_id_start, "beneficiaries", "bene_id", result, overall_validation_result)
         
     clm_grp_id_start = re.findall("exporter.bfd.clm_grp_id_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     ## this is the end of the batch 1 relocated ids; should be nothing between the generated start and this
     clm_grp_id_end = '-99999831003'
     query = f"select count(*) from carrier_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
     result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "carrier_claims", "clm_grp_id", result, overall_validation_result)
     
     query = f"select count(*) from inpatient_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
-    
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "inpatient_claims", "clm_grp_id", result, overall_validation_result)
+
     query = f"select count(*) from outpatient_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "outpatient_claims", "clm_grp_id", result, overall_validation_result)
     
     query = f"select count(*) from snf_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "snf_claims", "clm_grp_id", result, overall_validation_result)
     
     query = f"select count(*) from dme_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "dme_claims", "clm_grp_id", result, overall_validation_result)
     
     query = f"select count(*) from hha_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "hha_claims", "clm_grp_id", result, overall_validation_result)
     
     query = f"select count(*) from hospice_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "hospice_claims", "clm_grp_id", result, overall_validation_result)
     
     query = f"select count(*) from partd_events where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "partd_events", "clm_grp_id", result, overall_validation_result)
     
-    if result > 0:
-        print(f"Carrier claims group id potential conflict, {result} values past start value {clm_grp_id_start} across all tables")
-        ranges_good = False
-    else:
-        print("Carrier claims group id range is valid")
-        
+    
     pde_id_start = re.findall("exporter.bfd.pde_id_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from partd_events where pde_id::bigint <= {pde_id_start}"
     result = _execute_single_count_query(db_string, query)
-    if result > 0:
-        print(f"PDE id potential conflict, {result} values after start {pde_id_start}")
-        ranges_good = False
-    else:
-        print("PDE id range is valid")
+    overall_validation_result = field_has_room_in_table(pde_id_start, "partd_events", "pde_id", result, overall_validation_result)
     
     carr_clm_ctrl_num_start = re.findall("exporter.bfd.carr_clm_cntl_num_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from carrier_claims where carr_clm_cntl_num::bigint <= {carr_clm_ctrl_num_start}"
     result = _execute_single_count_query(db_string, query)
-    if result > 0:
-        print(f"carr_clm_cntl_num id range invalid, {result} values past starting id {carr_clm_ctrl_num_start}")
-        ranges_good = False
-    else:
-        print("carr_clm_cntl_num range is valid")
-    
+    overall_validation_result = field_has_room_in_table(carr_clm_ctrl_num_start, "carrier_claims", "carr_clm_cntl_num", result, overall_validation_result)
+
     ## Check fi_num_start in all the tables it exists in
     fi_num_start = re.findall("exporter.bfd.fi_doc_cntl_num_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from outpatient_claims where fi_doc_clm_cntl_num::bigint <= {fi_num_start}"
     result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(fi_num_start, "outpatient_claims", "fi_doc_clm_cntl_num", result, overall_validation_result)
     
     fi_num_start = re.findall("exporter.bfd.fi_doc_cntl_num_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from inpatient_claims where fi_doc_clm_cntl_num::bigint <= {fi_num_start}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(fi_num_start, "inpatient_claims", "fi_doc_clm_cntl_num", result, overall_validation_result)
     
     fi_num_start = re.findall("exporter.bfd.fi_doc_cntl_num_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from hha_claims where fi_doc_clm_cntl_num::bigint <= {fi_num_start}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(fi_num_start, "hha_claims", "fi_doc_clm_cntl_num", result, overall_validation_result)
     
     fi_num_start = re.findall("exporter.bfd.fi_doc_cntl_num_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from snf_claims where fi_doc_clm_cntl_num::bigint <= {fi_num_start}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(fi_num_start, "snf_claims", "fi_doc_clm_cntl_num", result, overall_validation_result)
     
     fi_num_start = re.findall("exporter.bfd.fi_doc_cntl_num_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from hospice_claims where fi_doc_clm_cntl_num::bigint <= {fi_num_start}"
-    result = result + _execute_single_count_query(db_string, query)
+    result = _execute_single_count_query(db_string, query)
+    overall_validation_result = field_has_room_in_table(fi_num_start, "hospice_claims", "fi_doc_clm_cntl_num", result, overall_validation_result)
     
-    if result > 0:
-        print(f"fi_doc_cntl_num id range invalid, {result} values past starting id {fi_num_start} across all tables")
-        ranges_good = False
-    else:
-        print("fi_doc_cntl_num range is valid")
-        
+    ## Since MBI and HICN are incremented in difficult-to-query ways, just check if it exists; if it doesnt exist the range should be fine
     hicn_start = re.findall("exporter.bfd.hicn_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from beneficiaries where hicn_unhashed = \'{hicn_start}\'"
     result = _execute_single_count_query(db_string, query)
     if result > 0:
-        print(f"Start HICN {hicn_start} exists in DB")
-        ranges_good = False
+        print(f"(Validation Failure) Start HICN {hicn_start} exists in DB")
+        overall_validation_result = False
     else:
-        print("Start HICN does not exist in DB")
+        print("(Validation Success) Start HICN does not exist in DB")
         
     mbi_start = re.findall("exporter.bfd.mbi_start.*$",properties_file,re.MULTILINE)[0].split("=")[1]
     query = f"select count(*) from beneficiaries where mbi_num = \'{mbi_start}\'"
     result = _execute_single_count_query(db_string, query)
     if result > 0:
-        print(f"Start MBI {mbi_start} exists in DB")
-        ranges_good = False
+        print(f"(Validation Failure) Start MBI {mbi_start} exists in DB")
+        overall_validation_result = False
     else:
-        print("Start MBI does not exist in DB")
+        print("(Validation Success) Start MBI does not exist in DB")
         
-    return ranges_good
+    return overall_validation_result
 
+
+def field_has_room_in_table(starting_value, table, field, query_result, overall_validation_result):
+    """
+    Checks if for a given starting value, for a specific table and field,
+    the query that checked the range was 0 (meaning there were no rows with 
+    values beyond the starting value). If the query was successful, return
+    the overall success value for the entire validation across tables.
+    """
+    if query_result > 0:
+        print(f"(Validation Failure) {table} : {field} has conflict with data to load, {query_result} rows beyond starting value {starting_value}")
+        return False
+    else:
+        print(f"(Validation Success) {table} : {field} has clearance from starting value {starting_value}")
+        return overall_validation_result
+    
 
 def update_property_file(end_state_file_data, synthea_props_file_location):
     """
