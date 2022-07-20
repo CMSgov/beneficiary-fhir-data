@@ -197,6 +197,15 @@ resource "aws_iam_role" "firehose-lambda-role" {
               "Resource": [
                   "arn:aws:logs:us-east-1:577373831711:log-group:/aws/lambda/${local.full_name}-cw-to-flattened-json:*"
               ]
+          },
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "firehose:PutRecordBatch"
+              ],
+              "Resource": [
+                  "arn:aws:firehose:us-east-1:577373831711:deliverystream/${local.full_name}-firehose"
+              ]
           }
       ]
     })
