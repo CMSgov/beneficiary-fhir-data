@@ -89,7 +89,7 @@ EOF
     -Dexec.args="./src/main/resources/"
     """
                                 sh "mvn ${quietFlags} package"
-                                sh 'mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt--${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"'
+                                sh 'mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"'
                             }
                             }
                         }
