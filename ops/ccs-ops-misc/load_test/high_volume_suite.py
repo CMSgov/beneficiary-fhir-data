@@ -10,9 +10,9 @@ from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 
-master_bene_ids: List[str] = []
-master_contract_data: List[Dict[str, str]] = []
-master_hashed_mbis: List[str] = []
+MASTER_BENE_IDS: List[str] = []
+MASTER_CONTRACT_DATA: List[Dict[str, str]] = []
+MASTER_HASHED_MBIS: List[str] = []
 
 
 @events.test_start.add_listener
@@ -26,24 +26,24 @@ def _(environment: Environment, **kwargs):
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global master_bene_ids
-    master_bene_ids = data.load_from_parsed_opts(
+    global MASTER_BENE_IDS
+    MASTER_BENE_IDS = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_bene_ids,
         use_table_sample=True,
         data_type_name="bene_ids",
     )
 
-    global master_contract_data
-    master_contract_data = data.load_from_parsed_opts(
+    global MASTER_CONTRACT_DATA
+    MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_contract_ids,
         use_table_sample=True,
         data_type_name="contract_data",
     )
 
-    global master_hashed_mbis
-    master_hashed_mbis = data.load_from_parsed_opts(
+    global MASTER_HASHED_MBIS
+    MASTER_HASHED_MBIS = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_hashed_mbis,
         use_table_sample=True,
@@ -66,9 +66,9 @@ class HighVolumeUser(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bene_ids = master_bene_ids.copy()
-        self.contract_data = master_contract_data.copy()
-        self.hashed_mbis = master_hashed_mbis.copy()
+        self.bene_ids = MASTER_BENE_IDS.copy()
+        self.contract_data = MASTER_CONTRACT_DATA.copy()
+        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
 
     @tag("coverage", "coverage_test_id_count")
     @task
@@ -152,7 +152,7 @@ class HighVolumeUser(BFDUserBase):
         def make_url():
             contract = self.contract_data.pop()
             return create_url_path(
-                f"/v2/fhir/Patient",
+                "/v2/fhir/Patient",
                 {
                     "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
                     "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
@@ -162,7 +162,7 @@ class HighVolumeUser(BFDUserBase):
             )
 
         self.run_task(
-            name=f"/v2/fhir/Patient search by coverage contract (all pages)",
+            name="/v2/fhir/Patient search by coverage contract (all pages)",
             headers={"IncludeIdentifiers": "mbi"},
             url_callback=make_url,
         )
@@ -174,7 +174,7 @@ class HighVolumeUser(BFDUserBase):
 
         def make_url():
             return create_url_path(
-                f"/v2/fhir/Patient/",
+                "/v2/fhir/Patient/",
                 {
                     "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
@@ -182,7 +182,7 @@ class HighVolumeUser(BFDUserBase):
             )
 
         self.run_task(
-            name=f"/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
+            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
             url_callback=make_url,
         )
 
