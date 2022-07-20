@@ -222,10 +222,6 @@
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-<<<<<<< HEAD
-=======
-			<version>${commons.csv}</version>
->>>>>>> 4fa72f5ac (Added common properities to pom files)
 		</dependency>
 
 		<dependency>

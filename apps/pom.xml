@@ -119,10 +119,10 @@
 	
 
 		<!--  Dependencies required for org.apache.commons -->
-		<commons.lang3>3.12.0</commons.lang3>
-        <commons.csv>1.2</commons.csv>
-		<commons.io>2.7</commons.io>
-		<commons.collections4>4.1</commons.collections4>
+		<commons.lang3.version>3.12.0</commons.lang3.version>
+        <commons.csv.version>1.2</commons.csv.version>
+		<commons.io.version>2.7</commons.io.version>
+		<commons.collections4.version>4.1</commons.collections4.version>
 	
 
         <!-- Dependencies required for connecting to a gRPC API -->
