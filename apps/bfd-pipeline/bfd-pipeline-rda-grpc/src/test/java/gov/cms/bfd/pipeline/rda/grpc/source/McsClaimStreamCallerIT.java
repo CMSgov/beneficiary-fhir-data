@@ -27,7 +27,7 @@ public class McsClaimStreamCallerIT {
         .serverName(getClass().getSimpleName())
         .mcsSourceFactory(
             sequenceNumber ->
-                new RandomMcsClaimSource(1000L, 2).toClaimChanges().skip(sequenceNumber))
+                new RandomMcsClaimSource(1000L, 2).toClaimChanges().skip(sequenceNumber - 1))
         .build()
         .runWithChannelParam(
             channel -> {
@@ -54,7 +54,7 @@ public class McsClaimStreamCallerIT {
         .serverName(getClass().getSimpleName())
         .mcsSourceFactory(
             sequenceNumber ->
-                new RandomMcsClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber))
+                new RandomMcsClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber - 1))
         .build()
         .runWithChannelParam(
             channel -> {
