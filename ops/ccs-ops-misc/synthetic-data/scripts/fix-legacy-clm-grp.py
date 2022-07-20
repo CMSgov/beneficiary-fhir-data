@@ -25,10 +25,10 @@ def gather_unique_grp_ids_for_legacy_synthetic_data(db_string):
     print("Gathering group id lists...")
     db_items = {}
     
-    db_items["carrier_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from carrier_claims_new where bene_id::bigint < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
-    db_items["inpatient_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from inpatient_claims_new where bene_id::bigint < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
-    db_items["outpatient_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from outpatient_claims_new where bene_id::bigint < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
-    db_items["pde_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from partd_events where bene_id::bigint < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
+    db_items["carrier_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from carrier_claims where bene_id < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
+    db_items["inpatient_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from inpatient_claims where bene_id < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
+    db_items["outpatient_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from outpatient_claims where bene_id < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
+    db_items["pde_grp_ids"] = _execute(db_string, "select distinct clm_grp_id from partd_events where bene_id < -19990000000001 and bene_id != '-88888888888888' order by clm_grp_id asc")
     
     print("Carrier grp_ids: " + str(len(db_items["carrier_grp_ids"])))
     print("Inpatient grp_ids: " + str(len(db_items["inpatient_grp_ids"])))
@@ -89,13 +89,13 @@ def replace_grp_ids(table_ids, mapped_lists, db_string):
     newly remapped value. This is run as a single transaction, so no action is taken unless all queries succeed.
     """
     
-    process = Process(target=replace_ids, args=(table_ids["carrier_grp_ids"], mapped_lists["carrier_grp_ids"], "carrier_claims_new", db_string,))
+    process = Process(target=replace_ids, args=(table_ids["carrier_grp_ids"], mapped_lists["carrier_grp_ids"], "carrier_claims", db_string,))
     process.start()
     
-    process2 = Process(target=replace_ids, args=(table_ids["inpatient_grp_ids"], mapped_lists["inpatient_grp_ids"], "inpatient_claims_new", db_string,))
+    process2 = Process(target=replace_ids, args=(table_ids["inpatient_grp_ids"], mapped_lists["inpatient_grp_ids"], "inpatient_claims", db_string,))
     process2.start()
     
-    process3 = Process(target=replace_ids, args=(table_ids["outpatient_grp_ids"], mapped_lists["outpatient_grp_ids"], "outpatient_claims_new", db_string,))
+    process3 = Process(target=replace_ids, args=(table_ids["outpatient_grp_ids"], mapped_lists["outpatient_grp_ids"], "outpatient_claims", db_string,))
     process3.start()
     
     process4 = Process(target=split_pde, args=(table_ids["pde_grp_ids"], mapped_lists["pde_grp_ids"], "partd_events", db_string,))
