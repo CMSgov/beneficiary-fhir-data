@@ -2,6 +2,10 @@
 # Java applications with deep visibility and low overhead.  For more details and additional
 # configuration options visit https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file.
 common: &default_settings
+  application_logging:
+    enabled: false
+    forwarding:
+      enabled: false
   transaction_events:
     custom_request_headers:
       - header_name: "BlueButton-OriginalQueryId"
