@@ -60,13 +60,13 @@ public class RdaServiceTest {
 
     // resource - We’re creating a mock, not invoking the method
     //noinspection resource
-    lenient().doReturn(mockFissSource).when(mockFissFactory).apply(SINCE_VALUE);
+    lenient().doReturn(mockFissSource).when(mockFissFactory).apply(SINCE_VALUE + 1);
 
     lenient().doReturn(mockFissFactory).when(mockConfig).getFissSourceFactory();
 
     // resource - We’re creating a mock, not invoking the method
     //noinspection resource
-    lenient().doReturn(mockMcsSource).when(mockMcsFactory).apply(SINCE_VALUE);
+    lenient().doReturn(mockMcsSource).when(mockMcsFactory).apply(SINCE_VALUE + 1);
 
     lenient().doReturn(mockMcsFactory).when(mockConfig).getMcsSourceFactory();
   }
