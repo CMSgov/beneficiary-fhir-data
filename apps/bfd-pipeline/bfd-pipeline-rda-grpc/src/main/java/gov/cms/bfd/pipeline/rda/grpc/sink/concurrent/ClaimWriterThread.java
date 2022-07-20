@@ -172,7 +172,8 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
    * WriterThreadPool} from seeing the error. Since we are no longer processing any messages we can
    * simply ignore any that are added to the queue.
    */
-  private void drainQueueUntilStoppedFlagIsSet() throws InterruptedException {
+  @VisibleForTesting
+  void drainQueueUntilStoppedFlagIsSet() throws InterruptedException {
     if (!stopped.get()) {
       LOGGER.info("waiting for stop signal");
       do {
