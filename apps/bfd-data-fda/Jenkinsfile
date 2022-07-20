@@ -40,7 +40,7 @@ spec:
                         sh 'git config --global --add safe.directory "$WORKSPACE"'
 
 
-                            dir('apps/bfd-data-utilities-fda-drug/') {
+                            dir('apps/bfd-data-fda/') {
                                 // inject code artifact credentials into maven ~/.m2/settings.xml
                                 // Setup AWS Credentials
                         withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
@@ -61,7 +61,7 @@ spec:
                         withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                             codeArtifactAuthToken = sh(
                                 returnStdout: true,
-                                script: 'aws codeartifact get-authorization-token --domain cms-bfd \
+                                script: 'aws codeartifact get-authorization-token --domain bfd-mgmt \
                                         --domain-owner "$ACCOUNT_ID" \
                                         --output text --query authorizationToken'
                                 ).trim()
@@ -76,7 +76,7 @@ xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.
         <server>
         <username>aws</username>
         <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-        <id>cms-bfd-maven-central-store</id>
+        <id>bfd-mgmt-bfd-mgmt</id>
         </server>
     </servers>
 </settings>
@@ -89,7 +89,7 @@ EOF
     -Dexec.args="./src/main/resources/"
     """
                                 sh "mvn ${quietFlags} package"
-                                sh 'mvn deploy "-DaltDeploymentRepository=cms-bfd-maven-central-store::default::https://cms-bfd-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/maven-central-store/"'
+                                sh 'mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt--${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"'
                             }
                             }
                         }
