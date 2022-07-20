@@ -59,20 +59,28 @@ def handler(event, context):
         return f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_password" not found or empty'
 
     if not cert_key:
-        return f'"/bfd/{environment}/server/sensitive/test_client_key" not found or empty'
+        return f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_key" not found or empty'
 
     if not cert:
-        return f'"/bfd/{environment}/server/sensitive/test_client_cert" not found or empty'
+        return f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_cert" not found or empty'
 
-    with open("/tmp/bfd_test_cert.pem", "w") as file:
+    cert_path = "/tmp/bfd_test_cert.pem"
+    with open(cert_path, "w", encoding="utf-8") as file:
         file.write(cert_key + cert)
 
     password = urllib.parse.quote(raw_password)
     db_uri = get_rds_db_uri(cluster_id)
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
+
     process = subprocess.run(
-        ["locust", f"--database-uri={db_dsn}", "--headless", "--only-summary"],
+        [
+            "locust",
+            f"--database-uri={db_dsn}",
+            f"--client-cert-path={cert_path}",
+            "--headless",
+            "--only-summary",
+        ],
         text=True,
         check=False,
     )
