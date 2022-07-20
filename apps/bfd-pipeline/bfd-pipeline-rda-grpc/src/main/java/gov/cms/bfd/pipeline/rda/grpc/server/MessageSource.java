@@ -53,6 +53,12 @@ public interface MessageSource<T> extends AutoCloseable {
     return new FilteredMessageSource<>(this, predicate);
   }
 
+  /**
+   * Used to define lambdas that can create a {@link MessageSource} instance for a given starting
+   * sequence number.
+   *
+   * @param <T>
+   */
   @FunctionalInterface
   interface Factory<T> {
     MessageSource<T> apply(long sequenceNumber) throws Exception;
