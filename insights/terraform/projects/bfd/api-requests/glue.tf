@@ -41,7 +41,9 @@ module "api-requests-table" {
     }
   ]
 
-  columns = []
+  # Don't specify here, because the schema is complex and it's sufficient to
+  # allow the crawler to define the columns
+  columns = [] 
 }
 
 # Crawler for the API Requests table
@@ -116,7 +118,10 @@ module "api-history-table" {
       comment = ""
     }
   ]
-  columns = [] # Don't specify here, because the schema is complex and it's sufficient to allow the crawler to define the columns
+
+  # Don't specify here, because the schema is complex and it's sufficient to
+  # allow the crawler to define the columns
+  columns = []
 }
 
 # Glue Crawler for the API History table

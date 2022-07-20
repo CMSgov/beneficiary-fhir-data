@@ -81,13 +81,6 @@ if record_count > 0:
         glueContext,
         "Relationalize"
         )
-    
-    # construct renaming mapping for ApplyMapping
-    mappings = list()
-    for field in relationalized.schema.fields:
-        if field.name:
-            dtype = field.dataType.typeName()
-            mappings.append((field.name, dtype, field.name.replace('.', '_'), dtype))
 
     OutputDy = Map.apply(frame = relationalized,
             f = format_field_names, transformation_ctx = 'Reformat_Field_Names')

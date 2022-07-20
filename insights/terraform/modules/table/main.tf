@@ -9,7 +9,18 @@ data "aws_kms_key" "bucket_cmk" {
 }
 
 locals {
-  account_id  = data.aws_caller_identity.current.account_id
+  account_id           = data.aws_caller_identity.current.account_id
+
+  table_parameters = {
+    json = {
+      EXTERNAL = "TRUE"
+    },
+    parquet = {
+      classification        = "parquet"
+      EXTERNAL              = "TRUE"
+      "parquet.compression" = "SNAPPY"
+    }
+  }
 
   storage_options = {
     json = {
@@ -55,11 +66,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
   table_type    = "EXTERNAL_TABLE"
   owner         = "owner"
 
-  parameters = {
-    classification          = var.storage_format == "parquet" ? "parquet" : null
-    EXTERNAL                = "TRUE"
-    "parquet.compression"   = var.storage_format == "parquet" ? "SNAPPY" : null
-  }
+  parameters = local.table_parameters[var.storage_format]
 
   dynamic "partition_keys" {
     for_each = var.partitions
@@ -81,7 +88,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
       for_each = var.columns
 
       content {
-        name    = lower(columns.value.name)
+        name    = columns.value.name
         type    = columns.value.type
         comment = columns.value.comment
       }
