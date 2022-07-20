@@ -6,12 +6,9 @@ from typing import Optional
 import boto3
 from botocore.config import Config
 
-environment = os.environ.get("ENVIRONMENT", "test")
-locustfile = os.environ.get("LOCUSTFILE", "locustfile.py")
-
+environment = os.environ.get("BFD_ENVIRONMENT", "test")
 
 boto_config = Config(region_name="us-east-1")
-
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
 
@@ -50,19 +47,34 @@ def handler(event, context):
     )
 
     if not cluster_id:
-        return f'SSM parameter "/bfd/{environment}/common/nonsensitive/rds_cluster_identifier" not found or empty'
+        return (
+            f'SSM parameter "/bfd/{environment}/common/nonsensitive/rds_cluster_identifier" not'
+            " found or empty"
+        )
 
     if not username:
-        return f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_username" not found or empty'
+        return (
+            f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_username"'
+            " not found or empty"
+        )
 
     if not raw_password:
-        return f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_password" not found or empty'
+        return (
+            f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_password"'
+            " not found or empty"
+        )
 
     if not cert_key:
-        return f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_key" not found or empty'
+        return (
+            f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_key" not found or'
+            " empty"
+        )
 
     if not cert:
-        return f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_cert" not found or empty'
+        return (
+            f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_cert" not found or'
+            " empty"
+        )
 
     cert_path = "/tmp/bfd_test_cert.pem"
     with open(cert_path, "w", encoding="utf-8") as file:
