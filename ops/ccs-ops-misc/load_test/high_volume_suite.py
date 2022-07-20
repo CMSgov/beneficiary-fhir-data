@@ -214,7 +214,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v2/fhir/Patient search by id",
         )
 
-    @tag("coverage", "coverage_test_id_count", "v1")
+    @tag("coverage", "coverage_test_id_count_v1", "v1")
     @task
     def coverage_test_id_count_v1(self):
         """Coverage search by ID, Paginated"""
@@ -224,7 +224,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
-    @tag("coverage", "coverage_test_id_last_updated", "v1")
+    @tag("coverage", "coverage_test_id_last_updated_v1", "v1")
     @task
     def coverage_test_id_last_updated_v1(self):
         """Coverage search by ID, Last Updated"""
@@ -237,7 +237,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
 
-    @tag("eob", "eob_test_id_count_type_pde", "v1")
+    @tag("eob", "eob_test_id_count_type_pde_v1", "v1")
     @task
     def eob_test_id_count_type_pde_v1(self):
         """Explanation of Benefit search by ID, type PDE, paginated"""
@@ -252,7 +252,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
         )
 
-    @tag("eob", "eob_test_id_last_updated_count", "v1")
+    @tag("eob", "eob_test_id_last_updated_count_v1", "v1")
     @task
     def eob_test_id_last_updated_count_v1(self):
         """Explanation of Benefit search by ID, last updated, paginated"""
@@ -267,7 +267,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
         )
 
-    @tag("eob", "eob_test_id_include_tax_number_last_updated", "v1")
+    @tag("eob", "eob_test_id_include_tax_number_last_updated_v1", "v1")
     @task
     def eob_test_id_include_tax_number_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
@@ -282,7 +282,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
         )
 
-    @tag("eob", "eob_test_id_last_updated", "v1")
+    @tag("eob", "eob_test_id_last_updated_v1", "v1")
     @task
     def eob_test_id_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated"""
@@ -296,7 +296,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
         )
 
-    @tag("eob", "eob_test_id", "v1")
+    @tag("eob", "eob_test_id_v1", "v1")
     @task
     def eob_test_id_v1(self):
         """Explanation of Benefit search by ID"""
@@ -306,7 +306,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
-    @tag("patient", "patient_test_coverage_contract", "v1")
+    @tag("patient", "patient_test_coverage_contract_v1", "v1")
     @task
     def patient_test_coverage_contract_v1(self):
         """Patient search by coverage contract (all pages)"""
@@ -329,7 +329,7 @@ class HighVolumeUser(BFDUserBase):
             url_callback=make_url,
         )
 
-    @tag("patient", "patient_test_hashed_mbi", "v1")
+    @tag("patient", "patient_test_hashed_mbi_v1", "v1")
     @task
     def patient_test_hashed_mbi_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -348,7 +348,7 @@ class HighVolumeUser(BFDUserBase):
             url_callback=make_url,
         )
 
-    @tag("patient", "patient_test_id_last_updated_include_mbi_include_address", "v1")
+    @tag("patient", "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
     @task
     def patient_test_id_last_updated_include_mbi_include_address_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -363,7 +363,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
         )
 
-    @tag("patient", "patient_test_id", "v1")
+    @tag("patient", "patient_test_id_v1", "v1")
     @task
     def patient_test_id_v1(self):
         """Patient search by ID"""
