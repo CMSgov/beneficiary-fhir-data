@@ -190,22 +190,7 @@ public final class PipelineTestUtils {
          * Finally, run the TRUNCATE. On Postgres the cascade option is required due to the
          * presence of FK constraints.
          */
-
-        // TODO - BFD-1933
-        // revert this section as part of the PR that will subsequently drop the views
-        // and rename the _new table names by dropping the '_new' from the table.
-
-        boolean noUnderscoreNew =
-            (entityType == LoadedBatch.class
-                || entityType == LoadedFile.class
-                || entityType == RdaFissClaim.class
-                || entityType == RdaFissProcCode.class);
-
-        String tableName = noUnderscoreNew ? tableNameSpecifier : tableNameSpecifier + "_new";
-        String truncateTableSql = String.format("TRUNCATE TABLE %s", tableName);
-
-        // end of temp modifcations that will be cleaned up
-
+        String truncateTableSql = String.format("TRUNCATE TABLE %s", tableNameSpecifier);
         if (DatabaseUtils.isPostgresConnection(connection)) {
           truncateTableSql = truncateTableSql + " CASCADE";
         }
