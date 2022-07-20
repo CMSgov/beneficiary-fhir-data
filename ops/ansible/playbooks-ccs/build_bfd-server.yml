@@ -40,7 +40,7 @@
         data_server_tmp_dir: "{{ data_server_dir }}/tmp"
         data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_container_name: jboss-eap-7.0
-        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ bfd_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer"
+        data_server_appserver_jvmargs: "-Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ bfd_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
         data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
         data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
@@ -50,7 +50,7 @@
         data_server_db_url: "{{ vault_data_db_secondary_url }}"
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
-        data_server_db_connections_max: "{{ data_server_num_cores * 10 }}" # Oracle recommends 1-10 connections per CPU core
+        data_server_db_connections_max: "{{ ansible_processor_vcpus * 10 }}" # Oracle recommends 1-10 connections per CPU core
         data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"

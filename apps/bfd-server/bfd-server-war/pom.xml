@@ -221,7 +221,6 @@
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
 		</dependency>
 
 		<dependency>

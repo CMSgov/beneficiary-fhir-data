@@ -2,7 +2,7 @@
 """
 
 from locust.env import Environment
-from locust.runners import DistributedRunner, WorkerRunner, MasterRunner
+from locust.runners import DistributedRunner, MasterRunner, WorkerRunner
 
 
 def is_locust_worker(env: Environment) -> bool:

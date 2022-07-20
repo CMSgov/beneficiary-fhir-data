@@ -309,7 +309,7 @@ public class RdaLoadJobIT {
     //noinspection resource
     return sequenceNumber ->
         new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange)
-            .skip(sequenceNumber);
+            .skip(sequenceNumber - 1);
   }
 
   private MessageSource.Factory<McsClaimChange> mcsJsonSource(List<String> claimJson) {
@@ -317,6 +317,6 @@ public class RdaLoadJobIT {
     //noinspection resource
     return sequenceNumber ->
         new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange)
-            .skip(sequenceNumber);
+            .skip(sequenceNumber - 1);
   }
 }

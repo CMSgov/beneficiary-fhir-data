@@ -320,7 +320,7 @@ public class StandardGrpcRdaSourceIT {
                 WrappedClaimSource.wrapFissClaims(
                     new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
                     clock,
-                    sequenceNumber));
+                    sequenceNumber - 1));
   }
 
   private RdaSourceConfig.RdaSourceConfigBuilder createSourceConfig(Integer port) {

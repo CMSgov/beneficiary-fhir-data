@@ -1,11 +1,17 @@
-"""Members of this file/module are related to the comparison and subsequent validation 
+"""Members of this file/module are related to the comparison and subsequent validation
 of performance statistics against a previous set of statistics or an average of all
 previous statistics"""
 import logging
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Set, Union
+
 from locust.env import Environment
-from common.stats.aggregated_stats import AggregatedStats, ResponseTimePercentiles, TaskStats
+
+from common.stats.aggregated_stats import (
+    AggregatedStats,
+    ResponseTimePercentiles,
+    TaskStats,
+)
 from common.stats.stats_config import StatsConfiguration
 from common.stats.stats_loaders import StatsLoader
 
@@ -21,11 +27,12 @@ DEFAULT_DEVIANCE_FAILURE_THRESHOLD = 500.0
 class StatCompareResult:
     """Dataclass representing the result of a comparison between the baseline/previous value of a
     TaskStats stat and the current value of said stat"""
+
     stat: str
     """The name of the stat"""
     percent: float
     """The percent value of this stat's value versus a previous run's, i.e. this stat is percent% times worse than
-    the previous run or average of all runs. A value of 100 means no change (i.e. current stat is 100% 
+    the previous run or average of all runs. A value of 100 means no change (i.e. current stat is 100%
     of a previous snapshot of the same stat), whereas values lower than 100 generally indicate
     positive change and values greater than 100 indicate negative change"""
     baseline: Union[float, int]
@@ -33,28 +40,44 @@ class StatCompareResult:
     current: Union[float, int]
     """The value of the stat from the current test run"""
 
-def do_stats_comparison(environment: Environment, stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+
+def do_stats_comparison(
+    environment: Environment, stats_config: StatsConfiguration, stats: AggregatedStats
+) -> None:
     if not stats_config.compare:
         return
-    
+
     logger = logging.getLogger()
     stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
     previous_stats = stats_loader.load()
     if previous_stats:
-        failed_stats_results = validate_aggregated_stats(previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD)
+        failed_stats_results = validate_aggregated_stats(
+            previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD
+        )
         if not failed_stats_results:
             logger.info(
-                'Comparison against %s stats under "%s" tag passed', stats_config.compare.value, stats_config.comp_tag)
+                'Comparison against %s stats under "%s" tag passed',
+                stats_config.compare.value,
+                stats_config.comp_tag,
+            )
         else:
             # If we get here, that means some tasks have stats exceeding the threshold percent
             # between the previous/average run and the current. Fail the test run, and log the
-            # failing tasks along with their relative stat percents   
+            # failing tasks along with their relative stat percents
             environment.process_exit_code = 1
-            logger.error('Comparison against %s stats under "%s" tag failed; following tasks had stats that exceeded %.2f%% of the baseline: %s', 
-                        stats_config.compare.value, stats_config.comp_tag, DEFAULT_DEVIANCE_FAILURE_THRESHOLD, failed_stats_results)
+            logger.error(
+                'Comparison against %s stats under "%s" tag failed; following tasks had stats that'
+                " exceeded %.2f%% of the baseline: %s",
+                stats_config.compare.value,
+                stats_config.comp_tag,
+                DEFAULT_DEVIANCE_FAILURE_THRESHOLD,
+                failed_stats_results,
+            )
     else:
         logger.warn(
-            'No applicable performance statistics under tag "%s" to compare against', stats_config.comp_tag)
+            'No applicable performance statistics under tag "%s" to compare against',
+            stats_config.comp_tag,
+        )
 
 
 def get_stats_compare_results(previous: TaskStats, current: TaskStats) -> List[StatCompareResult]:
@@ -71,30 +94,41 @@ def get_stats_compare_results(previous: TaskStats, current: TaskStats) -> List[S
     # whether a larger value is better (i.e. more requests per second) or a smaller
     # value is better (i.e. less failures). This determines which of the two TaskStats
     # (previous or current) is the dividend and divisor, as order matters.
-    fields_higher_better = {'num_requests', 'total_reqs_per_second'}
-    fields_lower_better = {'num_failures', 'median_response_time', 'average_response_time',
-                           'min_response_time', 'max_response_time', 'total_fails_per_sec'}
+    fields_higher_better = {"num_requests", "total_reqs_per_second"}
+    fields_lower_better = {
+        "num_failures",
+        "median_response_time",
+        "average_response_time",
+        "min_response_time",
+        "max_response_time",
+        "total_fails_per_sec",
+    }
 
     # Compute the list of StatCompareResults for each type of field
-    results_higher = _compute_results_list(previous, current, fields_higher_better, 
-                                           is_higher_val_better=True)
-    results_lower = _compute_results_list(previous, current, fields_lower_better,
-                                          is_higher_val_better=False)
+    results_higher = _compute_results_list(
+        previous, current, fields_higher_better, is_higher_val_better=True
+    )
+    results_lower = _compute_results_list(
+        previous, current, fields_lower_better, is_higher_val_better=False
+    )
 
     # Percentiles are stored as a dict within TaskStats, so we need to get the keys common to
     # both response percentiles dicts
     prev_percentiles = previous.response_time_percentiles
     cur_percentiles = current.response_time_percentiles
     percentiles = prev_percentiles.keys() & cur_percentiles.keys()
-    results_percentiles = _compute_results_list(prev_percentiles, cur_percentiles, percentiles,
-                                                is_higher_val_better=False)
+    results_percentiles = _compute_results_list(
+        prev_percentiles, cur_percentiles, percentiles, is_higher_val_better=False
+    )
 
     # Combine all of the lists created above into a single list with all of the important
     # stats and their comparison results
     return results_higher + results_lower + results_percentiles
 
 
-def get_stats_above_threshold(compare_results: List[StatCompareResult], threshold: float) -> List[StatCompareResult]:
+def get_stats_above_threshold(
+    compare_results: List[StatCompareResult], threshold: float
+) -> List[StatCompareResult]:
     """Computes the list of  whose relative percentages exceed a given threshold
 
     Args:
@@ -107,7 +141,11 @@ def get_stats_above_threshold(compare_results: List[StatCompareResult], threshol
     return [stat_delta for stat_delta in compare_results if stat_delta.percent > threshold]
 
 
-def validate_aggregated_stats(previous: AggregatedStats, current: AggregatedStats, threshold: float = DEFAULT_DEVIANCE_FAILURE_THRESHOLD) -> Dict[str, List[StatCompareResult]]:
+def validate_aggregated_stats(
+    previous: AggregatedStats,
+    current: AggregatedStats,
+    threshold: float = DEFAULT_DEVIANCE_FAILURE_THRESHOLD,
+) -> Dict[str, List[StatCompareResult]]:
     """Validates and compares the given AggregatedStats instances against each other, checking each of their common
     TaskStats and returning a dictionary of the name of those tasks that exceed the given threshold to the actual stats
     that failed
@@ -137,20 +175,30 @@ def validate_aggregated_stats(previous: AggregatedStats, current: AggregatedStat
     return failed_tasks_with_percents
 
 
-def _compute_results_list(previous: TaskStatsOrPercentiles, current: TaskStatsOrPercentiles,
-                          keys: Set[str], is_higher_val_better: bool) -> List[StatCompareResult]:
+def _compute_results_list(
+    previous: TaskStatsOrPercentiles,
+    current: TaskStatsOrPercentiles,
+    keys: Set[str],
+    is_higher_val_better: bool,
+) -> List[StatCompareResult]:
     # Convert TaskStats instances to dicts so that we can use the same logic for both
     prev_dict = asdict(previous) if isinstance(previous, TaskStats) else previous
     cur_dict = asdict(current) if isinstance(current, TaskStats) else current
-    
-    # Uses list comprehension to compute the relative percent "worseness" of a given stat in the 
+
+    # Uses list comprehension to compute the relative percent "worseness" of a given stat in the
     # dict when comparing a previous run of the given stats versus the current run.
     dividend = prev_dict if is_higher_val_better else cur_dict
     divisor = cur_dict if is_higher_val_better else prev_dict
-    return [StatCompareResult(key,
-                              _safe_division(dividend[key], divisor[key]) * 100.0,
-                              baseline=prev_dict[key], current=cur_dict[key])
-            for key in keys]
+    return [
+        StatCompareResult(
+            key,
+            _safe_division(dividend[key], divisor[key]) * 100.0,
+            baseline=prev_dict[key],
+            current=cur_dict[key],
+        )
+        for key in keys
+    ]
+
 
 def _safe_division(dividend: Union[float, int], divisor: Union[float, int]) -> float:
     # Often some fields will be 0 (such as the failure stats), and dividing by 0 results

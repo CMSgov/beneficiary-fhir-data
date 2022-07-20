@@ -197,7 +197,9 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   /**
    * Uses the hard coded starting sequence number if one has been configured. Otherwise asks the
    * sink to provide its maximum known sequence number as our starting point. When all else fails we
-   * start at the beginning.
+   * start at the beginning. The RDA API assumes we are sending the highest sequence number that we
+   * already have so they will start at that plus 1. For a configured starting sequence number we
+   * subtract one but for a value from the database we can just pass it through unchanged.
    *
    * @param sink used to obtain the maximum known sequence number
    * @return a valid RDA change sequence number
@@ -205,9 +207,9 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   private long getStartingSequenceNumber(RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
     if (startingSequenceNumber.isPresent()) {
-      return startingSequenceNumber.get();
+      return startingSequenceNumber.map(x -> Math.max(MIN_SEQUENCE_NUM, x - 1)).get();
     } else {
-      return sink.readMaxExistingSequenceNumber().map(seqNo -> seqNo + 1).orElse(MIN_SEQUENCE_NUM);
+      return sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
     }
   }
 }

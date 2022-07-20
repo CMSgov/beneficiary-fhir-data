@@ -83,12 +83,12 @@ public class FissClaimStreamCallerIT {
 
               RdaFissClaim claim = transform(results.next());
               assertEquals("63843470", claim.getDcn());
-              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
               assertEquals("2643602", claim.getDcn());
-              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertEquals(Long.valueOf(2), claim.getSequenceNumber());
               assertFalse(results.hasNext());
             });
   }
@@ -99,7 +99,7 @@ public class FissClaimStreamCallerIT {
         .serverName(getClass().getSimpleName())
         .fissSourceFactory(
             sequenceNumber ->
-                new RandomFissClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber))
+                new RandomFissClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber - 1))
         .build()
         .runWithChannelParam(
             channel -> {

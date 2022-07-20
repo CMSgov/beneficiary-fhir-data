@@ -127,8 +127,3 @@ The results will look the same whether running in distributed or non-distributed
     - If this occurs, you may need to adjust the ACLs in AWS to allow the box to connect to other single instances. This silent error may occur with other types of connection issues as well.
 - If there is any issue with the call, you'll also see 0 requests, often with no error message.
     - You'll need to do some additional debugging per endpoint to figure out the issue here; adjusting the LOCUST_LOGLEVEL in the runtests.py file to be DEBUG may help detect a problem.
-    
-## Improvements
-This is a list of some improvements that could be made to the tests moving forward:
-- (Consider) Move all tests into one script with each test being a @Task
-- Set up tests to all run at once to simulate actual load across the whole system (i.e. during big spike loads)
