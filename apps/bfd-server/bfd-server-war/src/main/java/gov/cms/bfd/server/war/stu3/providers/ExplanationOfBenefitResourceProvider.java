@@ -361,7 +361,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
         TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    LoggingUtils.logBenesToMdc(bundle);
+    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return bundle;
   }
