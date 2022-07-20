@@ -45,7 +45,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     LOGGER.info("start getFissClaims call with since={}", request.getSince());
     try {
       MessageSource<FissClaimChange> generator =
-          config.getFissSourceFactory().apply(request.getSince());
+          config.getFissSourceFactory().apply(request.getSince() + 1);
       Responder<FissClaimChange> responder = new Responder<>(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
@@ -59,7 +59,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     LOGGER.info("start getMcsClaims call with since={}", request.getSince());
     try {
       MessageSource<McsClaimChange> generator =
-          config.getMcsSourceFactory().apply(request.getSince());
+          config.getMcsSourceFactory().apply(request.getSince() + 1);
       Responder<McsClaimChange> responder = new Responder<>(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
