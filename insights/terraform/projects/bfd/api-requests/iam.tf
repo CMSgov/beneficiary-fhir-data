@@ -2,7 +2,7 @@
 data "aws_caller_identity" "current" {}
 
 # BFD Analysts IAM Group
-data "aws_iam_group" "bfd-analysts" {
+data "aws_iam_group" "iam-group-bfd-analysts" {
   group_name = "bfd-insights-analysts"
 }
 
@@ -10,7 +10,7 @@ data "aws_iam_group" "bfd-analysts" {
 # Firehose Ingestion
 
 # CloudWatch Role
-resource "aws_iam_role" "cloudwatch_role" {
+resource "aws_iam_role" "iam-role-cloudwatch-logs" {
   name               = "${local.full_name}-cloudwatch-logs-role"
   description        = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
   assume_role_policy = jsonencode(
@@ -45,7 +45,7 @@ resource "aws_iam_role" "cloudwatch_role" {
 }
 
 # Firehose Policy
-resource "aws_iam_policy" "firehose_policy" {
+resource "aws_iam_policy" "iam-policy-firehose" {
   description = "Allow firehose delivery to insights S3 bucket"
   name        = "${local.full_name}-firehose-to-s3-policy"
   policy = jsonencode(
@@ -59,7 +59,7 @@ resource "aws_iam_policy" "firehose_policy" {
           ]
           Effect   = "Allow"
           Resource = [
-            "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.api-history-table.name}",
+            "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.glue-table-api-history.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:database/${module.database.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:catalog"
           ]
@@ -112,13 +112,13 @@ resource "aws_iam_policy" "firehose_policy" {
 }
 
 # Firehose Role
-resource "aws_iam_role" "firehose_role" {
+resource "aws_iam_role" "iam-role-firehose" {
   name                  = "${local.full_name}-firehose-role"
   description           = ""
   path                  = "/"
   force_detach_policies = false
   managed_policy_arns   = [
-    aws_iam_policy.firehose_policy.arn,
+    aws_iam_policy.iam-policy-firehose.arn,
   ]
   max_session_duration = 3600
   assume_role_policy = jsonencode(
@@ -158,7 +158,7 @@ resource "aws_iam_role" "firehose_role" {
 }
 
 # Lambda Role
-resource "aws_iam_role" "firehose-lambda-role" {
+resource "aws_iam_role" "iam-role-firehose-lambda" {
   name                  = "${local.full_name}-firehose-lambda-role"
   description           = "Allow Lambda to create and write to its log group"
   path                  = "/service-role/"
@@ -216,6 +216,6 @@ resource "aws_iam_role" "firehose-lambda-role" {
 # Glue
 
 # Role for Glue to assume with S3 permissions
-data "aws_iam_role" "glue-role" {
+data "aws_iam_role" "iam-role-glue" {
   name = "bfd-insights-bfd-glue-role"
 }

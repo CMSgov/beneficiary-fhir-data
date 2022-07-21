@@ -12,7 +12,7 @@ module "database" {
 # Target location for ingested logs, no matter the method of ingestion.
 
 # Target Glue Table where ingested logs are eventually stored
-module "api-requests-table" {
+module "glue-table-api-requests" {
   source         = "../../../modules/table"
   table          = "${local.full_name_underscore}_api_requests"
   description    = "Target Glue Table where ingested logs are eventually stored"
@@ -47,7 +47,7 @@ module "api-requests-table" {
 }
 
 # Crawler for the API Requests table
-resource "aws_glue_crawler" "api-requests-crawler" {
+resource "aws_glue_crawler" "glue-crawler-api-requests" {
   classifiers   = []
   database_name = module.database.name
   configuration = jsonencode(
@@ -64,12 +64,12 @@ resource "aws_glue_crawler" "api-requests-crawler" {
     }
   )
   name     = "${local.full_name}-api-requests-crawler"
-  role     = data.aws_iam_role.glue-role.arn
+  role     = data.aws_iam_role.iam-role-glue.arn
 
   catalog_target {
     database_name = module.database.name
     tables = [
-      module.api-requests-table.name,
+      module.glue-table-api-requests.name,
     ]
   }
 
@@ -93,7 +93,7 @@ resource "aws_glue_crawler" "api-requests-crawler" {
 # Storage and Jobs for ingesting unaltered json log files.
 
 # Glue Table to store API History
-module "api-history-table" {
+module "glue-table-api-history" {
   source         = "../../../modules/table"
   table          = "${local.full_name_underscore}_api_history"
   description    = "Store log files from BFD for analysis in BFD Insights"
@@ -125,14 +125,14 @@ module "api-history-table" {
 }
 
 # Glue Crawler for the API History table
-resource "aws_glue_crawler" "bfd-history-crawler" {
+resource "aws_glue_crawler" "glue-crawler-api-history" {
   database_name = module.database.name
   name          = "${local.full_name}-history-crawler"
   description   = "Glue Crawler to ingest logs into the API History Glue Table"
-  role          = data.aws_iam_role.glue-role.arn
+  role          = data.aws_iam_role.iam-role-glue.arn
 
   classifiers = [
-    aws_glue_classifier.bfd-historicals-local.name,
+    aws_glue_classifier.glue-classifier-api-history.name,
   ]
 
   lineage_configuration {
@@ -145,7 +145,7 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
 
   catalog_target {
     database_name = module.database.name
-    tables        = [ module.api-history-table.name ]
+    tables        = [ module.glue-table-api-history.name ]
   }
 
   schema_change_policy {
@@ -164,7 +164,7 @@ resource "aws_glue_crawler" "bfd-history-crawler" {
 }
 
 # Classifier for the History Crawler
-resource "aws_glue_classifier" "bfd-historicals-local" {
+resource "aws_glue_classifier" "glue-classifier-api-history" {
   name = "${local.full_name}-historicals-local"
 
   grok_classifier {
@@ -174,7 +174,7 @@ resource "aws_glue_classifier" "bfd-historicals-local" {
 }
 
 # S3 object containing the Glue Script for history ingestion
-resource "aws_s3_object" "bfd-history-ingest" {
+resource "aws_s3_object" "s3-script-history-ingest" {
   bucket             = data.aws_s3_bucket.bfd-insights-bucket.id
   bucket_key_enabled = false
   content_type       = "application/octet-stream; charset=UTF-8"
@@ -186,7 +186,7 @@ resource "aws_s3_object" "bfd-history-ingest" {
 }
 
 # Glue Job for history ingestion
-resource "aws_glue_job" "bfd-history-ingest-job" {
+resource "aws_glue_job" "glue-job-history-ingest" {
   name                      = "${local.full_name}-history-ingest"
   description               = "Ingest historical log data"
   connections               = []
@@ -194,7 +194,7 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
   max_retries               = 0
   non_overridable_arguments = {}
   number_of_workers         = 10
-  role_arn                  = data.aws_iam_role.glue-role.arn
+  role_arn                  = data.aws_iam_role.iam-role-glue.arn
   timeout                   = 2880
   worker_type               = "G.1X"
 
@@ -211,15 +211,15 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
     "--spark-event-logs-path"            = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/sparkHistoryLogs/${local.environment}/"
     "--tempLocation"                     = "s3://${data.aws_s3_bucket.bfd-insights-bucket.id}/temp/${local.environment}/history-ingest/"
     "--sourceDatabase"                   = module.database.name
-    "--sourceTable"                      = module.api-history-table.name
+    "--sourceTable"                      = module.glue-table-api-history.name
     "--targetDatabase"                   = module.database.name
-    "--targetTable"                      = module.api-requests-table.name
+    "--targetTable"                      = module.glue-table-api-requests.name
   }
 
   command {
     name            = "glueetl"
     python_version  = "3"
-    script_location = "s3://${aws_s3_object.bfd-history-ingest.bucket}/${aws_s3_object.bfd-history-ingest.key}"
+    script_location = "s3://${aws_s3_object.s3-script-history-ingest.bucket}/${aws_s3_object.s3-script-history-ingest.key}"
   }
 
   execution_property {
@@ -233,57 +233,57 @@ resource "aws_glue_job" "bfd-history-ingest-job" {
 # Organizes the Glue jobs / crawlers and runs them in sequence
 
 # Glue Workflow Object
-resource "aws_glue_workflow" "glue-workflow" {
+resource "aws_glue_workflow" "glue-workflow-api-requests" {
   name = "${local.full_name}-api-requests-workflow"
   max_concurrent_runs = "1"
 }
 
 # Trigger for History Ingest Crawler. This will run every night at 4am UTC, but it can also be run
 # manually through the Console
-resource "aws_glue_trigger" "history-ingest-crawler-trigger" {
+resource "aws_glue_trigger" "glue-trigger-api-history-crawler" {
   name          = "${local.full_name}-history-ingest-crawler-trigger"
-  workflow_name = aws_glue_workflow.glue-workflow.name
+  workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
   type          = "SCHEDULED"
   schedule      = "cron(0 4 * * ? *)" # Every day at 4am UTC
 
   actions {
-    crawler_name = aws_glue_crawler.bfd-history-crawler.name
+    crawler_name = aws_glue_crawler.glue-crawler-api-history.name
   }
 }
 
 # Trigger for History Ingest Job
-resource "aws_glue_trigger" "bfd-history-ingest-job-trigger" {
+resource "aws_glue_trigger" "glue-trigger-history-ingest-job" {
   name          = "${local.full_name}-history-ingest-trigger"
   description   = "Trigger to start the History Ingest Glue Job whenever the Crawler completes successfully"
-  workflow_name = aws_glue_workflow.glue-workflow.name
+  workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
   type          = "CONDITIONAL"
 
   actions {
-    job_name = aws_glue_job.bfd-history-ingest-job.name
+    job_name = aws_glue_job.glue-job-history-ingest.name
   }
 
   predicate {
     conditions {
-      crawler_name = aws_glue_crawler.bfd-history-crawler.name
+      crawler_name = aws_glue_crawler.glue-crawler-api-history.name
       crawl_state  = "SUCCEEDED"
     }
   }
 }
 
 # Trigger for API Requests Crawler
-resource "aws_glue_trigger" "bfd-api-requests-crawler-trigger" {
+resource "aws_glue_trigger" "glue-crawler-api-requests-crawler" {
   name          = "${local.full_name}-api-requests-crawler-trigger"
   description   = "Trigger to start the API Requests Crawler whenever the History Ingest Job completes successfully"
-  workflow_name = aws_glue_workflow.glue-workflow.name
+  workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
   type          = "CONDITIONAL"
 
   actions {
-    crawler_name = aws_glue_crawler.api-requests-crawler.name
+    crawler_name = aws_glue_crawler.glue-crawler-api-requests.name
   }
 
   predicate {
     conditions {
-      job_name = aws_glue_job.bfd-history-ingest-job.name
+      job_name = aws_glue_job.glue-job-history-ingest.name
       state  = "SUCCEEDED"
     }
   }
