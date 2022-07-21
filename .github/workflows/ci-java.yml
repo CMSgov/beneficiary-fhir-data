@@ -162,7 +162,7 @@ jobs:
         if: steps.run_check.outputs.skip == 'false'
         uses: wei/wget@v1
         with:
-          args: ops/fhir_validations/validator_cli.jar https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+          args: -O ops/fhir_validations/validator_cli.jar https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Verify FHIR resource'
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'
