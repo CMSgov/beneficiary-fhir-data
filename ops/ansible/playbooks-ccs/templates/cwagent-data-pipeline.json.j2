@@ -25,5 +25,57 @@
         ]
       }
     }
+  },
+  "metrics": {
+    "metrics_collected": {
+      "collectd": {},
+      "cpu": {
+        "resources": [
+          "*"
+        ],
+        "measurement": [
+          {"name": "cpu_usage_idle", "rename": "CPU_USAGE_IDLE", "unit": "Percent"},
+          {"name": "cpu_usage_nice", "unit": "Percent"},
+          "cpu_usage_guest"
+        ],
+        "totalcpu": false,
+        "metrics_collection_interval": 10,
+        "append_dimensions": {
+          "test": "test1",
+          "date": "2017-10-01"
+        }
+      },
+      "netstat": {
+        "measurement": [
+          "tcp_established",
+          "tcp_syn_sent",
+          "tcp_close"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "disk": {
+        "measurement": [
+          "used_percent"
+        ],
+        "resources": [
+          "*"
+        ],
+        "drop_device": true
+      },  
+      "processes": {
+        "measurement": [
+          "running",
+          "sleeping",
+          "dead"
+        ]
+      }
+    },
+    "append_dimensions": {
+      "ImageId": "${aws:ImageId}",
+      "InstanceId": "${aws:InstanceId}",
+      "InstanceType": "${aws:InstanceType}",
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}"
+    },
+    "aggregation_dimensions" : [["AutoScalingGroupName"], ["InstanceId", "InstanceType"],[]]
   }
 }
