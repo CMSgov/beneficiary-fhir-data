@@ -59,8 +59,8 @@ def filter_errors(ignore_list: dict, errors_per_file: dict) -> dict:
     return filtered_errors_per_file
 
 
-def validate_resources(version: str, ignore_list: dict, files: List[str]) -> dict:
-    java_commands = ['java', '-Xmx3G', '-Xms2G', '-jar', 'validator_cli.jar']
+def validate_resources(validator_path: str, version: str, ignore_list: dict, files: List[str]) -> dict:
+    java_commands = ['java', '-Xmx3G', '-Xms2G', '-jar', validator_path]
 
     for file_name in files:
         java_commands.append(file_name)
@@ -106,7 +106,7 @@ class RunConfig(object):
         self.version = ''
 
 
-def validate_resource_dir(run_config: RunConfig, ignore_list: dict, recently_changed: bool) -> Tuple[int, dict]:
+def validate_resource_dir(validator_path: str, run_config: RunConfig, ignore_list: dict, recently_changed: bool) -> Tuple[int, dict]:
     print('Checking directory {}'.format(run_config.target_dir))
     files = get_fhir_resource_files(run_config.target_dir, recently_changed)
     files.sort()
@@ -115,7 +115,7 @@ def validate_resource_dir(run_config: RunConfig, ignore_list: dict, recently_cha
     if file_count > 0:
         print('Validating {} resources'.format(file_count))
 
-        invalid_resources = validate_resources(run_config.version, ignore_list, files)
+        invalid_resources = validate_resources(validator_path, run_config.version, ignore_list, files)
         for resource in invalid_resources:
             if len(resource) == 0:
                 del invalid_resources[resource]
@@ -155,8 +155,8 @@ def main():
     v2_config.target_dir = args.directory + '/v2'
     v2_config.version = '4.0'
 
-    v1_count, v1_invalid_resources = validate_resource_dir(v1_config, filters, args.recent)
-    v2_count, v2_invalid_resources = validate_resource_dir(v2_config, filters, args.recent)
+    v1_count, v1_invalid_resources = validate_resource_dir(args.validator, v1_config, filters, args.recent)
+    v2_count, v2_invalid_resources = validate_resource_dir(args.validator, v2_config, filters, args.recent)
     total_count = v1_count + v2_count
     invalid_resources = dict(v1_invalid_resources, **v2_invalid_resources)
 

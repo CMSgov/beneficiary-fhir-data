@@ -8,6 +8,9 @@ from typing import List
 def parse_arguments():
     parser = argparse.ArgumentParser()
     # This is normally executed by the pipeline from the root repo directory, thus the defaults are relative to that.
+    parser.add_argument('-v', '--validator',
+                        default='validator_cli.jar',
+                        help='path to the fhir validator jar')
     parser.add_argument('-d', '--directory',
                         default='apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses',
                         help='path to the directory containing the resource version folders')
