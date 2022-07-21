@@ -3,19 +3,14 @@ import glob
 import re
 import subprocess
 from typing import List, Tuple
+import diff_check
 
 import yaml
 
 
 def get_fhir_resource_files(base_dir: str, recently_changed: bool) -> List[str]:
     if recently_changed is True:
-        git_call = subprocess.run(['git', 'diff', '--name-only', 'master...'], check=True, capture_output=True)
-        grep_call = subprocess.run(['grep', base_dir], input=git_call.stdout, capture_output=True)
-        unique_call = subprocess.run(['uniq'], input=grep_call.stdout, capture_output=True)
-        output = unique_call.stdout.decode('utf-8')
-        if len(output) == 0:
-            return []
-        return output.strip().split('\n')
+        return diff_check.get_resource_changes(base_dir)
     else:
         return glob.glob(f'{base_dir}/*.json')
 
@@ -77,12 +72,12 @@ def validate_resources(version: str, ignore_list: dict, files: List[str]) -> dic
     output = java_call.stdout.decode('utf-8')
     error_output = java_call.stderr.decode('utf-8')
     if java_call.returncode != 0:
-        if output == '':
-            print('Validation failed, but no output was generated.')
-            exit(1)
-        elif error_output != '':
+        if error_output != '':
             print(error_output)
             print('There was an issue processing the request.')
+            exit(1)
+        elif output == '':
+            print('Validation failed, but no output was generated.')
             exit(1)
     output_lines = output.split('\n')
 
@@ -132,15 +127,7 @@ def validate_resource_dir(run_config: RunConfig, ignore_list: dict, recently_cha
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--directory',
-                        default='apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses',
-                        help='path to the directory containing the resource version folders')
-    parser.add_argument('-i', '--ignorefile',
-                        default='validations_ignorelist.yml',
-                        help='path to the ignore list yaml file')
-    parser.add_argument('-r', '--recent', action='store_const', const=True, help="Recent changes")
-    args = parser.parse_args()
+    args = diff_check.parse_arguments()
 
     try:
         ignore_list = yaml.safe_load(open(args.ignorefile))
@@ -148,6 +135,12 @@ def main():
     except FileNotFoundError:
         print('Could not find ignore list file, running without filters')
         ignore_list = {'ignore_list': {}}
+
+    # If the ignore list was changed, we need to check all resources to see if there were any
+    # unwanted side effects
+    if diff_check.has_ignore_changes(args.ignorefile):
+        print('Ignore list was changed, checking all resources.')
+        args.recent = False
 
     if ignore_list is not None and 'ignore_list' in ignore_list:
         filters = ignore_list['ignore_list']

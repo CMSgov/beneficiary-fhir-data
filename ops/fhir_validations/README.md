@@ -1,5 +1,5 @@
 # FHIR Validator
-Utility for validating FHIR resources using the HAPI provided FHIR validator cli tool.
+Utility for validating FHIR resources using the HAPI provided [FHIR validator cli tool](https://github.com/hapifhir/org.hl7.fhir.core/).
 
 ## Installation
 The validator script, `validations.py` is written in python and utilizes pyyaml.  Using pip, install the requirements with the command `pip install -r requirements.txt`
