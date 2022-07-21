@@ -135,6 +135,11 @@ jobs:
       - name: 'Create local branch references'
         # Check out the branches to build references for use in the next step
         run: git fetch && git checkout master && git checkout $GITHUB_HEAD_REF
+      - name: 'Set up Python'
+        if: steps.run_check.outputs.skip == 'false'
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10.5'
       - name: 'Check for new/modified resources'
         id: run_check
         # Checks if there are any modified resources in the endpoint responses
@@ -143,11 +148,6 @@ jobs:
           can_skip=$(if [[ $(python3 ops/fhir_validations/diff_check.py) ]]; then echo "true"; else echo "false"; fi)
           if [[ can_skip ]]; then echo "No modified resources found, skipping rest of job."; else echo "Found modified resources, validating..."; fi
           echo ::set-output name=skip::$can_skip
-      - name: 'Set up Python'
-        if: steps.run_check.outputs.skip == 'false'
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.10.5'
       - name: 'Install Python dependencies'
         if: steps.run_check.outputs.skip == 'false'
         run: |
