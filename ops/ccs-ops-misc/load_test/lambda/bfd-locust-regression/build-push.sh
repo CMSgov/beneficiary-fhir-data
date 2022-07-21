@@ -2,13 +2,9 @@
 set -eou pipefail
 
 # Constants
-readonly GIT_SHORT_HASH
 GIT_SHORT_HASH="$(git rev-parse --short HEAD)"
-readonly AWS_REGION
 AWS_REGION="us-east-1"
-readonly PRIVATE_REGISTRY_URI
 PRIVATE_REGISTRY_URI="$(aws ecr describe-registry --region $AWS_REGION | jq -r '.registryId').dkr.ecr.$AWS_REGION.amazonaws.com"
-readonly IMAGE_NAME
 IMAGE_NAME="$PRIVATE_REGISTRY_URI/bfd-mgmt-locust-regression"
 
 # Overridable defaults
