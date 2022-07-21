@@ -8,10 +8,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count/metadata/all" ],
-                    [ ".", "json/http-requests/count/coverageAll/all" ],
-                    [ ".", "json/http-requests/count/patientAll/all" ],
-                    [ ".", "json/http-requests/count/eobAll/all" ]
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/all" ],
+                    [ ".", "http-requests/count/coverageAll/all" ],
+                    [ ".", "http-requests/count/patientAll/all" ],
+                    [ ".", "http-requests/count/eobAll/all" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
@@ -29,10 +29,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count/metadata/bb" ],
-                    [ ".", "json/http-requests/count/coverageAll/bb" ],
-                    [ ".", "json/http-requests/count/patientAll/bb" ],
-                    [ ".", "json/http-requests/count/eobAll/bb" ]
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/bb" ],
+                    [ ".", "http-requests/count/coverageAll/bb" ],
+                    [ ".", "http-requests/count/patientAll/bb" ],
+                    [ ".", "http-requests/count/eobAll/bb" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
@@ -50,10 +50,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count/metadata/bcda" ],
-                    [ ".", "json/http-requests/count/coverageAll/bcda" ],
-                    [ ".", "json/http-requests/count/patientAll/bcda" ],
-                    [ ".", "json/http-requests/count/eobAll/bcda" ]
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/bcda" ],
+                    [ ".", "http-requests/count/coverageAll/bcda" ],
+                    [ ".", "http-requests/count/patientAll/bcda" ],
+                    [ ".", "http-requests/count/eobAll/bcda" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
@@ -71,10 +71,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count/metadata/mct" ],
-                    [ ".", "json/http-requests/count/coverageAll/mct" ],
-                    [ ".", "json/http-requests/count/patientAll/mct" ],
-                    [ ".", "json/http-requests/count/eobAll/mct" ]
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/mct" ],
+                    [ ".", "http-requests/count/coverageAll/mct" ],
+                    [ ".", "http-requests/count/patientAll/mct" ],
+                    [ ".", "http-requests/count/eobAll/mct" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
@@ -92,10 +92,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/latency/eobAll/bb" ],
-                    [ ".", "json/http-requests/latency/eobAll/bcda" ],
-                    [ ".", "json/http-requests/latency/eobAll/mct" ],
-                    [ ".", "json/http-requests/latency/eobAll/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
+                    [ ".", "http-requests/latency/eobAll/bcda" ],
+                    [ ".", "http-requests/latency/eobAll/mct" ],
+                    [ ".", "http-requests/latency/eobAll/ab2d" ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -113,10 +113,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/latency/eobAll/bb" ],
-                    [ ".", "json/http-requests/latency/eobAll/bcda" ],
-                    [ ".", "json/http-requests/latency/eobAll/mct" ],
-                    [ ".", "json/http-requests/latency/eobAll/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
+                    [ ".", "http-requests/latency/eobAll/bcda" ],
+                    [ ".", "http-requests/latency/eobAll/mct" ],
+                    [ ".", "http-requests/latency/eobAll/ab2d" ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -134,10 +134,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/latency/eobAll/bb" ],
-                    [ ".", "json/http-requests/latency/eobAll/bcda" ],
-                    [ ".", "json/http-requests/latency/eobAll/mct" ],
-                    [ ".", "json/http-requests/latency/eobAll/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
+                    [ ".", "http-requests/latency/eobAll/bcda" ],
+                    [ ".", "http-requests/latency/eobAll/mct" ],
+                    [ ".", "http-requests/latency/eobAll/ab2d" ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -155,10 +155,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/latency/eobAll/bb" ],
-                    [ ".", "json/http-requests/latency/eobAll/bcda" ],
-                    [ ".", "json/http-requests/latency/eobAll/mct" ],
-                    [ ".", "json/http-requests/latency/eobAll/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
+                    [ ".", "http-requests/latency/eobAll/bcda" ],
+                    [ ".", "http-requests/latency/eobAll/mct" ],
+                    [ ".", "http-requests/latency/eobAll/ab2d" ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -196,11 +196,11 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count-500/bb" ],
-                    [ ".", "json/http-requests/count-500/bcda" ],
-                    [ ".", "json/http-requests/count-500/mct" ],
-                    [ ".", "json/http-requests/count-500/dpc" ],
-                    [ ".", "json/http-requests/count-500/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/count-500/bb" ],
+                    [ ".", "http-requests/count-500/bcda" ],
+                    [ ".", "http-requests/count-500/mct" ],
+                    [ ".", "http-requests/count-500/dpc" ],
+                    [ ".", "http-requests/count-500/ab2d" ]
                 ],
                 "view": "singleValue",
                 "region": "us-east-1",
@@ -217,11 +217,11 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count-not-2xx/bb" ],
-                    [ ".", "json/http-requests/count-not-2xx/bcda" ],
-                    [ ".", "json/http-requests/count-not-2xx/mct" ],
-                    [ ".", "json/http-requests/count-not-2xx/dpc" ],
-                    [ ".", "json/http-requests/count-not-2xx/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/count-not-2xx/bb" ],
+                    [ ".", "http-requests/count-not-2xx/bcda" ],
+                    [ ".", "http-requests/count-not-2xx/mct" ],
+                    [ ".", "http-requests/count-not-2xx/dpc" ],
+                    [ ".", "http-requests/count-not-2xx/ab2d" ]
                 ],
                 "view": "singleValue",
                 "region": "us-east-1",
@@ -238,10 +238,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count/metadata/dpc" ],
-                    [ ".", "json/http-requests/count/coverageAll/dpc" ],
-                    [ ".", "json/http-requests/count/patientAll/dpc" ],
-                    [ ".", "json/http-requests/count/eobAll/dpc" ]
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/dpc" ],
+                    [ ".", "http-requests/count/coverageAll/dpc" ],
+                    [ ".", "http-requests/count/patientAll/dpc" ],
+                    [ ".", "http-requests/count/eobAll/dpc" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
@@ -259,10 +259,10 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/count/metadata/ab2d" ],
-                    [ ".", "json/http-requests/count/coverageAll/ab2d" ],
-                    [ ".", "json/http-requests/count/patientAll/ab2d" ],
-                    [ ".", "json/http-requests/count/eobAll/ab2d" ]
+                    [ "${dashboard_namespace}", "http-requests/count/metadata/ab2d" ],
+                    [ ".", "http-requests/count/coverageAll/ab2d" ],
+                    [ ".", "http-requests/count/patientAll/ab2d" ],
+                    [ ".", "http-requests/count/eobAll/ab2d" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
@@ -280,7 +280,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "json/http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c" } ],
+                    [ "${dashboard_namespace}", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c" } ],
                     [ "...", { "color": "#ff7f0e", "stat": "p99" } ],
                     [ "...", { "color": "#d62728" } ]
                 ],
