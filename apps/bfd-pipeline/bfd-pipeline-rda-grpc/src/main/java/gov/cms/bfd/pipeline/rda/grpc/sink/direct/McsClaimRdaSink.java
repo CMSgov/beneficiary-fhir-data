@@ -42,7 +42,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
 
   @Nonnull
   @Override
-  public RdaChange<RdaMcsClaim> transformMessage(String apiVersion, McsClaimChange message) {
+  RdaChange<RdaMcsClaim> transformMessageImpl(String apiVersion, McsClaimChange message) {
     var change = transformer.transformClaim(message);
     change.getClaim().setApiSource(apiVersion);
     return change;

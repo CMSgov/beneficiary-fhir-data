@@ -139,9 +139,11 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param message an RDA API message object of the correct type for this sync
    * @return an appropriate entity object containing the data from the message
+   * @throws DataTransformer.TransformationException if the message is invalid
    */
   @Nonnull
-  TClaim transformMessage(String apiVersion, TMessage message);
+  TClaim transformMessage(String apiVersion, TMessage message)
+      throws DataTransformer.TransformationException;
 
   /**
    * Write the specified collection of entity objects to the database. This write could happen in

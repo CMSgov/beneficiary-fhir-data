@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -64,7 +65,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -131,15 +131,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (patientId == null || patientId.getVersionIdPartAsLong() != null) {
       throw new IllegalArgumentException();
     }
-    String beneIdText = patientId.getIdPart();
-    if (beneIdText == null || beneIdText.trim().isEmpty()) {
-      throw new IllegalArgumentException();
-    }
-
+    Long beneId = Long.parseLong(patientId.getIdPart());
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
-
     operation.setOption("by", "id");
     // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
@@ -152,7 +147,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
+    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
 
     Beneficiary beneficiary = null;
     Long beneByIdQueryNanoSeconds = null;
@@ -169,7 +164,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
       TransformerUtilsV2.recordQueryInMdc(
           String.format(
-              "bene_by_id.include_%s",
+              "bene_by_id_include_%s",
               String.join(
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
@@ -177,7 +172,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneIdText));
+    TransformerUtilsV2.logBeneIdToMdc(beneId);
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
@@ -225,7 +220,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "Unsupported query parameter value: " + logicalId.getValue());
 
     List<IBaseResource> patients;
-    if (loadedFilterManager.isResultSetEmpty(logicalId.getValue(), lastUpdated)) {
+    if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
       patients = Collections.emptyList();
     } else {
       try {
@@ -704,13 +699,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
     // First, find all matching hashes from BeneficiariesHistory.
-    CriteriaQuery<String> beneHistoryMatches = builder.createQuery(String.class);
+    CriteriaQuery<Long> beneHistoryMatches = builder.createQuery(Long.class);
     Root<BeneficiaryHistory> beneHistoryMatchesRoot =
         beneHistoryMatches.from(BeneficiaryHistory.class);
     beneHistoryMatches
         .select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId))
         .where(builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
-    List<String> matchingIdsFromBeneHistory = null;
+    List<Long> matchingIdsFromBeneHistory = null;
     Long fromHistoryQueryNanoSeconds = null;
     Timer.Context beneHistoryMatchesTimer =
         metricRegistry
@@ -726,7 +721,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     } finally {
       fromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          "bene_by_" + hashType + "." + hashType + "s_from_beneficiarieshistory",
+          "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           fromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
     }
@@ -768,7 +763,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
       TransformerUtilsV2.recordQueryInMdc(
           String.format(
-              "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
+              "bene_by_" + hashType + "_bene_by_" + hashType + "_or_id_include_%s",
               String.join(
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
@@ -786,7 +781,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+      BfdMDC.put(
+          "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
@@ -917,7 +913,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the matching {@link Beneficiary}s
    */
   @Trace
-  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
+  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<Long> ids) {
 
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -1061,7 +1057,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      */
 
     // Fetch the Beneficiary.id values that we will get results for.
-    List<String> ids =
+    List<Long> ids =
         queryBeneficiaryIdsByPartDContractCodeAndYearMonth(yearMonth, contractCode, paging);
     if (ids.isEmpty()) {
       return Collections.emptyList();
@@ -1121,12 +1117,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the {@link List} of matching {@link Beneficiary#getBeneficiaryId()} values
    */
   @Trace
-  private List<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
+  private List<Long> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<String> beneIdCriteria = builder.createQuery(String.class);
+    CriteriaQuery<Long> beneIdCriteria = builder.createQuery(Long.class);
     Root<BeneficiaryMonthly> beneMonthlyRoot = beneIdCriteria.from(BeneficiaryMonthly.class);
+
     beneIdCriteria.select(
         beneMonthlyRoot.get(BeneficiaryMonthly_.parentBeneficiary).get(Beneficiary_.beneficiaryId));
 
@@ -1148,7 +1145,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     beneIdCriteria.orderBy(builder.asc(beneMonthlyRoot.get(BeneficiaryMonthly_.parentBeneficiary)));
 
     // Run the query and return the results.
-    List<String> matchingBeneIds = null;
+    List<Long> matchingBeneIds = null;
     Long beneHistoryMatchesTimerQueryNanoSeconds = null;
     Timer.Context beneIdMatchesTimer =
         metricRegistry

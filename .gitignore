@@ -15,5 +15,3 @@
 *.ipr
 *.iws
 *.pid
-**/__pycache__
-**/*.stats.json

@@ -1,0 +1,25 @@
+@startuml
+title Proposed SSM Deployment Sequence (Abbreviated)
+participant operator
+database "github"
+participant jenkins
+database "parameter-store"
+participant "ec2-bfd-services"
+note over jenkins,"parameter-store": additional jenkins config sources:\ncredentials plugin, ssm:/bfd/mgmt/jenkins/*
+operator -> github: Submit change set
+github --> operator
+operator -> jenkins: Trigger Deployment
+jenkins -> github: Request change set
+github --> jenkins: Return change set
+jenkins -> jenkins: terraform:\nread yaml files
+jenkins -> "parameter-store": terraform:\nwrite ssm parameters
+"parameter-store" --> jenkins
+jenkins -> "parameter-store": terraform:\nRequest configuration values
+"parameter-store" --> jenkins: Return configuration values
+jenkins -> "ec2-bfd-services": terraform:\ndeploy services
+"ec2-bfd-services" -> "parameter-store": ansible:\nRequest confguration values
+"parameter-store" --> "ec2-bfd-services": Return configuration values
+"ec2-bfd-services" -> "ec2-bfd-services": ansible:\nconfigure services
+"ec2-bfd-services" --> jenkins
+jenkins --> operator
+@enduml

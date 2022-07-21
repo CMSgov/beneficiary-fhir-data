@@ -3,15 +3,6 @@ provider "aws" {
 }
 
 locals {
-  # NOTE: known environments object is hopeful temporary, expedient work-around until parameter implementation
-  environments = {
-    test = {
-      rds_cluster_identifier = "bfd-1652-v70-pre-synthea-load" # TODO: Temporary. To be removed after BFD-1746
-    }
-    prod-sbx = {}
-    prod     = {}
-  }
-
   common_tags = {
     Environment = local.env
     Layer       = local.layer
@@ -39,7 +30,7 @@ locals {
   queue_name                                  = var.sqs_queue_name_override != null ? var.sqs_queue_name_override : "${local.env}-db-migrator"
   security_group_ids                          = concat(var.security_group_ids_extra, [data.aws_security_group.vpn.id])
   volume_size                                 = var.volume_size_override != null ? var.volume_size_override : 100
-  rds_cluster_identifier                      = var.rds_cluster_identifier_override != null ? var.rds_cluster_identifier_override : lookup(local.environments[local.env], "rds_cluster_identifier", "bfd-${local.env}-aurora-cluster")
+  rds_cluster_identifier                      = var.rds_cluster_identifier_override != null ? var.rds_cluster_identifier_override : "bfd-${local.env}-aurora-cluster"
   migrator_monitor_enabled                    = var.migrator_monitor_enabled_override != null ? var.migrator_monitor_enabled_override : true
   migrator_monitor_heartbeat_interval_seconds = var.migrator_monitor_heartbeat_interval_seconds_override != null ? var.migrator_monitor_heartbeat_interval_seconds_override : 300
 }

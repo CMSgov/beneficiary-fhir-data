@@ -80,23 +80,23 @@ from io import BytesIO
 import boto3
 
 
-"""
-BFD modification to add a function to flatten a JSON object (but not pivot out arrays).
-Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
-"""
 def flatten_json(y):
+    """
+    BFD modification to add a function to flatten a JSON object (but not pivot out arrays).
+    Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
+    """
+
     out = {}
 
     def flatten(x, name=''):
-        if type(x) is dict:
+        if isinstance(x, dict):
             for a in x:
-                flatten(x[a], name + a + '.')
+                flatten(x[a], name + a.replace('.', '_') + '_')
         else:
             out[name[:-1]] = x
 
     flatten(y)
     return out
-
 
 
 def transformLogEvent(log_event):

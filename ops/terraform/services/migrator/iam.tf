@@ -28,6 +28,39 @@ resource "aws_iam_policy" "sqs" {
   EOF
 }
 
+resource "aws_iam_policy" "ssm" {
+  name        = "bfd-${local.env}-${local.service}-ssm-parameters"
+  description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service} SSM hierarchies"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/${local.service}/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": [
+                "${data.aws_kms_key.main.arn}"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role" "this" {
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"
@@ -51,6 +84,7 @@ resource "aws_iam_role" "this" {
     data.aws_iam_policy.cloudwatch_agent_policy.arn,
     data.aws_iam_policy.ansible_vault_ro.arn,
     aws_iam_policy.sqs.arn,
+    aws_iam_policy.ssm.arn,
   ]
 }
 
