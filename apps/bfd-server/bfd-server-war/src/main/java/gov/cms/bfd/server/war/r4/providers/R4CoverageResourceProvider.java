@@ -197,12 +197,12 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
+    // Add bene_id to MDC logs
+    LoggingUtils.logBeneIdToMdc(beneficiaryId);
+
     Bundle bundle =
         TransformerUtilsV2.createBundle(
             paging, coverages, loadedFilterManager.getTransactionTime());
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBenesToMdc(bundle);
 
     return bundle;
   }

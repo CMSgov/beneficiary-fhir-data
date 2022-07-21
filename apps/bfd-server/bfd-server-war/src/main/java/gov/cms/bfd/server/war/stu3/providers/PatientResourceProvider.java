@@ -312,7 +312,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    LoggingUtils.logBenesToMdc(bundle);
+    LoggingUtils.logBeneIdToMdc(logicalId.getValue());
 
     return bundle;
   }

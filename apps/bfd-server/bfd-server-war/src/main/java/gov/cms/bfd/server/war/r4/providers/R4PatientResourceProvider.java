@@ -256,7 +256,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
     // Add bene_id to MDC logs
-    LoggingUtils.logBenesToMdc(bundle);
+    LoggingUtils.logBeneIdToMdc(logicalId.getValue());
 
     return bundle;
   }
