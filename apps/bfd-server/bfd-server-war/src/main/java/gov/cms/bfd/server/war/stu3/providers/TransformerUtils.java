@@ -3336,20 +3336,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Parses Sting beneficiary ID to Long and adds to List to log to MDC.
-   *
-   * @param beneIds the collection of beneIds logged to MDC.
-   * @param beneId beneficiaryId to add to beneId collection.
-   */
-  private static void addBeneIdsToSet(Set<Long> beneIds, String beneId) {
-    try {
-      beneIds.add(Long.parseLong(beneId));
-    } catch (NumberFormatException e) {
-      LOGGER.warn("Could not parse long from bene_id: " + beneId);
-    }
-  }
-
-  /**
    * @param currencyIdentifier the {@link CurrencyIdentifier} indicating the currency of an {@link
    *     Identifier}.
    * @return Returns an {@link Extension} describing the currency of an {@link Identifier}.
