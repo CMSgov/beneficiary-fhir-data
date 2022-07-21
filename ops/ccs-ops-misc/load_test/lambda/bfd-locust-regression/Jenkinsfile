@@ -38,7 +38,7 @@ spec:
                 container('docker') {
                     // checkout scm
                     // Install prerequisites
-                    sh 'apk add --no-cache aws-cli bash'
+                    sh 'apk add --no-cache aws-cli bash jq'
 
                     // Address limitations resulting from CVE-2022-24767
                     sh 'git config --global --add safe.directory "$WORKSPACE"'
