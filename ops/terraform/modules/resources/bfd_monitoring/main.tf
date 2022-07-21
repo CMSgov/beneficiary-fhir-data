@@ -2,7 +2,7 @@ locals {
   log_groups = {
     access = "/bfd/${var.env}/bfd-server/access.json"
   }
-  namespace = "json/bfd-${var.env}/bfd-server"
+  namespace = "bfd-${var.env}/bfd-server"
   endpoints = {
     "all" : "*/fhir/*",
     "metadata" : "*/fhir/metadata*",
@@ -36,7 +36,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "json/http-requests/count/${local.metric_config[count.index].name}"
+    name          = "http-requests/count/${local.metric_config[count.index].name}"
     namespace     = local.namespace
     value         = "1"
     default_value = "0"
@@ -51,7 +51,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "json/http-requests/latency/${local.metric_config[count.index].name}"
+    name          = "http-requests/latency/${local.metric_config[count.index].name}"
     namespace     = local.namespace
     value         = "$.mdc.http_access_response_duration_milliseconds"
     default_value = null
@@ -66,7 +66,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "json/http-requests/count-500/${each.key}"
+    name          = "http-requests/count-500/${each.key}"
     namespace     = local.namespace
     value         = "1"
     default_value = "0"
@@ -81,7 +81,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-not-2xx" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "json/http-requests/count-not-2xx/${each.key}"
+    name          = "http-requests/count-not-2xx/${each.key}"
     namespace     = local.namespace
     value         = "1"
     default_value = "0"
@@ -90,7 +90,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-not-2xx" {
 
 # BFD Server Dashboard
 resource "aws_cloudwatch_dashboard" "bfd-server-dashboard" {
-  dashboard_name = "bfd-server-${var.env}-json"
+  dashboard_name = "bfd-server-${var.env}"
   dashboard_body = templatefile("${path.module}/templates/bfd-server-dashboard.tpl", {
     dashboard_namespace = local.namespace
     asg_name            = var.asg_id

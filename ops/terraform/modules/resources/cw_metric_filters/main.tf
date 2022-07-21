@@ -14,7 +14,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count"
+    name          = "txt/http-requests/count"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -27,7 +27,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-coverage" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/coverage"
+    name          = "txt/http-requests/count/coverage"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-eob" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/eob"
+    name          = "txt/http-requests/count/eob"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -53,7 +53,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/http-500"
+    name          = "txt/http-requests/count/http-500"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -66,7 +66,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-metadata" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/metadata"
+    name          = "txt/http-requests/count/metadata"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -79,7 +79,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-not-2xx" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/not-2xx"
+    name          = "txt/http-requests/count/not-2xx"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -92,7 +92,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-patient" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/patient"
+    name          = "txt/http-requests/count/patient"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -105,7 +105,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-patient-patient
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/patient/patientSearchById"
+    name          = "txt/http-requests/count/patient/patientSearchById"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -118,7 +118,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-patient-patient
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/count/patient/patientSearchByIdentifier"
+    name          = "txt/http-requests/count/patient/patientSearchByIdentifier"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
@@ -131,7 +131,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/latency"
+    name          = "txt/http-requests/latency"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
@@ -144,7 +144,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-coverage
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/latency/fhir/coverage"
+    name          = "txt/http-requests/latency/fhir/coverage"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
@@ -157,7 +157,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-eob" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/latency/fhir/eob"
+    name          = "txt/http-requests/latency/fhir/eob"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
@@ -170,7 +170,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-patient"
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/latency/fhir/patient"
+    name          = "txt/http-requests/latency/fhir/patient"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
@@ -185,7 +185,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-over-6000" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/latency/over-6000"
+    name          = "txt/http-requests/latency/over-6000"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
