@@ -18,7 +18,8 @@ locals {
   layer      = "app"
   service    = "locust-regression"
 
-  vpc_name = "bfd-${local.env}-vpc"
+  vpc_name   = "bfd-${local.env}-vpc"
+  queue_name = "bfd-${local.env}-${local.service}"
 
   docker_image_tag                 = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
   regression_suite_api_version     = var.regression_suite_api_version
@@ -55,4 +56,9 @@ resource "aws_lambda_function" "this" {
     security_group_ids = [aws_security_group.this.id]
     subnet_ids         = data.aws_subnets.main.ids
   }
+}
+
+resource "aws_sqs_queue" "this" {
+  name                       = local.queue_name
+  visibility_timeout_seconds = 600
 }

@@ -1,3 +1,11 @@
+data "aws_iam_policy" "lambda_vpc_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+data "aws_iam_policy" "sqs_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}
+
 resource "aws_iam_policy" "lambda_vpc" {
   name        = "bfd-${local.env}-${local.service}-lambda-vpc"
   description = "Permissions to use VPCs for ${local.service} lambda"
@@ -161,12 +169,13 @@ resource "aws_iam_role" "this" {
   }
   EOF
   managed_policy_arns = [
+    data.aws_iam_policy.lambda_vpc_policy.arn,
+    data.aws_iam_policy.sqs_policy.arn,
     aws_iam_policy.lambda_vpc.arn,
     aws_iam_policy.ecr.arn,
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
-    aws_iam_policy.logs.arn,
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+    aws_iam_policy.logs.arn
   ]
 }
