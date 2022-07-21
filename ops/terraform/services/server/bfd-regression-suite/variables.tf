@@ -1,7 +1,8 @@
-variable "docker_image_uri_override" {
+variable "docker_image_tag_override" {
   description = "Overrides the Docker image URI used by the built regression suite lambda"
   type        = string
-} 
+  default     = null
+}
 
 variable "regression_suite_api_version" {
   default     = "v2"

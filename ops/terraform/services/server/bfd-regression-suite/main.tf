@@ -13,22 +13,20 @@ locals {
     stack       = local.env
   }
 
-  account_id          = data.aws_caller_identity.current.account_id
-  env                 = terraform.workspace
-  layer               = "app"
-  service             = "locust-regression"
+  account_id = data.aws_caller_identity.current.account_id
+  env        = terraform.workspace
+  layer      = "app"
+  service    = "locust-regression"
 
-  vpc_name            = "bfd-${local.env}-vpc"
+  vpc_name = "bfd-${local.env}-vpc"
 
-  docker_image_uri                 = coalesce(var.docker_image_uri_override, data.aws_ssm_parameter.docker_image_uri)
+  docker_image_tag                 = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
   regression_suite_api_version     = var.regression_suite_api_version
   regression_suite_spawn_rate      = var.regression_suite_spawn_rate
   regression_suite_num_users       = var.regression_suite_num_users
   regression_suite_spawned_runtime = var.regression_suite_spawned_runtime
-}
 
-resource "aws_ecr_repository" "this" {
-  name = "bfd-mgmt-${local.service}"
+  docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
 }
 
 resource "aws_lambda_function" "this" {
@@ -40,10 +38,11 @@ resource "aws_lambda_function" "this" {
   package_type = "Image"
 
   memory_size = 2048
-  timeout     = 600
+  timeout     = 600 # NOTE: 600 seconds or 10 minutes
   environment {
     variables = {
-      LOCUST_HOST                  = "https://${local.env}.bfd.cms.gov"
+      BFD_ENVIRONMENT              = local.env
+      LOCUST_HOST                  = "https://${local.env}.bfd.cms.gov" # TODO: Possible target of parameter store lookup?
       LOCUST_LOCUSTFILE            = "/var/task/${local.regression_suite_api_version}/regression_suite.py"
       LOCUST_SPAWN_RATE            = local.regression_suite_spawn_rate
       LOCUST_USERS                 = local.regression_suite_num_users
@@ -54,6 +53,6 @@ resource "aws_lambda_function" "this" {
   role = aws_iam_role.this.arn
   vpc_config {
     security_group_ids = [aws_security_group.this.id]
-    subnet_ids = data.aws_subnets.main.ids
+    subnet_ids         = data.aws_subnets.main.ids
   }
 }

@@ -1,5 +1,5 @@
 resource "aws_iam_policy" "lambda_vpc" {
-  name        = "bfd-mgmt-${local.service}-lambda-vpc"
+  name        = "bfd-${local.env}-${local.service}-lambda-vpc"
   description = "Permissions to use VPCs for ${local.service} lambda"
   policy      = <<-EOF
 {
@@ -30,7 +30,7 @@ EOF
 }
 
 resource "aws_iam_policy" "ecr" {
-  name        = "bfd-mgmt-${local.service}-ecr"
+  name        = "bfd-${local.env}-${local.service}-ecr"
   description = "Permissions to describe ${local.service} ECR images"
   policy      = <<-EOF
 {
@@ -106,7 +106,7 @@ resource "aws_iam_policy" "rds" {
                 "rds:DescribeDBClusters"
             ],
             "Resource": [
-                "arn:aws:ssm:us-east-1:${local.account_id}:cluster:bfd-${local.env}-aurora-cluster"
+                "arn:aws:rds:us-east-1:${local.account_id}:cluster:bfd-${local.env}-aurora-cluster"
             ]
         }
     ]
@@ -166,6 +166,7 @@ resource "aws_iam_role" "this" {
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
-    aws_iam_policy.logs.arn
+    aws_iam_policy.logs.arn,
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
   ]
 }
