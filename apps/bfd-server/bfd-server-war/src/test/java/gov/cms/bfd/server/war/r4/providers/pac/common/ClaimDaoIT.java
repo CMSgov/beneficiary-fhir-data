@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.server.war.r4.providers.pac.ClaimResponseTypeV2;
+import gov.cms.bfd.server.war.r4.providers.pac.ClaimTypeV2;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
@@ -128,15 +130,7 @@ public class ClaimDaoIT {
    * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI.
    */
   private List<RdaFissClaim> runFissMbiQuery(ClaimDao claimDao, String mbi) {
-    return claimDao.findAllByMbiAttribute(
-        RdaFissClaim.class,
-        RdaFissClaim.Fields.mbiRecord,
-        mbi,
-        false,
-        null,
-        null,
-        RdaFissClaim.Fields.dcn,
-        RdaFissClaim.Fields.stmtCovToDate);
+    return claimDao.findAllByMbiAttribute(ClaimResponseTypeV2.F, mbi, false, null, null);
   }
 
   /**
@@ -148,14 +142,6 @@ public class ClaimDaoIT {
    *     hash.
    */
   private List<RdaFissClaim> runFissMbiHashQuery(ClaimDao claimDao, String mbiHash) {
-    return claimDao.findAllByMbiAttribute(
-        RdaFissClaim.class,
-        RdaFissClaim.Fields.mbiRecord,
-        mbiHash,
-        true,
-        null,
-        null,
-        RdaFissClaim.Fields.dcn,
-        RdaFissClaim.Fields.stmtCovToDate);
+    return claimDao.findAllByMbiAttribute(ClaimTypeV2.F, mbiHash, true, null, null);
   }
 }
