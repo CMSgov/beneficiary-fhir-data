@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -92,7 +93,7 @@ class ClaimDaoTest {
 
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
-    doNothing().when(daoSpy).logQueryMetric(anyString(), anyLong(), anyInt());
+    doNothing().when(daoSpy).logQueryMetric(any(), anyString(), anyLong(), anyInt());
 
     Object actual = daoSpy.getEntityById(claimType, claimId);
 
@@ -104,7 +105,11 @@ class ClaimDaoTest {
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockPredicate);
     verify(daoSpy, times(1))
-        .logQueryMetric(eq(ClaimDao.CLAIM_BY_ID_QUERY), timeCaptor.capture(), sizeCaptor.capture());
+        .logQueryMetric(
+            same(claimType),
+            eq(ClaimDao.CLAIM_BY_ID_QUERY),
+            timeCaptor.capture(),
+            sizeCaptor.capture());
 
     assertEquals(1, sizeCaptor.getValue());
     assertEquals(expected, actual);
@@ -152,7 +157,7 @@ class ClaimDaoTest {
 
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
-    doNothing().when(daoSpy).logQueryMetric(anyString(), anyLong(), anyInt());
+    doNothing().when(daoSpy).logQueryMetric(any(), anyString(), anyLong(), anyInt());
 
     Object actual = daoSpy.getEntityById(claimType, claimId);
 
@@ -164,7 +169,11 @@ class ClaimDaoTest {
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockPredicate);
     verify(daoSpy, times(1))
-        .logQueryMetric(eq(ClaimDao.CLAIM_BY_ID_QUERY), timeCaptor.capture(), sizeCaptor.capture());
+        .logQueryMetric(
+            same(claimType),
+            eq(ClaimDao.CLAIM_BY_ID_QUERY),
+            timeCaptor.capture(),
+            sizeCaptor.capture());
 
     assertEquals(0, sizeCaptor.getValue());
 
@@ -469,7 +478,7 @@ class ClaimDaoTest {
     //noinspection unchecked
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(any(CriteriaQuery.class));
 
-    doNothing().when(daoSpy).logQueryMetric(anyString(), anyLong(), anyInt());
+    doNothing().when(daoSpy).logQueryMetric(any(), anyString(), anyLong(), anyInt());
 
     daoSpy.findAllByMbiAttribute(claimType, mbiSearchValue, isMbiSearchValueHashed, null, null);
 
@@ -478,7 +487,10 @@ class ClaimDaoTest {
 
     verify(daoSpy, times(1))
         .logQueryMetric(
-            eq(ClaimDao.CLAIM_BY_MBI_QUERY), timeCaptor.capture(), sizeCaptor.capture());
+            same(claimType),
+            eq(ClaimDao.CLAIM_BY_MBI_QUERY),
+            timeCaptor.capture(),
+            sizeCaptor.capture());
 
     assertEquals(5, sizeCaptor.getValue());
   }
@@ -523,7 +535,7 @@ class ClaimDaoTest {
     //noinspection unchecked
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(any(CriteriaQuery.class));
 
-    doNothing().when(daoSpy).logQueryMetric(anyString(), anyLong(), anyInt());
+    doNothing().when(daoSpy).logQueryMetric(any(), anyString(), anyLong(), anyInt());
 
     daoSpy.findAllByMbiAttribute(claimType, mbiSearchValue, isMbiSearchValueHashed, null, null);
 
@@ -532,7 +544,10 @@ class ClaimDaoTest {
 
     verify(daoSpy, times(1))
         .logQueryMetric(
-            eq(ClaimDao.CLAIM_BY_MBI_QUERY), timeCaptor.capture(), sizeCaptor.capture());
+            same(claimType),
+            eq(ClaimDao.CLAIM_BY_MBI_QUERY),
+            timeCaptor.capture(),
+            sizeCaptor.capture());
 
     assertEquals(0, sizeCaptor.getValue());
   }

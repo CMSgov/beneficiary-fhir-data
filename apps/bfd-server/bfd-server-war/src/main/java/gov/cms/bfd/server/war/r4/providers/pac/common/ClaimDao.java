@@ -63,7 +63,8 @@ public class ClaimDao {
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
     } finally {
-      logQueryMetric(CLAIM_BY_ID_QUERY, timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
+      logQueryMetric(
+          resourceType, CLAIM_BY_ID_QUERY, timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
     }
 
     return claimEntity;
@@ -122,6 +123,7 @@ public class ClaimDao {
       claimEntities = entityManager.createQuery(criteria).getResultList();
     } finally {
       logQueryMetric(
+          resourceType,
           CLAIM_BY_MBI_QUERY,
           timerClaimQuery.stop(),
           claimEntities == null ? 0 : claimEntities.size());
@@ -137,8 +139,11 @@ public class ClaimDao {
    * @param querySize The number of entities returned by the query.
    */
   @VisibleForTesting
-  void logQueryMetric(String queryName, long queryTime, int querySize) {
-    TransformerUtilsV2.recordQueryInMdc(queryName, queryTime, querySize);
+  void logQueryMetric(
+      ResourceTypeV2<?, ?> resourceType, String queryName, long queryTime, int querySize) {
+    final String combinedQueryId =
+        String.format("%s_%s", queryName, resourceType.getNameForMetrics());
+    TransformerUtilsV2.recordQueryInMdc(combinedQueryId, queryTime, querySize);
   }
 
   /**
