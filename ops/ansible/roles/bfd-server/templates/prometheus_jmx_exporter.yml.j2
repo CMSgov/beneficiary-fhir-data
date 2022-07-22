@@ -1,0 +1,10 @@
+# This file configures the Prometheus JMX Exportero for use wuth CloudWatch
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-PrometheusEC2.html
+# configuration options visit https://github.com/prometheus/jmx_exporter
+---
+startDelaySeconds: 0
+ssl: false
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+rules:
+  - pattern: ".*"

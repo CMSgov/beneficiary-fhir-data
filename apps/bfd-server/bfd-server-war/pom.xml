@@ -177,7 +177,7 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
 		</dependency>
-
+		
 		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
 				at runtime. -->
@@ -216,7 +216,12 @@
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>telemetry-http-okhttp</artifactId>
 		</dependency>
-		
+		<!-- Allows us to provide Cloudwatch via https://mvnrepository.com/artifact/io.prometheus.jmx/collector -->
+		<dependency>
+			<groupId>io.prometheus.jmx</groupId>
+			<artifactId>collector</artifactId>
+			<version>0.17.0</version>
+		</dependency>
 		<dependency>
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>

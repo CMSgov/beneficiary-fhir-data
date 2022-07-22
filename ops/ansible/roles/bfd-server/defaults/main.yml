@@ -32,3 +32,5 @@ data_server_v2_enabled: false
 
 # Whether or not partially adjudicated claims data resources are enabled.
 pac_resources_enabled: false
+
+prometheus_jmx_exporter_version: 0.17.0
