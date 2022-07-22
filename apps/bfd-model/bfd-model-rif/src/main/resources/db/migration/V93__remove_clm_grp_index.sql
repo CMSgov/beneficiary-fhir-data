@@ -1,4 +1,4 @@
--- ADD CLM_GRP_ID INDEX
+-- REMOVE CLM_GRP_ID INDEX
 --
 -- This flyway script is intended to remove an index on clm_grp_id for a handful
 -- of tables that needed their clm_grp_ids cleaned up for certain synthetic data.
