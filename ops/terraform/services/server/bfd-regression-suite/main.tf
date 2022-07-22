@@ -22,10 +22,6 @@ locals {
   queue_name = "bfd-${local.env}-${local.service}"
 
   docker_image_tag                 = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
-  regression_suite_api_version     = var.regression_suite_api_version
-  regression_suite_spawn_rate      = var.regression_suite_spawn_rate
-  regression_suite_num_users       = var.regression_suite_num_users
-  regression_suite_spawned_runtime = var.regression_suite_spawned_runtime
 
   docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
 }
@@ -43,11 +39,6 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = {
       BFD_ENVIRONMENT              = local.env
-      LOCUST_HOST                  = "https://${local.env}.bfd.cms.gov" # TODO: Possible target of parameter store lookup?
-      LOCUST_LOCUSTFILE            = "/var/task/${local.regression_suite_api_version}/regression_suite.py"
-      LOCUST_SPAWN_RATE            = local.regression_suite_spawn_rate
-      LOCUST_USERS                 = local.regression_suite_num_users
-      LOCUST_USERS_SPAWNED_RUNTIME = local.regression_suite_spawned_runtime
     }
   }
 
