@@ -21,7 +21,7 @@ locals {
   vpc_name   = "bfd-${local.env}-vpc"
   queue_name = "bfd-${local.env}-${local.service}"
 
-  docker_image_tag                 = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
+  docker_image_tag = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
 
   docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
 }
@@ -38,7 +38,7 @@ resource "aws_lambda_function" "this" {
   timeout     = 600 # NOTE: 600 seconds or 10 minutes
   environment {
     variables = {
-      BFD_ENVIRONMENT              = local.env
+      BFD_ENVIRONMENT = local.env
     }
   }
 
@@ -47,6 +47,11 @@ resource "aws_lambda_function" "this" {
     security_group_ids = [aws_security_group.this.id]
     subnet_ids         = data.aws_subnets.main.ids
   }
+}
+
+resource "aws_lambda_event_source_mapping" "this" {
+  event_source_arn = aws_sqs_queue.this.arn
+  function_name    = aws_lambda_function.this.arn
 }
 
 resource "aws_sqs_queue" "this" {
