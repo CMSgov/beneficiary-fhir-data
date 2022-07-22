@@ -28,6 +28,7 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -163,6 +164,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(patientId);
     } finally {
@@ -186,9 +190,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (!requestHeader.isMBIinIncludeIdentifiers()) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
-
-    // Add bene_id to MDC logs
-    TransformerUtils.logBeneIdToMdc(beneficiaryId);
 
     Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;
@@ -309,6 +310,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBeneIdToMdc(logicalId.getValue());
+
     return bundle;
   }
 
@@ -352,6 +357,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Bundle bundle =
         TransformerUtils.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
     TransformerUtils.workAroundHAPIIssue1585(requestDetails);
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBenesToMdc(bundle);
+
     return bundle;
   }
 
@@ -666,6 +675,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBenesToMdc(bundle);
+
     return bundle;
   }
 
