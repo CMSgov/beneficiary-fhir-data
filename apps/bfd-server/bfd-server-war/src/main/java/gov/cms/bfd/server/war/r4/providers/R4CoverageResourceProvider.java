@@ -200,11 +200,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
-    Bundle bundle =
-        TransformerUtilsV2.createBundle(
-            paging, coverages, loadedFilterManager.getTransactionTime());
-
-    return bundle;
+    return TransformerUtilsV2.createBundle(
+        paging, coverages, loadedFilterManager.getTransactionTime());
   }
 
   /**

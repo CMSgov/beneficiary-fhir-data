@@ -357,13 +357,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
-    Bundle bundle =
-        TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
-
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
-    return bundle;
+    return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
 
   /*

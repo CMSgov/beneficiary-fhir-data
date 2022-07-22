@@ -191,13 +191,11 @@ public final class CoverageResourceProvider implements IResourceProvider {
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
-    Bundle bundle =
-        TransformerUtils.createBundle(paging, coverages, loadedFilterManager.getTransactionTime());
-
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
-    return bundle;
+    return TransformerUtils.createBundle(
+        paging, coverages, loadedFilterManager.getTransactionTime());
   }
 
   /**
