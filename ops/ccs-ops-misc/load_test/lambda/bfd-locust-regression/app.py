@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 import json
 import os
 import subprocess
 import urllib.parse
+from dataclasses import dataclass
 from typing import Optional
 
 import boto3
@@ -30,6 +30,7 @@ def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
     try:
         return response["Parameter"]["Value"]
     except KeyError:
+        print(f'SSM parameter "{name}" not found or empty')
         return None
 
 
@@ -39,28 +40,32 @@ def get_rds_db_uri(cluster_id: str) -> Optional[str]:
     try:
         return response["DBClusters"][0]["ReaderEndpoint"]
     except KeyError:
+        print(f'DB URI not found for cluster ID "{cluster_id}"')
         return None
 
 
 def handler(event, context):
     # We take only the first record, if it exists
     try:
-        record = event["Records"][1]
+        record = event["Records"][0]
     except IndexError:
-        return "Invalid queue message, no records found"
+        print("Invalid queue message, no records found")
+        return
 
     # We extract the body, and attempt to convert from JSON
     try:
         body = json.loads(record["body"])
     except json.JSONDecodeError:
-        return "Record body was not valid JSON"
+        print("Record body was not valid JSON")
+        return
 
     # We then attempt to extract an InvokeEvent instance from
     # the JSON body
     try:
         invoke_event = InvokeEvent(**body)
     except TypeError as ex:
-        return f"Message body missing required keys: {str(ex)}"
+        print(f"Message body missing required keys: {str(ex)}")
+        return
 
     # Assuming we get this far, invoke_event should have the information
     # required to run the lambda:
@@ -78,35 +83,8 @@ def handler(event, context):
         f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
     )
 
-    if not cluster_id:
-        return (
-            f'SSM parameter "/bfd/{environment}/common/nonsensitive/rds_cluster_identifier" not'
-            " found or empty"
-        )
-
-    if not username:
-        return (
-            f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_username"'
-            " not found or empty"
-        )
-
-    if not raw_password:
-        return (
-            f'SSM parameter "/bfd/{environment}/common/nonsensitive/vault_data_server_db_password"'
-            " not found or empty"
-        )
-
-    if not cert_key:
-        return (
-            f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_key" not found or'
-            " empty"
-        )
-
-    if not cert:
-        return (
-            f'SSM parameter "/bfd/{environment}/server/sensitive/test_client_cert" not found or'
-            " empty"
-        )
+    if not cluster_id or not username or not raw_password or not cert_key or not cert:
+        return
 
     cert_path = "/tmp/bfd_test_cert.pem"
     with open(cert_path, "w", encoding="utf-8") as file:
@@ -114,6 +92,9 @@ def handler(event, context):
 
     password = urllib.parse.quote(raw_password)
     db_uri = get_rds_db_uri(cluster_id)
+
+    if not db_uri:
+        return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
