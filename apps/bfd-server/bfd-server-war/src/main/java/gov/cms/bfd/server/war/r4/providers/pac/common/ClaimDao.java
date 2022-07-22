@@ -43,6 +43,7 @@ public class ClaimDao {
    *
    * @param resourceType The type of claim to retrieve.
    * @param id The id of the claim to retrieve.
+   * @param <T> The entity type being retrieved.
    * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
   public <T> T getEntityById(ResourceTypeV2<?, T> resourceType, String id) {

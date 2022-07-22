@@ -84,8 +84,8 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
   }
 
   /**
-   * @param claimTypeText the lower-cased {@link ClaimTypeV2#name()} value to parse back into a
-   *     {@link ClaimTypeV2}
+   * @param claimTypeText the lower-cased {@link ClaimTypeV2#nameForParsing} value to parse back
+   *     into a {@link ClaimTypeV2}
    * @return the {@link ClaimTypeV2} represented by the specified {@link String}
    */
   public static Optional<ResourceTypeV2<Claim, ?>> parse(String claimTypeText) {

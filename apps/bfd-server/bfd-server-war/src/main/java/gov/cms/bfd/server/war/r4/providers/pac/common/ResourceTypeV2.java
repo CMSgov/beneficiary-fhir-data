@@ -18,7 +18,7 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
 
   /**
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     ResponseTypeV2} in the database
+   *     ResourceTypeV2} in the database
    */
   Class<TEntity> getEntityClass();
 

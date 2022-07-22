@@ -85,8 +85,8 @@ public final class ClaimResponseTypeV2<TEntity>
   }
 
   /**
-   * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#name()} value to parse back
-   *     into a {@link ClaimResponseTypeV2}
+   * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#nameForParsing} value to parse
+   *     back into a {@link ClaimResponseTypeV2}
    * @return the {@link ClaimResponseTypeV2} represented by the specified {@link String}
    */
   public static Optional<ResourceTypeV2<ClaimResponse, ?>> parse(String claimTypeText) {
