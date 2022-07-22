@@ -113,8 +113,8 @@
 - name: Download prometheus jmx exporter  
   become: true
   get_url:
-    owner: root
-    group: root
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
     mode: 0755
     url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ prometheus_jmx_exporter_version }}/\
       jmx_prometheus_javaagent-{{ prometheus_jmx_exporter_version }}.jar"
