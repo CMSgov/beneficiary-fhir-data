@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+import json
 import os
 import subprocess
 import urllib.parse
@@ -11,6 +13,15 @@ environment = os.environ.get("BFD_ENVIRONMENT", "test")
 boto_config = Config(region_name="us-east-1")
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
+
+
+@dataclass
+class InvokeEvent:
+    host: str
+    suite_version: str
+    spawn_rate: int
+    users: int
+    spawned_runtime: str
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
@@ -32,6 +43,27 @@ def get_rds_db_uri(cluster_id: str) -> Optional[str]:
 
 
 def handler(event, context):
+    # We take only the first record, if it exists
+    try:
+        record = event["Records"][1]
+    except IndexError:
+        return "Invalid queue message, no records found"
+
+    # We extract the body, and attempt to convert from JSON
+    try:
+        body = json.loads(record["body"])
+    except json.JSONDecodeError:
+        return "Record body was not valid JSON"
+
+    # We then attempt to extract an InvokeEvent instance from
+    # the JSON body
+    try:
+        invoke_event = InvokeEvent(**body)
+    except TypeError as ex:
+        return f"Message body missing required keys: {str(ex)}"
+
+    # Assuming we get this far, invoke_event should have the information
+    # required to run the lambda:
     cluster_id = get_ssm_parameter(f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier")
     username = get_ssm_parameter(
         f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
@@ -88,6 +120,11 @@ def handler(event, context):
     process = subprocess.run(
         [
             "locust",
+            f"--locustfile=/var/task/{invoke_event.suite_version}/regression_suite.py",
+            f"--host={invoke_event.host}",
+            f"--users={invoke_event.users}",
+            f"--spawn-rate={invoke_event.spawn_rate}",
+            f"--spawned-runtime={invoke_event.spawned_runtime}",
             f"--database-uri={db_dsn}",
             f"--client-cert-path={cert_path}",
             "--headless",
@@ -96,4 +133,5 @@ def handler(event, context):
         text=True,
         check=False,
     )
+
     return process.stdout
