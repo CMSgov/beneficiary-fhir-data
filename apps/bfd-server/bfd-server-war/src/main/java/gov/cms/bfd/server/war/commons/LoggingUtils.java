@@ -39,10 +39,11 @@ public class LoggingUtils {
       LOGGER.warn("Could not parse long from bene_id: " + beneId);
     }
   }
+
   /**
-   * Log beneIDs from a bundle to BfdMDC in v1
+   * Log beneIDs from a bundle to BfdMDC in v1.
    *
-   * @param bundle
+   * @param bundle that is searched for valid bene_ids to log
    */
   public static void logBenesToMdc(org.hl7.fhir.dstu3.model.Bundle bundle) {
     Set<Long> beneIds = findBeneIds(bundle);
@@ -50,9 +51,9 @@ public class LoggingUtils {
   }
 
   /**
-   * Log beneIDs from a bundle to BfdMDC in v2
+   * Log beneIDs from a bundle to BfdMDC in v2.
    *
-   * @param bundle
+   * @param bundle that is searched through for valid bene_ids to log
    */
   public static void logBenesToMdc(org.hl7.fhir.r4.model.Bundle bundle) {
     Set<Long> beneIds = findBeneIds(bundle);
@@ -60,9 +61,10 @@ public class LoggingUtils {
   }
 
   /**
-   * Finds beneIds in a bundle in v1
+   * Helper function for aggregating bene_ids within a bundle in v1. If no bene_ids found, an empty
+   * set is returned.
    *
-   * @param bundle
+   * @param bundle that is searched through for valid bene_ids
    */
   static Set<Long> findBeneIds(org.hl7.fhir.dstu3.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();
@@ -105,9 +107,10 @@ public class LoggingUtils {
   }
 
   /**
-   * Finds beneIds in a bundle in v2
+   * Helper function for aggregating bene_ids within a bundle in v2. If no bene_ids found, an empty
+   * set is returned.
    *
-   * @param bundle
+   * @param bundle that is searched through for valid bene_ids
    */
   static Set<Long> findBeneIds(org.hl7.fhir.r4.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();
@@ -152,8 +155,8 @@ public class LoggingUtils {
   /**
    * Parses Sting beneficiary ID to Long and adds to List to log to MDC.
    *
-   * @param beneIds the collection of beneIds logged to MDC.
-   * @param beneId beneficiaryId to add to beneId collection.
+   * @param beneIds the collection of beneIds logged to MDC
+   * @param beneId beneficiaryId to add to beneId collection
    */
   private static void addBeneIdsToSet(Set<Long> beneIds, String beneId) {
     try {
