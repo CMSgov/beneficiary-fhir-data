@@ -13,11 +13,9 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 
 /** Tests the utility methods within the {@link TransformerUtilsV2}. */
@@ -135,6 +133,7 @@ public class TransformerUtilsV2Test {
         BigDecimal.ZERO,
         Optional.of(fiNum),
         Optional.empty(),
+        Optional.empty(),
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -172,6 +171,7 @@ public class TransformerUtilsV2Test {
         BigDecimal.ZERO,
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -182,6 +182,86 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNull(fiNumExtension);
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the input
+   * fiscalIntermediaryClaimProcessDate is present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenFiClmProcDtExistsExpectExtensionOnEob() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    LocalDate fiClmProcDt = LocalDate.of(2014, 02, 07);
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.of(fiClmProcDt));
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+            new DateType("2014-02-07"));
+
+    assertTrue(compare.equalsDeep(ex));
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is not mapped to an eob as an extension when the input
+   * fiscalIntermediaryClaimProcessDate is not present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenNoFiClmProcDtExpectFiClmProcDtExtension() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty());
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmProcDtExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNull(fiClmProcDtExtension);
   }
 
   /** Verifies that createCoding can take a Character type value and create a Coding from it. */

@@ -440,6 +440,26 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @param date the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionDate(CcwCodebookInterface ccwVariable, LocalDate date) {
+    Extension extension = null;
+    try {
+      String stringDate = date.toString();
+      DateType dateValue = new DateType(stringDate);
+      String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+      extension = new Extension(extensionUrl, dateValue);
+    } catch (DataFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to create DateType with date: '%s'.", date), e);
+    }
+    return extension;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -3002,13 +3022,21 @@ public final class TransformerUtilsV2 {
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
-      Optional<String> fiDocClmControlNum) {
+      Optional<String> fiDocClmControlNum,
+      Optional<LocalDate> fiClmProcDt) {
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
             eob.addExtension(
                 createExtensionIdentifier(
                     CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, cntlNum)));
+
+    // FI_CLM_PROC_DT => ExplanationOfBenefit.extension
+    fiClmProcDt.ifPresent(
+        procDt ->
+            eob.addExtension(
+                TransformerUtilsV2.createExtensionDate(
+                    CcwCodebookVariable.FI_CLM_PROC_DT, procDt)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
