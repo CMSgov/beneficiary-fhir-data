@@ -75,9 +75,9 @@ data_pipeline_rda_grpc_server_type: 'InProcess'
 data_pipeline_rda_grpc_inproc_server_mode: 'S3'
 
 # Enables the CCW RIF job when true; disables when false
-data_pipeline_ccw_rif_job_enabled: true
+data_pipeline_ccw_rif_job_enabled: false
 
 # Enable RDA API data ETL pipeline jobs.
-data_pipeline_rda_job_enabled: true
+data_pipeline_rda_job_enabled: false
 data_pipeline_rda_job_interval_seconds: 3600
 
