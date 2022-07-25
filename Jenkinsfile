@@ -41,6 +41,7 @@ properties([
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
+		string(name: 'locust_regression_image_override', description: 'Overrides the Docker image tag used when deploy the Locust regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -50,6 +51,7 @@ def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
+def locustRegressionScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -153,6 +155,7 @@ try {
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
+					locustRegressionScripts = load('ops/terraform/services/server/deploy.groovy')
 
 					awsAssumeRole()
 
@@ -260,6 +263,13 @@ try {
 						awsAssumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 					}
+
+					locustRegressionScripts.deployLocustRegression(
+						bfdEnv: bfdEnv,
+						dockerImageTagOverride: params.locust_regression_image_override
+					)
+
+					// TODO: Run the regression suite once deployed
 				}
 			}
 
@@ -327,6 +337,13 @@ try {
 							awsAssumeRole()
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 						}
+
+						locustRegressionScripts.deployLocustRegression(
+							bfdEnv: bfdEnv,
+							dockerImageTagOverride: params.locust_regression_image_override
+						)
+
+						// TODO: Run the regression suite once deployed
 					}
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
