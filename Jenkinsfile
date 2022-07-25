@@ -269,7 +269,9 @@ try {
 						dockerImageTagOverride: params.locust_regression_image_override
 					)
 
-					// TODO: Run the regression suite once deployed
+					locustRegressionScripts.runRegressionSuite(
+						bfdEnv: bfdEnv,
+					)
 				}
 			}
 

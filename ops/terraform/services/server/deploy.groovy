@@ -39,4 +39,28 @@ terraform apply \
     }
 }
 
+def runRegressionSuite(Map args = [:]) {
+    bfdEnv = args.bfdEnv
+
+    locustSqsQueueName = "bfd-${bfdEnv}-locust-regression"
+    locustSqsQueueUrl = sh(
+        returnStdout: true,
+        script: "aws sqs get-queue-url --queue-name ${locustSqsQueueName} --output text"
+    ).trim()
+
+    sqsMessage = writeJSON(returnText: true, json: [
+        'host': "https://${bfdEnv}.bfd.cms.gov",
+        'suite_version': 'v2'
+        'spawn_rate': 10,
+        'users': 10,
+        'spawned_runtime': '30s'
+    ])
+    sh(returnStdout: true,
+       script: """
+ aws sqs send-message \
+--queue-url "$locustSqsQueueUrl" \
+--message-body "$sqsMessage"
+""")
+}
+
 return this
