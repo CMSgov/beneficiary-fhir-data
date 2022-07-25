@@ -687,7 +687,12 @@ public final class RifLoaderIT {
     verifyRecordPrimaryKeysPresent(samples);
   }
 
-  @Disabled
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHEA_DATA} data.
+   *
+   * <p>This test ensures that changes to RifLoader that break compatibility with Synthea-generated
+   * data are flagged.
+   */
   @Test
   public void loadSyntheaData() {
     List<StaticRifResource> samples =
