@@ -12,6 +12,18 @@ Normally, this happens in real time through AWS Kinesis Firehose, but it can als
 by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests
 table. Most other parts of this project will depend upon API-Requests.
 
+## Naming Conventions
+
+### AWS Resources
+
+Somewhere in the BFD documentation (which I cannot presently find; please update if found), there was a convention to name AWS resources to clearly identify that the resource belongs to BFD Insights and to which project (BFD, BB2, AB2D, etc.), plus an identifier for the environment (prod, prod-sbx, test). The convention is: `bfd-insights-<project>-<environment>-<identifier>` in kebab case (lower-case words separated by hyphens). The exception is for AWS Glue / Athena table names, which must be in snake case (lower-case separated by underscores), because the hyphen is not a valid character in Athena table names. For example, we have `bfd-insights-bfd-prod-sbx-firehose-ingester` and `bfd-insights-bfd-test-api-requests-crawler`. However, for Glue Tables, we have `bfd_insights_bfd_prod_sbx_api_requests`.
+
+### Terraform Resources
+
+The terraform resource names do not need to be labeled with the
+`bfd-insights-<project>-<environment>-` prefix, because it should be clear from context what project they
+belong in, and environment is derived from the workspace. However, we have decided on a naming convention like `<function>-<identifier>` in kebab case (lower-case words separated by hyphens), so that even the modules, which do not clearly indicate the type of AWS resource they represent, will be clear. For example, we have `module.glue-table-api-requests` and `aws_glue_crawler.glue-crawler-api-requests`.
+
 ### Structure
 
 ```mermaid
@@ -21,7 +33,7 @@ flowchart TD
     History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
 
     EC2["CloudWatch Log Subscription (Real-Time)"] --> Firehose["Kinesis Firehose"]
-    Firehose -->|Lambda| APIRequests
+    Firehose -->|Lambda| History
 ```
 
 ### Manual Ingestion of Log Files
