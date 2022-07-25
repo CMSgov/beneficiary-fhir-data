@@ -28,6 +28,7 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -157,6 +158,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneId);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(patientId);
     } finally {
@@ -170,9 +174,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
-
-    // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(beneId);
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
@@ -253,6 +254,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBeneIdToMdc(logicalId.getValue());
+
     return bundle;
   }
 
@@ -607,8 +612,14 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
-    return TransformerUtilsV2.createBundle(
-        paging, patients, loadedFilterManager.getTransactionTime());
+
+    Bundle bundle =
+        TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBenesToMdc(bundle);
+
+    return bundle;
   }
 
   /**
@@ -1015,7 +1026,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
+
     TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBenesToMdc(bundle);
+
     return bundle;
   }
 

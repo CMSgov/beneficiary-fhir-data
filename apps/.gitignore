@@ -4,3 +4,7 @@
 
 # Ignore IntelliJ configuration files
 *.iml
+
+# Ignore NetBeans settings files
+**/nb-configuration.xml
+**/nbactions.xml
