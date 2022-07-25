@@ -6,7 +6,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -62,7 +61,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,7 +106,6 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
@@ -3358,64 +3355,11 @@ public final class TransformerUtils {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
-
-      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
-        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
-        if (eob != null
-            && eob.getPatient() != null
-            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
-          String reference = eob.getPatient().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
-          }
-        }
-      } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
-        Patient patient = ((Patient) entry.getResource());
-        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(patient.getId());
-        }
-      } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
-        Coverage coverage = ((Coverage) entry.getResource());
-        if (coverage != null
-            && coverage.getBeneficiary() != null
-            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
-          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
-          }
-        }
-      }
     }
-
-    logBeneIdToMdc(beneIds);
-
     return bundle;
-  }
-
-  /**
-   * Output list of benefificiary IDs to MDC logging
-   *
-   * @param beneIds the {@link Collection} of beneficiary IDs top log
-   */
-  public static void logBeneIdToMdc(Collection<String> beneIds) {
-    if (!beneIds.isEmpty()) {
-      BfdMDC.put("bene_id", String.join(", ", beneIds));
-    }
-  }
-
-  /**
-   * Output beneficiary ID to the MDC logging
-   *
-   * @param beneId the {@link Long} beneficiary ID to log
-   */
-  public static void logBeneIdToMdc(Long beneId) {
-    if (beneId != null) {
-      BfdMDC.put("bene_id", String.valueOf(beneId));
-    }
   }
 
   /**

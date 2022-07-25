@@ -52,7 +52,7 @@ data_pipeline_ccw_rif_job_enabled: true
 
 # Enables the RDA API data pipeline
 data_pipeline_rda_job_enabled: true
-# Sets the pipeline manager to ensure the rda job is running every 5 mins
-data_pipeline_rda_job_interval_seconds: 300
+# Sets the pipeline manager to ensure the rda job is running every 10 mins
+data_pipeline_rda_job_interval_seconds: 600
 # Sets the job to use 20 threads to load data
 data_pipeline_rda_job_write_threads: 20
