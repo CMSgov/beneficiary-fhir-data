@@ -28,7 +28,7 @@ terraform plan \
         } else {
             sh "terraform plan -no-color -out=tfplan"
         }
-        
+
         // Apply Terraform plan
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
         sh '''
@@ -50,7 +50,7 @@ def runRegressionSuite(Map args = [:]) {
 
     sqsMessage = writeJSON(returnText: true, json: [
         'host': "https://${bfdEnv}.bfd.cms.gov",
-        'suite_version': 'v2'
+        'suite_version': 'v2',
         'spawn_rate': 10,
         'users': 10,
         'spawned_runtime': '30s'

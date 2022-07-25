@@ -51,7 +51,7 @@ def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
-def locustRegressionScripts
+def serverScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -155,7 +155,7 @@ try {
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
-					locustRegressionScripts = load('ops/terraform/services/server/deploy.groovy')
+					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
 					awsAssumeRole()
 
@@ -264,12 +264,12 @@ try {
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 					}
 
-					locustRegressionScripts.deployLocustRegression(
+					serverScripts.deployLocustRegression(
 						bfdEnv: bfdEnv,
 						dockerImageTagOverride: params.locust_regression_image_override
 					)
 
-					locustRegressionScripts.runRegressionSuite(
+					serverScripts.runRegressionSuite(
 						bfdEnv: bfdEnv,
 					)
 				}
@@ -340,7 +340,7 @@ try {
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 						}
 
-						locustRegressionScripts.deployLocustRegression(
+						serverScripts.deployLocustRegression(
 							bfdEnv: bfdEnv,
 							dockerImageTagOverride: params.locust_regression_image_override
 						)
