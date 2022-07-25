@@ -3006,8 +3006,10 @@ public final class TransformerUtilsV2 {
    * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
    * @param totalChargeAmount CLM_TOT_CHRG_AMT,
    * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
-   * @param fiscalIntermediaryNumber FI_NUM
-   * @param lastUpdated the last updated
+   * @param fiscalIntermediaryNumber FI_NUM,
+   * @param lastUpdated the last updated,
+   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM,
+   * @param fiClmProcDt FI_CLM_PROC_DT
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,

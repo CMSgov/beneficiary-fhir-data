@@ -91,7 +91,8 @@ final class HHAClaimTransformer {
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getFiDocumentClaimControlNumber(),
-        claimGroup.getFiOriginalClaimControlNumber());
+        claimGroup.getFiOriginalClaimControlNumber(),
+        claimGroup.getFiscalIntermediaryClaimProcessDate());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(

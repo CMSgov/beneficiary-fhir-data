@@ -78,6 +78,9 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
       "value" : "373273882012"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2011-02-18"
   } ],
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",

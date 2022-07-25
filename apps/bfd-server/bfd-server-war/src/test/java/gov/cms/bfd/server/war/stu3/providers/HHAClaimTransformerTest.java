@@ -93,7 +93,8 @@ public final class HHAClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber(),
         claim.getFiDocumentClaimControlNumber(),
-        claim.getFiOriginalClaimControlNumber());
+        claim.getFiOriginalClaimControlNumber(),
+        claim.getFiscalIntermediaryClaimProcessDate());
 
     assertEquals(4, eob.getDiagnosis().size());
 

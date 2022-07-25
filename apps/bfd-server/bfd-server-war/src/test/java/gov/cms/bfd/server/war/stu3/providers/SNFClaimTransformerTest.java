@@ -155,7 +155,8 @@ public final class SNFClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber(),
         claim.getFiDocumentClaimControlNumber(),
-        claim.getFiOriginalClaimControlNumber());
+        claim.getFiOriginalClaimControlNumber(),
+        claim.getFiscalIntermediaryClaimProcessDate());
 
     assertEquals(6, eob.getDiagnosis().size());
 
