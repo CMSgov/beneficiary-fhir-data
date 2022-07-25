@@ -262,16 +262,16 @@ try {
 					container('bfd-cbc-build') {
 						awsAssumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
+
+						serverScripts.deployLocustRegression(
+							bfdEnv: bfdEnv,
+							dockerImageTagOverride: params.locust_regression_image_override
+						)
+
+						serverScripts.runRegressionSuite(
+							bfdEnv: bfdEnv,
+						)
 					}
-
-					serverScripts.deployLocustRegression(
-						bfdEnv: bfdEnv,
-						dockerImageTagOverride: params.locust_regression_image_override
-					)
-
-					serverScripts.runRegressionSuite(
-						bfdEnv: bfdEnv,
-					)
 				}
 			}
 
@@ -338,14 +338,16 @@ try {
 						container('bfd-cbc-build') {
 							awsAssumeRole()
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
+
+							serverScripts.deployLocustRegression(
+								bfdEnv: bfdEnv,
+								dockerImageTagOverride: params.locust_regression_image_override
+							)
+
+							serverScripts.runRegressionSuite(
+								bfdEnv: bfdEnv,
+							)
 						}
-
-						serverScripts.deployLocustRegression(
-							bfdEnv: bfdEnv,
-							dockerImageTagOverride: params.locust_regression_image_override
-						)
-
-						// TODO: Run the regression suite once deployed
 					}
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
