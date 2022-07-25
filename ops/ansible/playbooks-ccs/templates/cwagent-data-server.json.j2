@@ -125,56 +125,54 @@
     },
     "metrics_collected": {
       "prometheus": {
-        "cluster_name": "bfd/{{ env }}/bfd-server",
-        "log_group_name": "bfd/{{ env }}/bfd-server/prometheus",
+        "cluster_name": "/bfd/{{ env }}/bfd-server",
+        "log_group_name": "/bfd/{{ env }}/bfd-server/prometheus",
         "prometheus_config_path": "/tmp/cwagent-prometheus.yaml",
         "emf_processor": {
           "metric_declaration_dedup": true,
-          "metric_namespace": "bfd-{{ env }}/bfd-server/prometheus",
+          "metric_namespace": "/bfd-{{ env }}/bfd-server/prometheus",
           "metric_unit": {
             "jvm_threads_current": "Count",
-            "jvm_gc_collection_seconds_sum": "Second",
-            "jvm_memory_bytes_used": "Bytes"
+            "jvm_classes_loaded": "Count",
+            "java_lang_operatingsystem_freephysicalmemorysize": "Bytes",
+            "catalina_manager_activesessions": "Count",
+            "jvm_gc_collection_seconds_sum": "Seconds",
+            "catalina_globalrequestprocessor_bytesreceived": "Bytes",
+            "jvm_memory_bytes_used": "Bytes",
+            "jvm_memory_pool_bytes_used": "Bytes"
           },
-          "metric_declaration": [{
-            "source_labels": [
-              "job"
-            ],
-            "label_matcher": "^jmx$",
-            "dimensions": [
-              [
-                "InstanceId",
-                "ComponentName",
-                "ImageId",
-                "InstanceType",
-                "AutoScalingGroupName"
-              ],
-              [
-                "ComponentName"
+          "metric_declaration": [
+            {
+              "source_labels": ["job"],
+              "label_matcher": "^jmx$",
+              "dimensions": [["instance"]],
+              "metric_selectors": [
+                "^jvm_threads_current$",
+                "^jvm_classes_loaded$",
+                "^java_lang_operatingsystem_freephysicalmemorysize$",
+                "^catalina_manager_activesessions$",
+                "^jvm_gc_collection_seconds_sum$",
+                "^catalina_globalrequestprocessor_bytesreceived$"
               ]
-            ],
-            "metric_selectors": [
-              "^java_lang_memory_heapmemoryusage_used$",
-              "^java_lang_memory_heapmemoryusage_committed$",
-              "^java_lang_operatingsystem_openfiledescriptorcount$",
-              "^java_lang_operatingsystem_maxfiledescriptorcount$",
-              "^java_lang_operatingsystem_freephysicalmemorysize$",
-              "^java_lang_operatingsystem_freeswapspacesize$",
-              "^java_lang_threading_threadcount$",
-              "^java_lang_threading_daemonthreadcount$",
-              "^java_lang_classloading_loadedclasscount$",
-              "^java_lang_garbagecollector_collectiontime_copy$",
-              "^java_lang_garbagecollector_collectiontime_ps_scavenge$",
-              "^java_lang_garbagecollector_collectiontime_parnew$",
-              "^java_lang_garbagecollector_collectiontime_marksweepcompact$",
-              "^java_lang_garbagecollector_collectiontime_ps_marksweep$",
-              "^java_lang_garbagecollector_collectiontime_concurrentmarksweep$",
-              "^java_lang_garbagecollector_collectiontime_g1_young_generation$",
-              "^java_lang_garbagecollector_collectiontime_g1_old_generation$",
-              "^java_lang_garbagecollector_collectiontime_g1_mixed_generation$",
-              "^java_lang_operatingsystem_committedvirtualmemorysize$"
-            ]
-          }]
+            },
+            {
+              "source_labels": ["job"],
+              "label_matcher": "^jmx$",
+              "dimensions": [["area"]],
+              "metric_selectors": [
+                "^jvm_memory_bytes_used$"
+              ]
+            },
+            {
+              "source_labels": ["job"],
+              "label_matcher": "^jmx$",
+              "dimensions": [["pool"]],
+              "metric_selectors": [
+                "^jvm_memory_pool_bytes_used$"
+                "^jvm_buffer_pool_used_bytes$"
+              ]
+            }
+          ]
         }
       }
     }

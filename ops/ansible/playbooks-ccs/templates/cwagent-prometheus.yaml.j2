@@ -2,7 +2,19 @@ global:
   scrape_interval: 1m
   scrape_timeout: 10s
 scrape_configs:
+
   - job_name: jmx
+    relabel_configs:
+      - source_labels: [__meta_ec2_tag_Name]
+        target_label: instance
+      - source_labels: [__meta_ec2_private_ip]
+        target_label: ip
+      - source_labels: [__meta_ec2_tag_Namespace]
+        regex: '${NAMESPACE}'
+        action: keep
+      - source_labels: [__meta_ec2_tag_Environment]
+        regex: '${ENVIRONMENT}'
+        action: keep
     sample_limit: 10000
     file_sd_configs:
       - files: [ "/opt/aws/amazon-cloudwatch-agent/var/prometheus_file_sd.yaml" ]
