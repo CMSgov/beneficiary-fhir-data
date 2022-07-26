@@ -152,21 +152,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.0</version>
-			</plugin>
-			<plugin>
-				<groupId>com.coveo</groupId>
-				<artifactId>fmt-maven-plugin</artifactId>
-				<version>2.9</version>
-			</plugin>
-			<plugin>
-				<groupId>io.github.phillipuniverse</groupId>
-				<artifactId>githook-maven-plugin</artifactId>
-				<version>1.0.4</version>
-			</plugin>
 		</plugins>
 	</build>
 </project>
