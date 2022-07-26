@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
@@ -8,13 +11,15 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.LongStream;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Provides a mechanism for reliably producing Mbi objects from an MBI string. Two implementations
@@ -26,17 +31,28 @@ import org.slf4j.LoggerFactory;
  * <p>Values that have been looked up previously are kept in an in-memory LRU cache to avoid
  * excessive lookups in case we encounter the same MBI frequently during a session.
  */
+@Slf4j
 public class MbiCache {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MbiCache.class);
+  /** Used to compute hash values for raw MBI strings. */
+  protected final IdHasher hasher;
 
-  private final LookupFunction lookupFunction;
+  /** Used to track metrics for dashboards. */
+  @Getter(AccessLevel.PACKAGE)
+  protected final Metrics metrics;
+
+  /** In-memory cache used to prevent re-calculation of recently used MBI hashes. */
   private final Cache<String, Mbi> cache;
-  private final IdHasher hasher;
 
+  /**
+   * Constructs a new instance that computes all hash values on demand.
+   *
+   * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
+   * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+   */
   @VisibleForTesting
-  MbiCache(LookupFunction lookupFunction, IdHasher hasher) {
-    this.lookupFunction = lookupFunction;
+  MbiCache(IdHasher hasher, Metrics metrics) {
     this.hasher = hasher;
+    this.metrics = metrics;
     cache = CacheBuilder.newBuilder().maximumSize(hasher.getConfig().getCacheSize()).build();
   }
 
@@ -46,12 +62,23 @@ public class MbiCache {
    * they can be used with a persistent claim object.
    *
    * @param config provides the information needed to configure the hash algorithm and cache
-   * @return an MbiCache instance with no database connection
+   * @return an MbiCache instance with no database connection and no metrics reporting
    */
   public static MbiCache computedCache(IdHasher.Config config) {
-    var hasher = new IdHasher(config);
-    var lookupFunction = new ComputedLookupFunction(hasher);
-    return new MbiCache(lookupFunction, hasher);
+    return computedCache(config, new MetricRegistry());
+  }
+
+  /**
+   * Produces a simple instance that computes the hash value when needed and is not connected to any
+   * database. The Mbi objects returned from this must be manually merged into the database before
+   * they can be used with a persistent claim object.
+   *
+   * @param config provides the information needed to configure the hash algorithm and cache
+   * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+   * @return an MbiCache instance with no database connection
+   */
+  public static MbiCache computedCache(IdHasher.Config config, MetricRegistry appMetrics) {
+    return new MbiCache(new IdHasher(config), new Metrics(appMetrics));
   }
 
   /**
@@ -62,27 +89,29 @@ public class MbiCache {
    * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
    * entityManager.
    *
-   * @param entityManager used to query and create records
-   * @param hasher the hasher
-   * @return an MbiCache instance with a corresponding record in the database
+   * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
+   * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+   * @param entityManager {@link EntityManager} used to query and create records
+   * @return an {@link MbiCache} instance with a corresponding record in the database
    */
-  public static MbiCache databaseCache(EntityManager entityManager, IdHasher hasher) {
-    var lookupFunction = new DatabaseLookupFunction(entityManager, hasher);
-    return new MbiCache(lookupFunction, hasher);
+  public static MbiCache databaseCache(
+      IdHasher hasher, MetricRegistry appMetrics, EntityManager entityManager) {
+    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), entityManager);
   }
 
   /**
    * Returns an Mbi object containing an appropriate hash value for the given MBI string.
    *
    * @param mbi the MBI to be hashed
-   * @return an Mbi object with correct hash value
+   * @return an {@link Mbi} object with correct hash value
    */
   public Mbi lookupMbi(String mbi) {
     try {
-      return cache.get(mbi, () -> lookupFunction.lookupMbi(mbi));
+      metrics.addLookup();
+      return cache.get(mbi, () -> lookupMbiImpl(mbi));
     } catch (ExecutionException ex) {
       final var hash = hasher.computeIdentifierHash(mbi);
-      LOGGER.warn(
+      log.warn(
           "caught exception while saving generated hash: hash={} message={}",
           hash,
           ex.getCause().getMessage());
@@ -97,54 +126,50 @@ public class MbiCache {
    * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
    * entityManager.
    *
-   * @param entityManager used to query and create records
-   * @return an MbiCache instance with a corresponding record in the database
+   * @param entityManager {@link EntityManager} used to query and create records
+   * @return an {@link MbiCache} instance with a corresponding record in the database
    */
   public MbiCache withDatabaseLookup(EntityManager entityManager) {
-    return databaseCache(entityManager, hasher);
+    return new DatabaseBackedCache(hasher, metrics, entityManager);
   }
 
   /**
-   * Implementations of this interface perform the computation and/or I/O necessary to produce an
-   * Mbi object from an MBI string.
-   */
-  public interface LookupFunction {
-    Mbi lookupMbi(String mbi);
-  }
-
-  private static class ComputedLookupFunction implements LookupFunction {
-    private final IdHasher hasher;
-
-    private ComputedLookupFunction(IdHasher hasher) {
-      this.hasher = hasher;
-    }
-
-    @Override
-    public Mbi lookupMbi(String mbi) {
-      return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
-    }
-  }
-
-  /**
-   * Maintains a cache of MBI/hash values in a separate table within the database. Requests to
-   * compute an MBI hash first check the database for an existing record and return the value from
-   * the record if one is found. Otherwise computes the value and writes it to the database.
-   * Multiple threads could encounter conflicts if they attempt to write a record at the same time
-   * so retry logic is used in case of an error while writing.
+   * Method called to perform the computation and/or I/O necessary to produce an Mbi object from an
+   * MBI string.
    *
-   * <p>Values that have been looked up previously are kept in an in-memory cache to avoid excessive
-   * lookups in case we encounter the same MBI frequently during a session.
+   * @param mbi an unhashed medicare beneficiary ID
+   * @return corresponding {@link Mbi}
+   */
+  protected Mbi lookupMbiImpl(String mbi) {
+    metrics.addMiss();
+    metrics.addRetries(0);
+    return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
+  }
+
+  /**
+   * {@link MbiCache} implementation that maintains a table in the database containing previously
+   * computed MBI/hash values. Requests to compute an MBI hash first check the database for an
+   * existing record and return the value from the record if one is found. Otherwise computes the
+   * value and writes it to the database. Multiple threads could encounter conflicts if they attempt
+   * to write a record at the same time so retry logic is used in case of an error while writing.
    */
   @VisibleForTesting
-  static class DatabaseLookupFunction implements LookupFunction {
+  @Slf4j
+  static class DatabaseBackedCache extends MbiCache {
     private final EntityManager entityManager;
-    private final IdHasher hasher;
     private final Random random;
 
+    /**
+     * Creates a new instance with the specified parameters.
+     *
+     * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
+     * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+     * @param entityManager {@link EntityManager} used to query and create records
+     */
     @VisibleForTesting
-    DatabaseLookupFunction(EntityManager entityManager, IdHasher hasher) {
+    DatabaseBackedCache(IdHasher hasher, Metrics metrics, EntityManager entityManager) {
+      super(hasher, metrics);
       this.entityManager = entityManager;
-      this.hasher = hasher;
       random = new Random();
     }
 
@@ -159,26 +184,40 @@ public class MbiCache {
      */
     @VisibleForTesting
     @Override
-    public Mbi lookupMbi(String mbi) {
+    public Mbi lookupMbiImpl(String mbi) {
+      Mbi result = null;
+      int loopNumber = 0;
       int retryNumber = 0;
-      while (retryNumber <= 5) {
-        if (retryNumber >= 1) {
-          waitForRetry(retryNumber);
+      while (result == null && loopNumber <= 5) {
+        if (loopNumber >= 1) {
+          waitForRetry(loopNumber, retryNumber);
         }
         try {
-          return readOrInsertIfMissing(mbi);
+          result = readOrInsertIfMissing(mbi, loopNumber > 0);
         } catch (PersistenceException ex) {
           final Throwable rootCause = Throwables.getRootCause(ex);
-          LOGGER.debug(
+          log.debug(
               "caught exception while caching MBI: retry={} class={} causeClass={}",
-              retryNumber,
+              loopNumber,
               ex.getClass().getSimpleName(),
               rootCause.getClass().getSimpleName());
           retryNumber += 1;
         }
+        if (result == null) {
+          loopNumber += 1;
+        }
       }
-      LOGGER.warn("unable to cache MBI after multiple tries, returning computed value");
-      return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
+
+      if (loopNumber > 0) {
+        metrics.addMiss();
+      }
+      metrics.addRetries(retryNumber);
+
+      if (result == null) {
+        log.warn("unable to cache MBI after multiple tries, returning computed value");
+        result = new Mbi(mbi, hasher.computeIdentifierHash(mbi));
+      }
+      return result;
     }
 
     /**
@@ -186,10 +225,12 @@ public class MbiCache {
      * found insert one. Any PersistenceException will be passed through to the caller.
      *
      * @param mbi MBI to look up in the database
+     * @param insertIfMissing true causes a record to be computed and written if none is found in
+     *     the database
      * @return the Mbi that is known to exist in the entityManager
      */
     @VisibleForTesting
-    Mbi readOrInsertIfMissing(String mbi) {
+    Mbi readOrInsertIfMissing(String mbi, boolean insertIfMissing) {
       entityManager.getTransaction().begin();
       boolean successful = false;
       try {
@@ -199,7 +240,7 @@ public class MbiCache {
         criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
         final var records = entityManager.createQuery(criteria).getResultList();
         var record = records.isEmpty() ? null : records.get(0);
-        if (record == null) {
+        if (record == null && insertIfMissing) {
           record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
         }
         successful = true;
@@ -214,19 +255,90 @@ public class MbiCache {
     }
 
     /**
-     * Wait a random backoff time. Later retries wait for a longer period of time.
+     * Wait a random backoff time. Later loops wait for a longer period of time.
      *
+     * @param loopNumber identifies which loop iteration we are in
      * @param retryNumber identifies which retry attempt we are waiting for
      */
-    private void waitForRetry(int retryNumber) {
-      var delay = retryNumber * (50L + random.nextInt(50));
+    private void waitForRetry(int loopNumber, int retryNumber) {
+      var delay = loopNumber * (50L + random.nextInt(50));
       try {
-        LOGGER.warn("waiting for retry: retryNumber={} delay={}", retryNumber, delay);
+        if (retryNumber > 0) {
+          log.info("waiting for retry: retryNumber={} delay={}", retryNumber, delay);
+        }
         Thread.sleep(delay);
       } catch (InterruptedException ex) {
         // allow the Interrupted exception to flow through to terminate processing
         throw new RuntimeException(ex);
       }
+    }
+  }
+
+  /** Metrics are tested in unit tests so they need to be easily accessible from tests. */
+  @VisibleForTesting
+  static class Metrics {
+    /** Tracks number of calls to {@link MbiCache#lookupMbi(String)} */
+    private final Meter lookups;
+    /**
+     * Tracks number of calls to {@link MbiCache#lookupMbi(String)} in which MBI was not present in
+     * the cache.
+     */
+    private final Meter misses;
+    /** Tracks number of times database read/write had to be reattempted to arrive at a result. */
+    private final Histogram retries;
+
+    /**
+     * Creates the metrics.
+     *
+     * @param appMetrics {@link MetricRegistry} to hold the metrics
+     */
+    Metrics(MetricRegistry appMetrics) {
+      lookups = appMetrics.meter(MetricRegistry.name(MbiCache.class.getSimpleName(), "lookups"));
+      misses = appMetrics.meter(MetricRegistry.name(MbiCache.class.getSimpleName(), "misses"));
+      retries =
+          appMetrics.histogram(MetricRegistry.name(MbiCache.class.getSimpleName(), "retries"));
+    }
+
+    /** Increment number of lookups metric. */
+    void addLookup() {
+      lookups.mark();
+    }
+
+    /** Increment number of misses metric. */
+    void addMiss() {
+      misses.mark();
+    }
+
+    /** Add number of retries value to retries metric. */
+    void addRetries(int count) {
+      retries.update(count);
+    }
+
+    /**
+     * Get current lookups metric value.
+     *
+     * @return current lookups metric value.
+     */
+    long getLookups() {
+      return lookups.getCount();
+    }
+
+    /**
+     * Get current misses metric value.
+     *
+     * @return current misses metric value.
+     */
+    long getMisses() {
+      return misses.getCount();
+    }
+
+    /**
+     * Get total number of retries.
+     *
+     * @return total number of retries.
+     */
+    long getTotalRetries() {
+      return LongStream.of(retries.getSnapshot().getValues()).sum();
     }
   }
 }
