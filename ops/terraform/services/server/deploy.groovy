@@ -45,8 +45,8 @@ terraform apply \
     }
 }
 
-/* Runs envionment-specific regression test suite via SQS signal.*/
-/* @param args a {@link Map} must include `bfdEnv`
+/* Runs envionment-specific regression test suite via SQS signal.
+ * @param args a {@link Map} must include `bfdEnv`
  * <ul>
  * <li>bfdEnv string represents the targeted BFD SDLC Environment
  * </ul>
