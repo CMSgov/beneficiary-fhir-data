@@ -85,7 +85,8 @@ final class SNFClaimTransformer {
         claimGroup.getNoncoveredStayThroughDate(),
         claimGroup.getCoveredCareThroughDate(),
         claimGroup.getMedicareBenefitsExhaustedDate(),
-        claimGroup.getDiagnosisRelatedGroupCd());
+        claimGroup.getDiagnosisRelatedGroupCd(),
+        claimGroup.getFiscalIntermediaryClaimActionCode());
 
     if (claimGroup.getPatientStatusCd().isPresent()) {
       TransformerUtils.addInformationWithCode(

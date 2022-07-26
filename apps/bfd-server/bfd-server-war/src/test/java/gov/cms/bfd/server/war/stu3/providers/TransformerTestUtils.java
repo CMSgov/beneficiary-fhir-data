@@ -1417,6 +1417,8 @@ final class TransformerTestUtils {
    *     exhausted date for the claim
    * @param diagnosisRelatedGroupCd CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared
    *     field representing the non-covered stay from date for the claim
+   * @param fiClaimActionCd FI_CLM_ACTN_CD: a {@link Character} shared field representing the fiscal
+   *     intermediary action cd for the claim
    */
   static void assertCommonEobInformationInpatientSNF(
       ExplanationOfBenefit eob,
@@ -1424,7 +1426,8 @@ final class TransformerTestUtils {
       Optional<LocalDate> noncoveredStayThroughDate,
       Optional<LocalDate> coveredCareThroughDate,
       Optional<LocalDate> medicareBenefitsExhaustedDate,
-      Optional<String> diagnosisRelatedGroupCd) {
+      Optional<String> diagnosisRelatedGroupCd,
+      Optional<Character> fiClaimActionCd) {
     /*
      * TODO missing tests for: admissionTypeCd, sourceAdmissionCd,
      * diagnosisAdmittingCode, diagnosisAdmittingCodeVersion
@@ -1466,6 +1469,9 @@ final class TransformerTestUtils {
         eob.getDiagnosisFirstRep().getPackageCode());
 
     assertEquals(1, eob.getDiagnosisFirstRep().getSequence());
+
+    // fiClaimActionCd
+    assertExtensionCodingEquals(CcwCodebookVariable.FI_CLM_ACTN_CD, fiClaimActionCd, eob);
   }
 
   /**

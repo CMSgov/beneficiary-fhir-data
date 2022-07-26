@@ -97,7 +97,8 @@ final class InpatientClaimTransformer {
         claimGroup.getNoncoveredStayThroughDate(),
         claimGroup.getCoveredCareThoughDate(),
         claimGroup.getMedicareBenefitsExhaustedDate(),
-        claimGroup.getDiagnosisRelatedGroupCd());
+        claimGroup.getDiagnosisRelatedGroupCd(),
+        claimGroup.getFiscalIntermediaryClaimActionCode());
 
     // Claim Operational Indirect Medical Education Amount
     if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {

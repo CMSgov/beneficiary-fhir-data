@@ -131,6 +131,7 @@ public class InpatientClaimTransformerV2 {
     // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
     // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
     // CLM_DRG_CD                       => ExplanationOfBenefit.supportingInfo.code
+    // FI_CLM_ACTN_CD                   => ExplanationOfBenefit.extension
     TransformerUtilsV2.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -139,7 +140,8 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getNoncoveredStayThroughDate(),
         claimGroup.getCoveredCareThoughDate(),
         claimGroup.getMedicareBenefitsExhaustedDate(),
-        claimGroup.getDiagnosisRelatedGroupCd());
+        claimGroup.getDiagnosisRelatedGroupCd(),
+        claimGroup.getFiscalIntermediaryClaimActionCode());
 
     // IME_OP_CLM_VAL_AMT => ExplanationOfBenefit.extension
     TransformerUtilsV2.addAdjudicationTotal(
