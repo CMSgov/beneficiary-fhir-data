@@ -4,10 +4,10 @@
 -- schema changes related to using BIGINT for bene_id, clm_id, and clm_grp_id.
 --
 -- In particular, this script:
---   1) fixes sppelling errors in constraint names
---   2) removes some unused table indeces.
+--   1) fixes spelling errors in constraint names
+--   2) removes some unused table indexes.
 --   3) drop db triggers that are no longer used and in fact are invalid.
---   4) drops some tables that were temporarily used during various data mitagation efforts
+--   4) drops some tables that were temporarily used during various data analysis efforts
 --   5) drop unused procedures that were used from db trigger(s)
 --
 -- fix spelling error 'benficiaries' in constraint names
