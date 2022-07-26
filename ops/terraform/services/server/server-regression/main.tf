@@ -16,7 +16,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   env        = terraform.workspace
   layer      = "app"
-  service    = "locust-regression"
+  service    = "server-regression"
 
   vpc_name   = "bfd-${local.env}-vpc"
   queue_name = "bfd-${local.env}-${local.service}"

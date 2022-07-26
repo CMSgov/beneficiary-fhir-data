@@ -37,7 +37,7 @@ data "aws_ecr_image" "image" {
 
 data "aws_ssm_parameter" "docker_image_tag" {
   # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
-  name = "/bfd/mgmt/server/nonsensitive/locust_regression_suite_latest_image_tag"
+  name = "/bfd/mgmt/server/nonsensitive/server_regression_latest_image_tag"
 }
 
 data "aws_security_group" "rds" {

@@ -5,11 +5,11 @@
  * <li>dockerImageTagOverride string represents an override regression test suite image
  * </ul>
 */
-def deployLocustRegression(Map args = [:]) {
+def deployServerRegression(Map args = [:]) {
     bfdEnv = args.bfdEnv
     dockerImageTagOverride = args.dockerImageTagOverride
 
-    dir("${workspace}/ops/terraform/services/server/bfd-regression-suite") {
+    dir("${workspace}/ops/terraform/services/server/server-regression") {
         // Debug output terraform version
         sh "terraform --version"
 
@@ -51,10 +51,10 @@ terraform apply \
  * <li>bfdEnv string represents the targeted BFD SDLC Environment
  * </ul>
 */
-def runRegressionSuite(Map args = [:]) {
+def runServerRegression(Map args = [:]) {
     bfdEnv = args.bfdEnv
 
-    locustSqsQueueName = "bfd-${bfdEnv}-locust-regression"
+    locustSqsQueueName = "bfd-${bfdEnv}-server-regression"
     locustSqsQueueUrl = sh(
         returnStdout: true,
         script: "aws sqs get-queue-url --queue-name ${locustSqsQueueName} --output text"

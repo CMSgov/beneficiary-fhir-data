@@ -41,7 +41,7 @@ properties([
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
-		string(name: 'locust_regression_image_override', description: 'Overrides the Docker image tag used when deploy the Locust regression lambda', defaultValue: null)
+		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -264,12 +264,12 @@ try {
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 
 						awsAssumeRole()
-						serverScripts.deployLocustRegression(
+						serverScripts.deployServerRegression(
 							bfdEnv: bfdEnv,
-							dockerImageTagOverride: params.locust_regression_image_override
+							dockerImageTagOverride: params.server_regression_image_override
 						)
 
-						serverScripts.runRegressionSuite(
+						serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
 						)
 					}
@@ -341,12 +341,12 @@ try {
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 
 							awsAssumeRole()
-							serverScripts.deployLocustRegression(
+							serverScripts.deployServerRegression(
 								bfdEnv: bfdEnv,
-								dockerImageTagOverride: params.locust_regression_image_override
+								dockerImageTagOverride: params.server_regression_image_override
 							)
 
-							serverScripts.runRegressionSuite(
+							serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
 							)
 						}
@@ -397,13 +397,13 @@ try {
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
 
 							awsAssumeRole()
-							serverScripts.deployLocustRegression(
+							serverScripts.deployServerRegression(
 								bfdEnv: bfdEnv,
-								dockerImageTagOverride: params.locust_regression_image_override
+								dockerImageTagOverride: params.server_regression_image_override
 							)
 
 							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
-							// serverScripts.runRegressionSuite(
+							// serverScripts.runServerRegression(
 							// 	bfdEnv: bfdEnv,
 							// )
 						}
