@@ -1,4 +1,10 @@
-// initializes, selects appropriate workspace, plans, and applies terraform
+/* Deploys regression test suite via terraform
+ * @param args a {@link Map} must include `bfdEnv`; optionally `dockerImageTagOverride`
+ * <ul>
+ * <li>bfdEnv string represents the targeted BFD SDLC Environment
+ * <li>dockerImageTagOverride string represents an override regression test suite image
+ * </ul>
+*/
 def deployLocustRegression(Map args = [:]) {
     bfdEnv = args.bfdEnv
     dockerImageTagOverride = args.dockerImageTagOverride
@@ -39,6 +45,12 @@ terraform apply \
     }
 }
 
+/* Runs envionment-specific regression test suite via SQS signal.*/
+/* @param args a {@link Map} must include `bfdEnv`
+ * <ul>
+ * <li>bfdEnv string represents the targeted BFD SDLC Environment
+ * </ul>
+*/
 def runRegressionSuite(Map args = [:]) {
     bfdEnv = args.bfdEnv
 
