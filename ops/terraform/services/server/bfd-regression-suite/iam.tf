@@ -6,37 +6,6 @@ data "aws_iam_policy" "sqs_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
 }
 
-resource "aws_iam_policy" "lambda_vpc" {
-  name        = "bfd-${local.env}-${local.service}-lambda-vpc"
-  description = "Permissions to use VPCs for ${local.service} lambda"
-  policy      = <<-EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DeleteNetworkInterface",
-                "ec2:DescribeDhcpOptions",
-                "ec2:AssignPrivateIpAddresses",
-                "ec2:DescribeSecurityGroups",
-                "ec2:CreateNetworkInterface",
-                "ec2:DescribeNetworkInterfaces",
-                "ec2:DeleteNetworkInterfacePermission",
-                "ec2:CreateNetworkInterfacePermission",
-                "ec2:DescribeVpcs",
-                "ec2:AttachNetworkInterface",
-                "ec2:DescribeNetworkInterfacePermissions",
-                "ec2:UnassignPrivateIpAddresses",
-                "ec2:DescribeSubnets"
-            ],
-            "Resource": "arn:aws:ssm:us-east-1:${local.account_id}:*/*"
-        }
-    ]
-}
-EOF
-}
-
 resource "aws_iam_policy" "ecr" {
   name        = "bfd-${local.env}-${local.service}-ecr"
   description = "Permissions to describe ${local.service} ECR images"
@@ -171,7 +140,6 @@ resource "aws_iam_role" "this" {
   managed_policy_arns = [
     data.aws_iam_policy.lambda_vpc_policy.arn,
     data.aws_iam_policy.sqs_policy.arn,
-    aws_iam_policy.lambda_vpc.arn,
     aws_iam_policy.ecr.arn,
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
