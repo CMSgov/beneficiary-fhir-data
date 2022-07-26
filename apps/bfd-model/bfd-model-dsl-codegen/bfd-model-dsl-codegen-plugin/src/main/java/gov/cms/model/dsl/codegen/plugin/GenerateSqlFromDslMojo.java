@@ -1,6 +1,5 @@
 package gov.cms.model.dsl.codegen.plugin;
 
-import com.google.common.annotations.VisibleForTesting;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
@@ -13,6 +12,9 @@ import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -24,6 +26,8 @@ import org.apache.maven.plugins.annotations.Parameter;
  * ALTER TABLE statements are created for each table. The template file can be used to copy SQL for
  * use in a flyway migration file.
  */
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Mojo(name = "sql", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class GenerateSqlFromDslMojo extends AbstractMojo {
   /** Path to a single mapping file or a directory containing one or more mapping files. */
@@ -35,21 +39,6 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
       property = "outputFile",
       defaultValue = "${project.build.directory}/generated-sources/entities-schema.sql")
   private String outputFile;
-
-  /** Parameterless constructor used by Maven to instantiate the plugin. */
-  public GenerateSqlFromDslMojo() {}
-
-  /**
-   * All fields constructor for use in unit tests.
-   *
-   * @param mappingPath path to file or directory containing mappings
-   * @param outputFile path to file to contain generated code
-   */
-  @VisibleForTesting
-  GenerateSqlFromDslMojo(String mappingPath, String outputFile) {
-    this.mappingPath = mappingPath;
-    this.outputFile = outputFile;
-  }
 
   /**
    * Executed by maven to execute the mojo. Reads all mapping files and generates template SQL code
@@ -64,6 +53,16 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
       try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)))) {
         RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
         List<MappingBean> rootMappings = getSortedMappings(root);
+        out.println("/*");
+        out.println(" ************************** WARNING **************************");
+        out.println();
+        out.println(
+            " * SQL code in this file is intended to serve as a starting point for creating migration files.");
+        out.println(
+            " * It is should be reviewed manually for performance/optimization when applied to specific use cases.");
+        out.println(" */");
+        out.println();
+        out.println();
         out.println("/************************** CREATES **************************/");
         out.println();
         out.println();
@@ -218,7 +217,7 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
             .filter(
                 m -> m.getArrays().stream().anyMatch(a -> a.getMapping().equals(mapping.getId())))
             .findFirst()
-            .map(m -> m.getTable());
+            .map(MappingBean::getTable);
     return parent.orElse(null);
   }
 

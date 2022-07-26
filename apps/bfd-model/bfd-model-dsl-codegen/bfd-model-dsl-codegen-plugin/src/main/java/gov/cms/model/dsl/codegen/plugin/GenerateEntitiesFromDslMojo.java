@@ -61,7 +61,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.hibernate.annotations.BatchSize;
 
-/** A Maven Mojo that generates code for RDA API JPA entities. */
+/** A Maven Mojo that generates code for JPA entities. */
 @Mojo(name = "entities", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   /** Value to use for the {@link BatchSize} annotation value on arrays. */
@@ -259,6 +259,12 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
       annotationSpecs.add(AnnotationSpec.builder(Builder.class).build());
       annotationSpecs.add(AnnotationSpec.builder(AllArgsConstructor.class).build());
       annotationSpecs.add(AnnotationSpec.builder(NoArgsConstructor.class).build());
+    } else {
+      getLog()
+          .info(
+              String.format(
+                  "Mapping field count prevented generation of builder or constructors: mapping=%s fieldCount=%d",
+                  mapping.getId(), mapping.getTable().getColumns().size()));
     }
 
     if (mapping.getTable().isEqualsNeeded()) {
@@ -507,7 +513,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     }
     for (ArrayBean arrayBean : mapping.getArrays()) {
       Optional<MappingBean> arrayMapping = root.findMappingWithId(arrayBean.getMapping());
-      if (!arrayMapping.isPresent()) {
+      if (arrayMapping.isEmpty()) {
         throw MojoUtil.createException(
             "array references unknown mapping: mapping=%s array=%s missing=%s",
             mapping.getId(), arrayBean.getTo(), arrayBean.getMapping());

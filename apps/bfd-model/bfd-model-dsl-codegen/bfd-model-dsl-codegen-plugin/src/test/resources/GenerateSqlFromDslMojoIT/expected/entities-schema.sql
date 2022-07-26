@@ -1,3 +1,9 @@
+/*
+ ************************** WARNING **************************
+ * SQL code in this file is intended to serve as a starting point for creating migration files.
+ * It is should be reviewed manually for performance/optimization when applied to specific use cases.
+ */
+
 /************************** CREATES **************************/
 
 
@@ -130,4 +136,3 @@ ALTER TABLE "rda"."MbiCache" ADD "mbi" varchar(11) NOT NULL;
 ALTER TABLE "rda"."MbiCache" ADD "hash" varchar(64) NOT NULL;
 ALTER TABLE "rda"."MbiCache" ADD "oldHash" varchar(64);
 ALTER TABLE "rda"."MbiCache" ADD "lastUpdated" timestamp with time zone NOT NULL;
-
