@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package gov.cms.bfd.data.fda.lookup;
-=======
-package gov.cms.bfd.data.fda.lookup.fdadrugcodelookup;
->>>>>>> 6d0647d45 (Pr comments)
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
