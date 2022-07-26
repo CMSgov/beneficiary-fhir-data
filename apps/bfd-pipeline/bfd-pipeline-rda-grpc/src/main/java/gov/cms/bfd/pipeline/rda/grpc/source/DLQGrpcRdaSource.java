@@ -173,7 +173,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
           // If our thread is interrupted we cancel the stream so the server knows we're done
           // and then shut down normally.
           responseStream.cancelStream("shutting down due to InterruptedException");
-          processResult.setWasInterrupted(true);
+          processResult.setInterrupted(true);
         } catch (Exception e) {
           // If we failed to process the claim, it stays in the DLQ, nothing to do.
           log.error(

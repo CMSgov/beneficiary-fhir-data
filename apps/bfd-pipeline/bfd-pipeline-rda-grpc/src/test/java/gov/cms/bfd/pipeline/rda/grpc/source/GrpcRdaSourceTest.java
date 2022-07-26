@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Throwables;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
@@ -236,9 +237,9 @@ public class GrpcRdaSourceTest {
       source.retrieveAndProcessObjects(2, sink);
       fail("source should have thrown exception");
     } catch (ProcessingException ex) {
-      assertEquals(3, ex.getProcessedCount());
+      assertEquals(0, ex.getProcessedCount());
       assertNotNull(ex.getCause());
-      assertSame(error, ex.getCause().getCause());
+      assertSame(error, Throwables.getRootCause(ex));
     }
     assertMeterReading(1, "calls", metrics.getCalls());
     assertMeterReading(4, "received", metrics.getObjectsReceived());
@@ -313,7 +314,11 @@ public class GrpcRdaSourceTest {
     doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     final Exception error = new RuntimeException("oops");
-    doThrow(error).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_3, CLAIM_4));
+    doThrow(error)
+        // Second doThrow() prevents "self-suppression" from testing logic
+        .doThrow(new RuntimeException("oops 2"))
+        .when(sink)
+        .writeMessages(VERSION, Arrays.asList(CLAIM_3, CLAIM_4));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -418,7 +423,7 @@ public class GrpcRdaSourceTest {
     doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
 
     try {
-      source.retrieveAndProcessObjects(2, sink);
+      source.retrieveAndProcessObjects(3, sink);
       fail("should have thrown an exception");
     } catch (ProcessingException error) {
       assertEquals(2, error.getProcessedCount());

@@ -234,12 +234,12 @@ public class RdaLoadJobIT {
                       job.callRdaServiceAndStoreRecords();
                       fail("expected an exception to be thrown");
                     } catch (ProcessingException ex) {
-                      assertEquals(fullBatchSize, ex.getProcessedCount());
+                      assertEquals(claimsToSendBeforeThrowing, ex.getProcessedCount());
                       assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                     }
                   });
           List<RdaMcsClaim> claims = getRdaMcsClaims(entityManager);
-          assertEquals(fullBatchSize, claims.size());
+          assertEquals(claimsToSendBeforeThrowing, claims.size());
         });
   }
 

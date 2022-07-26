@@ -64,7 +64,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
       setUptimeToRunning();
       ProcessResult result = logic.process();
       processed += result.getCount();
-      interrupted = result.isWasInterrupted();
+      interrupted = result.isInterrupted();
       error = result.getException();
     } catch (Exception ex) {
       error = ex;
@@ -105,7 +105,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   /** Data class for holding processing results. */
   @Data
   protected static class ProcessResult {
-    private boolean wasInterrupted = false;
+    private boolean interrupted = false;
     private int count = 0;
     private Exception exception = null;
   }
