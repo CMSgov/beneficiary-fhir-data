@@ -169,16 +169,18 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
           }
           lastProcessedTime = clock.millis();
         }
-        if (batch.size() > 0) {
-          processed += submitBatchToSink(apiVersion, sink, batch);
-        }
       } catch (GrpcResponseStream.StreamInterruptedException ex) {
         // If our thread is interrupted we cancel the stream so the server knows we're done
         // and then shut down normally.
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
       } catch (DroppedConnectionException ex) {
-        logOrRethrowDroppedConnectionException(lastProcessedTime, ex);
+        if (isUnexpectedDroppedConnectionException(lastProcessedTime, ex)) {
+          error = ex;
+        }
+      }
+      if (batch.size() > 0 && !interrupted) {
+        processed += submitBatchToSink(apiVersion, sink, batch);
       }
       sink.shutdown(Duration.ofMinutes(5));
       processed += sink.getProcessedCount();
@@ -212,24 +214,25 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * gRPC but we don't want to trigger alerts when they happen since they are not unexpected.
    *
    * <p>This method determines if we have been idle long enough that such a drop is possible. If the
-   * drop is expected it simply logs the event but if the drop is not expected it rethrows the
-   * exception so that normal error logic can be applied to it.
+   * drop is expected it simply logs the event and returns false to indicate the exception should
+   * not be treated as an error. But if the drop is not expected it returns true to indicate that
+   * the exception should be treated as an error and have normal error logic applied to it.
    *
    * @param lastProcessedTime time in millis when we last processed a message from the server
    * @param exception the exception to evaluate
-   * @throws DroppedConnectionException if not an expected drop
+   * @return true if not an expected drop and the exception should be treated as an error
    */
-  private void logOrRethrowDroppedConnectionException(
-      long lastProcessedTime, DroppedConnectionException exception)
-      throws DroppedConnectionException {
+  private boolean isUnexpectedDroppedConnectionException(
+      long lastProcessedTime, DroppedConnectionException exception) {
     final long idleMillis = clock.millis() - lastProcessedTime;
     if (idleMillis >= minIdleMillisBeforeConnectionDrop) {
       LOGGER.info(
           "RDA API server dropped connection after idle time: idleMillis={} message='{}'",
           idleMillis,
           exception.getMessage());
+      return false;
     } else {
-      throw exception;
+      return true;
     }
   }
 
