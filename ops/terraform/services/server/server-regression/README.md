@@ -6,7 +6,7 @@ The below diagram shows a high-level overview of the `server-regression` infrast
 additional resources created by the terraform in this directory, but the major pieces of
 infrastructure are included in this diagram.
 
-![Infrastructure Diagram](./docs/server-regression-diagram.svg)
+![Infrastructure Diagram](./docs/server-regression.svg)
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
