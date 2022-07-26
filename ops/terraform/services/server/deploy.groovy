@@ -67,12 +67,14 @@ def runRegressionSuite(Map args = [:]) {
         'users': 10,
         'spawned_runtime': '30s'
     ])
-    sh(returnStdout: true,
-       script: """
- aws sqs send-message \
---queue-url "$locustSqsQueueUrl" \
---message-body "$sqsMessage"
-""")
+
+    withEnv(["SQS_QUEUE_URL=${locustSqsQueueUrl}", "MESSAGE=${sqsMessage}"]) {
+        sh(returnStdout: true,
+            script: '''
+aws sqs send-message \
+--queue-url "$SQS_QUEUE_URL" \
+--message-body "$MESSAGE"
+''')}
 }
 
 return this
