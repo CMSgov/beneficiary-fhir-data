@@ -269,6 +269,7 @@ try {
 							dockerImageTagOverride: params.server_regression_image_override
 						)
 
+						awsAssumeRole()
 						serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
 						)
@@ -346,6 +347,7 @@ try {
 								dockerImageTagOverride: params.server_regression_image_override
 							)
 
+							awsAssumeRole()
 							serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
 							)
