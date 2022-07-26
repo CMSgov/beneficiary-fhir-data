@@ -50,7 +50,7 @@ ${logic.psql-only} drop table if exists beneficiary_monthly_audit;
 ${logic.psql-only} drop table if exists ccw_load_temp;
 
 -- check with team on who owns this one
-${logic.psql-only} drop table if exists tempbene;
+${logic.psql-only} drop table if exists public."TempBene";
 
 -- cleanup old stored procedures
 ${logic.psql-only} drop procedure if exists load_from_ccw;
