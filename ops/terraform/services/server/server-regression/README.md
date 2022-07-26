@@ -1,5 +1,12 @@
 # BFD Server Regression Test Suite
-TODO
+
+## Infrastructure Diagram
+
+The below diagram shows a high-level overview of the `server-regression` infrastructure. There are 
+additional resources created by the terraform in this directory, but the major pieces of
+infrastructure are included in this diagram.
+
+![Infrastructure Diagram](./docs/server-regression-diagram.svg)
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
