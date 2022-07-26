@@ -263,6 +263,7 @@ try {
 						awsAssumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 
+						awsAssumeRole()
 						serverScripts.deployLocustRegression(
 							bfdEnv: bfdEnv,
 							dockerImageTagOverride: params.locust_regression_image_override
@@ -339,6 +340,7 @@ try {
 							awsAssumeRole()
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 
+							awsAssumeRole()
 							serverScripts.deployLocustRegression(
 								bfdEnv: bfdEnv,
 								dockerImageTagOverride: params.locust_regression_image_override
