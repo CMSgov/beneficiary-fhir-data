@@ -39,5 +39,8 @@ github --> "deployment pipeline": Return change set
 "deployment pipeline" -> "AWS Lambda": terraform:\ndeploy server-regression Lambda to PROD-SBX
 note over "deployment pipeline", "AWS Lambda": assume deployment process is the same as in TEST above
 "AWS Lambda" --> "deployment pipeline"
+"deployment pipeline" -> "sqs queue": jenkinsfile:\nwrite server-regression invocation event to SQS
+"sqs queue" --> "deployment pipeline"
+note over "deployment pipeline", "sqs queue": assume server-regression run process is the same as in TEST above
 "deployment pipeline" --> operator
 @enduml
