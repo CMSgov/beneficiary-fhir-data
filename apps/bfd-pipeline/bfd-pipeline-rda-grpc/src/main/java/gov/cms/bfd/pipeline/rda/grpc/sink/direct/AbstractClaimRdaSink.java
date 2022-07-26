@@ -4,6 +4,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
@@ -329,8 +330,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param maxSeq highest sequence number from claims in the collection
    * @param changes collection of claims to write to the database
    */
-  private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
+  private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
     boolean commit = false;
+    final Timer.Context timerContext = metrics.dbUpdateTime.time();
     try {
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
@@ -354,6 +356,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         entityManager.getTransaction().rollback();
       }
       entityManager.clear();
+      timerContext.stop();
+      metrics.dbBatchSize.update(changes.size());
     }
   }
 
@@ -413,6 +417,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter transformFailures;
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
+    /** Tracks the elapsed time when we write claims to the database. */
+    private final Timer dbUpdateTime;
+    /** Tracks the number of updates per database transaction. */
+    private final Histogram dbBatchSize;
     /** Latest sequnce number from writing a batch. * */
     private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
@@ -436,6 +444,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+      dbUpdateTime = appMetrics.timer(MetricRegistry.name(base, "writes", "elapsed"));
+      dbBatchSize = appMetrics.histogram(MetricRegistry.name(base, "writes", "batchSize"));
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
