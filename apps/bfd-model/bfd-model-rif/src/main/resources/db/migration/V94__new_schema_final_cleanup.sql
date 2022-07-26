@@ -35,11 +35,11 @@ drop index if exists  beneficiaries_ptd_cntrct_number_nov_id_idx;
 drop index if exists  beneficiaries_ptd_cntrct_number_dec_id_idx;
 
 -- drop unused / invalid db triggers.
-${logic.psql-only} drop trigger ${logic.psql-only} if exists
+${logic.psql-only} drop trigger if exists
 ${logic.psql-only}   beneficiaries_populate_bene_id_numeric
 ${logic.psql-only}     on beneficiary_monthly cascade;
 
-${logic.psql-only} drop trigger ${logic.psql-only} if exists
+${logic.psql-only} drop trigger if exists
 ${logic.psql-only}   track_bene_monthly_change
 ${logic.psql-only}     on beneficiary_monthly cascade;
 
