@@ -1,11 +1,3 @@
-data "aws_iam_policy" "lambda_vpc_policy" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
-
-data "aws_iam_policy" "sqs_policy" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
-}
-
 resource "aws_iam_policy" "ecr" {
   name        = "bfd-${local.env}-${local.service}-ecr"
   description = "Permissions to describe ${local.service} ECR images"
@@ -137,9 +129,10 @@ resource "aws_iam_role" "this" {
       ]
   }
   EOF
+
   managed_policy_arns = [
-    data.aws_iam_policy.lambda_vpc_policy.arn,
-    data.aws_iam_policy.sqs_policy.arn,
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
     aws_iam_policy.ecr.arn,
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
