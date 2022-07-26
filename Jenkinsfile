@@ -395,6 +395,17 @@ try {
 						container('bfd-cbc-build') {
 							awsAssumeRole()
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
+
+							awsAssumeRole()
+							serverScripts.deployLocustRegression(
+								bfdEnv: bfdEnv,
+								dockerImageTagOverride: params.locust_regression_image_override
+							)
+
+							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
+							// serverScripts.runRegressionSuite(
+							// 	bfdEnv: bfdEnv,
+							// )
 						}
 					}
 				} else {
