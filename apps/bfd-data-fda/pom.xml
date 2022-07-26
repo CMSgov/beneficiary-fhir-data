@@ -70,12 +70,14 @@
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+			<version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides some extra collections, e.g. the CircularFifoQueue being 
 				used in DataSetMonitorWorker. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+			<version>${commons.collections4.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 

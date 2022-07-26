@@ -1,4 +1,4 @@
-package gov.cms.bfd.data.fda.lookup.fdadrugcodelookup;
+package gov.cms.bfd.data.fda.lookup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

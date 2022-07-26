@@ -1,4 +1,4 @@
-package gov.cms.bfd.data.fda.lookup.fdadrugcodelookup;
+package gov.cms.bfd.data.fda.lookup;
 
 import gov.cms.bfd.data.fda.utility.App;
 import java.io.BufferedReader;
