@@ -419,9 +419,9 @@ public class CarrierClaimTransformerV2Test {
         Arrays.asList(
             new Extension(
                 "http://hl7.org/fhir/sid/ndc",
-                new Coding("http://hl7.org/fhir/sid/ndc", "000000000", null))));
+                new Coding("http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER"))));
 
-    // assertTrue(compare.equalsDeep(pos));
+    assertTrue(compare.equalsDeep(pos));
   }
 
   @Test
