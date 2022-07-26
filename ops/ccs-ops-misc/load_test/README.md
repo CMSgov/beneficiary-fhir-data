@@ -9,23 +9,43 @@ to avoid caching affecting the response times of repeat runs.
 
 These tests are intended to be run from a server instance which has access permissions to reach out to the BFD endpoints. How to
 do this is outside the scope of this document, but instructions for this can be found in this more detailed run guide on confluence:
-https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests
+https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests. 
 
 
-## Setup
-The tests use a few python libraries that will need to be installed on the run box prior to starting the tests. Below are the required
-libraries, what they do, and the command to install them.
+## Dependencies
 
-To install everything below at the same time you can use the provided requirements file
-`pip3 install -r requirements.txt`:
+> **Important:** This project is targeting Python 3.8. Ensure that your local Python is version 3.8 **before** attempting to work in this project!
+> A good utility for managing multiple Python versions along with [virtualenv](https://virtualenv.pypa.io/en/latest/)s is [`pew`](https://github.com/berdario/pew).
 
-| Library | Description | Reason for Usage | Install | References |
-| - | - | - | - | - |
-| `psycopg2` | Library for connecting to a postGres database programatically via python. | The tests use this to connect to the environment's database in order to gather various randomized data sets to run each test. | `pip3 install psycopg2-binary` | <https://pypi.org/project/psycopg2/> |
-| `locust` | Test runner framework. Provides various utilities like configuration, argument parsing, and more. Allows for performance statistics collection | Runs the test execution and reporting | `pip3 install locust` | <http://docs.locust.io/en/stable/installation.html>
-| `boto3` | Library for interfacing with AWS services | Store and load performance stats from S3 | `pip3 install boto3` | <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>
+The tests use a few python libraries that will need to be installed on the run box prior to starting the tests. 
+Below are the required libraries, what they do, and the command to install them.
 
-In addition to these libraries, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
+To install everything below at the same time you can use the provided requirements file `pip3 install -r requirements.txt`:
+
+### "Production" Dependencies
+
+> Dependencies are considered _production dependencies_ if the dependency is used in _application_ code (i.e. the tests, scaffolding, etc.). They can be thought of as dependencies necessary to include when _deploying_ the project.
+
+| Library | Description | Reason for Usage | References |
+| - | - | - | - |
+| `psycopg2` | Library for connecting to a postGres database programatically via python | The tests use this to connect to the environment's database in order to gather various randomized data sets to run each test | <https://pypi.org/project/psycopg2/> |
+| `psycogreen` | Library that enables for `psycopg2` to work with coroutine libraries | `locust` uses `gevent` behind-the-scenes to spawn green theads. Without this package, data gathering will block threaded operations | <https://github.com/psycopg/psycogreen/> |
+| `locust` | Test runner framework. Provides various utilities like configuration, argument parsing, and more. Allows for performance statistics collection | Runs the test execution and reporting | <http://docs.locust.io/en/stable/installation.html>
+| `boto3` | Library for interfacing with AWS services | Store and load performance stats from S3 | <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>
+
+### Developer Dependencies
+
+> Dependencies are considered _developer dependencies_ if the dependency is used solely for the developer environment. Typically these dependencies are tooling, like linters, formatters, package sorters, etc. Unlike _production dependencies_, developer dependencies can be omitted before deploying the project.
+
+| Library | Description | Reason for Usage | References |
+| - | - | - | - |
+| `black` | Opionated, automated Python code formatter | Used to enforce a consistent code style | <https://black.readthedocs.io/en/stable/> |
+| `isort` | Automated, consistent Python import sorter | Used to enforce a consistent import order | <https://pycqa.github.io/isort/> |
+| `pylint` | Static code analyser for Python | Used to help improve code quality by identifying issues ahead-of-time | <https://pylint.pycqa.org/en/latest/> |
+
+## BFD Server TLS Certificate
+
+In addition to the software dependencies listed above, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
 Run the following two commands on the box from your local directory:
 
 ```
