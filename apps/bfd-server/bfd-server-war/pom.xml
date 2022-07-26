@@ -316,6 +316,11 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency> 
+			<groupId>gov.cms.bfd.data.fda.utility</groupId> 
+			<artifactId>bfd-data-fda</artifactId> 
+			<version>1.0-SNAPSHOT</version> 
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -470,44 +475,6 @@
 					</execution>
 					<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
 						process. -->
-					<execution>
-						<id>download-fda-drug-data</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>gov.cms.bfd.server.war.FDADrugDataUtilityApp</mainClass>
-							<arguments>
-								<argument>${project.build.outputDirectory}</argument>
-							</arguments>
-							<systemProperties>
-								<systemProperty>
-									<key>http.proxyHost</key>
-									<value>${http.proxyHost}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>http.proxyPort</key>
-									<value>${http.proxyPort}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>https.proxyHost</key>
-									<value>${https.proxyHost}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>https.proxyPort</key>
-									<value>${https.proxyPort}</value>
-								</systemProperty>
-								<systemProperty>
-									<key>http.nonProxyHosts</key>
-									<value>${http.nonProxyHosts}</value>
-								</systemProperty>
-							</systemProperties>
-							<environmentVariables>
-								<TZ>UTC</TZ>
-							</environmentVariables>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 		</plugins>
