@@ -31,7 +31,7 @@ github --> "deployment pipeline": Return change set
 "AWS ECR" --> "AWS Lambda"
 "AWS Lambda" -> "AWS Lambda": Create server-regression from\nbfd-mgmt-server-regression image
 "AWS Lambda" --> "deployment pipeline"
-"deployment pipeline" -> "sqs queue": jenkinsfile:\nwrite server-regression invocation event to SQS
+"deployment pipeline" -> "sqs queue": jenkinsfile:\nwrite server-regression TEST invocation event to SQS
 "sqs queue" --> "deployment pipeline"
 "AWS Lambda" -> "sqs queue":server-regression:\npolls messages
 "sqs queue" --> "AWS Lambda":Returns messages
@@ -39,8 +39,11 @@ github --> "deployment pipeline": Return change set
 "deployment pipeline" -> "AWS Lambda": terraform:\ndeploy server-regression Lambda to PROD-SBX
 note over "deployment pipeline", "AWS Lambda": assume deployment process is the same as in TEST above
 "AWS Lambda" --> "deployment pipeline"
-"deployment pipeline" -> "sqs queue": jenkinsfile:\nwrite server-regression invocation event to SQS
+"deployment pipeline" -> "sqs queue": jenkinsfile:\nwrite server-regression PROD-SBX invocation event to SQS
 "sqs queue" --> "deployment pipeline"
 note over "deployment pipeline", "sqs queue": assume server-regression run process is the same as in TEST above
+"deployment pipeline" -> "AWS Lambda": terraform:\ndeploy server-regression Lambda to PROD
+note over "deployment pipeline", "AWS Lambda": assume deployment process is the same as in TEST above
+"AWS Lambda" --> "deployment pipeline"
 "deployment pipeline" --> operator
 @enduml
