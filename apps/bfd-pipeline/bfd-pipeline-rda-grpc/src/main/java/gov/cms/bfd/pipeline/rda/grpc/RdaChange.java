@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 
 /**
@@ -11,6 +13,7 @@ import lombok.Getter;
  * @param <T> The database entity type for the change.
  */
 @Getter
+@AllArgsConstructor
 public class RdaChange<T> {
   public static final long MIN_SEQUENCE_NUM = 0;
 
@@ -25,10 +28,10 @@ public class RdaChange<T> {
   private final T claim;
   private final Instant timestamp;
 
-  public RdaChange(long sequenceNumber, Type type, T claim, Instant timestamp) {
-    this.sequenceNumber = sequenceNumber;
-    this.type = type;
-    this.claim = claim;
-    this.timestamp = timestamp;
+  @Data
+  public static class Source {
+    private String phase;
+    private long phaseSeqNum;
+    private String transmissionTimestamp;
   }
 }
