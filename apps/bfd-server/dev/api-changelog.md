@@ -1,5 +1,16 @@
 # API Changelog
 
+## BFD-1917: Map FI Claim Process Date in V1 and V2
+
+FI Claim Process Date data existed in our code but was not mapped for V1 or V2. This
+data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims:
+```json
+    {
+      "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+      "valueDate" : "2014-02-07"
+    }
+```
+
 ## BFD-1620: Add Total Slices for CARIN Compliance
 
 Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.
