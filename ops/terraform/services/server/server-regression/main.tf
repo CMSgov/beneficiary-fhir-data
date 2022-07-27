@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 locals {
-  common_tags = {
+  shared_tags = {
     Environment = local.env
     Layer       = local.layer
     Name        = "bfd-${local.env}-${local.service}"
@@ -29,7 +29,7 @@ locals {
 resource "aws_lambda_function" "this" {
   function_name = "bfd-${local.env}-${local.service}"
   description   = "Lambda to run the Locust regression suite against the ${local.env} BFD Server"
-  tags          = local.common_tags
+  tags          = local.shared_tags
 
   image_uri    = local.docker_image_uri
   package_type = "Image"
