@@ -105,6 +105,13 @@
 		<logback.classic.version>1.2.11</logback.classic.version>
 		<postgres.driver.version>42.4.0</postgres.driver.version>
 
+		<!--  Dependencies required for org.apache.commons -->
+		<commons.lang3.version>3.12.0</commons.lang3.version>
+        <commons.csv.version>1.2</commons.csv.version>
+		<commons.io.version>2.7</commons.io.version>
+		<commons.collections4.version>4.1</commons.collections4.version>
+	
+
         <!-- Dependencies required for connecting to a gRPC API -->
         <grpc_java.version>1.47.0</grpc_java.version>
         <protoc.version>3.21.2</protoc.version>
@@ -317,14 +324,14 @@
 				<!-- Common utility classes -->
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.12.0</version>
+				<version>${commons.lang3.version}</version>
 			</dependency>
 
 			<dependency>
 				<!-- Used to parse and read the RIF data files. -->
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
-				<version>1.2</version>
+				<version>${commons.csv.version}</version>
 			</dependency>
 
 			<dependency>
