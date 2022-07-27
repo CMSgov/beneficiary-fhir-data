@@ -48,8 +48,6 @@ ${logic.psql-only}     on beneficiary_monthly cascade;
 ${logic.psql-only} drop table if exists bene_hist_temp;
 ${logic.psql-only} drop table if exists beneficiary_monthly_audit;
 ${logic.psql-only} drop table if exists ccw_load_temp;
-
--- check with team on who owns this one
 ${logic.psql-only} drop table if exists public."TempBene";
 
 -- cleanup old stored procedures
