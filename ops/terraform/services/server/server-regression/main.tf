@@ -26,12 +26,15 @@ locals {
   docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
 
   lambda_timeout_seconds = 600
+  kms_key_arn            = data.aws_kms_key.cmk.arn
+  kms_key_id             = data.aws_kms_key.cmk.key_id
 }
 
 resource "aws_lambda_function" "this" {
   function_name = "bfd-${local.env}-${local.service}"
   description   = "Lambda to run the Locust regression suite against the ${local.env} BFD Server"
   tags          = local.shared_tags
+  kms_key_arn   = local.kms_key_arn
 
   image_uri    = local.docker_image_uri
   package_type = "Image"
@@ -59,4 +62,5 @@ resource "aws_lambda_event_source_mapping" "this" {
 resource "aws_sqs_queue" "this" {
   name                       = local.queue_name
   visibility_timeout_seconds = local.lambda_timeout_seconds
+  kms_master_key_id          = local.kms_key_id
 }
