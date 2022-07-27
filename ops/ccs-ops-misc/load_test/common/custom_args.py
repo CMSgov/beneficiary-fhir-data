@@ -1,10 +1,7 @@
 """Code in this file is related to defining and registering custom Locust arguments for testing"""
-import logging
-from datetime import timedelta
-from math import ceil
 
 from locust.argument_parser import LocustArgumentParser
-from locust.env import Environment
+from locust.util.timespan import parse_timespan
 
 
 def register_custom_args(parser: LocustArgumentParser):
@@ -26,6 +23,21 @@ def register_custom_args(parser: LocustArgumentParser):
         ),
         dest="database_uri",
         env_var="LOCUST_BFD_DATABASE_URI",
+    )
+    parser.add_argument(
+        "--spawned-runtime",
+        type=parse_timespan,
+        help=(
+            "Specifies the test runtime limit that begins after all users have spawned when running"
+            " tests with the custom UserInitAwareLoadShape load shape, which should be all of the"
+            " tests in this repository. If unspecified, tests run indefinitely even after all users"
+            ' have spawned. Specifying "0<s/h/m>" will stop the tests immediately once all users'
+            " have spawned. Note that this is not the same option as --run-time, which handles the"
+            " total runtime limit for the Locust run including non-test tasks and does not"
+            " compensate for spawn rate."
+        ),
+        dest="spawned_runtime",
+        env_var="LOCUST_USERS_SPAWNED_RUNTIME",
     )
     parser.add_argument(
         "--server-public-key",
@@ -53,36 +65,3 @@ def register_custom_args(parser: LocustArgumentParser):
         dest="stats_config",
         env_var="LOCUST_STATS_CONFIG",
     )
-
-
-def adjust_parsed_run_time(environment: Environment):
-    logger = logging.getLogger()
-    if not environment.parsed_options:
-        logger.warn("Cannot adjust runtime when running Locust as library")
-        return
-
-    # Adjust the runtime to account for spawn rate
-    num_users = int(environment.parsed_options.num_users)
-    spawn_rate = int(environment.parsed_options.spawn_rate)
-    init_run_time = environment.parsed_options.run_time
-
-    adjusted_run_time = _adjusted_run_time(init_run_time, num_users, spawn_rate)
-    if adjusted_run_time != init_run_time:
-        environment.parsed_options.run_time = adjusted_run_time
-        logger.info(
-            "Run time adjusted to account for ramp-up time. New run time: "
-            f"{timedelta(seconds=environment.parsed_options.run_time)}"
-        )
-
-
-def _adjusted_run_time(run_time: int, max_clients: int, clients_per_second: int) -> int:
-    """Get the adjusted run time of the test to account for the time it takes to instantiate and connect
-    all the clients.
-
-    If a user specifies a one-minute test, but it's going to take thirty seconds to ramp up to full
-    clients, then we actually run for one minute and thirty seconds, so that we can have the
-    specified time with full client capacity. You can optionally reset the statistics to zero at
-    the end of this ramp-up period using the --resetStats command line flag.
-    """
-
-    return run_time + ceil(int(max_clients) // int(clients_per_second))
