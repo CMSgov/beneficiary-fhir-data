@@ -54,7 +54,7 @@ resource "aws_iam_policy" "kms" {
                 "kms:Decrypt"
             ],
             "Resource": [
-                "${data.aws_kms_key.master_key.arn}"
+                "${data.aws_kms_key.cmk.arn}"
             ]
         }
     ]

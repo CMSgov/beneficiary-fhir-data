@@ -4,7 +4,7 @@ data "aws_caller_identity" "current" {}
 
 data "aws_ecr_authorization_token" "token" {}
 
-data "aws_kms_key" "master_key" {
+data "aws_kms_key" "cmk" {
   key_id = "alias/bfd-${local.env}-cmk" # TODO: replace ssm lookup
 }
 
