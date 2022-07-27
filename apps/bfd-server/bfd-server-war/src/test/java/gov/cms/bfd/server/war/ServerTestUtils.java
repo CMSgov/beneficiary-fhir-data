@@ -302,6 +302,7 @@ public final class ServerTestUtils {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
+            false,
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
     RifFilesProcessor processor = new RifFilesProcessor();
     List<Object> recordsParsed = new ArrayList<>();
@@ -322,6 +323,7 @@ public final class ServerTestUtils {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
+            false,
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
     // Create the processors that will handle each stage of the pipeline.

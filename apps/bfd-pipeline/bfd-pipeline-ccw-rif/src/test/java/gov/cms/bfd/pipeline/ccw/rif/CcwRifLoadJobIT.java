@@ -89,6 +89,7 @@ public final class CcwRifLoadJobIT {
           new DataSetManifest(
               Instant.now(),
               0,
+              true,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
@@ -169,6 +170,7 @@ public final class CcwRifLoadJobIT {
           new DataSetManifest(
               Instant.now().minus(1L, ChronoUnit.HOURS),
               0,
+              true,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
       s3Client.putObject(
@@ -181,6 +183,7 @@ public final class CcwRifLoadJobIT {
           new DataSetManifest(
               manifestA.getTimestampText(),
               1,
+              true,
               new DataSetManifestEntry("pde.rif", RifFileType.PDE));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
       s3Client.putObject(
@@ -191,7 +194,7 @@ public final class CcwRifLoadJobIT {
               StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
       DataSetManifest manifestC =
           new DataSetManifest(
-              Instant.now(), 0, new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+              Instant.now(), 0, true, new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC));
       s3Client.putObject(
           DataSetTestUtilities.createPutRequest(
@@ -268,6 +271,7 @@ public final class CcwRifLoadJobIT {
           new DataSetManifest(
               Instant.now(),
               0,
+              true,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));

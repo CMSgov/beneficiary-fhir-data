@@ -216,7 +216,10 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
                         appMetrics, manifestEntry, s3TaskManager.downloadAsync(manifestEntry)))
             .collect(Collectors.toList());
     RifFilesEvent rifFilesEvent =
-        new RifFilesEvent(manifestToProcess.getTimestamp(), new ArrayList<>(rifFiles));
+        new RifFilesEvent(
+            manifestToProcess.getTimestamp(),
+            manifestToProcess.isSyntheticData(),
+            new ArrayList<>(rifFiles));
 
     /*
      * To save time for the next data set, peek ahead at it. If it's available and

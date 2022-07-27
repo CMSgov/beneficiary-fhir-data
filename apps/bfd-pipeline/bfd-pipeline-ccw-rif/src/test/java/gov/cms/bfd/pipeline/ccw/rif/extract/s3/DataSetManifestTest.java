@@ -41,6 +41,7 @@ public final class DataSetManifestTest {
         LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault())
             .get(ChronoField.YEAR));
     assertEquals(1, manifest.getSequenceId());
+    assertEquals(false, manifest.isSyntheticData());
     assertEquals(2, manifest.getEntries().size());
     assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
     assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
@@ -69,6 +70,7 @@ public final class DataSetManifestTest {
         LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault())
             .get(ChronoField.YEAR));
     assertEquals(1, manifest.getSequenceId());
+    assertEquals(false, manifest.isSyntheticData());
     assertEquals(9, manifest.getEntries().size());
     assertEquals("bene.txt", manifest.getEntries().get(0).getName());
     for (int i = 0; i < manifest.getEntries().size(); i++) {
@@ -128,6 +130,7 @@ public final class DataSetManifestTest {
         new DataSetManifest(
             Instant.now(),
             0,
+            true,
             new DataSetManifestEntry("foo.xml", RifFileType.BENEFICIARY),
             new DataSetManifestEntry("bar.xml", RifFileType.PDE));
 

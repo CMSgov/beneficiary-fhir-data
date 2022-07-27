@@ -365,8 +365,9 @@ public final class RifLoader {
       PostgreSqlCopyInserter postgresBatch) {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
     MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
-
     RifFileType rifFileType = fileEvent.getFile().getFileType();
+    // keep track if we are processing synthetic data
+    boolean isSyntheticData = fileEvent.getParentFilesEvent().isSyntheticData();
 
     if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
@@ -436,8 +437,9 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          // Log if we have a non-2022 enrollment year INSERT
-          if (isBackdatedBene(rifRecordEvent)) {
+          // Log if we have a non-2022 enrollment year INSERT and we are
+          // NOT processing synthetic data.
+          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
             Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
             LOGGER.info(
                 "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
@@ -456,8 +458,9 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            // Log if we have a non-2022 enrollment year INSERT
-            if (isBackdatedBene(rifRecordEvent)) {
+            // Log if we have a non-2022 enrollment year INSERT and we are
+            // NOT processing synthetic data.
+            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
               LOGGER.info(
                   "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
@@ -468,7 +471,7 @@ public final class RifLoader {
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
             // Skip this record if the year is not 2022 and its an update.
-            if (isBackdatedBene(rifRecordEvent)) {
+            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               /*
                * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
                * it in the DB.
@@ -578,6 +581,8 @@ public final class RifLoader {
    * @return {@code true} if the bene should be filtered/skipped
    */
   private boolean isBackdatedBene(Beneficiary bene) {
+    // no filtering of synthetic data
+
     // No filtering should take place unless filtering is turned on in the configuration
     if (!options.isFilteringNonNullAndNon2022Benes()) {
       return false;
