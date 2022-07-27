@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
@@ -196,6 +197,14 @@ public class FissTransformer extends AbstractTransformer {
         .setClaim(claimBuilder.build())
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setDcn(dcn)
+        .setSource(
+            RecordSource.newBuilder()
+                // Hardcoding values for test data, this data is only used in production for
+                // analysis
+                .setPhase("p1")
+                .setPhaseSeqNum(0)
+                .setTransmissionTimestamp(Instant.now().toString())
+                .build())
         .build();
   }
 

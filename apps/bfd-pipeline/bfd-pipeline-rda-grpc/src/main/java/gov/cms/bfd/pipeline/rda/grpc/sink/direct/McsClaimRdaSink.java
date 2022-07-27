@@ -64,6 +64,9 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .receivedDate(claim.getLastUpdated())
         .locations(locations)
         .transactionDate(claim.getIdrStatusDate())
+        .phase(change.getSource().getPhase())
+        .phaseSeqNumber(change.getSource().getPhaseSeqNum())
+        .transmissionTimestamp(change.getSource().getTransmissionTimestamp())
         .build();
   }
 

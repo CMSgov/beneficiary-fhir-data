@@ -4,6 +4,7 @@ import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * RDA API wraps each claim in a `ClaimChange` object that indicates the type of change. This class
@@ -27,11 +28,14 @@ public class RdaChange<T> {
   private final Type type;
   private final T claim;
   private final Instant timestamp;
+  private final Source source;
 
   @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
   public static class Source {
     private String phase;
-    private long phaseSeqNum;
+    private Integer phaseSeqNum;
     private String transmissionTimestamp;
   }
 }

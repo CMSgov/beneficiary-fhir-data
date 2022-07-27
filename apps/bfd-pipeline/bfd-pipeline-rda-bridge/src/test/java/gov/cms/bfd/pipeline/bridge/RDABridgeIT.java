@@ -22,7 +22,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,7 +84,7 @@ class RDABridgeIT {
           rifDir
         });
 
-    Set<String> ignorePaths = Collections.singleton("/timestamp");
+    Set<String> ignorePaths = Set.of("/timestamp", "/source/transmissionTimestamp");
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
     List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));

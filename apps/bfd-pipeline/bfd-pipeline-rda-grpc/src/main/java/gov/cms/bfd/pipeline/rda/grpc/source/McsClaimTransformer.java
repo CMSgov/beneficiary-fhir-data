@@ -37,7 +37,7 @@ import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
 
-public class McsClaimTransformer {
+public class McsClaimTransformer extends AbstractClaimTransformer {
   private final EnumStringExtractor<McsClaim, McsClaimType> RdaMcsClaim_idrClaimType_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsBeneficiarySex> RdaMcsClaim_idrBeneSex_Extractor;
@@ -275,7 +275,8 @@ public class McsClaimTransformer {
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
-        transformer.instant(change.getTimestamp()));
+        transformer.instant(change.getTimestamp()),
+        transformSource(change.getSource(), transformer));
   }
 
   private RdaMcsClaim transformMessage(McsClaim from, DataTransformer transformer, Instant now) {

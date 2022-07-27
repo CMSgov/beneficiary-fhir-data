@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
@@ -68,7 +69,8 @@ public class McsTransformerIT {
       ExpectedValues expectedValues,
       Exception expectedException) {
     try {
-      final Set<String> jsonCompareIgnorePaths = Set.of("/timestamp");
+      final Set<String> jsonCompareIgnorePaths =
+          Set.of("/timestamp", "/source/transmissionTimestamp");
 
       Optional<MessageOrBuilder> actualResponse =
           new McsTransformer(arguments.getMbiMap())
@@ -129,13 +131,7 @@ public class McsTransformerIT {
 
     // Expected values
     McsClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
-    McsClaimChange expectedClaimChange =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+    McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(1);
@@ -167,13 +163,7 @@ public class McsTransformerIT {
 
     // Expected values
     McsClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
-    McsClaimChange expectedClaimChange =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+    McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(1);
@@ -201,12 +191,7 @@ public class McsTransformerIT {
     dataMap.put("LINE_NUM", "2");
     Parser.Data<String> data = TestData.createDataParser(dataMap);
     McsClaimChange recurringClaim =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(TestData.createDefaultClaimBuilder().build())
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+        createMcsClaimChange(TestData.createDefaultClaimBuilder().build());
     WrappedMessage wrappedMessage = new WrappedMessage();
     wrappedMessage.setLineNumber(1);
     wrappedMessage.setMessage(recurringClaim);
@@ -228,13 +213,7 @@ public class McsTransformerIT {
                     .setIdrDtlDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                     .build())
             .build();
-    McsClaimChange expectedClaimChange =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+    McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(2);
@@ -261,12 +240,7 @@ public class McsTransformerIT {
     dataMap.put("LINE_NUM", "3");
     Parser.Data<String> data = TestData.createDataParser(dataMap);
     McsClaimChange recurringClaim =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(TestData.createDefaultClaimBuilder().build())
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+        createMcsClaimChange(TestData.createDefaultClaimBuilder().build());
     WrappedMessage wrappedMessage = new WrappedMessage();
     wrappedMessage.setLineNumber(1);
     wrappedMessage.setMessage(recurringClaim);
@@ -288,13 +262,7 @@ public class McsTransformerIT {
                     .setIdrDtlDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                     .build())
             .build();
-    McsClaimChange expectedClaimChange =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+    McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(2);
@@ -324,12 +292,7 @@ public class McsTransformerIT {
     dataMap.put("CARR_CLM_CNTL_NUM", NEW_CLAIM_ICN);
     Parser.Data<String> data = TestData.createDataParser(dataMap);
     McsClaimChange previouslyProcessedClaim =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(TestData.createDefaultClaimBuilder().build())
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+        createMcsClaimChange(TestData.createDefaultClaimBuilder().build());
     WrappedMessage wrappedMessage = new WrappedMessage();
     wrappedMessage.setLineNumber(1);
     wrappedMessage.setMessage(previouslyProcessedClaim);
@@ -339,13 +302,7 @@ public class McsTransformerIT {
 
     // Expected values
     McsClaim expectedResponseClaim = TestData.createDefaultClaimBuilder().build();
-    McsClaimChange expectedResponseClaimChange =
-        McsClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedResponseClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(TestData.CARR_CLM_CNTL_NUM)
-            .build();
+    McsClaimChange expectedResponseClaimChange = createMcsClaimChange(expectedResponseClaim);
 
     Optional<MessageOrBuilder> expectedResponse = Optional.of(expectedResponseClaimChange);
 
@@ -362,12 +319,7 @@ public class McsTransformerIT {
                     .build())
             .build();
     McsClaimChange expectedWrappedClaimChange =
-        McsClaimChange.newBuilder()
-            .setSeq(2)
-            .setClaim(expectedWrappedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setIcn(NEW_CLAIM_ICN)
-            .build();
+        createMcsClaimChange(expectedWrappedClaim, NEW_CLAIM_ICN, 2);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(1);
@@ -386,6 +338,40 @@ public class McsTransformerIT {
         new ExpectedValues(
             expectedWrappedMessage, expectedWrappedCounter, expectedResponse, expectedSampledMbis),
         expectedException);
+  }
+
+  /**
+   * Helper method to create {@link McsClaimChange} objects.
+   *
+   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object.
+   * @return The created {@link McsClaimChange} object.
+   */
+  private static McsClaimChange createMcsClaimChange(McsClaim claim) {
+    return createMcsClaimChange(claim, TestData.CARR_CLM_CNTL_NUM, 1);
+  }
+
+  /**
+   * Helper method to create {@link McsClaimChange} objects.
+   *
+   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object.
+   * @param icn The ICN to use.
+   * @param sequenceNumber THe sequence number to use.
+   * @return The created {@link McsClaimChange} object.
+   */
+  private static McsClaimChange createMcsClaimChange(
+      McsClaim claim, String icn, int sequenceNumber) {
+    return McsClaimChange.newBuilder()
+        .setSeq(sequenceNumber)
+        .setClaim(claim)
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setIcn(icn)
+        .setSource(
+            RecordSource.newBuilder()
+                .setPhase("p1")
+                .setPhaseSeqNum(0)
+                .setTransmissionTimestamp("1970-01-01T00:00:00.000000Z")
+                .build())
+        .build();
   }
 
   private static class TestData {

@@ -50,7 +50,7 @@ import lombok.Getter;
  * object. A lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed
  * using an IdHasher.
  */
-public class FissClaimTransformer {
+public class FissClaimTransformer extends AbstractClaimTransformer {
   private final EnumStringExtractor<FissClaim, FissClaimStatus> RdaFissClaim_currStatus_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissProcessingType> RdaFissClaim_currLoc1_Extractor;
@@ -513,7 +513,8 @@ public class FissClaimTransformer {
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
-        transformer.instant(change.getTimestamp()));
+        transformer.instant(change.getTimestamp()),
+        transformSource(change.getSource(), transformer));
   }
 
   /**

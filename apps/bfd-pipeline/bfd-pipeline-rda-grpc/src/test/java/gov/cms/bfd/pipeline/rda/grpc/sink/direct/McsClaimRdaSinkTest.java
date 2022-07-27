@@ -222,7 +222,13 @@ public class McsClaimRdaSinkTest {
                         .build()))
             .idrStatusDate(transactionDate)
             .build();
-    RdaChange<RdaMcsClaim> change = new RdaChange<>(100L, RdaChange.Type.UPDATE, claim, changeDate);
+    RdaChange<RdaMcsClaim> change =
+        new RdaChange<>(
+            100L,
+            RdaChange.Type.UPDATE,
+            claim,
+            changeDate,
+            new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
     RdaClaimMessageMetaData metaData = sink.createMetaData(change);
     assertEquals(100L, metaData.getSequenceNumber());
     assertEquals('M', metaData.getClaimType());
@@ -253,6 +259,10 @@ public class McsClaimRdaSinkTest {
     claim.setIdrClmHdIcn(dcn);
     claim.setApiSource(VERSION);
     return new RdaChange<>(
-        nextSeq++, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
+        nextSeq++,
+        RdaChange.Type.INSERT,
+        claim,
+        clock.instant().minusMillis(12),
+        new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
   }
 }

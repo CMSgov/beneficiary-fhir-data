@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,9 +37,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class AbstractClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -48,16 +51,14 @@ public class AbstractClaimRdaSinkTest {
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
-  private MetricRegistry appMetrics;
   private TestClaimRdaSink sink;
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
-    appMetrics = new MetricRegistry();
-    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
-    doReturn(transaction).when(entityManager).getTransaction();
-    doReturn(true).when(entityManager).isOpen();
+    MetricRegistry appMetrics = new MetricRegistry();
+    lenient().doReturn(entityManager).when(entityManagerFactory).createEntityManager();
+    lenient().doReturn(transaction).when(entityManager).getTransaction();
+    lenient().doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
     sink = spy(new TestClaimRdaSink(appState, RdaApiProgress.ClaimType.FISS, true));
@@ -78,7 +79,9 @@ public class AbstractClaimRdaSinkTest {
       doReturn(createChangeClaimFromMessage(message)).when(sink).transformMessage(VERSION, message);
     }
 
-    doNothing()
+    // Just to ensure default behavior isn't executed
+    lenient()
+        .doNothing()
         .when(sink)
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
@@ -113,7 +116,9 @@ public class AbstractClaimRdaSinkTest {
             .when(sink)
             .transformMessageImpl(VERSION, message);
       } else {
-        doReturn(createChangeClaimFromMessage(message))
+        // Just to ensure default behavior isn't executed
+        lenient()
+            .doReturn(createChangeClaimFromMessage(message))
             .when(sink)
             .transformMessageImpl(VERSION, message);
       }
@@ -132,7 +137,7 @@ public class AbstractClaimRdaSinkTest {
             eq(VERSION), eq(badMessage), any(DataTransformer.TransformationException.class));
   }
 
-  /** Verify that {@link RdaSink#transformMessage} success updates success metric. */
+  /** Verify that {@link AbstractClaimRdaSink#transformMessage} success updates success metric. */
   @Test
   public void testSingleMessageTransformSuccessUpdatesMetric() {
     sink.transformMessage(VERSION, "message");
@@ -142,7 +147,7 @@ public class AbstractClaimRdaSinkTest {
     assertMeterReading(0, "transform failures", metrics.getTransformFailures());
   }
 
-  /** Verify that {@link RdaSink#transformMessage} failure updates failure metric. */
+  /** Verify that {@link AbstractClaimRdaSink#transformMessage} failure updates failure metric. */
   @Test
   public void testSingleMessageTransformFailureUpdatesMetric() {
     doThrow(
@@ -170,7 +175,12 @@ public class AbstractClaimRdaSinkTest {
    * @return The created {@link RdaChange} object.
    */
   private RdaChange<String> createChangeClaimFromMessage(String message) {
-    return new RdaChange<>(0, RdaChange.Type.UPDATE, message + "_claim", Instant.ofEpochMilli(1));
+    return new RdaChange<>(
+        0,
+        RdaChange.Type.UPDATE,
+        message + "_claim",
+        Instant.ofEpochMilli(1),
+        new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
   }
 
   /**
@@ -225,7 +235,12 @@ public class AbstractClaimRdaSinkTest {
     @Nonnull
     @Override
     RdaChange<String> transformMessageImpl(String apiVersion, String s) {
-      return new RdaChange<>(1L, RdaChange.Type.UPDATE, s, Instant.now());
+      return new RdaChange<>(
+          1L,
+          RdaChange.Type.UPDATE,
+          s,
+          Instant.now(),
+          new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
     }
 
     @Override

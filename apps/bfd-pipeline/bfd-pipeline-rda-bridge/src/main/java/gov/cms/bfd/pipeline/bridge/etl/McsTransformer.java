@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
@@ -166,6 +167,12 @@ public class McsTransformer extends AbstractTransformer {
         .setClaim(claimBuilder)
         .setIcn(icn)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setSource(
+            RecordSource.newBuilder()
+                .setPhase("p1")
+                .setPhaseSeqNum(0)
+                .setTransmissionTimestamp(Instant.now().toString())
+                .build())
         .build();
   }
 
