@@ -2250,12 +2250,6 @@ public final class TransformerUtilsV2 {
           d -> nchVrfdNcvrdStayPeriod.setEnd(convertToDate(d), TemporalPrecisionEnum.DAY));
 
       nchVrfdNcvrdStayInfo.setTiming(nchVrfdNcvrdStayPeriod);
-
-      // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
-      fiClaimActionCd.ifPresent(
-          value ->
-              eob.addExtension(
-                  createExtensionCoding(eob, CcwCodebookVariable.FI_CLM_ACTN_CD, value)));
     }
 
     // coveredCareThroughDate
@@ -2286,6 +2280,12 @@ public final class TransformerUtilsV2 {
         cd ->
             addInformationWithCode(
                 eob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, cd));
+
+    // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
+    fiClaimActionCd.ifPresent(
+        value ->
+            eob.addExtension(
+                createExtensionCoding(eob, CcwCodebookVariable.FI_CLM_ACTN_CD, value)));
   }
 
   /**

@@ -216,7 +216,7 @@ public class TransformerUtilsV2Test {
             .orElse(null);
 
     assertNotNull(fiClmActnCdExtension);
-    assertEquals(fiClmActnCd, ((Coding) fiClmActnCdExtension.getValue()).getCode());
+    assertEquals(fiClmActnCd.toString(), ((Coding) fiClmActnCdExtension.getValue()).getCode());
   }
 
   /**
@@ -242,7 +242,7 @@ public class TransformerUtilsV2Test {
         Optional.empty());
 
     assertNotNull(eob.getExtension());
-    assertFalse(eob.getExtension().isEmpty());
+    assertTrue(eob.getExtension().isEmpty());
     Extension fiClmActnCdExtension =
         eob.getExtension().stream()
             .filter(e -> expectedDiscriminator.equals(e.getUrl()))

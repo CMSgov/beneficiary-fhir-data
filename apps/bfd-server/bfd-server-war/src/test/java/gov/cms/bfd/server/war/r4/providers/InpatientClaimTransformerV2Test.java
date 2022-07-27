@@ -551,7 +551,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(7, eob.getExtension().size());
+    assertEquals(8, eob.getExtension().size());
   }
 
   @Test
