@@ -1,5 +1,20 @@
 # API Changelog
 
+## BFD-1916: Map FI Claim Action Code in V1 and V2
+
+FI Claim Action Code data existed in our code but was not mapped for V1 or V2. This
+data is now available in the extensions for SNF and Inpatient claims:
+```json
+  {
+  "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+  "valueCoding" : {
+    "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+    "code" : "1",
+    "display" : "Original debit action (always a 1 for all regular bills)"
+  }
+}
+```
+
 ## BFD-1620: Add Total Slices for CARIN Compliance
 
 Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.
