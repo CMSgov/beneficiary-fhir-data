@@ -41,6 +41,7 @@ properties([
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
+		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -50,6 +51,7 @@ def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
+def serverScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -153,6 +155,7 @@ try {
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
+					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
 					awsAssumeRole()
 
@@ -259,6 +262,17 @@ try {
 					container('bfd-cbc-build') {
 						awsAssumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
+
+						awsAssumeRole()
+						serverScripts.deployServerRegression(
+							bfdEnv: bfdEnv,
+							dockerImageTagOverride: params.server_regression_image_override
+						)
+
+						awsAssumeRole()
+						serverScripts.runServerRegression(
+							bfdEnv: bfdEnv,
+						)
 					}
 				}
 			}
@@ -326,6 +340,17 @@ try {
 						container('bfd-cbc-build') {
 							awsAssumeRole()
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
+
+							awsAssumeRole()
+							serverScripts.deployServerRegression(
+								bfdEnv: bfdEnv,
+								dockerImageTagOverride: params.server_regression_image_override
+							)
+
+							awsAssumeRole()
+							serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+							)
 						}
 					}
 				} else {
@@ -372,6 +397,17 @@ try {
 						container('bfd-cbc-build') {
 							awsAssumeRole()
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
+
+							awsAssumeRole()
+							serverScripts.deployServerRegression(
+								bfdEnv: bfdEnv,
+								dockerImageTagOverride: params.server_regression_image_override
+							)
+
+							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
+							// serverScripts.runServerRegression(
+							// 	bfdEnv: bfdEnv,
+							// )
 						}
 					}
 				} else {

@@ -28,7 +28,6 @@ def _(environment: Environment, **kwargs) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
-    custom_args.adjust_parsed_run_time(environment)
     validation.setup_failsafe_event(environment)
 
 
