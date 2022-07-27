@@ -24,6 +24,8 @@ locals {
   docker_image_tag = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
 
   docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
+
+  lambda_timeout_seconds = 600
 }
 
 resource "aws_lambda_function" "this" {
@@ -35,7 +37,7 @@ resource "aws_lambda_function" "this" {
   package_type = "Image"
 
   memory_size = 2048
-  timeout     = 600 # NOTE: 600 seconds or 10 minutes
+  timeout     = local.lambda_timeout_seconds
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
@@ -56,5 +58,5 @@ resource "aws_lambda_event_source_mapping" "this" {
 
 resource "aws_sqs_queue" "this" {
   name                       = local.queue_name
-  visibility_timeout_seconds = 600
+  visibility_timeout_seconds = local.lambda_timeout_seconds
 }
