@@ -252,9 +252,15 @@ module "fhir_asg" {
 ## FHIR server metrics, per partner
 #
 
-# all
-module "bfd_server_metrics_all" {
+module "bfd_server_metrics" {
   source = "../resources/bfd_server_metrics"
+  env    = var.env_config.env
+  asg_id = module.fhir_asg.asg_id
+}
+
+#all 
+module "bfd_server_metrics_all" {
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -266,7 +272,7 @@ module "bfd_server_metrics_all" {
 
 # bluebutton
 module "bfd_server_metrics_bb" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -278,7 +284,7 @@ module "bfd_server_metrics_bb" {
 
 # bcda
 module "bfd_server_metrics_bcda" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -290,7 +296,7 @@ module "bfd_server_metrics_bcda" {
 
 # dpc
 module "bfd_server_metrics_dpc" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -302,7 +308,7 @@ module "bfd_server_metrics_dpc" {
 
 # ab2d
 module "bfd_server_metrics_ab2d" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
