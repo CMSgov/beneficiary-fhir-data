@@ -16,12 +16,16 @@ import java.time.temporal.ChronoField;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.UnmarshalException;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXParseException;
 
 /** Unit tests for {@link DataSetManifest}. */
 public final class DataSetManifestTest {
   /**
-   * Verifies that {@link DataSetManifest} can be unmarshalled, as expected.
+   * Verifies that {@link DataSetManifest} can be unmarshalled, as expected; the sample-a XML does
+   * not contain the syntheticData attribute whuch means that the data will not be treated as
+   * synthetic data.
    *
    * @throws JAXBException (indicates test failure)
    */
@@ -38,6 +42,8 @@ public final class DataSetManifestTest {
         LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault())
             .get(ChronoField.YEAR));
     assertEquals(1, manifest.getSequenceId());
+    // xml did not contain the syntheticData attribute; therefore the isSyntheticData should be
+    // false.
     assertEquals(false, manifest.isSyntheticData());
     assertEquals(2, manifest.getEntries().size());
     assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
@@ -45,22 +51,58 @@ public final class DataSetManifestTest {
   }
 
   /**
-   * Verifies that {@link DataSetManifest} cannot be unmarshalled, as expected.
+   * Verifies that {@link DataSetManifest} cannot be unmarshalled, as expected. The invalid-sample-a
+   * XML defines the syntheticData with a value of "junk"; this should trigger a {@link
+   * SAXException} which will result in a linked exception within {@link JAXBException}, {@link
+   * UnmarshalException}.
    *
-   * <p>UnmarshalException (indicates test success)
+   * <p>The error messsage should identify the XML attribute in error and the value that it
+   * attempted to use.
+   *
+   * <p>JAXBException (indicates test success)
    */
   @Test
   public void jaxbUnmarshallingForInvalidSampleA() {
+    JAXBException thrown =
+        assertThrows(
+            JAXBException.class,
+            () -> {
+              InputStream manifestStream =
+                  Thread.currentThread()
+                      .getContextClassLoader()
+                      .getResourceAsStream("manifest-invalid-sample-a.xml");
+
+              DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+            },
+            "SAXParseException message was expected");
+
+    UnmarshalException unmarshalException = (UnmarshalException) thrown.getLinkedException();
+    assertNotNull(unmarshalException);
+    SAXParseException saxParseException =
+        (SAXParseException) unmarshalException.getLinkedException();
+    assertNotNull(saxParseException);
+    assertEquals(
+        "cvc-datatype-valid.1.2.1: 'junk' is not a valid value for 'boolean'.",
+        saxParseException.getLocalizedMessage());
+  }
+
+  /**
+   * Verifies that {@link DataSetManifest} cannot be unmarshalled, as expected. The
+   * malformed-sample-a XML is not well-formed; this should trigger a JAXBException.
+   *
+   * <p>JAXBException (indicates test success)
+   */
+  @Test
+  public void jaxbUnmarshallingForMalformedSampleA() {
     assertThrows(
         JAXBException.class,
         () -> {
           InputStream manifestStream =
               Thread.currentThread()
                   .getContextClassLoader()
-                  .getResourceAsStream("manifest-invalid-sample-a.xml");
+                  .getResourceAsStream("manifest-malformed-sample-a.xml");
 
-          DataSetManifest manifest =
-              DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+          DataSetManifestFactory.newInstance().parseManifest(manifestStream);
         });
   }
 
@@ -92,6 +134,34 @@ public final class DataSetManifestTest {
       assertNotNull(entry.getName(), "Null entry name: " + i);
       assertNotNull(entry.getType(), "Null entry type: " + i);
     }
+    assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
+  }
+
+  /**
+   * Verifies that {@link DataSetManifest} can be unmarshalled, as expected; the sample-d XML
+   * contains the syntheticData attribute which is set to true whci causes the data set to be
+   * treated as synthetic data.
+   *
+   * @throws JAXBException (indicates test failure)
+   */
+  @Test
+  public void jaxbUnmarshallingForSampleD() throws JAXBException {
+    InputStream manifestStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-d.xml");
+
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+
+    assertNotNull(manifest);
+    assertEquals(
+        1994,
+        LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault())
+            .get(ChronoField.YEAR));
+    assertEquals(1, manifest.getSequenceId());
+    // xml did not contain the syntheticData attribute; therefore the isSyntheticData should be
+    // false.
+    assertEquals(true, manifest.isSyntheticData());
+    assertEquals(2, manifest.getEntries().size());
+    assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
     assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
   }
 
