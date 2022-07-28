@@ -213,6 +213,26 @@ public class DataTransformer {
   }
 
   /**
+   * If the value exists, check that the integer value of the given {@link IntSupplier} is unsigned
+   * (not negative) and small enough to fit in a {@link Short} type, and passes it to the given
+   * {@link IntConsumer}.
+   *
+   * @param fieldName The name of the field from which the value originates.
+   * @param exists Indicates if the value exists in the supplier.
+   * @param value The value being validated / copied.
+   * @param copier The consumer to receive the value.
+   * @return this
+   */
+  public DataTransformer copyOptionalUIntToShort(
+      String fieldName, BooleanSupplier exists, IntSupplier value, Consumer<Short> copier) {
+    if (exists.getAsBoolean()) {
+      copyUIntToShort(fieldName, value, copier);
+    }
+
+    return this;
+  }
+
+  /**
    * Checks that the integer value of the given {@link IntSupplier} is unsigned (not negative) and
    * small enough to fit in a {@link Short} type, and passes it to the given {@link IntConsumer}.
    *

@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
 
@@ -17,10 +18,15 @@ public abstract class AbstractClaimTransformer {
   protected RdaChange.Source transformSource(RecordSource from, DataTransformer transformer) {
     RdaChange.Source to = new RdaChange.Source();
 
-    transformer.copyOptionalString("phase", 2, 2, from::hasPhase, from::getPhase, to::setPhase);
-    transformer.copyOptionalInt(from::hasPhaseSeqNum, from::getPhaseSeqNum, to::setPhaseSeqNum);
     transformer.copyOptionalString(
-        "transmissionTimestamp",
+        RdaClaimMessageMetaData.Fields.phase, 2, 2, from::hasPhase, from::getPhase, to::setPhase);
+    transformer.copyOptionalUIntToShort(
+        RdaClaimMessageMetaData.Fields.phaseSeqNumber,
+        from::hasPhaseSeqNum,
+        from::getPhaseSeqNum,
+        to::setPhaseSeqNum);
+    transformer.copyOptionalString(
+        RdaClaimMessageMetaData.Fields.transmissionTimestamp,
         10,
         30,
         from::hasTransmissionTimestamp,

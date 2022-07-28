@@ -92,11 +92,11 @@ public class RdaClaimMessageMetaData {
   private String phase;
 
   /** Identifies the particular sequence number of the phase associated with this claim (0, 1, 2) */
-  @Column(name = "phaseSeqNumber")
-  private Integer phaseSeqNumber;
+  @Column(name = "phase_seq_number")
+  private Short phaseSeqNumber;
 
   /** The date & time the claim was originally transmitted to RDA. */
-  @Column(name = "transmissionTimestamp")
+  @Column(name = "transmission_timestamp")
   private String transmissionTimestamp;
 
   /**

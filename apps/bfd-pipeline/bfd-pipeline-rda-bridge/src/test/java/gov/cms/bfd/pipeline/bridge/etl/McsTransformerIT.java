@@ -211,6 +211,7 @@ public class McsTransformerIT {
                     .setIdrModTwo(TestData.HCPCS_2ND_MDFR_CD)
                     .setIdrDtlPrimaryDiagCode(TestData.LINE_ICD_DGNS_CD)
                     .setIdrDtlDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
+                    .setIdrDtlNumber(2)
                     .build())
             .build();
     McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
@@ -443,6 +444,7 @@ public class McsTransformerIT {
                   .setIdrModTwo(HCPCS_2ND_MDFR_CD)
                   .setIdrDtlPrimaryDiagCode(LINE_ICD_DGNS_CD)
                   .setIdrDtlDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
+                  .setIdrDtlNumber(1)
                   .build())
           .setIdrHdrFromDos(CLM_FROM_DT)
           .setIdrHdrToDos(CLM_THRU_DT);

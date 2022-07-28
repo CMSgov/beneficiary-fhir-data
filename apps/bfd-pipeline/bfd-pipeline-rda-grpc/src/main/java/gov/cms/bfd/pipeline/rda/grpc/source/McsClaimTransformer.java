@@ -907,6 +907,8 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
         from::hasIdrDtlAmbDropoffZipcode,
         from::getIdrDtlAmbDropoffZipcode,
         to::setIdrDtlAmbDropoffZipcode);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsDetail.Fields.idrDtlNumber, from::getIdrDtlNumber, to::setIdrDtlNumber);
     to.setLastUpdated(now);
     return to;
   }

@@ -35,7 +35,7 @@ public class RdaChange<T> {
   @NoArgsConstructor
   public static class Source {
     private String phase;
-    private Integer phaseSeqNum;
+    private Short phaseSeqNum;
     private String transmissionTimestamp;
   }
 }
