@@ -71,7 +71,7 @@ public class DataSetManifestFactory {
   }
 
   /**
-   * Parses the input byte strean {@link InputStream} and returns a new {@link DataSetManifest}
+   * Parses the input byte stream {@link InputStream} and returns a new {@link DataSetManifest}
    * instance. It validates the XML data stream {@link InputStream} to be both well-formed and
    * valid.
    *
