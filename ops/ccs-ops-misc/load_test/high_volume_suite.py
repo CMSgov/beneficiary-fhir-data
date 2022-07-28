@@ -1,5 +1,6 @@
 """High Volume Load test suite for BFD Server endpoints."""
 
+from random import shuffle
 from typing import Dict, List
 
 from locust import events, tag, task
@@ -74,6 +75,13 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+
+        # Shuffle all the data around so that each HighVolumeUser is _probably_
+        # not requesting the same data.
+        shuffle(self.bene_ids)
+        shuffle(self.contract_data)
+        shuffle(self.hashed_mbis)
+
         # Override the value for last_updated with a static value
         self.last_updated = "2022-06-29"
 
