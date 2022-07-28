@@ -55,6 +55,10 @@ def _(environment: Environment, **kwargs):
 validation.set_validation_goal(validation.ValidationGoal.SLA_V2_BASELINE)
 
 
+class TestLoadShape(UserInitAwareLoadShape):
+    pass
+
+
 class HighVolumeUser(BFDUserBase):
     """High volume load test suite for V2 BFD Server endpoints.
 
