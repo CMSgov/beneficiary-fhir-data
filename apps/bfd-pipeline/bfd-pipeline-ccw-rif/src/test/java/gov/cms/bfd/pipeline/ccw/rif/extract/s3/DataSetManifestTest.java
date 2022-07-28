@@ -8,21 +8,15 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link DataSetManifest}. */
 public final class DataSetManifestTest {
@@ -36,9 +30,7 @@ public final class DataSetManifestTest {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-a.xml");
 
-    JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-    DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
 
     assertNotNull(manifest);
     assertEquals(
@@ -60,49 +52,16 @@ public final class DataSetManifestTest {
   @Test
   public void jaxbUnmarshallingForInvalidSampleA() {
     assertThrows(
-        UnmarshalException.class,
+        JAXBException.class,
         () -> {
           InputStream manifestStream =
               Thread.currentThread()
                   .getContextClassLoader()
                   .getResourceAsStream("manifest-invalid-sample-a.xml");
 
-          InputStream xsdStream =
-              Thread.currentThread()
-                  .getContextClassLoader()
-                  .getResourceAsStream("pipeline-manifest.xsd");
-
-          SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-          Schema schema = sf.newSchema(new StreamSource(new ByteArrayInputStream(xsd.getBytes())));
-          JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-          Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-          jaxbUnmarshaller.setSchema(schema);
-          DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+          DataSetManifest manifest =
+              DataSetManifestFactory.newInstance().parseManifest(manifestStream);
         });
-    /*
-    try {
-      InputStream manifestStream =
-          Thread.currentThread()
-              .getContextClassLoader()
-              .getResourceAsStream("manifest-invalid-sample-a.xml");
-
-      InputStream xsdStream =
-          Thread.currentThread()
-              .getContextClassLoader()
-              .getResourceAsStream("pipeline-manifest.xsd");
-
-      SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      Schema schema = sf.newSchema(new StreamSource(new ByteArrayInputStream(xsd.getBytes())));
-
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-      jaxbUnmarshaller.setSchema(schema);
-      DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
-      System.out.println("hello");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    */
   }
 
   /**
@@ -115,11 +74,7 @@ public final class DataSetManifestTest {
   public void jaxbUnmarshallingForSampleB() throws JAXBException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-b.xml");
-
-    JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-    DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
 
     assertNotNull(manifest);
     assertNotNull(manifest.getTimestamp());
@@ -152,11 +107,7 @@ public final class DataSetManifestTest {
   public void jaxbUnmarshallingForTimestampsWithLeadingWhitespace() throws JAXBException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-c.xml");
-
-    JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-    DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
 
     assertNotNull(manifest);
     assertNotNull(manifest.getTimestamp());

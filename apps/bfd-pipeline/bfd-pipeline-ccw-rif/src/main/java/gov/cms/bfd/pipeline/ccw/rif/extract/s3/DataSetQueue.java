@@ -22,9 +22,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,13 +212,9 @@ public final class DataSetQueue {
       throws JAXBException {
     try (S3Object manifestObject =
         s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-      DataSetManifest manifest =
-          (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestObject.getObjectContent());
+      return DataSetManifestFactory.newInstance().parseManifest(manifestObject.getObjectContent());
 
-      return manifest;
     } catch (AmazonServiceException e) {
       /*
        * This could likely be retried, but we don't currently support
