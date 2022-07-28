@@ -257,7 +257,7 @@ module "bfd_server_metrics" {
   env    = var.env_config.env
   asg_id = module.fhir_asg.asg_id
 }
-
+# TODO: purge all access.txt 
 #all 
 module "bfd_server_metrics_all" {
   source = "../resources/bfd_server_metrics_txt"
