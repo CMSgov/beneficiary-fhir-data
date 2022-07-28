@@ -555,7 +555,14 @@ class ClaimDaoTest {
   /** A helper class to use for testing methods in place of actual resources. */
   private static class MockClaimType extends AbstractResourceTypeV2<IBaseResource, Long> {
     public MockClaimType() {
-      super("mockType", Long.class, "mbiAttribute", "somePropertyName", "endDateAttribute", null);
+      super(
+          "mock",
+          "mockType",
+          Long.class,
+          "mbiAttribute",
+          "somePropertyName",
+          "endDateAttribute",
+          null);
     }
   }
 }

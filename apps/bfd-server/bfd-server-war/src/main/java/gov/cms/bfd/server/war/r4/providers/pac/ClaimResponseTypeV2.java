@@ -41,9 +41,6 @@ public final class ClaimResponseTypeV2<TEntity>
   /** Immutable list of all possible instances of this class. */
   private static final List<ClaimResponseTypeV2<?>> VALUES = List.of(F, M);
 
-  /** Name used when parsing parameter string to find appropriate instance. */
-  private final String nameForParsing;
-
   /**
    * Constructor is private to ensure only instances defined in this class are allowed.
    *
@@ -66,13 +63,13 @@ public final class ClaimResponseTypeV2<TEntity>
       String entityEndDateAttribute,
       ResourceTransformer<ClaimResponse> transformer) {
     super(
+        nameForParsing,
         nameForMetrics,
         entityClass,
         entityMbiRecordAttribute,
         entityIdAttribute,
         entityEndDateAttribute,
         transformer);
-    this.nameForParsing = nameForParsing;
   }
 
   /**
@@ -85,14 +82,14 @@ public final class ClaimResponseTypeV2<TEntity>
   }
 
   /**
+   * Scans our instances to find the first one whose {@link AbstractResourceTypeV2#nameForParsing}
+   * is equal to the provided string.
+   *
    * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#nameForParsing} value to parse
    *     back into a {@link ClaimResponseTypeV2}
    * @return the {@link ClaimResponseTypeV2} represented by the specified {@link String}
    */
   public static Optional<ResourceTypeV2<ClaimResponse, ?>> parse(String claimTypeText) {
-    for (ClaimResponseTypeV2<?> claimType : values())
-      if (claimType.nameForParsing.toLowerCase().equals(claimTypeText))
-        return Optional.of(claimType);
-    return Optional.empty();
+    return AbstractResourceTypeV2.parse(claimTypeText, VALUES);
   }
 }

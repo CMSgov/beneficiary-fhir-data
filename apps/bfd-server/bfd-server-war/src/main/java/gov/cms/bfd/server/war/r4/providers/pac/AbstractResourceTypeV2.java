@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
+import java.util.Collection;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -13,6 +15,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TEntity>
     implements ResourceTypeV2<TResource, TEntity> {
+  /** Name used when parsing parameter string to find appropriate instance. */
+  protected final String nameForParsing;
   /** Value returned by {@link ResourceTypeV2#getNameForMetrics} */
   protected final String nameForMetrics;
   /** The JPA entity class. */
@@ -38,12 +42,14 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
    *     resource type
    */
   protected AbstractResourceTypeV2(
+      String nameForParsing,
       String nameForMetrics,
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       String entityEndDateAttribute,
       ResourceTransformer<TResource> transformer) {
+    this.nameForParsing = nameForParsing;
     this.nameForMetrics = nameForMetrics;
     this.entityClass = entityClass;
     this.entityMbiRecordAttribute = entityMbiRecordAttribute;
@@ -80,5 +86,24 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   @Override
   public ResourceTransformer<TResource> getTransformer() {
     return transformer;
+  }
+
+  /**
+   * Scans the provided instances to find the first one whose {@link
+   * AbstractResourceTypeV2#nameForParsing} is equal to the provided string.
+   *
+   * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#nameForParsing} value to parse
+   *     search for
+   * @param values The specific instances to search
+   * @return the {@link AbstractResourceTypeV2} represented by the specified {@link String}
+   */
+  public static <
+          TResource extends IBaseResource, TSubclass extends AbstractResourceTypeV2<TResource, ?>>
+      Optional<ResourceTypeV2<TResource, ?>> parse(
+          String claimTypeText, Collection<TSubclass> values) {
+    for (TSubclass claimType : values)
+      if (claimType.nameForParsing.toLowerCase().equals(claimTypeText))
+        return Optional.of(claimType);
+    return Optional.empty();
   }
 }
