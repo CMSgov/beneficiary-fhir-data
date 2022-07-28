@@ -4,6 +4,11 @@
 
 from typing import List, Optional
 
+import psycogreen.gevent
+
+# We need to patch psycopg2 to support green threads
+psycogreen.gevent.patch_psycopg()
+
 import psycopg2
 
 LIMIT = 100000  # global limit on the number of records to return
@@ -52,12 +57,19 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     else:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
-    bene_query = (
-        f'SELECT "mbi_hash" FROM "beneficiaries" {table_sample_text} WHERE "mbi_hash" IS NOT NULL '
+    # Handle possible hash collisions from duplicate hashes in beneficiaries_history
+    # by only taking MBI hashes that are distinct in both beneficiaries _and_
+    # benficiaries_history
+    mbi_query = (
+        f"SELECT beneficiaries.mbi_hash FROM beneficiaries {table_sample_text} "
+        "    INNER JOIN beneficiaries_history "
+        "        ON beneficiaries.mbi_hash = beneficiaries_history.mbi_hash "
+        "    GROUP BY beneficiaries.mbi_hash "
+        "    HAVING count(beneficiaries_history.mbi_hash) = 1 "
         f"LIMIT {LIMIT}"
     )
 
-    return [str(r[0]) for r in _execute(uri, bene_query)]
+    return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
 def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
@@ -72,21 +84,22 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
     contract_id_query = (
-        'SELECT DISTINCT "partd_contract_number_id", "year_month" '
+        'SELECT "partd_contract_number_id", "year_month" '
         'FROM "beneficiary_monthly" '
         f"{table_sample_text}"
-        'WHERE "partd_contract_number_id" IS NOT NULL '
         f"LIMIT {LIMIT}"
     )
 
-    return [
+    unfiltered_contracts = [
         {
-            "id": str(result[0]),
+            "id": str(result[0]) if result[0] else None,
             "month": f"{result[1].month:02}",
             "year": str(result[1].year),
         }
         for result in _execute(uri, contract_id_query)
     ]
+
+    return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
 def get_pac_hashed_mbis(uri: str) -> List:

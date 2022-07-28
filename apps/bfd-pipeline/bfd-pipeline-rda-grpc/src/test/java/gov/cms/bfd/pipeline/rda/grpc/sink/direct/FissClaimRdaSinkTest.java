@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertGaugeReading;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertHistogramReading;
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertTimerCount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -84,6 +86,8 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.successes",
             "FissClaimRdaSink.transform.failures",
             "FissClaimRdaSink.transform.successes",
+            "FissClaimRdaSink.writes.batchSize",
+            "FissClaimRdaSink.writes.elapsed",
             "FissClaimRdaSink.writes.merged",
             "FissClaimRdaSink.writes.persisted",
             "FissClaimRdaSink.writes.total"),
@@ -115,6 +119,8 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
+    assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
   @Test
@@ -146,6 +152,8 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
+    assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
   @Test
