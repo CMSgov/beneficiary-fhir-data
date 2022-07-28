@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
@@ -50,7 +51,7 @@ import lombok.Getter;
  * object. A lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed
  * using an IdHasher.
  */
-public class FissClaimTransformer {
+public class FissClaimTransformer extends AbstractClaimTransformer {
   private final EnumStringExtractor<FissClaim, FissClaimStatus> RdaFissClaim_currStatus_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissProcessingType> RdaFissClaim_currLoc1_Extractor;
@@ -150,10 +151,12 @@ public class FissClaimTransformer {
   private final EnumStringExtractor<FissAuditTrail, FissClaimStatus>
       RdaFissAuditTrail_badtStatus_Extractor;
 
+  private final Metrics metrics;
   private final Clock clock;
   @Getter private final MbiCache mbiCache;
 
-  public FissClaimTransformer(Clock clock, MbiCache mbiCache) {
+  public FissClaimTransformer(MetricRegistry metricRegistry, Clock clock, MbiCache mbiCache) {
+    this.metrics = new Metrics(metricRegistry, FissClaimTransformer.class);
     this.clock = clock;
     this.mbiCache = mbiCache;
     RdaFissClaim_currStatus_Extractor =
@@ -483,7 +486,7 @@ public class FissClaimTransformer {
    * @return a new transformer with the same clock but alternative MbiCache
    */
   public FissClaimTransformer withMbiCache(MbiCache mbiCache) {
-    return new FissClaimTransformer(clock, mbiCache);
+    return new FissClaimTransformer(metrics.getMetricRegistry(), clock, mbiCache);
   }
 
   /**
@@ -509,6 +512,14 @@ public class FissClaimTransformer {
               errors.size(), change.getSeq(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
+
+    metrics.insertCount(
+        1
+            + from.getFissProcCodesCount()
+            + from.getFissDiagCodesCount()
+            + from.getFissPayersCount()
+            + from.getFissAuditTrailCount());
+
     return new RdaChange<>(
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),

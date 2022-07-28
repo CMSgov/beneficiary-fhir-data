@@ -83,7 +83,9 @@ public class RdaLoadOptions implements Serializable {
                     new FissClaimRdaSink(
                         appState,
                         new FissClaimTransformer(
-                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
+                            appState.getMetrics(),
+                            appState.getClock(),
+                            MbiCache.computedCache(idHasherConfig)),
                         autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
@@ -112,7 +114,9 @@ public class RdaLoadOptions implements Serializable {
                     new McsClaimRdaSink(
                         appState,
                         new McsClaimTransformer(
-                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
+                            appState.getMetrics(),
+                            appState.getClock(),
+                            MbiCache.computedCache(idHasherConfig)),
                         autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }

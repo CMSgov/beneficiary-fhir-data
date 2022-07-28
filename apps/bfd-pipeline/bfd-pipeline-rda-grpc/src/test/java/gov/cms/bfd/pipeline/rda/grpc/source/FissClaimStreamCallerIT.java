@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
@@ -55,7 +56,8 @@ public class FissClaimStreamCallerIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
   private final FissClaimTransformer transformer =
-      new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
+      new FissClaimTransformer(
+          new MetricRegistry(), clock, MbiCache.computedCache(hasher.getConfig()));
 
   @Test
   public void basicCall() throws Exception {

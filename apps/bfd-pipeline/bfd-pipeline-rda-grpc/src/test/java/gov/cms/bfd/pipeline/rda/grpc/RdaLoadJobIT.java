@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
@@ -68,7 +69,8 @@ public class RdaLoadJobIT {
     final ImmutableList<FissClaimChange> expectedClaims =
         JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
     final FissClaimTransformer transformer =
-        new FissClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
+        new FissClaimTransformer(
+            new MetricRegistry(), clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (FissClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);
@@ -159,7 +161,8 @@ public class RdaLoadJobIT {
     final ImmutableList<McsClaimChange> expectedClaims =
         JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
     final McsClaimTransformer transformer =
-        new McsClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
+        new McsClaimTransformer(
+            new MetricRegistry(), clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (McsClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);
