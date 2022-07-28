@@ -9,6 +9,7 @@ from common import data, db, validation
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
+from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 MASTER_BENE_IDS: List[str] = []
 MASTER_CONTRACT_DATA: List[Dict[str, str]] = []
