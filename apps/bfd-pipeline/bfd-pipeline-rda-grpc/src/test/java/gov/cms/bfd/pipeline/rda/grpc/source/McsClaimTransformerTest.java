@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaMcsAdjustment;
 import gov.cms.bfd.model.rda.RdaMcsAudit;
@@ -75,8 +74,7 @@ public class McsClaimTransformerTest {
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final McsClaimTransformer transformer =
-      new McsClaimTransformer(
-          new MetricRegistry(), clock, MbiCache.computedCache(idHasher.getConfig()));
+      new McsClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
   private McsClaimChange.Builder changeBuilder;
   private McsClaim.Builder claimBuilder;
   private RdaMcsClaim claim;

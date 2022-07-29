@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.bridge;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
@@ -169,11 +168,9 @@ class RDABridgeIT {
             Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
             IdHasher.Config hasherConfig = new IdHasher.Config(10, "justsomestring");
             FissClaimTransformer fissTransformer =
-                new FissClaimTransformer(
-                    new MetricRegistry(), clock, MbiCache.computedCache(hasherConfig));
+                new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
             McsClaimTransformer mcsTransformer =
-                new McsClaimTransformer(
-                    new MetricRegistry(), clock, MbiCache.computedCache(hasherConfig));
+                new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
             for (MessageOrBuilder message : results) {
               if (message instanceof FissClaimChange) {

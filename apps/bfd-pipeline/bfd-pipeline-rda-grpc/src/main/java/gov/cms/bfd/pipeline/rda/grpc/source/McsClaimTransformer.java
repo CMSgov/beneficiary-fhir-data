@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rda.RdaMcsAdjustment;
 import gov.cms.bfd.model.rda.RdaMcsAudit;
@@ -38,7 +37,7 @@ import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
 
-public class McsClaimTransformer extends AbstractClaimTransformer {
+public class McsClaimTransformer {
   private final EnumStringExtractor<McsClaim, McsClaimType> RdaMcsClaim_idrClaimType_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsBeneficiarySex> RdaMcsClaim_idrBeneSex_Extractor;
@@ -85,12 +84,10 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
   private final EnumStringExtractor<McsLocation, McsLocationActivityCode>
       RdaMcsLocation_idrLocActvCode_Extractor;
 
-  private final Metrics metrics;
   private final Clock clock;
   @Getter private final MbiCache mbiCache;
 
-  public McsClaimTransformer(MetricRegistry appMetrics, Clock clock, MbiCache mbiCache) {
-    this.metrics = new Metrics(appMetrics, McsClaimTransformer.class);
+  public McsClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
     RdaMcsClaim_idrClaimType_Extractor =
@@ -256,7 +253,7 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
    * @return a new transformer with the same clock but alternative MbiCache
    */
   public McsClaimTransformer withMbiCache(MbiCache mbiCache) {
-    return new McsClaimTransformer(metrics.getMetricRegistry(), clock, mbiCache);
+    return new McsClaimTransformer(clock, mbiCache);
   }
 
   public RdaChange<RdaMcsClaim> transformClaim(McsClaimChange change) {
@@ -274,14 +271,6 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
               errors.size(), change.getSeq(), from.getIdrClmHdIcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
-
-    metrics.insertCount(
-        1
-            + from.getMcsDetailsCount()
-            + from.getMcsDiagnosisCodesCount()
-            + from.getMcsAdjustmentsCount()
-            + from.getMcsAuditsCount()
-            + from.getMcsLocationsCount());
 
     return new RdaChange<>(
         change.getSeq(),

@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -20,9 +19,7 @@ public class McsClaimStreamCallerIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final McsClaimTransformer transformer =
       new McsClaimTransformer(
-          new MetricRegistry(),
-          clock,
-          MbiCache.computedCache(new IdHasher.Config(10, "justsomestring")));
+          clock, MbiCache.computedCache(new IdHasher.Config(10, "justsomestring")));
 
   @Test
   public void basicCall() throws Exception {

@@ -323,8 +323,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   abstract RdaChange<TClaim> transformMessageImpl(String apiVersion, TMessage message)
       throws DataTransformer.TransformationException;
 
+  abstract int getInsertCount(TClaim claim);
+
   /**
-   * Uses {@link EntityManager#merge} to write each claim and its associated meta data to the
+   * Uses {@link EntityManager#merge} to write each claim and its associated metadata to the
    * database.
    *
    * @param maxSeq highest sequence number from claims in the collection
@@ -340,6 +342,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           var metaData = createMetaData(change);
           entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
+          metrics.insertCount.update(getInsertCount(change.getClaim()));
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
@@ -369,7 +372,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   private long maxSequenceInBatch(Collection<RdaChange<TClaim>> claims) {
     OptionalLong value = claims.stream().mapToLong(RdaChange::getSequenceNumber).max();
-    if (!value.isPresent()) {
+    if (value.isEmpty()) {
       // This should never happen! But if it does, we'll shout about it rather than throw an
       // exception
       logger.warn("processed an empty batch!");
@@ -425,9 +428,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
+    /** The number of insert statements executed */
+    private final Histogram insertCount;
 
     /**
-     * Initializes all of the metrics.
+     * Initializes all the metrics.
      *
      * @param klass used to derive metric names
      * @param appMetrics where to store the metrics
@@ -449,6 +454,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
+      insertCount = appMetrics.histogram(MetricRegistry.name(base, "insertCount"));
     }
 
     /**

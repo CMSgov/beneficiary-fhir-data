@@ -47,6 +47,15 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   }
 
   @Override
+  int getInsertCount(RdaFissClaim claim) {
+    return 1
+        + claim.getProcCodes().size()
+        + claim.getDiagCodes().size()
+        + claim.getPayers().size()
+        + claim.getAuditTrail().size();
+  }
+
+  @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaFissClaim> change) {
     final RdaFissClaim claim = change.getClaim();
     return RdaClaimMessageMetaData.builder()

@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
 import gov.cms.bfd.model.rda.RdaFissClaim;
@@ -80,8 +79,7 @@ public class FissClaimTransformerTest {
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final FissClaimTransformer transformer =
-      new FissClaimTransformer(
-          new MetricRegistry(), clock, MbiCache.computedCache(idHasher.getConfig()));
+      new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
   private FissClaimChange.Builder changeBuilder;
   private FissClaim.Builder claimBuilder;
   private RdaFissClaim claim;

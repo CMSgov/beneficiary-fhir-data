@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
@@ -46,9 +45,9 @@ public class RdaServerJobIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   private final IdHasher.Config hasherConfig = new IdHasher.Config(100, "whatever");
   private final FissClaimTransformer fissTransformer =
-      new FissClaimTransformer(new MetricRegistry(), clock, MbiCache.computedCache(hasherConfig));
+      new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
   private final McsClaimTransformer mcsTransformer =
-      new McsClaimTransformer(new MetricRegistry(), clock, MbiCache.computedCache(hasherConfig));
+      new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
   @Test
   public void testRandom() throws Exception {

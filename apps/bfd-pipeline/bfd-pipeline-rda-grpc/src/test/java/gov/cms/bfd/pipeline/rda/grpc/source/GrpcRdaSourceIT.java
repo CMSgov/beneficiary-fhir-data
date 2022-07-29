@@ -225,8 +225,7 @@ public class GrpcRdaSourceIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
   private final FissClaimTransformer transformer =
-      new FissClaimTransformer(
-          new MetricRegistry(), clock, MbiCache.computedCache(hasher.getConfig()));
+      new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
   private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
   private MetricRegistry appMetrics;
   private JsonCaptureSink sink;

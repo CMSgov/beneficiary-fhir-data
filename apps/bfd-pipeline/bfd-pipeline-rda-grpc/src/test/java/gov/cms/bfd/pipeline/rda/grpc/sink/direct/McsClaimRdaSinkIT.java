@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -103,8 +102,7 @@ public class McsClaimRdaSinkIT {
 
           final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer =
-              new McsClaimTransformer(
-                  new MetricRegistry(), clock, MbiCache.computedCache(hasher.getConfig()));
+              new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
           final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
           final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
@@ -208,8 +206,7 @@ public class McsClaimRdaSinkIT {
 
           final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer =
-              new McsClaimTransformer(
-                  new MetricRegistry(), clock, MbiCache.computedCache(hasher.getConfig()));
+              new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
           final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
           final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
