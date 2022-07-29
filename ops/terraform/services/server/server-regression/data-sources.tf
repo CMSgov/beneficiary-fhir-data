@@ -47,3 +47,17 @@ data "aws_security_group" "rds" {
     values = ["bfd-${local.env}-aurora-cluster"] # TODO think harder about this... RE: ssm, ephemeral environments, etc.
   }
 }
+
+data "aws_iam_role" "insights" {
+  name = "bfd-insights-bfd-glue-role"
+}
+
+data "aws_s3_bucket" "insights" {
+  bucket = "bfd-insights-bfd-${data.aws_caller_identity.current.account_id}"
+}
+
+data "archive_file" "glue_trigger" {
+  type        = "zip"
+  source_file = "${path.module}/lambda-src/glue-trigger/glue-trigger.py"
+  output_path = "${path.module}/lambda-src/glue-trigger/out/glue-trigger.zip"
+}

@@ -140,3 +140,45 @@ resource "aws_iam_role" "this" {
     aws_iam_policy.logs.arn
   ]
 }
+
+resource "aws_iam_policy" "glue" {
+  name        = "bfd-${local.env}-${local.service}-glue"
+  description = "Permissions start the bfd-${local.env}-${local.service} Glue crawler"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "glue:StartCrawler",
+            "Resource": "${aws_glue_crawler.this.arn}"
+        }
+    ]
+}
+EOF  
+}
+
+resource "aws_iam_role" "glue_trigger" {
+  name        = "bfd-${local.env}-${local.service}-glue-trigger"
+  path        = "/"
+  description = "Role for bfd-${local.env}-${local.service}-glue-trigger Lambda"
+
+  assume_role_policy = <<-EOF
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                  "Service": "lambda.amazonaws.com"
+              }
+          }
+      ]
+  }
+  EOF
+
+  managed_policy_arns = [
+    aws_iam_policy.glue.arn
+  ]
+}

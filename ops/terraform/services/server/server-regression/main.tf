@@ -64,3 +64,51 @@ resource "aws_sqs_queue" "this" {
   visibility_timeout_seconds = local.lambda_timeout_seconds
   kms_master_key_id          = local.kms_key_id
 }
+
+resource "aws_glue_crawler" "this" {
+  database_name = "bfd-insights-bfd-${local.env}"
+  name          = "bfd-${local.env}-${local.service}"
+  table_prefix  = "bfd_insights_bfd_"
+  role          = data.aws_iam_role.insights.arn
+
+  lineage_configuration {
+    crawler_lineage_settings = "DISABLE"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_NEW_FOLDERS_ONLY"
+  }
+
+  s3_target {
+    path = "s3://${data.aws_s3_bucket.insights.id}/databases/bfd-insights-bfd-${local.env}/${local.service}"
+  }
+
+  schema_change_policy {
+    delete_behavior = "DEPRECATE_IN_DATABASE"
+    update_behavior = "UPDATE_IN_DATABASE"
+  }
+}
+
+resource "aws_lambda_function" "glue_trigger" {
+  description   = "Triggers the bfd-${local.env}-${local.service} Glue Crawler to run when new statistics are uploaded to S3"
+  function_name = "bfd-${local.env}-${local.service}-glue-trigger"
+  tags          = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}-glue-trigger" })
+  kms_key_arn   = local.kms_key_arn
+
+  filename         = data.archive_file.glue_trigger.output_path
+  source_code_hash = data.archive_file.glue_trigger.output_base64sha256
+  architectures    = ["x86_64"]
+  handler          = "glue-trigger.handler"
+  memory_size      = 128
+  package_type     = "Zip"
+  runtime          = "python3.9"
+  environment {
+    variables = {
+      CRAWLER_NAME = aws_glue_crawler.this.name
+    }
+  }
+
+  role = aws_iam_role.glue_trigger.arn
+
+  timeout = 300
+}

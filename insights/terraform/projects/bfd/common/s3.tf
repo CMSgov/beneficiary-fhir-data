@@ -72,3 +72,29 @@ resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
     mfa_delete = false
   }
 }
+
+# TODO: Replace the following when/if insights Terraform is merged with main Terraform
+locals {
+  server_regression_lambda_arns = [
+    for lambda in data.aws_lambda_function.server_regression_glue_triggers : {
+      arn = lambda.arn
+    }
+  ]
+
+  server_regression_lambdas_by_env = zipmap(local.envs, local.server_regression_lambda_arns)
+}
+
+resource "aws_s3_bucket_notification" "bucket_notifications" {
+  for_each = local.envs
+  bucket   = module.bucket.id
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "${each.key}_server_regression/"
+    filter_suffix       = ".json"
+    id                  = "bfd-${each.key}-server-regression-glue-trigger"
+    lambda_function_arn = local.server_regression_lambdas_by_env[each.key].arn
+  }
+}
