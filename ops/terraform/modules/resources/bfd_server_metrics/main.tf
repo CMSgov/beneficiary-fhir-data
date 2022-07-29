@@ -17,6 +17,7 @@ locals {
     bcda = "*bcda*"
     dpc  = "*dpc*"
     ab2d = "*ab2d*"
+    test = "*data-server-client-test*"
   }
 
   metric_config = flatten([
