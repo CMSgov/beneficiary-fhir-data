@@ -223,7 +223,7 @@ public class FissClaimRdaSinkTest {
             RdaChange.Type.UPDATE,
             claim,
             changeDate,
-            new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
+            new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
     RdaClaimMessageMetaData metaData = sink.createMetaData(change);
     assertEquals(100L, metaData.getSequenceNumber());
     assertEquals('F', metaData.getClaimType());
@@ -258,6 +258,6 @@ public class FissClaimRdaSinkTest {
         RdaChange.Type.INSERT,
         claim,
         clock.instant().minusMillis(12),
-        new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
+        new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
   }
 }

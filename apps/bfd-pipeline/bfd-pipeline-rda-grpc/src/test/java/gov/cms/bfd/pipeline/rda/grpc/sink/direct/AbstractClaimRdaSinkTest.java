@@ -180,7 +180,7 @@ public class AbstractClaimRdaSinkTest {
         RdaChange.Type.UPDATE,
         message + "_claim",
         Instant.ofEpochMilli(1),
-        new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
+        new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
   }
 
   /**
@@ -240,7 +240,7 @@ public class AbstractClaimRdaSinkTest {
           RdaChange.Type.UPDATE,
           s,
           Instant.now(),
-          new RdaChange.Source("p1", 0, "1970-01-01T00:00:00.000000Z"));
+          new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
     }
 
     @Override
