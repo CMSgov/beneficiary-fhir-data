@@ -18,17 +18,31 @@ def generate_characteristics_file(args):
     header = ['Beneficiary Id','MBI Unhashed','Part D Contract Number','Carrier Claims Total','DME Claims Total','HHA Claims Total','Hospice Claims Total','Inpatient Claims Total','Outpatient Claims Total','SNF Claims Total','Part D Events Total']
     
     ## get data for csv from db
+    bene_data = {}
+    carrier_data = {}
+    dme_data = {}
+    hha_data = {}
+    hospice_data = {}
+    inpatient_data = {}
+    outpatient_data = {}
+    snf_data = {}
+    pde_data = {}
     
-    ## bene data, 3 columns: bene id, unhashed mbi, concatenated contract numbers
-    bene_data = get_bene_data(bene_id_start, bene_id_end, db_string)
-    carrier_data = get_table_count("carrier_claims", bene_id_start, bene_id_end, db_string)
-    dme_data = get_table_count("dme_claims", bene_id_start, bene_id_end, db_string)
-    hha_data = get_table_count("hha_claims", bene_id_start, bene_id_end, db_string)
-    hospice_data = get_table_count("hospice_claims", bene_id_start, bene_id_end, db_string)
-    inpatient_data = get_table_count("inpatient_claims", bene_id_start, bene_id_end, db_string)
-    outpatient_data = get_table_count("outpatient_claims", bene_id_start, bene_id_end, db_string)
-    snf_data = get_table_count("snf_claims", bene_id_start, bene_id_end, db_string)
-    pde_data = get_table_count("partd_events", bene_id_start, bene_id_end, db_string)
+    try:
+        ## bene data, 3 columns: bene id, unhashed mbi, concatenated contract numbers
+        bene_data = get_bene_data(bene_id_start, bene_id_end, db_string)
+        carrier_data = get_table_count("carrier_claims", bene_id_start, bene_id_end, db_string)
+        dme_data = get_table_count("dme_claims", bene_id_start, bene_id_end, db_string)
+        hha_data = get_table_count("hha_claims", bene_id_start, bene_id_end, db_string)
+        hospice_data = get_table_count("hospice_claims", bene_id_start, bene_id_end, db_string)
+        inpatient_data = get_table_count("inpatient_claims", bene_id_start, bene_id_end, db_string)
+        outpatient_data = get_table_count("outpatient_claims", bene_id_start, bene_id_end, db_string)
+        snf_data = get_table_count("snf_claims", bene_id_start, bene_id_end, db_string)
+        pde_data = get_table_count("partd_events", bene_id_start, bene_id_end, db_string)
+    except BaseException as err:
+        print(f"Unexpected error while running queries: {err}")
+        print("Returning with exit code 1")
+        sys.exit(1)
     
     ## synthesize data into final rows
     final_data_rows = put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data)
@@ -36,12 +50,25 @@ def generate_characteristics_file(args):
     ## Write csv to filesystem + header
     filePath = output_path + 'characteristics.csv'
     print("Writing final csv...")
-    with open(filePath, 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(header)
-        writer.writerows(final_data_rows)
-        num_rows = len(final_data_rows)
-        print(f"Wrote out {num_rows} to {filePath}")
+    try:
+        with open(filePath, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(final_data_rows)
+            num_rows = len(final_data_rows)
+            print(f"Wrote out {num_rows} to {filePath}")
+    except IOError as err:
+        print(f"IOError while opening/writing csv: {err}")
+        print("Returning with exit code 1")
+        sys.exit(1)
+    except BaseException as err:
+        print(f"Unexpected error while opening/writing csv: {err}")
+        print("Returning with exit code 1")
+        sys.exit(1)
+    
+    print("Returning with exit code 0 (No errors)")
+    sys.exit(0)
+    
 
 def get_bene_data(bene_id_start, bene_id_end, db_string):
     """
