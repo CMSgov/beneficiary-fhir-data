@@ -4,19 +4,19 @@ locals {
   }
   namespace = "bfd-${var.env}/bfd-server"
   endpoints = {
-    "all" : "*/fhir/*",
-    "metadata" : "*/fhir/metadata*",
-    "coverageAll" : "*/fhir/Coverage*",
-    "patientAll" : "*/fhir/Patient*",
-    "eobAll" : "*/fhir/ExplanationOfBenefit*",
+    all         = "*/fhir/*"
+    metadata    = "*/fhir/metadata*"
+    coverageAll = "*/fhir/Coverage*"
+    patientAll  = "*/fhir/Patient*"
+    eobAll      = "*/fhir/ExplanationOfBenefit*"
   }
 
   partners = {
-    "all" : "*",
-    "bb" : "*BlueButton*",
-    "bcda" : "*bcda*",
-    "dpc" : "*dpc*",
-    "ab2d" : "*ab2d*",
+    all  = "*"
+    bb   = "*BlueButton*"
+    bcda = "*bcda*"
+    dpc  = "*dpc*"
+    ab2d = "*ab2d*"
   }
 
   metric_config = flatten([
