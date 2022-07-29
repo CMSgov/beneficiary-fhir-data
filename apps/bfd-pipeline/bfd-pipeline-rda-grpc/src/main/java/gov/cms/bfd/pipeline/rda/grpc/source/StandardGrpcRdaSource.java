@@ -5,6 +5,7 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
@@ -74,8 +75,12 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    * @param clock used to access current time
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
+   * @param callOptionsFactory factory for generating runtime options for the gRPC call
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param claimType string representation of the claim type
    * @param startingSequenceNumber optional hard coded sequence number
+   * @param minIdleMillisBeforeConnectionDrop the amount of time before a connection drop is
+   *     expected
    */
   @VisibleForTesting
   StandardGrpcRdaSource(
@@ -113,8 +118,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       throws ProcessingException {
     return tryRetrieveAndProcessObjects(
         () -> {
+          boolean flushBatch = true;
           ProcessResult processResult = new ProcessResult();
-          int processed = 0;
           long lastProcessedTime = clock.millis();
 
           final long startingSequenceNumber = getStartingSequenceNumber(sink);
@@ -134,13 +139,14 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               metrics.getObjectsReceived().mark();
               batch.put(sink.getDedupKeyForMessage(result), result);
               if (batch.size() >= maxPerBatch) {
-                processed += submitBatchToSink(apiVersion, sink, batch);
+                processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
               }
               lastProcessedTime = clock.millis();
             }
           } catch (GrpcResponseStream.StreamInterruptedException ex) {
             // If our thread is interrupted we cancel the stream so the server knows we're done
             // and then shut down normally.
+            flushBatch = false;
             responseStream.cancelStream("shutting down due to InterruptedException");
             processResult.setInterrupted(true);
           } catch (GrpcResponseStream.DroppedConnectionException ex) {
@@ -148,16 +154,20 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               processResult.setException(ex);
             }
           } catch (ProcessingException ex) {
-            processed += ex.getProcessedCount();
+            flushBatch = false;
+            processResult.addCount(ex.getProcessedCount());
             processResult.setException(ex);
           } catch (Exception ex) {
+            flushBatch = false;
             processResult.setException(ex);
           }
 
-          try {
-            if (batch.size() > 0 && !processResult.isInterrupted()) {
-              processed += submitBatchToSink(apiVersion, sink, batch);
+          try (MultiCloser closer = new MultiCloser()) {
+            if (batch.size() > 0 && flushBatch) {
+              closer.add(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
             }
+
+            closer.add(() -> sink.shutdown(Duration.ofMinutes(5)));
           } catch (Exception ex) {
             if (processResult.getException() != null) {
               processResult.getException().addSuppressed(ex);
@@ -166,10 +176,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             }
           }
 
-          sink.shutdown(Duration.ofMinutes(5));
-          processed += sink.getProcessedCount();
+          processResult.addCount(sink.getProcessedCount());
 
-          processResult.setCount(processed);
           return processResult;
         });
   }

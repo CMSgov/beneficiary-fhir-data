@@ -54,15 +54,18 @@ public class DLQGrpcRdaSourceTest {
     doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
-  private static final List<MessageError> MOCK_MESSAGE_ERRORS =
+  private static final List<MessageError> FISS_MOCK_MESSAGE_ERRORS =
       List.of(
           MessageError.builder().claimType(MessageError.ClaimType.FISS).sequenceNumber(5L).build(),
-          MessageError.builder().claimType(MessageError.ClaimType.MCS).sequenceNumber(7L).build(),
-          MessageError.builder().claimType(MessageError.ClaimType.MCS).sequenceNumber(9L).build(),
           MessageError.builder()
               .claimType(MessageError.ClaimType.FISS)
               .sequenceNumber(15L)
               .build());
+
+  private static final List<MessageError> MCS_MOCK_MESSAGE_ERRORS =
+      List.of(
+          MessageError.builder().claimType(MessageError.ClaimType.MCS).sequenceNumber(7L).build(),
+          MessageError.builder().claimType(MessageError.ClaimType.MCS).sequenceNumber(9L).build());
 
   /** Checks that the logic lambda was successfully and correctly invoked for FISS claims */
   @Test
@@ -82,7 +85,9 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
-    doReturn(MOCK_MESSAGE_ERRORS).when(mockDao).findAllMessageErrors();
+    doReturn(FISS_MOCK_MESSAGE_ERRORS)
+        .when(mockDao)
+        .findAllMessageErrorsByClaimType(MessageError.ClaimType.FISS);
 
     TestUtils.setField(sourceSpy, "dao", mockDao);
 
@@ -109,7 +114,9 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
-    doReturn(MOCK_MESSAGE_ERRORS).when(mockDao).findAllMessageErrors();
+    doReturn(MCS_MOCK_MESSAGE_ERRORS)
+        .when(mockDao)
+        .findAllMessageErrorsByClaimType(MessageError.ClaimType.MCS);
 
     TestUtils.setField(sourceSpy, "dao", mockDao);
 

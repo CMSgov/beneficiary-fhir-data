@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import java.io.IOException;
@@ -20,8 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Manages a pool of worker threads to write claim and sequence number updates to a database
@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
  * @param <TMessage> RDA API message class
  * @param <TClaim> JPA claim entity class
  */
+@Slf4j
 public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(WriterThreadPool.class);
   private static final HashFunction Hasher = Hashing.goodFastHash(32);
 
   private final SequenceNumberTracker sequenceNumbers;
@@ -61,8 +61,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
       var writer = new ClaimWriterThread<>(sinkFactory, batchSize, outputQueue::put);
       writers.add(writer);
       threadPool.submit(writer);
-      LOGGER.info(
-          "added writer writer: sink={} writer={}", sink.getClass().getSimpleName(), writer);
+      log.info("added writer writer: sink={} writer={}", sink.getClass().getSimpleName(), writer);
     }
     this.writers = writers.build();
   }
@@ -159,26 +158,43 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * @throws Exception if the closer encounters an issue
    */
   public void shutdown(Duration waitTime) throws Exception {
-    LOGGER.info("shutdown started");
-    final MultiCloser closer = new MultiCloser();
-    writers.forEach(
-        writer -> {
-          LOGGER.info("calling claimWriterThread.close: writer={}", writer);
-          closer.close(() -> writer.close());
-        });
-    LOGGER.info("calling sequenceNumberWriterThread.close");
-    closer.close(sequenceNumberWriter::close);
-    LOGGER.info("calling threadPool.shutdown");
-    closer.close(threadPool::shutdown);
-    closer.close(
-        () -> {
-          LOGGER.info("calling threadPool.awaitTermination");
-          awaitThreadPoolTermination(waitTime);
-        });
-    LOGGER.info("calling updateSequenceNumberDirectly");
-    closer.close(this::updateSequenceNumberDirectly);
-    LOGGER.info("shutdown complete");
-    closer.finish();
+    log.info("shutdown started");
+
+    try (final MultiCloser closer = new MultiCloser()) {
+      writers.forEach(
+          writer ->
+              closer.add(
+                  () -> {
+                    log.info("calling claimWriterThread.close: writer={}", writer);
+                    writer.close();
+                  }));
+
+      closer.add(
+          () -> {
+            log.info("calling sequenceNumberWriterThread.close");
+            sequenceNumberWriter.close();
+          });
+
+      closer.add(
+          () -> {
+            log.info("calling threadPool.shutdown");
+            threadPool.shutdown();
+          });
+
+      closer.add(
+          () -> {
+            log.info("calling threadPool.awaitTermination");
+            awaitThreadPoolTermination(waitTime);
+          });
+
+      closer.add(
+          () -> {
+            log.info("calling updateSequenceNumberDirectly");
+            updateSequenceNumberDirectly();
+          });
+    }
+
+    log.info("shutdown complete");
   }
 
   private void awaitThreadPoolTermination(Duration waitTime)
@@ -187,7 +203,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     try {
       successful = threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
     } catch (InterruptedException ex) {
-      LOGGER.info("interrupted while waiting for thread pool termination, retrying once...");
+      log.info("interrupted while waiting for thread pool termination, retrying once...");
       successful = threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
     }
     if (!successful) {
@@ -197,16 +213,28 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
 
   @Override
   public void close() throws Exception {
-    final MultiCloser closer = new MultiCloser();
-    if (!threadPool.isShutdown()) {
-      closer.close(() -> shutdown(Duration.ofMinutes(5)));
+    try (final MultiCloser closer = new MultiCloser()) {
+      closer.add(
+          () -> {
+            if (!threadPool.isShutdown()) {
+              shutdown(Duration.ofMinutes(5));
+            }
+          });
+
+      closer.add(
+          () -> {
+            log.info("calling this.updateSequenceNumberForClose");
+            updateSequenceNumberForClose();
+          });
+
+      closer.add(
+          () -> {
+            log.info("calling sink.close");
+            sink.close();
+          });
     }
-    LOGGER.info("calling this.updateSequenceNumberForClose");
-    closer.close(this::updateSequenceNumberForClose);
-    LOGGER.info("calling sink.close");
-    closer.close(sink::close);
-    LOGGER.info("close complete");
-    closer.finish();
+
+    log.info("close complete");
   }
 
   private void updateSequenceNumberDirectly() throws ProcessingException {
@@ -231,7 +259,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   private void updateSequenceNumberForClose() throws Exception {
     int count = getProcessedCount();
     if (count != 0) {
-      LOGGER.warn("uncollected final processedCount: {}", count);
+      log.warn("uncollected final processedCount: {}", count);
     }
     updateSequenceNumberDirectly();
   }

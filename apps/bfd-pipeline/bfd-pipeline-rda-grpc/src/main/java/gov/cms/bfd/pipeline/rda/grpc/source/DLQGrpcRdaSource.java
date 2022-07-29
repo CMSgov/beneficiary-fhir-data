@@ -43,6 +43,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
    * gRPC service.
    *
+   * @param entityManager the {@link EntityManager} to use to communicate with the DB
+   * @param sequencePredicate {@link BiPredicate} used to compare sequence values
    * @param config the configuration values used to establish the channel
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
@@ -70,9 +72,13 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * used internally by the primary constructor but is also used by unit tests to allow a mock
    * channel to be provided.
    *
+   * @param entityManager the {@link EntityManager} to use to communicate with the DB
+   * @param sequencePredicate {@link BiPredicate} used to compare sequence values
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
+   * @param callOptionsFactory factory for generating runtime options for the gRPC call
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param claimType string representation of the claim type
    */
   @VisibleForTesting
   DLQGrpcRdaSource(
@@ -110,13 +116,10 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     MessageError.ClaimType type = MessageError.ClaimType.valueOf(claimType.toUpperCase());
 
-    List<MessageError> messageErrors = dao.findAllMessageErrors();
+    List<MessageError> messageErrors = dao.findAllMessageErrorsByClaimType(type);
 
     final Set<Long> sequenceNumbers =
-        messageErrors.stream()
-            .filter(m -> m.getClaimType() == type)
-            .map(MessageError::getSequenceNumber)
-            .collect(Collectors.toSet());
+        messageErrors.stream().map(MessageError::getSequenceNumber).collect(Collectors.toSet());
 
     if (sequenceNumbers.isEmpty()) {
       log.info("Found no {} claims in DLQ, skipping", claimType);
@@ -131,12 +134,20 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
     return totalProcessed;
   }
 
+  /**
+   * Helper method, called internally, to return the DLQ processing logic to pass to {@link
+   * AbstractGrpcRdaSource#tryRetrieveAndProcessObjects(Processor)}.
+   *
+   * @param sink The sink to use to write claims, etc.
+   * @param type The {@link MessageError.ClaimType} associated with the claims to process.
+   * @param sequenceNumbers A {@link Set} of sequence numbers to attempt to reprocess
+   * @return The DLQ processing logic {@link Processor}.
+   */
   @VisibleForTesting
   Processor dlqProcessingLogic(
       RdaSink<TMessage, TClaim> sink, MessageError.ClaimType type, Set<Long> sequenceNumbers) {
     return () -> {
       ProcessResult processResult = new ProcessResult();
-      int processed = 0;
       final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
 
       for (final long startingSequenceNumber : sequenceNumbers) {
@@ -157,7 +168,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
             if (sequencePredicate.test(startingSequenceNumber, result)) {
               batch.put(sink.getDedupKeyForMessage(result), result);
-              processed += submitBatchToSink(apiVersion, sink, batch);
+              int processed = submitBatchToSink(apiVersion, sink, batch);
+              processResult.addCount(processed);
 
               if (processed > 0 && dao.delete(startingSequenceNumber, type) > 0) {
                 log.info(
@@ -184,11 +196,19 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
               e);
         }
 
-        sink.shutdown(Duration.ofMinutes(5));
-        processed += sink.getProcessedCount();
+        try {
+          sink.shutdown(Duration.ofMinutes(5));
+        } catch (Exception ex) {
+          if (processResult.getException() != null) {
+            processResult.getException().addSuppressed(ex);
+          } else {
+            processResult.setException(ex);
+          }
+        }
+
+        processResult.addCount(sink.getProcessedCount());
       }
 
-      processResult.setCount(processed);
       return processResult;
     };
   }
@@ -200,9 +220,12 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     private final EntityManager entityManager;
 
-    public List<MessageError> findAllMessageErrors() {
+    public List<MessageError> findAllMessageErrorsByClaimType(MessageError.ClaimType claimType) {
       return entityManager
-          .createQuery("select error from MessageError error", MessageError.class)
+          .createQuery(
+              "select error from MessageError error where error.claimType = :claimType",
+              MessageError.class)
+          .setParameter("claimType", claimType)
           .getResultList();
     }
 

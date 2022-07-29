@@ -237,7 +237,7 @@ public class GrpcRdaSourceTest {
       source.retrieveAndProcessObjects(2, sink);
       fail("source should have thrown exception");
     } catch (ProcessingException ex) {
-      assertEquals(0, ex.getProcessedCount());
+      assertEquals(3, ex.getProcessedCount());
       assertNotNull(ex.getCause());
       assertSame(error, Throwables.getRootCause(ex));
     }

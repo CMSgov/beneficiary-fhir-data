@@ -108,6 +108,15 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     private boolean interrupted = false;
     private int count = 0;
     private Exception exception = null;
+
+    /**
+     * Add to the current {@link ProcessResult#count}.
+     *
+     * @param count The amount to add to the current count.
+     */
+    public void addCount(int count) {
+      this.count += count;
+    }
   }
 
   /**
