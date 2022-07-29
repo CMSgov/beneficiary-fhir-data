@@ -58,8 +58,10 @@ import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link GenerateEntitiesFromDslMojo}. */
 public class GenerateEntitiesFromDslMojoTest {
+  /** The generation class. */
   private GenerateEntitiesFromDslMojo mojo;
 
+  /** Sets the test up. */
   @BeforeEach
   void setUp() {
     mojo = spy(new GenerateEntitiesFromDslMojo());
