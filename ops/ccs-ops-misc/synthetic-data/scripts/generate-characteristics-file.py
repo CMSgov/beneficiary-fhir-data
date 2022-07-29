@@ -33,7 +33,7 @@ def generate_characteristics_file(args):
     ## synthesize data into final rows
     final_data_rows = put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data)
     
-    ## Write initial csv to filesystem + header
+    ## Write csv to filesystem + header
     filePath = output_path + 'characteristics.csv'
     print("Writing final csv...")
     with open(filePath, 'w') as f:
