@@ -1,0 +1,60 @@
+# BFD Common Environment Definitions
+
+This module represents the _common service_ responsible for defining common infrastructure within a BFD environment.
+As of this writing, _common_ is primarily concerned with defining the AWS RDS cluster hosting the `fhirdb` database.
+This is supported by a [terraform workspaces-enabled](https://www.terraform.io/language/state/workspaces) state.
+**If you're manipulating this state manually, you must verify that you're operating in the appropriate workspace for the targeted environment.**
+
+As stated previously, this is mainly concerned with defining the AWS RDS Cluster for hosting `fhirdb`.
+Strictly speaking, there are no _inputs_ to this module.
+Instead, this module is configured via the `base` module with AWS SSM Parameter Store.
+See the locals block in [`main.tf`](./main.tf) to see the expected parameters.
+
+## Prerequisites
+In addition to the [Requirements (below)](#requirements), you (or the automation) will need:
+- sufficient AWS IAM privileges for the AWS provider [Resources and Date Sources (below)](#resources)
+- access outlined for the remote [AWS S3 Backend](https://www.terraform.io/language/settings/backends/s3#s3-bucket-permissions)
+- read/write privileges to the state-locking [AWS DynamoDB Table](https://www.terraform.io/language/settings/backends/s3#dynamodb-table-permissions)
+
+<!-- BEGIN_TF_DOCS -->
+<!-- GENERATED WITH `terraform-docs .`
+     Updates to text between BEGIN_TF_DOCS and END_TFDOCS tags
+     will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
+-->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22 |
+
+<!-- GENERATED WITH `terraform-docs .`
+Updates to text between BEGIN_TF_DOCS and END_TFDOCS tags
+will be overwritten.
+For more details, see the file '.terraform-docs.yml' or
+https://terraform-docs.io/user-guide/configuration/
+-->
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_db_parameter_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group) | resource |
+| [aws_db_subnet_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group) | resource |
+| [aws_rds_cluster.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster) | resource |
+| [aws_rds_cluster_endpoint.beta_reader](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_endpoint) | resource |
+| [aws_rds_cluster_endpoint.readers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_endpoint) | resource |
+| [aws_rds_cluster_instance.nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance) | resource |
+| [aws_security_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_availability_zones.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_iam_role.monitoring](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
+| [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_security_group.management](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_group.tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_ssm_parameters_by_path.ns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_ssm_parameters_by_path.s](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_subnet.data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
+| [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+<!-- END_TF_DOCS -->
