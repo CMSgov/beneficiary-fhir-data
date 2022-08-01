@@ -93,13 +93,11 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
     table count as the value.
     """
     
-    query = "SELECT t1.bene_id, count(t2.*)"\
-            " FROM public.beneficiaries as t1"\
-            f" LEFT JOIN public.{table_name} as t2"\
-            " ON t1.bene_id=t2.bene_id"\
-            f" WHERE t1.bene_id <= {bene_id_start} and t1.bene_id > {bene_id_end}"\
-            " GROUP BY t1.bene_id"\
-            " ORDER BY t1.bene_id desc;"\
+    query = "SELECT bene_id, count(*)"\
+            f" FROM public.{table_name}"\
+            f" WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end}"\
+            " GROUP BY bene_id"\
+            " ORDER BY bene_id desc;"\
             
     print(f"Starting query for {table_name} count...");
     raw_query_response = _execute_query(db_string, query)
@@ -124,14 +122,14 @@ def put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospic
         bene_id = row[0]
         mbi = row[1]
         contracts = row[2]
-        carrier_count = carrier_data[bene_id]
-        dme_count = dme_data[bene_id]
-        hha_count = hha_data[bene_id]
-        hospice_count = hospice_data[bene_id]
-        inpatient_count = inpatient_data[bene_id]
-        outpatient_count = outpatient_data[bene_id]
-        snf_count = snf_data[bene_id]
-        pde_count = pde_data[bene_id]
+        carrier_count = carrier_data[bene_id] if bene_id in carrier_data else 0
+        dme_count = dme_data[bene_id] if bene_id in dme_data else 0
+        hha_count = hha_data[bene_id] if bene_id in hha_data else 0
+        hospice_count = hospice_data[bene_id] if bene_id in hospice_data else 0
+        inpatient_count = inpatient_data[bene_id] if bene_id in inpatient_data else 0
+        outpatient_count = outpatient_data[bene_id] if bene_id in outpatient_data else 0
+        snf_count = snf_data[bene_id] if bene_id in snf_data else 0
+        pde_count = pde_data[bene_id] if bene_id in pde_data else 0
         final_rows.append([bene_id, mbi, contracts, carrier_count, dme_count, hha_count, hospice_count, inpatient_count, outpatient_count, snf_count, pde_count])
         
     return final_rows
