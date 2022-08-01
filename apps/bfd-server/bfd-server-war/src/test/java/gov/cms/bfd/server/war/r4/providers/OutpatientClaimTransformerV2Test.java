@@ -551,7 +551,7 @@ public final class OutpatientClaimTransformerV2Test {
         Arrays.asList(
             new Extension(
                 "http://hl7.org/fhir/sid/ndc",
-                new Coding("http://hl7.org/fhir/sid/ndc", "987654321", null))));
+                new Coding("http://hl7.org/fhir/sid/ndc", "000000000", null))));
 
     assertTrue(compare.equalsDeep(pos));
   }
@@ -569,7 +569,7 @@ public final class OutpatientClaimTransformerV2Test {
     Extension compare =
         new Extension(
             "http://hl7.org/fhir/sid/ndc",
-            new Coding("http://hl7.org/fhir/sid/ndc", "987654321", null));
+            new Coding("http://hl7.org/fhir/sid/ndc", "000000000", null));
 
     assertTrue(compare.equalsDeep(ex));
   }

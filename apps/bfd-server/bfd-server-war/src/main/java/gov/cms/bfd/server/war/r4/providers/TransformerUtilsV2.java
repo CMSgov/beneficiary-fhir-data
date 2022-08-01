@@ -1546,7 +1546,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * <<<<<<< HEAD Output list of benefificiary IDs to MDC logging
+   * Output list of benefificiary IDs to MDC logging
    *
    * @param beneIds the {@link Collection} beneficiary IDs to log
    */
@@ -1568,8 +1568,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * ======= >>>>>>> master
-   *
    * @param currencyIdentifier the {@link CurrencyIdentifier} indicating the currency of an {@link
    *     Identifier}.
    * @return Returns an {@link Extension} describing the currency of an {@link Identifier}.
