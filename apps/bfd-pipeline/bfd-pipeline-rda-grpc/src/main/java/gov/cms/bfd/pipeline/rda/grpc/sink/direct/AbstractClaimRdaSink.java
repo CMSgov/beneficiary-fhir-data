@@ -248,6 +248,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       String apiVersion, TMessage change, List<DataTransformer.ErrorMessage> errors)
       throws IOException;
 
+  /**
+   * Updates the {@link RdaApiProgress} table with the sequence number for the most recently added
+   * claim of a given type.
+   *
+   * @param lastSequenceNumber The sequence number of the most recently added claim of a given type.
+   */
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
@@ -323,6 +329,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   abstract RdaChange<TClaim> transformMessageImpl(String apiVersion, TMessage message)
       throws DataTransformer.TransformationException;
 
+  /**
+   * Implementation specific method to count the number of expected inserts that will be used to
+   * load all the data into the database. Used for metrics and analysis.
+   *
+   * @param claim The claim data to be inserted
+   * @return The calculated number of expected insert statements needed for the claim data.
+   */
   abstract int getInsertCount(TClaim claim);
 
   /**
