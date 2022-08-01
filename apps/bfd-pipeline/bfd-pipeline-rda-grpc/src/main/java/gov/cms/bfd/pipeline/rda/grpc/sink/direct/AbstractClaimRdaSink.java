@@ -348,6 +348,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
     boolean commit = false;
     final Timer.Context timerContext = metrics.dbUpdateTime.time();
+    int insertCount = 0;
+
     try {
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
@@ -355,7 +357,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           var metaData = createMetaData(change);
           entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
-          metrics.insertCount.update(getInsertCount(change.getClaim()));
+          insertCount += getInsertCount(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
@@ -374,6 +376,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       entityManager.clear();
       timerContext.stop();
       metrics.dbBatchSize.update(changes.size());
+      metrics.insertCount.update(insertCount);
     }
   }
 
