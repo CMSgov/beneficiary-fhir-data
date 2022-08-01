@@ -6,16 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-
-
-  /**
-   * Provides tests for FDA Drug Test Utils
-   */
+/** Provides tests for FDA Drug Test Utils. */
 public class FDADrugUtilsTest {
 
+  /** The FAKE_DRUG_CODE_NUMBER for testing. */
   public static final String FAKE_DRUG_CODE_NUMBER = "000000000";
 
-  /** Return Fake Drug Code when parameter is true */
+  /** Return Fake Drug Code when parameter is true. */
   @Test
   public void shouldReturnFakeDrugCodeWhenConstructorSetToTrue() {
     FdaDrugCodeDisplayLookup drugUtils = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
@@ -24,7 +21,7 @@ public class FDADrugUtilsTest {
     assertNotEquals(null, drugCodeDisplay);
   }
 
-  /** Do Not Return Fake Drug Code when parameter is false */
+  /** Do Not Return Fake Drug Code when parameter is false. */
   @Test
   public void shouldNotReturnFakeDrugCodeWhenConstructorSetToFalse() {
     FdaDrugCodeDisplayLookup drugUtils =
@@ -34,7 +31,7 @@ public class FDADrugUtilsTest {
     assertEquals(null, drugCodeDisplay);
   }
 
-  /** Return Fake Drug Code Display when parameter is true */
+  /** Return Fake Drug Code Display when parameter is true. */
   @Test
   public void shouldReturnFakeDrugCodeDisplayWhenConstructorSetToTrue() {
     FdaDrugCodeDisplayLookup drugUtils = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
@@ -43,7 +40,7 @@ public class FDADrugUtilsTest {
     assertEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 
-  /** Do not Return Fake Drug Code Display when parameter is false */
+  /** Do not Return Fake Drug Code Display when parameter is false. */
   @Test
   public void shouldNotReturnFakeDrugCodeDisplayWhenConstructorSetToFalse() {
     FdaDrugCodeDisplayLookup drugUtils =
