@@ -2199,8 +2199,6 @@ public final class TransformerUtilsV2 {
    *     exhausted date for the claim
    * @param diagnosisRelatedGroupCd CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared
    *     field representing the non-covered stay from date for the claim
-   * @param sourceAdmissionCd CLM_SRC_IP_ADMSN_CD: an {@link Optional}&lt;{@link Character}&gt;
-   *     shared field representing the source admission cd for the claim
    * @param fiClaimActionCd FI_CLM_ACTN_CD: a {@link Character} shared field representing the fiscal
    *     intermediary action cd for the claim
    */
