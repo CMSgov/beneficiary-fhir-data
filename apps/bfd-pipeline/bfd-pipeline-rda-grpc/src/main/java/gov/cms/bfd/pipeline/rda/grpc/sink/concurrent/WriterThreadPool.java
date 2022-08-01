@@ -159,42 +159,25 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    */
   public void shutdown(Duration waitTime) throws Exception {
     log.info("shutdown started");
-
-    try (final MultiCloser closer = new MultiCloser()) {
-      writers.forEach(
-          writer ->
-              closer.add(
-                  () -> {
-                    log.info("calling claimWriterThread.close: writer={}", writer);
-                    writer.close();
-                  }));
-
-      closer.add(
-          () -> {
-            log.info("calling sequenceNumberWriterThread.close");
-            sequenceNumberWriter.close();
-          });
-
-      closer.add(
-          () -> {
-            log.info("calling threadPool.shutdown");
-            threadPool.shutdown();
-          });
-
-      closer.add(
-          () -> {
-            log.info("calling threadPool.awaitTermination");
-            awaitThreadPoolTermination(waitTime);
-          });
-
-      closer.add(
-          () -> {
-            log.info("calling updateSequenceNumberDirectly");
-            updateSequenceNumberDirectly();
-          });
-    }
-
+    final MultiCloser closer = new MultiCloser();
+    writers.forEach(
+        writer -> {
+          log.info("calling claimWriterThread.close: writer={}", writer);
+          closer.close(() -> writer.close());
+        });
+    log.info("calling sequenceNumberWriterThread.close");
+    closer.close(sequenceNumberWriter::close);
+    log.info("calling threadPool.shutdown");
+    closer.close(threadPool::shutdown);
+    closer.close(
+        () -> {
+          log.info("calling threadPool.awaitTermination");
+          awaitThreadPoolTermination(waitTime);
+        });
+    log.info("calling updateSequenceNumberDirectly");
+    closer.close(this::updateSequenceNumberDirectly);
     log.info("shutdown complete");
+    closer.finish();
   }
 
   private void awaitThreadPoolTermination(Duration waitTime)
@@ -213,28 +196,16 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
 
   @Override
   public void close() throws Exception {
-    try (final MultiCloser closer = new MultiCloser()) {
-      closer.add(
-          () -> {
-            if (!threadPool.isShutdown()) {
-              shutdown(Duration.ofMinutes(5));
-            }
-          });
-
-      closer.add(
-          () -> {
-            log.info("calling this.updateSequenceNumberForClose");
-            updateSequenceNumberForClose();
-          });
-
-      closer.add(
-          () -> {
-            log.info("calling sink.close");
-            sink.close();
-          });
+    final MultiCloser closer = new MultiCloser();
+    if (!threadPool.isShutdown()) {
+      closer.close(() -> shutdown(Duration.ofMinutes(5)));
     }
-
+    log.info("calling this.updateSequenceNumberForClose");
+    closer.close(this::updateSequenceNumberForClose);
+    log.info("calling sink.close");
+    closer.close(sink::close);
     log.info("close complete");
+    closer.finish();
   }
 
   private void updateSequenceNumberDirectly() throws ProcessingException {

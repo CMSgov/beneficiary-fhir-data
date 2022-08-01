@@ -162,12 +162,15 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             processResult.setException(ex);
           }
 
-          try (MultiCloser closer = new MultiCloser()) {
-            if (batch.size() > 0 && flushBatch) {
-              closer.add(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
-            }
+          MultiCloser closer = new MultiCloser();
+          if (batch.size() > 0 && flushBatch) {
+            closer.close(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
+          }
+          ;
+          closer.close(() -> sink.shutdown(Duration.ofMinutes(5)));
 
-            closer.add(() -> sink.shutdown(Duration.ofMinutes(5)));
+          try {
+            closer.finish();
           } catch (Exception ex) {
             if (processResult.getException() != null) {
               processResult.getException().addSuppressed(ex);
