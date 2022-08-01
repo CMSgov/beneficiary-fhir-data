@@ -139,8 +139,8 @@ public final class DataSetManifestTest {
 
   /**
    * Verifies that {@link DataSetManifest} can be unmarshalled, as expected; the sample-d XML
-   * contains the syntheticData attribute which is set to true whci causes the data set to be
-   * treated as synthetic data.
+   * contains the syntheticData attribute set to true which causes the data set to be treated as
+   * synthetic data.
    *
    * @throws JAXBException (indicates test failure)
    */
