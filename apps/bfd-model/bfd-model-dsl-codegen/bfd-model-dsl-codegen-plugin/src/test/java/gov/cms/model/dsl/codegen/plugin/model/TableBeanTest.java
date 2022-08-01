@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link TableBean}. */
 public class TableBeanTest {
   /** Test query methods used to check various boolean conditions. */
   @Test
@@ -80,6 +81,10 @@ public class TableBeanTest {
     assertEquals(java.util.Set.of("a", "c"), bean.getColumnsForEqualsMethod());
   }
 
+  /**
+   * Tests that quotes are correctly ignored if the bean is set to quoteNames, and it does not look
+   * for quotes if set to false.
+   */
   @Test
   public void testQuoteName() {
     TableBean bean = TableBean.builder().build();
@@ -89,6 +94,7 @@ public class TableBeanTest {
     assertEquals("`benefit`", bean.quoteName("benefit"));
   }
 
+  /** Tests adding additional field names. */
   @Test
   public void testAdditionalFieldNames() {
     TableBean bean =
