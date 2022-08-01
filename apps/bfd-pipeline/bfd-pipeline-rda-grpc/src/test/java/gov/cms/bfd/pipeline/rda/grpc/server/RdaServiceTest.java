@@ -18,8 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class RdaServiceTest {
 
   @Mock private RdaService.Config mockConfig;
@@ -54,21 +57,21 @@ public class RdaServiceTest {
 
   @BeforeEach
   void init() throws Exception {
-    lenient().doReturn(mockApiVersion).when(mockVersion).toApiVersion();
+    doReturn(mockApiVersion).when(mockVersion).toApiVersion();
 
-    lenient().doReturn(mockVersion).when(mockConfig).getVersion();
-
-    // resource - We’re creating a mock, not invoking the method
-    //noinspection resource
-    lenient().doReturn(mockFissSource).when(mockFissFactory).apply(SINCE_VALUE + 1);
-
-    lenient().doReturn(mockFissFactory).when(mockConfig).getFissSourceFactory();
+    doReturn(mockVersion).when(mockConfig).getVersion();
 
     // resource - We’re creating a mock, not invoking the method
     //noinspection resource
-    lenient().doReturn(mockMcsSource).when(mockMcsFactory).apply(SINCE_VALUE + 1);
+    doReturn(mockFissSource).when(mockFissFactory).apply(SINCE_VALUE + 1);
 
-    lenient().doReturn(mockMcsFactory).when(mockConfig).getMcsSourceFactory();
+    doReturn(mockFissFactory).when(mockConfig).getFissSourceFactory();
+
+    // resource - We’re creating a mock, not invoking the method
+    //noinspection resource
+    doReturn(mockMcsSource).when(mockMcsFactory).apply(SINCE_VALUE + 1);
+
+    doReturn(mockMcsFactory).when(mockConfig).getMcsSourceFactory();
   }
 
   /**
