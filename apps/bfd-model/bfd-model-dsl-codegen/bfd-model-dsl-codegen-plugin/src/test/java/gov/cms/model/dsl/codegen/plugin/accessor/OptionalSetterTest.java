@@ -6,7 +6,7 @@ import com.squareup.javapoet.CodeBlock;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link OptionalSetter} */
+/** Unit tests for {@link OptionalSetter}. */
 public class OptionalSetterTest {
   /** Verifies output of {@link OptionalSetter#createSetRef}. */
   @Test

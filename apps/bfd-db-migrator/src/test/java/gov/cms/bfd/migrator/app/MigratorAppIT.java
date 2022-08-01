@@ -31,13 +31,18 @@ public final class MigratorAppIT {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
 
-  // Enum for determining which flyway script directory to run a test against
+  /** Enum for determining which flyway script directory to run a test against. */
   private enum TestDirectory {
+    /** Value that will not override the flyway script location, and use the real flyway scripts. */
     REAL(""),
+    /** Value that will use the flyway path for testing bad sql. */
     BAD_SQL("/bad-sql"),
+    /** Value that will use the flyway path for a duplicate version number. * */
     DUPLICATE_VERSION("/duplicate-version"),
+    /** Value that will use the flyway path for a validation failure. * */
     VALIDATION_FAILURE("/validation-failure");
 
+    /** The flyway path to use. */
     private final String path;
 
     /**
