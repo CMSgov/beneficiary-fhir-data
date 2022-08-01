@@ -7,6 +7,7 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
+from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 master_pac_mbis: List[str] = []
 
@@ -30,6 +31,10 @@ def _(environment: Environment, **kwargs):
         use_table_sample=False,
         data_type_name="pac_mbis",
     )
+
+
+class TestLoadShape(UserInitAwareLoadShape):
+    pass
 
 
 class PACUser(BFDUserBase):

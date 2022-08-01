@@ -15,6 +15,7 @@ from common import data, db, validation
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
+from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 master_bene_ids: List[str] = []
 master_contract_data: List[Dict[str, str]] = []
@@ -59,6 +60,8 @@ def _(environment: Environment, **kwargs):
 
 validation.set_validation_goal(validation.ValidationGoal.SLA_V1_BASELINE)
 
+class TestLoadShape(UserInitAwareLoadShape):
+    pass
 
 class RegressionV1User(BFDUserBase):
     """Regression test suite for V1 BFD Server endpoints.
