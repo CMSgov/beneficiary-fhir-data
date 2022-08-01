@@ -62,7 +62,7 @@
 				used in DataSetMonitorWorker. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>${commons.collections4}</version>
+			<version>${commons.collections4.version}</version>
 		</dependency>
 
 		<dependency>

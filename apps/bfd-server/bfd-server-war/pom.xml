@@ -221,7 +221,6 @@
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>${commons.csv}</version>
 		</dependency>
 
 		<dependency>
@@ -295,8 +294,8 @@
 		</dependency>
 		<dependency>
    			 <groupId>commons-io</groupId>
-  			  <artifactId>commons-io</artifactId>
-  			  <version>${commons.io}</version>
+  			 <artifactId>commons-io</artifactId>
+			 <version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Used for Bloom filters -->
@@ -315,11 +314,6 @@
 			<artifactId>bfd-pipeline-shared-test-utils</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency> 
-			<groupId>gov.cms.bfd.data.fda.utility</groupId> 
-			<artifactId>bfd-data-fda</artifactId> 
-			<version>1.0-SNAPSHOT</version> 
 		</dependency>
 	</dependencies>
 

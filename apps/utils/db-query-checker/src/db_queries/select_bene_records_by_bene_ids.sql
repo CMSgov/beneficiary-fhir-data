@@ -1,4 +1,4 @@
-SELECT beneficiar0_.bene_id AS bene_id1_13_0_,
+SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
        medicarebe1_.bene_mbi_id AS bene_mbi1_28_1_,
        skippedrif2_.record_id AS record_i1_32_2_,
        beneficiar0_.age AS age2_13_0_,
@@ -234,7 +234,7 @@ SELECT beneficiar0_.bene_id AS bene_id1_13_0_,
        skippedrif2_.record_id AS record_i1_32_1__
 FROM beneficiaries beneficiar0_
        LEFT OUTER JOIN medicare_beneficiaryid_history medicarebe1_
-                    ON beneficiar0_.bene_id=medicarebe1_.bene_id
+                    ON beneficiar0_.bene_id::text=medicarebe1_.bene_id::text
        LEFT OUTER JOIN skipped_rif_records skippedrif2_
-                    ON beneficiar0_.bene_id=skippedrif2_.bene_id
-WHERE beneficiar0_.bene_id IN ($1)
+                    ON beneficiar0_.bene_id::text=skippedrif2_.bene_id::text
+WHERE beneficiar0_.bene_id::text IN ($1)

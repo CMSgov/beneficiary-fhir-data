@@ -1,4 +1,4 @@
-package gov.cms.bfd.data.fda.lookup.fdadrugcodelookup;
+package gov.cms.bfd.data.fda.lookup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+
+
+  /**
+   * Provides tests for FDA Drug Test Utils
+   */
 public class FDADrugUtilsTest {
 
   public static final String FAKE_DRUG_CODE_NUMBER = "000000000";

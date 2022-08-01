@@ -6,7 +6,7 @@ public class App {
    * The name of the classpath resource (for the project's main web application) for the FDA
    * "Products" TSV file.
    */
-  public static final String FDA_PRODUCTS_RESOURCE = "fda_products_cp1252.tsv";
+  public static final String FDA_PRODUCTS_RESOURCE = "fda_products_utf8.tsv";
 
   /**
    * The application entry point, which will receive all non-JVM command line options in the <code>

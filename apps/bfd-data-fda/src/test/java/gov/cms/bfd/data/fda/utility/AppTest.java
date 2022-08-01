@@ -8,7 +8,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
+/** Provides tests for the FDA App class. */
 public final class AppTest {
+   /** Return illegal argument exception when no arguments are passed */
   @Test
   public void fdappThrowsIllegalArgumentExceptionWhenNoArgumentsPassed() {
     Throwable exception =
@@ -20,6 +22,7 @@ public final class AppTest {
     assertEquals("OUTPUT_DIR argument not specified for FDA NDC download.", exception.getMessage());
   }
 
+  /** Return illegal argument exception when more than one arguments are passed */
   @Test
   public void fdaAppThrowsIllegalArgumentExceptionWhenMoreThanOneArgumentsPassed() {
     Throwable exception =
@@ -31,6 +34,7 @@ public final class AppTest {
     assertEquals("Invalid arguments supplied for FDA NDC download.", exception.getMessage());
   }
 
+  /** Return illegal argument exception when one arguments are passed and is not a directory */
   @Test
   public void fdaAppThrowsIllegalStateExceptionWhenOneArgumentsPassedThatIsNotADirectory() {
     Throwable exception =
@@ -42,6 +46,7 @@ public final class AppTest {
     assertEquals("OUTPUT_DIR does not exist for FDA NDC download.", exception.getMessage());
   }
 
+  /** App passes with valid parameters */
   @Test
   public void fdaAppPassesWithValidParameters() {
     try (MockedStatic<DataUtilityCommons> dataUtilityCommons =

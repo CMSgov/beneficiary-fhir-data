@@ -3,7 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.fdadrugcodelookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimLine;

@@ -12,7 +12,7 @@ import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.DatabaseTestUtils;
-import gov.cms.bfd.data.fda.lookup.fdadrugcodelookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;

@@ -48,7 +48,7 @@ package "Kinesis FIrehose" {
 }
 
 Subscription --> (Lambda)
-Lambda --> api_requests
+Lambda --> api_history
 
 note right of Lambda
   Flatten the JSON schema so that

@@ -60,26 +60,24 @@
 			<!-- Common utility classes -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>${commons.lang3}</version>
 		</dependency>
 		<dependency>
 			<!-- Used to parse and read various CSV data resources. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>${commons.csv}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>${commons.io}</version>
+			<version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides some extra collections, e.g. the CircularFifoQueue being 
 				used in DataSetMonitorWorker. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>${commons.collections4}</version>
+			<version>${commons.collections4.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
@@ -112,7 +110,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>bfd-data-utilities-fda-drug</finalName>
+		<finalName>bfd-data-fda</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -153,21 +151,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.0</version>
-			</plugin>
-			<plugin>
-				<groupId>com.coveo</groupId>
-				<artifactId>fmt-maven-plugin</artifactId>
-				<version>2.9</version>
-			</plugin>
-			<plugin>
-				<groupId>io.github.phillipuniverse</groupId>
-				<artifactId>githook-maven-plugin</artifactId>
-				<version>1.0.4</version>
 			</plugin>
 		</plugins>
 	</build>

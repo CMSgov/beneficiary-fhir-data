@@ -1,11 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
 import gov.cms.mpsm.rda.v1.ApiVersion;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
+import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,7 +37,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
       responseObserver.onNext(config.getVersion().toApiVersion());
       responseObserver.onCompleted();
     } catch (Exception ex) {
-      responseObserver.onError(ex);
+      responseObserver.onError(Status.fromThrowable(ex).asException());
     }
   }
 
@@ -45,13 +47,20 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     LOGGER.info("start getFissClaims call with since={}", request.getSince());
     try {
       MessageSource<FissClaimChange> generator =
-          config.getFissSourceFactory().apply(request.getSince());
-      Responder<FissClaimChange> responder = new Responder<>(responseObserver, generator);
+          config.getFissSourceFactory().apply(request.getSince() + 1);
+      Responder<FissClaimChange> responder = createFissResponder(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
-      responseObserver.onError(ex);
+      responseObserver.onError(Status.fromThrowable(ex).asException());
     }
     LOGGER.info("end getFissClaims call");
+  }
+
+  /** Helper method to make mocking in tests easier. */
+  @VisibleForTesting
+  Responder<FissClaimChange> createFissResponder(
+      StreamObserver<FissClaimChange> observer, MessageSource<FissClaimChange> source) {
+    return new Responder<>(observer, source);
   }
 
   @Override
@@ -59,16 +68,24 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     LOGGER.info("start getMcsClaims call with since={}", request.getSince());
     try {
       MessageSource<McsClaimChange> generator =
-          config.getMcsSourceFactory().apply(request.getSince());
-      Responder<McsClaimChange> responder = new Responder<>(responseObserver, generator);
+          config.getMcsSourceFactory().apply(request.getSince() + 1);
+      Responder<McsClaimChange> responder = createMcsResponder(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
-      responseObserver.onError(ex);
+      responseObserver.onError(Status.fromThrowable(ex).asException());
     }
     LOGGER.info("end getMcsClaims call");
   }
 
-  private static class Responder<TChange> {
+  /** Helper method to make mocking in tests easier. */
+  @VisibleForTesting
+  Responder<McsClaimChange> createMcsResponder(
+      StreamObserver<McsClaimChange> observer, MessageSource<McsClaimChange> source) {
+    return new Responder<>(observer, source);
+  }
+
+  @VisibleForTesting
+  static class Responder<TChange> {
     private final ServerCallStreamObserver<TChange> responseObserver;
     private final MessageSource<TChange> generator;
     private final AtomicBoolean cancelled;
@@ -83,7 +100,8 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
       this.responseObserver.setOnCancelHandler(() -> cancelled.set(true));
     }
 
-    private void sendResponses() {
+    @VisibleForTesting
+    void sendResponses() {
       if (running.get()) {
         try {
           while (running.get()
@@ -107,7 +125,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
         } catch (Exception ex) {
           running.set(false);
           LOGGER.error("caught exception: {}", ex.getMessage(), ex);
-          responseObserver.onError(ex);
+          responseObserver.onError(Status.fromThrowable(ex).asException());
         }
       }
     }
