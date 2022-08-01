@@ -163,10 +163,11 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
           }
 
           MultiCloser closer = new MultiCloser();
+
           if (batch.size() > 0 && flushBatch) {
             closer.close(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
           }
-          ;
+
           closer.close(() -> sink.shutdown(Duration.ofMinutes(5)));
 
           try {
