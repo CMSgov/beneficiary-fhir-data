@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,8 +39,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AbstractClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -57,9 +59,9 @@ public class AbstractClaimRdaSinkTest {
   @BeforeEach
   public void setUp() {
     appMetrics = new MetricRegistry();
-    lenient().doReturn(entityManager).when(entityManagerFactory).createEntityManager();
-    lenient().doReturn(transaction).when(entityManager).getTransaction();
-    lenient().doReturn(true).when(entityManager).isOpen();
+    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
+    doReturn(transaction).when(entityManager).getTransaction();
+    doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
     sink = spy(new TestClaimRdaSink(appState, RdaApiProgress.ClaimType.FISS, true));
@@ -80,8 +82,7 @@ public class AbstractClaimRdaSinkTest {
       doReturn(createChangeClaimFromMessage(message)).when(sink).transformMessage(VERSION, message);
     }
 
-    lenient()
-        .doNothing()
+    doNothing()
         .when(sink)
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
@@ -116,8 +117,7 @@ public class AbstractClaimRdaSinkTest {
             .when(sink)
             .transformMessageImpl(VERSION, message);
       } else {
-        lenient()
-            .doReturn(createChangeClaimFromMessage(message))
+        doReturn(createChangeClaimFromMessage(message))
             .when(sink)
             .transformMessageImpl(VERSION, message);
       }

@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,8 +45,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FissClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -66,11 +68,11 @@ public class FissClaimRdaSinkTest {
   @BeforeEach
   public void setUp() {
     appMetrics = new MetricRegistry();
-    lenient().doReturn(entityManager).when(entityManagerFactory).createEntityManager();
-    lenient().doReturn(transaction).when(entityManager).getTransaction();
-    lenient().doReturn(MbiCache.computedCache(hasherConfig)).when(transformer).getMbiCache();
-    lenient().doReturn(transformer).when(transformer).withMbiCache(any());
-    lenient().doReturn(true).when(entityManager).isOpen();
+    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
+    doReturn(transaction).when(entityManager).getTransaction();
+    doReturn(MbiCache.computedCache(hasherConfig)).when(transformer).getMbiCache();
+    doReturn(transformer).when(transformer).withMbiCache(any());
+    doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
     sink = new FissClaimRdaSink(appState, transformer, true);
@@ -249,7 +251,7 @@ public class FissClaimRdaSinkTest {
               .setDcn(change.getClaim().getDcn())
               .setSeq(change.getSequenceNumber())
               .build();
-      lenient().doReturn(change).when(transformer).transformClaim(message);
+      doReturn(change).when(transformer).transformClaim(message);
       messages.add(message);
     }
     return messages.build();
