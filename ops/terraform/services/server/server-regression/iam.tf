@@ -110,6 +110,73 @@ resource "aws_iam_policy" "logs" {
 EOF  
 }
 
+resource "aws_iam_policy" "s3" {
+  name        = "bfd-${local.env}-${local.service}-s3"
+  description = "Permissions to write to ${data.aws_s3_bucket.insights.arn} S3 bucket and associated ${local.service} paths"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:AbortMultipartUpload"
+            ],
+            "Resource": [
+                "${data.aws_s3_bucket.insights.arn}",
+                "${data.aws_s3_bucket.insights.arn}/databases/bfd-insights-bfd-${local.env}/bfd_insights_bfd_bfd_${local.env}_server_regression/*"
+            ]
+        }
+    ]
+}
+EOF  
+}
+
+resource "aws_iam_policy" "athena" {
+  name        = "bfd-${local.env}-${local.service}-athena"
+  description = "Permissions to query Athena tables and put query results at a particular S3 path in ${data.aws_s3_bucket.insights.arn}"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+                "s3:ListMultipartUploadParts",
+                "s3:AbortMultipartUpload",
+                "s3:CreateBucket",
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-athena-query-results-*",
+                "${data.aws_s3_bucket.insights.arn}",
+                "${data.aws_s3_bucket.insights.arn}/adhoc/query_results/bfd_insights_bfd_${local.env}_server_regression/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "athena:StartQueryExecution",
+                "athena:GetQueryResults",
+                "athena:GetWorkGroup",
+                "athena:StopQueryExecution",
+                "athena:GetQueryExecution"
+            ],
+            "Resource": [
+                "arn:aws:athena:*:${local.account_id}:workgroup/bfd"
+            ]
+        }
+    ]
+}
+EOF  
+}
+
 resource "aws_iam_role" "this" {
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"
@@ -137,7 +204,9 @@ resource "aws_iam_role" "this" {
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
-    aws_iam_policy.logs.arn
+    aws_iam_policy.logs.arn,
+    aws_iam_policy.s3.arn,
+    aws_iam_policy.athena.arn
   ]
 }
 
