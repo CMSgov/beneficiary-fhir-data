@@ -17,6 +17,7 @@ import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode;
 import gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator;
@@ -182,7 +183,14 @@ public class FissClaimTransformerTest {
     changeBuilder
         .setSeq(42)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-        .setClaim(claimBuilder.build());
+        .setClaim(claimBuilder.build())
+        .setSource(
+            RecordSource.newBuilder()
+                .setPhase("p1")
+                .setPhaseSeqNum(0)
+                .setExtractDate("1970-01-01")
+                .setTransmissionTimestamp("1970-01-01T00:00:00.000001Z")
+                .build());
     assertChangeMatches(RdaChange.Type.UPDATE);
   }
 
@@ -2137,7 +2145,7 @@ public class FissClaimTransformerTest {
   class DiagnosisCodeFieldTester
       extends AbstractFieldTester<FissDiagnosisCode.Builder, RdaFissDiagnosisCode> {
 
-    private boolean addDiagCode;
+    private final boolean addDiagCode;
 
     /**
      * Either diagCd2 or bitFlags must have a value so when testing those fields we can't pre-define

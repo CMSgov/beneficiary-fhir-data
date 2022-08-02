@@ -27,27 +27,30 @@ public abstract class AbstractClaimTransformer {
 
     transformer.copyOptionalUIntToShort(
         RdaClaimMessageMetaData.Fields.phase,
-        from::hasPhase,
         () -> {
-          if (!PHASE_TO_SHORT.containsKey(from.getPhase())) {
-            transformer.addError(RdaClaimMessageMetaData.Fields.phase, "is unknown phase");
+          boolean hasPhase = from.hasPhase();
+
+          if (hasPhase && !PHASE_TO_SHORT.containsKey(from.getPhase())) {
+            transformer.addError(RdaChange.Source.Fields.phase, "is unknown phase");
+            hasPhase = false;
           }
 
-          return PHASE_TO_SHORT.get(from.getPhase());
+          return hasPhase;
         },
+        () -> PHASE_TO_SHORT.get(from.getPhase()),
         to::setPhase);
     transformer.copyOptionalUIntToShort(
-        RdaClaimMessageMetaData.Fields.phaseSeqNumber,
+        RdaChange.Source.Fields.phaseSeqNum,
         from::hasPhaseSeqNum,
         from::getPhaseSeqNum,
         to::setPhaseSeqNum);
     transformer.copyOptionalDate(
-        RdaClaimMessageMetaData.Fields.extractDate,
+        RdaChange.Source.Fields.extractDate,
         from::hasExtractDate,
         from::getExtractDate,
         to::setExtractDate);
     transformer.copyOptionalTimestamp(
-        RdaClaimMessageMetaData.Fields.transmissionTimestamp,
+        RdaChange.Source.Fields.transmissionTimestamp,
         from::hasTransmissionTimestamp,
         from::getTransmissionTimestamp,
         to::setTransmissionTimestamp);

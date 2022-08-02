@@ -92,8 +92,8 @@ public class RdaClaimMessageMetaData {
   private Short phase;
 
   /** Identifies the particular sequence number of the phase associated with this claim (0, 1, 2) */
-  @Column(name = "phase_seq_number")
-  private Short phaseSeqNumber;
+  @Column(name = "phase_seq_num")
+  private Short phaseSeqNum;
 
   /** Identifies the date RDA read the claim the IDR extract file */
   @Column(name = "extract_date")

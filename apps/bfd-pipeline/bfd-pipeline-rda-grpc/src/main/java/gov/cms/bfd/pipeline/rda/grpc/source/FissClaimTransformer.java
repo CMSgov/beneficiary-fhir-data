@@ -501,8 +501,6 @@ public class FissClaimTransformer extends AbstractClaimTransformer {
     transformMessageArrays(from, to, transformer, now, "");
     to.setSequenceNumber(change.getSeq());
     RdaChange.Source source = transformSource(change.getSource(), transformer);
-    to.setPhase(source.getPhase());
-    to.setPhaseSeqNumber(source.getPhaseSeqNum());
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {

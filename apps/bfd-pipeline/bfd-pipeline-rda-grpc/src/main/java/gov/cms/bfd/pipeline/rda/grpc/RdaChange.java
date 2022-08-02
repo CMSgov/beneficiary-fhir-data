@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
 /**
  * RDA API wraps each claim in a `ClaimChange` object that indicates the type of change. This class
@@ -34,6 +35,7 @@ public class RdaChange<T> {
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
+  @FieldNameConstants
   public static class Source {
     private Short phase;
     private Short phaseSeqNum;

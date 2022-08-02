@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -156,24 +156,29 @@ public class DataTransformerTest {
   public void testCopyTimestamp() {
     final String VALID_ONE = "2021-03-01T01:01:01.1Z";
     final String VALID_TWO = "2021-03-01T01:01:01.111111Z";
+    final String VALID_THREE = "2021-03-01T01:01:01.1+00:00";
 
     transformer
         .copyTimestamp("valid-1", false, VALID_ONE, copied::add)
         .copyTimestamp("valid-2", true, VALID_TWO, copied::add)
-        .copyTimestamp("invalid-1", true, "2021-03-01T01:01:01.1+00:00", copied::add)
-        .copyTimestamp("invalid-2", true, "20210301T010101Z", copied::add)
-        .copyTimestamp("invalid-3", true, "2021-03-01 01:01:01.1Z", copied::add)
-        .copyTimestamp("invalid-4", true, "2021-03-01T01:01:01.1", copied::add)
+        .copyTimestamp("valid-3", true, VALID_THREE, copied::add)
+        .copyTimestamp("invalid-1", true, "20210301T010101Z", copied::add)
+        .copyTimestamp("invalid-2", true, "2021-03-01 01:01:01.1Z", copied::add)
+        .copyTimestamp("invalid-3", true, "2021-03-01T01:01:01.1", copied::add)
         .copyTimestamp("null-ok", true, null, copied::add)
         .copyTimestamp("null-bad", false, null, copied::add);
 
-    assertEquals(List.of(Instant.parse(VALID_ONE), Instant.parse(VALID_TWO)), copied);
+    assertEquals(
+        List.of(
+            OffsetDateTime.parse(VALID_ONE).toInstant(),
+            OffsetDateTime.parse(VALID_TWO).toInstant(),
+            OffsetDateTime.parse(VALID_THREE).toInstant()),
+        copied);
     assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("invalid-1", "invalid timestamp"),
             new DataTransformer.ErrorMessage("invalid-2", "invalid timestamp"),
             new DataTransformer.ErrorMessage("invalid-3", "invalid timestamp"),
-            new DataTransformer.ErrorMessage("invalid-4", "invalid timestamp"),
             new DataTransformer.ErrorMessage("null-bad", "is null")),
         transformer.getErrors());
   }

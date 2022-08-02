@@ -315,12 +315,6 @@ public class RdaFissClaim {
   @Column(name = "medical_record_no", length = 17)
   private String medicalRecordNo;
 
-  @Column(name = "phase")
-  private Short phase;
-
-  @Column(name = "phase_seq_number")
-  private Short phaseSeqNumber;
-
   @OneToMany(
       mappedBy = "dcn",
       fetch = FetchType.EAGER,

@@ -6,6 +6,7 @@ import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -416,7 +417,8 @@ public class DataTransformer {
       String fieldName, boolean nullable, String value, Consumer<Instant> copier) {
     if (nonNull(fieldName, value, nullable)) {
       try {
-        Instant timestamp = Instant.parse(value);
+        // In Java 11, Instant.parse() doesn't support offsets, so using OffsetDateTime
+        Instant timestamp = OffsetDateTime.parse(value).toInstant();
         copier.accept(timestamp);
       } catch (DateTimeParseException ex) {
         addError(fieldName, "invalid timestamp");

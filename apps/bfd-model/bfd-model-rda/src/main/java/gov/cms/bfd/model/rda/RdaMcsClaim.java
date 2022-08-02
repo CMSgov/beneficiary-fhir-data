@@ -201,12 +201,6 @@ public class RdaMcsClaim {
   @Column(name = "idr_amb_dropoff_zipcode", length = 9)
   private String idrAmbDropoffZipcode;
 
-  @Column(name = "phase")
-  private Short phase;
-
-  @Column(name = "phase_seq_number")
-  private Short phaseSeqNumber;
-
   @OneToMany(
       mappedBy = "idrClmHdIcn",
       fetch = FetchType.EAGER,
