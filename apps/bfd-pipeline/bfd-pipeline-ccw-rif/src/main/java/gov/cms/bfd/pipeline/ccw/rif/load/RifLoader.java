@@ -581,8 +581,6 @@ public final class RifLoader {
    * @return {@code true} if the bene should be filtered/skipped
    */
   private boolean isBackdatedBene(Beneficiary bene) {
-    // no filtering of synthetic data
-
     // No filtering should take place unless filtering is turned on in the configuration
     if (!options.isFilteringNonNullAndNon2022Benes()) {
       return false;

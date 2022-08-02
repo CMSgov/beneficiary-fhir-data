@@ -11,6 +11,12 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.xml.sax.SAXException;
 
+/**
+ * This singleton class defines the XML parsing functionality specific to a BFD file manifest; it is
+ * used to assert XML <code>manifest.xml</code> files are both well-formed and have valid content.
+ * The embedded XML Schema Definition (XSD) will be specified per JAXB schema validation to ensure
+ * data is valid.
+ */
 public class DataSetManifestFactory {
   /** The {@link String} pipeline manifest XML Schema Definition (XSD). */
   public static final String MANIFEST_XSD =

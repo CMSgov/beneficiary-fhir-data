@@ -134,7 +134,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     return sequenceId;
   }
 
-  /** @return the {@link boolean} denoting if the data is synthetic {@link DataSetManifest} */
+  /**
+   * @return the {@link boolean} denoting if the data is synthetic based on the {@link
+   *     DataSetManifest}
+   */
   public boolean isSyntheticData() {
     return syntheticData;
   }
