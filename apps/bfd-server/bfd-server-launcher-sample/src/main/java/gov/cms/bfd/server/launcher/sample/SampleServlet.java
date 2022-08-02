@@ -13,10 +13,12 @@ import org.slf4j.LoggerFactory;
 public final class SampleServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
 
+  /** The logger for the class logic. */
   private static final Logger LOGGER_MISC = LoggerFactory.getLogger(SampleServlet.class);
+  /** The logger for the http access. */
   private static final Logger LOGGER_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
 
-  /** @see javax.servlet.GenericServlet#init() */
+  /** {@inheritDoc} */
   @Override
   public void init() throws ServletException {
     // We'll use this log entry to verify that the servlet is running as expected.
@@ -30,10 +32,7 @@ public final class SampleServlet extends HttpServlet {
     System.err.println("Johnny 5 is alive on STDERR.");
   }
 
-  /**
-   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *     javax.servlet.http.HttpServletResponse)
-   */
+  /** {@inheritDoc} */
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
