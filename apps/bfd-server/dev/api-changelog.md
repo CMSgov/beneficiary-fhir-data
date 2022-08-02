@@ -1,8 +1,8 @@
 # API Changelog
 
-## BFD-1916: Map FI Claim Action Code in V1 and V2
+## BFD-1916: Map FI Claim Action Code in V2
 
-FI Claim Action Code data existed in our code but was not mapped for V1 or V2. This
+FI Claim Action Code data existed in our code but was not mapped for V2. This
 data is now available in the extensions for SNF and Inpatient claims:
 ```json
   "resource" : {
