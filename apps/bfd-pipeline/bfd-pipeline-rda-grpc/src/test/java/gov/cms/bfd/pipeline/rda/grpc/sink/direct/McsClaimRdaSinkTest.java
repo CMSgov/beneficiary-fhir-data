@@ -43,9 +43,14 @@ import javax.persistence.EntityTransaction;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class McsClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -63,7 +68,6 @@ public class McsClaimRdaSinkTest {
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
@@ -236,7 +240,8 @@ public class McsClaimRdaSinkTest {
             RdaChange.Type.UPDATE,
             claim,
             changeDate,
-            new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
+            new RdaChange.Source(
+                (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
     RdaClaimMessageMetaData metaData = sink.createMetaData(change);
     assertEquals(100L, metaData.getSequenceNumber());
     assertEquals('M', metaData.getClaimType());
@@ -271,6 +276,7 @@ public class McsClaimRdaSinkTest {
         RdaChange.Type.INSERT,
         claim,
         clock.instant().minusMillis(12),
-        new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
+        new RdaChange.Source(
+            (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
   }
 }

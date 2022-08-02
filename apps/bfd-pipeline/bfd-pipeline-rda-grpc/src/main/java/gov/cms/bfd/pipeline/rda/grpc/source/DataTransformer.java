@@ -402,6 +402,53 @@ public class DataTransformer {
   }
 
   /**
+   * Parses the string into an {@link Instant} and delivers it to the Consumer. The string value
+   * must be in ISO-8601 format (YYYY-MM-DDTHH:ii:ss.SSSSSSZ). Valid null values are silently
+   * accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value timestamp string in ISO-8601 format
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyTimestamp(
+      String fieldName, boolean nullable, String value, Consumer<Instant> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      try {
+        Instant timestamp = Instant.parse(value);
+        copier.accept(timestamp);
+      } catch (DateTimeParseException ex) {
+        addError(fieldName, "invalid timestamp");
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into an {@link Instant} and delivers it to the Consumer. The string value
+   * must be in ISO-8601 format (YYYY-MM-DDTHH:ii:ss.SSSSSSZ). Valid null values are silently
+   * accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the timestamp
+   * @return this
+   */
+  public DataTransformer copyOptionalTimestamp(
+      String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Instant> copier) {
+    if (exists.getAsBoolean()) {
+      return copyTimestamp(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
    * Parses the string into a BigDecimal and delivers it to the Consumer. The string value must be a
    * valid positive or negative numeric format. Valid null values are silently accepted without
    * calling the Consumer.

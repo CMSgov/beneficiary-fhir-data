@@ -27,6 +27,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -182,7 +183,8 @@ public class AbstractClaimRdaSinkTest {
         RdaChange.Type.UPDATE,
         message + "_claim",
         Instant.ofEpochMilli(1),
-        new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
+        new RdaChange.Source(
+            (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
   }
 
   /**
@@ -242,7 +244,8 @@ public class AbstractClaimRdaSinkTest {
           RdaChange.Type.UPDATE,
           s,
           Instant.now(),
-          new RdaChange.Source("p1", (short) 0, "1970-01-01T00:00:00.000000Z"));
+          new RdaChange.Source(
+              (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
     }
 
     @Override

@@ -3,9 +3,16 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
+import java.util.Map;
 
 /** Base class for Claim transformation offering common logic shared between FISS and MCS */
 public abstract class AbstractClaimTransformer {
+
+  private static final Map<String, Short> PHASE_TO_SHORT =
+      Map.of(
+          "p1", (short) 1,
+          "p2", (short) 2,
+          "p3", (short) 3);
 
   /**
    * Validates and copies the {@link RecordSource} phase, phaseSequence, and transmissionTimestamp
@@ -18,17 +25,29 @@ public abstract class AbstractClaimTransformer {
   protected RdaChange.Source transformSource(RecordSource from, DataTransformer transformer) {
     RdaChange.Source to = new RdaChange.Source();
 
-    transformer.copyOptionalString(
-        RdaClaimMessageMetaData.Fields.phase, 2, 2, from::hasPhase, from::getPhase, to::setPhase);
+    transformer.copyOptionalUIntToShort(
+        RdaClaimMessageMetaData.Fields.phase,
+        from::hasPhase,
+        () -> {
+          if (!PHASE_TO_SHORT.containsKey(from.getPhase())) {
+            transformer.addError(RdaClaimMessageMetaData.Fields.phase, "is unknown phase");
+          }
+
+          return PHASE_TO_SHORT.get(from.getPhase());
+        },
+        to::setPhase);
     transformer.copyOptionalUIntToShort(
         RdaClaimMessageMetaData.Fields.phaseSeqNumber,
         from::hasPhaseSeqNum,
         from::getPhaseSeqNum,
         to::setPhaseSeqNum);
-    transformer.copyOptionalString(
+    transformer.copyOptionalDate(
+        RdaClaimMessageMetaData.Fields.extractDate,
+        from::hasExtractDate,
+        from::getExtractDate,
+        to::setExtractDate);
+    transformer.copyOptionalTimestamp(
         RdaClaimMessageMetaData.Fields.transmissionTimestamp,
-        10,
-        30,
         from::hasTransmissionTimestamp,
         from::getTransmissionTimestamp,
         to::setTransmissionTimestamp);

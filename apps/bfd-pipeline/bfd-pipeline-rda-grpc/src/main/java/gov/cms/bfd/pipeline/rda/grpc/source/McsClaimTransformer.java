@@ -262,6 +262,9 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
     final DataTransformer transformer = new DataTransformer();
     final RdaMcsClaim to = transformMessage(from, transformer, clock.instant());
     to.setSequenceNumber(change.getSeq());
+    RdaChange.Source source = transformSource(change.getSource(), transformer);
+    to.setPhase(source.getPhase());
+    to.setPhaseSeqNumber(source.getPhaseSeqNum());
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {
@@ -276,7 +279,7 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
         transformer.instant(change.getTimestamp()),
-        transformSource(change.getSource(), transformer));
+        source);
   }
 
   private RdaMcsClaim transformMessage(McsClaim from, DataTransformer transformer, Instant now) {

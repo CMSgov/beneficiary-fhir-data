@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -34,8 +35,9 @@ public class RdaChange<T> {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Source {
-    private String phase;
+    private Short phase;
     private Short phaseSeqNum;
-    private String transmissionTimestamp;
+    private LocalDate extractDate;
+    private Instant transmissionTimestamp;
   }
 }
