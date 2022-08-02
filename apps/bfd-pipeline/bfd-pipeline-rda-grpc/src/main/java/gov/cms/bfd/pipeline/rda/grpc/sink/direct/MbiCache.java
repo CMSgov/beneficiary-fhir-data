@@ -33,6 +33,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class MbiCache {
+  /**
+   * Increment of time used by {@link MbiCache#waitForRetry} to compute exponential backoff delay
+   * when retrying insert of record into MBI cache table. The value is somewhat arbitrary but should
+   * be long enough to be meaningful but short enough to not impose excessive wait times.
+   */
+  private static final int RETRY_INTERVAL_MILLIS = 50;
+
   /** Used to compute hash values for raw MBI strings. */
   protected final IdHasher hasher;
 
@@ -261,7 +268,7 @@ public class MbiCache {
      * @param retryNumber identifies which retry attempt we are waiting for
      */
     private void waitForRetry(int loopNumber, int retryNumber) {
-      var delay = loopNumber * (50L + random.nextInt(50));
+      var delay = loopNumber * (RETRY_INTERVAL_MILLIS + random.nextInt(RETRY_INTERVAL_MILLIS));
       try {
         if (retryNumber > 0) {
           log.info("waiting for retry: retryNumber={} delay={}", retryNumber, delay);
