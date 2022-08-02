@@ -239,7 +239,7 @@ public class RDATestUtils {
             .sequenceNumber(2L)
             .dcn("123457")
             .hicNo("hicnumbe2")
-            .currStatus('t')
+            .currStatus('\0')
             .currLoc1('r')
             .currLoc2("Somdb")
             .medaProvId("meda12346")
@@ -395,6 +395,7 @@ public class RDATestUtils {
    * @return The MCS test claim B
    */
   private RdaMcsClaim mcsTestDataB(Mbi mbi) {
+    final String NOT_VALID_CODE = "?";
     RdaMcsClaim claim =
         RdaMcsClaim.builder()
             .sequenceNumber(1L)
@@ -407,7 +408,7 @@ public class RDATestUtils {
             .idrBeneFirstInit("J")
             .idrBeneMidInit("D")
             .idrBeneSex("M")
-            .idrStatusCode(null)
+            .idrStatusCode(NOT_VALID_CODE)
             .idrStatusDate(LocalDate.ofEpochDay(2))
             .idrBillProvNpi("9876789102")
             .idrBillProvNum("4444422222")
