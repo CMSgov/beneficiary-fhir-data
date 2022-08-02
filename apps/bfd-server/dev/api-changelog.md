@@ -2,8 +2,9 @@
 
 ## BFD-1916: Map FI Claim Action Code in V2
 
-FI Claim Action Code data existed in our code but was not mapped for V2. This
-data is now available in the extensions for SNF and Inpatient claims:
+FI Claim Action Code data has been mapped for V2. This data is now available in the extensions for SNF and Inpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Action Code Example:
 ```json
   "resource" : {
     "resourceType" : "ExplanationOfBenefit",
