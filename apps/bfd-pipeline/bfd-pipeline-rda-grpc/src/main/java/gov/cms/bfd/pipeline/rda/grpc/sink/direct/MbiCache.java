@@ -169,7 +169,7 @@ public class MbiCache {
           return readOrInsertIfMissing(mbi);
         } catch (PersistenceException ex) {
           final Throwable rootCause = Throwables.getRootCause(ex);
-          LOGGER.warn(
+          LOGGER.debug(
               "caught exception while caching MBI: retry={} class={} message={} causeClass={} causeMessage={}",
               retryNumber,
               ex.getClass().getSimpleName(),
