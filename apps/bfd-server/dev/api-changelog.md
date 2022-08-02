@@ -5,10 +5,19 @@
 FI Claim Process Date data existed in our code but was not mapped for V1 or V2. This
 data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims:
 ```json
-    {
-      "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
-      "valueDate" : "2014-02-07"
-    }
+  "resource" : {
+    "resourceType" : "ExplanationOfBenefit",
+    ...
+      "extension": [{
+        ...
+        {
+          "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+          "valueDate" : "2014-02-07"
+        },
+        ...         
+     }]
+    ...
+  }
 ```
 
 ## BFD-1620: Add Total Slices for CARIN Compliance
