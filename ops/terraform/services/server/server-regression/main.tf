@@ -18,6 +18,11 @@ locals {
   layer      = "app"
   service    = "server-regression"
 
+  insights_db_prefix    = "bfd-insights-bfd"
+  insights_table_prefix = "bfd_insights_bfd"
+  insights_database     = "${local.insights_db_prefix}-${local.env}"
+  insights_table        = "${local.insights_table_prefix}_${replace(local.env, "-", "_")}_${replace(local.service, "-", "_")}"
+
   vpc_name   = "bfd-${local.env}-vpc"
   queue_name = "bfd-${local.env}-${local.service}"
 
@@ -66,10 +71,12 @@ resource "aws_sqs_queue" "this" {
 }
 
 resource "aws_glue_crawler" "this" {
-  database_name = "bfd-insights-bfd-${local.env}"
-  name          = "bfd-${local.env}-${local.service}"
-  table_prefix  = "bfd_insights_bfd_"
-  role          = data.aws_iam_role.insights.arn
+  name = "${local.insights_database}-${local.service}"
+  tags = merge(local.shared_tags, { Name = "${local.insights_database}-${local.service}", application = "bfd-insights" })
+
+  database_name = "${local.insights_database}"
+
+  role = data.aws_iam_role.insights.arn
 
   lineage_configuration {
     crawler_lineage_settings = "DISABLE"
@@ -80,7 +87,7 @@ resource "aws_glue_crawler" "this" {
   }
 
   s3_target {
-    path = "s3://${data.aws_s3_bucket.insights.id}/databases/bfd-insights-bfd-${local.env}/${local.service}"
+    path = "s3://${data.aws_s3_bucket.insights.id}/databases/${local.insights_database}/${local.insights_table}"
   }
 
   schema_change_policy {

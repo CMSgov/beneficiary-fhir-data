@@ -126,7 +126,7 @@ resource "aws_iam_policy" "s3" {
             ],
             "Resource": [
                 "${data.aws_s3_bucket.insights.arn}",
-                "${data.aws_s3_bucket.insights.arn}/databases/bfd-insights-bfd-${local.env}/bfd_insights_bfd_bfd_${local.env}_server_regression/*"
+                "${data.aws_s3_bucket.insights.arn}/databases/${local.insights_database}/${local.insights_table}/*"
             ]
         }
     ]
@@ -156,7 +156,7 @@ resource "aws_iam_policy" "athena" {
             "Resource": [
                 "arn:aws:s3:::aws-athena-query-results-*",
                 "${data.aws_s3_bucket.insights.arn}",
-                "${data.aws_s3_bucket.insights.arn}/adhoc/query_results/bfd_insights_bfd_${local.env}_server_regression/*"
+                "${data.aws_s3_bucket.insights.arn}/adhoc/query_results/${local.insights_database}/${local.insights_table}/*"
             ]
         },
         {
