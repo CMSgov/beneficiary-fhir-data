@@ -20,6 +20,8 @@ data is now available in the extensions for SNF and Inpatient claims:
           },
         ...
       }]
+      ...
+  }
 ```
 
 ## BFD-1620: Add Total Slices for CARIN Compliance
