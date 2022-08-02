@@ -165,8 +165,7 @@ public final class InpatientClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber(),
         claim.getFiDocumentClaimControlNumber(),
-        claim.getFiOriginalClaimControlNumber(),
-        claim.getFiscalIntermediaryClaimProcessDate());
+        claim.getFiOriginalClaimControlNumber());
 
     assertEquals(9, eob.getDiagnosis().size());
 

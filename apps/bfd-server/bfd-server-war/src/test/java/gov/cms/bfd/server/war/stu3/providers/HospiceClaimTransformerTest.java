@@ -104,8 +104,7 @@ public final class HospiceClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber(),
         claim.getFiDocumentClaimControlNumber(),
-        claim.getFiOriginalClaimControlNumber(),
-        claim.getFiscalIntermediaryClaimProcessDate());
+        claim.getFiOriginalClaimControlNumber());
 
     // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
     // expected

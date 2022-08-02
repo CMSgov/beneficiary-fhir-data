@@ -91,9 +91,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
           "value" : "373273882012"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
-        "valueDate" : "2011-02-18"
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -1195,9 +1192,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
           "value" : "10493204767560565"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
-        "valueDate" : "2015-10-30"
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -1765,9 +1759,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
           "value" : "261660474641024"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
-        "valueDate" : "2016-02-19"
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -2509,9 +2500,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
           "value" : "34534535535"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
-        "valueDate" : "2014-02-07"
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -4068,9 +4056,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
           "value" : "38875439343923937"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
-        "valueDate" : "2014-10-07"
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",

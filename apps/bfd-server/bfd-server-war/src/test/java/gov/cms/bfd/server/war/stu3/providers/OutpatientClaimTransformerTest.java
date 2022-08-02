@@ -198,8 +198,7 @@ public final class OutpatientClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber(),
         claim.getFiDocumentClaimControlNumber(),
-        claim.getFiOriginalClaimControlNumber(),
-        claim.getFiscalIntermediaryClaimProcessDate());
+        claim.getFiOriginalClaimControlNumber());
 
     assertTrue(
         countDiagnosisCodes(claim) >= eob.getDiagnosis().size(),

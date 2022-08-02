@@ -204,8 +204,7 @@ final class InpatientClaimTransformer {
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getFiDocumentClaimControlNumber(),
-        claimGroup.getFiOriginalClaimControlNumber(),
-        claimGroup.getFiscalIntermediaryClaimProcessDate());
+        claimGroup.getFiOriginalClaimControlNumber());
 
     // Common group level fields between Inpatient, HHA, Hospice and SNF
     TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(

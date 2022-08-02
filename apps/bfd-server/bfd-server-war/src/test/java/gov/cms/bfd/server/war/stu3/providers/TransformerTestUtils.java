@@ -1,10 +1,12 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -45,7 +47,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BaseDateTimeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
@@ -53,6 +59,15 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -657,26 +672,6 @@ final class TransformerTestUtils {
             .findFirst();
 
     assertEquals(expectedDateYear.isPresent(), extensionForUrl.isPresent());
-  }
-
-  /**
-   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
-   *     Coding} are for
-   * @param expectedDate the expected {@link Coding#getCode()}
-   * @param actualElement the FHIR element to find and verify the {@link Extension} of
-   */
-  static void assertExtensionDateEquals(
-      CcwCodebookInterface ccwVariable,
-      Optional<?> expectedDate,
-      IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-    String expectedCodingSystem = expectedExtensionUrl;
-    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
-        actualElement.getExtension().stream()
-            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
-            .findFirst();
-
-    assertEquals(expectedDate.isPresent(), extensionForUrl.isPresent());
   }
 
   /**
@@ -1765,8 +1760,7 @@ final class TransformerTestUtils {
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
       Optional<String> fiDocumentClaimControlNumber,
-      Optional<String> fiOriginalClaimControlNumber,
-      Optional<LocalDate> fiClmProcDt) {
+      Optional<String> fiOriginalClaimControlNumber) {
 
     TransformerTestUtils.assertReferenceIdentifierEquals(
         TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getOrganization());
@@ -1796,10 +1790,6 @@ final class TransformerTestUtils {
 
     if (fiscalIntermediaryNumber.isPresent()) {
       assertExtensionIdentifierEquals(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber, eob);
-    }
-
-    if (fiClmProcDt.isPresent()) {
-      assertExtensionDateEquals(CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, fiClmProcDt, eob);
     }
   }
 
