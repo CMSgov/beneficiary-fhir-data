@@ -2,8 +2,9 @@
 
 ## BFD-1917: Map FI Claim Process Date in V1 and V2
 
-FI Claim Process Date data existed in our code but was not mapped for V1 or V2. This
-data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims:
+FI Claim Process Date data has been mapped for V2. This data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Process Date Example:
 ```json
   "resource" : {
     "resourceType" : "ExplanationOfBenefit",
