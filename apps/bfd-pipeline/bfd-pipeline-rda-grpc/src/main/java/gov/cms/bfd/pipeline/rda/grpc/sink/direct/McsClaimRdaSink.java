@@ -50,7 +50,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
 
   @Override
   int getInsertCount(RdaMcsClaim claim) {
-    return 1
+    return 1 // Add one for the base claim
         + claim.getDetails().size()
         + claim.getDiagCodes().size()
         + claim.getAdjustments().size()

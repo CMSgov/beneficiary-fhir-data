@@ -48,7 +48,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
 
   @Override
   int getInsertCount(RdaFissClaim claim) {
-    return 1
+    return 1 // Add one for the base claim
         + claim.getProcCodes().size()
         + claim.getDiagCodes().size()
         + claim.getPayers().size()
