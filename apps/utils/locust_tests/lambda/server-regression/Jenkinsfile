@@ -62,7 +62,7 @@ spec:
                     }
 
                     // Execute the existing build-push script
-                    dir('ops/ccs-ops-misc/load_test') {
+                    dir('apps/utils/locust_tests') {
                         sh 'bash ./lambda/server-regression/build-push.sh'
                     }
                 }
