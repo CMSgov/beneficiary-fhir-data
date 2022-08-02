@@ -57,7 +57,11 @@ public final class CodebookVariableReaderIT {
     assertTypoFixForNchClmPrvdtPmtAmt(variable);
   }
 
-  /** @param variable the {@link Variable} to check */
+  /**
+   * Validates a typo fix for nch clm prvdt pmt amt.
+   *
+   * @param variable the {@link Variable} to check
+   */
   private static void assertTypoFixForNchClmPrvdtPmtAmt(Variable variable) {
     assertNotEquals("NCH_CLM_PRVDT_PMT_AMT", variable.getId());
   }
