@@ -447,6 +447,7 @@ public final class TransformerUtilsV2 {
    */
   static Extension createExtensionDate(CcwCodebookInterface ccwVariable, LocalDate date) {
     Extension extension = null;
+    if (date == null) throw new NullPointerException();
     try {
       String stringDate = date.toString();
       DateType dateValue = new DateType(stringDate);
