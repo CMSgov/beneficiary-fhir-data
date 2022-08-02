@@ -5,7 +5,7 @@ sections:
     - resources
     - data-sources
 
-# the following `content` string is implemented with as a golang template https://pkg.go.dev/text/template
+# the following `content` string is implemented with a golang template https://pkg.go.dev/text/template
 # updates here correspond to `{{ .Content }}` in `output.template` setting below
 content: |-
     {{ .Requirements }}

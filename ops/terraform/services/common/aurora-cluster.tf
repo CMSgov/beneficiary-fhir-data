@@ -33,14 +33,7 @@ resource "aws_security_group" "aurora_cluster" {
     },
   ]
 
-  tags = merge(
-    local.shared_tags,
-    { "Name" = "bfd-${local.env}-aurora-cluster" }
-  )
-  tags_all = merge(
-    local.shared_tags,
-    { "Name" = "bfd-${local.env}-aurora-cluster" }
-  )
+  tags = merge(local.shared_tags, { Name = "bfd-${local.env}-aurora-cluster" })
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
@@ -53,20 +46,20 @@ resource "aws_rds_cluster" "aurora_cluster" {
   deletion_protection                 = true
   engine                              = "aurora-postgresql"
   engine_mode                         = "provisioned"
-  engine_version                      = "14.3" # TODO: This may need to be ignored.
+  engine_version                      = "14.3"
   iam_database_authentication_enabled = local.rds_iam_database_authentication_enabled
   kms_key_id                          = data.aws_kms_key.cmk.arn
   port                                = 5432
-  preferred_backup_window             = "05:00-06:00"         # TODO: Review with Keith
-  preferred_maintenance_window        = "fri:07:00-fri:08:00" # TODO: Review with Keith
+  preferred_backup_window             = "05:00-06:00"
+  preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
+  tags                                = merge(local.shared_tags, { "cpm backup" = "Weekly Monthly", "Layer" = "data" })
 
-  # credentials are null when a snapshot identifier is specified; clone and ephemeral support
-  master_password     = local.rds_snapshot_identifier == null ? local.rds_master_password : null
-  master_username     = local.rds_snapshot_identifier == null ? local.rds_master_username : null
+  # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
+  master_password     = local.rds_master_password
+  master_username     = local.rds_master_username
   snapshot_identifier = local.rds_snapshot_identifier
-
 
   availability_zones = [
     data.aws_availability_zones.main.names[0],
@@ -77,16 +70,6 @@ resource "aws_rds_cluster" "aurora_cluster" {
   enabled_cloudwatch_logs_exports = [
     "postgresql",
   ]
-
-  tags = merge(
-    local.shared_tags,
-    { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
-  )
-
-  tags_all = merge(
-    local.shared_tags,
-    { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
-  )
 
   vpc_security_group_ids = [
     aws_security_group.aurora_cluster.id,
@@ -123,31 +106,26 @@ resource "aws_rds_cluster_instance" "nodes" {
   db_parameter_group_name         = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name
   engine                          = aws_rds_cluster.aurora_cluster.engine
-  engine_version                  = aws_rds_cluster.aurora_cluster.engine_version # TODO: may need to ignore this...
+  engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
   identifier                      = "${aws_rds_cluster.aurora_cluster.id}-node-${count.index}"
-  instance_class                  = local.rds_instance_class # TODO: should this come from the aurora cluster?
-  monitoring_interval             = 15                       # TODO: Does this interval need to be more granular in prod?
+  instance_class                  = local.rds_instance_class
+  monitoring_interval             = 15
   monitoring_role_arn             = data.aws_iam_role.monitoring.arn
-  performance_insights_enabled    = true # TODO: Is this necessary for test? Should this be on for *all* environments?
+  performance_insights_enabled    = true
   performance_insights_kms_key_id = aws_rds_cluster.aurora_cluster.kms_key_id
-  preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window # "fri:07:00-fri:08:00" # TODO: should this come from the aurora cluster?
+  preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
   publicly_accessible             = false
-  tags = merge(
-    local.shared_tags,
-    { "Layer" = "data" }
-  )
-
-  tags_all = merge(
-    local.shared_tags,
-    { "Layer" = "data" }
-  )
+  tags                            = merge(local.shared_tags, { Layer = "data" })
 }
 
+### The following configuration is almost exlcusively for separated, custom reader endpoints
+### supporting development of synthea data
 locals {
   # declare a reader_nodes collection for nodes that aren't currently identified as a writer
   reader_nodes = [for node in aws_rds_cluster_instance.nodes : node if !node.writer]
 }
 
+# This is the general reader endpoint in production
 resource "aws_rds_cluster_endpoint" "readers" {
   # Create the separate endpoint for prod clusters
   count = local.env == "prod" ? 1 : 0
@@ -156,12 +134,13 @@ resource "aws_rds_cluster_endpoint" "readers" {
   cluster_endpoint_identifier = "bfd-${local.env}-ro"
   custom_endpoint_type        = "READER"
 
-  # assign all but the last reader node to this endpoint
+  # EXCLUDED_MEMBERS assigns ALL but the last reader to the custom endpoint
   excluded_members = [
     element(local.reader_nodes, length(local.reader_nodes) - 1).id
   ]
 }
 
+# This is the reserved synthea reader endpoint in production
 resource "aws_rds_cluster_endpoint" "beta_reader" {
   # Create the separate endpoint for prod clusters
   count = local.env == "prod" ? 1 : 0
@@ -170,6 +149,7 @@ resource "aws_rds_cluster_endpoint" "beta_reader" {
   cluster_endpoint_identifier = "bfd-${local.env}-beta-reader"
   custom_endpoint_type        = "READER"
 
+  # STATIC_MEMBERS assigns just the last reader node to the custom endpoint
   static_members = [
     element(local.reader_nodes, length(local.reader_nodes) - 1).id
   ]
