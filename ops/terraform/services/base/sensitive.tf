@@ -1,17 +1,11 @@
 locals {
-  eyaml_file = contains(local.established_envs, local.env) ? "${local.env}.eyaml" : "default.eyaml" # TODO: Default to support future ephemeral environments
+  eyaml_file = contains(local.established_envs, local.env) ? "${local.env}.eyaml" : "default.eyaml"
   eyaml      = data.external.eyaml.result
-
-  kms_key_alias = contains(local.established_envs, local.env) ? "alias/bfd-${local.env}-cmk" : "alias/bfd-test-cmk"
 
   common_sensitive   = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "common") }
   migrator_sensitive = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "migrator") }
   pipeline_sensitive = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "pipeline") }
   server_sensitive   = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "server") }
-}
-
-data "aws_kms_key" "cmk" {
-  key_id = local.kms_key_alias
 }
 
 data "external" "eyaml" {
