@@ -11,7 +11,7 @@ locals {
 
   # TODO: Replace when/if this is merged into main Terraform
   # Used for generating S3 event notifications for server-regression-glue-trigger
-  # lambda in s3.tf
+  # lambda in s3.tf/data-sources.tf
   envs = toset(["test", "prod-sbx", "prod"])
 }
 
