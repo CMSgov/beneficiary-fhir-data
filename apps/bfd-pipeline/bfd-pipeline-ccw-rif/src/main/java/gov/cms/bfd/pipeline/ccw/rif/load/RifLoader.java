@@ -410,6 +410,7 @@ public final class RifLoader {
        */
       LoadedBatchBuilder loadedBatchBuilder =
           new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
+
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         RecordAction recordAction = rifRecordEvent.getRecordAction();
         RifRecordBase record = rifRecordEvent.getRecord();
@@ -437,13 +438,9 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          // Log if we have a non-2022 enrollment year INSERT and we are
-          // NOT processing synthetic data.
-          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-            Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
-            LOGGER.info(
-                "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
-                bene.getBeneficiaryId());
+          if (!isSyntheticData) {
+            // don't care about return status here...just want the logging
+            isBackdatedBene(rifRecordEvent);
           }
 
           if (recordInDb == null) {
@@ -458,13 +455,9 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            // Log if we have a non-2022 enrollment year INSERT and we are
-            // NOT processing synthetic data.
-            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-              Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
-              LOGGER.info(
-                  "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
-                  bene.getBeneficiaryId());
+            if (!isSyntheticData) {
+              // don't care about return status here...just want the logging
+              isBackdatedBene(rifRecordEvent);
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
@@ -569,7 +562,6 @@ public final class RifLoader {
       Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
       return isBackdatedBene(bene);
     }
-
     // Not currently worried about other types of records
     return false;
   }
@@ -596,7 +588,10 @@ public final class RifLoader {
       return false;
     }
 
-    // Otherwise we do want to filter it
+    // Otherwise we do want to log and filter it
+    LOGGER.info(
+        "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+        bene.getBeneficiaryId());
     return true;
   }
 

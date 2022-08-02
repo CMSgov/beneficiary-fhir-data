@@ -1,11 +1,13 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import java.io.InputStream;
@@ -18,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.UnmarshalException;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /** Unit tests for {@link DataSetManifest}. */
@@ -30,7 +33,7 @@ public final class DataSetManifestTest {
    * @throws JAXBException (indicates test failure)
    */
   @Test
-  public void jaxbUnmarshallingForSampleA() throws JAXBException {
+  public void jaxbUnmarshallingForSampleA() throws JAXBException, SAXException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-a.xml");
 
@@ -53,19 +56,18 @@ public final class DataSetManifestTest {
   /**
    * Verifies that {@link DataSetManifest} cannot be unmarshalled, as expected. The invalid-sample-a
    * XML defines the syntheticData with a value of "junk"; this should trigger a {@link
-   * SAXException} which will result in a linked exception within {@link JAXBException}, {@link
-   * UnmarshalException}.
+   * UnmarshalException} which contains a linked exception {@link SAXParseException},
    *
    * <p>The error messsage should identify the XML attribute in error and the value that it
    * attempted to use.
    *
-   * <p>JAXBException (indicates test success)
+   * <p>UnmarshalException (indicates test success)
    */
   @Test
   public void jaxbUnmarshallingForInvalidSampleA() {
-    JAXBException thrown =
+    UnmarshalException thrown =
         assertThrows(
-            JAXBException.class,
+            UnmarshalException.class,
             () -> {
               InputStream manifestStream =
                   Thread.currentThread()
@@ -74,13 +76,10 @@ public final class DataSetManifestTest {
 
               DataSetManifestFactory.newInstance().parseManifest(manifestStream);
             },
-            "SAXParseException message was expected");
+            "UnmarshalException message was expected");
 
-    UnmarshalException unmarshalException = (UnmarshalException) thrown.getLinkedException();
-    assertNotNull(unmarshalException);
     SAXParseException saxParseException =
-        (SAXParseException) unmarshalException.getLinkedException();
-    assertNotNull(saxParseException);
+        assertInstanceOf(SAXParseException.class, thrown.getLinkedException());
     assertEquals(
         "cvc-datatype-valid.1.2.1: 'junk' is not a valid value for 'boolean'.",
         saxParseException.getLocalizedMessage());
@@ -113,7 +112,7 @@ public final class DataSetManifestTest {
    * @throws JAXBException (indicates test failure)
    */
   @Test
-  public void jaxbUnmarshallingForSampleB() throws JAXBException {
+  public void jaxbUnmarshallingForSampleB() throws JAXBException, SAXException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-b.xml");
     DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
@@ -145,7 +144,7 @@ public final class DataSetManifestTest {
    * @throws JAXBException (indicates test failure)
    */
   @Test
-  public void jaxbUnmarshallingForSampleD() throws JAXBException {
+  public void jaxbUnmarshallingForSampleD() throws JAXBException, SAXException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-d.xml");
 
@@ -174,7 +173,8 @@ public final class DataSetManifestTest {
    * @throws JAXBException (indicates test failure)
    */
   @Test
-  public void jaxbUnmarshallingForTimestampsWithLeadingWhitespace() throws JAXBException {
+  public void jaxbUnmarshallingForTimestampsWithLeadingWhitespace()
+      throws JAXBException, SAXException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-c.xml");
     DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
