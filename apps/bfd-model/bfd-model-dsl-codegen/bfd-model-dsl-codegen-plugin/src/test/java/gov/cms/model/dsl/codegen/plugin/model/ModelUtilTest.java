@@ -27,6 +27,7 @@ public class ModelUtilTest {
   /**
    * Test the ability to load mappings from individual files as well as directories.
    *
+   * @param folder the folder tor read from
    * @throws Exception included because the methods have checked exceptions
    */
   @Test
@@ -52,6 +53,7 @@ public class ModelUtilTest {
         ModelUtil.loadModelFromYamlFileOrDirectory(folder.getAbsolutePath()).getMappings().size());
   }
 
+  /** Validates that {@link ModelUtil#mapJavaTypeToTypeName} returns the correct type. */
   @Test
   public void testMapJavaTypeToTypeName() {
     assertEquals(Optional.of(TypeName.CHAR), mapJavaTypeToTypeName("char"));

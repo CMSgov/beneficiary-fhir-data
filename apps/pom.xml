@@ -622,6 +622,7 @@ checkJavaFormat
 						<!-- Only look in source directories, basically ignores generated code -->
 						<sourceDirectories>
 							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
 						</sourceDirectories>
 					</configuration>
 					<version>${checkstyle.plugin.version}</version>

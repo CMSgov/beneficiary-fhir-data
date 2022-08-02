@@ -108,10 +108,7 @@ public class RdaSchemaMigrationIT {
     entityManager = entityManagerFactory.createEntityManager();
   }
 
-  /**
-   * Tears down the test, and removes a specific type that is not removed as part of flyway's
-   * cleanup.
-   */
+  /** Cleans up the resources after all tests have run. */
   @AfterAll
   public static void tearDown() {
     DatabaseTestUtils.get().dropSchemaForDataSource();

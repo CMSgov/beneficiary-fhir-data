@@ -14,12 +14,12 @@ import org.mockito.stubbing.Answer;
 /** Provides tests for the FDA Data Utility Commons class. */
 public final class DataUtilityCommonsTest {
 
-  /** Return exception when file is not a directory */
+  /** Return exception when file is not a directory. */
   @Test
   public void getFDADrugCodesThrowsExceptionWhenFileIsNotADirectory() {
     String outputDir = "../temp/";
     Path tempDir = Paths.get(outputDir);
-    
+
     try (MockedStatic<Paths> paths = Mockito.mockStatic(Paths.class)) {
       try (MockedStatic<Path> path = Mockito.mockStatic(Path.class)) {
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class)) {

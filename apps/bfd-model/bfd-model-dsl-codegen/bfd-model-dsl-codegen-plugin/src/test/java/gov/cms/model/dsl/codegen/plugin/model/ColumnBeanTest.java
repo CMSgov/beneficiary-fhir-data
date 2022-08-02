@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link ColumnBean}. */
 public class ColumnBeanTest {
   /** Test accessor for column name. */
   @Test
