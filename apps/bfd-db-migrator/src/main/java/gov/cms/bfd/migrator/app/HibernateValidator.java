@@ -1,6 +1,5 @@
 package gov.cms.bfd.migrator.app;
 
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +31,7 @@ public class HibernateValidator {
   private final boolean HIBERNATE_DETAILED_LOGGING = false;
 
   /** The configured data source for hibernate. */
-  private final HikariDataSource dataSource;
+  private final DataSource dataSource;
 
   /** Validates the schema. */
   private SchemaValidator schemaValidator;
@@ -49,7 +48,7 @@ public class HibernateValidator {
    * @param dataSource the data source to use
    * @param modelPackagesToScan the model packages to scan
    */
-  public HibernateValidator(HikariDataSource dataSource, List<String> modelPackagesToScan) {
+  public HibernateValidator(DataSource dataSource, List<String> modelPackagesToScan) {
     this.dataSource = dataSource;
     this.modelPackagesToScan = modelPackagesToScan;
     this.schemaValidator = new SchemaValidator();
@@ -113,13 +112,39 @@ public class HibernateValidator {
   }
 
   /**
+   * Creates a Hibernate session factory, needed for obtaining the metadata used in validation. This
+   * will scan the modelPackagesToScan paths and attempt to create a factory using the classes found
+   * within, else throws a RuntimeException if no scanned classes were found.
+   *
+   * @param dataSource the data source which contains the database connection
+   * @return the session factory
+   */
+  public SessionFactory createHibernateSessionFactory(DataSource dataSource) {
+
+    // Add the models to scan for (used in validation)
+    Set<Class<?>> scannedClasses = new HashSet<>();
+
+    for (String packagePath : modelPackagesToScan) {
+      scannedClasses.addAll(getEntityClassesFromPackage(packagePath));
+    }
+
+    if (scannedClasses.isEmpty()) {
+      throw new RuntimeException(
+          String.format("Found no classes for the paths %n.", modelPackagesToScan.toArray()));
+    }
+    LOGGER.debug("Added {} classes to be validated.", scannedClasses.size());
+
+    return createHibernateSessionFactory(dataSource, scannedClasses);
+  }
+
+  /**
    * Creates a Hibernate session factory, needed for obtaining the metadata used in validation.
    *
    * @param dataSource the data source which contains the database connection
    * @param classesToValidate the classes to validate
    * @return the session factory
    */
-  private SessionFactory createHibernateSessionFactory(
+  public SessionFactory createHibernateSessionFactory(
       DataSource dataSource, Set<Class<?>> classesToValidate) {
 
     for (Class<?> clazz : classesToValidate) {

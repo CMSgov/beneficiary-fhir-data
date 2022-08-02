@@ -1,4 +1,6 @@
 locals {
+  rds_cluster_identifier = "bfd-${var.env_config.env}-aurora-cluster"
+
   is_prod = var.env_config.env == "prod"
 
   log_groups = {
@@ -227,6 +229,19 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
   policy_arn = aws_iam_policy.aws_cli.arn
 }
 
+# Locate general RDS cluster configuration
+data "aws_rds_cluster" "rds" {
+  cluster_identifier = local.rds_cluster_identifier
+}
+
+# Generate detailed RDS cluster configuration, including Writer AZ
+data "external" "rds" {
+  program = [
+    "${path.module}/rds-cluster-config.sh",     # helper script
+    data.aws_rds_cluster.rds.cluster_identifier # verified, positional argument to script
+  ]
+}
+
 # EC2 Instance to run the BFD Pipeline app.
 module "ec2_instance" {
   source = "../ec2"
@@ -234,7 +249,7 @@ module "ec2_instance" {
   env_config = var.env_config
   role       = "etl"
   layer      = "data"
-  az         = "us-east-1a" # Same as the master db
+  az         = data.external.rds.result["WriterAZ"]
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
@@ -260,4 +275,10 @@ module "ec2_instance" {
 
   # Ensure that the DB is accessible before the BFD Pipeline is launched.
   ec2_depends_on_1 = "aws_security_group_rule.allow_db_primary_access"
+}
+
+# BFD Pipeline CloudWatch Dashboard
+resource "aws_cloudwatch_dashboard" "bfd-pipeline-dashboard" {
+  dashboard_name = "bfd-pipeline-${var.env_config.env}"
+  dashboard_body = templatefile("${path.module}/templates/bfd-dashboards.tpl", { dashboard_namespace = "bfd-${var.env_config.env}/bfd-pipeline" })
 }

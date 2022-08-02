@@ -27,10 +27,10 @@ import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -120,7 +120,7 @@ public final class RifLoaderIT {
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
       // loaded (6x12)
       assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
@@ -174,7 +174,7 @@ public final class RifLoaderIT {
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
       // loaded (6x12)
       assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
@@ -257,7 +257,7 @@ public final class RifLoaderIT {
               final LoadedBatch allBatches = batches.stream().reduce(null, LoadedBatch::combine);
               assertTrue(batches.size() > 0, "Expected to have at least one beneficiary loaded");
               assertEquals(
-                  "567834",
+                  567834L,
                   allBatches.getBeneficiariesAsList().get(0),
                   "Expected to match the sample-a beneficiary");
             });
@@ -378,7 +378,7 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        assertEquals("567834", beneHistory.getBeneficiaryId());
+        assertEquals(567834L, beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
         assertTrue(beneHistory.getLastUpdated().isPresent(), "Expected a lastUpdated field");
         beneHistory
@@ -392,7 +392,7 @@ public final class RifLoaderIT {
       }
       assertEquals(4, beneficiaryHistoryEntries.size());
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Last Name inserted with value of "Johnson"
       assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
       // Following fields were NOT changed in update record
@@ -517,7 +517,7 @@ public final class RifLoaderIT {
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Checks all 12 months are in beneficiary monthlys for that beneficiary
       assertEquals(12, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       // Checks every month in the beneficiary monthly table
@@ -545,7 +545,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Checks to make sure we have 2 years or 24 months of data
       assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
@@ -573,7 +573,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Checks to make sure we only have 20 months of data
       assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
@@ -599,7 +599,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
 
       BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
@@ -629,7 +629,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       assertEquals(21, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
       assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
@@ -687,7 +687,12 @@ public final class RifLoaderIT {
     verifyRecordPrimaryKeysPresent(samples);
   }
 
-  @Disabled
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHEA_DATA} data.
+   *
+   * <p>This test ensures that changes to RifLoader that break compatibility with Synthea-generated
+   * data are flagged.
+   */
   @Test
   public void loadSyntheaData() {
     List<StaticRifResource> samples =
@@ -934,74 +939,6 @@ public final class RifLoaderIT {
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the modified {@link StaticRifResourceGroup#SAMPLE_A} data for an
-   * <code>UPDATE</code> on a {@link Beneficiary} record that has a single file with multiple update
-   * records. The Beneficiary object will have been initialized by the pipeline causing the
-   * bene_id_numeric (native long) to be initialized to 0 (zero). However, the beneficiaries table
-   * has a pre-insert / pre-update trigger that populates the bene_id_numeric at the time the data
-   * is persisted to the table. This check verifies that both the insert and the update trigger has
-   * fired and successully populated the bene_id_numeric column.
-   *
-   * <p>NOTE: This test will be removed when the new schema migration has been completed; at that
-   * time the bene_id_numeric will no longer be needed and the trigger will be removed.
-   */
-  @Test
-  public void verifyBeneficiaryEntityHasPopulatedBeneIdNumeric() {
-    // persist a record into Beneficiary table
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-
-    EntityManagerFactory entityManagerFactory =
-        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-    EntityManager entityManager = null;
-
-    try {
-      entityManager = entityManagerFactory.createEntityManager();
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-
-      // verify that the pre-insert trigger populated the bene_id_numeric
-      assertEquals(
-          567834L,
-          beneficiaryFromDb.getBeneficiaryIdNumeric(),
-          "Beneficiary has incorrect bene_id_numeric after INSERT");
-
-      /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
-      loadSampleABeneWithEnrollmentRefYear(
-          null,
-          CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
-              USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
-          true);
-      validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-
-      // verify that the pre-update trigger populated the bene_id_numeric
-      Beneficiary beneficiary2FromDb = entityManager.find(Beneficiary.class, "567834");
-      assertEquals(
-          beneficiaryFromDb.getBeneficiaryIdNumeric(),
-          beneficiary2FromDb.getBeneficiaryIdNumeric(),
-          "Beneficiary has incorrect bene_id_numeric after UPDATE");
-
-      // brute force trying to break the bene_id_numeric by explicitly setting to zero; this
-      // actually mimics a RIF load UPDATE as the RIF columns-to-entity setters will not know about
-      // bene_id_numeric.
-      beneficiary2FromDb.setBeneficiaryIdNumeric(0L);
-      entityManager.persist(beneficiary2FromDb);
-      // secret sauce for verifying that our Hibernate object actually was
-      // refreshed with what is in the database.
-      entityManager.refresh(beneficiary2FromDb);
-
-      // verify that the update trigger still did its thing
-      assertEquals(
-          567834L,
-          beneficiary2FromDb.getBeneficiaryIdNumeric(),
-          "Beneficiary has incorrect bene_id_numeric afer explicit UPDATE");
-
-    } finally {
-      if (entityManager != null) {
-        entityManager.close();
-      }
-    }
   }
 
   /**

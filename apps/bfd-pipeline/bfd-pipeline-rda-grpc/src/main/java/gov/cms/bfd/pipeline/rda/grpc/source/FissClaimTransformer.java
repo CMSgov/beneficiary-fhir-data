@@ -164,7 +164,7 @@ public class FissClaimTransformer {
             FissClaim::getCurrStatusUnrecognized,
             FissClaimStatus.UNRECOGNIZED,
             ImmutableSet.of(),
-            ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+            ImmutableSet.of());
     RdaFissClaim_currLoc1_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrLoc1Enum,
@@ -1077,6 +1077,8 @@ public class FissClaimTransformer {
         from::hasProcDt,
         from::getProcDt,
         to::setProcDate);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissProcCode.Fields.rdaPosition, from::getRdaPosition, to::setRdaPosition);
     to.setLastUpdated(now);
     return to;
   }
@@ -1115,12 +1117,11 @@ public class FissClaimTransformer {
         from::hasBitFlags,
         from::getBitFlags,
         to::setBitFlags);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissDiagnosisCode.Fields.rdaPosition,
+        from::getRdaPosition,
+        to::setRdaPosition);
     to.setLastUpdated(now);
-
-    // At least one of these two fields must have a value for the object to be valid.
-    transformer.validateAtLeastOneIsPresent(
-        namePrefix + RdaFissDiagnosisCode.Fields.diagCd2, from.getDiagCd2(),
-        namePrefix + RdaFissDiagnosisCode.Fields.bitFlags, from.getBitFlags());
     return to;
   }
 
@@ -1257,6 +1258,12 @@ public class FissClaimTransformer {
         () -> from.hasInsuredPayer() && from.getInsuredPayer().hasInsuredDobText(),
         () -> from.getInsuredPayer().getInsuredDobText(),
         to::setInsuredDobText);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissPayer.Fields.rdaPosition,
+        from.hasBeneZPayer()
+            ? from.getBeneZPayer()::getRdaPosition
+            : from.getInsuredPayer()::getRdaPosition,
+        to::setRdaPosition);
     transformer.copyEnumAsString(
         namePrefix + RdaFissPayer.Fields.payersId,
         true,
@@ -1312,14 +1319,14 @@ public class FissClaimTransformer {
         2,
         RdaFissPayer_beneZPayer_beneRel_Extractor.getEnumString(from),
         to::setBeneRel);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaFissPayer.Fields.beneLastName,
         1,
         15,
         () -> from.hasBeneZPayer() && from.getBeneZPayer().hasBeneLastName(),
         () -> from.getBeneZPayer().getBeneLastName(),
         to::setBeneLastName);
-    transformer.copyOptionalString(
+    transformer.copyOptionalNonEmptyString(
         namePrefix + RdaFissPayer.Fields.beneFirstName,
         1,
         10,
@@ -1427,6 +1434,10 @@ public class FissClaimTransformer {
         from::hasBadtCurrDateCymd,
         from::getBadtCurrDateCymd,
         to::setBadtCurrDate);
+    transformer.copyUIntToShort(
+        namePrefix + RdaFissAuditTrail.Fields.rdaPosition,
+        from::getRdaPosition,
+        to::setRdaPosition);
     return to;
   }
 }

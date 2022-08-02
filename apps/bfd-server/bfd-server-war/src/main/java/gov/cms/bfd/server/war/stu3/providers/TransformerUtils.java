@@ -6,7 +6,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -34,6 +33,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -61,7 +61,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +106,6 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
@@ -118,7 +116,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -3331,48 +3328,11 @@ public final class TransformerUtils {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
-
-      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
-        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
-        if (eob != null
-            && eob.getPatient() != null
-            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
-          String reference = eob.getPatient().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
-          }
-        }
-      } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
-        Patient patient = ((Patient) entry.getResource());
-        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(patient.getId());
-        }
-      } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
-        Coverage coverage = ((Coverage) entry.getResource());
-        if (coverage != null
-            && coverage.getBeneficiary() != null
-            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
-          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
-          }
-        }
-      }
     }
-
-    logBeneIdToMdc(beneIds);
-
     return bundle;
-  }
-
-  public static void logBeneIdToMdc(Collection<String> beneIds) {
-    if (!beneIds.isEmpty()) {
-      MDC.put("bene_id", String.join(", ", beneIds));
-    }
   }
 
   /**
@@ -3397,7 +3357,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Records the JPA query details in {@link MDC}.
+   * Records the JPA query details in {@link BfdMDC}.
    *
    * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
    * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
@@ -3405,14 +3365,14 @@ public final class TransformerUtils {
    */
   public static void recordQueryInMdc(
       String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query.%s", queryId);
-    MDC.put(
-        String.format("%s.duration_nanoseconds", keyPrefix),
+    String keyPrefix = String.format("jpa_query_%s", queryId);
+    BfdMDC.put(
+        String.format("%s_duration_nanoseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds));
-    MDC.put(
-        String.format("%s.duration_milliseconds", keyPrefix),
+    BfdMDC.put(
+        String.format("%s_duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
-    MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**

@@ -15,14 +15,6 @@
         Loads partially adjudicated claims data exported from RDA gRPC service into the BFD database.
     </description>
 
-    <properties>
-        <!-- Version of gRPC related dependencies -->
-        <grpc_java.version>1.37.0</grpc_java.version>
-        <!-- Version of the plugin used to build the gRPC stubs from the Health.proto file. -->
-        <protoc.version>3.15.8</protoc.version>
-        <protobuf.version>3.12.0</protobuf.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
@@ -172,6 +164,13 @@
             illegal reflection access (JDK9+) in certain circumstances -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Adds convenience features for working with mocks in tests -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>

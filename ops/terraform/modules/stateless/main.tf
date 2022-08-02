@@ -223,7 +223,7 @@ module "fhir_asg" {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
     # test == c5.xlarge (4 vCPUs and 8GiB mem)
     # prod and prod-sbx == c5.4xlarge (16 vCPUs and 32GiB mem )
-    instance_type = var.env_config.env == "test" ? "c5.xlarge" : "c5.4xlarge"
+    instance_type = "c5.4xlarge"
     volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
@@ -252,9 +252,15 @@ module "fhir_asg" {
 ## FHIR server metrics, per partner
 #
 
-# all
-module "bfd_server_metrics_all" {
+module "bfd_server_metrics" {
   source = "../resources/bfd_server_metrics"
+  env    = var.env_config.env
+  asg_id = module.fhir_asg.asg_id
+}
+# TODO: purge all access.txt 
+#all 
+module "bfd_server_metrics_all" {
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -266,7 +272,7 @@ module "bfd_server_metrics_all" {
 
 # bluebutton
 module "bfd_server_metrics_bb" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -278,7 +284,7 @@ module "bfd_server_metrics_bb" {
 
 # bcda
 module "bfd_server_metrics_bcda" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -290,7 +296,7 @@ module "bfd_server_metrics_bcda" {
 
 # dpc
 module "bfd_server_metrics_dpc" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 
@@ -302,7 +308,7 @@ module "bfd_server_metrics_dpc" {
 
 # ab2d
 module "bfd_server_metrics_ab2d" {
-  source = "../resources/bfd_server_metrics"
+  source = "../resources/bfd_server_metrics_txt"
 
   env = var.env_config.env
 

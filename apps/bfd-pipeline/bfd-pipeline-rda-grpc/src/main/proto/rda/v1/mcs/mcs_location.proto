@@ -14,4 +14,9 @@ message McsLocation {
     McsLocationActivityCode idr_loc_actv_code_enum = 4;
     string idr_loc_actv_code_unrecognized = 5;
   }
+
+  // RDA Position:
+  //
+  // Indicates which position this mcs location is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 6;
 }

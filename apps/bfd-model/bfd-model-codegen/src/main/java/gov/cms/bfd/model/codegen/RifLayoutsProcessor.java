@@ -200,8 +200,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("BENE_ID")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList(
-                          "HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED", "BENE_ID_NUMERIC")))
+                      Arrays.asList("HICN_UNHASHED", "MBI_HASH", "LAST_UPDATED")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -268,10 +267,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
               .setHeaderEntity("CarrierClaim")
-              .setHeaderTable("carrier_claims_new")
+              .setHeaderTable("carrier_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("carrier_claim_lines_new")
+              .setLineTable("carrier_claim_lines")
               .setLineEntityLineNumberField("LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -280,10 +279,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
               .setHeaderEntity("InpatientClaim")
-              .setHeaderTable("inpatient_claims_new")
+              .setHeaderTable("inpatient_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("inpatient_claim_lines_new")
+              .setLineTable("inpatient_claim_lines")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -304,10 +303,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
               .setHeaderEntity("HHAClaim")
-              .setHeaderTable("hha_claims_new")
+              .setHeaderTable("hha_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("hha_claim_lines_new")
+              .setLineTable("hha_claim_lines")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -316,10 +315,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
               .setHeaderEntity("DMEClaim")
-              .setHeaderTable("dme_claims_new")
+              .setHeaderTable("dme_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("dme_claim_lines_new")
+              .setLineTable("dme_claim_lines")
               .setLineEntityLineNumberField("LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -328,10 +327,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
               .setHeaderEntity("HospiceClaim")
-              .setHeaderTable("hospice_claims_new")
+              .setHeaderTable("hospice_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("hospice_claim_lines_new")
+              .setLineTable("hospice_claim_lines")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -340,10 +339,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
               .setHeaderEntity("SNFClaim")
-              .setHeaderTable("snf_claims_new")
+              .setHeaderTable("snf_claims")
               .setHeaderEntityIdField("CLM_ID")
               .setHasLines(true)
-              .setLineTable("snf_claim_lines_new")
+              .setLineTable("snf_claim_lines")
               .setLineEntityLineNumberField("CLM_LINE_NUM")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
@@ -673,7 +672,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .initializer("$L", 1L)
             .build());
 
-    TypeName parentBeneficiaryIdFieldType = ClassName.get(String.class);
+    TypeName parentBeneficiaryIdFieldType = TypeName.LONG;
     FieldSpec.Builder parentIdField =
         FieldSpec.builder(parentBeneficiaryIdFieldType, PARENT_BENEFICIARY, Modifier.PRIVATE);
 
@@ -686,8 +685,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyIdClass.addField(yearMonthIdField.build());
 
     MethodSpec.Builder parentGetter =
-        MethodSpec.methodBuilder("getParentBeneficiary")
-            .addStatement("return Long.parseLong($N)", PARENT_BENEFICIARY)
+        MethodSpec.methodBuilder("getBeneficiaryId")
+            .addStatement("return $N", PARENT_BENEFICIARY)
             .returns(TypeName.LONG);
     beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
     MethodSpec.Builder yearMonthGetter =
@@ -1019,74 +1018,30 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .build();
       headerEntityClass.addField(headerField);
 
-      MethodSpec.Builder headerFieldGetter;
-
-      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
-        if (rifField.isRifColumnOptional()) {
-          headerFieldGetter =
-              MethodSpec.methodBuilder(calculateGetterName(headerField))
-                  .addModifiers(Modifier.PUBLIC)
-                  .addStatement("return Optional.of(Long.parseLong($N))", headerField.name)
-                  .returns(
-                      ParameterizedTypeName.get(
-                          ClassName.get(Optional.class), ClassName.get(Long.class)));
-        } else {
-          headerFieldGetter =
-              MethodSpec.methodBuilder(calculateGetterName(headerField))
-                  .addModifiers(Modifier.PUBLIC)
-                  .addStatement("return Long.parseLong($N)", headerField.name)
-                  .returns(TypeName.LONG);
-        }
-      } else {
-        headerFieldGetter =
-            MethodSpec.methodBuilder(calculateGetterName(headerField))
-                .addModifiers(Modifier.PUBLIC)
-                .returns(
-                    selectJavaPropertyType(
-                        rifField.getRifColumnType(),
-                        rifField.isRifColumnOptional(),
-                        rifField.getRifColumnLength(),
-                        rifField.getRifColumnScale()));
-        addGetterStatement(rifField, headerField, headerFieldGetter);
-      }
+      MethodSpec.Builder headerFieldGetter =
+          MethodSpec.methodBuilder(calculateGetterName(headerField))
+              .addModifiers(Modifier.PUBLIC)
+              .returns(
+                  selectJavaPropertyType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()));
+      addGetterStatement(rifField, headerField, headerFieldGetter);
       headerEntityClass.addMethod(headerFieldGetter.build());
 
-      MethodSpec.Builder headerFieldSetter;
-      if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
-        if (rifField.isRifColumnOptional()) {
-          headerFieldSetter =
-              MethodSpec.methodBuilder(calculateSetterName(headerField))
-                  .addModifiers(Modifier.PUBLIC)
-                  .returns(void.class)
-                  .addParameter(
-                      ParameterizedTypeName.get(
-                          ClassName.get(Optional.class), ClassName.get(Long.class)),
-                      headerField.name);
-          headerFieldSetter.addStatement(
-              "this.$N = String.valueOf($N.orElse(null))", headerField.name, headerField.name);
-        } else {
-          headerFieldSetter =
-              MethodSpec.methodBuilder(calculateSetterName(headerField))
-                  .addModifiers(Modifier.PUBLIC)
-                  .returns(void.class)
-                  .addParameter(TypeName.LONG, headerField.name);
-          headerFieldSetter.addStatement(
-              "this.$N = String.valueOf($N)", headerField.name, headerField.name);
-        }
-      } else {
-        headerFieldSetter =
-            MethodSpec.methodBuilder(calculateSetterName(headerField))
-                .addModifiers(Modifier.PUBLIC)
-                .returns(void.class)
-                .addParameter(
-                    selectJavaPropertyType(
-                        rifField.getRifColumnType(),
-                        rifField.isRifColumnOptional(),
-                        rifField.getRifColumnLength(),
-                        rifField.getRifColumnScale()),
-                    headerField.name);
-        addSetterStatement(rifField, headerField, headerFieldSetter);
-      }
+      MethodSpec.Builder headerFieldSetter =
+          MethodSpec.methodBuilder(calculateSetterName(headerField))
+              .addModifiers(Modifier.PUBLIC)
+              .returns(void.class)
+              .addParameter(
+                  selectJavaPropertyType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()),
+                  headerField.name);
+      addSetterStatement(rifField, headerField, headerFieldSetter);
       headerEntityClass.addMethod(headerFieldSetter.build());
     }
 
@@ -1292,36 +1247,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     return headerEntityFinal;
   }
-  /**
-   * Support method for the varchar to bigint transition that identifies the columns that are
-   * planned to be converted.
-   *
-   * <p>TODO: BFD-1583 This is a temporary method that should be removed along with all code blocks
-   * that are conditional on this method once all beneficiary and claim tables IDs have completed
-   * the transition from varchar to bigint.
-   *
-   * @param tableName the table name
-   * @param rifField the field model
-   * @return true if the field specified is one that will be converted to a bigint in the near
-   *     future
-   */
-  private boolean isFutureBigint(String tableName, RifField rifField) {
-    /*
-     * Remove elements from these arrays as they are converted. When everything is removed, remove
-     * the method and all blocks that are conditional on this method.
-     */
-    final List<String> futureBigIntColumns = Arrays.asList("bene_id", "clm_id", "pde_id");
-    final List<String> futureBigIntTables =
-        Arrays.asList(
-            "beneficiaries",
-            "beneficiaries_history",
-            "medicare_beneficiaryid_history",
-            "outpatient_claims",
-            "partd_events");
-
-    return futureBigIntColumns.contains(rifField.getRifColumnName().toLowerCase())
-        && futureBigIntTables.contains(tableName.toLowerCase());
-  }
 
   /**
    * Generates a Java class that can handle RIF-to-Entity parsing.
@@ -1424,11 +1349,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       // Determine which parsing utility method to use.
       String parseUtilsMethodName;
       if (rifField.getRifColumnType() == RifColumnType.CHAR) {
-
-        if (isFutureBigint(mappingSpec.getHeaderTable(), rifField)) {
-          parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalLong" : "parseLong";
-
-        } else if (rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
+        if (rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
           // Handle a String field.
           parseUtilsMethodName =
               rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";

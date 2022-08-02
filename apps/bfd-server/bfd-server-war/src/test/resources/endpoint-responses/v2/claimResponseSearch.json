@@ -148,6 +148,13 @@
         ],
         "extension": [
           {
+            "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
+              "code": "?"
+            }
+          },
+          {
             "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-receipt-date",
             "valueDate": "1970-02-24"
           },
@@ -194,7 +201,7 @@
         "request": {
           "reference": "Claim/m-654323"
         },
-        "outcome": "queued"
+        "outcome": "partial"
       }
     }
   ]

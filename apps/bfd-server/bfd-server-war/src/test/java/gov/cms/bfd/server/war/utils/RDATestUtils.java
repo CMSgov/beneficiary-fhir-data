@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.utils;
 
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
@@ -8,7 +9,6 @@ import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -239,7 +239,7 @@ public class RDATestUtils {
             .sequenceNumber(2L)
             .dcn("123457")
             .hicNo("hicnumbe2")
-            .currStatus('t')
+            .currStatus('\0')
             .currLoc1('r')
             .currLoc2("Somdb")
             .medaProvId("meda12346")
@@ -381,9 +381,9 @@ public class RDATestUtils {
     claim.setDiagCodes(
         Set.of(
             new RdaMcsDiagnosisCode(
-                "654321", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+                "654321", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654321", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654321", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }
@@ -394,6 +394,7 @@ public class RDATestUtils {
    * @return The MCS test claim B
    */
   private RdaMcsClaim mcsTestDataB(Mbi mbi) {
+    final String NOT_VALID_CODE = "?";
     RdaMcsClaim claim =
         RdaMcsClaim.builder()
             .sequenceNumber(1L)
@@ -406,7 +407,7 @@ public class RDATestUtils {
             .idrBeneFirstInit("J")
             .idrBeneMidInit("D")
             .idrBeneSex("M")
-            .idrStatusCode(null)
+            .idrStatusCode(NOT_VALID_CODE)
             .idrStatusDate(LocalDate.ofEpochDay(2))
             .idrBillProvNpi("9876789102")
             .idrBillProvNum("4444422222")
@@ -450,9 +451,9 @@ public class RDATestUtils {
     claim.setDiagCodes(
         Set.of(
             new RdaMcsDiagnosisCode(
-                "654323", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+                "654323", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654323", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654323", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }

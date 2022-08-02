@@ -4,28 +4,71 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERS
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.Clock;
+import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 public class RdaPipelineTestUtils {
+  /**
+   * Verifies the expected value of a {@link Meter} with a meaningful message in case of a mismatch.
+   *
+   * @param expected expected reading
+   * @param meterName name for inclusion in the message
+   * @param meter {@link Meter} to get value from
+   */
   public static void assertMeterReading(long expected, String meterName, Meter meter) {
     assertEquals(expected, meter.getCount(), "Meter " + meterName);
   }
 
+  /**
+   * Verifies the expected value of a {@link Histogram} with a meaningful message in case of a
+   * mismatch.
+   *
+   * @param expected expected reading
+   * @param histogramName name for inclusion in the message
+   * @param histogram {@link Histogram} to get value from
+   */
+  public static void assertHistogramReading(
+      long expected, String histogramName, Histogram histogram) {
+    long total = Arrays.stream(histogram.getSnapshot().getValues()).sum();
+    assertEquals(expected, total, "Histogram " + histogramName);
+  }
+
+  /**
+   * Verifies the expected value of a {@link Gauge} with a meaningful message in case of a mismatch.
+   *
+   * @param expected expected reading
+   * @param meterName name for inclusion in the message
+   * @param histogram {@link Gauge} to get value from
+   */
   public static void assertGaugeReading(long expected, String gaugeName, Gauge<?> gauge) {
-    assertEquals(Long.valueOf(expected), gauge.getValue(), "Gauge " + gaugeName);
+    assertEquals(expected, gauge.getValue(), "Gauge " + gaugeName);
+  }
+
+  /**
+   * Verifies the expected number of values have been written to a {@link Timer} with a meaningful
+   * message in case of a mismatch.
+   *
+   * @param expected expected number of values added to the timer
+   * @param meterName name for inclusion in the message
+   * @param histogram {@link Timer} to get count from
+   */
+  public static void assertTimerCount(long expected, String timerName, Timer timer) {
+    assertEquals(expected, timer.getCount(), "Gauge " + timerName);
   }
 
   /**

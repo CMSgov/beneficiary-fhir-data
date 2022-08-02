@@ -4,10 +4,8 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
 import gov.cms.bfd.model.rda.RdaFissClaim;
@@ -477,6 +475,7 @@ public class FissClaimTransformerTest {
                 .setBadtOperId("2")
                 .setBadtReas("3")
                 .setBadtCurrDateCymd("2021-12-03")
+                .setRdaPosition(0)
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
@@ -562,8 +561,11 @@ public class FissClaimTransformerTest {
             claim -> String.valueOf(claim.getCurrStatus()),
             FissClaimStatus.CLAIM_STATUS_MOVE,
             "M")
-        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
-            FissClaim.Builder::setCurrStatusUnrecognized, RdaFissClaim.Fields.currStatus, "ZZZ");
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setCurrStatusUnrecognized,
+            claim -> String.valueOf(claim.getCurrStatus()),
+            RdaFissClaim.Fields.currStatus,
+            1);
   }
 
   @Test
@@ -1318,48 +1320,13 @@ public class FissClaimTransformerTest {
             4);
   }
 
-  /**
-   * Ensures that a {@link }FissDiagnosisCode} with either {@code diagCd2} or {@code bitFlags}
-   * defined transforms without error but one with neither has an appropriate error.
-   */
   @Test
-  public void testEitherDiagCd2OrBitFlagsRequired() {
-    final var claimTransformer =
-        new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
-
-    // neither defined generates an error
-    var fissDiagnosisCode = FissDiagnosisCode.newBuilder().build();
-    var dataTransformer = new DataTransformer();
-    var rdaFissDiagnosisCode =
-        claimTransformer.transformMessageImpl(
-            fissDiagnosisCode, dataTransformer, clock.instant(), "");
-    assertNotNull(rdaFissDiagnosisCode);
-    assertEquals(
-        ImmutableList.of(
-            new DataTransformer.ErrorMessage(
-                RdaFissDiagnosisCode.Fields.diagCd2,
-                String.format(
-                    "expected either %s or %s to have value but neither did",
-                    RdaFissDiagnosisCode.Fields.diagCd2, RdaFissDiagnosisCode.Fields.bitFlags))),
-        dataTransformer.getErrors());
-
-    // only diagCd2 defined is ok
-    fissDiagnosisCode = FissDiagnosisCode.newBuilder().setDiagCd2("x").build();
-    dataTransformer = new DataTransformer();
-    rdaFissDiagnosisCode =
-        claimTransformer.transformMessageImpl(
-            fissDiagnosisCode, dataTransformer, clock.instant(), "");
-    assertNotNull(rdaFissDiagnosisCode);
-    assertEquals(ImmutableList.of(), dataTransformer.getErrors());
-
-    // only bitFlags defined is ok
-    fissDiagnosisCode = FissDiagnosisCode.newBuilder().setBitFlags("x").build();
-    dataTransformer = new DataTransformer();
-    rdaFissDiagnosisCode =
-        claimTransformer.transformMessageImpl(
-            fissDiagnosisCode, dataTransformer, clock.instant(), "");
-    assertNotNull(rdaFissDiagnosisCode);
-    assertEquals(ImmutableList.of(), dataTransformer.getErrors());
+  public void testDiagnosisCodeRdaPosition() {
+    new DiagnosisCodeFieldTester(true)
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissDiagnosisCode.Builder::setRdaPosition,
+            RdaFissDiagnosisCode::getRdaPosition,
+            RdaFissDiagnosisCode.Fields.rdaPosition);
   }
 
   // endregion ProcCode tests
@@ -1393,6 +1360,16 @@ public class FissClaimTransformerTest {
             RdaFissProcCode::getProcDate,
             RdaFissProcCode.Fields.procDate);
   }
+
+  @Test
+  public void testProcCodeRdaPosition() {
+    new ProcCodeFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissProcedureCode.Builder::setRdaPosition,
+            RdaFissProcCode::getRdaPosition,
+            RdaFissProcCode.Fields.rdaPosition);
+  }
+
   // endregion ProcCode tests
   // region BeneZPayer tests
 
@@ -1507,7 +1484,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneLastName() {
     new BeneZPayerFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyIgnored(
             FissBeneZPayer.Builder::setBeneLastName,
             RdaFissPayer::getBeneLastName,
             RdaFissPayer.Fields.beneLastName,
@@ -1517,7 +1494,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneFirstName() {
     new BeneZPayerFieldTester()
-        .verifyStringFieldCopiedCorrectly(
+        .verifyStringFieldCopiedCorrectlyEmptyIgnored(
             FissBeneZPayer.Builder::setBeneFirstName,
             RdaFissPayer::getBeneFirstName,
             RdaFissPayer.Fields.beneFirstName,
@@ -1616,6 +1593,15 @@ public class FissClaimTransformerTest {
             RdaFissPayer::getInsuredRelX12,
             RdaFissPayer.Fields.insuredRelX12,
             2);
+  }
+
+  @Test
+  public void testBeneZPayerRdaPosition() {
+    new BeneZPayerFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissBeneZPayer.Builder::setRdaPosition,
+            RdaFissPayer::getRdaPosition,
+            RdaFissPayer.Fields.rdaPosition);
   }
 
   // endregion BeneZPayer tests
@@ -1828,6 +1814,15 @@ public class FissClaimTransformerTest {
             9);
   }
 
+  @Test
+  public void testInsuredPayerRdaPosition() {
+    new InsuredPayerFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissInsuredPayer.Builder::setRdaPosition,
+            RdaFissPayer::getRdaPosition,
+            RdaFissPayer.Fields.rdaPosition);
+  }
+
   // endregion InsuredPayer tests
   // region AuditTrail tests
 
@@ -1878,6 +1873,15 @@ public class FissClaimTransformerTest {
             FissAuditTrail.Builder::setBadtCurrDateCymd,
             RdaFissAuditTrail::getBadtCurrDate,
             RdaFissAuditTrail.Fields.badtCurrDate);
+  }
+
+  @Test
+  public void testAudiTrailRdaPosition() {
+    new AuditTrailFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            FissAuditTrail.Builder::setRdaPosition,
+            RdaFissAuditTrail::getRdaPosition,
+            RdaFissAuditTrail.Fields.rdaPosition);
   }
 
   // endregion AuditTrail tests

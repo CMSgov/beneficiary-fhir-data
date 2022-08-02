@@ -19,11 +19,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -195,6 +197,14 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
                 new TransformerContext(
                     metricRegistry, Optional.of(includeTaxNumbers), drugCodeDisplayLookup),
                 claimEntity);
+
+    // Add bene_id to MDC logs
+    if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+      String beneficiaryId = eob.getPatient().getReference().replace("Patient/", "");
+      if (!Strings.isNullOrEmpty(beneficiaryId)) {
+        LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      }
+    }
     return eob;
   }
 
@@ -251,7 +261,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
      * later.
      */
 
-    String beneficiaryId = patient.getIdPart();
+    Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimTypeV2> claimTypes = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
@@ -368,7 +378,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneficiaryId));
+    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -408,7 +418,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @Trace
   private <T> List<T> findClaimTypeByPatient(
       ClaimTypeV2 claimType,
-      String patientId,
+      Long patientId,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -417,18 +427,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
     criteria.select(root).distinct(true);
 
-    // Search for a beneficiary's records. Use lastUpdated if present
-    // TODO - BFD-1596
-    // while we gradually convert entity beans to use long data type for patientId,
-    // we may need to change the expected type for beneficiaryId in the entity Predicate.
-    // Once all claims have been migrated we can modify the ClaimTypeV2 to specifically
-    // return a long data type and this extra data type checking can be removed.
-    java.lang.Class javaClass = claimType.getEntityBeneficiaryIdAttribute().getJavaType();
-
     Predicate wherePredicate =
-        builder.equal(
-            root.get(claimType.getEntityBeneficiaryIdAttribute()),
-            javaClass.getName().equals("long") ? Long.parseLong(patientId) : patientId);
+        builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId);
 
     if (lastUpdated != null && !lastUpdated.isEmpty()) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdated);
@@ -452,7 +452,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     } finally {
       eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
+          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
     }

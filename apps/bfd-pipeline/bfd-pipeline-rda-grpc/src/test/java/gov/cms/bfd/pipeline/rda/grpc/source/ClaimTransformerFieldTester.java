@@ -258,6 +258,43 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   /**
+   * Verifies that the transformer can correctly extract integer fields to short variables. This
+   * includes verifying that inappropriate values result in an error if it can not be transformed to
+   * a short value.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyUIntFieldToShortFieldCopiedCorrectly(
+          BiConsumer<TTestEntityBuilder, Integer> setter,
+          Function<TTestEntity, Short> getter,
+          String fieldLabel) {
+    final BiConsumer<TClaimBuilder, Integer> wrappedSetter =
+        (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
+    final Function<TClaimEntity, Short> wrappedGetter = claim -> getter.apply(getTestEntity(claim));
+    verifyFieldTransformationSucceeds(
+        claimBuilder -> wrappedSetter.accept(claimBuilder, (int) Short.MAX_VALUE),
+        wrappedGetter,
+        Short.MAX_VALUE);
+    verifyFieldTransformationFails(
+        claimBuilder -> wrappedSetter.accept(claimBuilder, ((int) Short.MAX_VALUE) + 1),
+        getLabel(fieldLabel),
+        "is too large");
+    verifyFieldTransformationFails(
+        claimBuilder -> wrappedSetter.accept(claimBuilder, -1), getLabel(fieldLabel), "is signed");
+
+    return this;
+  }
+
+  /**
    * Verifies that a int field transformation is working properly. This includes verifying that a
    * value is properly copied from the message object to the entity object.
    *

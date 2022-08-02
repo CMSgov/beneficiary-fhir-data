@@ -31,7 +31,7 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -1394,7 +1394,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     entityManager.getTransaction().begin();
     outpatientRifRecord =
-        entityManager.find(OutpatientClaim.class, String.valueOf(outpatientRifRecord.getClaimId()));
+        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
     outpatientRifRecord.setDiagnosis2Code(
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
