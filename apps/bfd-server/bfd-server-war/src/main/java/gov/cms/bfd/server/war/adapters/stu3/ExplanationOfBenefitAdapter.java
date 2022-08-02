@@ -18,6 +18,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     this.eob = eob;
   }
 
+  /** {@inheritDoc} */
   @Override
   public List<ProcedureComponent> getProcedure() {
     return eob.getProcedure().stream()
@@ -25,6 +26,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
         .collect(Collectors.toList());
   }
 
+  /** {@inheritDoc} */
   @Override
   public List<DiagnosisComponent> getDiagnosis() {
     return eob.getDiagnosis().stream()
@@ -32,6 +34,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
         .collect(Collectors.toList());
   }
 
+  /** {@inheritDoc} */
   @Override
   public List<ItemComponent> getItem() {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
@@ -45,6 +48,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
       this.procedureComponent = procedureComponent;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CodeableConcept getProcedureCodeableConcept() {
       // The STU3 versions seem to have less protections for null items, so we need a null check
@@ -62,6 +66,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
       this.diagnosisComponent = diagnosisComponent;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CodeableConcept getDiagnosisCodeableConcept() {
       // The STU3 versions seem to have less protections for null items, so we need a null check
@@ -70,6 +75,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
           : new CodeableConceptAdapter(diagnosisComponent.getDiagnosisCodeableConcept());
     }
 
+    /** {@inheritDoc} */
     @Override
     public CodeableConcept getPackageCode() {
       return new CodeableConceptAdapter(diagnosisComponent.getPackageCode());
@@ -84,6 +90,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
       this.itemComponent = itemComponent;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CodeableConcept getProductOrService() {
       return new CodeableConceptAdapter(itemComponent.getService());
@@ -98,6 +105,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
       this.codeableConcept = codeableConcept;
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<Coding> getCoding() {
       return codeableConcept.getCoding().stream()
@@ -114,11 +122,13 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
       this.coding = coding;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getSystem() {
       return coding.getSystem();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getCode() {
       return coding.getCode();
