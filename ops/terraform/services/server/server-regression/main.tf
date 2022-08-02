@@ -96,6 +96,14 @@ resource "aws_glue_crawler" "this" {
   }
 }
 
+resource "aws_lambda_permission" "allow_s3_glue_trigger" {
+  statement_id  = "bfd-${local.env}-${local.service}-glue-trigger-allow-s3"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.glue_trigger.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = data.aws_s3_bucket.insights.arn
+}
+
 resource "aws_lambda_function" "glue_trigger" {
   description   = "Triggers the bfd-${local.env}-${local.service} Glue Crawler to run when new statistics are uploaded to S3"
   function_name = "bfd-${local.env}-${local.service}-glue-trigger"
