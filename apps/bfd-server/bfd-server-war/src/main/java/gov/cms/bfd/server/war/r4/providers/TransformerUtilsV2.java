@@ -437,8 +437,11 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Helper function to create the valueDate for the specified {@link Extension}.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
-   * @param date the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @param date the value to use for {@link Extension#getValue()} for the resulting {@link
+   *     Extension}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
