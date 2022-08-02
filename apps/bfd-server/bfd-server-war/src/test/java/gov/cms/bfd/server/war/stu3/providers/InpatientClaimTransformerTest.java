@@ -132,8 +132,7 @@ public final class InpatientClaimTransformerTest {
         claim.getNoncoveredStayThroughDate(),
         claim.getCoveredCareThoughDate(),
         claim.getMedicareBenefitsExhaustedDate(),
-        claim.getDiagnosisRelatedGroupCd(),
-        claim.getFiscalIntermediaryClaimActionCode());
+        claim.getDiagnosisRelatedGroupCd());
 
     TransformerTestUtils.assertAdjudicationTotalAmountEquals(
         CcwCodebookVariable.NCH_DRG_OUTLIER_APRVD_PMT_AMT,

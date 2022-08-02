@@ -115,8 +115,7 @@ public final class SNFClaimTransformerTest {
         claim.getNoncoveredStayThroughDate(),
         claim.getCoveredCareThroughDate(),
         claim.getMedicareBenefitsExhaustedDate(),
-        claim.getDiagnosisRelatedGroupCd(),
-        claim.getFiscalIntermediaryClaimActionCode());
+        claim.getDiagnosisRelatedGroupCd());
 
     TransformerTestUtils.assertDateEquals(
         claim.getClaimAdmissionDate().get(), eob.getHospitalization().getStartElement());
