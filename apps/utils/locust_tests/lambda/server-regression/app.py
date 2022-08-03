@@ -108,7 +108,7 @@ def handler(event, context):
         "comp_tag": invoke_event.compare_tag,
         "bucket": s3_bucket,
         "database": f"bfd-insights-bfd-{environment}",
-        "table": f"bfd_insights_bfd_{environment}_server_regression",
+        "table": f"bfd_insights_bfd_{environment.replace('-', '_')}_server_regression",
     }
     stats_config_str = ";".join([f"{k}={str(v)}" for k, v in stats_config.items()])
     process = subprocess.run(
@@ -121,7 +121,7 @@ def handler(event, context):
             f"--spawned-runtime={invoke_event.spawned_runtime}",
             f"--database-uri={db_dsn}",
             f"--client-cert-path={cert_path}",
-            f'--stats-config="{stats_config_str}"'
+            f'--stats-config="{stats_config_str}"',
             "--headless",
             "--only-summary",
         ],
