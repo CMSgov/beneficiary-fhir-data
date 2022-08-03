@@ -102,8 +102,37 @@ resource "aws_iam_policy" "ssm" {
 EOF
 }
 
-# attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
+# attach AWS managed SSM paramaters to all EC2 instances
 resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.ssm.arn
 }
+
+# AWS CloudWatch agent needs extra IAM permissions CloudWatchAgentServerPolicy
+resource "aws_iam_role_policy_attachment" "cwagent_opentelemetry" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.cwagent_opentelemetry.arn
+}
+resource "aws_iam_policy" "cwagent_opentelemetry" {
+  name        = "bfd-${var.env_config.env}-${local.service}-cwagent-opentelemetry"
+  description = "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-open-telemetry.html"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+                "xray:GetSamplingStatisticSummaries"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
