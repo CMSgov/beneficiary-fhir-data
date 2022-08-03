@@ -227,6 +227,33 @@ resource "aws_iam_policy" "glue" {
 EOF  
 }
 
+resource "aws_iam_policy" "logs_glue_trigger" {
+  name        = "bfd-${local.env}-${local.service}-glue-trigger-logs"
+  description = "Permissions to create and write to bfd-${local.env}-${local.service}-glue-trigger logs"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:us-east-1:${local.account_id}:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:us-east-1:${local.account_id}:log-group:/aws/lambda/bfd-${local.env}-${local.service}-glue-trigger:*"
+            ]
+        }
+    ]
+}
+EOF  
+}
+
 resource "aws_iam_role" "glue_trigger" {
   name        = "bfd-${local.env}-${local.service}-glue-trigger"
   path        = "/"
@@ -248,6 +275,7 @@ resource "aws_iam_role" "glue_trigger" {
   EOF
 
   managed_policy_arns = [
+    aws_iam_policy.logs_glue_trigger.arn,
     aws_iam_policy.glue.arn
   ]
 }
