@@ -1439,6 +1439,27 @@ public class SNFClaimTransformerV2Test {
   }
 
   /**
+   * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimProcessDate is present.
+   */
+  @Test
+  public void shouldHaveFiClaimProcessDateExtension() {
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+            new DateType("2014-02-07"));
+
+    assertTrue(compare.equalsDeep(ex));
+  }
+
+  /**
    * Serializes the EOB and prints to the command line
    *
    * @throws FHIRException

@@ -245,6 +245,7 @@ public class InpatientClaimTransformerV2 {
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -258,7 +259,8 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated(),
-        claimGroup.getFiDocumentClaimControlNumber());
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiscalIntermediaryClaimProcessDate());
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(

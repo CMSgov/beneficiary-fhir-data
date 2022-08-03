@@ -52,6 +52,9 @@
       "value" : "23443453453"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2014-02-07"
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",

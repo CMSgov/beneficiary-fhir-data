@@ -6,22 +6,43 @@ FI Claim Action Code data has been mapped for V2. This data is now available in 
 
 FI Claim Action Code Example:
 ```json
-  "resource" : {
-    "resourceType" : "ExplanationOfBenefit",
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
     ...
       "extension": [{
-        ...
+       ...
           {
-              "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
-              "valueCoding" : {
-                "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
-                "code" : "1",
-                "display" : "Original debit action (always a 1 for all regular bills)"
-              }
+            "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+            "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)"
+            }
           },
         ...
       }]
+    ...
+  }
+```
+
+## BFD-1917: Map FI Claim Process Date in V1 and V2
+
+FI Claim Process Date data has been mapped for V2. This data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Process Date Example:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+     "extension": [{
       ...
+        {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-02-07"
+        },
+      ...
+    }]
+  ...
   }
 ```
 
