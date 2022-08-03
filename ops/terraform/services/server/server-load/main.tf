@@ -117,3 +117,26 @@ resource "aws_sqs_queue" "broker" {
   visibility_timeout_seconds = local.lambda_timeout_seconds
   kms_master_key_id          = local.kms_key_id
 }
+
+resource "aws_sns_topic" "scaling_topic" {
+  name = "${local.queue_name}-scaling"
+}
+
+# Send scaling notifications from SNS to the SQS queue.
+resource "aws_sns_topic_subscription" "scaling_subscription" {
+  topic_arn = aws_sns_topic.scaling_topic.arn
+  protocol = "sqs"
+  endpoint = aws_sqs_queue.broker.arn
+}
+
+resource "aws_autoscaling_notification" "asn" {
+  group_names = [
+    data.aws_auto_scaling_group.asg.name
+  ]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+  ]
+
+  topic_arn = aws_sns_topic.scaling_topic
+}
