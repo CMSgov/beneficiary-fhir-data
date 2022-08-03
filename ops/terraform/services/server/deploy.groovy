@@ -60,12 +60,24 @@ def runServerRegression(Map args = [:]) {
         script: "aws sqs get-queue-url --queue-name ${locustSqsQueueName} --output text"
     ).trim()
 
+    currentBuildId = currentBuild.id
+    lastSuccessfulBuildID = getLastSuccessfulBuildNum()
+    // Athena only accepts partitions (which the compare/store tags, which are constructed
+    // from the branch name, are) with alphanumeric characters and the '_' character. We need
+    // to sanitize the branch name in case it contains invalid characters
+    sanitizedBranchName = sh(
+        returnStdout: true,
+        script: "echo \"${env.GIT_LOCAL_BRANCH}\" | sed 's/[^0-9a-zA-Z_]*//g'"
+    ).trim()
+
     sqsMessage = writeJSON(returnText: true, json: [
         'host': "https://${bfdEnv}.bfd.cms.gov",
         'suite_version': 'v2',
         'spawn_rate': 10,
         'users': 10,
-        'spawned_runtime': '30s'
+        'spawned_runtime': '30s',
+        'compare_tag': "build${lastSuccessfulBuildID}__${sanitizedBranchName}",
+        'store_tag': "build${currentBuildId}__${sanitizedBranchName}"
     ])
 
     withEnv(["SQS_QUEUE_URL=${locustSqsQueueUrl}", "MESSAGE=${sqsMessage}"]) {
@@ -75,6 +87,22 @@ aws sqs send-message \
 --queue-url "$SQS_QUEUE_URL" \
 --message-body "$MESSAGE"
 ''')}
+}
+
+/* Gets the build ID of the last successful Jenkins job build of the current branch */
+def getLastSuccessfulBuildNum() {
+    def lastSuccessfulBuildID = 0
+    def build = currentBuild.previousBuild
+    while (build != null) {
+        if (build.result == "SUCCESS")
+        {
+            lastSuccessfulBuildID = build.id as Integer
+            break
+        }
+        build = build.previousBuild
+    }
+
+    return lastSuccessfulBuildID
 }
 
 return this
