@@ -721,6 +721,12 @@ checkJavaFormat
 					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
 					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
 					<quiet>true</quiet>
+					<!-- This notimestamp option does not make our *-javadoc.jar files completely
+						reproducible, but the option is recommended by Maven for a reproducible
+						build in general. However, we are not using the javadocs in any of the war
+						and zip artifacts that we need to be reproducible.
+						See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
+					 -->
 					<notimestamp>true</notimestamp>
 				</configuration>
 				<executions>
