@@ -551,7 +551,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(7, eob.getExtension().size());
+    assertEquals(8, eob.getExtension().size());
   }
 
   @Test
@@ -1696,6 +1696,27 @@ public final class InpatientClaimTransformerV2Test {
             .orElse(null);
     assertNotNull(fiNumExtension);
     assertEquals("8299", ((Coding) fiNumExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimProcessDate is present.
+   */
+  @Test
+  public void shouldHaveFiClaimProcessDateExtension() {
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+            new DateType("2016-02-19"));
+
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**

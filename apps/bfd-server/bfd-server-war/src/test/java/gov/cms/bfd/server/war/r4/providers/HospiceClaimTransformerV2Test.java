@@ -29,6 +29,7 @@ import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
@@ -245,12 +246,16 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    assertEquals(6, expected.size());
+    assertEquals(7, expected.size());
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
             eob.getExtension()));
+
+    assertNotNull(
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension()));
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -292,6 +297,9 @@ public final class HospiceClaimTransformerV2Test {
                 new Identifier()
                     .setSystem("https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num")
                     .setValue("2718813985998")),
+            new Extension(
+                "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+                new DateType("2014-10-07")),
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
                 new Coding(
