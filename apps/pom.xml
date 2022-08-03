@@ -79,7 +79,7 @@
 		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
 			they are reproducible bit-by-bit no matter when/where they are generated.
 			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
-		<project.build.outputTimestamp>1970-01-01T00:00:00Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
 
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
