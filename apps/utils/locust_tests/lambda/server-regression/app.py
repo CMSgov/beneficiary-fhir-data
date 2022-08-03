@@ -9,6 +9,7 @@ import boto3
 from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
+s3_bucket = os.environ.get("INSIGHTS_BUCKET_NAME")
 
 boto_config = Config(region_name="us-east-1")
 ssm_client = boto3.client("ssm", config=boto_config)
@@ -22,6 +23,8 @@ class InvokeEvent:
     spawn_rate: int
     users: int
     spawned_runtime: str
+    compare_tag: str
+    store_tag: str
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
@@ -98,6 +101,16 @@ def handler(event, context):
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
+    stats_config = {
+        "store": "s3",
+        "env": environment,
+        "store_tag": invoke_event.store_tag,
+        "comp_tag": invoke_event.compare_tag,
+        "bucket": s3_bucket,
+        "database": f"bfd-insights-bfd-{environment}",
+        "table": f"bfd_insights_bfd_{environment}_server_regression",
+    }
+    stats_config_str = ";".join([f"{k}={str(v)}" for k, v in stats_config.items()])
     process = subprocess.run(
         [
             "locust",
@@ -108,6 +121,7 @@ def handler(event, context):
             f"--spawned-runtime={invoke_event.spawned_runtime}",
             f"--database-uri={db_dsn}",
             f"--client-cert-path={cert_path}",
+            f'--stats-config="{stats_config_str}"'
             "--headless",
             "--only-summary",
         ],
