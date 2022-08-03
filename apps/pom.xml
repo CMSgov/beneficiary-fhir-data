@@ -86,7 +86,7 @@
 		<metrics.version>4.1.29</metrics.version>
 		<newrelic.version>0.5.0</newrelic.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
-		<telemetry-http-okhttp.version>0.13.2</telemetry-http-okhttp.version>
+		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
@@ -105,6 +105,13 @@
 		<logback.classic.version>1.2.11</logback.classic.version>
 		<postgres.driver.version>42.4.0</postgres.driver.version>
 
+		<!--  Dependencies required for org.apache.commons -->
+		<commons.lang3.version>3.12.0</commons.lang3.version>
+        <commons.csv.version>1.2</commons.csv.version>
+		<commons.io.version>2.7</commons.io.version>
+		<commons.collections4.version>4.1</commons.collections4.version>
+	
+
         <!-- Dependencies required for connecting to a gRPC API -->
         <grpc_java.version>1.47.0</grpc_java.version>
         <protoc.version>3.21.2</protoc.version>
@@ -114,8 +121,8 @@
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
 		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
-		<its.db.username></its.db.username>
-		<its.db.password></its.db.password>
+		<its.db.username/>
+		<its.db.password/>
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
@@ -317,14 +324,14 @@
 				<!-- Common utility classes -->
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.12.0</version>
+				<version>${commons.lang3.version}</version>
 			</dependency>
 
 			<dependency>
 				<!-- Used to parse and read the RIF data files. -->
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
-				<version>1.2</version>
+				<version>${commons.csv.version}</version>
 			</dependency>
 
 			<dependency>
@@ -615,6 +622,7 @@ checkJavaFormat
 						<!-- Only look in source directories, basically ignores generated code -->
 						<sourceDirectories>
 							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
 						</sourceDirectories>
 					</configuration>
 					<version>${checkstyle.plugin.version}</version>
@@ -801,7 +809,7 @@ checkJavaFormat
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -816,7 +824,7 @@ checkJavaFormat
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -831,7 +839,7 @@ checkJavaFormat
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -845,7 +853,7 @@ checkJavaFormat
 											</pluginExecutionFilter>
 											<action>
 												<!-- Don't run this plugin automatically on every build inside m2e. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -859,7 +867,7 @@ checkJavaFormat
 											</pluginExecutionFilter>
 											<action>
 												<!-- Don't run this plugin automatically on every build inside m2e. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 									</pluginExecutions>

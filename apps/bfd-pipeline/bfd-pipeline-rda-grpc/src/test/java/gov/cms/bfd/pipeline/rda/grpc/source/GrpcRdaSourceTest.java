@@ -53,6 +53,10 @@ import org.mockito.MockitoAnnotations;
 
 /** Unit tests for the {@link GrpcRdaSource} class. */
 public class GrpcRdaSourceTest {
+  /** Value used as result from {@link RdaSink#readMaxExistingSequenceNumber()}. */
+  public static final long DATABASE_SEQUENCE_NUMBER = 42;
+  /** Value used when passing a non-empty configured sequence number to the constructor. */
+  public static final long CONFIGURED_SEQUENCE_NUMBER = 18;
   /**
    * We need a starting time for the {@link Clock} used to compute idle time. The time and date are
    * arbitrary since only relative calculations are used.
@@ -149,10 +153,10 @@ public class GrpcRdaSourceTest {
    */
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
-    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
         .when(caller)
-        .callService(channel, CallOptions.DEFAULT, 42L);
+        .callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
     doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeMessages(VERSION, List.of(CLAIM_3));
 
@@ -169,7 +173,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
   /**
@@ -189,9 +193,11 @@ public class GrpcRdaSourceTest {
                 () -> CallOptions.DEFAULT,
                 appMetrics,
                 "ints",
-                Optional.of(18L),
+                Optional.of(CONFIGURED_SEQUENCE_NUMBER),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
-    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
+    doReturn(createResponse(CLAIM_1))
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, CONFIGURED_SEQUENCE_NUMBER - 1);
     doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
@@ -207,7 +213,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(1)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, CallOptions.DEFAULT, 18L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, CONFIGURED_SEQUENCE_NUMBER - 1);
     verify(sink, times(0)).readMaxExistingSequenceNumber();
   }
 
@@ -219,7 +225,7 @@ public class GrpcRdaSourceTest {
    */
   @Test
   public void testPassesThroughProcessingExceptionFromSink() throws Exception {
-    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
@@ -249,7 +255,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
   /**
@@ -339,7 +345,7 @@ public class GrpcRdaSourceTest {
    */
   @Test
   public void testHandlesInterruptFromStream() throws Exception {
-    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
     // Creates a response with 3 valid values followed by an interrupt.
     final GrpcResponseStream<Integer> response = mock(GrpcResponseStream.class);
     when(response.next()).thenReturn(CLAIM_1, CLAIM_2, CLAIM_3);
@@ -366,7 +372,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(2)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
   @Test
@@ -414,7 +420,7 @@ public class GrpcRdaSourceTest {
    */
   @Test
   public void testDisconnectBeforeExpectedIdleLimitThrowsException() throws Exception {
-    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
 
     // set up clock times to ensure idle time is not exceeded
     doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
@@ -433,12 +439,14 @@ public class GrpcRdaSourceTest {
                 new StatusRuntimeException(Status.INTERNAL)))
         .when(mockResponseStream)
         .next();
-    doReturn(mockResponseStream).when(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    doReturn(mockResponseStream)
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
 
     doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
 
     try {
-      source.retrieveAndProcessObjects(2, sink);
+      source.retrieveAndProcessObjects(3, sink);
       fail("should have thrown an exception");
     } catch (ProcessingException error) {
       assertEquals(2, error.getProcessedCount());
@@ -455,7 +463,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
   /**
@@ -467,7 +475,7 @@ public class GrpcRdaSourceTest {
    */
   @Test
   public void testDisconnectAfterExpectedIdleLimitStopsButDoesNotThrow() throws Exception {
-    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
 
     // set up clock times to ensure idle time is exceeded
     doReturn(BASE_TIME_FOR_TEST.toEpochMilli())
@@ -486,7 +494,9 @@ public class GrpcRdaSourceTest {
                 new StatusRuntimeException(Status.INTERNAL)))
         .when(mockResponseStream)
         .next();
-    doReturn(mockResponseStream).when(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    doReturn(mockResponseStream)
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
 
     doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
 
@@ -504,7 +514,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
   /**

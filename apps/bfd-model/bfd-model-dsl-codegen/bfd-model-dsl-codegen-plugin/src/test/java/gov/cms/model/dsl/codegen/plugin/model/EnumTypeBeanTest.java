@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link EnumTypeBean}. */
 public class EnumTypeBeanTest {
   /** Test {@link EnumTypeBean#findValue} method. */
   @Test

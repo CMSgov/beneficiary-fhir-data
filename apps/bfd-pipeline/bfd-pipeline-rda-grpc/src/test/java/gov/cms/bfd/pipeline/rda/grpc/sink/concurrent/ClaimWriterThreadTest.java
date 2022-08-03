@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,11 @@ public class ClaimWriterThreadTest {
     buffer = new ClaimWriterThread.Buffer<>();
   }
 
+  /**
+   * Verifies that the thread properly handles an empty queue during a loop iteration.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
   @Test
   public void queueIsEmpty() throws Exception {
     var running = thread.runOnce(sink, buffer);
@@ -43,8 +49,14 @@ public class ClaimWriterThreadTest {
     assertEquals(0, buffer.getFullCount());
   }
 
+  /**
+   * Verifies that the thread properly updates an existing claim in its buffer if a new one is added
+   * with the same key.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
   @Test
-  public void incompleteBatch() throws Exception {
+  public void newClaimOverwriteOldClaimWithSameKeyInBuffer() throws Exception {
     final var claimA1 = new TestDatabase.Claim("a", "a1", 1, VERSION);
     final var claimB1 = new TestDatabase.Claim("b", "b1", 2, VERSION);
     final var claimA2 = new TestDatabase.Claim("a", "b2", 3, VERSION);
@@ -78,6 +90,11 @@ public class ClaimWriterThreadTest {
     assertEquals(Collections.emptyList(), callbacks);
   }
 
+  /**
+   * Verifies that the thread properly writes to database once it has a full buffer.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
   @Test
   public void completeBatch() throws Exception {
     final var claimA1 = new TestDatabase.Claim("a", "a1", 1, VERSION);
@@ -134,6 +151,11 @@ public class ClaimWriterThreadTest {
         callbacks);
   }
 
+  /**
+   * Verifies that the thread properly flushes its buffer when shutting down.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
   @Test
   public void shutdownFlushesBuffer() throws Exception {
     final var claimA1 = new TestDatabase.Claim("a", "a1", 1, VERSION);
@@ -171,6 +193,11 @@ public class ClaimWriterThreadTest {
         callbacks);
   }
 
+  /**
+   * Verifies that the thread properly flushes partial buffer if claims arrive slowly.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
   @Test
   public void loopWithNoNewEntriesFlushesBuffer() throws Exception {
     final var claimA1 = new TestDatabase.Claim("a", "a1", 1, VERSION);
@@ -199,6 +226,11 @@ public class ClaimWriterThreadTest {
         callbacks);
   }
 
+  /**
+   * Verifies that the thread properly reports an error through the callback and shuts down.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
   @Test
   public void writeErrorReportsExceptionAndShutsDown() throws Exception {
     final ProcessingException error = new ProcessingException(new IOException("oops"), 0);
@@ -225,5 +257,43 @@ public class ClaimWriterThreadTest {
                 ImmutableList.of(claimA1.toMessage(), claimB1.toMessage(), claimC1.toMessage()),
                 error)),
         callbacks);
+  }
+
+  /**
+   * Tests that queue is drained until close is called.
+   *
+   * @throws Exception passes through any exceptions thrown during test
+   */
+  @Test
+  public void testDrainQueueUntilStoppedFlagIsSet() throws Exception {
+    final AtomicBoolean interrupted = new AtomicBoolean();
+    final Thread runningThread =
+        new Thread(
+            () -> {
+              try {
+                thread.drainQueueUntilStoppedFlagIsSet();
+              } catch (InterruptedException ex) {
+                interrupted.set(true);
+              }
+            });
+
+    // Start the thread and add some claims.
+    runningThread.start();
+    for (int i = 1; i <= 10; ++i) {
+      thread.add(VERSION, new TestDatabase.Claim("a", "a" + i, i, VERSION).toMessage());
+      Thread.sleep(25L);
+    }
+
+    // Thread should still be running because we have not yet called close().
+    assertTrue(runningThread.isAlive());
+
+    // Tell the thread to stop and give it plenty of time to exit.
+    thread.close();
+    runningThread.join(30_000);
+
+    // Thread should now be stopped and none of the claims should have been written to the database.
+    assertFalse(runningThread.isAlive());
+    assertFalse(interrupted.get());
+    assertTrue(database.getClaims().isEmpty());
   }
 }

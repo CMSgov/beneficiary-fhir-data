@@ -49,7 +49,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,7 +92,6 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
@@ -434,6 +432,30 @@ public final class TransformerUtilsV2 {
     } catch (DataFormatException e) {
       throw new InvalidRifValueException(
           String.format("Unable to create DateType with reference year: '%s'.", dateYear), e);
+    }
+    return extension;
+  }
+
+  /**
+   * Helper function to create the valueDate for the specified {@link Extension}.
+   *
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @param date the value to use for {@link Extension#getValue()} for the resulting {@link
+   *     Extension}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionDate(CcwCodebookInterface ccwVariable, LocalDate date) {
+    Extension extension = null;
+    Objects.requireNonNull(date);
+    try {
+      String stringDate = date.toString();
+      DateType dateValue = new DateType(stringDate);
+      String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+      extension = new Extension(extensionUrl, dateValue);
+    } catch (DataFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to create DateType with date: '%s'.", date), e);
     }
     return extension;
   }
@@ -1540,65 +1562,11 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
-    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
-
-      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
-        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
-        if (eob != null
-            && eob.getPatient() != null
-            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
-          String reference = eob.getPatient().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
-          }
-        }
-      } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
-        Patient patient = ((Patient) entry.getResource());
-        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
-          beneIds.add(patient.getId());
-        }
-
-      } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
-        Coverage coverage = ((Coverage) entry.getResource());
-        if (coverage != null
-            && coverage.getBeneficiary() != null
-            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
-          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
-          if (!Strings.isNullOrEmpty(reference)) {
-            beneIds.add(reference);
-          }
-        }
-      }
     }
-
-    logBeneIdToMdc(beneIds);
-
     return bundle;
-  }
-
-  /**
-   * Output list of benefificiary IDs to MDC logging
-   *
-   * @param beneIds the {@link Collection} beneficiary IDs to log
-   */
-  public static void logBeneIdToMdc(Collection<String> beneIds) {
-    if (!beneIds.isEmpty()) {
-      BfdMDC.put("bene_id", String.join(", ", beneIds));
-    }
-  }
-
-  /**
-   * Output beneficiary ID to the MDC logging
-   *
-   * @param beneId the {@link Long} beneficiary ID to log
-   */
-  public static void logBeneIdToMdc(Long beneId) {
-    if (beneId != null) {
-      BfdMDC.put("bene_id", String.valueOf(beneId));
-    }
   }
 
   /**
@@ -2255,6 +2223,8 @@ public final class TransformerUtilsV2 {
    *     exhausted date for the claim
    * @param diagnosisRelatedGroupCd CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared
    *     field representing the non-covered stay from date for the claim
+   * @param fiClaimActionCd FI_CLM_ACTN_CD: a {@link Character} shared field representing the fiscal
+   *     intermediary action cd for the claim
    */
   static void addCommonEobInformationInpatientSNF(
       ExplanationOfBenefit eob,
@@ -2264,7 +2234,8 @@ public final class TransformerUtilsV2 {
       Optional<LocalDate> noncoveredStayThroughDate,
       Optional<LocalDate> coveredCareThroughDate,
       Optional<LocalDate> medicareBenefitsExhaustedDate,
-      Optional<String> diagnosisRelatedGroupCd) {
+      Optional<String> diagnosisRelatedGroupCd,
+      Optional<Character> fiClaimActionCd) {
 
     // CLM_IP_ADMSN_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
     addInformationWithCode(
@@ -2331,6 +2302,12 @@ public final class TransformerUtilsV2 {
         cd ->
             addInformationWithCode(
                 eob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, cd));
+
+    // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
+    fiClaimActionCd.ifPresent(
+        value ->
+            eob.addExtension(
+                createExtensionCoding(eob, CcwCodebookVariable.FI_CLM_ACTN_CD, value)));
   }
 
   /**
@@ -2986,8 +2963,10 @@ public final class TransformerUtilsV2 {
    * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
    * @param totalChargeAmount CLM_TOT_CHRG_AMT,
    * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
-   * @param fiscalIntermediaryNumber FI_NUM
-   * @param lastUpdated the last updated
+   * @param fiscalIntermediaryNumber FI_NUM,
+   * @param lastUpdated the last updated,
+   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM,
+   * @param fiClmProcDt FI_CLM_PROC_DT
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3002,13 +2981,21 @@ public final class TransformerUtilsV2 {
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
-      Optional<String> fiDocClmControlNum) {
+      Optional<String> fiDocClmControlNum,
+      Optional<LocalDate> fiClmProcDt) {
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
             eob.addExtension(
                 createExtensionIdentifier(
                     CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, cntlNum)));
+
+    // FI_CLM_PROC_DT => ExplanationOfBenefit.extension
+    fiClmProcDt.ifPresent(
+        procDt ->
+            eob.addExtension(
+                TransformerUtilsV2.createExtensionDate(
+                    CcwCodebookVariable.FI_CLM_PROC_DT, procDt)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);

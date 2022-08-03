@@ -19,6 +19,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -133,6 +134,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
+
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
@@ -194,7 +198,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     // Add bene_id to MDC logs
-    TransformerUtilsV2.logBeneIdToMdc(beneficiaryId);
+    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtilsV2.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
