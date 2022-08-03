@@ -438,9 +438,11 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          if (!isSyntheticData) {
-            // don't care about return status here...just want the logging
-            isBackdatedBene(rifRecordEvent);
+          // Log if we have a non-2022 enrollment year INSERT
+          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
+            LOGGER.info(
+                "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
           }
 
           if (recordInDb == null) {
@@ -455,9 +457,11 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            if (!isSyntheticData) {
-              // don't care about return status here...just want the logging
-              isBackdatedBene(rifRecordEvent);
+            // Log if we have a non-2022 enrollment year INSERT
+            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
+              LOGGER.info(
+                  "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                  ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
@@ -587,11 +591,6 @@ public final class RifLoader {
     if (BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get())) {
       return false;
     }
-
-    // Otherwise we do want to log and filter it
-    LOGGER.info(
-        "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
-        bene.getBeneficiaryId());
     return true;
   }
 
