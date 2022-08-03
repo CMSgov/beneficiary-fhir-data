@@ -48,7 +48,7 @@ resource "aws_lambda_function" "this" {
   timeout     = local.lambda_timeout_seconds
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
+      BFD_ENVIRONMENT      = local.env
       INSIGHTS_BUCKET_NAME = data.aws_s3_bucket.insights.id
     }
   }
@@ -75,7 +75,7 @@ resource "aws_glue_crawler" "this" {
   name = "${local.insights_database}-${local.service}"
   tags = merge(local.shared_tags, { Name = "${local.insights_database}-${local.service}", application = "bfd-insights" })
 
-  database_name = "${local.insights_database}"
+  database_name = local.insights_database
 
   role = data.aws_iam_role.insights.arn
 
@@ -100,7 +100,7 @@ resource "aws_glue_crawler" "this" {
 resource "aws_lambda_permission" "allow_s3_glue_trigger" {
   statement_id  = "bfd-${local.env}-${local.service}-glue-trigger-allow-s3"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.glue_trigger.function_name
+  function_name = aws_lambda_function.glue_trigger.arn
   principal     = "s3.amazonaws.com"
   source_arn    = data.aws_s3_bucket.insights.arn
 }
