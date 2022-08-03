@@ -10,10 +10,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
+/**
+ * Adapter for creating stu3 FHIR resources from an {@link
+ * org.hl7.fhir.r4.model.ExplanationOfBenefit}.
+ */
 public class ExplanationOfBenefitAdapter implements FhirResource {
 
+  /** The explanation of benefit to build components from. */
   private final ExplanationOfBenefit eob;
 
+  /**
+   * Instantiates a new Explanation of benefit adapter.
+   *
+   * @param eob the eob
+   */
   public ExplanationOfBenefitAdapter(ExplanationOfBenefit eob) {
     this.eob = eob;
   }
@@ -40,10 +50,17 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
   }
 
+  /** Adapter for creating stu3 FHIR procedure components. */
   public static class ProcedureComponentAdapter implements ProcedureComponent {
 
+    /** The eob's procedure component. */
     private final ExplanationOfBenefit.ProcedureComponent procedureComponent;
 
+    /**
+     * Instantiates a new Procedure component adapter.
+     *
+     * @param procedureComponent the procedure component
+     */
     public ProcedureComponentAdapter(ExplanationOfBenefit.ProcedureComponent procedureComponent) {
       this.procedureComponent = procedureComponent;
     }
@@ -58,10 +75,17 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     }
   }
 
+  /** Adapter for creating stu3 FHIR diagnosis components. */
   public static class DiagnosisComponentAdapter implements DiagnosisComponent {
 
+    /** The eob's diagnosis component. */
     private final ExplanationOfBenefit.DiagnosisComponent diagnosisComponent;
 
+    /**
+     * Instantiates a new Diagnosis component adapter.
+     *
+     * @param diagnosisComponent the diagnosis component
+     */
     public DiagnosisComponentAdapter(ExplanationOfBenefit.DiagnosisComponent diagnosisComponent) {
       this.diagnosisComponent = diagnosisComponent;
     }
@@ -82,10 +106,17 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     }
   }
 
+  /** Adapter for creating stu3 FHIR item components. */
   public static class ItemComponentAdapter implements ItemComponent {
 
+    /** The eob's item component. */
     private final ExplanationOfBenefit.ItemComponent itemComponent;
 
+    /**
+     * Instantiates a new Item component adapter.
+     *
+     * @param itemComponent the item component
+     */
     public ItemComponentAdapter(ExplanationOfBenefit.ItemComponent itemComponent) {
       this.itemComponent = itemComponent;
     }
@@ -97,10 +128,17 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     }
   }
 
+  /** Adapter for creating stu3 FHIR codeable concepts. */
   public static class CodeableConceptAdapter implements CodeableConcept {
 
+    /** The eob's codeable concept. */
     private final org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept;
 
+    /**
+     * Instantiates a new Codeable concept adapter.
+     *
+     * @param codeableConcept the codeable concept
+     */
     public CodeableConceptAdapter(org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept) {
       this.codeableConcept = codeableConcept;
     }
@@ -114,10 +152,17 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     }
   }
 
+  /** Adapter for creating stu3 FHIR codings. */
   public static class CodingAdapter implements Coding {
 
+    /** The eob's coding. */
     private final org.hl7.fhir.dstu3.model.Coding coding;
 
+    /**
+     * Instantiates a new Coding adapter.
+     *
+     * @param coding the coding
+     */
     public CodingAdapter(org.hl7.fhir.dstu3.model.Coding coding) {
       this.coding = coding;
     }
