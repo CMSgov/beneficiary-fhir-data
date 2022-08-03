@@ -8,6 +8,7 @@ import java.util.Map;
 /** Base class for Claim transformation offering common logic shared between FISS and MCS */
 public abstract class AbstractClaimTransformer {
 
+  /** Maps strings sent by RDA to simple numeric values for DB storage */
   private static final Map<String, Short> PHASE_TO_SHORT =
       Map.of(
           "p1", (short) 1,

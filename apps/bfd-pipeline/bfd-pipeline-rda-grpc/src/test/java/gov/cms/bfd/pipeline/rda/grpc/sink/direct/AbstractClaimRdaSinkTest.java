@@ -239,13 +239,9 @@ public class AbstractClaimRdaSinkTest {
     @Nonnull
     @Override
     RdaChange<String> transformMessageImpl(String apiVersion, String s) {
-      return new RdaChange<>(
-          1L,
-          RdaChange.Type.UPDATE,
-          s,
-          Instant.now(),
-          new RdaChange.Source(
-              (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
+      // ConstantConditions - This method is never actually executed in testing
+      //noinspection ConstantConditions
+      return null;
     }
 
     @Override

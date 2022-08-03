@@ -11,7 +11,6 @@ import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
@@ -102,9 +101,9 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                     RecordSource.newBuilder()
                         .setPhase("p1")
                         .setPhaseSeqNum(1)
-                        .setExtractDate(LocalDate.now().minusDays(1).toString())
+                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
                         .setTransmissionTimestamp(
-                            Instant.now().minus(2, ChronoUnit.DAYS).toString())
+                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
                         .build())
                 .build());
   }
@@ -127,9 +126,9 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                     RecordSource.newBuilder()
                         .setPhase("p1")
                         .setPhaseSeqNum(1)
-                        .setExtractDate(LocalDate.now().minusDays(1).toString())
+                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
                         .setTransmissionTimestamp(
-                            Instant.now().minus(2, ChronoUnit.DAYS).toString())
+                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
                         .build())
                 .build());
   }
