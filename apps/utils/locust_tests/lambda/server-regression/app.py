@@ -104,6 +104,7 @@ def handler(event, context):
     stats_config = {
         "store": "s3",
         "env": environment,
+        "compare": "previous",
         "store_tag": invoke_event.store_tag,
         "comp_tag": invoke_event.compare_tag,
         "bucket": s3_bucket,
