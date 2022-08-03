@@ -30,9 +30,11 @@ locals {
 
   docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
 
-  lambda_timeout_seconds = 600
-  kms_key_arn            = data.aws_kms_key.cmk.arn
-  kms_key_id             = data.aws_kms_key.cmk.key_id
+  lambda_timeout_seconds              = 600
+  glue_trigger_lambda_timeout_seconds = 600
+
+  kms_key_arn = data.aws_kms_key.cmk.arn
+  kms_key_id  = data.aws_kms_key.cmk.key_id
 }
 
 resource "aws_lambda_function" "this" {
@@ -118,6 +120,7 @@ resource "aws_lambda_function" "glue_trigger" {
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
+  timeout          = local.glue_trigger_lambda_timeout_seconds
   environment {
     variables = {
       CRAWLER_NAME = aws_glue_crawler.this.name
@@ -125,6 +128,4 @@ resource "aws_lambda_function" "glue_trigger" {
   }
 
   role = aws_iam_role.glue_trigger.arn
-
-  timeout = 300
 }
