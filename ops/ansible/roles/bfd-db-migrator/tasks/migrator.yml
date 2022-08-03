@@ -69,7 +69,7 @@
     mode: u=rwx,g=rx,o=rx
   become: true
   loop:
-    - "{{ data_pipeline_dir }}/aws_otel_java"
+    - "{{ db_migrator_dir }}/aws_otel_java"
   tags: 
     - pre-ami
 
@@ -88,14 +88,14 @@
   - pre-ami
 # - name: Find AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray JAR
 #   find:
-#     paths: "{{ data_pipeline_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+#     paths: "{{ db_migrator_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
 #     pattern: aws-opentelemetry-agent.jar*.jar
 #   register: find_opentelemetry_agent
 
 # - name: Copy AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray  JAR
 #   copy:
 #     src: "{{ item.path }}"
-#     dest: "{{ data_pipeline_dir }}/aws_otel_java/aws-opentelemetry-agent.jar"
+#     dest: "{{ db_migrator_dir }}/aws_otel_java/aws-opentelemetry-agent.jar"
 #     remote_src: true
 #     owner: "{{ db_migrator_user }}"
 #     group: "{{ db_migrator_user }}"
