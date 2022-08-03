@@ -663,7 +663,7 @@ public final class TransformerUtils {
    *     Beneficiary}
    */
   public static IdDt buildPatientId(Long beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId.toString());
+    return new IdDt(Patient.class.getSimpleName(), String.valueOf(beneficiaryId));
   }
 
   /**
@@ -688,8 +688,11 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: BFD-1583 Remove this method and anything that references it once beneficiaryId datatype
-   * conversion to Long is complete.
+   * Internally BFD treats beneficiaryId as a Long (db bigint); however, within FHIR, an {@link
+   * ca.uhn.fhir.model.primitive.IdDt} does not constrain itself to numeric. So this convenience
+   * method will continue to exist as a means to create a non-numeric IdDt. This non-numeric
+   * handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
    *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link

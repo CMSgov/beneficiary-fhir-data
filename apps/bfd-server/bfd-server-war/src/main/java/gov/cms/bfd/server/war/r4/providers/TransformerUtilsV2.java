@@ -1653,9 +1653,11 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO: Remove this method when the calling method has been removed as per BFD-1582 and the
-   * conversion to bigint for beneficiaryId is complete which will allow removal of the other caller
-   * which is a unit test that passes an ID that contains alpha characters (BFD-1583).
+   * Internally BFD treats beneficiaryId as a Long (db bigint); however, within FHIR, an {@link
+   * ca.uhn.fhir.model.primitive.IdDt} does not constrain itself to numeric. So this convenience
+   * method will continue to exist as a means to create a non-numeric IdDt. This non-numeric
+   * handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
    *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
