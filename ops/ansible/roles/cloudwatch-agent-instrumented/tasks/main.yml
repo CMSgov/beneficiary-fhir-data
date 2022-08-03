@@ -17,3 +17,9 @@
   become: true
   tags:
     - pre-ami
+
+- name: Configure and launch CloudWatch unified agent OpenTelemetry process
+  shell: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s"
+  become: true
+  tags:
+    - pre-ami

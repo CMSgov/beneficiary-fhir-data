@@ -22,6 +22,13 @@ export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
 {% else %}
 #export NEW_RELIC_METRIC_KEY=
 {% endif %}
+
+# The AWS OpenTelemetry Agent running in the WAR needs some additional environment variables, so set those.
+{% if data_pipeline_aws_opentelemetry_app_name and data_pipeline_aws_opentelemetry_environment is defined %}{% endif %}
+export OTEL_RESOURCE_ATTRIBUTES=service.name='{{ data_pipeline_new_relic_app_name }}',service.namespace='{{ data_pipeline_new_relic_environment }}
+export OTEL_TRACES_SAMPLER=xray
+{% endif %}
+
 export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
 export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
 export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
@@ -49,5 +56,6 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
+	-javaagent:{{ data_server_dir }}/aws_otel_java/aws-opentelemetry-agent.jar \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"

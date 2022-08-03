@@ -62,6 +62,12 @@ export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
 
 {% endif %}
 
+# The AWS OpenTelemetry Agent running in the WAR needs some additional environment variables, so set those.
+{% if data_server_aws_opentelemetry_app_name and data_server_aws_opentelemetry_environment is defined %}{% endif %}
+export OTEL_RESOURCE_ATTRIBUTES=service.name={{ data_server_new_relic_app_name }},service.namespace={{ data_server_new_relic_environment }}
+export OTEL_TRACES_SAMPLER=xray
+{% endif %}
+
 # Begin smoke testing startup routine
 STARTUP_TESTING_REQ_TIMEOUT='15'
 STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='1'
@@ -143,6 +149,7 @@ JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 # 3... 2... 1... launch!
 bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
+  -javaagent:{{ data_server_dir }}/aws_otel_java/aws-opentelemetry-agent.jar\
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
   "-DbfdServer.db.url=${DB_URL}" \

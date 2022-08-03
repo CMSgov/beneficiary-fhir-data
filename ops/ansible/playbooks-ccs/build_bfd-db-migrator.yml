@@ -42,6 +42,9 @@
         db_migrator_db_url: "{{ vault_data_db_primary_url }}"
         db_migrator_db_username: "{{ vault_data_pipeline_db_username }}" # TODO: BFD-1552 get migrator-specific credentials
         db_migrator_db_password: "{{ vault_data_pipeline_db_password }}" # TODO: BFD-1552 get migrator-specific credentials
+        db_migrator_aws_opentelemetry_app_name: "BFD Migrator ({{ env_name_std }})"
+        db_migrator_aws_opentelemetry_environment: "{{ env_name_std }}"
+        
 
     - name: Add SSH users
       import_role:

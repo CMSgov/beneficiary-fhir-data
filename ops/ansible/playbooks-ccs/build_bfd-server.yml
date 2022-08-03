@@ -55,6 +55,8 @@
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"
         data_server_new_relic_metric_key: "{{ vault_data_server_new_relic_metric_key }}"
+        data_server_aws_opentelemetry_app_name: "BFD Server ({{ env_name_std }})"
+        data_server_aws_opentelemetry_environment: "{{ env_name_std }}"
 
     - name: Add SSH users
       import_role:

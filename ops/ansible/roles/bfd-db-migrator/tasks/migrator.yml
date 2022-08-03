@@ -60,6 +60,50 @@
   tags:
     - pre-ami
 
+- name: Create AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  loop:
+    - "{{ data_pipeline_dir }}/aws_otel_java"
+  tags: 
+    - pre-ami
+
+- name: Download AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray 
+  become: true
+  get_url:
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
+    mode: 0755
+    url: "https://github.com/aws-observability/aws-otel-java-instrumentation/releases/download/v{{ aws_otel_java_instrumentation_version}}/aws-opentelemetry-agent.jar"
+  register: aws_otel_java_instrumentation_download
+  retries: 5
+  delay: 10
+  until: aws_otel_java_instrumentation_download is succeeded
+  tags: 
+  - pre-ami
+# - name: Find AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray JAR
+#   find:
+#     paths: "{{ data_pipeline_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+#     pattern: aws-opentelemetry-agent.jar*.jar
+#   register: find_opentelemetry_agent
+
+# - name: Copy AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray  JAR
+#   copy:
+#     src: "{{ item.path }}"
+#     dest: "{{ data_pipeline_dir }}/aws_otel_java/aws-opentelemetry-agent.jar"
+#     remote_src: true
+#     owner: "{{ db_migrator_user }}"
+#     group: "{{ db_migrator_user }}"
+#     mode: u=rw,g=r,o=r
+#   with_items:
+#     - "{{ find_opentelemetry_agent.files }}"
+#   become: true
+
 - name: Create Migrator Monitor Script
   template:
     src: migrator-monitor.sh.j2
@@ -114,3 +158,4 @@
     - Restart Migrator Service
   tags:
     - post-ami
+

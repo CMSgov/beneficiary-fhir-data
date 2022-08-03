@@ -50,6 +50,8 @@
         #data_pipeline_loader_threads: (see group_vars/all/main.yml
         data_pipeline_new_relic_app_name: "BFD Pipeline ({{ env_name_std }})"
         data_pipeline_new_relic_metric_key: "{{ vault_data_pipeline_new_relic_metric_key }}"
+        data_pipeline_aws_opentelemetry_app_name: "BFD Pipeline ({{ env_name_std }})"
+        data_pipeline_aws_opentelemetry_environment: "{{ env_name_std }}"
 
     - name: Add SSH users
       import_role:

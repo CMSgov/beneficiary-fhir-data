@@ -10,6 +10,7 @@ export DATABASE_USERNAME='{{ db_migrator_db_username }}'
 # strategy and remains flexible for manual manipulation of resultant script in development and
 # troubleshooting scenarios.
 #}
+
 # DATABASE_MAX_POOL_SIZE defaults to 1 in the bfd-db-migrator application
 {{ '#' if db_migrator_db_max_pool_size|default('', true)|length < 1 }}export DATABASE_MAX_POOL_SIZE='{{ db_migrator_db_max_pool_size|default('', true) }}'
 
@@ -29,9 +30,16 @@ export NEW_RELIC_METRIC_PATH='{{ db_migrator_new_relic_metric_path }}'
 export NEW_RELIC_METRIC_PERIOD='{{ db_migrator_new_relic_metric_period }}'
 {%- endif %}
 
+# The AWS OpenTelemetry Agent running in the WAR needs some additional environment variables, so set those.
+{% if db_migrator_aws_opentelemetry_app_name and db_migrator_aws_opentelemetry_environment is defined %}{% endif %}
+export OTEL_RESOURCE_ATTRIBUTES=service.name='{{ db_migrator_new_relic_app_name }}',service.namespace='{{ db_migrator_new_relic_environment }}'
+export OTEL_TRACES_SAMPLER=xray
+{% endif %}
+
 LOGS_DIR='{{ db_migrator_dir }}/'
 
 exec "{{ db_migrator_dir }}/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh" \
+	-javaagent:{{ data_server_dir }}/aws_otel_java/aws-opentelemetry-agent.jar \
 	"-DbfdDbMigrator.logs.dir=${LOGS_DIR}" \
 	-Djava.io.tmpdir={{ db_migrator_tmp_dir }} \
 	&>> "{{ db_migrator_dir }}/migrator-log.json"
