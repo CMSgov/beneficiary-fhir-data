@@ -551,7 +551,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(8, eob.getExtension().size());
+    assertEquals(9, eob.getExtension().size());
   }
 
   @Test
@@ -1696,6 +1696,26 @@ public final class InpatientClaimTransformerV2Test {
             .orElse(null);
     assertNotNull(fiNumExtension);
     assertEquals("8299", ((Coding) fiNumExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fiClmActnCd is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimActionCode is present.
+   */
+  @Test
+  public void shouldHaveFiClaimActionCdExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmActCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiClmActCdExtension);
+    assertEquals("1", ((Coding) fiClmActCdExtension.getValue()).getCode());
   }
 
   /**
