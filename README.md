@@ -88,6 +88,42 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
 1. Install pre-commit hooks `mvn -f apps initialize`
 
+### Adding Referene to AWS Code Artifactory
+1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours).  Replace {aws account id goes here} with the aws account id
+
+'''sh
+export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`
+'''
+
+2.  In your settings settings.xml file add the following (Replace {aws account id goes here} with the aws account id):
+```xml
+<profiles>
+  <profile>
+    <id>bfd-mgmt-bfd-mgmt</id>
+    <activation>
+      <activeByDefault>true</activeByDefault>
+    </activation>
+    <repositories>
+      <repository>
+        <id>bfd-mgmt-bfd-mgmt</id>
+        <url>https://bfd-mgmt-{aws account id}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/</url>
+      </repository>
+    </repositories>
+  </profile>
+</profiles>
+```
+
+Under servers in your settings.xml file add the following:
+```xml
+<servers>
+  <server>
+    <id>bfd-mgmt-bfd-mgmt</id>
+    <username>aws</username>
+    <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+  </server>
+</servers>
+```
+
 ### Native Setup
 1. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
 2. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
