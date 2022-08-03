@@ -8,27 +8,42 @@ exec > >(
     done
 )
 
-ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_branch_name} force=true'
+ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" .
+aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" . # TODO: remove vault.password in BFD-1786
 
-# TODO: Consider making more overridable via terraform inputs
-# TODO: remove the hardcoded dev settings for the hearbeat interval
+# TODO: Injection of ansible variables in here does works, but with more modern interpreter/ansible versions, this would needless indirection. This will be addressed after BFD-1890.
+aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/migrator/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > migrator_vars.json
+
+aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
+
+cat <<EOF > ssh_users.yaml
+${ssh_users}
+EOF
+
 cat <<EOF > extra_vars.json
 {
     "db_migrator_db_url": "${db_migrator_db_url}",
-    "db_migrator_dir": "/opt/bfd-db-migrator",
     "env": "${env}",
     "migrator_monitor_enabled": ${migrator_monitor_enabled},
     "migrator_monitor_heartbeat_interval_seconds": ${migrator_monitor_heartbeat_interval_seconds}
 }
 EOF
 
-ansible-playbook --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-db-migrator.yml
+ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --extra-vars '@ssh_users.yaml' --tags "post-ami" launch_bfd-db-migrator.yml
 
-rm vault.password
+rm vault.password # TODO: remove vault.password in BFD-1786
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
