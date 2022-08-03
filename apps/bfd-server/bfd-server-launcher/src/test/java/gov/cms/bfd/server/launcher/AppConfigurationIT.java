@@ -33,7 +33,6 @@ public final class AppConfigurationIT {
    * @throws InterruptedException (indicates a test error)
    * @throws ClassNotFoundException (indicates a test error)
    * @throws URISyntaxException (indicates a test error)
-   * @throws DecoderException (indicates a test error)
    */
   @Test
   public void normalUsage()
@@ -90,7 +89,11 @@ public final class AppConfigurationIT {
         testAppConfig.getWar().toString());
   }
 
-  /** @return the local {@link Path} to this project/module */
+  /**
+   * Gets the project directory.
+   *
+   * @return the local {@link Path} to this project/module
+   */
   static Path getProjectDirectory() {
     /*
      * The working directory for tests will either be the module directory or their parent
@@ -106,6 +109,8 @@ public final class AppConfigurationIT {
   }
 
   /**
+   * Resolves the real file name for a {@link Path}.
+   *
    * @param path the {@link Path} to resolve the real {@link Path#getFileName()} of
    * @return the real {@link Path#getFileName()} of the specified {@link Path}
    */
@@ -139,8 +144,10 @@ public final class AppConfigurationIT {
   }
 
   /**
-   * @return a {@link ProcessBuilder} that will launch {@link #main(String[])} as a separate JVM
-   *     process
+   * Create a {@link ProcessBuilder} that will launch {@link #main(String[])} as a separate JVM
+   * process.
+   *
+   * @return a {@link ProcessBuilder} for the main app entry
    */
   private static ProcessBuilder createProcessBuilderForTestDriver() {
     Path java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
@@ -155,6 +162,8 @@ public final class AppConfigurationIT {
   }
 
   /**
+   * Collect output from the test app's stdout.
+   *
    * @param process the {@link Process} to collect the output of
    * @return the output of the specified {@link Process} in a format suitable for debugging
    */

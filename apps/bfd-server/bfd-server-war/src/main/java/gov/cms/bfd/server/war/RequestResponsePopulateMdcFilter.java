@@ -41,10 +41,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
   private static final String REQUEST_START_KEY =
       BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
 
-  /**
-   * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse,
-   *     javax.servlet.FilterChain)
-   */
+  /** {@inheritDoc} */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
@@ -185,13 +182,13 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
           Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
   }
 
-  /** @see javax.servlet.Filter#init(javax.servlet.FilterConfig) */
+  /** {@inheritDoc} */
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
     // Nothing to do here.
   }
 
-  /** @see javax.servlet.Filter#destroy() */
+  /** {@inheritDoc} */
   @Override
   public void destroy() {
     // Nothing to do here.

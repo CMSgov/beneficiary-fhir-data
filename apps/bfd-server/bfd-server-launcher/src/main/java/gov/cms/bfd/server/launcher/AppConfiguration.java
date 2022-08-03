@@ -40,10 +40,21 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_WAR = "BFD_WAR";
 
+  /** The host/address that the server will bind to and listen for HTTPS connections on. * */
   private final String host;
+  /** The port that the server will listen for HTTPS connections on. * */
   private final int port;
+  /**
+   * The {@link Path} of the Java keystore (<code>.jks</code> file) containing the private key and
+   * certificate to use for this server. *
+   */
   private final String keystore;
+  /**
+   * The {@link Path} of the Java trust store (<code>.jks</code> file) containing the client
+   * certificates to use (i.e. trust/authenticate) for this server. *
+   */
   private final String truststore;
+  /** The {@link Path} of the WAR file to run. * */
   private final String war;
 
   /**
@@ -65,42 +76,55 @@ public final class AppConfiguration implements Serializable {
   }
 
   /**
-   * @return the host/address that the server will bind to and listen for HTTPS connections on, if
-   *     {@link Optional#empty()} or <code>"0.0.0.0"</code>, then it will try to bind to all
-   *     interfaces (though note that the port may not be available on all of them, and Jetty just
-   *     kinda' silently ignores that)
+   * Gets the {@link #host}.
+   *
+   * <p>If {@link Optional#empty()} or <code>"0.0.0.0"</code>, then it will try to bind to all
+   * interfaces (though note that the port may not be available on all of them, and Jetty just
+   * kinda' silently ignores that).
+   *
+   * @return the host/address that the server will bind to and listen for HTTPS connections on
    */
   public Optional<String> getHost() {
     return Optional.ofNullable(host);
   }
 
-  /** @return the port that the server will listen for HTTPS connections on */
+  /**
+   * Gets the {@link #port}.
+   *
+   * @return the port
+   */
   public int getPort() {
     return port;
   }
 
   /**
-   * @return the {@link Path} of the Java keystore (<code>.jks</code> file) containing the private
-   *     key and certificate to use for this server
+   * Gets the {@link #keystore}.
+   *
+   * @return the {@link Path} of the Java keystore
    */
   public Path getKeystore() {
     return Paths.get(keystore);
   }
 
   /**
-   * @return the {@link Path} of the Java keystore (<code>.jks</code> file) containing the client
-   *     certificates to use (i.e. trust/authenticate) for this server
+   * Gets the {@link #truststore}.
+   *
+   * @return the {@link Path} of the Java trust store
    */
   public Path getTruststore() {
     return Paths.get(truststore);
   }
 
-  /** @return the {@link Path} of the WAR file to run */
+  /**
+   * Gets the {@link #war}.
+   *
+   * @return the {@link Path} of the WAR file
+   */
   public Path getWar() {
     return Paths.get(war);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     return "AppConfiguration [port="
@@ -159,6 +183,9 @@ public final class AppConfiguration implements Serializable {
   }
 
   /**
+   * Reads an optional environment variable as a string. If no environment variable is found,
+   * returns {@link Optional#empty()}.
+   *
    * @param envVarKey the name of the environment variable to read
    * @return the specified environment variable's value, as a {@link String}, or {@link
    *     Optional#empty()} if it's not defined
@@ -169,6 +196,9 @@ public final class AppConfiguration implements Serializable {
   }
 
   /**
+   * Reads a required environment variable as an int. Throws an {@link AppConfigurationException} if
+   * not found.
+   *
    * @param envVarKey the name of the environment variable to read
    * @return the specified environment variable's value, as an <code>int</code>
    */
@@ -192,6 +222,9 @@ public final class AppConfiguration implements Serializable {
   }
 
   /**
+   * Read a required environment variable as a {@link Path}. Throws an {@link
+   * AppConfigurationException} if not found.
+   *
    * @param envVarKey the name of the environment variable to read
    * @return the specified environment variable's value, as a {@link Path}
    */

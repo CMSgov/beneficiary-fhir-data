@@ -106,7 +106,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return Patient.class;

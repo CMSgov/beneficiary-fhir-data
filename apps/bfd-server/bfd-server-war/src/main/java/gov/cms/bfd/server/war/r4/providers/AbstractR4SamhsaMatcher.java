@@ -20,17 +20,7 @@ public abstract class AbstractR4SamhsaMatcher<T> extends AbstractSamhsaMatcher<T
           TransformerConstants.CODING_SYSTEM_HCPCS,
           CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD));
 
-  /**
-   * Checks if the given {@link CodeableConcept} contains only known coding systems.
-   *
-   * <p>For v2 FHIR resources, we include backwards compatability for the
-   * https://bluebutton.cms.gov/resources/variables/hcpcs_cd system.
-   *
-   * @param procedureConcept the procedure {@link CodeableConcept} to check
-   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
-   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems, <code>
-   *     false</code> otherwise
-   */
+  /** {@inheritDoc} */
   @Override
   protected boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
