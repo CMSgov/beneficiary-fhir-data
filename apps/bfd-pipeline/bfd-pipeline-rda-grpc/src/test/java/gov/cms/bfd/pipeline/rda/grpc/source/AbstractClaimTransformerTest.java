@@ -16,6 +16,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class AbstractClaimTransformerTest {
 
+  private static final short PHASE_ONE = 1;
+  private static final short PHASE_TWO = 2;
+  private static final short PHASE_THREE = 3;
+  private static final short PHASE_SEQ_ZERO = 0;
+  private static final short PHASE_SEQ_ONE = 1;
+  private static final short PHASE_SEQ_TWO = 2;
+
   public static Stream<Arguments> shouldTransformSource() {
     final String DATE = "1970-01-01";
     final String TIMESTAMP = "1970-01-01T00:00:00.000001Z";
@@ -31,27 +38,31 @@ public class AbstractClaimTransformerTest {
         Arguments.arguments(
             "No errors - Just phase argument",
             RecordSource.newBuilder().setPhase("p1").build(),
-            new RdaChange.Source((short) 1, null, null, null),
+            new RdaChange.Source(PHASE_ONE, null, null, null),
             List.of()),
         Arguments.arguments(
             "No errors - Phase and phase sequence arguments",
-            RecordSource.newBuilder().setPhase("p2").setPhaseSeqNum(0).build(),
-            new RdaChange.Source((short) 2, (short) 0, null, null),
+            RecordSource.newBuilder().setPhase("p2").setPhaseSeqNum(PHASE_SEQ_ZERO).build(),
+            new RdaChange.Source(PHASE_TWO, PHASE_SEQ_ZERO, null, null),
             List.of()),
         Arguments.arguments(
             "No errors - Phase, phase sequence, and extract date",
-            RecordSource.newBuilder().setPhase("p3").setPhaseSeqNum(1).setExtractDate(DATE).build(),
-            new RdaChange.Source((short) 3, (short) 1, LOCAL_DATE, null),
+            RecordSource.newBuilder()
+                .setPhase("p3")
+                .setPhaseSeqNum(PHASE_SEQ_ONE)
+                .setExtractDate(DATE)
+                .build(),
+            new RdaChange.Source(PHASE_THREE, PHASE_SEQ_ONE, LOCAL_DATE, null),
             List.of()),
         Arguments.arguments(
             "No errors - All Arguments",
             RecordSource.newBuilder()
                 .setPhase("p3")
-                .setPhaseSeqNum(2)
+                .setPhaseSeqNum(PHASE_SEQ_TWO)
                 .setExtractDate(DATE)
                 .setTransmissionTimestamp(TIMESTAMP)
                 .build(),
-            new RdaChange.Source((short) 3, (short) 2, LOCAL_DATE, INSTANT),
+            new RdaChange.Source(PHASE_THREE, PHASE_SEQ_TWO, LOCAL_DATE, INSTANT),
             List.of()),
         Arguments.arguments(
             "Invalid arguments",
@@ -74,7 +85,8 @@ public class AbstractClaimTransformerTest {
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
   void shouldTransformSource(
-      final String testName,
+      // unused - This is just to give the test a name
+      @SuppressWarnings("unused") final String testName,
       final RecordSource from,
       final RdaChange.Source expectedSource,
       final List<DataTransformer.ErrorMessage> expectedErrors) {
