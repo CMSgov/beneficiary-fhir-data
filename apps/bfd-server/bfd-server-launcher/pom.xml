@@ -18,11 +18,6 @@
 	<properties>
 		<!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
 		<jetty.version>10.0.7</jetty.version>
-
-		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
-			they are reproducible bit-by-bit no matter when/where they are generated.
-			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
-		<project.build.outputTimestamp>10</project.build.outputTimestamp>
 	</properties>
 
 	<dependencies>

@@ -15,13 +15,6 @@
 		Converts the CCW Data Dictionary codebook PDFs to XML.
 	</description>
 
-	<properties>
-		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
-			they are reproducible bit-by-bit no matter when/where they are generated.
-			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
-		<project.build.outputTimestamp>10</project.build.outputTimestamp>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
