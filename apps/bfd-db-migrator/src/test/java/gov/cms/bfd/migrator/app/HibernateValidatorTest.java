@@ -35,14 +35,19 @@ import org.mockito.MockitoAnnotations;
 /** Tests the functionality of the HibernateValidator. */
 public class HibernateValidatorTest {
 
+  /** The Hibernate validator under test. */
   HibernateValidator hibernateValidator;
 
+  /** A mock Data source. */
   @Mock HikariDataSource dataSource;
 
+  /** A mock schema validator. */
   @Mock SchemaValidator mockSchemaValidator;
 
+  /** A mock Configuration. */
   @Mock Configuration configuration;
 
+  /** A mock session factory. */
   @Mock SessionFactory mockSessionFactory;
 
   /** Sets up mocks needed for each test. */
