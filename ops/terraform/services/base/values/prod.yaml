@@ -7,6 +7,9 @@
 /bfd/prod/common/nonsensitive/management_security_group: bfd-prod-remote-management
 /bfd/prod/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
 /bfd/prod/common/nonsensitive/new_relic_metric_path: /metric/v1
+/bfd/prod/common/nonsensitive/rds_aurora_family: aurora-postgresql14
+/bfd/prod/common/nonsensitive/rds_backup_retention_period: 21 # in days TODO: is a 21 day retention period sensible default?
+/bfd/prod/common/nonsensitive/rds_iam_database_authentication_enabled: false
 /bfd/prod/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
 /bfd/prod/common/nonsensitive/rds_instance_class: db.r5.12xlarge
 /bfd/prod/common/nonsensitive/rds_instance_count: 4
