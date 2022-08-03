@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -192,39 +193,35 @@ public class MbiCache {
     @VisibleForTesting
     @Override
     public Mbi lookupMbiImpl(String mbi) {
-      Mbi result = null;
-      int loopNumber = 0;
+      ReadResult result = new ReadResult(null, false);
       int retryNumber = 0;
-      while (result == null && loopNumber <= 5) {
-        if (loopNumber >= 1) {
-          waitForRetry(loopNumber, retryNumber);
+      while (result.isEmpty() && retryNumber <= 5) {
+        if (retryNumber >= 1) {
+          waitForRetry(retryNumber);
         }
         try {
-          result = readOrInsertIfMissing(mbi, loopNumber > 0);
+          result = readOrInsertIfMissing(mbi);
         } catch (PersistenceException ex) {
           final Throwable rootCause = Throwables.getRootCause(ex);
           log.debug(
               "caught exception while caching MBI: retry={} class={} causeClass={}",
-              loopNumber,
+              retryNumber,
               ex.getClass().getSimpleName(),
               rootCause.getClass().getSimpleName());
           retryNumber += 1;
         }
-        if (result == null) {
-          loopNumber += 1;
-        }
       }
 
-      if (loopNumber > 0) {
+      if (result.isInserted()) {
         metrics.addMiss();
       }
       metrics.addRetries(retryNumber);
 
-      if (result == null) {
+      if (result.isEmpty()) {
         log.warn("unable to cache MBI after multiple tries, returning computed value");
-        result = new Mbi(mbi, hasher.computeIdentifierHash(mbi));
+        return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
       }
-      return result;
+      return result.getRecord();
     }
 
     /**
@@ -232,12 +229,11 @@ public class MbiCache {
      * found insert one. Any PersistenceException will be passed through to the caller.
      *
      * @param mbi MBI to look up in the database
-     * @param insertIfMissing true causes a record to be computed and written if none is found in
-     *     the database
-     * @return the Mbi that is known to exist in the entityManager
+     * @return {@link ReadResult} containing the Mbi that is known to exist in the entityManager and
+     *     a flag to indicate if the record was inserted by this call
      */
     @VisibleForTesting
-    Mbi readOrInsertIfMissing(String mbi, boolean insertIfMissing) {
+    ReadResult readOrInsertIfMissing(String mbi) {
       entityManager.getTransaction().begin();
       boolean successful = false;
       try {
@@ -245,13 +241,15 @@ public class MbiCache {
         final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
         final Root<Mbi> root = criteria.from(Mbi.class);
         criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+        boolean inserted = false;
         final var records = entityManager.createQuery(criteria).getResultList();
         var record = records.isEmpty() ? null : records.get(0);
-        if (record == null && insertIfMissing) {
+        if (record == null) {
           record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
+          inserted = true;
         }
         successful = true;
-        return record;
+        return new ReadResult(record, inserted);
       } finally {
         if (successful) {
           entityManager.getTransaction().commit();
@@ -262,22 +260,38 @@ public class MbiCache {
     }
 
     /**
-     * Wait a random backoff time. Later loops wait for a longer period of time.
+     * Wait a random backoff time. Later retries wait for a longer period of time.
      *
-     * @param loopNumber identifies which loop iteration we are in
      * @param retryNumber identifies which retry attempt we are waiting for
      */
-    private void waitForRetry(int loopNumber, int retryNumber) {
-      var delay = loopNumber * (RETRY_INTERVAL_MILLIS + random.nextInt(RETRY_INTERVAL_MILLIS));
+    private void waitForRetry(int retryNumber) {
+      var delay = retryNumber * (RETRY_INTERVAL_MILLIS + random.nextInt(RETRY_INTERVAL_MILLIS));
       try {
-        if (retryNumber > 0) {
-          log.info("waiting for retry: retryNumber={} delay={}", retryNumber, delay);
-        }
+        log.info("waiting for retry: retryNumber={} delay={}", retryNumber, delay);
         Thread.sleep(delay);
       } catch (InterruptedException ex) {
         // allow the Interrupted exception to flow through to terminate processing
         throw new RuntimeException(ex);
       }
+    }
+  }
+
+  /** Used to return two output values from {@link DatabaseBackedCache#readOrInsertIfMissing}. */
+  @VisibleForTesting
+  @Data
+  static class ReadResult {
+    /** The record from the database or null if we don't have a record. */
+    private final Mbi record;
+    /** Flag indicating if the record is one that we have inserted during the call. */
+    private final boolean inserted;
+
+    /**
+     * Used to test whether or we have a record.
+     *
+     * @return true if record is not null
+     */
+    boolean isEmpty() {
+      return record == null;
     }
   }
 

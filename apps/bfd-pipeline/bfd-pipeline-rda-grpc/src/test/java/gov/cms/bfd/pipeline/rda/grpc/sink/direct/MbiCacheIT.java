@@ -148,13 +148,13 @@ public class MbiCacheIT {
                   new MbiCache.DatabaseBackedCache(
                       normalHasher, new MbiCache.Metrics(appMetrics), entityManager));
           doThrow(error, error, error, error, error)
-              .doReturn(new Mbi(1L, mbi1, hash1))
+              .doReturn(new MbiCache.ReadResult(new Mbi(1L, mbi1, hash1), true))
               .when(mbiCache)
-              .readOrInsertIfMissing(eq(mbi1), anyBoolean());
+              .readOrInsertIfMissing(eq(mbi1));
 
           assertEquals(hash1, mbiCache.lookupMbi(mbi1).getHash());
           verify(mbiCache, times(1)).lookupMbi(mbi1);
-          verify(mbiCache, times(6)).readOrInsertIfMissing(eq(mbi1), anyBoolean());
+          verify(mbiCache, times(6)).readOrInsertIfMissing(eq(mbi1));
         });
   }
 }
