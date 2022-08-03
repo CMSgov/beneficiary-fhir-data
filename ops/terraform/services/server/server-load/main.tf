@@ -84,8 +84,8 @@ resource "aws_lambda_function" "node" {
 }
 
 resource "aws_lambda_function" "broker" {
-  function_name = "bfd-${local.env}-${local.service}-node"
-  description   = "Lambda to run the broker for load testing on the ${local.eng} server"
+  function_name = "bfd-${local.env}-${local.service}-broker"
+  description   = "Lambda to run the broker for load testing on the ${local.env} server"
   tags          = local.shared_tags
   kms_key_arn   = local.kms_key_arn
 
@@ -97,6 +97,9 @@ resource "aws_lambda_function" "broker" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
+      SQS_QUEUE_NAME = resource.aws_sqs_queue.broker.name
+      CONTROLLER_LAMBDA_NAME = resource.aws_lambda_function.controller.name
+      NODE_LAMBDA_NAME = resource.aws_lambda_function.node.name
     }
   }
 
@@ -107,13 +110,19 @@ resource "aws_lambda_function" "broker" {
   }
 }
 
-resource "aws_lambda_event_source_mapping" "broker" {
-  event_source_arn = aws_sqs_queue.broker.arn
+resource "aws_lambda_event_source_mapping" "broker_run" {
+  event_source_arn = aws_sqs_queue.broker_run_queue.arn
   function_name    = aws_lambda_function.broker.arn
 }
 
+resource "aws_sqs_queue" "broker_run_queue" {
+  name                       = "${local.queue_name}-broker-run"
+  visibility_timeout_seconds = local.lambda_timeout_seconds
+  kms_master_key_id          = local.kms_key_id
+}
+
 resource "aws_sqs_queue" "broker" {
-  name                       = local.queue_name
+  name                       = "${local.queue_name}-broker"
   visibility_timeout_seconds = local.lambda_timeout_seconds
   kms_master_key_id          = local.kms_key_id
 }
