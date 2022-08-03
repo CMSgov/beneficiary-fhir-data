@@ -6,7 +6,7 @@ import com.squareup.javapoet.CodeBlock;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link StandardSetter} */
+/** Unit tests for {@link StandardSetter}. */
 public class StandardSetterTest {
   /** Verifies output of {@link StandardSetter#createSetRef}. */
   @Test

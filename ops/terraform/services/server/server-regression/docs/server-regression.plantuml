@@ -1,0 +1,48 @@
+@startuml server-regression
+title server-regression Lambda Deployment and Execution Sequence
+actor operator
+database "github"
+participant "bfd-server-regression-build"
+participant "deployment pipeline"
+database "AWS ECR"
+database "parameter store"
+participant "AWS Lambda"
+participant "sqs queue"
+group Image Deployment
+    operator -> github: Submit change set
+    github --> operator
+    operator -> "bfd-server-regression-build": Trigger Image Build
+    "bfd-server-regression-build" -> github: Request change set
+    github --> "bfd-server-regression-build": Return change set
+    "bfd-server-regression-build" -> "bfd-server-regression-build": build-push.sh:\nbuild lambda Docker image
+    "bfd-server-regression-build" -> "AWS ECR": build-push.sh:\npush Docker image to bfd-mgmt-server-regression
+    "AWS ECR" --> "bfd-server-regression-build"
+    "bfd-server-regression-build" -> "parameter store": build-push.sh:\nwrite image tag SSM parameter
+    "parameter store" --> "bfd-server-regression-build"
+    "bfd-server-regression-build" --> operator
+end
+group BFD Deployment Excerpt
+    operator -> github: Submit change set
+    github --> operator
+    operator -> "deployment pipeline": Trigger Deployment
+    "deployment pipeline" -> github: Request change set
+    github --> "deployment pipeline": Return change set
+        loop ENV for ENV in ("TEST", "PROD-SBX", "PROD")
+            "deployment pipeline" -> "deployment pipeline": terraform:\nplan and apply
+            "deployment pipeline" -> "parameter store": terraform:\nRequest latest Docker image tag
+            "parameter store" --> "deployment pipeline": Return latest Docker image tage
+            "deployment pipeline" -> "AWS Lambda": terraform:\ndeploy server-regression Lambda to ENV using tag
+            "AWS Lambda" -> "AWS ECR": Retrieve tagged server-regression Docker Image
+            "AWS ECR" --> "AWS Lambda"
+            "AWS Lambda" -> "AWS Lambda": Create server-regression from\nbfd-mgmt-server-regression image
+            "AWS Lambda" --> "deployment pipeline"
+            "deployment pipeline" -> "sqs queue": jenkinsfile:\nwrite server-regression ENV invocation event to SQS
+            "sqs queue" --> "deployment pipeline"
+            "AWS Lambda" -> "sqs queue":server-regression:\npolls messages
+            "sqs queue" --> "AWS Lambda":Returns messages
+            "AWS Lambda" -> "AWS Lambda":server-regression:\nconsumes event and runs on ENV
+            "AWS Lambda" --> "deployment pipeline"
+        end
+    "deployment pipeline" --> operator
+end
+@enduml

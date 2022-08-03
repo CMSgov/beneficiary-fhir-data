@@ -11,7 +11,6 @@ This is supported by a [terraform workspaces-enabled](https://www.terraform.io/l
 Configuration management can get away from us, becoming wildly complex if there isn't a conscious effort to _keep things simple_.
 While simplicity is in the eye of the beholder, this module seeks to be as simple as possible and no simpler.
 To that end, this module will primarily be composed of two files, `sensitive.tf` and `nonsensitive.tf` that configure sensitive and nonsensitve values, respectively.
-At this writing, the logic presented here is only supportive of sensitive values.
 Additional terraform instructions are housed in somewhat canonical, expected files, e.g. `main.tf`.
 This _generally_ takes values from specific, yaml-formatted files stored in the [values directory](.values), and produces AWS SSM Parameters.
 
@@ -24,19 +23,20 @@ To summarize, terraform reads encrypted **and** plaintext yaml-encoded _key:valu
 ### Formatting and Validation
 
 As of mid July 2022, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
-- hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/sensitive/${leaf}` format <!-- NOTE: _nonsensitive support is forthcoming_ -->
-- `${env}` must be one of `test`, `prod-sbx`, or `prod` <!-- NOTE: _full ephemeral environment support is forthcoming_ -->
+- hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/${sensitivity}/${leaf}` format
+- `${env}` must be one of `test`, `prod-sbx`, or `prod` <!-- NOTE: full ephemeral environment support is forthcoming_ -->
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
+- `${sensitivity}` must be one of `sensitive` when encrypted or `nonsensitive` when in plain text
 - `${leaf}` _should_ be lower_snake_case formatted
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)
-- only string-formatted values only are accepted
+- only string-formatted values are accepted
 - sensitive values must be encrypted with appropriate [AWS Key Management Service-stored CMK](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/keys)
 
-**As of mid July 2022, this module only manages sensitive configuration. Nonsensitive configuration is forthcoming.**
+**As of late July 2022, this module is only beginning to manage nonsensitive configuration. Further support is forthcoming.**
 
 ### Usage and User Additions
 
-If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory.
+If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory for those encrypted values (stored in `.eyaml`), otherwise a text-editor of their choosing when adjusting plain text values (stored in `.yaml`).
 
 #### Viewing with read-and-decrypt-eyaml.sh
 **WARNING:** This will present unencrypted, sensitive data to stdout. Do not execute this while sharing your screen during presentations or pairing opportunities.
@@ -117,10 +117,15 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Type |
 |------|------|
+| [aws_ssm_parameter.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.migrator_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.migrator_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.pipeline_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.pipeline_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.server_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.server_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/data-sources/kms_key) | data source |
+| [aws_ssm_parameters_by_path.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/data-sources/ssm_parameters_by_path) | data source |
 | [external_external.eyaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 <!-- END_TF_DOCS -->
