@@ -592,8 +592,11 @@ public final class TransformerUtils {
   }
 
   /**
-   * TODO: BFD-1583 Remove this method and the calling unit test when fully converted to BigInt
-   * claim IDs.
+   * Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier has a
+   * data type of StringType that does not constrain itself to numeric. So this convenience method
+   * will continue to exist as a means to create a {@link ExplanationOfBenefit#getId()} whose claim
+   * ID is not numeric. This non-numeric handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
    *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
