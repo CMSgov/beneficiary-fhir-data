@@ -26,6 +26,14 @@ data "aws_subnets" "main" {
   }
 }
 
+data "aws_launch_template" "template" {
+  name = "bfd-${local.env}-fhir"
+}
+
+data "aws_auto_scaling_group" "asg" {
+  name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
+}
+
 data "aws_ecr_repository" "ecr" {
   name = "bfd-mgmt-${local.service}"
 }
