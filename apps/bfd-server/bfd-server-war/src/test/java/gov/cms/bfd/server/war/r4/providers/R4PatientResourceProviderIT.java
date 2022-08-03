@@ -253,6 +253,22 @@ public final class R4PatientResourceProviderIT {
 
   /**
    * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
+   * throws an exception for a non-numeric {@link Patient} identifer.
+   */
+  @Test
+  public void readPatientForNonNumericPatientId() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    assertThrows(
+        ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
+        () -> {
+          // No data is loaded, so this should return nothing.
+          fhirClient.read().resource(Patient.class).withId("junk").execute();
+        });
+  }
+
+  /**
+   * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
    * works as expected for a {@link Patient} that does exist in the DB.
    */

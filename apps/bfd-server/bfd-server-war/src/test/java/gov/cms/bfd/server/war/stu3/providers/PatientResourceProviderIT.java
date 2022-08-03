@@ -96,6 +96,22 @@ public final class PatientResourceProviderIT {
 
   /**
    * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.stu3.model.IdType)}
+   * throws an exception for a non-numeric {@link Patient} identifer.
+   */
+  @Test
+  public void readPatientForNonNumericPatientId() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+    assertThrows(
+        ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
+        () -> {
+          // No data is loaded, so this should return nothing.
+          fhirClient.read().resource(Patient.class).withId("junk").execute();
+        });
+  }
+
+  /**
+   * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
    * works as expected for a {@link Patient} when include identifiers value = "true".
    */
