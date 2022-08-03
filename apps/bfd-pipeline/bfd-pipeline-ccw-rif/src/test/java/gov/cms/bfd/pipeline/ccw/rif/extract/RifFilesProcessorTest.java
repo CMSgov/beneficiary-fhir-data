@@ -404,7 +404,7 @@ public final class RifFilesProcessorTest {
     assertFalse(claimLine.getRxNumber().isPresent());
     assertEquals(new BigDecimal("42.0"), claimLine.getHctHgbTestResult());
     assertEquals("R1", claimLine.getHctHgbTestTypeCode().get());
-    assertEquals("49035044700", claimLine.getNationalDrugCode().get());
+    assertEquals("000000000", claimLine.getNationalDrugCode().get());
     assertEquals("BB889999AA", claimLine.getCliaLabNumber().get());
     assertEquals(BigDecimal.ZERO, claimLine.getAnesthesiaUnitCount());
   }
