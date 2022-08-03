@@ -121,7 +121,7 @@ def handler(event, context):
             f"--spawned-runtime={invoke_event.spawned_runtime}",
             f"--database-uri={db_dsn}",
             f"--client-cert-path={cert_path}",
-            f'--stats-config="{stats_config_str}"',
+            f"--stats-config={stats_config_str}",
             "--headless",
             "--only-summary",
         ],
