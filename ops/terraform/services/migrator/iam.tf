@@ -61,6 +61,29 @@ resource "aws_iam_policy" "ssm" {
 EOF
 }
 
+resource "aws_iam_policy" "cwagent_opentelemetry" {
+  name        = "bfd-${local.env}-${local.service}-cwagent-opentelemetry"
+  description = "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-open-telemetry.html"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+                "xray:GetSamplingStatisticSummaries"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role" "this" {
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"
@@ -85,6 +108,7 @@ resource "aws_iam_role" "this" {
     data.aws_iam_policy.ansible_vault_ro.arn,
     aws_iam_policy.sqs.arn,
     aws_iam_policy.ssm.arn,
+    aws_iam_policy.cwagent_opentelemetry.arn,
   ]
 }
 
