@@ -39,6 +39,13 @@
       "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+      "code" : "1",
+      "display" : "Original debit action (always a 1 for all regular bills)"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
     "valueMoney" : {
       "value" : 66125.51,

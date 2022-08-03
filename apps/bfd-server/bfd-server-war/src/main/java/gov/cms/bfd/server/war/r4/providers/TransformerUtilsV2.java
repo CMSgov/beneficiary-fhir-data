@@ -2223,6 +2223,8 @@ public final class TransformerUtilsV2 {
    *     exhausted date for the claim
    * @param diagnosisRelatedGroupCd CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared
    *     field representing the non-covered stay from date for the claim
+   * @param fiClaimActionCd FI_CLM_ACTN_CD: a {@link Character} shared field representing the fiscal
+   *     intermediary action cd for the claim
    */
   static void addCommonEobInformationInpatientSNF(
       ExplanationOfBenefit eob,
@@ -2232,7 +2234,8 @@ public final class TransformerUtilsV2 {
       Optional<LocalDate> noncoveredStayThroughDate,
       Optional<LocalDate> coveredCareThroughDate,
       Optional<LocalDate> medicareBenefitsExhaustedDate,
-      Optional<String> diagnosisRelatedGroupCd) {
+      Optional<String> diagnosisRelatedGroupCd,
+      Optional<Character> fiClaimActionCd) {
 
     // CLM_IP_ADMSN_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
     addInformationWithCode(
@@ -2299,6 +2302,12 @@ public final class TransformerUtilsV2 {
         cd ->
             addInformationWithCode(
                 eob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, cd));
+
+    // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
+    fiClaimActionCd.ifPresent(
+        value ->
+            eob.addExtension(
+                createExtensionCoding(eob, CcwCodebookVariable.FI_CLM_ACTN_CD, value)));
   }
 
   /**

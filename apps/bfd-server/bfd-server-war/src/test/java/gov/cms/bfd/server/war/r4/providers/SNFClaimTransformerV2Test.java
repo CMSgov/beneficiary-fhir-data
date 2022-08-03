@@ -1419,6 +1419,26 @@ public class SNFClaimTransformerV2Test {
   }
 
   /**
+   * Ensures the fiClmActnCd is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimActionCode is present.
+   */
+  @Test
+  public void shouldHaveFiClaimActionCdExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmActCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiClmActCdExtension);
+    assertEquals("1", ((Coding) fiClmActCdExtension.getValue()).getCode());
+  }
+
+  /**
    * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the
    * fiscalIntermediaryClaimProcessDate is present.
    */

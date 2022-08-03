@@ -189,6 +189,73 @@ public class TransformerUtilsV2Test {
   }
 
   /**
+   * Ensures the fiClmActnCd is correctly mapped to an eob as an extension when the input
+   * fiscalIntermediaryClaimActionCode is present.
+   */
+  @Test
+  public void mapEobCommonGroupInpSNFWhenFiClmActnCdExistsExpectExtensionOnEob() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    Character fiClmActnCd = '1';
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    TransformerUtilsV2.addCommonEobInformationInpatientSNF(
+        eob,
+        ' ',
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.of(fiClmActnCd));
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmActnCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(fiClmActnCdExtension);
+    assertEquals(fiClmActnCd.toString(), ((Coding) fiClmActnCdExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fiClmActnCd is not mapped to an eob as an extension when the input
+   * fiscalIntermediaryClaimActionCode is not present.
+   */
+  @Test
+  public void mapEobCommonGroupInpSNFWhenNoFiClmActnCdExpectNoFiClmActnCdExtension() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    TransformerUtilsV2.addCommonEobInformationInpatientSNF(
+        eob,
+        ' ',
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty());
+
+    assertNotNull(eob.getExtension());
+    assertTrue(eob.getExtension().isEmpty());
+    Extension fiClmActnCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNull(fiClmActnCdExtension);
+  }
+
+  /**
    * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the input
    * fiscalIntermediaryClaimProcessDate is present.
    */
