@@ -32,6 +32,7 @@ export NEW_RELIC_METRIC_PERIOD='{{ db_migrator_new_relic_metric_period }}'
 LOGS_DIR='{{ db_migrator_dir }}/'
 
 exec "{{ db_migrator_dir }}/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh" \
+	-javaagent:{{ db_migrator_dir }}/prometheus/jmx_prometheus.jar=9404:{{ db_migrator_dir }}/prometheus/prometheus_jmx_exporter.yml  \
 	"-DbfdDbMigrator.logs.dir=${LOGS_DIR}" \
 	-Djava.io.tmpdir={{ db_migrator_tmp_dir }} \
 	&>> "{{ db_migrator_dir }}/migrator-log.json"

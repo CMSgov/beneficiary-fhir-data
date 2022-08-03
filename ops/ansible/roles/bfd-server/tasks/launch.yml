@@ -110,4 +110,62 @@
 - name: Flush BFD Server Handlers
   meta: flush_handlers
 
+- name: Create Cloudwatch Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  loop:
+    - "{{ data_server_dir }}/prometheus"
+  tags:
+    - pre-ami
+
+- name: Download prometheus jmx exporter  
+  become: true
+  get_url:
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: 0755
+    url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ prometheus_jmx_exporter_version }}/jmx_prometheus_javaagent-{{ prometheus_jmx_exporter_version }}.jar"
+    dest: '{{ data_server_dir }}/prometheus/jmx_prometheus.jar'
+  register: prometheus_download
+  retries: 5
+  delay: 10
+  until: prometheus_download is succeeded
+  tags:
+    - pre-ami
+# This is the install pattern for New Relic getting baked into the build/image
+# - name: Find Prometheus JMX exporter
+#   find:
+#     paths: "{{ data_server_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+#     pattern: jmx_prometheus_javaagent*.jar
+#   register: find_pje
+
+# - name: Copy Prometheus JMX exporter JAR
+#   copy:
+#     src: "{{ item.path }}"
+#     dest: "{{ data_server_dir }}/prometheus/jmx_prometheus.jar"
+#     remote_src: true
+#     owner: "{{ data_server_user }}"
+#     group: "{{ data_server_user }}"
+#     mode: u=rw,g=r,o=r
+#   with_items:
+#     - "{{ find_pje.files }}"
+#   become: true
+
+- name: Copy Prometheus JMX exporter Config
+  template:
+    src: 'prometheus_jmx_exporter.yml.j2'
+    dest: "{{ data_server_dir }}/prometheus/prometheus_jmx_exporter.yml"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r
+  become: true
+  tags:
+    - pre-ami
+
+
 # TODO: This'd be a great place to run some smoke tests.

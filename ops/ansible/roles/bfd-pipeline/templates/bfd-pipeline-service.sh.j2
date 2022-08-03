@@ -49,5 +49,6 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
-	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
+-javaagent:{{ data_pipeline_tmp_dir }}/prometheus/jmx_prometheus.jar=9404:{{ data_pipeline_tmp_dir }}/prometheus/prometheus_jmx_exporter.yml  \
+-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"

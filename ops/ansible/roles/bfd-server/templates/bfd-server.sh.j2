@@ -142,6 +142,7 @@ JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
 # 3... 2... 1... launch!
 bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
+  -javaagent:{{ data_server_dir }}/prometheus/jmx_prometheus.jar=9404:{{ data_server_dir }}/prometheus/prometheus_jmx_exporter.yml  \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
