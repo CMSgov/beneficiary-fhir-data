@@ -49,6 +49,7 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
+      INSIGHTS_BUCKET_NAME = data.aws_s3_bucket.insights.id
     }
   }
 
