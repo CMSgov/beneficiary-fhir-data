@@ -128,6 +128,15 @@ resource "aws_iam_policy" "s3" {
                 "${data.aws_s3_bucket.insights.arn}",
                 "${data.aws_s3_bucket.insights.arn}/databases/${local.insights_database}/${local.insights_table}/*"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${data.aws_kms_key.insights_s3.arn}"
+            ]
         }
     ]
 }
