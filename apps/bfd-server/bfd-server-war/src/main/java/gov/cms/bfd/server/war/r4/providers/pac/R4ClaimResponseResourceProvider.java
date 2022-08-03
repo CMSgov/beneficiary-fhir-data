@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<ClaimResponse> {
 
-  private static final Map<String, ResourceTypeV2<ClaimResponse>> claimTypeMap =
+  private static final Map<String, ResourceTypeV2<ClaimResponse, ?>> claimTypeMap =
       ImmutableMap.of("fiss", ClaimResponseTypeV2.F, "mcs", ClaimResponseTypeV2.M);
 
   /**
@@ -25,7 +25,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    * @return The parsed claim type.
    */
   @Override
-  Optional<ResourceTypeV2<ClaimResponse>> parseClaimType(String typeText) {
+  Optional<ResourceTypeV2<ClaimResponse, ?>> parseClaimType(String typeText) {
     return ClaimResponseTypeV2.parse(typeText);
   }
 
@@ -35,7 +35,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    * @return Set of all supported resource types.
    */
   @VisibleForTesting
-  Set<ResourceTypeV2<ClaimResponse>> getResourceTypes() {
+  Set<ResourceTypeV2<ClaimResponse, ?>> getResourceTypes() {
     return Sets.newHashSet(ClaimResponseTypeV2.values());
   }
 
@@ -46,7 +46,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    */
   @VisibleForTesting
   @Override
-  Map<String, ResourceTypeV2<ClaimResponse>> getResourceTypeMap() {
+  Map<String, ResourceTypeV2<ClaimResponse, ?>> getResourceTypeMap() {
     return claimTypeMap;
   }
 }
