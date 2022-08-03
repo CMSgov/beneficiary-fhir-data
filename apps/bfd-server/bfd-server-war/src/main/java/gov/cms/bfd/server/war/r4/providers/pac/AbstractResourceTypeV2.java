@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * Abstract base class for implementations of {@link ResourceTypeV2} that provides funcationality
+ * Abstract base class for implementations of {@link ResourceTypeV2} that provides functionality
  * common to all implementations.
  *
  * @param <TResource> the {@link IBaseResource} type
