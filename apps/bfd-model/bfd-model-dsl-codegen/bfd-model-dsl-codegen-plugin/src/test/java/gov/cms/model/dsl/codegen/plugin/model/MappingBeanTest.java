@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link MappingBean}. */
 public class MappingBeanTest {
   /** Verify that entity class name can be parsed into package and simple names. */
   @Test

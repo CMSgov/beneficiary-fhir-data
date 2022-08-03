@@ -1419,6 +1419,47 @@ public class SNFClaimTransformerV2Test {
   }
 
   /**
+   * Ensures the fiClmActnCd is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimActionCode is present.
+   */
+  @Test
+  public void shouldHaveFiClaimActionCdExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmActCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiClmActCdExtension);
+    assertEquals("1", ((Coding) fiClmActCdExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimProcessDate is present.
+   */
+  @Test
+  public void shouldHaveFiClaimProcessDateExtension() {
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+            new DateType("2014-02-07"));
+
+    assertTrue(compare.equalsDeep(ex));
+  }
+
+  /**
    * Serializes the EOB and prints to the command line
    *
    * @throws FHIRException
