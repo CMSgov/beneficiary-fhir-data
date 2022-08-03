@@ -437,6 +437,30 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Helper function to create the valueDate for the specified {@link Extension}.
+   *
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @param date the value to use for {@link Extension#getValue()} for the resulting {@link
+   *     Extension}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionDate(CcwCodebookInterface ccwVariable, LocalDate date) {
+    Extension extension = null;
+    Objects.requireNonNull(date);
+    try {
+      String stringDate = date.toString();
+      DateType dateValue = new DateType(stringDate);
+      String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+      extension = new Extension(extensionUrl, dateValue);
+    } catch (DataFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to create DateType with date: '%s'.", date), e);
+    }
+    return extension;
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
@@ -2205,6 +2229,8 @@ public final class TransformerUtilsV2 {
    *     exhausted date for the claim
    * @param diagnosisRelatedGroupCd CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared
    *     field representing the non-covered stay from date for the claim
+   * @param fiClaimActionCd FI_CLM_ACTN_CD: a {@link Character} shared field representing the fiscal
+   *     intermediary action cd for the claim
    */
   static void addCommonEobInformationInpatientSNF(
       ExplanationOfBenefit eob,
@@ -2214,7 +2240,8 @@ public final class TransformerUtilsV2 {
       Optional<LocalDate> noncoveredStayThroughDate,
       Optional<LocalDate> coveredCareThroughDate,
       Optional<LocalDate> medicareBenefitsExhaustedDate,
-      Optional<String> diagnosisRelatedGroupCd) {
+      Optional<String> diagnosisRelatedGroupCd,
+      Optional<Character> fiClaimActionCd) {
 
     // CLM_IP_ADMSN_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
     addInformationWithCode(
@@ -2281,6 +2308,12 @@ public final class TransformerUtilsV2 {
         cd ->
             addInformationWithCode(
                 eob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, cd));
+
+    // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
+    fiClaimActionCd.ifPresent(
+        value ->
+            eob.addExtension(
+                createExtensionCoding(eob, CcwCodebookVariable.FI_CLM_ACTN_CD, value)));
   }
 
   /**
@@ -2936,8 +2969,10 @@ public final class TransformerUtilsV2 {
    * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
    * @param totalChargeAmount CLM_TOT_CHRG_AMT,
    * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
-   * @param fiscalIntermediaryNumber FI_NUM
-   * @param lastUpdated the last updated
+   * @param fiscalIntermediaryNumber FI_NUM,
+   * @param lastUpdated the last updated,
+   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM,
+   * @param fiClmProcDt FI_CLM_PROC_DT
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -2952,13 +2987,21 @@ public final class TransformerUtilsV2 {
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
-      Optional<String> fiDocClmControlNum) {
+      Optional<String> fiDocClmControlNum,
+      Optional<LocalDate> fiClmProcDt) {
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
             eob.addExtension(
                 createExtensionIdentifier(
                     CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, cntlNum)));
+
+    // FI_CLM_PROC_DT => ExplanationOfBenefit.extension
+    fiClmProcDt.ifPresent(
+        procDt ->
+            eob.addExtension(
+                TransformerUtilsV2.createExtensionDate(
+                    CcwCodebookVariable.FI_CLM_PROC_DT, procDt)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);

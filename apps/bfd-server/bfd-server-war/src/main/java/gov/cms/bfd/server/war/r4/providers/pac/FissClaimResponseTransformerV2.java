@@ -65,6 +65,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
+   * Transforms an {@link RdaFissClaim} to a FHIR {@link ClaimResponse}.
+   *
    * @param claimGroup the {@link RdaFissClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
    *     RdaFissClaim}
@@ -77,7 +79,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
     claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);
-    claim.setOutcome(STATUS_TO_OUTCOME.get(Character.toLowerCase(claimGroup.getCurrStatus())));
+    claim.setOutcome(getOutcome(claimGroup.getCurrStatus()));
     claim.setType(getType());
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
@@ -90,6 +92,14 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
+  /**
+   * Returns a {@link Patient} {@link Resource} if the associated data is present in the given
+   * {@link RdaFissClaim}.
+   *
+   * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
+   * @return A {@link Patient} object built from the associated data in the given {@link
+   *     RdaFissClaim}, or null if the appropriate data wasn't present.
+   */
   private static Resource getContainedPatient(RdaFissClaim claimGroup) {
     Optional<RdaFissPayer> optional =
         claimGroup.getPayers().stream()
@@ -117,6 +127,12 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return patient;
   }
 
+  /**
+   * Builds a list of {@link Extension} objects using data from the given {@link RdaFissClaim}.
+   *
+   * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
+   * @return A list of {@link Extension} objects build from the given {@link RdaFissClaim} data.
+   */
   private static List<Extension> getExtension(RdaFissClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
     extensions.add(
@@ -138,6 +154,12 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return List.copyOf(extensions);
   }
 
+  /**
+   * Builds a list of {@link Identifier} objects using data from the given {@link RdaFissClaim}.
+   *
+   * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
+   * @return A list of {@link Identifier} objects build from the given {@link RdaFissClaim} data.
+   */
   private static List<Identifier> getIdentifier(RdaFissClaim claimGroup) {
     return List.of(
         new Identifier()
@@ -153,6 +175,23 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
             .setValue(claimGroup.getDcn()));
   }
 
+  /**
+   * Maps the given status code to an associated {@link ClaimResponse.RemittanceOutcome}. Unknown
+   * status codes are mapped to {@link ClaimResponse.RemittanceOutcome#PARTIAL}.
+   *
+   * @param statusCode The statusCode from the {@link RdaFissClaim}.
+   * @return The {@link ClaimResponse.RemittanceOutcome} associated with the given status code.
+   */
+  private static ClaimResponse.RemittanceOutcome getOutcome(char statusCode) {
+    return STATUS_TO_OUTCOME.getOrDefault(
+        Character.toLowerCase(statusCode), ClaimResponse.RemittanceOutcome.PARTIAL);
+  }
+
+  /**
+   * Builds a {@link CodeableConcept} object containing type information for this claim type.
+   *
+   * @return A {@link CodeableConcept} object containing type information for this claim type.
+   */
   private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(

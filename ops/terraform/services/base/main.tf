@@ -11,11 +11,17 @@ provider "aws" {
 }
 
 locals {
-  env              = terraform.workspace
+  env = terraform.workspace
   established_envs = [
     "test",
     "mgmt",
     "prod-sbx",
     "prod"
   ]
+
+  kms_key_alias = "alias/bfd-${local.env}-cmk"
+}
+
+data "aws_kms_key" "cmk" {
+  key_id = local.kms_key_alias
 }

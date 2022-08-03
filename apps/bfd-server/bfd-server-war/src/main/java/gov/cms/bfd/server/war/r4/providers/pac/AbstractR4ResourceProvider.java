@@ -153,9 +153,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
 
     String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<ResourceTypeV2<T>> optional = parseClaimType(claimIdTypeText);
+    Optional<ResourceTypeV2<T, ?>> optional = parseClaimType(claimIdTypeText);
     if (optional.isEmpty()) throw new ResourceNotFoundException(claimId);
-    ResourceTypeV2<T> claimIdType = optional.get();
+    ResourceTypeV2<T, ?> claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 
     Object claimEntity;
@@ -176,7 +176,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return The parsed {@link ClaimResponseTypeV2} type.
    */
   @VisibleForTesting
-  abstract Optional<ResourceTypeV2<T>> parseClaimType(String typeText);
+  abstract Optional<ResourceTypeV2<T, ?>> parseClaimType(String typeText);
 
   /**
    * Creates a Set of {@link ResourceTypeV2} for the given claim types.
@@ -186,7 +186,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @VisibleForTesting
   @Nonnull
-  Set<ResourceTypeV2<T>> parseClaimTypes(@Nonnull TokenAndListParam types) {
+  Set<ResourceTypeV2<T, ?>> parseClaimTypes(@Nonnull TokenAndListParam types) {
     return types.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().stream()
         .map(TokenParam::getValue)
         .map(String::toLowerCase)
@@ -201,7 +201,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return Set of all supported resource types.
    */
   @VisibleForTesting
-  abstract Set<ResourceTypeV2<T>> getResourceTypes();
+  abstract Set<ResourceTypeV2<T, ?>> getResourceTypes();
 
   /**
    * Returns implementation specific {@link ResourceTypeV2} map.
@@ -209,7 +209,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return The implementation specific {@link ResourceTypeV2} map.
    */
   @VisibleForTesting
-  abstract Map<String, ResourceTypeV2<T>> getResourceTypeMap();
+  abstract Map<String, ResourceTypeV2<T, ?>> getResourceTypeMap();
 
   @Search
   @Trace
@@ -293,7 +293,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @VisibleForTesting
   Bundle createBundleFor(
-      Set<ResourceTypeV2<T>> resourceTypes,
+      Set<ResourceTypeV2<T, ?>> resourceTypes,
       String mbi,
       boolean isHashed,
       boolean excludeSamhsa,
@@ -302,19 +302,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       OffsetLinkBuilder paging) {
     List<T> resources = new ArrayList<>();
 
-    for (ResourceTypeV2<T> type : resourceTypes) {
+    for (ResourceTypeV2<T, ?> type : resourceTypes) {
       List<?> entities;
 
-      entities =
-          claimDao.findAllByMbiAttribute(
-              type.getEntityClass(),
-              type.getEntityMbiRecordAttribute(),
-              mbi,
-              isHashed,
-              lastUpdated,
-              serviceDate,
-              type.getEntityIdAttribute(),
-              type.getEntityEndDateAttribute());
+      entities = claimDao.findAllByMbiAttribute(type, mbi, isHashed, lastUpdated, serviceDate);
 
       resources.addAll(
           entities.stream()
