@@ -17,6 +17,11 @@
 
 	<properties>
 		<checkstyle.skip>true</checkstyle.skip>
+
+		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
+		they are reproducible bit-by-bit no matter when/where they are generated.
+		See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+		<project.build.outputTimestamp>10</project.build.outputTimestamp>
 	</properties>
 
 	<dependencies>

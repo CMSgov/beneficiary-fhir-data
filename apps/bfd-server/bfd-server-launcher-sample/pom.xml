@@ -15,6 +15,13 @@
 		A sample WAR that can be used to test the bfd-server-launcher project.
 	</description>
 
+	<properties>
+		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
+		they are reproducible bit-by-bit no matter when/where they are generated.
+		See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+		<project.build.outputTimestamp>10</project.build.outputTimestamp>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<!-- Needed for JEE/Servlet support -->

@@ -721,6 +721,7 @@ checkJavaFormat
 					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
 					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
 					<quiet>true</quiet>
+					<notimestamp>true</notimestamp>
 				</configuration>
 				<executions>
 					<execution>
