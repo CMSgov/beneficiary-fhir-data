@@ -110,7 +110,7 @@
     group: "{{ data_pipeline_user }}"
     mode: 0755
     url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ prometheus_jmx_exporter_version }}/jmx_prometheus_javaagent-{{ prometheus_jmx_exporter_version }}.jar"
-    dest: '{{ data_pipeline_dir }}/prometheus/jmx_prometheus.jar'
+    dest: "{{ data_pipeline_dir }}/prometheus/jmx_prometheus.jar"
   register: prometheus_download
   retries: 5
   delay: 10
