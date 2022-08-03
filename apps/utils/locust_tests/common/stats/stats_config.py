@@ -38,8 +38,7 @@ class StatsComparisonType(str, Enum):
 
 @dataclass
 class StatsConfiguration:
-    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared
-    """
+    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared"""
 
     store: StatsStorageType
     """The storage type that the stats will be written to"""
@@ -48,15 +47,21 @@ class StatsConfiguration:
     store_tag: str
     """A simple string tag that is used to partition collected statistics when stored"""
     path: Optional[str]
-    """The local parent directory where JSON files will be written to. Used only if type is file, ignored if type is s3"""
+    """The local parent directory where JSON files will be written to.
+    Used only if type is file, ignored if type is s3"""
     bucket: Optional[str]
-    """The AWS S3 Bucket that the JSON will be written to. Used only if type is s3, ignored if type is file"""
+    """The AWS S3 Bucket that the JSON will be written to.
+    Used only if type is s3, ignored if type is file"""
+    database: Optional[str]
+    """Name of the Athena database that is queried upon when comparing statistics.
+    Also used as part of the file path when storing stats in S3"""
+    table: Optional[str]
+    """Name of the table to query using Athena if store is s3 and compare is set.
+    Also used as part of the file path when storing stats in S3"""
     compare: Optional[StatsComparisonType]
     """Indicates the type of performance stats comparison that will be done"""
     comp_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
-    athena_tbl: Optional[str]
-    """Name of the table to query using Athena if store is s3 and compare is set"""
 
     def to_key_val_str(self) -> str:
         """Returns a key-value string representation of this StatsConfiguration instance.
@@ -119,14 +124,14 @@ class StatsConfiguration:
 
         # Validate necessary parameters if S3 is specified
         if storage_type == StatsStorageType.S3:
-            # Validate that bucket is always specified if S3 is specified
+            # Validate that parameters necessary to store stats in S3
+            # are specified if S3 is the store
             if not "bucket" in config_dict:
                 raise ValueError('"bucket" must be specified if "store" is "s3"') from None
-            # Validate that the Athena table is set if compare is set
-            if compare_type and not "athena_tbl" in config_dict:
-                raise ValueError(
-                    '"athena_tbl" must be specified if "store" is "s3" and "compare" is set'
-                ) from None
+            if not "database" in config_dict:
+                raise ValueError('"database" must be specified if "store" is "s3"') from None
+            if not "table" in config_dict:
+                raise ValueError('"table" must be specified if "store" is "s3"') from None
 
         return cls(
             store=storage_type,
@@ -134,9 +139,10 @@ class StatsConfiguration:
             store_tag=storage_tag,
             path=config_dict.get("path") or "./",
             bucket=config_dict.get("bucket"),
+            database=config_dict.get("database"),
+            table=config_dict.get("table"),
             compare=compare_type,
             comp_tag=comparison_tag,
-            athena_tbl=config_dict.get("athena_tbl"),
         )
 
     @classmethod
@@ -156,7 +162,7 @@ class StatsConfiguration:
             stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
         except ValueError as e:
             logger = logging.getLogger()
-            logger.warn('--stats-config was invalid: "%s"', e)
+            logger.warning('--stats-config was invalid: "%s"', e)
             return None
 
         return stats_config

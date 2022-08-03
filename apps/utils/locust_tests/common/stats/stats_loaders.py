@@ -83,8 +83,7 @@ class StatsLoader(ABC):
 
 
 class StatsFileLoader(StatsLoader):
-    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files
-    """
+    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
 
     def load_previous(self) -> Optional[AggregatedStats]:
         # Get a list of all AggregatedStats from stats.json files under path
@@ -150,7 +149,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_previous(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" '
+            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.database}"."{self.stats_config.table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -160,7 +159,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_average(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" '
+            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.database}"."{self.stats_config.table}" '
             f"WHERE {self.__get_where_clause()}"
         )
 
@@ -178,18 +177,17 @@ class StatsAthenaLoader(StatsLoader):
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
         return self.client.start_query_execution(
             QueryString=query,
-            # The database should _always_ be "bfd", so we're hardcoding it here
-            QueryExecutionContext={"Database": "bfd"},
+            QueryExecutionContext={"Database": self.stats_config.database},
             # This method requires an OutputLocation, so we're using the "adhoc"
             # path defined in the BFD Insights data organization standards to
             # store query results
             ResultConfiguration={
                 "OutputLocation": (
-                    f"s3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stats/"
+                    f"s3://{self.stats_config.bucket}/adhoc/query_results/{self.stats_config.database}/{self.stats_config.table}"
                 )
             },
-            # The workgroup should also always be "bfd" if we're targeting the "bfd"
-            # database
+            # The workgroup should always be "bfd" if we're targeting BFD Insights
+            # databases
             WorkGroup="bfd",
         )
 
