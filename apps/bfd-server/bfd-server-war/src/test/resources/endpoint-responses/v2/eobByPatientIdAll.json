@@ -58,6 +58,9 @@
           "value" : "32490593716374487"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2011-02-18"
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -1574,6 +1577,9 @@
           "value" : "08683096577486"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2015-10-30"
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -2162,6 +2168,9 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
           "value" : "28486613848"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2016-02-19"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
@@ -3180,6 +3189,9 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
           "value" : "23443453453"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-02-07"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
@@ -5351,6 +5363,9 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
           "value" : "2718813985998"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-10-07"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {

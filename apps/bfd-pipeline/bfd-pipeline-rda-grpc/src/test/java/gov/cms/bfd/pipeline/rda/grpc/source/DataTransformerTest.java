@@ -13,11 +13,14 @@ import org.junit.jupiter.api.Test;
 
 /** Tests proper operation of the {@link DataTransformer} class. */
 public class DataTransformerTest {
+  /** The Transformer under test. */
   private DataTransformer transformer;
+  /** The copied data to test. */
   private List<Object> copied;
 
+  /** Sets the test up. */
   @BeforeEach
-  public void setUp() throws Exception {
+  public void setUp() {
     transformer = new DataTransformer();
     copied = new ArrayList<>();
   }
