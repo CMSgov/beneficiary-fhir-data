@@ -31,7 +31,7 @@ export NEW_RELIC_METRIC_PERIOD='{{ db_migrator_new_relic_metric_period }}'
 {%- endif %}
 
 # The AWS OpenTelemetry Agent running in the WAR needs some additional environment variables, so set those.
-{% if db_migrator_aws_opentelemetry_app_name and db_migrator_aws_opentelemetry_environment is defined %}{% endif %}
+{% if db_migrator_aws_opentelemetry_app_name and db_migrator_aws_opentelemetry_environment is defined %}
 export OTEL_RESOURCE_ATTRIBUTES=service.name='{{ db_migrator_new_relic_app_name }}',service.namespace='{{ db_migrator_new_relic_environment }}'
 export OTEL_TRACES_SAMPLER=xray
 {% endif %}
