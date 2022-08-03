@@ -42,7 +42,7 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
     if not stats.metadata:
         raise ValueError("AggregatedStats instance must have metadata to write to file")
 
-    env_name = stats.metadata.environment.name
+    env_name = stats.metadata.environment.name.replace("-", "_")
     store_tag = stats.metadata.tag
     path = stats_config.path or ""
     with open(
@@ -79,7 +79,7 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
             "--stats-config must specify a table that stats will be stored under in S3"
         )
 
-    env_name = stats.metadata.environment.name
+    env_name = stats.metadata.environment.name.replace("-", "_")
     store_tag = stats.metadata.tag
 
     s3_path = f"databases/{stats_config.database}/{stats_config.table}/env={env_name}/tag={store_tag}/{int(time.time())}.stats.json"

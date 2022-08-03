@@ -22,9 +22,14 @@ class StatsEnvironment(str, Enum):
     """Enumeration for each possible test running environment"""
 
     TEST = "test"
-    """Indicates that the running environment is in testing, using testing resources"""
+    """Indicates that the running environment is in the TEST environment"""
+    # TODO: PROD_SBX may be "prod-sbx" or "prod_sbx" depending on context (specifically, Glue Table partition columns)
+    # so a better way of handling its string representation should be considered. For now, "prod-sbx" is the only
+    # string representation expected to be encountered by this code and other contexts
+    PROD_SBX = "prod-sbx"
+    """Indicates that the running environment is in the PROD-SBX environment"""
     PROD = "prod"
-    """Indicates that the running environment is in production, using production resources"""
+    """Indicates that the running environment is in the PROD environment"""
 
 
 class StatsComparisonType(str, Enum):
