@@ -81,7 +81,6 @@ jq '.? | map({receipt: .ReceiptHandle, body: .Body | fromjson}) | unique'
 }
 
 /* Wrapping `aws sqs send-message`, this sends a message to a given SQS queue
- * Messages contain `pid`, `start_time`, `stop_time`, `status`, `code keys` and string values.
  *
  * @param args a {@link Map} must include sqsQueueUrl and sqsMessage
  * <ul>
