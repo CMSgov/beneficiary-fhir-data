@@ -208,6 +208,9 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
      * of asynchronously-downloading S3RifFiles.
      */
     LOGGER.info(LOG_MESSAGE_DATA_SET_READY);
+    LOGGER.info(
+        "Data set syntheticData indicator is: {}",
+        String.valueOf(manifestToProcess.isSyntheticData()));
     List<S3RifFile> rifFiles =
         manifestToProcess.getEntries().stream()
             .map(
@@ -216,7 +219,10 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
                         appMetrics, manifestEntry, s3TaskManager.downloadAsync(manifestEntry)))
             .collect(Collectors.toList());
     RifFilesEvent rifFilesEvent =
-        new RifFilesEvent(manifestToProcess.getTimestamp(), new ArrayList<>(rifFiles));
+        new RifFilesEvent(
+            manifestToProcess.getTimestamp(),
+            manifestToProcess.isSyntheticData(),
+            new ArrayList<>(rifFiles));
 
     /*
      * To save time for the next data set, peek ahead at it. If it's available and

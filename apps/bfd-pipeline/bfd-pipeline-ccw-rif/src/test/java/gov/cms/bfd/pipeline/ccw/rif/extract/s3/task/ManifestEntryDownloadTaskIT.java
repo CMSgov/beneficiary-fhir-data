@@ -58,6 +58,7 @@ public final class ManifestEntryDownloadTaskIT {
           new DataSetManifest(
               Instant.now(),
               0,
+              false,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 
       // upload beneficiary sample file to S3 bucket created above

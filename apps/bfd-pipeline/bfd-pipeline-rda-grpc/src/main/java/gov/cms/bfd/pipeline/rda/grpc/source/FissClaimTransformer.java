@@ -509,6 +509,7 @@ public class FissClaimTransformer {
               errors.size(), change.getSeq(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
+
     return new RdaChange<>(
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),

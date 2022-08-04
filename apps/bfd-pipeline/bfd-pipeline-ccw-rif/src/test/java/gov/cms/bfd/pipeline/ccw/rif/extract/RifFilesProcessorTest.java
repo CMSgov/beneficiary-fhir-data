@@ -47,7 +47,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1BeneRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_BENES.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_BENES.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -112,7 +112,7 @@ public final class RifFilesProcessorTest {
   public void process1BeneRecordWithBackslash() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(
-            Instant.now(), StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.toRifFile());
+            Instant.now(), false, StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -142,7 +142,7 @@ public final class RifFilesProcessorTest {
   public void processBeneficiaryHistoryRecord_SAMPLE_A() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(
-            Instant.now(), StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.toRifFile());
+            Instant.now(), false, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -202,7 +202,9 @@ public final class RifFilesProcessorTest {
   public void process1MedicareBeneficiaryIdHistoryRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(
-            Instant.now(), StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.toRifFile());
+            Instant.now(),
+            false,
+            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -235,7 +237,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1PDERecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_PDE.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_PDE.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -301,7 +303,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1CarrierClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -416,7 +418,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1InpatientClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_INPATIENT.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_INPATIENT.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -511,7 +513,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1OutpatientClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_OUTPATIENT.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_OUTPATIENT.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -584,7 +586,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1SNFClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_SNF.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_SNF.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -674,7 +676,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1HospiceClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -738,7 +740,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1HHAClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HHA.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_HHA.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =
@@ -801,7 +803,7 @@ public final class RifFilesProcessorTest {
   @Test
   public void process1DMEClaimRecord() {
     RifFilesEvent filesEvent =
-        new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_DME.toRifFile());
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_DME.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList =

@@ -16,21 +16,25 @@ public final class RifFilesEvent {
   private final Instant timestamp;
   /** The {@link RifFileEvent}s contained in this {@link RifFilesEvent}. */
   private final List<RifFileEvent> fileEvents;
+  /** boolean indicator denoting if data is synthetic (true). */
+  private final boolean syntheticData;
 
   /**
    * Constructs a new {@link RifFilesEvent} instance.
    *
    * @param timestamp the value to use for {@link #getTimestamp()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param files the value to use for {@link #getFileEvents()}
    */
-  public RifFilesEvent(Instant timestamp, List<RifFile> files) {
+  public RifFilesEvent(Instant timestamp, boolean syntheticData, List<RifFile> files) {
     if (timestamp == null) throw new IllegalArgumentException();
     if (files == null) throw new IllegalArgumentException();
     if (files.isEmpty()) throw new IllegalArgumentException();
-    for (RifFile file : files) if (file == null) throw new IllegalArgumentException();
-
+    for (RifFile file : files) {
+      if (file == null) throw new IllegalArgumentException();
+    }
     this.timestamp = timestamp;
-
+    this.syntheticData = syntheticData;
     this.fileEvents = buildFileEvents(files);
   }
 
@@ -46,7 +50,9 @@ public final class RifFilesEvent {
    */
   private List<RifFileEvent> buildFileEvents(List<RifFile> files) {
     List<RifFileEvent> fileEvents = new ArrayList<>(files.size());
-    for (RifFile file : files) fileEvents.add(new RifFileEvent(this, file));
+    for (RifFile file : files) {
+      fileEvents.add(new RifFileEvent(this, file));
+    }
 
     Comparator<RifFileEvent> fileEventsSorter =
         new Comparator<RifFileEvent>() {
@@ -70,10 +76,11 @@ public final class RifFilesEvent {
    * Constructs a new {@link RifFilesEvent} instance.
    *
    * @param timestamp the value to use for {@link #getTimestamp()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param files the value to use for {@link #getFileEvents()}
    */
-  public RifFilesEvent(Instant timestamp, RifFile... files) {
-    this(timestamp, Arrays.asList(files));
+  public RifFilesEvent(Instant timestamp, boolean syntheticData, RifFile... files) {
+    this(timestamp, syntheticData, Arrays.asList(files));
   }
 
   /**
@@ -83,6 +90,15 @@ public final class RifFilesEvent {
    */
   public Instant getTimestamp() {
     return timestamp;
+  }
+
+  /**
+   * Gets the {@link #syntheticData}.
+   *
+   * @return the boolean denoting the data as synthetic (true) or not (false)
+   */
+  public boolean isSyntheticData() {
+    return syntheticData;
   }
 
   /**
@@ -100,6 +116,8 @@ public final class RifFilesEvent {
     StringBuilder builder = new StringBuilder();
     builder.append("RifFilesEvent [timestamp=");
     builder.append(DateTimeFormatter.ISO_INSTANT.format(timestamp));
+    builder.append("RifFilesEvent [syntheticData=");
+    builder.append(String.valueOf(syntheticData));
     builder.append(", fileEvents=");
     builder.append(fileEvents);
     builder.append("]");
