@@ -7,9 +7,12 @@ import com.google.protobuf.Timestamp;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
 
 /**
@@ -94,6 +97,14 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                 .setChangeType(type)
                 .setSeq(seq)
                 .setClaim(claim)
+                .setSource(
+                    RecordSource.newBuilder()
+                        .setPhase("p1")
+                        .setPhaseSeqNum(1)
+                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
+                        .setTransmissionTimestamp(
+                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
+                        .build())
                 .build());
   }
 
@@ -111,6 +122,14 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                 .setChangeType(type)
                 .setSeq(seq)
                 .setClaim(claim)
+                .setSource(
+                    RecordSource.newBuilder()
+                        .setPhase("p1")
+                        .setPhaseSeqNum(1)
+                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
+                        .setTransmissionTimestamp(
+                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
+                        .build())
                 .build());
   }
 
