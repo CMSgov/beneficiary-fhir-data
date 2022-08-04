@@ -84,7 +84,8 @@ class RDABridgeIT {
           rifDir
         });
 
-    Set<String> ignorePaths = Set.of("/timestamp", "/source/transmissionTimestamp");
+    Set<String> ignorePaths =
+        Set.of("/timestamp", "/source/transmissionTimestamp", "/source/extractDate");
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
     List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));

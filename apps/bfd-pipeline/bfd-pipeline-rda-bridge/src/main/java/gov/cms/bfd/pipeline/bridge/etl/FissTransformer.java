@@ -19,6 +19,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -203,6 +204,7 @@ public class FissTransformer extends AbstractTransformer {
                 // analysis
                 .setPhase("p1")
                 .setPhaseSeqNum(0)
+                .setExtractDate(LocalDate.now().toString())
                 .setTransmissionTimestamp(Instant.now().toString())
                 .build())
         .build();

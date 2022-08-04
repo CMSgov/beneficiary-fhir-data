@@ -18,6 +18,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -175,6 +176,7 @@ public class McsTransformer extends AbstractTransformer {
             RecordSource.newBuilder()
                 .setPhase("p1")
                 .setPhaseSeqNum(0)
+                .setExtractDate(LocalDate.now().toString())
                 .setTransmissionTimestamp(Instant.now().toString())
                 .build())
         .build();
