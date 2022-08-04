@@ -4,6 +4,11 @@ data "aws_iam_policy" "cloudwatch_agent_policy" {
   arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+# AWS CloudWatch agent needs extra IAM permissions for x-ray
+data "aws_iam_policy" "cloudwatch_agent_xray_policy" {
+  arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
 data "aws_iam_policy" "ansible_vault_ro" {
   arn = "arn:aws:iam::${local.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
@@ -61,28 +66,6 @@ resource "aws_iam_policy" "ssm" {
 EOF
 }
 
-resource "aws_iam_policy" "cwagent_opentelemetry" {
-  name        = "bfd-${local.env}-${local.service}-cwagent-opentelemetry"
-  description = "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-open-telemetry.html"
-  policy      = <<-EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-                "xray:GetSamplingRules",
-                "xray:GetSamplingTargets",
-                "xray:GetSamplingStatisticSummaries"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-EOF
-}
 
 resource "aws_iam_role" "this" {
   name        = "bfd-${local.env}-${local.service}"
@@ -105,10 +88,10 @@ resource "aws_iam_role" "this" {
   EOF
   managed_policy_arns = [
     data.aws_iam_policy.cloudwatch_agent_policy.arn,
+    data.aws_iam_policy.cloudwatch_agent_xray_policy.arn,
     data.aws_iam_policy.ansible_vault_ro.arn,
     aws_iam_policy.sqs.arn,
     aws_iam_policy.ssm.arn,
-    aws_iam_policy.cwagent_opentelemetry.arn,
   ]
 }
 
