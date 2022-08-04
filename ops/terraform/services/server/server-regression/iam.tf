@@ -43,7 +43,7 @@ EOF
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${local.service}-kms"
-  description = "Permissions to decrypt master KMS key for ${local.env}"
+  description = "Permissions to decrypt master and insights S3 bucket KMS key for ${local.env}"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -54,7 +54,8 @@ resource "aws_iam_policy" "kms" {
                 "kms:Decrypt"
             ],
             "Resource": [
-                "${local.kms_key_arn}"
+                "${local.kms_key_arn}",
+                "${data.aws_kms_key.insights_s3.arn}"
             ]
         }
     ]
@@ -165,7 +166,17 @@ resource "aws_iam_policy" "athena" {
             "Resource": [
                 "arn:aws:s3:::aws-athena-query-results-*",
                 "${data.aws_s3_bucket.insights.arn}",
-                "${data.aws_s3_bucket.insights.arn}/adhoc/query_results/${local.insights_database}/${local.insights_table}/*"
+                "${data.aws_s3_bucket.insights.arn}/adhoc/query_results/${local.insights_database}/${local.insights_table}/*",
+                "${data.aws_s3_bucket.insights.arn}/workgroups/bfd/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "${data.aws_s3_bucket.insights.arn}/databases/${local.insights_database}/${local.insights_table}/*"
             ]
         },
         {
@@ -179,6 +190,18 @@ resource "aws_iam_policy" "athena" {
             ],
             "Resource": [
                 "arn:aws:athena:*:${local.account_id}:workgroup/bfd"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "glue:GetTable",
+                "glue:GetPartitions"
+            ],
+            "Resource": [
+                "arn:aws:glue:us-east-1:${local.account_id}:catalog",
+                "arn:aws:glue:us-east-1:${local.account_id}:database/${local.insights_database}",
+                "arn:aws:glue:us-east-1:${local.account_id}:table/${local.insights_database}/${local.insights_table}"
             ]
         }
     ]
