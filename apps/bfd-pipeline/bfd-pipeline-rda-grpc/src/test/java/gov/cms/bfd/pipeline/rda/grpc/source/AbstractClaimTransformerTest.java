@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.RecordSource;
 import java.time.Instant;
 import java.time.LocalDate;
