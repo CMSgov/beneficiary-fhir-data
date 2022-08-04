@@ -133,7 +133,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (patientId.getVersionIdPartAsLong() != null) {
       throw new IllegalArgumentException();
     }
-    Long beneficiaryId = Long.parseLong(patientId.getIdPart());
+    Long beneficiaryId = patientId.getIdPartAsLong();
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);

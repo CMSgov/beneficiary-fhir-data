@@ -56,7 +56,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
    */
   private static final Pattern COVERAGE_ID_PATTERN =
-      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Alnum}+)");
+      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(R4CoverageResourceProvider.class);
 
