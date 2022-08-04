@@ -8,9 +8,24 @@ import java.util.List;
  */
 public interface FhirResource {
 
+  /**
+   * Gets the procedure.
+   *
+   * @return the procedure
+   */
   List<ProcedureComponent> getProcedure();
 
+  /**
+   * Gets the diagnosis.
+   *
+   * @return the diagnosis
+   */
   List<DiagnosisComponent> getDiagnosis();
 
+  /**
+   * Gets the item.
+   *
+   * @return the item
+   */
   List<ItemComponent> getItem();
 }

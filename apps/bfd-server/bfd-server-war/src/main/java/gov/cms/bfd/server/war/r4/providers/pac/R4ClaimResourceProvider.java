@@ -18,12 +18,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
   private static final Map<String, ResourceTypeV2<Claim, ?>> claimTypeMap =
       ImmutableMap.of("fiss", ClaimTypeV2.F, "mcs", ClaimTypeV2.M);
 
-  /**
-   * Claim type parsing for {@link Claim} resources.
-   *
-   * @param typeText String to parse representing the claim type.
-   * @return The parsed claim type.
-   */
+  /** {@inheritDoc} */
   @VisibleForTesting
   @Override
   Optional<ResourceTypeV2<Claim, ?>> parseClaimType(String typeText) {
@@ -40,11 +35,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
     return Sets.newHashSet(ClaimTypeV2.values());
   }
 
-  /**
-   * Returns implementation specific {@link ResourceTypeV2} map.
-   *
-   * @return The implementation specific {@link ResourceTypeV2} map.
-   */
+  /** {@inheritDoc} */
   @VisibleForTesting
   @Override
   Map<String, ResourceTypeV2<Claim, ?>> getResourceTypeMap() {

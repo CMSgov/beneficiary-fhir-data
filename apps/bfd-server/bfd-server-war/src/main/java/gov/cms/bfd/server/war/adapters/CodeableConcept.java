@@ -8,5 +8,10 @@ import java.util.List;
  */
 public interface CodeableConcept {
 
+  /**
+   * Gets the coding.
+   *
+   * @return the coding
+   */
   List<Coding> getCoding();
 }
