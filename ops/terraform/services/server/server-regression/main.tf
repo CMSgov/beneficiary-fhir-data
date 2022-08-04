@@ -23,8 +23,9 @@ locals {
   insights_database     = "${local.insights_db_prefix}-${local.env}"
   insights_table        = "${local.insights_table_prefix}_${replace(local.env, "-", "_")}_${replace(local.service, "-", "_")}"
 
-  vpc_name   = "bfd-${local.env}-vpc"
-  queue_name = "bfd-${local.env}-${local.service}"
+  vpc_name                   = "bfd-${local.env}-vpc"
+  queue_name                 = "bfd-${local.env}-${local.service}"
+  pipeline_signal_queue_name = "bfd-${local.env}-${local.service}-signal"
 
   docker_image_tag = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
 
@@ -50,8 +51,9 @@ resource "aws_lambda_function" "this" {
   timeout     = local.lambda_timeout_seconds
   environment {
     variables = {
-      BFD_ENVIRONMENT      = local.env
-      INSIGHTS_BUCKET_NAME = data.aws_s3_bucket.insights.id
+      BFD_ENVIRONMENT          = local.env
+      INSIGHTS_BUCKET_NAME     = data.aws_s3_bucket.insights.id,
+      SQS_PIPELINE_SIGNAL_NAME = local.pipeline_signal_queue_name
     }
   }
 
@@ -69,6 +71,12 @@ resource "aws_lambda_event_source_mapping" "this" {
 
 resource "aws_sqs_queue" "this" {
   name                       = local.queue_name
+  visibility_timeout_seconds = local.lambda_timeout_seconds
+  kms_master_key_id          = local.kms_key_id
+}
+
+resource "aws_sqs_queue" "pipeline_signal" {
+  name                       = local.pipeline_signal_queue_name
   visibility_timeout_seconds = local.lambda_timeout_seconds
   kms_master_key_id          = local.kms_key_id
 }

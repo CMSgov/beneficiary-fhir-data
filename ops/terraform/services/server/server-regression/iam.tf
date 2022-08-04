@@ -111,6 +111,37 @@ resource "aws_iam_policy" "logs" {
 EOF  
 }
 
+resource "aws_iam_policy" "sqs_send" {
+  name        = "bfd-${local.env}-${local.service}-sqs-send"
+  description = "Permissions to send to ${local.pipeline_signal_queue_name} SQS queue"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage"
+            ],
+            "Resource": [
+                "${aws_sqs_queue.pipeline_signal.arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${local.kms_key_arn}"
+            ]
+        }
+    ]
+}
+EOF  
+}
+
 resource "aws_iam_policy" "s3" {
   name        = "bfd-${local.env}-${local.service}-s3"
   description = "Permissions to write to ${data.aws_s3_bucket.insights.arn} S3 bucket and associated ${local.service} paths"
@@ -237,6 +268,7 @@ resource "aws_iam_role" "this" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.logs.arn,
+    aws_iam_policy.sqs_send.arn,
     aws_iam_policy.s3.arn,
     aws_iam_policy.athena.arn
   ]
