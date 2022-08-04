@@ -21,13 +21,13 @@ locals {
   vpc_name   = "bfd-${local.env}-vpc"
   queue_name = "bfd-${local.env}-${local.service}"
 
-  docker_image_tag_node = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_node.value))
+  docker_image_tag_node = coalesce(var.docker_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_node.value))
   docker_image_uri_node = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag_node}"
 
-  docker_image_tag_controller = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_controller.value))
+  docker_image_tag_controller = coalesce(var.docker_image_tag_controller_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_controller.value))
   docker_image_uri_controller = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag_controller}"
 
-  docker_image_tag_broker = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_broker.value))
+  docker_image_tag_broker = coalesce(var.docker_image_tag_broker_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_broker.value))
   docker_image_uri_broker = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag_broker}"
 
   lambda_timeout_seconds = 600
