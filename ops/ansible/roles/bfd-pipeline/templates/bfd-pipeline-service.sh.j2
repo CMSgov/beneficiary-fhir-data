@@ -57,5 +57,6 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
 	-javaagent:{{ data_pipeline_dir }}/aws_otel_java/aws-opentelemetry-agent.jar \
+	-Xshare:off \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
