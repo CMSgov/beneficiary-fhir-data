@@ -34,7 +34,7 @@ public final class App {
    * The name of the classpath resource (for the project's main web application) for the NPI
    * "Orgs" TSV file.
    */
-  public static final String NPI_RESOURCE = "npiorgdata.tsv";
+  public static final String NPI_RESOURCE = "npi_org_data_utf8.tsv";
 
   /**
    * The application entry point, which will receive all non-JVM command line options in the <code>

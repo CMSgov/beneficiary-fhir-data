@@ -100,7 +100,7 @@ public class NPIOrgLookup {
    * @return a map with npi numbers and org data
    * @param includeFakeNPIOrgCode whether to include the fake testing NPI Org
    */
-  private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
+  private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) throws IOException {
     try (final InputStream npiOrgStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(App.NPI_RESOURCE);
         final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
@@ -117,11 +117,12 @@ public class NPIOrgLookup {
         }
       }
 
-      if (includeFakeNPIOrgCode) {
-        npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
-      }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI data.", e);
     }
+
+    if (includeFakeNPIOrgCode) {
+        npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
+      }
   }
 }
