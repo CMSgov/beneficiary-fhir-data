@@ -82,7 +82,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return Coverage.class;

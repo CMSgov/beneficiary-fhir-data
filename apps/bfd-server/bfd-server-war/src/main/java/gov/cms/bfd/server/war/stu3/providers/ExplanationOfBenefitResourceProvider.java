@@ -114,7 +114,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return ExplanationOfBenefit.class;

@@ -240,6 +240,7 @@ public class ClaimDao {
     return builder.and(predicates.toArray(new Predicate[0]));
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -249,6 +250,7 @@ public class ClaimDao {
         && Objects.equals(metricRegistry, claimDao.metricRegistry);
   }
 
+  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     return Objects.hash(entityManager, metricRegistry);
