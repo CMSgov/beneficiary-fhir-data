@@ -150,7 +150,7 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
     }
 }
 
-// checks for indications of a running server-regression lambda by looking for unconsumed SQS messages
+/* Checks for indications of a running server-regression lambda by looking for unconsumed SQS messages */
 boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, String bfdEnv) {
     println "Checking server-regression ${sqsQueueName} state..."
 
@@ -176,7 +176,7 @@ boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, Str
     }
 }
 
-// print formatted migrator messages
+/* Print formatted messages about the outcome of the server-regression run */
 def printServerRegressionMessage(Map message) {
     body = message.body
 
