@@ -311,7 +311,7 @@ public final class PipelineTestUtils {
           }
         };
 
-    return new RifFilesEvent(Instant.now(), Arrays.asList(dummyFile));
+    return new RifFilesEvent(Instant.now(), false, Arrays.asList(dummyFile));
   }
 
   /**

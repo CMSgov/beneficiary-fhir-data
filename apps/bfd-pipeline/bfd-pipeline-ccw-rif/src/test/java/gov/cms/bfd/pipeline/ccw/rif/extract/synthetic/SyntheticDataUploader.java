@@ -72,7 +72,7 @@ public final class SyntheticDataUploader {
           new DataSetManifestEntry(
               syntheticDataPathGrabber.apply(syntheticDataFile).getFileName().toString(),
               syntheticDataFile.getRifFile().getFileType()));
-    DataSetManifest manifest = new DataSetManifest(Instant.now(), 0, manifestEntries);
+    DataSetManifest manifest = new DataSetManifest(Instant.now(), 0, true, manifestEntries);
 
     // Upload the manifest and every file in it.
     PutObjectRequest manifestRequest =
