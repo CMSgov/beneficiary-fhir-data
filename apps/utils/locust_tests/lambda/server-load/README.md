@@ -1,6 +1,5 @@
 ```mermaid
 sequenceDiagram
-    autonumber
     actor u as User
     participant sqs as SQS
     participant b as Broker
