@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 import urllib.parse
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Optional
 
 import boto3
@@ -10,10 +10,12 @@ from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 s3_bucket = os.environ.get("INSIGHTS_BUCKET_NAME")
+sqs_pipeline_signal = os.environ.get("SQS_PIPELINE_SIGNAL_NAME")
 
 boto_config = Config(region_name="us-east-1")
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
+sqs_client = boto3.client("sqs", config=boto_config)
 
 
 @dataclass
@@ -25,6 +27,15 @@ class InvokeEvent:
     spawned_runtime: str
     compare_tag: str
     store_tag: str
+
+
+@dataclass
+class PipelineSignalMessage:
+    function_name: str
+    result: str
+    request_id: str
+    log_stream_name: str
+    log_group_name: str
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
@@ -47,7 +58,36 @@ def get_rds_db_uri(cluster_id: str) -> Optional[str]:
         return None
 
 
+def get_sqs_queue_url(sqs_queue_name: str) -> Optional[str]:
+    response = sqs_client.get_queue_url(QueueName=sqs_queue_name)
+
+    try:
+        return response["QueueUrl"]
+    except KeyError:
+        print(f'SQS Queue URL not found for queue "{sqs_queue_name}"')
+        return None
+
+
+def send_sqs_message(sqs_queue_url: str, msg_body: PipelineSignalMessage) -> bool:
+    try:
+        sqs_client.send_message(QueueUrl=sqs_queue_url, MessageBody=json.dumps(asdict(msg_body)))
+        return True
+    except sqs_client.exceptions.UnsupportedOperation:
+        print(f'Unable to post message to queue at URL "{sqs_queue_url}"')
+        return False
+
+
 def handler(event, context):
+    if not s3_bucket or not sqs_pipeline_signal:
+        print(
+            '"INSIGHTS_BUCKET_NAME" and "SQS_PIPELINE_SIGNAL_NAME" environment variables must be specified'
+        )
+        return
+
+    signal_queue_url = get_sqs_queue_url(sqs_pipeline_signal)
+    if not signal_queue_url:
+        return
+
     # We take only the first record, if it exists
     try:
         record = event["Records"][0]
@@ -129,5 +169,15 @@ def handler(event, context):
         text=True,
         check=False,
     )
+
+    # Signal the outcome of the locust test run
+    pipeline_signal_msg = PipelineSignalMessage(
+        function_name=context.function_name,
+        result="SUCCESS" if process.returncode == 0 else "FAILURE",
+        request_id=context.aws_request_id,
+        log_stream_name=context.log_stream_name,
+        log_group_name=context.log_group_name,
+    )
+    send_sqs_message(signal_queue_url, pipeline_signal_msg)
 
     return process.stdout
