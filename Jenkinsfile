@@ -270,10 +270,17 @@ try {
 						)
 
 						awsAssumeRole()
-						serverScripts.runServerRegression(
+						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
-							gitBranchName: gitBranchName
+							gitBranchName: gitBranchName,
+							this.&awsAssumeRole
 						)
+
+						if (hasRegressionRunSucceeded) {
+							println 'Regression suite passed, proceeding to next stage...'
+						} else {
+							error('Regression suite failed, check the CloudWatch logs above for more details')
+						}
 					}
 				}
 			}
@@ -349,10 +356,17 @@ try {
 							)
 
 							awsAssumeRole()
-							serverScripts.runServerRegression(
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+								gitBranchName: gitBranchName,
+								this.&awsAssumeRole
 							)
+
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								error('Regression suite failed, check the CloudWatch logs above for more details')
+							}
 						}
 					}
 				} else {
@@ -407,9 +421,18 @@ try {
 							)
 
 							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
-							// serverScripts.runServerRegression(
+							// awsAssumeRole()
+							// hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							// 	bfdEnv: bfdEnv,
+							// 	gitBranchName: gitBranchName,
+							// 	this.&awsAssumeRole
 							// )
+
+							// if (hasRegressionRunSucceeded) {
+							// 	println 'Regression suite passed, proceeding to next stage...'
+							// } else {
+							// 	error('Regression suite failed, check the CloudWatch logs above for more details')
+							// }
 						}
 					}
 				} else {
