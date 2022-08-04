@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.data.utilities.NPIApp;
+package gov.cms.bfd.data.npi.utility;
 
 import com.google.common.base.Strings;
 import java.io.BufferedReader;
