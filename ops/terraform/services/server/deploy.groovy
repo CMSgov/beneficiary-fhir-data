@@ -1,3 +1,8 @@
+#!/usr/bin/env groovy
+
+// Load the sqs-specific methods
+sqs = load('ops/terraform/services/common/sqs.groovy')
+
 /* Deploys regression test suite via terraform
  * @param args a {@link Map} must include `bfdEnv`; optionally `dockerImageTagOverride`
  * <ul>
@@ -57,10 +62,7 @@ def runServerRegression(Map args = [:]) {
     gitBranchName = args.gitBranchName
 
     locustSqsQueueName = "bfd-${bfdEnv}-server-regression"
-    locustSqsQueueUrl = sh(
-        returnStdout: true,
-        script: "aws sqs get-queue-url --queue-name ${locustSqsQueueName} --output text"
-    ).trim()
+    locustSqsQueueUrl = sqs.getQueueUrl(locustSqsQueueName)
 
     currentBuildId = currentBuild.id
     lastSuccessfulBuildID = getLastSuccessfulBuildNum()
@@ -80,14 +82,11 @@ def runServerRegression(Map args = [:]) {
         'compare_tag': "build${lastSuccessfulBuildID}__${sanitizedBranchName}",
         'store_tag': "build${currentBuildId}__${sanitizedBranchName}"
     ])
+    sqs.sendMessage(
+        sqsQueueUrl: locustSqsQueueUrl,
+        sqsMessage: sqsMessage
+    )
 
-    withEnv(["SQS_QUEUE_URL=${locustSqsQueueUrl}", "MESSAGE=${sqsMessage}"]) {
-        sh(returnStdout: true,
-            script: '''
-aws sqs send-message \
---queue-url "$SQS_QUEUE_URL" \
---message-body "$MESSAGE"
-''')}
 }
 
 /* Gets the build ID of the last successful Jenkins job build of the current branch */

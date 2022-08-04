@@ -31,8 +31,7 @@ def purgeQueue(String sqsQueueName, String awsRegion = 'us-east-1') {
     return result
 }
 
-/* Wrapping `aws sqs receive-message`, this returns a JSON array of migrator messages from sqs.
- * Messages contain `pid`, `start_time`, `stop_time`, `status`, `code keys` and string values.
+/* Wrapping `aws sqs receive-message`, this returns a JSON array of message bodies and their receipts from sqs.
  *
  * @param args a {@link Map} must include maxMessages, sqsQueueUrl, visibilityTimeoutSeconds,
  * and waitTimeSeconds.
@@ -79,6 +78,30 @@ jq '.? | map({receipt: .ReceiptHandle, body: .Body | fromjson}) | unique'
         jsonMessages = readJSON text: '[]'
     }
     return jsonMessages
+}
+
+/* Wrapping `aws sqs send-message`, this sends a message to a given SQS queue
+ * Messages contain `pid`, `start_time`, `stop_time`, `status`, `code keys` and string values.
+ *
+ * @param args a {@link Map} must include sqsQueueUrl and sqsMessage
+ * <ul>
+ * <li>awsRegion targeted aws region. Defaults to 'us-east-1'</li>
+ * <li>sqsQueueUrl targeted sqs queue url</li>
+ * <li>sqsMessage string the message to send to the SQS queue</li>
+ * </ul>
+ */
+def sendMessage(Map args = [:]) {
+    awsRegion = args.awsRegion ?: 'us-east-1'
+    sqsQueueUrl = args.sqsQueueUrl
+    sqsMessage = args.sqsMessage
+
+    withEnv(["SQS_QUEUE_URL=${sqsQueueUrl}", "MESSAGE=${sqsMessage}"]) {
+    sh(returnStdout: true,
+        script: '''
+aws sqs send-message \
+--queue-url "$SQS_QUEUE_URL" \
+--message-body "$MESSAGE"
+    ''')}
 }
 
 return this
