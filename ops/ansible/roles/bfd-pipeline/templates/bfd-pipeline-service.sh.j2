@@ -24,8 +24,8 @@ export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
 {% endif %}
 
 # The AWS OpenTelemetry Agent running in the WAR needs some additional environment variables, so set those.
-{% if data_pipeline_aws_opentelemetry_app_name and data_pipeline_aws_opentelemetry_environment is defined %}
-export OTEL_RESOURCE_ATTRIBUTES=service.name='{{ data_pipeline_new_relic_app_name }}',service.namespace='{{ data_pipeline_new_relic_environment }}
+{% if (data_pipeline_aws_opentelemetry_app_name and data_pipeline_aws_opentelemetry_environment) is defined %}
+export OTEL_RESOURCE_ATTRIBUTES='service.name={{ data_pipeline_aws_opentelemetry_app_name }},service.namespace={{ data_pipeline_aws_opentelemetry_environment }}'
 export OTEL_TRACES_SAMPLER=xray
 {% endif %}
 
