@@ -133,8 +133,9 @@ class StatsFileLoader(StatsLoader):
                 loaded_metadata.num_total_users == self.metadata.num_total_users,
                 loaded_metadata.num_users_per_second == self.metadata.num_users_per_second,
                 loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
-                # Pick some delta that the runtimes should be under -- in this case, we're using 1 second
-                loaded_metadata.total_runtime - self.metadata.total_runtime < 1.0,
+                # Pick some delta that the runtimes should be under -- in this case, we're using 3 seconds
+                # TODO: Determine the right delta for checking for matching runtimes
+                loaded_metadata.total_runtime - self.metadata.total_runtime < 3.0,
             ]
         )
 
@@ -238,7 +239,8 @@ class StatsAthenaLoader(StatsLoader):
         generated_checks = [self.__generate_check_str(field) for field in filtered_fields]
         explicit_checks = [
             f"metadata.tag='{self.stats_config.comp_tag}'",
-            f"(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0",
+            # TODO: Determine the right delta for checking for matching runtimes
+            f"(metadata.total_runtime - {self.metadata.total_runtime}) < 3.0",
         ]
 
         return " AND ".join(generated_checks + explicit_checks)
