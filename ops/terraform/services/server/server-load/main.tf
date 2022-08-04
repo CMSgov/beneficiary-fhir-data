@@ -49,6 +49,7 @@ resource "aws_lambda_function" "controller" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
+      SQS_QUEUE_NAME  = resource.aws_sqs_queue.broker.name
     }
   }
 
@@ -73,6 +74,7 @@ resource "aws_lambda_function" "node" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
+      SQS_QUEUE_NAME  = resource.aws_sqs_queue.broker.name
     }
   }
 

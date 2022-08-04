@@ -25,7 +25,7 @@ sequenceDiagram
         Note right of b: Sleep interval should be a variable
         b ->> sqs: Fetch messages in queue
     end
-    break On ASG lifecycle hook "autoscaling:EC2_INSTANCE_LAUNCHING"
+    break On ASG lifecycle hook "EC2_INSTANCE_LAUNCHING"
         asg -->> sqs: Scaling event has ocurred
         sqs -->> b: Broker receives scaling event
         b ->> b: stop starting worker nodes
