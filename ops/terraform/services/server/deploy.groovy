@@ -49,10 +49,12 @@ terraform apply \
  * @param args a {@link Map} must include `bfdEnv`
  * <ul>
  * <li>bfdEnv string represents the targeted BFD SDLC Environment
+ * <li>gitBranchName string the name of the current git branch being ran
  * </ul>
 */
 def runServerRegression(Map args = [:]) {
     bfdEnv = args.bfdEnv
+    gitBranchName = args.gitBranchName
 
     locustSqsQueueName = "bfd-${bfdEnv}-server-regression"
     locustSqsQueueUrl = sh(
@@ -65,10 +67,9 @@ def runServerRegression(Map args = [:]) {
     // Athena only accepts partitions (which the compare/store tags, which are constructed
     // from the branch name, are) with alphanumeric characters and the '_' character. We need
     // to sanitize the branch name in case it contains invalid characters
-    sanitizedBranchName = sh(
-        returnStdout: true,
-        script: "echo \"${env.GIT_LOCAL_BRANCH}\" | sed 's/[^0-9a-zA-Z_]*//g'"
-    ).trim()
+    sanitizedBranchName = gitBranchName.replaceAll(/[^0-9a-zA-Z_]/, '_')
+                                       .replaceAll(/[\_]+/, '_')
+                                       .toLowerCase()
 
     sqsMessage = writeJSON(returnText: true, json: [
         'host': "https://${bfdEnv}.bfd.cms.gov",

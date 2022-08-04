@@ -272,6 +272,7 @@ try {
 						awsAssumeRole()
 						serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
+							gitBranchName: gitBranchName
 						)
 					}
 				}
@@ -350,6 +351,7 @@ try {
 							awsAssumeRole()
 							serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
 							)
 						}
 					}
