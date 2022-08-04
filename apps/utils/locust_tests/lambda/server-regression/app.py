@@ -3,6 +3,7 @@ import os
 import subprocess
 import urllib.parse
 from dataclasses import asdict, dataclass
+from enum import Enum
 from typing import Optional
 
 import boto3
@@ -32,10 +33,15 @@ class InvokeEvent:
 @dataclass
 class PipelineSignalMessage:
     function_name: str
-    result: str
+    result: "TestResult"
     request_id: str
     log_stream_name: str
     log_group_name: str
+
+
+class TestResult(str, Enum):
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
@@ -77,6 +83,17 @@ def send_sqs_message(sqs_queue_url: str, msg_body: PipelineSignalMessage) -> boo
         return False
 
 
+def send_pipeline_signal(signal_queue_url: str, result: TestResult, context) -> None:
+    pipeline_signal_msg = PipelineSignalMessage(
+        function_name=context.function_name,
+        result=result,
+        request_id=context.aws_request_id,
+        log_stream_name=context.log_stream_name,
+        log_group_name=context.log_group_name,
+    )
+    send_sqs_message(signal_queue_url, pipeline_signal_msg)
+
+
 def handler(event, context):
     if not s3_bucket or not sqs_pipeline_signal:
         print(
@@ -93,6 +110,7 @@ def handler(event, context):
         record = event["Records"][0]
     except IndexError:
         print("Invalid queue message, no records found")
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
         return
 
     # We extract the body, and attempt to convert from JSON
@@ -100,6 +118,7 @@ def handler(event, context):
         body = json.loads(record["body"])
     except json.JSONDecodeError:
         print("Record body was not valid JSON")
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
         return
 
     # We then attempt to extract an InvokeEvent instance from
@@ -108,6 +127,7 @@ def handler(event, context):
         invoke_event = InvokeEvent(**body)
     except TypeError as ex:
         print(f"Message body missing required keys: {str(ex)}")
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
         return
 
     # Assuming we get this far, invoke_event should have the information
@@ -127,6 +147,7 @@ def handler(event, context):
     )
 
     if not cluster_id or not username or not raw_password or not cert_key or not cert:
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
         return
 
     cert_path = "/tmp/bfd_test_cert.pem"
@@ -137,6 +158,7 @@ def handler(event, context):
     db_uri = get_rds_db_uri(cluster_id)
 
     if not db_uri:
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
         return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
@@ -171,13 +193,10 @@ def handler(event, context):
     )
 
     # Signal the outcome of the locust test run
-    pipeline_signal_msg = PipelineSignalMessage(
-        function_name=context.function_name,
-        result="SUCCESS" if process.returncode == 0 else "FAILURE",
-        request_id=context.aws_request_id,
-        log_stream_name=context.log_stream_name,
-        log_group_name=context.log_group_name,
+    send_pipeline_signal(
+        signal_queue_url=signal_queue_url,
+        result=TestResult.SUCCESS if process.returncode == 0 else TestResult.FAILURE,
+        context=context,
     )
-    send_sqs_message(signal_queue_url, pipeline_signal_msg)
 
     return process.stdout
