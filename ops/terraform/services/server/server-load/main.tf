@@ -96,10 +96,10 @@ resource "aws_lambda_function" "broker" {
   timeout     = local.lambda_timeout_seconds
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      SQS_QUEUE_NAME = resource.aws_sqs_queue.broker.name
+      BFD_ENVIRONMENT        = local.env
+      SQS_QUEUE_NAME         = resource.aws_sqs_queue.broker.name
       CONTROLLER_LAMBDA_NAME = resource.aws_lambda_function.controller.name
-      NODE_LAMBDA_NAME = resource.aws_lambda_function.node.name
+      NODE_LAMBDA_NAME       = resource.aws_lambda_function.node.name
     }
   }
 
@@ -127,25 +127,10 @@ resource "aws_sqs_queue" "broker" {
   kms_master_key_id          = local.kms_key_id
 }
 
-resource "aws_sns_topic" "scaling_topic" {
-  name = "${local.queue_name}-scaling"
-}
-
-# Send scaling notifications from SNS to the SQS queue.
-resource "aws_sns_topic_subscription" "scaling_subscription" {
-  topic_arn = aws_sns_topic.scaling_topic.arn
-  protocol = "sqs"
-  endpoint = aws_sqs_queue.broker.arn
-}
-
-resource "aws_autoscaling_notification" "asn" {
-  group_names = [
-    data.aws_auto_scaling_group.asg.name
-  ]
-
-  notifications = [
-    "autoscaling:EC2_INSTANCE_LAUNCH",
-  ]
-
-  topic_arn = aws_sns_topic.scaling_topic
+# Send scaling event notifications to the broker's SQS queue
+resource "aws_autoscaling_lifecycle_hook" "scaling_hook" {
+  name                    = "${local.queue_name}-scaling-hook"
+  autoscaling_group_name  = data.aws_auto_scaling_group.asg.name
+  notification_target_arn = aws_sqs_queue.broker.arn
+  lifecycle_transition    = "autoscaling:EC2_INSTANCE_LAUNCHING"
 }
