@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 public final class DataServerLauncherAppIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
-  /** Regex for access log entries */
+  /** Regex for access log entries. */
   private static final String accessLogPattern =
       new StringJoiner(" ")
           .add("^(\\S+)") // Address or Hostname
@@ -62,7 +62,7 @@ public final class DataServerLauncherAppIT {
 
   /**
    * Verifies the regex for valdiating our access log entries adequately avoids edge cases that
-   * could break our alerts, which depend on logs
+   * could break our alerts, which depend on logs.
    */
   @Test
   public void checkAccessLogFormat() {
@@ -170,13 +170,12 @@ public final class DataServerLauncherAppIT {
   }
 
   /**
-   * Verifies that {@link DataServerLauncherApp} starts up as expected when properly configured
+   * Verifies that {@link DataServerLauncherApp} starts up as expected when properly configured.
    *
    * @throws IOException (indicates a test error)
-   * @throws InterruptedException
    */
   @Test
-  public void normalUsage() throws IOException, InterruptedException {
+  public void normalUsage() throws IOException {
     ServerProcess serverProcess = null;
     try {
       // Launch the server.

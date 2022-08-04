@@ -123,7 +123,7 @@ class RDABridgeIT {
 
     List<MessageOrBuilder> results = new ArrayList<>();
 
-    Sink<MessageOrBuilder> testSink =
+    try (Sink<MessageOrBuilder> testSink =
         new Sink<>() {
           @Override
           public void write(MessageOrBuilder value) {
@@ -132,54 +132,55 @@ class RDABridgeIT {
 
           @Override
           public void close() throws IOException {}
-        };
+        }) {
 
-    final int FISS_ID = 0;
-    final int MCS_ID = 1;
+      final int FISS_ID = 0;
+      final int MCS_ID = 1;
 
-    DataSampler<String> dataSampler =
-        DataSampler.<String>builder()
-            .maxValues(10_000)
-            .registerSampleSet(FISS_ID, 0.5f)
-            .registerSampleSet(MCS_ID, 0.5f)
-            .build();
+      DataSampler<String> dataSampler =
+          DataSampler.<String>builder()
+              .maxValues(10_000)
+              .registerSampleSet(FISS_ID, 0.5f)
+              .registerSampleSet(MCS_ID, 0.5f)
+              .build();
 
-    assertDoesNotThrow(
-        () -> {
-          bridge.executeTransformation(
-              RDABridge.SourceType.FISS,
-              resourcesDir,
-              inpatientData,
-              new WrappedCounter(0),
-              mbiMap,
-              testSink,
-              dataSampler,
-              FISS_ID);
-          bridge.executeTransformation(
-              RDABridge.SourceType.MCS,
-              resourcesDir,
-              carrierData,
-              new WrappedCounter(0),
-              mbiMap,
-              testSink,
-              dataSampler,
-              MCS_ID);
+      assertDoesNotThrow(
+          () -> {
+            bridge.executeTransformation(
+                RDABridge.SourceType.FISS,
+                resourcesDir,
+                inpatientData,
+                new WrappedCounter(0),
+                mbiMap,
+                testSink,
+                dataSampler,
+                FISS_ID);
+            bridge.executeTransformation(
+                RDABridge.SourceType.MCS,
+                resourcesDir,
+                carrierData,
+                new WrappedCounter(0),
+                mbiMap,
+                testSink,
+                dataSampler,
+                MCS_ID);
 
-          Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-          IdHasher.Config hasherConfig = new IdHasher.Config(10, "justsomestring");
-          FissClaimTransformer fissTransformer =
-              new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
-          McsClaimTransformer mcsTransformer =
-              new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+            Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+            IdHasher.Config hasherConfig = new IdHasher.Config(10, "justsomestring");
+            FissClaimTransformer fissTransformer =
+                new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+            McsClaimTransformer mcsTransformer =
+                new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
-          for (MessageOrBuilder message : results) {
-            if (message instanceof FissClaimChange) {
-              fissTransformer.transformClaim((FissClaimChange) message);
-            } else {
-              mcsTransformer.transformClaim((McsClaimChange) message);
+            for (MessageOrBuilder message : results) {
+              if (message instanceof FissClaimChange) {
+                fissTransformer.transformClaim((FissClaimChange) message);
+              } else {
+                mcsTransformer.transformClaim((McsClaimChange) message);
+              }
             }
-          }
-        });
+          });
+    }
   }
 
   private Path getResourcePath() {

@@ -140,7 +140,10 @@ public class AbstractClaimRdaSinkTest {
             eq(VERSION), eq(badMessage), any(DataTransformer.TransformationException.class));
   }
 
-  /** Verify that {@link AbstractClaimRdaSink#transformMessage} success updates success metric. */
+  /**
+   * Verify that {@link AbstractClaimRdaSink#transformMessage(String, Object)} success updates
+   * success metric.
+   */
   @Test
   public void testSingleMessageTransformSuccessUpdatesMetric() {
     sink.transformMessage(VERSION, "message");
@@ -150,7 +153,10 @@ public class AbstractClaimRdaSinkTest {
     assertMeterReading(0, "transform failures", metrics.getTransformFailures());
   }
 
-  /** Verify that {@link AbstractClaimRdaSink#transformMessage} failure updates failure metric. */
+  /**
+   * Verify that {@link AbstractClaimRdaSink#transformMessage(String, Object)} failure updates
+   * failure metric.
+   */
   @Test
   public void testSingleMessageTransformFailureUpdatesMetric() {
     doThrow(
@@ -247,6 +253,11 @@ public class AbstractClaimRdaSinkTest {
     @Override
     RdaClaimMessageMetaData createMetaData(RdaChange<String> change) {
       return null;
+    }
+
+    @Override
+    int getInsertCount(String s) {
+      return 1;
     }
 
     @Override

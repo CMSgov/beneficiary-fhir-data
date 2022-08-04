@@ -28,7 +28,7 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
   // Valid system url for productOrService coding
   private static final Set<String> HCPCS_SYSTEM = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
 
-  /** @see Predicate#test(Object) */
+  /** {@inheritDoc} */
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
   @Override
@@ -62,14 +62,7 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
     return containsSamhsa;
   }
 
-  /**
-   * Checks if the given {@link CodeableConcept} contains only known coding systems.
-   *
-   * @param procedureConcept the procedure {@link CodeableConcept} to check
-   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
-   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems, <code>
-   *     false</code> otherwise
-   */
+  /** {@inheritDoc} */
   @Override
   protected boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =

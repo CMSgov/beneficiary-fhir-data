@@ -3,12 +3,19 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Pharmacy Care Team Roles <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBClaimPharmacyTeamRole.html">ValueSet:
- * C4BB Claim Pharmacy CareTeam Roles</a>
+ * C4BB Claim Pharmacy CareTeam Roles</a>.
  */
 public enum C4BBClaimPharmacyTeamRole {
+  /** The primary care provider. * */
   PRIMARY,
+  /** The prescribing provider. * */
   PRESCRIBING;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
       case PRIMARY:
@@ -18,6 +25,11 @@ public enum C4BBClaimPharmacyTeamRole {
     }
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case PRIMARY:
@@ -29,6 +41,11 @@ public enum C4BBClaimPharmacyTeamRole {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case PRIMARY:
@@ -40,6 +57,11 @@ public enum C4BBClaimPharmacyTeamRole {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case PRIMARY:

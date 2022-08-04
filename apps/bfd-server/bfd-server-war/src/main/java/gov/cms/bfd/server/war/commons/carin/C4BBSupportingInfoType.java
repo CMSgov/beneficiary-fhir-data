@@ -3,23 +3,48 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN CodeSystem for Supportin INfo <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
- * C4BB Supporting Info Type Type</a>
+ * C4BB Supporting Info Type Type</a>.
  */
 public enum C4BBSupportingInfoType {
+  /** UB-04 Type of Bill (FL-04) provides specific information for payer purposes. */
   TYPE_OF_BILL,
+  /**
+   * UB-04 Discharge Status (FL-17) indicates the patient’s status as of the discharge date for a
+   * facility stay.
+   */
   DISCHARGE_STATUS,
+  /** NCPDP code indicating whether or not the prescription is a compound. */
   DAYS_SUPPLY,
+  /** NCPDP value indicating the Number of days supply of medication dispensed by the pharmacy. */
   COMPOUND_CODE,
+  /** NCPDP value indicating the number fill of the current dispensed supply (0, 1, 2, etc.). */
   REFILL_NUM,
+  /**
+   * NCPDP code indicating whether the prescription was transmitted as an electronic prescription,
+   * by phone, by fax, or as a written paper copy.
+   */
   RX_ORIGIN_CODE,
+  /** NCPDP code indicating whether the plan adjudicated the claim as a brand or generic drug. */
   BRAND_GENERIC_CODE,
+  /** Dates corresponding with the admission and discharge of the beneficiary to a facility. */
   ADMISSION_PERIOD,
+  /** Date the claim was received by the payer. */
   RECEIVED_DATE;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     return "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType";
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case TYPE_OF_BILL:
@@ -45,6 +70,11 @@ public enum C4BBSupportingInfoType {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case TYPE_OF_BILL:
@@ -70,6 +100,11 @@ public enum C4BBSupportingInfoType {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case TYPE_OF_BILL:

@@ -6,5 +6,10 @@ package gov.cms.bfd.server.war.adapters;
  */
 public interface ItemComponent {
 
+  /**
+   * Gets the product or service.
+   *
+   * @return the product or service
+   */
   CodeableConcept getProductOrService();
 }

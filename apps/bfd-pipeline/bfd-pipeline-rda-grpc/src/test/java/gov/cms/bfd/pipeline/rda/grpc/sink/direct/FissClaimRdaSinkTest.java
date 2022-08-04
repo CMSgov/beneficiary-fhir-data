@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -86,6 +87,7 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.calls",
             "FissClaimRdaSink.change.latency.millis",
             "FissClaimRdaSink.failures",
+            "FissClaimRdaSink.insertCount",
             "FissClaimRdaSink.lastSeq",
             "FissClaimRdaSink.successes",
             "FissClaimRdaSink.transform.failures",
@@ -124,6 +126,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
     assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertHistogramReading(3, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
@@ -131,6 +134,10 @@ public class FissClaimRdaSinkTest {
   public void mergeFatalError() {
     final List<RdaChange<RdaFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
+    doReturn(mock(RdaClaimMessageMetaData.class))
+        .when(entityManager)
+        .merge(any(RdaClaimMessageMetaData.class));
+    doReturn(mock(RdaFissClaim.class)).when(entityManager).merge(any(RdaFissClaim.class));
     doThrow(new RuntimeException("oops")).when(entityManager).merge(batch.get(1).getClaim());
 
     try {
@@ -157,6 +164,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(1, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
     assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertHistogramReading(1, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
@@ -199,6 +207,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
+    assertHistogramReading(0, "database insert count", metrics.getInsertCount());
   }
 
   /**

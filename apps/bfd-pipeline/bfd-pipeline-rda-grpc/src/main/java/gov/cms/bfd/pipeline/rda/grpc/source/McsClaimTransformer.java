@@ -272,6 +272,7 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
               errors.size(), change.getSeq(), from.getIdrClmHdIcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
+
     return new RdaChange<>(
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),

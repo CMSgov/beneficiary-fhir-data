@@ -24,12 +24,8 @@ import javax.persistence.criteria.Root;
 /** Provides common logic for performing DB interactions */
 public class ClaimDao {
 
-  private static final String CLAIM_BY_MBI_METRIC_QUERY = "claim_by_mbi";
-  private static final String CLAIM_BY_MBI_METRIC_NAME =
-      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_MBI_METRIC_QUERY);
-  private static final String CLAIM_BY_ID_METRIC_QUERY = "claim_by_id";
-  private static final String CLAIM_BY_ID_METRIC_NAME =
-      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_ID_METRIC_QUERY);
+  static final String CLAIM_BY_MBI_QUERY = "claim_by_mbi";
+  static final String CLAIM_BY_ID_QUERY = "claim_by_id";
 
   private final EntityManager entityManager;
   private final MetricRegistry metricRegistry;
@@ -45,26 +41,14 @@ public class ClaimDao {
   /**
    * Gets an entity by it's ID for the given claim type.
    *
-   * @param type The type of claim to retrieve.
+   * @param resourceType The type of claim to retrieve.
    * @param id The id of the claim to retrieve.
+   * @param <T> The entity type being retrieved.
    * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
-  public Object getEntityById(ResourceTypeV2<?> type, String id) {
-    return getEntityById(type.getEntityClass(), type.getEntityIdAttribute(), id);
-  }
-
-  /**
-   * Gets an entity by it's ID for the given claim type.
-   *
-   * @param entityClass The type of entity to retrieve.
-   * @param entityIdAttribute The name of the entity's id attribute.
-   * @param id The id value of the claim to retrieve.
-   * @param <T> The entity type of the claim.
-   * @return The retrieved entity of the given type for the requested claim id.
-   */
-  @VisibleForTesting
-  <T> T getEntityById(Class<T> entityClass, String entityIdAttribute, String id) {
-    T claimEntity = null;
+  public <T> T getEntityById(ResourceTypeV2<?, T> resourceType, String id) {
+    final Class<T> entityClass = resourceType.getEntityClass();
+    final String entityIdAttribute = resourceType.getEntityIdAttribute();
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<T> criteria = builder.createQuery(entityClass);
@@ -73,45 +57,46 @@ public class ClaimDao {
     criteria.select(root);
     criteria.where(builder.equal(root.get(entityIdAttribute), id));
 
-    Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_ID_METRIC_NAME).time();
+    T claimEntity = null;
+
+    Timer.Context timerClaimQuery =
+        getTimerForResourceQuery(resourceType, CLAIM_BY_ID_QUERY).time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
     } finally {
-      logQueryMetric(timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
+      logQueryMetric(
+          resourceType, CLAIM_BY_ID_QUERY, timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
     }
 
     return claimEntity;
   }
 
   /**
-   * Find records by MBI (hashed or unhashed) based on a given {@link Mbi} attribute name and search
-   * value with a given last updated range.
+   * Find records by MBI (hashed or unhashed) for a given {@link ResourceTypeV2} using search value
+   * plus optional last updated and service date ranges.
    *
-   * @param entityClass The entity type to retrieve.
-   * @param mbiRecordAttributeName The name of the entity's mbiRecord attribute..
-   * @param mbiSearchValue The desired value of the attribute be searched on.
-   * @param isMbiSearchValueHashed True iff the mbiSearchValue is a hashed MBI.
+   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
+   * @param mbiSearchValue The desired value of the mbi attribute be searched on.
+   * @param isMbiSearchValueHashed True if the mbiSearchValue is a hashed MBI.
    * @param lastUpdated The range of lastUpdated values to search on.
-   * @param serviceDate Date range of the desired service date to search on.
-   * @param idAttributeName The name of the entity attribute denoting its ID
-   * @param endDateAttributeName The name of the entity attribute denoting service end date.
+   * @param serviceDate The range of the desired service date to search on.
    * @param <T> The entity type being retrieved.
    * @return A list of entities of type T retrieved matching the given parameters.
    */
   public <T> List<T> findAllByMbiAttribute(
-      Class<T> entityClass,
-      String mbiRecordAttributeName,
+      ResourceTypeV2<?, T> resourceType,
       String mbiSearchValue,
       boolean isMbiSearchValueHashed,
       DateRangeParam lastUpdated,
-      DateRangeParam serviceDate,
-      String idAttributeName,
-      String endDateAttributeName) {
-    List<T> claimEntities = null;
+      DateRangeParam serviceDate) {
+    final Class<T> entityClass = resourceType.getEntityClass();
+    final String mbiRecordAttributeName = resourceType.getEntityMbiRecordAttribute();
+    final String idAttributeName = resourceType.getEntityIdAttribute();
+    final String endDateAttributeName = resourceType.getEntityEndDateAttribute();
 
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<T> criteria = builder.createQuery(entityClass);
-    Root<T> root = criteria.from(entityClass);
+    final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    final CriteriaQuery<T> criteria = builder.createQuery(entityClass);
+    final Root<T> root = criteria.from(entityClass);
 
     criteria.select(root);
     criteria.where(
@@ -131,11 +116,18 @@ public class ClaimDao {
     // This sort will ensure predictable responses for any current/future testing needs
     criteria.orderBy(builder.asc(root.get(idAttributeName)));
 
-    Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
+    List<T> claimEntities = null;
+
+    Timer.Context timerClaimQuery =
+        getTimerForResourceQuery(resourceType, CLAIM_BY_MBI_QUERY).time();
     try {
       claimEntities = entityManager.createQuery(criteria).getResultList();
     } finally {
-      logQueryMetric(timerClaimQuery.stop(), claimEntities == null ? 0 : claimEntities.size());
+      logQueryMetric(
+          resourceType,
+          CLAIM_BY_MBI_QUERY,
+          timerClaimQuery.stop(),
+          claimEntities == null ? 0 : claimEntities.size());
     }
 
     return claimEntities;
@@ -148,8 +140,11 @@ public class ClaimDao {
    * @param querySize The number of entities returned by the query.
    */
   @VisibleForTesting
-  void logQueryMetric(long queryTime, int querySize) {
-    TransformerUtilsV2.recordQueryInMdc(CLAIM_BY_MBI_METRIC_QUERY, queryTime, querySize);
+  void logQueryMetric(
+      ResourceTypeV2<?, ?> resourceType, String queryName, long queryTime, int querySize) {
+    final String combinedQueryId =
+        String.format("%s_%s", queryName, resourceType.getNameForMetrics());
+    TransformerUtilsV2.recordQueryInMdc(combinedQueryId, queryTime, querySize);
   }
 
   /**
@@ -245,6 +240,7 @@ public class ClaimDao {
     return builder.and(predicates.toArray(new Predicate[0]));
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -254,8 +250,34 @@ public class ClaimDao {
         && Objects.equals(metricRegistry, claimDao.metricRegistry);
   }
 
+  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     return Objects.hash(entityManager, metricRegistry);
+  }
+
+  /**
+   * Obtains a {@link Timer} metric to time a query on a given {@link ResourceTypeV2}.
+   *
+   * @param resourceType The type of claim being retrieved.
+   * @param queryName used to specify the particular query in the metric name
+   * @return A drop wizard {@link Timer}
+   */
+  private Timer getTimerForResourceQuery(ResourceTypeV2<?, ?> resourceType, String queryName) {
+    return metricRegistry.timer(createMetricNameForResourceQuery(resourceType, queryName));
+  }
+
+  /**
+   * Creates a metric name for a query on a given {@link ResourceTypeV2}.
+   *
+   * @param resourceType The type of claim being retrieved.
+   * @param queryName used to specify the particular query in the metric name
+   * @return A valid drop wizard metric name
+   */
+  @VisibleForTesting
+  static String createMetricNameForResourceQuery(
+      ResourceTypeV2<?, ?> resourceType, String queryName) {
+    return MetricRegistry.name(
+        ClaimDao.class.getSimpleName(), "query", queryName, resourceType.getNameForMetrics());
   }
 }
