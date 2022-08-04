@@ -179,11 +179,17 @@ boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, Str
 // print formatted migrator messages
 def printServerRegressionMessage(Map message) {
     body = message.body
+
+    cloudWatchUrl = getCloudWatchLogUrl(
+        logGroupName: body.log_group_name,
+        logStreamName: body.log_stream_name
+    )
     println "Timestamp: ${java.time.LocalDateTime.now().toString()}"
     println """${body.function_name} finished running with a ${body.result} result, more information:
                 |   Lambda Request ID: ${body.request_id}
                 |   CloudWatch log stream name: ${body.log_stream_name}
-                |   CloudWatch log group name: ${body.log_group_name}""".stripMargin()
+                |   CloudWatch log group name: ${body.log_group_name}
+                |   CloudWatch URL: ${cloudWatchUrl}""".stripMargin()
 }
 
 /* Gets the build ID of the last successful Jenkins job build of the current branch */
@@ -200,6 +206,23 @@ def getLastSuccessfulBuildNum() {
     }
 
     return lastSuccessfulBuildID
+}
+
+/* Builds a CloudWatch log URL given a Log Group and a Log Stream */
+String getCloudWatchLogUrl(Map args = [:]) {
+    awsRegion = args.awsRegion ?: 'us-east-1'
+    logGroupName = args.logGroupName
+    logStreamName = args.logStreamName
+
+    cloudWatchUrl = [
+        "https://${awsRegion}.console.aws.amazon.com/cloudwatch/home?region=${awsRegion}",
+        "#logsV2:log-groups/log-group/",
+        URLEncoder.encode(logGroupName, "UTF-8"),
+        '/log-events/',
+        URLEncoder.encode(logStreamName, "UTF-8")
+    ].join("")
+
+    return cloudWatchUrl
 }
 
 return this
