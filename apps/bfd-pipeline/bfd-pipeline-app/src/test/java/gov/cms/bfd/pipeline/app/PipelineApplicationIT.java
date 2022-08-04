@@ -200,6 +200,7 @@ public final class PipelineApplicationIT {
           new DataSetManifest(
               Instant.now(),
               0,
+              false,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
