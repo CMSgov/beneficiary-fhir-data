@@ -76,6 +76,11 @@
 		<!-- The version of Java that we'll use for everything. -->
 		<javaSourceVersion>11</javaSourceVersion>
 
+		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
+			they are reproducible bit-by-bit no matter when/where they are generated.
+			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+		<project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
+
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -552,7 +557,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.2.2</version>
 					<configuration>
 						<!-- Add some extra information to the JAR manifests. Helpful for folks 
 							looking at a JAR, trying to figure out what it is. -->
@@ -567,7 +572,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -577,7 +582,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -724,6 +729,13 @@ checkJavaFormat
 					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
 					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
 					<quiet>true</quiet>
+					<!-- This notimestamp option does not make our *-javadoc.jar files completely
+						reproducible, but the option is recommended by Maven for a reproducible
+						build in general. However, we are not using the javadocs in any of the war
+						and zip artifacts that we need to be reproducible.
+						See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
+					 -->
+					<notimestamp>true</notimestamp>
 				</configuration>
 				<executions>
 					<execution>

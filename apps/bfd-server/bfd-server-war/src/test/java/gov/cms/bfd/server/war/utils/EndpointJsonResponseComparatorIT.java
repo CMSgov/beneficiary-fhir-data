@@ -333,6 +333,7 @@ public final class EndpointJsonResponseComparatorIT {
     Collections.sort(
         searchParams,
         new Comparator<JsonNode>() {
+          /** {@inheritDoc} */
           @Override
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("name").toString();
@@ -405,6 +406,7 @@ public final class EndpointJsonResponseComparatorIT {
     Collections.sort(
         diagnosisTypes,
         new Comparator<JsonNode>() {
+          /** {@inheritDoc} */
           @Override
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("coding").get(0).get("code").toString();
@@ -1304,6 +1306,7 @@ public final class EndpointJsonResponseComparatorIT {
       this.f = f;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void accept(JsonNode t) {
       if (f.apply(t)) {

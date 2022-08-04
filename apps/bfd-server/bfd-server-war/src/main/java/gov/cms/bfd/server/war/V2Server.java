@@ -71,7 +71,7 @@ public class V2Server extends RestfulServer {
     setServerConformanceProvider(capabilityStatementProvider);
   }
 
-  /** @see ca.uhn.fhir.rest.server.RestfulServer#initialize() */
+  /** {@inheritDoc} */
   @SuppressWarnings("unchecked")
   @Override
   protected void initialize() throws ServletException {

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class R4EobSamhsaMatcher extends AbstractR4SamhsaMatcher<ExplanationOfBenefit> {
 
-  /** @see Predicate#test(Object) */
+  /** {@inheritDoc} */
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
   @Override
