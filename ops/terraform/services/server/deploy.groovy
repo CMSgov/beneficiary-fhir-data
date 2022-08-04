@@ -118,9 +118,10 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion ?: 'us-east-1'
     heartbeatInterval = args.heartbeatInterval
+    maxRetries = args.maxRetries ?: 15
 
     sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
-    while (true) {
+    for (int i = 0; i < maxRetries; i++) {
         authFunction()
         messages = sqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
@@ -142,7 +143,7 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
             testRunResult = msg.body.result
             return testRunResult == 'SUCCESS' ? true : false
         } else {
-            println "No messages posted to ${sqsQueueName} yet, waiting ${heartbeatInterval} seconds to check again..."
+            println "[Attempt ${i + 1}/${maxRetries}] No messages posted to ${sqsQueueName} yet, waiting ${heartbeatInterval} seconds to check again..."
         }
 
         sleep(heartbeatInterval)
