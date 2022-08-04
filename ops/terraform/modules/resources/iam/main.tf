@@ -71,10 +71,11 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
   role       = aws_iam_role.instance.id
   policy_arn = data.aws_iam_policy.cloudwatch_agent_policy.arn
 }
+
 # attach AWS managed AWSXRayDaemonWriteAccess to all EC2 instances
 resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
   role       = aws_iam_role.instance.id
-  policy_arn = aws_iam_policy.cloudwatch_xray_policy.arn
+  policy_arn = data.aws_iam_policy.cloudwatch_xray_policy.arn
 }
 
 
