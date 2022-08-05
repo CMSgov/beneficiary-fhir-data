@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
@@ -70,7 +71,8 @@ public class FissTransformerIT {
       ExpectedValues expectedValues,
       Exception expectedException) {
     try {
-      final Set<String> jsonCompareIgnorePaths = Set.of("/timestamp");
+      final Set<String> jsonCompareIgnorePaths =
+          Set.of("/timestamp", "/source/transmissionTimestamp", "/source/extractDate");
 
       Optional<MessageOrBuilder> actualResponse =
           new FissTransformer(arguments.getMbiMap())
@@ -131,13 +133,7 @@ public class FissTransformerIT {
 
     // Expected values
     FissClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
-    FissClaimChange expectedClaimChange =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+    FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(1);
@@ -169,13 +165,7 @@ public class FissTransformerIT {
 
     // Expected values
     FissClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
-    FissClaimChange expectedClaimChange =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+    FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(1);
@@ -203,12 +193,7 @@ public class FissTransformerIT {
     dataMap.put("CLM_LINE_NUM", "2");
     Parser.Data<String> data = TestData.createDataParser(dataMap);
     FissClaimChange recurringClaim =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(TestData.createDefaultClaimBuilder().build())
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+        createFissClaimChange(TestData.createDefaultClaimBuilder().build());
     WrappedMessage wrappedMessage = new WrappedMessage();
     wrappedMessage.setLineNumber(1);
     wrappedMessage.setMessage(recurringClaim);
@@ -218,13 +203,7 @@ public class FissTransformerIT {
 
     // Expected values
     FissClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
-    FissClaimChange expectedClaimChange =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+    FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(2);
@@ -251,12 +230,7 @@ public class FissTransformerIT {
     dataMap.put("CLM_LINE_NUM", "3");
     Parser.Data<String> data = TestData.createDataParser(dataMap);
     FissClaimChange recurringClaim =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(TestData.createDefaultClaimBuilder().build())
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+        createFissClaimChange(TestData.createDefaultClaimBuilder().build());
     WrappedMessage wrappedMessage = new WrappedMessage();
     wrappedMessage.setLineNumber(1);
     wrappedMessage.setMessage(recurringClaim);
@@ -266,13 +240,7 @@ public class FissTransformerIT {
 
     // Expected values
     FissClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
-    FissClaimChange expectedClaimChange =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+    FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(2);
@@ -296,17 +264,13 @@ public class FissTransformerIT {
   }
 
   private static Arguments newNonFirstClaimCase() {
+    final String NEW_CLAIM_DCN = "dcn87654321";
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
-    dataMap.put("FI_DOC_CLM_CNTL_NUM", "dcn87654321");
+    dataMap.put("FI_DOC_CLM_CNTL_NUM", NEW_CLAIM_DCN);
     Parser.Data<String> data = TestData.createDataParser(dataMap);
     FissClaimChange previouslyProcessedClaim =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(TestData.createDefaultClaimBuilder().build())
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+        createFissClaimChange(TestData.createDefaultClaimBuilder().build());
     WrappedMessage wrappedMessage = new WrappedMessage();
     wrappedMessage.setLineNumber(1);
     wrappedMessage.setMessage(previouslyProcessedClaim);
@@ -316,25 +280,14 @@ public class FissTransformerIT {
 
     // Expected values
     FissClaim expectedResponseClaim = TestData.createDefaultClaimBuilder().build();
-    FissClaimChange expectedResponseClaimChange =
-        FissClaimChange.newBuilder()
-            .setSeq(1)
-            .setClaim(expectedResponseClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn(TestData.FI_DOC_CLM_CNTL_NUM)
-            .build();
+    FissClaimChange expectedResponseClaimChange = createFissClaimChange(expectedResponseClaim);
 
     Optional<MessageOrBuilder> expectedResponse = Optional.of(expectedResponseClaimChange);
 
     FissClaim expectedWrappedClaim =
-        TestData.createDefaultClaimBuilder().setDcn("dcn87654321").build();
+        TestData.createDefaultClaimBuilder().setDcn(NEW_CLAIM_DCN).build();
     FissClaimChange expectedWrappedClaimChange =
-        FissClaimChange.newBuilder()
-            .setSeq(2)
-            .setClaim(expectedWrappedClaim)
-            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-            .setDcn("dcn87654321")
-            .build();
+        createFissClaimChange(expectedWrappedClaim, NEW_CLAIM_DCN, 2);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
     expectedWrappedMessage.setLineNumber(1);
@@ -353,6 +306,41 @@ public class FissTransformerIT {
         new ExpectedValues(
             expectedWrappedMessage, expectedWrappedCounter, expectedResponse, expectedSampledMbis),
         expectedException);
+  }
+
+  /**
+   * Helper method to generate {@link FissClaimChange} objects.
+   *
+   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object.
+   * @return The created wrapping {@link FissClaimChange} object.
+   */
+  private static FissClaimChange createFissClaimChange(FissClaim claim) {
+    return createFissClaimChange(claim, TestData.FI_DOC_CLM_CNTL_NUM, 1);
+  }
+
+  /**
+   * Helper method to generate {@link FissClaimChange} objects.
+   *
+   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object.
+   * @param dcn The dcn to use.
+   * @param sequenceNumber The sequence number to use.
+   * @return The created wrapping {@link FissClaimChange} object.
+   */
+  private static FissClaimChange createFissClaimChange(
+      FissClaim claim, String dcn, int sequenceNumber) {
+    return FissClaimChange.newBuilder()
+        .setSeq(sequenceNumber)
+        .setClaim(claim)
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setDcn(dcn)
+        .setSource(
+            RecordSource.newBuilder()
+                .setPhase("p1")
+                .setPhaseSeqNum(0)
+                .setExtractDate("1970-01-01")
+                .setTransmissionTimestamp("1970-01-01T00:00:00.000000Z")
+                .build())
+        .build();
   }
 
   private static class TestData {

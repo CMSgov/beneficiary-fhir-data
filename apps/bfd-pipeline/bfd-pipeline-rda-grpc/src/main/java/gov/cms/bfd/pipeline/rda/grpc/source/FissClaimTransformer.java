@@ -50,7 +50,7 @@ import lombok.Getter;
  * object. A lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed
  * using an IdHasher.
  */
-public class FissClaimTransformer {
+public class FissClaimTransformer extends AbstractClaimTransformer {
   private final EnumStringExtractor<FissClaim, FissClaimStatus> RdaFissClaim_currStatus_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissProcessingType> RdaFissClaim_currLoc1_Extractor;
@@ -500,6 +500,7 @@ public class FissClaimTransformer {
     final RdaFissClaim to = transformMessageImpl(from, transformer, now, "");
     transformMessageArrays(from, to, transformer, now, "");
     to.setSequenceNumber(change.getSeq());
+    RdaChange.Source source = transformSource(change.getSource(), transformer);
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {
@@ -509,11 +510,13 @@ public class FissClaimTransformer {
               errors.size(), change.getSeq(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
+
     return new RdaChange<>(
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
-        transformer.instant(change.getTimestamp()));
+        transformer.instant(change.getTimestamp()),
+        source);
   }
 
   /**

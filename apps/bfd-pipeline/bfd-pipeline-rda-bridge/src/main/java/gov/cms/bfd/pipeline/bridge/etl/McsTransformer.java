@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
@@ -17,6 +18,8 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -51,14 +54,15 @@ public class McsTransformer extends AbstractTransformer {
 
       if (message.getLineNumber() == (lineNumber - 1)) {
         // If it's the next sequential line number, add to previous claim
-        message.setMessage(addToExistingClaim(storedClaim, data));
+        message.setMessage(addToExistingClaim(lineNumber, storedClaim, data));
         message.setLineNumber(lineNumber);
         claimToReturn = null;
       } else if (lineNumber == 1) {
         // If the line number is 1, it's a new claim, return the old, store the new
         claimToReturn = storedClaim;
         message.setLineNumber(1);
-        message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
+        message.setMessage(
+            transformNewClaim(sequenceNumber, lineNumber, data, mbiSampler, sampleId));
       } else {
         // If it's not the next claim or a new one starting at 1, then something is wrong.
         throw new IllegalStateException(
@@ -67,6 +71,7 @@ public class McsTransformer extends AbstractTransformer {
                 message.getLineNumber(), lineNumber));
       }
     } else {
+      // This is the first run, no claims have been created yet
       if (lineNumber != 1) {
         throw new IllegalStateException(
             String.format(
@@ -74,7 +79,7 @@ public class McsTransformer extends AbstractTransformer {
       }
 
       message.setLineNumber(lineNumber);
-      message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
+      message.setMessage(transformNewClaim(sequenceNumber, lineNumber, data, mbiSampler, sampleId));
       claimToReturn = null;
     }
 
@@ -89,10 +94,11 @@ public class McsTransformer extends AbstractTransformer {
    * @return The newly constructed claim with additional line items added.
    */
   @VisibleForTesting
-  McsClaimChange addToExistingClaim(McsClaimChange mcsClaimChange, Parser.Data<String> data) {
+  McsClaimChange addToExistingClaim(
+      int lineNumber, McsClaimChange mcsClaimChange, Parser.Data<String> data) {
     McsClaim.Builder claimBuilder = mcsClaimChange.getClaim().toBuilder();
 
-    claimBuilder.addMcsDetails(buildDetails(data));
+    claimBuilder.addMcsDetails(buildDetails(lineNumber, data));
 
     return mcsClaimChange.toBuilder().setClaim(claimBuilder.build()).build();
   }
@@ -106,6 +112,7 @@ public class McsTransformer extends AbstractTransformer {
    */
   McsClaimChange transformNewClaim(
       WrappedCounter sequenceNumber,
+      int lineNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
       int sampleId) {
@@ -156,7 +163,7 @@ public class McsTransformer extends AbstractTransformer {
     data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).ifPresent(claimBuilder::setIdrTotBilledAmt);
     data.get(Mcs.ORG_NPI_NUM).ifPresent(claimBuilder::setIdrBillProvNpi);
 
-    claimBuilder.addMcsDetails(buildDetails(data));
+    claimBuilder.addMcsDetails(buildDetails(lineNumber, data));
 
     addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
 
@@ -166,6 +173,13 @@ public class McsTransformer extends AbstractTransformer {
         .setClaim(claimBuilder)
         .setIcn(icn)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setSource(
+            RecordSource.newBuilder()
+                .setPhase("p1")
+                .setPhaseSeqNum(0)
+                .setExtractDate(LocalDate.now().minusDays(2).toString())
+                .setTransmissionTimestamp(Instant.now().minus(1, ChronoUnit.DAYS).toString())
+                .build())
         .build();
   }
 
@@ -239,7 +253,7 @@ public class McsTransformer extends AbstractTransformer {
    * @param data The {@link Parser.Data} to pull procedure codes from.
    * @return The list of build {@link McsDetail}s.
    */
-  private McsDetail buildDetails(Parser.Data<String> data) {
+  private McsDetail buildDetails(int lineNumber, Parser.Data<String> data) {
     McsDetail.Builder detailBuilder = McsDetail.newBuilder();
 
     data.get(Mcs.LINE_ICD_DGNS_CD).ifPresent(detailBuilder::setIdrDtlPrimaryDiagCode);
@@ -253,6 +267,7 @@ public class McsTransformer extends AbstractTransformer {
         .ifPresent(detailBuilder::setIdrDtlFromDate);
     data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
         .ifPresent(detailBuilder::setIdrDtlToDate);
+    detailBuilder.setIdrDtlNumber(lineNumber);
 
     return detailBuilder.build();
   }

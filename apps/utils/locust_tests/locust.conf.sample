@@ -1,0 +1,17 @@
+# This file represents a possible locust.conf file that can be used in-place of command-line arguments.
+# See https://docs.locust.io/en/stable/configuration.html#configuration-file
+
+# These parameters are default Locust parameters.
+# See https://docs.locust.io/en/stable/configuration.html#command-line-options
+headless = true
+spawn-rate = 5
+host = "http://test.bfd.cms.gov/"
+users = 100
+
+# These parameters are custom-defined parameters needed to run BFD-specific tests.
+# See common/bfd_user_base.py's custom_args() function for their implementation
+spawned-runtime = 10s
+database-uri = postgres://.../bfd
+table-sample-percent = 0.25
+stats-config = "store=file;env=TEST;store_tag=some_format;compare=previous"
+client-cert-path = /some/path/to/client/cert

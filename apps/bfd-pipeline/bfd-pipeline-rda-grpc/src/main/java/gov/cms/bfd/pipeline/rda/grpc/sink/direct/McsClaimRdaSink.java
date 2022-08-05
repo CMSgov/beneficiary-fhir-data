@@ -49,6 +49,16 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
   }
 
   @Override
+  int getInsertCount(RdaMcsClaim claim) {
+    return 1 // Add one for the base claim
+        + claim.getDetails().size()
+        + claim.getDiagCodes().size()
+        + claim.getAdjustments().size()
+        + claim.getAudits().size()
+        + claim.getLocations().size();
+  }
+
+  @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
     final RdaMcsClaim claim = change.getClaim();
     final var locations = new StringList();
@@ -64,6 +74,10 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .receivedDate(claim.getLastUpdated())
         .locations(locations)
         .transactionDate(claim.getIdrStatusDate())
+        .phase(change.getSource().getPhase())
+        .phaseSeqNum(change.getSource().getPhaseSeqNum())
+        .extractDate(change.getSource().getExtractDate())
+        .transmissionTimestamp(change.getSource().getTransmissionTimestamp())
         .build();
   }
 

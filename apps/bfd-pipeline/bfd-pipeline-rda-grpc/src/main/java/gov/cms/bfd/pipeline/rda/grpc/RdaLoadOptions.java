@@ -108,7 +108,8 @@ public class RdaLoadOptions implements Serializable {
     return (AbstractRdaLoadJob.SinkTypePreference sinkTypePreference) -> {
       RdaSink<FissClaimChange, RdaChange<RdaFissClaim>> sink;
       FissClaimTransformer transformer =
-          new FissClaimTransformer(appState.getClock(), MbiCache.computedCache(idHasherConfig));
+          new FissClaimTransformer(
+              appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
         sink = new FissClaimRdaSink(appState, transformer, true);
@@ -167,7 +168,8 @@ public class RdaLoadOptions implements Serializable {
     return (AbstractRdaLoadJob.SinkTypePreference sinkTypePreference) -> {
       RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>> sink;
       McsClaimTransformer transformer =
-          new McsClaimTransformer(appState.getClock(), MbiCache.computedCache(idHasherConfig));
+          new McsClaimTransformer(
+              appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
         sink = new McsClaimRdaSink(appState, transformer, true);

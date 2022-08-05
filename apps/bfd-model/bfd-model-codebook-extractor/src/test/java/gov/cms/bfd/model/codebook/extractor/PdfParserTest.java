@@ -337,6 +337,8 @@ public final class PdfParserTest {
   }
 
   /**
+   * Asserts that two paragraphs are equal.
+   *
    * @param expectedParagraphs the expected {@link List} of paragraphs
    * @param actualParagraphs the actual {@link List} of paragraphs to verify
    */
@@ -348,6 +350,8 @@ public final class PdfParserTest {
   }
 
   /**
+   * Asserts that two paragraphs are equal.
+   *
    * @param expectedParagraphs the expected {@link List} of paragraphs
    * @param actualParagraphs the actual {@link List} of paragraphs to verify
    */

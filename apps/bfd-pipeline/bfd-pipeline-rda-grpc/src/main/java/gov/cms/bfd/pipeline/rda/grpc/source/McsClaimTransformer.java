@@ -37,7 +37,7 @@ import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
 
-public class McsClaimTransformer {
+public class McsClaimTransformer extends AbstractClaimTransformer {
   private final EnumStringExtractor<McsClaim, McsClaimType> RdaMcsClaim_idrClaimType_Extractor;
 
   private final EnumStringExtractor<McsClaim, McsBeneficiarySex> RdaMcsClaim_idrBeneSex_Extractor;
@@ -262,6 +262,7 @@ public class McsClaimTransformer {
     final DataTransformer transformer = new DataTransformer();
     final RdaMcsClaim to = transformMessage(from, transformer, clock.instant());
     to.setSequenceNumber(change.getSeq());
+    RdaChange.Source source = transformSource(change.getSource(), transformer);
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {
@@ -271,11 +272,13 @@ public class McsClaimTransformer {
               errors.size(), change.getSeq(), from.getIdrClmHdIcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
+
     return new RdaChange<>(
         change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
-        transformer.instant(change.getTimestamp()));
+        transformer.instant(change.getTimestamp()),
+        source);
   }
 
   private RdaMcsClaim transformMessage(McsClaim from, DataTransformer transformer, Instant now) {
@@ -906,6 +909,8 @@ public class McsClaimTransformer {
         from::hasIdrDtlAmbDropoffZipcode,
         from::getIdrDtlAmbDropoffZipcode,
         to::setIdrDtlAmbDropoffZipcode);
+    transformer.copyUIntToShort(
+        namePrefix + RdaMcsDetail.Fields.idrDtlNumber, from::getIdrDtlNumber, to::setIdrDtlNumber);
     to.setLastUpdated(now);
     return to;
   }

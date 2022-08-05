@@ -136,6 +136,7 @@ public class AssertUtils {
       this.f = f;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void accept(JsonNode t) {
       if (f.apply(t)) {

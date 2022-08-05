@@ -3,14 +3,26 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Outpatient Institutional Diagnosis types <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBClaimOutpatientInstitutionalDiagnosisType.html">
- * ValueSet: C4BB Claim Outpatient Institutional Diagnosis Type</a>
+ * ValueSet: C4BB Claim Outpatient Institutional Diagnosis Type</a>.
  */
 public enum C4BBClaimOutpatientInstitutionalDiagnosisType {
+  /**
+   * The single medical diagnosis that is most relevant to the patient's chief complaint or need for
+   * treatment.*
+   */
   PRINCIPAL,
+  /** Required when other conditions coexist or develop subsequently during the treatment. * */
   OTHER,
+  /** Required when an external cause of injury is needed to describe the injury. * */
   EXTERNAL_CAUSE,
+  /** Identifies the patient's reason for the outpatient institutional visit. * */
   PATIENT_REASON;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
       case PRINCIPAL:
@@ -20,6 +32,11 @@ public enum C4BBClaimOutpatientInstitutionalDiagnosisType {
     }
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case PRINCIPAL:
@@ -35,6 +52,11 @@ public enum C4BBClaimOutpatientInstitutionalDiagnosisType {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case PRINCIPAL:
@@ -50,6 +72,11 @@ public enum C4BBClaimOutpatientInstitutionalDiagnosisType {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case PRINCIPAL:

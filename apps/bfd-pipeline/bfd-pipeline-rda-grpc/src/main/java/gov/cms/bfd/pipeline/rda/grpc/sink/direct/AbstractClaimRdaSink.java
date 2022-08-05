@@ -4,6 +4,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
@@ -247,6 +248,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       String apiVersion, TMessage change, List<DataTransformer.ErrorMessage> errors)
       throws IOException;
 
+  /**
+   * Updates the {@link RdaApiProgress} table with the sequence number for the most recently added
+   * claim of a given type.
+   *
+   * @param lastSequenceNumber The sequence number of the most recently added claim of a given type.
+   */
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
@@ -323,14 +330,26 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       throws DataTransformer.TransformationException;
 
   /**
-   * Uses {@link EntityManager#merge} to write each claim and its associated meta data to the
+   * Implementation specific method to count the number of expected inserts that will be used to
+   * load all the data into the database. Used for metrics and analysis.
+   *
+   * @param claim The claim data to be inserted
+   * @return The calculated number of expected insert statements needed for the claim data.
+   */
+  abstract int getInsertCount(TClaim claim);
+
+  /**
+   * Uses {@link EntityManager#merge} to write each claim and its associated metadata to the
    * database.
    *
    * @param maxSeq highest sequence number from claims in the collection
    * @param changes collection of claims to write to the database
    */
-  private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
+  private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
     boolean commit = false;
+    final Timer.Context timerContext = metrics.dbUpdateTime.time();
+    int insertCount = 0;
+
     try {
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
@@ -338,6 +357,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           var metaData = createMetaData(change);
           entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
+          insertCount += getInsertCount(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
@@ -354,6 +374,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         entityManager.getTransaction().rollback();
       }
       entityManager.clear();
+      timerContext.stop();
+      metrics.dbBatchSize.update(changes.size());
+      metrics.insertCount.update(insertCount);
     }
   }
 
@@ -365,7 +388,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   private long maxSequenceInBatch(Collection<RdaChange<TClaim>> claims) {
     OptionalLong value = claims.stream().mapToLong(RdaChange::getSequenceNumber).max();
-    if (!value.isPresent()) {
+    if (value.isEmpty()) {
       // This should never happen! But if it does, we'll shout about it rather than throw an
       // exception
       logger.warn("processed an empty batch!");
@@ -413,13 +436,19 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter transformFailures;
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
+    /** Tracks the elapsed time when we write claims to the database. */
+    private final Timer dbUpdateTime;
+    /** Tracks the number of updates per database transaction. */
+    private final Histogram dbBatchSize;
     /** Latest sequnce number from writing a batch. * */
     private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
+    /** The number of insert statements executed */
+    private final Histogram insertCount;
 
     /**
-     * Initializes all of the metrics.
+     * Initializes all the metrics.
      *
      * @param klass used to derive metric names
      * @param appMetrics where to store the metrics
@@ -436,9 +465,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+      dbUpdateTime = appMetrics.timer(MetricRegistry.name(base, "writes", "elapsed"));
+      dbBatchSize = appMetrics.histogram(MetricRegistry.name(base, "writes", "batchSize"));
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
+      insertCount = appMetrics.histogram(MetricRegistry.name(base, "insertCount"));
     }
 
     /**
