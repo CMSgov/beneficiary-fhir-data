@@ -88,22 +88,22 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.1.29</metrics.version>
-		<newrelic.version>0.5.0</newrelic.version>
+		<metrics.version>4.2.1</metrics.version>
+		<newrelic.version>0.7.0</newrelic.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.261</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
-		<postgresql.version>42.2.20</postgresql.version>
+		<postgresql.version>42.3.3</postgresql.version>
 		<hsqldb.version>2.6.0</hsqldb.version>
-		<slf4j.version>1.7.7</slf4j.version>
-		<hikari.version>4.0.3</hikari.version>
+		<slf4j.version>1.7.36</slf4j.version>
+		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelicAgent.version>7.5.0</newrelicAgent.version>
+		<newrelicAgent.version>7.8.0</newrelicAgent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
@@ -233,7 +233,7 @@
 					Hibernate is used for that in our projects.) -->
 				<artifactId>hibernate-jpa-2.1-api</artifactId>
 				<groupId>org.hibernate.javax.persistence</groupId>
-				<version>1.0.0.Final</version>
+				<version>1.0.2.Final</version>
 			</dependency>
 			<dependency>
 				<!-- Hibernate's JPA implementation is used to manage most database usage 
@@ -299,7 +299,7 @@
 					for details. -->
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
-				<version>3.3.0</version>
+				<version>${hikari.version}</version>
 			</dependency>
 
 			<dependency>
