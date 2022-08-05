@@ -92,18 +92,18 @@
 		<newrelic.version>0.7.0</newrelic.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.261</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.276</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
-		<hibernate.version>5.6.1.Final</hibernate.version>
+		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
-		<postgresql.version>42.3.3</postgresql.version>
+		<postgresql.version>42.4.1</postgresql.version>
 		<hsqldb.version>2.6.0</hsqldb.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelicAgent.version>7.8.0</newrelicAgent.version>
+		<newrelicAgent.version>7.9.0</newrelicAgent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
@@ -235,8 +235,10 @@
 				<groupId>org.hibernate.javax.persistence</groupId>
 				<version>1.0.2.Final</version>
 			</dependency>
+
+			<!-- Hibernate version not latest because entity manager does not have a 6.1 to upgrade to-->
 			<dependency>
-				<!-- Hibernate's JPA implementation is used to manage most database usage 
+				<!-- Hibernate's JPA implementation is used to manage most database usage
 					in our applications. -->
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
@@ -264,6 +266,8 @@
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
+
+			<!-- Dependencies are in the Jakarta namespace. Should be upgraded when Jetty is upgraded to version 11 -->
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
@@ -284,7 +288,7 @@
 				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>${postgres.driver.version}</version>
+				<version>${postgresql.version}</version>
 			</dependency>
 			<dependency>
 				<!-- In-memory database that is used in some tests to speed things up. -->
