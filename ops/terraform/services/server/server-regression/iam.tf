@@ -18,7 +18,7 @@ resource "aws_iam_policy" "ssm" {
             ]
         }
     ]
-} 
+}
 EOF
 }
 
@@ -40,8 +40,8 @@ resource "aws_iam_policy" "kms" {
             ]
         }
     ]
-}    
-EOF  
+}
+EOF
 }
 
 resource "aws_iam_policy" "rds" {
@@ -61,8 +61,8 @@ resource "aws_iam_policy" "rds" {
             ]
         }
     ]
-}    
-EOF  
+}
+EOF
 }
 
 resource "aws_iam_policy" "logs" {
@@ -89,7 +89,7 @@ resource "aws_iam_policy" "logs" {
         }
     ]
 }
-EOF  
+EOF
 }
 
 resource "aws_iam_policy" "sqs_send" {
@@ -120,7 +120,7 @@ resource "aws_iam_policy" "sqs_send" {
         }
     ]
 }
-EOF  
+EOF
 }
 
 resource "aws_iam_policy" "s3" {
@@ -153,7 +153,7 @@ resource "aws_iam_policy" "s3" {
         }
     ]
 }
-EOF  
+EOF
 }
 
 resource "aws_iam_policy" "athena" {
@@ -218,7 +218,7 @@ resource "aws_iam_policy" "athena" {
         }
     ]
 }
-EOF  
+EOF
 }
 
 resource "aws_iam_role" "this" {
@@ -268,7 +268,7 @@ resource "aws_iam_policy" "glue" {
         }
     ]
 }
-EOF  
+EOF
 }
 
 resource "aws_iam_policy" "logs_glue_trigger" {
@@ -295,7 +295,7 @@ resource "aws_iam_policy" "logs_glue_trigger" {
         }
     ]
 }
-EOF  
+EOF
 }
 
 resource "aws_iam_role" "glue_trigger" {
