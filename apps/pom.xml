@@ -108,7 +108,7 @@
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<postgres.driver.version>42.4.0</postgres.driver.version>
+		<postgres.driver.version>42.4.1</postgres.driver.version>
 
 		<!--  Dependencies required for org.apache.commons -->
 		<commons.lang3.version>3.12.0</commons.lang3.version>
