@@ -19,6 +19,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
+import java.util.function.LongConsumer;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import lombok.Data;
 import lombok.Getter;
@@ -273,6 +275,35 @@ public class DataTransformer {
       BooleanSupplier exists, IntSupplier value, IntConsumer copier) {
     if (exists.getAsBoolean()) {
       copier.accept(value.getAsInt());
+    }
+    return this;
+  }
+
+  /**
+   * Copies a required java long value. Uses lambda expression for the value extraction.
+   *
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyLong(LongSupplier value, LongConsumer copier) {
+    copier.accept(value.getAsLong());
+    return this;
+  }
+
+  /**
+   * Copies an optional java long value only if its value exists. Uses lambda expressions for the
+   * existence test as well as the value extraction.
+   *
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyOptionalLong(
+      BooleanSupplier exists, LongSupplier value, LongConsumer copier) {
+    if (exists.getAsBoolean()) {
+      copier.accept(value.getAsLong());
     }
     return this;
   }

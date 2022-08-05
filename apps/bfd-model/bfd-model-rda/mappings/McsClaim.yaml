@@ -340,7 +340,6 @@ mappings:
   transformations:
   - from: idrClmHdIcn
     optionalComponents: None
-  - from: sequenceNumber
   - from: idrContrId
     optionalComponents: None
   - from: idrHic

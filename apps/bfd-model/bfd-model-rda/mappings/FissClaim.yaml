@@ -419,9 +419,6 @@ mappings:
   transformations:
   - from: dcn
     optionalComponents: None
-  - from: seq
-    to: sequenceNumber
-    optionalComponents: None
   - from: hicNo
     optionalComponents: None
   - from: currStatus
