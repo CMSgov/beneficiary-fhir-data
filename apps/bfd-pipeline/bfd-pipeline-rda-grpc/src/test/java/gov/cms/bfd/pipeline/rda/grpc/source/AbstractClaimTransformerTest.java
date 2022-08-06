@@ -24,8 +24,8 @@ public class AbstractClaimTransformerTest {
   private static final short PHASE_SEQ_TWO = 2;
 
   public static Stream<Arguments> shouldTransformSource() {
-    final String DATE = "1970-01-01";
-    final String TIMESTAMP = "1970-01-01T00:00:00.000001Z";
+    final String DATE = "2022-07-29";
+    final String TIMESTAMP = "2022-07-30T05:47:25.9Z";
     final LocalDate LOCAL_DATE = LocalDate.parse(DATE);
     final Instant INSTANT = OffsetDateTime.parse(TIMESTAMP).toInstant();
 
