@@ -204,12 +204,14 @@ public final class DataSetQueue {
    * @param manifestToProcessKey the {@link S3Object#getKey()} of the S3 object for the manifest to
    *     be read
    * @return the {@link DataSetManifest} that was contained in the specified S3 object
-   * @throws JAXBException
-   * @throws SAXException Any {@link JAXBException}s or {@link SAXException}s that are encountered
-   *     will be bubbled up. These generally indicate that the {@link DataSetManifest} could not be
-   *     parsed because its content was invalid in some way. Note: As of 2017-03-24, this has been
-   *     observed multiple times in production, and care should be taken to account for its
-   *     possibility.
+   * @throws JAXBException Any {@link JAXBException}s that are encountered will be bubbled up. These
+   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
+   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
+   *     production, and care should be taken to account for its possibility.
+   * @throws SAXException Any {@link SAXException}s that are encountered will be bubbled up. These
+   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
+   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
+   *     production, and care should be taken to account for its possibility.
    */
   public static DataSetManifest readManifest(
       AmazonS3 s3Client, ExtractionOptions options, String manifestToProcessKey)
