@@ -181,6 +181,7 @@ public final class DataSetManifestTest {
 
     assertNotNull(manifest);
     assertNotNull(manifest.getTimestamp());
+    assertEquals(121212, manifest.getSequenceId());
   }
 
   /**
