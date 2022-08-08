@@ -48,7 +48,7 @@ public class AbstractClaimTransformerTest {
         Arguments.arguments(
             "No errors - Phase, phase sequence, and extract date",
             RecordSource.newBuilder()
-                .setPhase("P3")
+                .setPhase("p3")
                 .setPhaseSeqNum(PHASE_SEQ_ONE)
                 .setExtractDate(DATE)
                 .build(),

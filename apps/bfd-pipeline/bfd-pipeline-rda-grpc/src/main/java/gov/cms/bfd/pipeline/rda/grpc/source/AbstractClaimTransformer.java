@@ -31,14 +31,14 @@ public abstract class AbstractClaimTransformer {
         () -> {
           boolean hasPhase = from.hasPhase();
 
-          if (hasPhase && !PHASE_TO_SHORT.containsKey(from.getPhase())) {
+          if (hasPhase && lookupPhaseString(from.getPhase()) == null) {
             transformer.addError(RdaChange.Source.Fields.phase, "is unknown phase");
             hasPhase = false;
           }
 
           return hasPhase;
         },
-        () -> PHASE_TO_SHORT.get(from.getPhase()),
+        () -> lookupPhaseString(from.getPhase()),
         to::setPhase);
     transformer.copyOptionalUIntToShort(
         RdaChange.Source.Fields.phaseSeqNum,
@@ -57,5 +57,20 @@ public abstract class AbstractClaimTransformer {
         to::setTransmissionTimestamp);
 
     return to;
+  }
+
+  /**
+   * Attempts to map a string to a short value representing the phase number (P1, P2, or P3) from
+   * the file name of a claim's IDR extract file..
+   *
+   * @param value value (possibly null) received from RDA API
+   * @return null if value is unrecognized or a short if it is recognized
+   */
+  private Short lookupPhaseString(String value) {
+    if (value == null) {
+      return null;
+    } else {
+      return PHASE_TO_SHORT.get(value.toUpperCase());
+    }
   }
 }
