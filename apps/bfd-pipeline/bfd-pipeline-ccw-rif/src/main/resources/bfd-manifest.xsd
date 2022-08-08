@@ -13,7 +13,7 @@
         </xs:element>
       </xs:sequence>
       <xs:attribute name="timestamp" type="xs:dateTime" use="required" />
-      <xs:attribute name="sequenceId" type="xs:unsignedByte" use="required" />
+      <xs:attribute name="sequenceId" type="xs:integer" use="required" />
       <xs:attribute name="syntheticData" type="xs:boolean" use="optional" />
     </xs:complexType>
   </xs:element>
