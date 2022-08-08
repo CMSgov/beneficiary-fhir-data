@@ -99,7 +99,7 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                 .setClaim(claim)
                 .setSource(
                     RecordSource.newBuilder()
-                        .setPhase("p1")
+                        .setPhase("P1")
                         .setPhaseSeqNum(1)
                         .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
                         .setTransmissionTimestamp(
@@ -124,7 +124,7 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                 .setClaim(claim)
                 .setSource(
                     RecordSource.newBuilder()
-                        .setPhase("p1")
+                        .setPhase("P1")
                         .setPhaseSeqNum(1)
                         .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
                         .setTransmissionTimestamp(
