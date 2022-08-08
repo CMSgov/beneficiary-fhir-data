@@ -27,6 +27,9 @@ import boto3
 AthenaQueryRowResult = Dict[str, List[Dict[str, str]]]
 """Type representing a single row result from the result of an Athena query"""
 
+TOTAL_RUNTIME_DELTA = 3.0
+"""The delta under which two AggregatedStats instances are considered able to
+be compared"""
 
 class StatsLoader(ABC):
     """Loads AggregatedStats depending on what type of comparison is requested"""
@@ -135,7 +138,7 @@ class StatsFileLoader(StatsLoader):
                 loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
                 # Pick some delta that the runtimes should be under -- in this case, we're using 3 seconds
                 # TODO: Determine the right delta for checking for matching runtimes
-                loaded_metadata.total_runtime - self.metadata.total_runtime < 3.0,
+                loaded_metadata.total_runtime - self.metadata.total_runtime < TOTAL_RUNTIME_DELTA,
             ]
         )
 
@@ -240,7 +243,7 @@ class StatsAthenaLoader(StatsLoader):
         explicit_checks = [
             f"metadata.tag='{self.stats_config.comp_tag}'",
             # TODO: Determine the right delta for checking for matching runtimes
-            f"(metadata.total_runtime - {self.metadata.total_runtime}) < 3.0",
+            f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
         ]
 
         return " AND ".join(generated_checks + explicit_checks)
