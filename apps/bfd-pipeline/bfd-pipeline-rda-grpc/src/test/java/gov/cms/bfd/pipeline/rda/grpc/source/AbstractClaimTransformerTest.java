@@ -24,8 +24,8 @@ public class AbstractClaimTransformerTest {
   private static final short PHASE_SEQ_TWO = 2;
 
   public static Stream<Arguments> shouldTransformSource() {
-    final String DATE = "1970-01-01";
-    final String TIMESTAMP = "1970-01-01T00:00:00.000001Z";
+    final String DATE = "2022-07-29";
+    final String TIMESTAMP = "2022-07-30T05:47:25.9Z";
     final LocalDate LOCAL_DATE = LocalDate.parse(DATE);
     final Instant INSTANT = OffsetDateTime.parse(TIMESTAMP).toInstant();
 
@@ -37,12 +37,12 @@ public class AbstractClaimTransformerTest {
             List.of()),
         Arguments.arguments(
             "No errors - Just phase argument",
-            RecordSource.newBuilder().setPhase("p1").build(),
+            RecordSource.newBuilder().setPhase("P1").build(),
             new RdaChange.Source(PHASE_ONE, null, null, null),
             List.of()),
         Arguments.arguments(
             "No errors - Phase and phase sequence arguments",
-            RecordSource.newBuilder().setPhase("p2").setPhaseSeqNum(PHASE_SEQ_ZERO).build(),
+            RecordSource.newBuilder().setPhase("P2").setPhaseSeqNum(PHASE_SEQ_ZERO).build(),
             new RdaChange.Source(PHASE_TWO, PHASE_SEQ_ZERO, null, null),
             List.of()),
         Arguments.arguments(
@@ -57,7 +57,7 @@ public class AbstractClaimTransformerTest {
         Arguments.arguments(
             "No errors - All Arguments",
             RecordSource.newBuilder()
-                .setPhase("p3")
+                .setPhase("P3")
                 .setPhaseSeqNum(PHASE_SEQ_TWO)
                 .setExtractDate(DATE)
                 .setTransmissionTimestamp(TIMESTAMP)
@@ -67,7 +67,7 @@ public class AbstractClaimTransformerTest {
         Arguments.arguments(
             "Invalid arguments",
             RecordSource.newBuilder()
-                .setPhase("p4")
+                .setPhase("P4")
                 .setPhaseSeqNum(-2)
                 .setExtractDate("apple")
                 .setTransmissionTimestamp("banana")

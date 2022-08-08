@@ -368,7 +368,7 @@ public class McsTransformerIT {
         .setIcn(icn)
         .setSource(
             RecordSource.newBuilder()
-                .setPhase("p1")
+                .setPhase("P1")
                 .setPhaseSeqNum(0)
                 .setExtractDate("1970-01-01")
                 .setTransmissionTimestamp("1970-01-01T00:00:00.000000Z")

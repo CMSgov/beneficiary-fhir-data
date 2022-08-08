@@ -174,7 +174,7 @@ public class McsTransformer extends AbstractTransformer {
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setSource(
             RecordSource.newBuilder()
-                .setPhase("p1")
+                .setPhase("P1")
                 .setPhaseSeqNum(0)
                 .setExtractDate(LocalDate.now().toString())
                 .setTransmissionTimestamp(Instant.now().toString())
