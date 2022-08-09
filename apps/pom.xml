@@ -89,7 +89,6 @@
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
 		<metrics.version>4.2.1</metrics.version>
-		<newrelic.version>0.7.0</newrelic.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.276</aws-java-sdk-bom.version>
@@ -103,12 +102,11 @@
 		<slf4j.version>1.7.36</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelicAgent.version>7.9.0</newrelicAgent.version>
+		<newrelic.agent.version>7.9.0</newrelic.agent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<postgres.driver.version>42.4.0</postgres.driver.version>
 
 		<!--  Dependencies required for org.apache.commons -->
 		<commons.lang3.version>3.12.0</commons.lang3.version>
@@ -145,7 +143,7 @@
 				<!-- The newrelic.jar javaagent dependency -->
 				<groupId>com.newrelic.agent.java</groupId>
 				<artifactId>newrelic-agent</artifactId>
-				<version>${newrelicAgent.version}</version>
+				<version>${newrelic.agent.version}</version>
 			</dependency>
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 

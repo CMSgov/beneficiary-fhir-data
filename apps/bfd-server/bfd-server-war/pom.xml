@@ -205,7 +205,7 @@
 			<!-- Allows us to provide New Relic with additional information on requests. -->
 			<groupId>com.newrelic.agent.java</groupId>
 			<artifactId>newrelic-api</artifactId>
-			<version>7.8.0</version>
+			<version>${newrelic.agent.version}</version>
 		</dependency>
 
 		<dependency>
