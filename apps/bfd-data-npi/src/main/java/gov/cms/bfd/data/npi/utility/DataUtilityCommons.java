@@ -229,36 +229,20 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
-      // TODO: Explain file format and show example
-      // TODO: Extract this logic into a testable method or class
-      String firstLine = reader.readLine();
-       String[] fields = firstLine.split(",");
+               // skip first line which is header
+      reader.readLine();
+      for (String line; (line = reader.readLine()) != null; ) {
+        String[] fields = line.split(",");
 
         String orgName = fields[4].trim().replace("\"", "");
         String npi = fields[0].replace("\"", "");
-        out.write(npi + "\t" + orgName);
-        out.newLine();
-        orgName = null;
-        npi = null;
-        String lastNonEmptyOrgName = null;
+        int entityTypeCode = Integer.parseInt(fields[4].trim().replace("\"", ""));
 
-      for (String line; (line = reader.readLine()) != null; ) {
-        fields = line.split(",");
-
-        orgName = fields[4].trim().replace("\"", "");
-        npi = fields[0].replace("\"", "");
-
-        if (!Strings.isNullOrEmpty(orgName)) {
-          lastNonEmptyOrgName = orgName;
+        //entity type code 2 is organization
+        if (entityTypeCode==2) {
+          out.write(npi + "\t" + orgName);
+          out.newLine();
         }
-
-        if (lastNonEmptyOrgName == null) {
-          LOGGER.warn("Skipping a record due to unavailable organization name: '" + line + "'");
-          continue;
-        }
-
-        out.write(npi + "\t" + lastNonEmptyOrgName);
-        out.newLine();
       }
     }
   }

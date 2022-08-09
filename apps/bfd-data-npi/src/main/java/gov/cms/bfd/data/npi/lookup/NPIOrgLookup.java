@@ -104,10 +104,8 @@ public class NPIOrgLookup {
     try (final InputStream npiOrgStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(App.NPI_RESOURCE);
         final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
-      String line = "";
-      // skip first line which is header
-      npiOrgIn.readLine();
-      while ((line = npiOrgIn.readLine()) != null) {
+
+      while ((String line = npiOrgIn.readLine()) != null) {
         String npiProductColumns[] = line.split("\t");
         try {
           npiOrgHashMap.put(
