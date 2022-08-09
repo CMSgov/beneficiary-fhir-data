@@ -119,5 +119,3 @@ aws sqs send-message \
 
     error("Unable to send message to ${sqsQueueUrl} after ${maxRetries} retries")
 }
-
-return this
