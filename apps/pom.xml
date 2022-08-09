@@ -93,6 +93,9 @@
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.276</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
+		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
+		but not all (in particular, entity-manager does not have a 6.0 version available yet).
+		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
@@ -234,7 +237,6 @@
 				<version>1.0.2.Final</version>
 			</dependency>
 
-			<!-- Hibernate version not latest because entity manager does not have a 6.1 to upgrade to-->
 			<dependency>
 				<!-- Hibernate's JPA implementation is used to manage most database usage
 					in our applications. -->
@@ -265,7 +267,11 @@
 				<version>1.1.1</version>
 			</dependency>
 
-			<!-- Dependencies are in the Jakarta namespace. Should be upgraded when Jetty is upgraded to version 11 -->
+			<!-- BFD currently uses Jetty 10 which is compatible with Java EE 8
+			and predates the move to the jakarta namespace that comes with Jakarta EE 9.
+			For the sake of consistency, the other EE APIs and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
+			Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
+			these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
