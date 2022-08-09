@@ -141,6 +141,14 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     else:
         print("(Validation Success) Start MBI does not exist in DB")
         
+    ## Ensure no mbi_hash has more than one bene_id associated with it from any previous loads
+    query = "select count(*) from (select mbi_hash, bene_id, count(bene_id) from beneficiaries_history where mbi_hash IS NOT NULL group by mbi_hash, bene_id having count(bene_id) > 1) as s"
+    result = _execute_single_count_query(db_string, query)
+    if result > 0:
+        print(f"(Validation Warning) {result} MBI(s) resolve to multiple bene_ids; a given mbi should only resolve to one bene_id (this needs cleanup to avoid errors using that data)")
+    else:
+        print("(Validation Success) No MBIs resolve to multiple bene_ids")
+        
     return overall_validation_result
 
 

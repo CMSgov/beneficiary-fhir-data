@@ -6,6 +6,7 @@ option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
 import "rda/v1/change_type.proto";
+import "rda/v1/record_source.proto";
 import "rda/v1/mcs/mcs_claim.proto";
 
 message McsClaimChange {
@@ -16,4 +17,6 @@ message McsClaimChange {
   string icn = 4;
 
   optional rda.v1.mcs.McsClaim claim = 5;
+
+  optional RecordSource source = 6;
 }

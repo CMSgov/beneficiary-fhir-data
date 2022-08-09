@@ -67,6 +67,10 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .receivedDate(claim.getLastUpdated())
         .locations(new StringList().add(claim.getCurrLoc1()).addIfNonEmpty(claim.getCurrLoc2()))
         .transactionDate(claim.getCurrTranDate())
+        .phase(change.getSource().getPhase())
+        .phaseSeqNum(change.getSource().getPhaseSeqNum())
+        .extractDate(change.getSource().getExtractDate())
+        .transmissionTimestamp(change.getSource().getTransmissionTimestamp())
         .build();
   }
 

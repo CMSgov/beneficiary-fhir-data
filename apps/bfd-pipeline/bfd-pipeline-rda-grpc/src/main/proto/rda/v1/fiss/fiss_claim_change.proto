@@ -6,6 +6,7 @@ option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
 import "rda/v1/change_type.proto";
+import "rda/v1/record_source.proto";
 import "rda/v1/fiss/fiss_claim.proto";
 
 message FissClaimChange {
@@ -16,4 +17,6 @@ message FissClaimChange {
   string dcn = 4;
 
   optional rda.v1.fiss.FissClaim claim = 5;
+
+  optional RecordSource source = 6;
 }
