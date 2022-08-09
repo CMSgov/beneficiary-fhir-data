@@ -83,4 +83,16 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
     store_tag = stats.metadata.tag
 
     s3_path = f"databases/{stats_config.database}/{stats_config.table}/env={env_name}/tag={store_tag}/{int(time.time())}.stats.json"
-    __s3_client.put_object(Bucket=stats_config.bucket, Key=s3_path, Body=json.dumps(asdict(stats)))
+    try:
+        put_response = __s3_client.put_object(
+            Bucket=stats_config.bucket, Key=s3_path, Body=json.dumps(asdict(stats))
+        )
+
+        if not put_response:
+            raise RuntimeError(
+                f"Storing stats to {s3_path} failed as an invalid response from AWS was returned"
+            )
+    except __s3_client.exceptions.NoSuchBucket as exc:
+        raise ValueError(f"S3 bucket {stats_config.bucket} does not exist") from exc
+    except __s3_client.exceptions.ClientError as exc:
+        raise RuntimeError(f"Unable to upload to {s3_path}") from exc
