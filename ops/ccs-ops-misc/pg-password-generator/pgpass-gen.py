@@ -3,7 +3,6 @@ from hashlib import pbkdf2_hmac, sha256
 from os import urandom
 import hmac
 import sys
-import getpass
 import string
 import random
 import re
