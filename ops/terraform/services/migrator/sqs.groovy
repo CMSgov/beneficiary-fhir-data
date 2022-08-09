@@ -87,20 +87,37 @@ jq '.? | map({receipt: .ReceiptHandle, body: .Body | fromjson}) | unique'
  * <li>awsRegion targeted aws region. Defaults to 'us-east-1'</li>
  * <li>sqsQueueUrl targeted sqs queue url</li>
  * <li>sqsMessage string the message to send to the SQS queue</li>
+ * <li>maxRetries int number of times to attempt sending a message to SQS queue before erroring</li>
+ * <li>retryInterval int interval, in seconds, to wait between attempts to send messages to SQS queue</li>
  * </ul>
  */
 def sendMessage(Map args = [:]) {
     awsRegion = args.awsRegion ?: 'us-east-1'
     sqsQueueUrl = args.sqsQueueUrl
     sqsMessage = args.sqsMessage
+    maxRetries = args.maxRetries ?: 15
+    retryInterval = args.retryInterval ?: 2
 
-    withEnv(["SQS_QUEUE_URL=${sqsQueueUrl}", "MESSAGE=${sqsMessage}"]) {
-    sh(returnStdout: true,
-        script: '''
+    for (int i = 0; i < maxRetries; i++) {
+        withEnv(["SQS_QUEUE_URL=${sqsQueueUrl}", "MESSAGE=${sqsMessage}"]) { 
+            returnCode = sh(returnStdout: true,
+                returnStatus: true,
+                script: '''
 aws sqs send-message \
 --queue-url "$SQS_QUEUE_URL" \
 --message-body "$MESSAGE"
-    ''')}
+            '''.trim())
+
+            if (returnCode == 0) {
+                return
+            }
+
+            println "[Attempt ${i + 1}/${maxRetries}] Message not sent to \"${sqsQueueUrl}\" yet, waiting ${retryInterval} seconds to try again..."
+            sleep(retryInterval)
+        } 
+    }
+
+    error("Unable to send message to ${sqsQueueUrl} after ${maxRetries} retries")
 }
 
 return this
