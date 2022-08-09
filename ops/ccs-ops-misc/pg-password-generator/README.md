@@ -1,10 +1,10 @@
 
 This script randomly generates and encrypts (one way salted hash) a random database password. 
 
-The output includes both the encrypted and non-ecrypted password, the latter of which should be sent to a database administrator so they can update the account. The user should save the unencrypted password to their password manager of choice.
+The output includes both the encrypted and non-encrypted password, the latter of which should be sent to a database administrator so they can update the account. The user should save the unencrypted password to their password manager of choice.
 
 ## Quickstart
-1. Get the script from BFD's github repo or from an adminstrator.
+1. Get the script from BFD's GitHub repo or from an administrator.
 2. Open a terminal and run the script to generate a password.
 
 ```
@@ -23,9 +23,9 @@ $ python3 pgpass-gen.py
 ```
 ## Crypto notes
 
-The password is salted and hashed many times to make brute-forcing realistically impossible (currently anyway), assuming the password is of suffecient length and complexity before being hashed- the purpose of this script.
+The password is salted and hashed many times to make brute-forcing realistically impossible (currently anyway), assuming the password is of sufficient length and complexity before being hashed- the purpose of this script.
 
-Theoritically, an attacker could take the hashed password and attempt to build a set of rainbow tables to brute force; but currently, this would take many years. That said, the hashed password should not be made public and shared using appropriate TLS enrypted channels such as Box, private slack message, etc.
+Theoretically, an attacker could take the hashed password and attempt to build a set of rainbow tables to brute force; but currently, this would take many years. That said, the hashed password should not be made public and shared using appropriate TLS encrypted channels such as Box, private slack message, etc.
 
 Ask your db admin how they prefer it being sent.
 
