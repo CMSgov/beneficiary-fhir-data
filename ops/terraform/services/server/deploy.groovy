@@ -187,6 +187,7 @@ def printServerRegressionMessage(Map message) {
     )
     println "Timestamp: ${java.time.LocalDateTime.now().toString()}"
     println """${body.function_name} finished running with a ${body.result} result, more information:
+                |   Message: ${body.message}
                 |   Lambda Request ID: ${body.request_id}
                 |   CloudWatch log stream name: ${body.log_stream_name}
                 |   CloudWatch log group name: ${body.log_group_name}

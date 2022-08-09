@@ -4,7 +4,6 @@ import subprocess
 import urllib.parse
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Optional
 
 import boto3
 from botocore.config import Config
@@ -34,6 +33,7 @@ class InvokeEvent:
 class PipelineSignalMessage:
     function_name: str
     result: "TestResult"
+    message: str
     request_id: str
     log_stream_name: str
     log_group_name: str
@@ -44,49 +44,50 @@ class TestResult(str, Enum):
     FAILURE = "FAILURE"
 
 
-def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
+def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
     response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
 
     try:
         return response["Parameter"]["Value"]
-    except KeyError:
-        print(f'SSM parameter "{name}" not found or empty')
-        return None
+    except KeyError as exc:
+        raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
 
 
-def get_rds_db_uri(cluster_id: str) -> Optional[str]:
+def get_rds_db_uri(cluster_id: str) -> str:
     response = rds_client.describe_db_clusters(DBClusterIdentifier=cluster_id)
 
     try:
         return response["DBClusters"][0]["ReaderEndpoint"]
-    except KeyError:
-        print(f'DB URI not found for cluster ID "{cluster_id}"')
-        return None
+    except KeyError as exc:
+        raise ValueError(f'DB URI not found for cluster ID "{cluster_id}"') from exc
 
 
-def get_sqs_queue_url(sqs_queue_name: str) -> Optional[str]:
+def get_sqs_queue_url(sqs_queue_name: str) -> str:
     response = sqs_client.get_queue_url(QueueName=sqs_queue_name)
 
     try:
         return response["QueueUrl"]
-    except KeyError:
-        print(f'SQS Queue URL not found for queue "{sqs_queue_name}"')
-        return None
+    except KeyError as exc:
+        raise ValueError(f'SQS Queue URL not found for queue "{sqs_queue_name}"') from exc
 
 
 def send_sqs_message(sqs_queue_url: str, msg_body: PipelineSignalMessage) -> bool:
     try:
-        sqs_client.send_message(QueueUrl=sqs_queue_url, MessageBody=json.dumps(asdict(msg_body)))
+        sqs_msg = asdict(msg_body)
+        print(f"Sending message to queue: {sqs_msg}")
+
+        sqs_client.send_message(QueueUrl=sqs_queue_url, MessageBody=json.dumps(sqs_msg))
         return True
     except sqs_client.exceptions.UnsupportedOperation:
         print(f'Unable to post message to queue at URL "{sqs_queue_url}"')
         return False
 
 
-def send_pipeline_signal(signal_queue_url: str, result: TestResult, context) -> None:
+def send_pipeline_signal(signal_queue_url: str, result: TestResult, message: str, context) -> None:
     pipeline_signal_msg = PipelineSignalMessage(
         function_name=context.function_name,
         result=result,
+        message=message,
         request_id=context.aws_request_id,
         log_stream_name=context.log_stream_name,
         log_group_name=context.log_group_name,
@@ -101,24 +102,26 @@ def handler(event, context):
         )
         return
 
-    signal_queue_url = get_sqs_queue_url(sqs_pipeline_signal)
-    if not signal_queue_url:
+    try:
+        signal_queue_url = get_sqs_queue_url(sqs_pipeline_signal)
+    except ValueError as exc:
+        print(str(exc))
         return
 
     # We take only the first record, if it exists
     try:
         record = event["Records"][0]
     except IndexError:
-        print("Invalid queue message, no records found")
-        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
+        message = "Invalid queue message, no records found"
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, message, context)
         return
 
     # We extract the body, and attempt to convert from JSON
     try:
         body = json.loads(record["body"])
     except json.JSONDecodeError:
-        print("Record body was not valid JSON")
-        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
+        message = "Record body was not valid JSON"
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, message, context)
         return
 
     # We then attempt to extract an InvokeEvent instance from
@@ -126,28 +129,35 @@ def handler(event, context):
     try:
         invoke_event = InvokeEvent(**body)
     except TypeError as ex:
-        print(f"Message body missing required keys: {str(ex)}")
-        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
+        message = f"Message body missing required keys: {str(ex)}"
+        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, message, context)
         return
 
     # Assuming we get this far, invoke_event should have the information
     # required to run the lambda:
-    cluster_id = get_ssm_parameter(f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier")
-    username = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
-    )
-    raw_password = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
-    )
-    cert_key = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
-    )
-    cert = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
-    )
-
-    if not cluster_id or not username or not raw_password or not cert_key or not cert:
-        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
+    try:
+        cluster_id = get_ssm_parameter(
+            f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
+        )
+        username = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+        )
+        raw_password = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+        )
+        cert_key = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
+        )
+        cert = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
+        )
+    except ValueError as exc:
+        send_pipeline_signal(
+            signal_queue_url=signal_queue_url,
+            result=TestResult.FAILURE,
+            message=str(exc),
+            context=context,
+        )
         return
 
     cert_path = "/tmp/bfd_test_cert.pem"
@@ -155,10 +165,15 @@ def handler(event, context):
         file.write(cert_key + cert)
 
     password = urllib.parse.quote(raw_password)
-    db_uri = get_rds_db_uri(cluster_id)
-
-    if not db_uri:
-        send_pipeline_signal(signal_queue_url, TestResult.FAILURE, context)
+    try:
+        db_uri = get_rds_db_uri(cluster_id)
+    except ValueError as exc:
+        send_pipeline_signal(
+            signal_queue_url=signal_queue_url,
+            result=TestResult.FAILURE,
+            message=str(exc),
+            context=context,
+        )
         return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
@@ -196,6 +211,7 @@ def handler(event, context):
     send_pipeline_signal(
         signal_queue_url=signal_queue_url,
         result=TestResult.SUCCESS if process.returncode == 0 else TestResult.FAILURE,
+        message="Pipeline run succeeded, check the CloudWatch logs for more information",
         context=context,
     )
 
