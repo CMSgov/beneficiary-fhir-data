@@ -267,9 +267,9 @@
 				<version>1.1.1</version>
 			</dependency>
 
-			<!-- BFD currently uses Jetty 10 which is compatible with Java EE 8
-			and predates the move to the jakarta namespace that comes with Jakarta EE 9.
-			For the sake of consistency, the other EE APIs and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
+			<!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
+			jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
+			and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
 			Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
 			these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
 			<dependency>
