@@ -167,8 +167,9 @@ boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, Str
             println "Queue ${sqsQueueName} is empty. bfd-${bfdEnv}-server-regression run can proceed"
             return true
         } else {
-            println "Queue ${sqsQueueName} has messages. Is there an ongoing run of the server-regression lambda for the ${bfdEnv} environment?"
-            return false
+            println "Queue ${sqsQueueName} has messages. Purging queue..."
+            sqs.purgeQueue(sqsQueueName)
+            return true
         }
     } else {
         println "Queue ${sqsQueueName} can not be found. Was the ${sqsQueueName} destroyed?"
