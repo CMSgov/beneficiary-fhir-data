@@ -28,10 +28,6 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
 
-cat <<EOF > ssh_users.yaml
-${ssh_users}
-EOF
-
 cat <<EOF > extra_vars.json
 {
     "db_migrator_db_url": "${db_migrator_db_url}",
@@ -41,7 +37,7 @@ cat <<EOF > extra_vars.json
 }
 EOF
 
-ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --extra-vars '@ssh_users.yaml' --tags "post-ami" launch_bfd-db-migrator.yml
+ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-db-migrator.yml
 
 rm vault.password # TODO: remove vault.password in BFD-1786
 

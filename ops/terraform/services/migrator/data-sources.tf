@@ -65,8 +65,3 @@ data "aws_ssm_parameters_by_path" "sensitive" {
   path            = "/bfd/${local.env}/${local.service}/sensitive"
   with_decryption = true
 }
-
-data "aws_ssm_parameters_by_path" "users" {
-  path            = "/bfd/mgmt/common/sensitive"
-  with_decryption = true
-}

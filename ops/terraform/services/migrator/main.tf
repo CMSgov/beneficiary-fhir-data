@@ -24,18 +24,6 @@ locals {
   sensitive_map              = zipmap(data.aws_ssm_parameters_by_path.sensitive.names, data.aws_ssm_parameters_by_path.sensitive.values)
   sensitive_config           = { for key, value in local.sensitive_map : split("/", key)[5] => value }
 
-  # User Configuration
-  sudoers       = split(" ", local.sensitive_config["sudoers"])
-  mgmt_users    = zipmap(data.aws_ssm_parameters_by_path.users.names, data.aws_ssm_parameters_by_path.users.values)
-  users_pubkeys = { for username, pubkey in local.mgmt_users : split("_", split("/", username)[5])[1] => pubkey }
-  ssh_users = { ssh_users = [for username, pubkey in local.users_pubkeys : {
-    "username"   = username,
-    "public_key" = pubkey,
-    "sudoer"     = contains(local.sudoers, username)
-  }] }
-
-
-
   # Data source lookups
   kms_key_arn           = data.aws_kms_key.cmk.arn
   kms_key_id            = data.aws_kms_key.cmk.key_id
@@ -96,6 +84,5 @@ resource "aws_instance" "this" {
     git_repo_version                            = var.git_repo_version # TODO: This works for now, but it's probably more appropriate for image to contain ansible configuration
     migrator_monitor_enabled                    = local.migrator_monitor_enabled
     migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
-    ssh_users                                   = yamlencode(local.ssh_users)
   })
 }

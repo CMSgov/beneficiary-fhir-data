@@ -21,12 +21,6 @@
         # db_migrator_db_username:
         # db_migrator_db_password:
 
-    - name: Add SSH users
-      import_role:
-        name: ssh_users
-      tags:
-        - post-ami
-
     # TODO: Consider moving the CloudWatch agent configuration elsewhere, potentially in the application role or a cloudwatch-specific role. This is a little awkward.
     - name: Build CloudWatch unified agent configuration
       template:
