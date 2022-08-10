@@ -105,7 +105,6 @@ def runServerRegression(Map args = [:]) {
         heartbeatInterval: heartbeatInterval
     )
 
-    awsSqs.purgeQueue(sqsQueueName)
     return hasRegressionSucceeded
 }
 
@@ -151,22 +150,9 @@ boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, Str
     println "Checking server-regression ${sqsQueueName} state..."
 
     if (awsSqs.queueExists(sqsQueueName)) {
-        sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
-        println "Queue ${sqsQueueName} exists. Checking for messages in ${sqsQueueUrl}..."
-        serverRegressionSignalMsgs = awsSqs.receiveMessages(
-                sqsQueueUrl: sqsQueueUrl,
-                awsRegion: awsRegion,
-                maxMessages: 10,
-                visibilityTimeoutSeconds: 0,
-                waitTimeSeconds: 0)
-        if (serverRegressionSignalMsgs?.isEmpty()) {
-            println "Queue ${sqsQueueName} is empty. bfd-${bfdEnv}-server-regression run can proceed"
-            return true
-        } else {
-            println "Queue ${sqsQueueName} has messages. Purging queue..."
-            awsSqs.purgeQueue(sqsQueueName)
-            return true
-        }
+        println "Queue ${sqsQueueName} exists. Purging queue..."
+        awsSqs.purgeQueue(sqsQueueName)
+        return true
     } else {
         println "Queue ${sqsQueueName} can not be found. Was the ${sqsQueueName} destroyed?"
         return false
