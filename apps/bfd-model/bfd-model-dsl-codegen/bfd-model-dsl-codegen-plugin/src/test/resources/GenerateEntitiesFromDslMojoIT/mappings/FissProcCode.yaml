@@ -1,0 +1,48 @@
+mappings:
+  - id: FissProcCode
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissProcedureCode
+    entityClassName: gov.cms.test.FissProcCode
+    entityInterfaces:
+      - java.io.Serializable
+    table:
+      name: FissProcCodes
+      schema: pre_adj
+      quoteNames: true
+      primaryKeyColumns:
+        - dcn
+        - priority
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: priority
+          sqlType: smallint
+          javaType: short
+          nullable: false
+        - name: procCode
+          sqlType: varchar(10)
+          nullable: false
+        - name: procFlag
+          sqlType: varchar(4)
+        - name: procDate
+          sqlType: date
+        - name: longString
+          sqlType: varchar(15)
+          javaType: String
+          javaAccessorType: long
+          comment: Illustrates string column auto-converted into long in entity class.
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      - from: procCd
+        to: procCode
+        optionalComponents: None
+      - from: procFlag
+      - from: procDt
+        to: procDate
+      - from: NOW
+        to: lastUpdated

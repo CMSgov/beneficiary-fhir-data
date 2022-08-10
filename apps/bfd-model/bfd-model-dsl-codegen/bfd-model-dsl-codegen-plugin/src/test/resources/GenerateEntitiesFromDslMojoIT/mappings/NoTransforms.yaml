@@ -1,0 +1,33 @@
+mappings:
+  - id: NoTransforms
+    entityClassName: gov.cms.test.NoTransforms
+    nullableFieldAccessorType: Optional
+    table:
+      name: MbiCache
+      schema: rda
+      primaryKeyColumns:
+        - mbiId
+      equalsColumns:
+        - mbi
+      columns:
+        - name: mbiId
+          dbName: mbi_id
+          sqlType: bigint
+          nullable: false
+          identity: true
+        - name: mbi
+          sqlType: varchar(11)
+          nullable: false
+        - name: hash
+          sqlType: varchar(64)
+          nullable: false
+        - name: oldHash
+          dbName: old_hash
+          sqlType: varchar(64)
+        - name: lastUpdated
+          dbName: last_updated
+          sqlType: timestamp with time zone
+          nullable: false
+        - name: extra
+          sqlType: varchar(32)
+          fieldType: Transient

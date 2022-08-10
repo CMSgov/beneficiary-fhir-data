@@ -38,8 +38,8 @@ public class DataUtilityCommons {
    * @param outputDir the output directory.
    * @param fdaFile the fda file.
    */
-  public static void getFDADrugCodes(String outputDir, String fdaFile) throws IllegalStateException 
-  {
+  public static void getFDADrugCodes(String outputDir, String fdaFile)
+      throws IllegalStateException {
     Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {
       throw new IllegalStateException("OUTPUT_DIR does not exist for FDA NDC download.");
@@ -72,8 +72,12 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up).
    */
   public static void buildProductsResource(Path convertedNdcDataFile, Path workingDir)
+<<<<<<< HEAD
       throws IOException, IllegalStateException
   {
+=======
+      throws IOException, IllegalStateException {
+>>>>>>> cbrune/bfd-1921-npi-org-library
     // download FDA NDC file
     Path downloadedNdcZipFile =
         Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());

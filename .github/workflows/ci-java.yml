@@ -120,7 +120,7 @@ jobs:
         run: mvn --batch-mode --threads 1C verify
         working-directory: ./apps/bfd-data-fda
 
-      - name: 'Run Maven Build on FDA Drug Utility'
+      - name: 'Run Maven Build on NPI Org Utility'
         run: mvn --batch-mode --threads 1C verify
         working-directory: ./apps/bfd-data-npi
 

@@ -111,6 +111,32 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
+   * throws an exception as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit}
+   * that provides an non-numeric claim identifer.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForNonNumericClaimId() throws FHIRException {
+    ca.uhn.fhir.rest.server.exceptions.InternalErrorException thrown =
+        assertThrows(
+            ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
+            () -> {
+              IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+              ExplanationOfBenefit eob =
+                  fhirClient
+                      .read()
+                      .resource(ExplanationOfBenefit.class)
+                      .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
+                      .execute();
+            },
+            "Unsupported ID pattern: junk");
+  }
+
+  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
    * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist
    * in the DB.

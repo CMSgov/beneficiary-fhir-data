@@ -276,7 +276,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA DRG Code
+   * Checks if the given {@link Coding} contains a SAMHSA DRG Code.
    *
    * @param coding the code {@link Coding} to check
    * @return <code>true</code> if the specified code {@link Coding} matches one of the {@link
@@ -289,7 +289,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD9 Diagnosis Code
+   * Checks if the given {@link Coding} contains a SAMHSA ICD9 Diagnosis Code.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
@@ -302,7 +302,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD9 Procedure Code
+   * Checks if the given {@link Coding} contains a SAMHSA ICD9 Procedure Code.
    *
    * @param coding the procedure {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
@@ -315,7 +315,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Diagnosis Code
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Diagnosis Code.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
@@ -328,7 +328,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
@@ -341,10 +341,10 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} is in the given {@link Set<String>} of SAMHSA codes.
+   * Checks if the given {@link Coding} is in the given {@link Set} of SAMHSA codes.
    *
    * @param coding The {@link Coding} to check.
-   * @param samhsaCodes The {@link Set<String>} of defined SAMHSA codes to compare against.
+   * @param samhsaCodes The {@link Set} of defined SAMHSA codes to compare against.
    * @param requireeSystem The expected {@link Coding} system of the given {@link Coding}.
    * @return <code>true</code> if the given {@link Set<String>} of SAMHSA codes includes the given
    *     {@link Coding} code. <code>false</code> otherwise.

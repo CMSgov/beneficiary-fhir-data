@@ -36,9 +36,14 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AbstractClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -53,7 +58,6 @@ public class AbstractClaimRdaSinkTest {
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
@@ -132,7 +136,10 @@ public class AbstractClaimRdaSinkTest {
             eq(VERSION), eq(badMessage), any(DataTransformer.TransformationException.class));
   }
 
-  /** Verify that {@link RdaSink#transformMessage} success updates success metric. */
+  /**
+   * Verify that {@link AbstractClaimRdaSink#transformMessage(String, Object)} success updates
+   * success metric.
+   */
   @Test
   public void testSingleMessageTransformSuccessUpdatesMetric() {
     sink.transformMessage(VERSION, "message");
@@ -142,7 +149,10 @@ public class AbstractClaimRdaSinkTest {
     assertMeterReading(0, "transform failures", metrics.getTransformFailures());
   }
 
-  /** Verify that {@link RdaSink#transformMessage} failure updates failure metric. */
+  /**
+   * Verify that {@link AbstractClaimRdaSink#transformMessage(String, Object)} failure updates
+   * failure metric.
+   */
   @Test
   public void testSingleMessageTransformFailureUpdatesMetric() {
     doThrow(
@@ -231,6 +241,11 @@ public class AbstractClaimRdaSinkTest {
     @Override
     RdaClaimMessageMetaData createMetaData(RdaChange<String> change) {
       return null;
+    }
+
+    @Override
+    int getInsertCount(String s) {
+      return 1;
     }
 
     @Override

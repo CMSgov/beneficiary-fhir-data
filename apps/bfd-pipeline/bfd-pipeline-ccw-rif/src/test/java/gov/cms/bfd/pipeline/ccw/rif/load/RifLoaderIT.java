@@ -1127,7 +1127,7 @@ public final class RifLoaderIT {
     try {
       Path editedTempFile = Files.createTempFile("edited-sample-rif", ".rif");
       RifFilesProcessor rifProcessor = new RifFilesProcessor();
-      RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), inputFile);
+      RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), false, inputFile);
       RifFileEvent rifFileEvent = rifFilesEvent.getFileEvents().get(0);
       RifFileRecords records = rifProcessor.produceRecords(rifFileEvent);
 
@@ -1184,7 +1184,7 @@ public final class RifLoaderIT {
    */
   private void loadSample(String sampleName, LoadAppOptions options, Stream<RifFile> filesToLoad) {
     RifFilesEvent rifFilesEvent =
-        new RifFilesEvent(Instant.now(), filesToLoad.collect(Collectors.toList()));
+        new RifFilesEvent(Instant.now(), false, filesToLoad.collect(Collectors.toList()));
     loadSample(sampleName, options, rifFilesEvent);
   }
 
@@ -1198,6 +1198,7 @@ public final class RifLoaderIT {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
+            false,
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
     int loadCount =
         loadSample(
@@ -1296,7 +1297,8 @@ public final class RifLoaderIT {
       }
 
       LOGGER.info("Checking DB for records for: {}", rifResource);
-      RifFilesEvent rifFilesEventSingle = new RifFilesEvent(Instant.now(), rifResource.toRifFile());
+      RifFilesEvent rifFilesEventSingle =
+          new RifFilesEvent(Instant.now(), false, rifResource.toRifFile());
       RifFileRecords rifFileRecordsCopy =
           processor.produceRecords(rifFilesEventSingle.getFileEvents().get(0));
       assertAreInDatabase(

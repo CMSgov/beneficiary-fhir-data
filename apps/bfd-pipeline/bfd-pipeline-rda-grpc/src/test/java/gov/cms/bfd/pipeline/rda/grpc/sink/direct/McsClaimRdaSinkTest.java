@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -43,9 +44,14 @@ import javax.persistence.EntityTransaction;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class McsClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -63,7 +69,6 @@ public class McsClaimRdaSinkTest {
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
@@ -84,6 +89,7 @@ public class McsClaimRdaSinkTest {
             "McsClaimRdaSink.calls",
             "McsClaimRdaSink.change.latency.millis",
             "McsClaimRdaSink.failures",
+            "McsClaimRdaSink.insertCount",
             "McsClaimRdaSink.lastSeq",
             "McsClaimRdaSink.successes",
             "McsClaimRdaSink.transform.failures",
@@ -123,6 +129,7 @@ public class McsClaimRdaSinkTest {
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
     assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertHistogramReading(3, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
@@ -130,6 +137,10 @@ public class McsClaimRdaSinkTest {
   public void mergeFatalError() {
     final List<RdaChange<RdaMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
+    doReturn(mock(RdaClaimMessageMetaData.class))
+        .when(entityManager)
+        .merge(any(RdaClaimMessageMetaData.class));
+    doReturn(mock(RdaMcsClaim.class)).when(entityManager).merge(any(RdaMcsClaim.class));
     doThrow(new RuntimeException("oops")).when(entityManager).merge(batch.get(1).getClaim());
 
     try {
@@ -156,6 +167,7 @@ public class McsClaimRdaSinkTest {
     assertMeterReading(1, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
     assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertHistogramReading(1, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
@@ -198,6 +210,7 @@ public class McsClaimRdaSinkTest {
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
+    assertHistogramReading(0, "database insert count", metrics.getInsertCount());
   }
 
   /**

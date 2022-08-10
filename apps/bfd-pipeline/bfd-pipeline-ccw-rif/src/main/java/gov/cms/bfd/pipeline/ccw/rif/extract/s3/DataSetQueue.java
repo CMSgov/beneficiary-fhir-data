@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
@@ -22,11 +23,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
 public final class DataSetQueue {
@@ -103,7 +103,7 @@ public final class DataSetQueue {
               DataSetManifest manifest = null;
               try {
                 manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
-              } catch (JAXBException e) {
+              } catch (JAXBException | SAXException e) {
                 /*
                  * We want to terminate the ETL load process if an invalid manifest was found
                  * such as a incorrect version number
@@ -204,23 +204,21 @@ public final class DataSetQueue {
    * @param manifestToProcessKey the {@link S3Object#getKey()} of the S3 object for the manifest to
    *     be read
    * @return the {@link DataSetManifest} that was contained in the specified S3 object
-   * @throws JAXBException Any {@link JAXBException}s that are encountered will be bubbled up. These
-   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
-   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
-   *     production, and care should be taken to account for its possibility.
+   * @throws JAXBException
+   * @throws SAXException Any {@link JAXBException}s or {@link SAXException}s that are encountered
+   *     will be bubbled up. These generally indicate that the {@link DataSetManifest} could not be
+   *     parsed because its content was invalid in some way. Note: As of 2017-03-24, this has been
+   *     observed multiple times in production, and care should be taken to account for its
+   *     possibility.
    */
   public static DataSetManifest readManifest(
       AmazonS3 s3Client, ExtractionOptions options, String manifestToProcessKey)
-      throws JAXBException {
+      throws JAXBException, SAXException {
     try (S3Object manifestObject =
         s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-      DataSetManifest manifest =
-          (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestObject.getObjectContent());
+      return DataSetManifestFactory.newInstance().parseManifest(manifestObject.getObjectContent());
 
-      return manifest;
     } catch (AmazonServiceException e) {
       /*
        * This could likely be retried, but we don't currently support

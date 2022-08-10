@@ -10,6 +10,7 @@ import java.io.IOException;
 public class ExtraParamsInterceptor implements IClientInterceptor {
   private RequestHeaders requestHeader;
 
+  /** {@inheritDoc} */
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
     // inject headers values
@@ -21,10 +22,7 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
             });
   }
 
-  /**
-   * @see
-   *     ca.uhn.fhir.rest.client.api.IClientInterceptor#interceptResponse(ca.uhn.fhir.rest.client.api.IHttpResponse)
-   */
+  /** {@inheritDoc} */
   @Override
   public void interceptResponse(IHttpResponse theResponse) throws IOException {
     // nothing needed here
