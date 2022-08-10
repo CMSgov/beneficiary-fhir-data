@@ -272,8 +272,7 @@ try {
 						awsAssumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
-							gitBranchName: gitBranchName,
-							this.&awsAssumeRole
+							gitBranchName: gitBranchName
 						)
 
 						if (hasRegressionRunSucceeded) {
@@ -362,8 +361,7 @@ try {
 							awsAssumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName,
-								this.&awsAssumeRole
+								gitBranchName: gitBranchName
 							)
 
 							if (hasRegressionRunSucceeded) {
@@ -432,8 +430,7 @@ try {
 							// awsAssumeRole()
 							// hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							// 	bfdEnv: bfdEnv,
-							// 	gitBranchName: gitBranchName,
-							// 	this.&awsAssumeRole
+							// 	gitBranchName: gitBranchName
 							// )
 
 							// if (hasRegressionRunSucceeded) {

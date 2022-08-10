@@ -56,7 +56,7 @@ terraform apply \
  * <li>heartbeatInterval int the interval of time, in seconds, to heartbeat the signal SQS queue
  * </ul>
 */
-def runServerRegression(Map args = [:], authFunction) {
+def runServerRegression(Map args = [:]) {
     awsRegion = args.awsRegion ?: 'us-east-1'
     bfdEnv = args.bfdEnv
     gitBranchName = args.gitBranchName
@@ -102,8 +102,7 @@ def runServerRegression(Map args = [:], authFunction) {
 
     hasRegressionSucceeded = monitorServerRegression(
         sqsQueueName: signalSqsQueueName, 
-        heartbeatInterval: heartbeatInterval,
-        authFunction
+        heartbeatInterval: heartbeatInterval
     )
 
     awsSqs.purgeQueue(sqsQueueName)
@@ -111,7 +110,7 @@ def runServerRegression(Map args = [:], authFunction) {
 }
 
 /* Monitors the server-regression-signal SQS queue for when the server-regression lambda finishes */
-boolean monitorServerRegression(Map args = [:], authFunction) {
+boolean monitorServerRegression(Map args = [:]) {
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion ?: 'us-east-1'
     heartbeatInterval = args.heartbeatInterval
@@ -119,7 +118,7 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
 
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
     for (int i = 0; i < maxRetries; i++) {
-        authFunction()
+        awsAuth.assumeRole()
         messages = awsSqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
             awsRegion: awsRegion,
