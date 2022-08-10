@@ -4,26 +4,26 @@
 #
 # Args:
 # 1: previous end state properties file location
-# 2: number of beneficiaries to be generated
-# 3: file system location of synthea folder
+# 2: file system location of synthea folder
+# 3: number of beneficiaries to be generated
 # 4: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
-# 5: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False
+# 5: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
 #
 # Example runstring (with test db stored as an env variable TEST_DB): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $TEST_DB
 #
 # The script will enact the following steps:
 #
-# 1. Validate the paths and files for synthea needed are in place within the synthea directory (as passed in arg3)
+# 1. Validate the paths and files for synthea needed are in place within the synthea directory (as passed in arg2)
 #    - Also checks files and folders that must be written to are writable, and that some externally added files are readable
 #    - Checks if the output folder exists, and creates one if not
-# 2. Checks the supplied database (as passed in arg4) has room to load the number of benes (as passed in arg2) and related table data, so we dont waste time generating something that will have collisions in the target db
+# 2. Checks the supplied database (as passed in arg4) has room to load the number of benes (as passed in arg3) and related table data, so we dont waste time generating something that will have collisions in the target db
 #    - This validation's checks will begin at the expected generation starting point for each field, as read from the end state properties file in arg1
 #    - This is the validation that can be skipped by using optional arg5. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
 # 3. Validates the output directory is empty
 #    - If the output folder has data from a previous run, the output directory is renamed with a timestamp and a new empty output directory is created
 #    - Since this check handles a non-empty output folder, this step wont fail unless there is an IO issue
 # 4. Swaps the script's execution directory to the synthea directory supplied in arg3, since the national script is hardcoded to run other synthea code via relative paths
-# 5. Run the synthea bfd-national shell script with the number of beneficiaries supplied in arg2
+# 5. Run the synthea bfd-national shell script with the number of beneficiaries supplied in arg3
 #    - Output of this run will be written to a timestamped log file in the synthea directory
 #    - If this run fails (denoted by checking the output for text synthea outputs on a build failure) the synthea generation step will be considered a failure
 #
@@ -404,8 +404,8 @@ def _execute_single_count_query(uri: str, query: str):
 if __name__ == "__main__":
     # 5 args:
     # arg1: previous end state properties file location
-    # arg2: number of items to be generated
-    # arg3: file system location of synthea folder
+    # arg2: file system location of synthea folder
+    # arg3: number of items to be generated
     # arg4: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
-    # arg5: (optional) skip validation, useful if re-generating a bad batch, True or False
+    # arg5: (optional) skip validation, useful if re-generating a bad batch, True or False, defaults to False
     validate_and_run(sys.argv[1:])
