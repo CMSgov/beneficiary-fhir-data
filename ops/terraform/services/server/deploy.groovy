@@ -1,8 +1,5 @@
 #!/usr/bin/env groovy
 
-// Load the sqs-specific methods
-sqs = load('ops/terraform/services/common/sqs.groovy')
-
 /* Deploys regression test suite via terraform
  * @param args a {@link Map} must include `bfdEnv`; optionally `dockerImageTagOverride`
  * <ul>
@@ -67,7 +64,7 @@ def runServerRegression(Map args = [:], authFunction) {
 
     // This queue is used to trigger the lambda
     lambdaSqsQueueName = "bfd-${bfdEnv}-server-regression"
-    lamdaSqsQueueUrl = sqs.getQueueUrl(lambdaSqsQueueName)
+    lamdaSqsQueueUrl = awsSqs.getQueueUrl(lambdaSqsQueueName)
 
     // This queue is posted to by the lambda to signal to the pipeline
     // the result of the test run
@@ -98,7 +95,7 @@ def runServerRegression(Map args = [:], authFunction) {
         'compare_tag': "build${lastSuccessfulBuildID}__${sanitizedBranchName}",
         'store_tag': "build${currentBuildId}__${sanitizedBranchName}"
     ])
-    sqs.sendMessage(
+    awsSqs.sendMessage(
         sqsQueueUrl: lamdaSqsQueueUrl,
         sqsMessage: sqsMessage
     )
@@ -109,7 +106,7 @@ def runServerRegression(Map args = [:], authFunction) {
         authFunction
     )
 
-    sqs.purgeQueue(sqsQueueName)
+    awsSqs.purgeQueue(sqsQueueName)
     return hasRegressionSucceeded
 }
 
@@ -120,10 +117,10 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
     heartbeatInterval = args.heartbeatInterval
     maxRetries = args.maxRetries ?: 15
 
-    sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
+    sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
     for (int i = 0; i < maxRetries; i++) {
         authFunction()
-        messages = sqs.receiveMessages(
+        messages = awsSqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
             awsRegion: awsRegion,
             visibilityTimeoutSeconds: 30,
@@ -138,7 +135,7 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
             msg = messages[0]
 
             printServerRegressionMessage(msg)
-            sqs.deleteMessage(msg.receipt, sqsQueueUrl)
+            awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
 
             testRunResult = msg.body.result
             return testRunResult == 'SUCCESS' ? true : false
@@ -154,10 +151,10 @@ boolean monitorServerRegression(Map args = [:], authFunction) {
 boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, String bfdEnv) {
     println "Checking server-regression ${sqsQueueName} state..."
 
-    if (sqs.queueExists(sqsQueueName)) {
-        sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
+    if (awsSqs.queueExists(sqsQueueName)) {
+        sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
         println "Queue ${sqsQueueName} exists. Checking for messages in ${sqsQueueUrl}..."
-        serverRegressionSignalMsgs = sqs.receiveMessages(
+        serverRegressionSignalMsgs = awsSqs.receiveMessages(
                 sqsQueueUrl: sqsQueueUrl,
                 awsRegion: awsRegion,
                 maxMessages: 10,
@@ -168,7 +165,7 @@ boolean canServerRegressionRunProceed(String awsRegion, String sqsQueueName, Str
             return true
         } else {
             println "Queue ${sqsQueueName} has messages. Purging queue..."
-            sqs.purgeQueue(sqsQueueName)
+            awsSqs.purgeQueue(sqsQueueName)
             return true
         }
     } else {
