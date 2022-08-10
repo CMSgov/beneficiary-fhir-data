@@ -98,15 +98,14 @@ def sendMessage(Map args = [:]) {
     maxRetries = args.maxRetries ?: 15
     retryInterval = args.retryInterval ?: 2
 
-    for (int i = 0; i < maxRetries; i++) {
-        withEnv(["SQS_QUEUE_URL=${sqsQueueUrl}", "MESSAGE=${sqsMessage}"]) { 
-            returnCode = sh(returnStdout: true,
-                returnStatus: true,
+    withEnv(["SQS_QUEUE_URL=${sqsQueueUrl}", "MESSAGE=${sqsMessage}"]) { 
+        for (int i = 0; i < maxRetries; i++) {
+            returnCode = sh(returnStatus: true,
                 script: '''
 aws sqs send-message \
 --queue-url "$SQS_QUEUE_URL" \
 --message-body "$MESSAGE"
-            '''.trim())
+                '''.trim())
 
             if (returnCode == 0) {
                 return
@@ -115,7 +114,7 @@ aws sqs send-message \
             println "[Attempt ${i + 1}/${maxRetries}] Message not sent to \"${sqsQueueUrl}\" yet, waiting ${retryInterval} seconds to try again..."
             sleep(retryInterval)
         } 
-    }
 
-    error("Unable to send message to ${sqsQueueUrl} after ${maxRetries} retries")
+        error("Unable to send message to ${sqsQueueUrl} after ${maxRetries} retries")
+    }
 }
