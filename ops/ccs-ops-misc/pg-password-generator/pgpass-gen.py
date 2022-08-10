@@ -7,12 +7,6 @@ import string
 import random
 import re
 
-# A valid password should contain at least:
-min_uppers = 2
-min_lowers = 2
-min_numbers = 2
-min_specials = 2
-min_length = 21
 
 # special characters allowed in the password
 # - RDS does not like /, `, or @ (there may be others depending on the age of the db driver)
@@ -31,7 +25,12 @@ characters = uppers + lowers + digits + specials
 # contains at least two numbers: (?=(?:.*[0-9]){2})
 # contains at least 2 specials: (?=(?:.*[{allowed_specials}]){2})'
 # and at least min_length long: .{min_length,}
-password_re = f'^(?=(?:.*[a-z]){{{min_lowers}}})(?=(?:.*[A-Z]){{{min_uppers}}})(?=(?:.*[0-9]){{{min_numbers}}})(?=(?:.*[{re.escape(allowed_specials)}]){{{min_specials}}}).{{15,}}$'
+min_uppers = 2
+min_lowers = 2
+min_numbers = 2
+min_specials = 2
+min_length = 21
+password_re = f'^(?=(?:.*[a-z]){{{min_lowers}}})(?=(?:.*[A-Z]){{{min_uppers}}})(?=(?:.*[0-9]){{{min_numbers}}})(?=(?:.*[{re.escape(allowed_specials)}]){{{min_specials}}}).{{{min_length},}}$'
 
 
 # scram hash settings (gleaned from https://github.com/postgres/postgres/blob/07044efe00762bdd04c4d392adb8f6425b13369b/src/include/common/scram-common.h#L35)
