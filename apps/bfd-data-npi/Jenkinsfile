@@ -41,7 +41,7 @@ spec:
                         sh 'git config --global --add safe.directory "$WORKSPACE"'
 
 
-                            dir('apps/bfd-data-fda/') {
+                            dir('apps/bfd-data-npi/') {
                                 // inject code artifact credentials into maven ~/.m2/settings.xml
                                 // Setup AWS Credentials
                         withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
