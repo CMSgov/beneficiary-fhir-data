@@ -25,6 +25,7 @@ spec:
 """
         }
     }
+    //
      triggers {
         cron('0 0 28 * *')
     }
