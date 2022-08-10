@@ -3,55 +3,48 @@ package gov.cms.bfd.data.npi.lookup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.io.IOException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+/** NPI org lookup test. */
 public class NPIOrgLookupTest {
 
-  /** Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is true */
+  /** Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is true. */
   @Test
-  public void shouldReturnFakeOrgDataWhenConstructorSetToTrue() {
-    NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForTesting();
+  public void shouldReturnFakeOrgDataWhenConstructorSetToTrue() throws IOException {
+    NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgDataLookup.FAKE_NPI_NUMBER));
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
     assertNotEquals(null, npiOrgDisplay.get());
   }
 
   /**
-   * Do Not Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is false
+   * Do Not Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is false.
    */
   @Test
-  public void shouldNotReturnFakeOrgWhenConstructorSetToFalse() {
-    NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForProduction();
+  public void shouldNotReturnFakeOrgWhenConstructorSetToFalse() throws IOException {
+    NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgDataLookup.FAKE_NPI_NUMBER));
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
-  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true */
+  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true. */
   @Test
-  public void shouldReturnFakeNPIOrgNameWhenConstructorSetToTrue() {
-    NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForTesting();
+  public void shouldReturnFakeNPIOrgNameWhenConstructorSetToTrue() throws IOException {
+    NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgDataLookup.FAKE_NPI_NUMBER));
-    assertEquals(NPIOrgDataLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
+    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
-  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true */
+  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true. */
   @Test
-  public void shouldNotReturnFakeNPIOrgNameWhenConstructorSetToFalse() {
-    NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForProduction();
+  public void shouldNotReturnFakeNPIOrgNameWhenConstructorSetToFalse() throws IOException {
+    NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgDataLookup.FAKE_NPI_NUMBER));
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
     assertEquals(false, npiOrgDisplay.isPresent());
-  }
-
-  /** Return real NPI Org Data when the parameter bfdServer.include.fake.drug.code is false */
-  @Test
-  public void shouldReturnRealOrgDataWhenConstructorSetToTrue() {
-    NPIOrgDataLookup npiOrgDataLookup = NPIOrgDataLookup.createNpiOrgLookupForProduction();
-    Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of("1497758544"));
-    assertEquals("CUMBERLAND COUNTY HOSPITAL SYSTEM", npiOrgDisplay.get());
   }
 }

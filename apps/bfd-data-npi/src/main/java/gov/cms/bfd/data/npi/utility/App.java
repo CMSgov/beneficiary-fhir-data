@@ -1,26 +1,6 @@
 package gov.cms.bfd.data.npi.utility;
 
-import com.google.common.base.Strings;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +11,8 @@ import org.slf4j.LoggerFactory;
 public final class App {
   private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
   /**
-   * The name of the classpath resource (for the project's main web application) for the NPI
-   * "Orgs" TSV file.
+   * The name of the classpath resource (for the project's main web application) for the NPI "Orgs"
+   * TSV file.
    */
   public static final String NPI_RESOURCE = "npi_org_data_utf8.tsv";
 
@@ -45,9 +25,9 @@ public final class App {
    *     <ol>
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
    *           should be the path to the project's rsource directory
-   *     </ol> 
+   *     </ol>
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     if (args.length < 1) {
       throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
     }
@@ -57,4 +37,3 @@ public final class App {
     DataUtilityCommons.getNPIOrgNames(args[0], NPI_RESOURCE);
   }
 }
-

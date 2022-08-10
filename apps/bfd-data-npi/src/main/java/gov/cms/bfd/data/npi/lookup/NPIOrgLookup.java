@@ -12,59 +12,59 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Provides an NPI org lookup */
+/** Provides an NPI org lookup. */
 public class NPIOrgLookup {
-  private static final Logger LOGGER = LoggerFactory.getLogger(NPIOrgDataLookup.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NPIOrgLookup.class);
 
-  /** A fake npi number used for testing */
+  /** A fake npi number used for testing. */
   public static final String FAKE_NPI_NUMBER = "0000000000";
 
-  /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME */
+  /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
-  /** Hashmap to keep the org names */
+  /** Hashmap to keep the org names. */
   private final Map<String, String> npiOrgHashMap = new HashMap<>();
 
-  /** A field to return the testing org lookup */
-  private static NPIOrgDataLookup npiOrgLookupForTesting;
+  /** A field to return the testing org lookup. */
+  private static NPIOrgLookup npiOrgLookupForTesting;
 
-  /** A field to return the production org lookup */
-  private static NPIOrgDataLookup npiOrgLookupForProduction;
+  /** A field to return the production org lookup. */
+  private static NPIOrgLookup npiOrgLookupForProduction;
 
   /**
-   * Factory method for creating a {@link NPIOrgDataLookup } for testing that includes the fake org
+   * Factory method for creating a {@link NPIOrgLookup } for testing that includes the fake org
    * name.
    *
-   * @return the {@link NPIOrgDataLookup }
+   * @return the {@link NPIOrgLookup }
    */
-  public static NPIOrgDataLookup createNpiOrgLookupForTesting() {
+  public static NPIOrgLookup createNpiOrgLookupForTesting() throws IOException {
     if (npiOrgLookupForTesting == null) {
-      npiOrgLookupForTesting = new NPIOrgDataLookup(true);
+      npiOrgLookupForTesting = new NPIOrgLookup(true);
     }
 
     return npiOrgLookupForTesting;
   }
 
   /**
-   * Factory method for creating a {@link NPIOrgDataLookup } for production that does not include
-   * the fake org name.
+   * Factory method for creating a {@link NPIOrgLookup } for production that does not include the
+   * fake org name.
    *
-   * @return the {@link NPIOrgDataLookup }
+   * @return the {@link NPIOrgLookup }
    */
-  public static NPIOrgDataLookup createNpiOrgLookupForProduction() {
+  public static NPIOrgLookup createNpiOrgLookupForProduction() throws IOException {
     if (npiOrgLookupForProduction == null) {
-      npiOrgLookupForProduction = new NPIOrgDataLookup(false);
+      npiOrgLookupForProduction = new NPIOrgLookup(false);
     }
 
     return npiOrgLookupForProduction;
   }
 
   /**
-   * Constructs an {@link NPIOrgDataLookup}
+   * Constructs an {@link NPIOrgLookup}.
    *
    * @param includeFakeNpiOrgName whether to include the fake testing npi org name or not
    */
-  private NPIOrgDataLookup(boolean includeFakeNpiOrgName) {
+  private NPIOrgLookup(boolean includeFakeNpiOrgName) throws IOException {
     readNPIOrgDataFile(includeFakeNpiOrgName);
   }
 
@@ -97,30 +97,33 @@ public class NPIOrgLookup {
    *
    * <p>See {@link gov.cms.bfd.server.war.NPIDataUtilityApp} for details.
    *
-   * @return a map with npi numbers and org data
    * @param includeFakeNPIOrgCode whether to include the fake testing NPI Org
    */
   private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) throws IOException {
-    try (final InputStream npiOrgStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(App.NPI_RESOURCE);
-        final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
+    InputStream stream = App.class.getClassLoader().getResourceAsStream(App.NPI_RESOURCE);
 
-      while ((String line = npiOrgIn.readLine()) != null) {
-        String npiProductColumns[] = line.split("\t");
-        try {
-          npiOrgHashMap.put(
-              npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
-        } catch (StringIndexOutOfBoundsException e) {
-          continue;
+    if (stream != null) {
+      try (final InputStream npiOrgStream =
+              Thread.currentThread().getContextClassLoader().getResourceAsStream(App.NPI_RESOURCE);
+          final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
+        String line = "";
+        while ((line = npiOrgIn.readLine()) != null) {
+          String npiProductColumns[] = line.split("\t");
+          try {
+            npiOrgHashMap.put(
+                npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
+          } catch (StringIndexOutOfBoundsException e) {
+            continue;
+          }
         }
-      }
 
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NPI data.", e);
+      } catch (IOException e) {
+        throw new UncheckedIOException("Unable to read NPI data.", e);
+      }
     }
 
     if (includeFakeNPIOrgCode) {
-        npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
-      }
+      npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
+    }
   }
 }

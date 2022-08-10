@@ -1,5 +1,6 @@
-package  gov.cms.bfd.data.npi.utility;
+package gov.cms.bfd.data.npi.utility;
 
+import com.google.common.base.Strings;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,31 +20,32 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import com.google.common.base.Strings;
 
+/** Data Utility Commons class for npi. * */
 public class DataUtilityCommons {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataUtilityCommons.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DataUtilityCommons.class);
 
-   /** Size of the buffer to read/write data */
+  /** Size of the buffer to read/write data. */
   private static final int BUFFER_SIZE = 4096;
 
-/**
-   * Gets the org names from the npi file
+  /**
+   * Gets the org names from the npi file.
    *
    * @param outputDir the output directory
    * @param npiFile the npi file
    */
-public static void getNPIOrgNames(String outputDir, String npiFile)throws IOException, IllegalStateException{
-  Path outputPath = Paths.get(outputDir);
+  public static void getNPIOrgNames(String outputDir, String npiFile)
+      throws IOException, IllegalStateException {
+    Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {
       throw new IllegalStateException("OUTPUT_DIR does not exist for NPI download.");
     }
@@ -67,11 +69,11 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
         recursivelyDelete(tempDir);
       }
     }
-}
+  }
 
   /**
    * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
-   * (will be created if does not exists)
+   * (will be created if does not exists).
    *
    * @param zipFilePath the zip file path
    * @param destDirectory the destination directory
@@ -99,7 +101,7 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
   }
 
   /**
-   * Extracts a zip entry (file entry)
+   * Extracts a zip entry (file entry).
    *
    * @param zipIn the zip file coming in
    * @param filePath the file path for the file
@@ -124,7 +126,8 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
    * @throws IOException (any errors encountered will be bubbled up)
    * @return path to file
    */
-  public static Path getOriginalNpiDataFile(Path workingDir, String fileName) throws IOException, IllegalStateException {
+  public static Path getOriginalNpiDataFile(Path workingDir, String fileName)
+      throws IOException, IllegalStateException {
     // download NPI file
     Path downloadedNpiZipFile =
         Paths.get(workingDir.resolve("npidata.zip").toFile().getAbsolutePath());
@@ -166,7 +169,11 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
     return originalNpiDataFile;
   }
 
-    /** @param tempDir */
+  /**
+   * Deletes the directory.
+   *
+   * @param tempDir for the temp directory
+   */
   private static void recursivelyDelete(Path tempDir) {
     // Recursively delete the working dir.
     try {
@@ -179,7 +186,6 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
       LOGGER.warn("Failed to cleanup the temporary folder", e);
     }
   }
-
 
   /**
    * Creates the {@link #NPI_RESOURCE} file in the specified location.
@@ -204,9 +210,11 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
   }
 
   /**
-   * @param convertedNpiDataFile
-   * @param originalNpiDataFile
-   * @throws IOException
+   * Converts the npi data file.
+   *
+   * @param convertedNpiDataFile converted npi data file.
+   * @param originalNpiDataFile original npi data file.
+   * @throws IOException exception thrown.
    */
   private static void convertNpiDataFile(Path convertedNpiDataFile, Path originalNpiDataFile)
       throws IOException {
@@ -229,17 +237,17 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
-               // skip first line which is header
+      // skip first line which is header
       reader.readLine();
       for (String line; (line = reader.readLine()) != null; ) {
         String[] fields = line.split(",");
 
         String orgName = fields[4].trim().replace("\"", "");
-        String npi = fields[0].replace("\"", "");
-        int entityTypeCode = Integer.parseInt(fields[4].trim().replace("\"", ""));
+        String npi = fields[0].trim().replace("\"", "");
+        String entityTypeCode = fields[1].trim().replace("\"", "");
 
-        //entity type code 2 is organization
-        if (entityTypeCode==2) {
+        // entity type code 2 is organization
+        if (!Strings.isNullOrEmpty(entityTypeCode) && Integer.parseInt(entityTypeCode) == 2) {
           out.write(npi + "\t" + orgName);
           out.newLine();
         }
@@ -248,9 +256,9 @@ public static void getNPIOrgNames(String outputDir, String npiFile)throws IOExce
   }
 
   /**
-   * Extracts a file name
+   * Extracts a file name.
    *
-   * @param getMonthBefore
+   * @param getMonthBefore gets the month before
    * @return a file name string
    */
   private static String getFileName(boolean getMonthBefore) {
