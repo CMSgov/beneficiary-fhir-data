@@ -29,7 +29,7 @@ def build(boolean verboseMaven) {
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
 
-		sh "mvn ${quietFlags} --threads 1C --update-snapshots -Dmaven.test.failure.ignore -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
+		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
 	}
 
 	return new AppBuildResults(
