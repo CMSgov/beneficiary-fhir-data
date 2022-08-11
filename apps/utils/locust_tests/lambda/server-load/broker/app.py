@@ -20,15 +20,6 @@ class ControllerResponse:
     ip_address: str
 
 
-@dataclass
-class ScalingEvent:
-    """
-    A notification that a scaling event has occurred
-    """
-
-    is_scaling_event: bool
-
-
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
 # TODO: Would this be better using an ARN instead?
@@ -123,4 +114,6 @@ def handler(event, context):
     while not scaling_event:
         start_worker(controller_ip=controller_response.ip_address)
         # Check for a scaling event
-        messages = check_queue(timeout=1)
+        scaling_event = check_queue(timeout=1)
+
+    return
