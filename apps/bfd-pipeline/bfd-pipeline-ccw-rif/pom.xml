@@ -101,7 +101,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
