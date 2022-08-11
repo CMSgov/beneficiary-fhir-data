@@ -665,17 +665,17 @@ checkJavaFormat
 						</dependency>
 					</dependencies>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.11.0</version>
-					<configuration>
-						<rulesUri>file://${project.basedir}/rules.xml</rulesUri>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.11.0</version>
+				<configuration>
+					<rulesUri>file://${project.basedir}/rules.xml</rulesUri>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
