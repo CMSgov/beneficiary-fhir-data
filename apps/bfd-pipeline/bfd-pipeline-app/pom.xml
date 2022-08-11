@@ -94,13 +94,13 @@
 		</dependency>
 		<!-- Used in tests to help with managing asynchronous behavior. Reference:
         https://github.com/awaitility/awaitility -->
-		<!--<dependency>
+		<dependency>
 
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
 			<version>${awaitility.version}</version>
 			<scope>test</scope>
-		</dependency>-->
+		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif-samples</artifactId>
