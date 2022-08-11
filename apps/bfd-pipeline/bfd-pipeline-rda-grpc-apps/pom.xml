@@ -138,7 +138,7 @@
         </dependency>
         <dependency>
             <!-- Used in tests to help with managing asynchronous behavior. Reference:
-            https://github.com/awaitility/awaitility -->
+                https://github.com/awaitility/awaitility -->
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>
