@@ -72,12 +72,7 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up).
    */
   public static void buildProductsResource(Path convertedNdcDataFile, Path workingDir)
-<<<<<<< HEAD
-      throws IOException, IllegalStateException
-  {
-=======
       throws IOException, IllegalStateException {
->>>>>>> cbrune/bfd-1921-npi-org-library
     // download FDA NDC file
     Path downloadedNdcZipFile =
         Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
