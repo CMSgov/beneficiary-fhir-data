@@ -29,15 +29,7 @@ def build(boolean verboseMaven) {
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
 
-		sh "mvn ${quietFlags} --threads 1C --update-snapshots -Dmaven.test.failure.ignore clean verify"
-		/*
-		 * Fingerprint the output artifacts and archive the test results.
-		 *
-		 * Archiving the artifacts here would waste space, as the build deploys them to the local Maven repository.
-		 */
-		fingerprint '**/target/*.jar,**/target/*.war,**/target/*.zip'
-		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
-		archiveArtifacts artifacts: '**/target/*.jar,**/target/*.war,**/target/*.zip,**/target/*-reports/*.txt', allowEmptyArchive: true
+		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
 	}
 
 	return new AppBuildResults(

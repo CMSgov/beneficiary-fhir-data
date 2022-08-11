@@ -231,7 +231,13 @@ public class FissClaimRdaSinkTest {
             .currTranDate(transactionDate)
             .build();
     RdaChange<RdaFissClaim> change =
-        new RdaChange<>(100L, RdaChange.Type.UPDATE, claim, changeDate);
+        new RdaChange<>(
+            100L,
+            RdaChange.Type.UPDATE,
+            claim,
+            changeDate,
+            new RdaChange.Source(
+                (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
     RdaClaimMessageMetaData metaData = sink.createMetaData(change);
     assertEquals(100L, metaData.getSequenceNumber());
     assertEquals('F', metaData.getClaimType());
@@ -262,6 +268,11 @@ public class FissClaimRdaSinkTest {
     claim.setDcn(dcn);
     claim.setApiSource(VERSION);
     return new RdaChange<>(
-        nextSeq++, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
+        nextSeq++,
+        RdaChange.Type.INSERT,
+        claim,
+        clock.instant().minusMillis(12),
+        new RdaChange.Source(
+            (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
   }
 }
