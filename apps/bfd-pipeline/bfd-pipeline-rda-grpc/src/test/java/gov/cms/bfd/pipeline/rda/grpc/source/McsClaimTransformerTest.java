@@ -1034,6 +1034,8 @@ public class McsClaimTransformerTest {
   // endregion McsDiagnosisCode
 
   // region McsDetail
+
+  /** Verifies that {@link RdaMcsDetail#idrDtlNumber} is initialized properly. */
   @Test
   public void testDetailIdrDtlNumber() {
     new McsClaimTransformerTest.DetailFieldTester()
