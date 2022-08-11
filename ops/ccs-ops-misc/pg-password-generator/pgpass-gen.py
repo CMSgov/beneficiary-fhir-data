@@ -9,8 +9,11 @@ import re
 
 
 # special characters allowed in the password
-# - RDS does not like /, `, or @ (there may be others depending on the age of the db driver)
-allowed_specials = "~!%#^&][)(}{_><+=.;?|"
+# notes: RDS does not like /, `, or @ (at least for the admin password). I'm avoiding others for a variety of reasons, 
+# but mostly to avoid shell/scripting languages expansion/interpolation, URI encoding, etc. A general web search for
+# 'allowed special characters in postgresql or aurora or rds led to omition of some of the others. I did not spend
+# time verifying/validating these so just went with:
+allowed_specials = "~!%#^&][)(}{_><+=.-;?|"
 
 # lists of available characters
 uppers = list(string.ascii_uppercase)
