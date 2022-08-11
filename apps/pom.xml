@@ -116,7 +116,7 @@
 		<auto-service.version>1.0.1</auto-service.version>
 		<zjsonpatch.version>0.4.12</zjsonpatch.version>
 		<hamcrest-library.version>2.2</hamcrest-library.version>
-		<awaitility.version>2.0.0</awaitility.version>
+		<awaitility.version>4.2.0</awaitility.version>
 		<lombok.version>1.18.24</lombok.version>
 		<commons-codec.version>1.15</commons-codec.version>
 
@@ -383,14 +383,6 @@
 				<artifactId>telemetry-http-okhttp</artifactId>
 				<version>${telemetry-http-okhttp.version}</version>
 			</dependency>
-		<!--	<dependency> -->
-				<!-- Used in tests to help with managing asynchronous behavior. Reference:
-			https://github.com/awaitility/awaitility -->
-                <!--<groupId>org.awaitility</groupId>
-                <artifactId>awaitility</artifactId>
-                <version>${awaitility.version}</version>
-                <scope>test</scope>
-            </dependency>-->
 		</dependencies>
 	</dependencyManagement>
 
