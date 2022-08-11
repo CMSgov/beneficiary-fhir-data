@@ -150,6 +150,9 @@ public class RdaMcsDetail {
   @Column(name = "idr_dtl_amb_dropoff_zipcode", length = 9)
   private String idrDtlAmbDropoffZipcode;
 
+  @Column(name = "idr_dtl_number", nullable = false)
+  private short idrDtlNumber;
+
   @Column(name = "last_updated")
   private Instant lastUpdated;
 

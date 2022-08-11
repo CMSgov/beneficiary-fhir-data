@@ -178,9 +178,9 @@ try {
 				}
 			}
 
-			/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
-			value if the build is a PR as the BRANCH_NAME var is populated with the build 
-			name during PR builds. 
+			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
+			value if the build is a PR as the BRANCH_NAME var is populated with the build
+			name during PR builds.
 			*/
 			stage('Set Branch Name') {
 				currentStage = env.STAGE_NAME
@@ -270,9 +270,20 @@ try {
 						)
 
 						awsAssumeRole()
-						serverScripts.runServerRegression(
+						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
+							gitBranchName: gitBranchName
 						)
+
+						if (hasRegressionRunSucceeded) {
+							println 'Regression suite passed, proceeding to next stage...'
+						} else {
+							// TODO: Regression suite is currently inconsistent, so failing builds automatically
+							// would cause false negatives. Uncomment the line below when the regression suite is
+							// more consistent
+
+							// error('Regression suite failed, check the CloudWatch logs above for more details')
+						}
 					}
 				}
 			}
@@ -348,9 +359,20 @@ try {
 							)
 
 							awsAssumeRole()
-							serverScripts.runServerRegression(
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
 							)
+
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								// TODO: Regression suite is currently inconsistent, so failing builds automatically
+								// would cause false negatives. Uncomment the line below when the regression suite is
+								// more consistent
+
+								// error('Regression suite failed, check the CloudWatch logs above for more details')
+							}
 						}
 					}
 				} else {
@@ -405,9 +427,17 @@ try {
 							)
 
 							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
-							// serverScripts.runServerRegression(
+							// awsAssumeRole()
+							// hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							// 	bfdEnv: bfdEnv,
+							// 	gitBranchName: gitBranchName
 							// )
+
+							// if (hasRegressionRunSucceeded) {
+							// 	println 'Regression suite passed, proceeding to next stage...'
+							// } else {
+							// 	error('Regression suite failed, check the CloudWatch logs above for more details')
+							// }
 						}
 					}
 				} else {

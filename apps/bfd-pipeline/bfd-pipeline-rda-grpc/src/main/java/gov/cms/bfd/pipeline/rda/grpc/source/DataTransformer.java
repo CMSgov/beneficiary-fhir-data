@@ -6,6 +6,7 @@ import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -213,6 +214,26 @@ public class DataTransformer {
   }
 
   /**
+   * If the value exists, check that the integer value of the given {@link IntSupplier} is unsigned
+   * (not negative) and small enough to fit in a {@link Short} type, and passes it to the given
+   * {@link IntConsumer}.
+   *
+   * @param fieldName The name of the field from which the value originates.
+   * @param exists Indicates if the value exists in the supplier.
+   * @param value The value being validated / copied.
+   * @param copier The consumer to receive the value.
+   * @return this
+   */
+  public DataTransformer copyOptionalUIntToShort(
+      String fieldName, BooleanSupplier exists, IntSupplier value, Consumer<Short> copier) {
+    if (exists.getAsBoolean()) {
+      copyUIntToShort(fieldName, value, copier);
+    }
+
+    return this;
+  }
+
+  /**
    * Checks that the integer value of the given {@link IntSupplier} is unsigned (not negative) and
    * small enough to fit in a {@link Short} type, and passes it to the given {@link IntConsumer}.
    *
@@ -377,6 +398,54 @@ public class DataTransformer {
       Consumer<LocalDate> copier) {
     if (exists.getAsBoolean()) {
       return copyDate(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Parses the string into an {@link Instant} and delivers it to the Consumer. The string value
+   * must be in ISO-8601 format (YYYY-MM-DDTHH:ii:ss.SSSSSSZ). Valid null values are silently
+   * accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value timestamp string in ISO-8601 format
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyTimestamp(
+      String fieldName, boolean nullable, String value, Consumer<Instant> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      try {
+        // In Java 11, Instant.parse() doesn't support offsets, so using OffsetDateTime
+        Instant timestamp = OffsetDateTime.parse(value).toInstant();
+        copier.accept(timestamp);
+      } catch (DateTimeParseException ex) {
+        addError(fieldName, "invalid timestamp");
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into an {@link Instant} and delivers it to the Consumer. The string value
+   * must be in ISO-8601 format (YYYY-MM-DDTHH:ii:ss.SSSSSSZ). Valid null values are silently
+   * accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the timestamp
+   * @return this
+   */
+  public DataTransformer copyOptionalTimestamp(
+      String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Instant> copier) {
+    if (exists.getAsBoolean()) {
+      return copyTimestamp(fieldName, false, value.get(), copier);
     }
     return this;
   }
