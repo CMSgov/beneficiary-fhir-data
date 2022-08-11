@@ -37,7 +37,7 @@
 					version of this library (1.1) that isn't compatible with our other dependencies. -->
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
+				<version>${commons-codec.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -127,7 +127,7 @@
 				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
 			<groupId>com.flipkart.zjsonpatch</groupId>
 			<artifactId>zjsonpatch</artifactId>
-			<version>0.4.12</version>
+			<version>${zjsonpatch.version}</version>
 			<scope>test</scope>
 			<!-- Don't let the jackson transitive dependency versions be determined by
 			     this test dependency -->
@@ -233,7 +233,7 @@
 			<!-- Used to proxy JDBC usage, for monitoring. -->
 			<groupId>net.ttddyy</groupId>
 			<artifactId>datasource-proxy</artifactId>
-			<version>1.8</version>
+			<version>${datasource-proxy.version}</version>
 		</dependency>
 
 		<dependency>
@@ -264,7 +264,7 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
-            <version>2.2</version>
+            <version>${hamcrest-library.version}</version>
             <scope>test</scope>
         </dependency>
 		<dependency>

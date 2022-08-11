@@ -133,12 +133,13 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
+		<!-- Used in tests to help with managing asynchronous behavior. Reference:
+        https://github.com/awaitility/awaitility -->
 		<dependency>
-			<!-- Used in tests to help with managing asynchronous behavior. Reference:
-				https://github.com/awaitility/awaitility -->
+
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>4.2.0</version>
+			<version>${awaitility.version}</version>
 			<scope>test</scope>
 		</dependency>
         <dependency>
