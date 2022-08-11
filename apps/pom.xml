@@ -88,27 +88,28 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.1.29</metrics.version>
-		<newrelic.version>0.5.0</newrelic.version>
+		<metrics.version>4.2.1</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.276</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
-		<hibernate.version>5.6.1.Final</hibernate.version>
+		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
+		but not all (in particular, entity-manager does not have a 6.0 version available yet).
+		Staying on latest 5.x version until all components have 6.0 versions available. -->
+		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
 		<jackson.version>2.13.3</jackson.version>
 		<mockito.version>4.2.0</mockito.version>
-		<postgresql.version>42.2.20</postgresql.version>
+		<postgresql.version>42.4.1</postgresql.version>
 		<hsqldb.version>2.6.0</hsqldb.version>
-		<slf4j.version>1.7.7</slf4j.version>
-		<hikari.version>4.0.3</hikari.version>
+		<slf4j.version>1.7.36</slf4j.version>
+		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelicAgent.version>7.5.0</newrelicAgent.version>
+		<newrelic.agent.version>7.9.0</newrelic.agent.version>
 		<checkstyle.version>10.1</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<postgres.driver.version>42.4.0</postgres.driver.version>
 
 		<!--  Dependencies required for org.apache.commons -->
 		<commons.lang3.version>3.12.0</commons.lang3.version>
@@ -145,7 +146,7 @@
 				<!-- The newrelic.jar javaagent dependency -->
 				<groupId>com.newrelic.agent.java</groupId>
 				<artifactId>newrelic-agent</artifactId>
-				<version>${newrelicAgent.version}</version>
+				<version>${newrelic.agent.version}</version>
 			</dependency>
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
@@ -233,10 +234,11 @@
 					Hibernate is used for that in our projects.) -->
 				<artifactId>hibernate-jpa-2.1-api</artifactId>
 				<groupId>org.hibernate.javax.persistence</groupId>
-				<version>1.0.0.Final</version>
+				<version>1.0.2.Final</version>
 			</dependency>
+
 			<dependency>
-				<!-- Hibernate's JPA implementation is used to manage most database usage 
+				<!-- Hibernate's JPA implementation is used to manage most database usage
 					in our applications. -->
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
@@ -264,6 +266,12 @@
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
+
+			<!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
+			jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
+			and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
+			Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
+			these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
@@ -284,7 +292,7 @@
 				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>${postgres.driver.version}</version>
+				<version>${postgresql.version}</version>
 			</dependency>
 			<dependency>
 				<!-- In-memory database that is used in some tests to speed things up. -->
@@ -299,7 +307,7 @@
 					for details. -->
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
-				<version>3.3.0</version>
+				<version>${hikari.version}</version>
 			</dependency>
 
 			<dependency>
