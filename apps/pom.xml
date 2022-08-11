@@ -88,38 +88,38 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.2.1</metrics.version>
+		<metrics.version>4.2.11</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.276</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.278</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
 		but not all (in particular, entity-manager does not have a 6.0 version available yet).
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
-		<junit.version>5.8.2</junit.version>
+		<junit.version>5.9.0</junit.version>
 		<jackson.version>2.13.3</jackson.version>
-		<mockito.version>4.2.0</mockito.version>
+		<mockito.version>4.6.1</mockito.version>
 		<postgresql.version>42.4.1</postgresql.version>
-		<hsqldb.version>2.6.0</hsqldb.version>
+		<hsqldb.version>2.7.0</hsqldb.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
 		<newrelic.agent.version>7.9.0</newrelic.agent.version>
-		<checkstyle.version>10.1</checkstyle.version>
+		<checkstyle.version>10.3.2</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
 
 		<!--  Dependencies required for org.apache.commons -->
 		<commons.lang3.version>3.12.0</commons.lang3.version>
-        <commons.csv.version>1.2</commons.csv.version>
-		<commons.io.version>2.7</commons.io.version>
-		<commons.collections4.version>4.1</commons.collections4.version>
+        <commons.csv.version>1.9.0</commons.csv.version>
+		<commons.io.version>2.11.0</commons.io.version>
+		<commons.collections4.version>4.4</commons.collections4.version>
 	
 
         <!-- Dependencies required for connecting to a gRPC API -->
-        <grpc_java.version>1.47.0</grpc_java.version>
+        <grpc_java.version>1.48.1</grpc_java.version>
         <protoc.version>3.21.2</protoc.version>
         <protobuf.version>3.21.2</protobuf.version>
 
@@ -299,7 +299,7 @@
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
 				<!-- The 2.5.x series is the last to support Java 8. -->
-				<version>2.5.2</version>
+				<version>2.7.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -328,7 +328,7 @@
 				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
 				 <groupId>org.projectlombok</groupId>
 				 <artifactId>lombok</artifactId>
-				 <version>1.18.20</version>
+				 <version>1.18.24</version>
 				 <scope>provided</scope>
 			 </dependency>
 
@@ -646,6 +646,14 @@ checkJavaFormat
 							<version>${checkstyle.version}</version>
 						</dependency>
 					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.11.0</version>
+					<configuration>
+						<rulesUri>file://${project.basedir}/rules.xml</rulesUri>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

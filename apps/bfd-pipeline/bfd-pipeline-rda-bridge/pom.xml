@@ -17,7 +17,7 @@
     <description>Utility project for creating RDA data</description>
 
     <properties>
-        <commons-cli.version>1.4</commons-cli.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
 
         <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
         <bfd-pipeline-rda-grpcs.version>1.0.0-SNAPSHOT</bfd-pipeline-rda-grpcs.version>
@@ -87,7 +87,7 @@
                  https://github.com/flipkart-incubator/zjsonpatch for details. -->
             <groupId>com.flipkart.zjsonpatch</groupId>
             <artifactId>zjsonpatch</artifactId>
-            <version>0.4.6</version>
+            <version>0.4.12</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -107,6 +107,13 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <configuration>
+                    <rulesUri>file://${project.basedir}/../../rules.xml</rulesUri>
+                </configuration>
             </plugin>
         </plugins>
     </build>
