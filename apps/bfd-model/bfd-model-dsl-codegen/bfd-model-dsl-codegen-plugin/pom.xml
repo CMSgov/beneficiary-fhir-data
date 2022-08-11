@@ -20,7 +20,7 @@
 
     <properties>
         <javapoet.version>1.9.0</javapoet.version>
-        <maven.plugin.version>3.6.0</maven.plugin.version>
+        <maven.plugin.version>3.8.2</maven.plugin.version>
     </properties>
 
     <dependencies>
