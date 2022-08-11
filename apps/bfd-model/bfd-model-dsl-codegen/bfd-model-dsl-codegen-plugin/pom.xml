@@ -22,7 +22,7 @@
         <maven-plugin-api.version>3.8.6</maven-plugin-api.version>
         <maven-core.version>3.8.6</maven-core.version>
         <maven-plugin-annotations.version>3.6.4</maven-plugin-annotations.version>
-        <maven.plugin.version>3.8.2</maven.plugin.version>
+        <maven.plugin.version>3.6.4</maven.plugin.version>
     </properties>
 
     <dependencies>
