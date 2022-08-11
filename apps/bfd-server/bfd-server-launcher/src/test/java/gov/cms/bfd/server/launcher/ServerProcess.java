@@ -62,8 +62,8 @@ public final class ServerProcess implements AutoCloseable {
 
     // Wait for it to start both Jetty and the app.
     try {
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
     } catch (ConditionTimeoutException e) {
       // Add some additional logging detail.
       throw new ConditionTimeoutException(
