@@ -660,6 +660,8 @@ checkJavaFormat
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<!-- Use the versions-maven-plugin plugin to help ensure that checking
+							for new versions to update dependencies to don't include alphas. -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
