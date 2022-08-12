@@ -22,7 +22,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.password=bfd >> /flyway/conf/flyway.conf \
     && echo flyway.user=bfd >> /flyway/conf/flyway.conf
 
-FROM amazonlinux as al2
+FROM amazonlinux:2 as al2
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
 # Getting systemd to run correctly inside Docker is very tricky. Need to
@@ -34,7 +34,8 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 # * <https://hub.docker.com/_/centos/>: Good start, but badly broken.
 # * <https://github.com/solita/docker-systemd>: For Ubuntu, but works!
 # * <https://github.com/moby/moby/issues/28614>: Also some useful info.
-RUN amazon-linux-extras enable java-openjdk11 && \
+RUN yum update -y --security && \
+    amazon-linux-extras enable java-openjdk11 && \
     yum clean metadata && \
     yum install -y sudo unzip selinux-policy systemd java-11-openjdk-devel python3 && \
     find /etc/systemd/system \
