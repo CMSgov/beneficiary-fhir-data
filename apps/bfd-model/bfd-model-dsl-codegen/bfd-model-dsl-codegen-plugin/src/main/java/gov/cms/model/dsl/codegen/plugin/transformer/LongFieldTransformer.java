@@ -8,13 +8,13 @@ import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 
-/** Implementation of {@link FieldTransformer} for use with native integer fields. */
-public class IntFieldTransformer implements FieldTransformer {
+/** Implementation of {@link FieldTransformer} for use with native long fields. */
+public class LongFieldTransformer implements FieldTransformer {
   /**
    * {@inheritDoc}
    *
-   * <p>Generate code to call either {@link DataTransformer#copyOptionalInt} when the field is
-   * optional or {@link DataTransformer#copyInt} when it is not optional.
+   * <p>Generate code to call either {@link DataTransformer#copyOptionalLong} when the field is
+   * optional or {@link DataTransformer#copyLong} when it is not optional.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column
@@ -35,7 +35,7 @@ public class IntFieldTransformer implements FieldTransformer {
     return transformation.isOptional()
         ? CodeBlock.builder()
             .addStatement(
-                "$L.copyOptionalInt($L, $L, $L)",
+                "$L.copyOptionalLong($L, $L, $L)",
                 TRANSFORMER_VAR,
                 getter.createHasRef(transformation),
                 getter.createGetRef(transformation),
@@ -43,7 +43,7 @@ public class IntFieldTransformer implements FieldTransformer {
             .build()
         : CodeBlock.builder()
             .addStatement(
-                "$L.copyInt($L, $L)",
+                "$L.copyLong($L, $L)",
                 TRANSFORMER_VAR,
                 getter.createGetCall(transformation),
                 setter.createSetRef(column))

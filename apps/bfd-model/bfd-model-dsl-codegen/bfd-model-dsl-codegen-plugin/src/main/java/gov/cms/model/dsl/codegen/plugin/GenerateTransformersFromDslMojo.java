@@ -428,7 +428,8 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
    * @param mapping {@link MappingBean} for message/entity to be processed
    * @return the {@link MethodSpec}
    */
-  private MethodSpec createTransformMethodForMapping(MappingBean mapping) {
+  private MethodSpec createTransformMethodForMapping(MappingBean mapping)
+      throws MojoExecutionException {
     final TypeName messageClassType = ModelUtil.classType(mapping.getMessageClassName());
     final TypeName entityClassType = ModelUtil.classType(mapping.getEntityClassName());
     final MethodSpec.Builder builder =
@@ -454,12 +455,18 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
             : OptionalSetter.Instance;
     for (TransformationBean transformation : mapping.getTransformations()) {
       final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
-      TransformerUtil.selectTransformerForField(column, transformation)
-          .map(
-              generator ->
-                  generator.generateCodeBlock(
-                      mapping, column, transformation, fromCodeGenerator, toCodeGenerator))
-          .ifPresent(builder::addCode);
+      final CodeBlock transformationCode =
+          TransformerUtil.selectTransformerForField(column, transformation)
+              .map(
+                  generator ->
+                      generator.generateCodeBlock(
+                          mapping, column, transformation, fromCodeGenerator, toCodeGenerator))
+              .orElseThrow(
+                  () ->
+                      MojoUtil.createException(
+                          "No known transformation found: mapping=%s from=%s to=%s",
+                          mapping.getId(), transformation.getFrom(), transformation.getTo()));
+      builder.addCode(transformationCode);
     }
     if (mapping.hasExternalTransformations()) {
       for (ExternalTransformationBean externalTransformation :
