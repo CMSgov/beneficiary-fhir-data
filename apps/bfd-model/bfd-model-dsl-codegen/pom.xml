@@ -15,6 +15,7 @@
         A parent POM for the bfd-model-dsl-codegen-* projects, which provide a code generation plugin and associated library for RDA API data.
     </description>
 
+
     <modules>
         <module>bfd-model-dsl-codegen-plugin</module>
         <module>bfd-model-dsl-codegen-library</module>
