@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -100,9 +99,7 @@ public final class MigratorAppIT {
 
     // Await start/finish of application
     try {
-      Awaitility.await()
-          .atMost(new Durations(60, TimeUnit.SECONDS))
-          .until(() -> !appProcess.isAlive());
+      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
 
       // Verify results
       assertEquals(
@@ -153,9 +150,7 @@ public final class MigratorAppIT {
 
     // Await start/finish of application
     try {
-      Awaitility.await()
-          .atMost(new Durations(60, TimeUnit.SECONDS))
-          .until(() -> !appProcess.isAlive());
+      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
 
       // Verify results
       assertEquals(
@@ -190,9 +185,7 @@ public final class MigratorAppIT {
 
     // Await start/finish of application
     try {
-      Awaitility.await()
-          .atMost(new Durations(60, TimeUnit.SECONDS))
-          .until(() -> !appProcess.isAlive());
+      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
 
       // Verify results
       assertEquals(1, appProcess.exitValue());
