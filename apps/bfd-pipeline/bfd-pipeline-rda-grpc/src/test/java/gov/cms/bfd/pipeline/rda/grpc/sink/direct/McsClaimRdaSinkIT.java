@@ -14,9 +14,9 @@ import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
@@ -137,8 +137,8 @@ public class McsClaimRdaSinkIT {
 
   /**
    * Checks if writing invalid MCS claim messages results in a {@link
-   * gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException} being thrown and
-   * if {@link MessageError} entities were written out to the database.
+   * DataTransformer.TransformationException} being thrown and if {@link MessageError} entities were
+   * written out to the database.
    *
    * @throws Exception If any unexpected exceptions were thrown.
    */

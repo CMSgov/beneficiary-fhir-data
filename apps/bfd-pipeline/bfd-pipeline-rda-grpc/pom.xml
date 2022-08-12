@@ -27,6 +27,12 @@
             <artifactId>bfd-model-rda</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <!-- contains the data transformation library classes needed to transform incoming data -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-dsl-codegen-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -201,6 +207,22 @@
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <mappingPath>${project.basedir}/../../bfd-model/bfd-model-rda/mappings</mappingPath>
+                    <outputDirectory>${project.build.directory}/generated-sources/transformers</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>transformers</goal>
                         </goals>
                     </execution>
                 </executions>

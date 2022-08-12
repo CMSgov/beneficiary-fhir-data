@@ -1,0 +1,73 @@
+mappings:
+- id: FissDiagnosisCode
+  messageClassName: gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode
+  entityClassName: gov.cms.bfd.model.rda.RdaFissDiagnosisCode
+  table:
+    name: fiss_diagnosis_codes
+    schema: rda
+    primaryKeyColumns:
+    - dcn
+    - priority
+    columns:
+    - name: dcn
+      sqlType: varchar(23)
+      nullable: false
+      comment: 'Document Control Number: This field is the identification number for
+        a claim. It provides a reference number for the control and monitoring of
+        specific claims, and to differentiate between claims for the beneficiary;
+        it may be used to access data for the record depending on the copybook it
+        used for. This is a unique field created by the system.'
+    - name: priority
+      sqlType: smallint
+      javaType: short
+      nullable: false
+    - name: diagCd2
+      sqlType: varchar(7)
+      minLength: 0
+      nullable: false
+      dbName: diag_cd2
+    - name: diagPoaInd
+      sqlType: varchar(1)
+      dbName: diag_poa_ind
+      comment: 'Diagnosis Present On Admission (POA) Indicator: This field identifies
+        the patient''s condition that is present at the time the order for inpatient
+        admission to a general acute care hospital occurs. This indicator is assigned
+        to every principal and secondary diagnosis on an inpatient acute care hospital
+        claim, and the external cause of injury codes. Conditions that develop during
+        an outpatient encounter, including emergency department, observation, or
+        outpatient surgery, are considered as present on admission. The Centers
+        for Medicare and Medicaid Services (CMS) does not require a POA indicator
+        for the external cause of injury code unless it is being reported as another
+        diagnosis. Effective with discharges on or after 10/01/07.'
+    - name: bitFlags
+      sqlType: varchar(4)
+      minLength: 0
+      dbName: bit_flags
+      comment: 'Bit Flags: This field identifies the reason for a cancel without a
+        corresponding repayment.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: lastUpdated
+      sqlType: timestamp with time zone
+      dbName: last_updated
+  transformations:
+  - from: PARENT
+    to: dcn
+  - from: INDEX
+    to: priority
+  - from: diagCd2
+    optionalComponents: None
+  - from: diagPoaInd
+    optionalComponents: None
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator
+  - from: bitFlags
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: NOW
+    to: lastUpdated

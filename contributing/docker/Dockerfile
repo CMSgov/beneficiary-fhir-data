@@ -12,8 +12,9 @@ COPY . /config
 # - iputils includes ping and friends
 # - systat includes top, uptime, ps, etc
 # - procps-ng includes iostat
-RUN yum -y update && yum -y groupinstall "Development Tools" && \
-    yum -y install \
+RUN yum update -y --security && \
+    yum groupinstall -y "Development Tools" && \
+    yum install -y \
       sudo \
       net-tools \
       iputils \
