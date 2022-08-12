@@ -22,8 +22,8 @@ import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
@@ -102,10 +102,9 @@ public class AbstractClaimRdaSinkTest {
 
   /**
    * Checks that when {@link AbstractClaimRdaSink#transformMessage(String, Object)} throws an
-   * exception, the {@link
-   * gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException} is rethrown and
-   * the {@link AbstractClaimRdaSink#writeError(String, Object,
-   * DataTransformer.TransformationException)} method was correctly invoked.
+   * exception, the {@link DataTransformer.TransformationException} is rethrown and the {@link
+   * AbstractClaimRdaSink#writeError(String, Object, DataTransformer.TransformationException)}
+   * method was correctly invoked.
    */
   @Test
   void shouldNotTransformInvalidClaimsSuccessfully() throws IOException {

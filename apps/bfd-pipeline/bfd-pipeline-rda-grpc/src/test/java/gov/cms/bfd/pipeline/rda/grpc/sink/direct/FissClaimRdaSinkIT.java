@@ -14,9 +14,9 @@ import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
@@ -146,8 +146,8 @@ public class FissClaimRdaSinkIT {
 
   /**
    * Checks if writing invalid FISS claim messages results in a {@link
-   * gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException} being thrown and
-   * if {@link MessageError} entities were written out to the database.
+   * DataTransformer.TransformationException} being thrown and if {@link MessageError} entities were
+   * written out to the database.
    *
    * @throws Exception If any unexpected exceptions were thrown.
    */
