@@ -110,10 +110,6 @@
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<datasource-proxy.version>1.8</datasource-proxy.version>
-		<javapoet.version>1.13.0</javapoet.version>
-		<itextpdf.version>5.5.13.3</itextpdf.version>
-		<auto-service.version>1.0.1</auto-service.version>
 		<zjsonpatch.version>0.4.12</zjsonpatch.version>
 		<hamcrest-library.version>2.2</hamcrest-library.version>
 		<awaitility.version>4.2.0</awaitility.version>

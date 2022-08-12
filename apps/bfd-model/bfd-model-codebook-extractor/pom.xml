@@ -15,6 +15,10 @@
 		Converts the CCW Data Dictionary codebook PDFs to XML.
 	</description>
 
+	<properties>
+		<itextpdf.version>5.5.13.3</itextpdf.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging

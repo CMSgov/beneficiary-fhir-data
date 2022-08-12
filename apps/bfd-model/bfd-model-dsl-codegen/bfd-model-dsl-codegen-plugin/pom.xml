@@ -19,6 +19,7 @@
     </description>
 
     <properties>
+        <javapoet.version>1.13.0</javapoet.version>
         <maven-plugin-api.version>3.8.6</maven-plugin-api.version>
         <maven-core.version>3.8.6</maven-core.version>
         <maven-plugin-annotations.version>3.6.4</maven-plugin-annotations.version>
