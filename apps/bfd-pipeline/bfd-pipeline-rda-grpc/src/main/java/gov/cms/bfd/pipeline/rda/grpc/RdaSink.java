@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;

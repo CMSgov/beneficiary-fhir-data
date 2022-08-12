@@ -17,6 +17,7 @@ import gov.cms.bfd.model.rda.RdaMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
@@ -1033,6 +1034,17 @@ public class McsClaimTransformerTest {
   // endregion McsDiagnosisCode
 
   // region McsDetail
+
+  /** Verifies that {@link RdaMcsDetail#idrDtlNumber} is initialized properly. */
+  @Test
+  public void testDetailIdrDtlNumber() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlNumber,
+            RdaMcsDetail::getIdrDtlNumber,
+            RdaMcsDetail.Fields.idrDtlNumber);
+  }
+
   @Test
   public void testDetailIdrDtlStatus() {
     new McsClaimTransformerTest.DetailFieldTester()
