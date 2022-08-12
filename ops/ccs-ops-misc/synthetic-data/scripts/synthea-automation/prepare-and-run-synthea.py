@@ -133,38 +133,35 @@ def validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_
             print(f"(Validation Failure) Synthea properties file is not writable (found at {synthea_prop_filepath})")
             validation_passed = False
         if not os.path.exists(synthea_output_filepath):
-            print(f"(Validation Failure) Synthea output directory could not be found at {synthea_output_filepath}")
-            validation_passed = False
-        elif not os.access(synthea_output_filepath, os.W_OK):
+            print(f"(Validation Warning) Output directory ({synthea_output_filepath}) could not be found, creating it...")
+            os.mkdir(synthea_output_filepath)
+        if not os.access(synthea_output_filepath, os.W_OK):
             print(f"(Validation Failure) Synthea output directory is not writable (found at {synthea_output_filepath})")
             validation_passed = False
     
     if not os.path.exists(end_state_file_path):
         print(f"(Validation Failure) End state properties file could not be found at {end_state_file_path}")
         validation_passed = False
+    
+    if os.path.exists(synthea_folder_filepath):
+        ## Validate we have the export files in place, and the national script
+        export_filenames = ["condition_code_map.json", "dme_code_map.json", "hcpcs_code_map.json", "medication_code_map.json", "drg_code_map.json", "betos_code_map.json", "external_codes.csv"]
+        for filename in export_filenames:
+            export_file_loc = synthea_folder_filepath + "src/main/resources/export/" + filename
+            if not os.path.exists(export_file_loc):
+                print(f"(Validation Failure) Expected export file could not be found: {export_file_loc}")
+                validation_passed = False
+            elif not os.access(synthea_prop_filepath, os.R_OK):
+                print(f"(Validation Failure) Export file {export_file_loc} not readable")
+                validation_passed = False
         
-    ## Validate we have the export files in place, and the national script
-    export_filenames = ["condition_code_map.json", "dme_code_map.json", "hcpcs_code_map.json", "medication_code_map.json", "drg_code_map.json", "betos_code_map.json", "external_codes.csv"]
-    for filename in export_filenames:
-        export_file_loc = synthea_folder_filepath + "src/main/resources/export/" + filename
-        if not os.path.exists(export_file_loc):
-            print(f"(Validation Failure) Expected export file could not be found: {export_file_loc}")
+        national_file_loc = synthea_folder_filepath + "national_bfd.sh"
+        if not os.path.exists(national_file_loc):
+            print(f"(Validation Failure) Expected national runfile ({national_file_loc}) could not be found")
             validation_passed = False
-        elif not os.access(synthea_prop_filepath, os.R_OK):
-            print(f"(Validation Failure) Export file {export_file_loc} not readable")
+        elif not os.access(national_file_loc, os.X_OK):
+            print(f"(Validation Failure) Synthea run file is not executable (found at {national_file_loc})")
             validation_passed = False
-            
-    national_file_loc = synthea_folder_filepath + "national_bfd.sh"
-    if not os.path.exists(national_file_loc):
-        print(f"(Validation Failure) Expected national runfile ({national_file_loc}) could not be found")
-        validation_passed = False
-    elif not os.access(national_file_loc, os.X_OK):
-        print(f"(Validation Failure) Synthea run file is not executable (found at {national_file_loc})")
-        validation_passed = False
-        
-    if not os.path.exists(synthea_output_filepath):
-        print(f"(Validation Warning) Output directory ({synthea_output_filepath}) could not be found, creating it...")
-        os.mkdir(synthea_output_filepath)
     
     return validation_passed
 
