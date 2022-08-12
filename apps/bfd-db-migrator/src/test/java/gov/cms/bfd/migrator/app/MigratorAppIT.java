@@ -18,7 +18,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +101,7 @@ public final class MigratorAppIT {
     // Await start/finish of application
     try {
       Awaitility.await()
-          .atMost(new Duration(60, TimeUnit.SECONDS))
+          .atMost(new Durations(60, TimeUnit.SECONDS))
           .until(() -> !appProcess.isAlive());
 
       // Verify results
@@ -154,7 +154,7 @@ public final class MigratorAppIT {
     // Await start/finish of application
     try {
       Awaitility.await()
-          .atMost(new Duration(60, TimeUnit.SECONDS))
+          .atMost(new Durations(60, TimeUnit.SECONDS))
           .until(() -> !appProcess.isAlive());
 
       // Verify results
@@ -191,7 +191,7 @@ public final class MigratorAppIT {
     // Await start/finish of application
     try {
       Awaitility.await()
-          .atMost(new Duration(60, TimeUnit.SECONDS))
+          .atMost(new Durations(60, TimeUnit.SECONDS))
           .until(() -> !appProcess.isAlive());
 
       // Verify results
@@ -224,7 +224,7 @@ public final class MigratorAppIT {
 
     // Await start/finish of application
     try {
-      Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
 
       // Verify results
 
@@ -273,7 +273,7 @@ public final class MigratorAppIT {
 
     // Await start/finish of application
     try {
-      Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
 
       LOGGER.info(appRunConsumer.getStdoutContents());
 
