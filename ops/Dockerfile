@@ -1,5 +1,5 @@
 # declaring flyway as a COPY source in al2 image
-FROM flyway/flyway as flyway
+FROM flyway/flyway:8.5.13 as flyway
 RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.placeholders.type.text=text >> /flyway/conf/flyway.conf \
     && echo flyway.placeholders.logic.tablespaces-escape=-- >> /flyway/conf/flyway.conf \
