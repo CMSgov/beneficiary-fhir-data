@@ -87,6 +87,7 @@ public class FissClaimTransformer {
       DataTransformer transformer, Instant now, String namePrefix) {
     final FissClaim to = new FissClaim();
     transformer.copyString(namePrefix + FissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn);
+    transformer.copyLong(from.getSeq(), to::setSequenceNumber);
     transformer.copyEnumAsCharacter(namePrefix + FissClaim.Fields.currStatus, FissClaim_currStatus_Extractor.getEnumString(from), to::setCurrStatus);
     transformer.copyOptionalString(namePrefix + FissClaim.Fields.provStateCd, 1, 2, from::hasProvStateCd, from::getProvStateCd, to::setProvStateCd);
     transformer.copyOptionalString(namePrefix + FissClaim.Fields.medaProvId, 1, 13, from::hasMedaProvId, from::getMedaProvId, to::setMedaProvId);
