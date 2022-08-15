@@ -1,0 +1,1 @@
+alter table rda.message_errors add column obsolete boolean not null default false;

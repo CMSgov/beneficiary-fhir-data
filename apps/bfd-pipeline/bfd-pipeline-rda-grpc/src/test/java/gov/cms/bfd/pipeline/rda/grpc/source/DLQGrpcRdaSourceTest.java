@@ -54,18 +54,32 @@ public class DLQGrpcRdaSourceTest {
     doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
+  private static final long FISS_ERROR_ONE_SEQ = 5L;
+  private static final long FISS_ERROR_TWO_SEQ = 15L;
+  private static final long MCS_ERROR_ONE_SEQ = 7L;
+  private static final long MCS_ERROR_TWO_SEQ = 9L;
+
   private static final List<MessageError> FISS_MOCK_MESSAGE_ERRORS =
       List.of(
-          MessageError.builder().claimType(MessageError.ClaimType.FISS).sequenceNumber(5L).build(),
           MessageError.builder()
               .claimType(MessageError.ClaimType.FISS)
-              .sequenceNumber(15L)
+              .sequenceNumber(FISS_ERROR_ONE_SEQ)
+              .build(),
+          MessageError.builder()
+              .claimType(MessageError.ClaimType.FISS)
+              .sequenceNumber(FISS_ERROR_TWO_SEQ)
               .build());
 
   private static final List<MessageError> MCS_MOCK_MESSAGE_ERRORS =
       List.of(
-          MessageError.builder().claimType(MessageError.ClaimType.MCS).sequenceNumber(7L).build(),
-          MessageError.builder().claimType(MessageError.ClaimType.MCS).sequenceNumber(9L).build());
+          MessageError.builder()
+              .claimType(MessageError.ClaimType.MCS)
+              .sequenceNumber(MCS_ERROR_ONE_SEQ)
+              .build(),
+          MessageError.builder()
+              .claimType(MessageError.ClaimType.MCS)
+              .sequenceNumber(MCS_ERROR_TWO_SEQ)
+              .build());
 
   /** Checks that the logic lambda was successfully and correctly invoked for FISS claims */
   @Test
@@ -81,19 +95,23 @@ public class DLQGrpcRdaSourceTest {
             new DLQGrpcRdaSource<>(
                 mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
 
-    doReturn(mockLogic).when(sourceSpy).dlqProcessingLogic(mockSink, type, Set.of(5L, 15L));
+    doReturn(mockLogic)
+        .when(sourceSpy)
+        .dlqProcessingLogic(mockSink, type, Set.of(FISS_ERROR_ONE_SEQ, FISS_ERROR_TWO_SEQ));
 
-    doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
+    final int MOCK_PROCESS_COUNT = 2;
+
+    doReturn(MOCK_PROCESS_COUNT).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
     doReturn(FISS_MOCK_MESSAGE_ERRORS)
         .when(mockDao)
-        .findAllMessageErrorsByClaimType(MessageError.ClaimType.FISS);
+        .findAllMessageErrorsByClaimTypeAndNotObsolete(MessageError.ClaimType.FISS);
 
     TestUtils.setField(sourceSpy, "dao", mockDao);
 
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
-    assertEquals(2, actualProcessed);
+    assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
   }
 
   /** Checks that the logic lambda was successfully and correctly invoked for MCS claims */
@@ -110,19 +128,23 @@ public class DLQGrpcRdaSourceTest {
             new DLQGrpcRdaSource<>(
                 mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
 
-    doReturn(mockLogic).when(sourceSpy).dlqProcessingLogic(mockSink, type, Set.of(7L, 9L));
+    doReturn(mockLogic)
+        .when(sourceSpy)
+        .dlqProcessingLogic(mockSink, type, Set.of(MCS_ERROR_ONE_SEQ, MCS_ERROR_TWO_SEQ));
 
-    doReturn(2).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
+    final int MOCK_PROCESS_COUNT = 2;
+
+    doReturn(MOCK_PROCESS_COUNT).when(sourceSpy).tryRetrieveAndProcessObjects(mockLogic);
 
     doReturn(MCS_MOCK_MESSAGE_ERRORS)
         .when(mockDao)
-        .findAllMessageErrorsByClaimType(MessageError.ClaimType.MCS);
+        .findAllMessageErrorsByClaimTypeAndNotObsolete(MessageError.ClaimType.MCS);
 
     TestUtils.setField(sourceSpy, "dao", mockDao);
 
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
-    assertEquals(2, actualProcessed);
+    assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
   }
 
   /**
@@ -137,9 +159,6 @@ public class DLQGrpcRdaSourceTest {
     final CallOptions mockCallOptions = mock(CallOptions.class);
     final Meter mockMeter = mock(Meter.class);
 
-    // Set up sink mocks, needs to return fake DCNs and process count
-    doReturn("A").when(mockSink).getDedupKeyForMessage(5L);
-
     doReturn(0).when(mockSink).getProcessedCount();
 
     // Set up metrics mock for meters
@@ -149,6 +168,8 @@ public class DLQGrpcRdaSourceTest {
     doReturn(mockCallOptions).when(mockConfig).createCallOptions();
 
     // Create our spy for the class we're testing, so we can mock sibling methods
+    // Using Object::equals for sequence predicate, effectively making the "message"
+    // be treated as the sequence number, for testing simplicity
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
@@ -170,9 +191,15 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(true).doReturn(false).when(mockStreamA).hasNext();
 
-    doReturn(5L).doReturn(null).when(mockStreamA).next();
+    final long MOCK_STREAM_A_MESSAGE = 5L;
 
-    doReturn(mockStreamA).when(mockCaller).callService(mockChannel, mockCallOptions, 5);
+    doReturn(MOCK_STREAM_A_MESSAGE).doReturn(null).when(mockStreamA).next();
+
+    doReturn("A").when(mockSink).getDedupKeyForMessage(MOCK_STREAM_A_MESSAGE);
+
+    doReturn(mockStreamA)
+        .when(mockCaller)
+        .callService(mockChannel, mockCallOptions, FISS_ERROR_ONE_SEQ - 1);
 
     // Create a stream that returns no sequence in the DLQ
     // unchecked - This is fine for a mock.
@@ -181,29 +208,41 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(true).when(mockStreamB).hasNext();
 
-    doReturn(16L).when(mockStreamB).next();
+    final long MOCK_STREAM_B_MESSAGE = 16L;
 
-    doReturn(mockStreamB).when(mockCaller).callService(mockChannel, mockCallOptions, 15);
+    doReturn(MOCK_STREAM_B_MESSAGE).when(mockStreamB).next();
+
+    doReturn(mockStreamB)
+        .when(mockCaller)
+        .callService(mockChannel, mockCallOptions, FISS_ERROR_TWO_SEQ - 1);
 
     // Mock for deleting the only sequence that should have been found and processed
-    doReturn(1L).when(mockDao).delete(5L, MessageError.ClaimType.FISS);
+    doReturn(1L).when(mockDao).delete(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS);
 
     // Force our mock dao into the source object using reflection hackery
     TestUtils.setField(sourceSpy, "dao", mockDao);
 
     AbstractGrpcRdaSource.ProcessResult expectedResult = new AbstractGrpcRdaSource.ProcessResult();
+    // Only a claim that was could be successfully written to the DB is considered processed, thus
+    // the expected value is 1, since only one DLQ message could be reprocessed.
     expectedResult.setCount(1);
 
     // We're testing the lambda logic in this test, so have to grab it first from the method that
     // returns it
     AbstractGrpcRdaSource.Processor logic =
-        sourceSpy.dlqProcessingLogic(mockSink, type, Set.of(5L, 15L));
+        sourceSpy.dlqProcessingLogic(
+            mockSink, type, Set.of(FISS_ERROR_ONE_SEQ, FISS_ERROR_TWO_SEQ));
     AbstractGrpcRdaSource.ProcessResult actualResult = logic.process();
 
-    // In the end, only 1 sequence should have been reprocessed and deleted (5)
+    // In the end, 1 sequence should have been deleted (5), and the other marked obsolete (15)
     assertEquals(expectedResult, actualResult);
-    verify(mockDao).delete(5L, MessageError.ClaimType.FISS);
+
     verify(mockDao, times(1)).delete(anyLong(), any(MessageError.ClaimType.class));
+    verify(mockDao).delete(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS);
+
+    verify(mockDao, times(1)).softDelete(anyLong(), any(MessageError.ClaimType.class));
+    verify(mockDao).softDelete(FISS_ERROR_TWO_SEQ, MessageError.ClaimType.FISS);
+
     verify(mockSink, times(2)).shutdown(any(Duration.class));
   }
 }

@@ -116,7 +116,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     MessageError.ClaimType type = MessageError.ClaimType.valueOf(claimType.toUpperCase());
 
-    List<MessageError> messageErrors = dao.findAllMessageErrorsByClaimType(type);
+    List<MessageError> messageErrors = dao.findAllMessageErrorsByClaimTypeAndNotObsolete(type);
 
     final Set<Long> sequenceNumbers =
         messageErrors.stream().map(MessageError::getSequenceNumber).collect(Collectors.toSet());
@@ -156,8 +156,12 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
             claimType,
             startingSequenceNumber);
 
+        // The "since" parameter of the RDA API is actually non-inclusive, so we have to subtract 1
+        // in order to attempt to get the claim we really want
+        final long SINCE = startingSequenceNumber - 1;
+
         final GrpcResponseStream<TMessage> responseStream =
-            caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
+            caller.callService(channel, callOptionsFactory.get(), SINCE);
         final Map<Object, TMessage> batch = new LinkedHashMap<>();
 
         try {
@@ -167,6 +171,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
             metrics.getObjectsReceived().mark();
 
             if (sequencePredicate.test(startingSequenceNumber, result)) {
+              // It's a match, so check if we can successfully process it now.
               batch.put(sink.getDedupKeyForMessage(result), result);
               int processed = submitBatchToSink(apiVersion, sink, batch);
               processResult.addCount(processed);
@@ -174,6 +179,20 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
               if (processed > 0 && dao.delete(startingSequenceNumber, type) > 0) {
                 log.info(
                     "{} claim with sequence ({}) processed successfully, removed DLQ entry",
+                    claimType,
+                    startingSequenceNumber);
+              }
+            } else {
+              // We didn't get the sequence number we wanted, which means it's obsolete
+              // "Soft delete" the MessageError for later analysis
+              if (dao.softDelete(startingSequenceNumber, type) > 0) {
+                log.info(
+                    "{} claim with sequence({}) was not returned, marking as obsolete",
+                    claimType,
+                    startingSequenceNumber);
+              } else {
+                log.error(
+                    "{} claim with sequence({}) was not returned, but failed to mark obsolete",
                     claimType,
                     startingSequenceNumber);
               }
@@ -220,16 +239,25 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     private final EntityManager entityManager;
 
-    public List<MessageError> findAllMessageErrorsByClaimType(MessageError.ClaimType claimType) {
+    public List<MessageError> findAllMessageErrorsByClaimTypeAndNotObsolete(
+        MessageError.ClaimType claimType) {
       return entityManager
           .createQuery(
-              "select error from MessageError error where error.claimType = :claimType",
+              "select error from MessageError error where error.claimType = :claimType and error.obsolete = false",
               MessageError.class)
           .setParameter("claimType", claimType)
           .getResultList();
     }
 
-    public Long delete(Long sequenceNumber, MessageError.ClaimType type) {
+    public long softDelete(Long sequenceNumber, MessageError.ClaimType type) {
+      return delete(sequenceNumber, type, true);
+    }
+
+    public long delete(Long sequenceNumber, MessageError.ClaimType type) {
+      return delete(sequenceNumber, type, false);
+    }
+
+    private long delete(long sequenceNumber, MessageError.ClaimType type, boolean softDelete) {
       long entitiesAffected = 0L;
 
       entityManager.getTransaction().begin();
@@ -238,7 +266,12 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
           entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
 
       if (messageError != null) {
-        entityManager.remove(messageError);
+        if (softDelete) {
+          messageError.setObsolete(true);
+          entityManager.merge(messageError);
+        } else {
+          entityManager.remove(messageError);
+        }
         entitiesAffected = 1L;
       }
 

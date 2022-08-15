@@ -82,6 +82,9 @@ public class MessageError {
   @Column(name = "message", nullable = false, columnDefinition = "jsonb")
   private String message;
 
+  @Column(name = "outdated", nullable = false)
+  private boolean obsolete;
+
   /** Hibernate used method to set certain values only on insert */
   @PrePersist
   protected void onCreate() {
