@@ -20,6 +20,16 @@ class ControllerResponse:
     ip_address: str
 
 
+@dataclass
+class InvokeEvent:
+    """
+    Values contained in the event object passed to the handler function on invocation.
+    """
+
+    host: str
+    users: int
+
+
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
 controller_lambda_name = os.environ.get("CONTROLLER_LAMBDA_NAME")
@@ -34,11 +44,13 @@ lambda_client = boto3.client("lambda", config=boto_config)
 queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
 
-def start_controller():
+def start_controller(payload: str):
     """
     Invokes the lambda function that runs the main Locust test instance.
     """
-    response = lambda_client.invoke(FunctionName=controller_lambda_name, InvocationType="Event")
+    response = lambda_client.invoke(
+        FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload
+    )
     if response.StatusCode != 202:
         print(
             f"An error occurred while trying to start the '{controller_lambda_name}' function:"
@@ -87,8 +99,29 @@ def handler(event, context):
     """
     Lambda function handler.
     """
+    # We take only the first record, if it exists
+    try:
+        record = event["Records"][0]
+    except IndexError:
+        print("Invalid queue message, no records found")
+        return None
 
-    start_controller()
+    # We extract the body, and attempt to convert from JSON
+    try:
+        body = json.loads(record["body"])
+    except json.JSONDecodeError:
+        print("Record body was not valid JSON")
+        return None
+
+    # We then attempt to extract an InvokeEvent instance from
+    # the JSON body
+    try:
+        invoke_event = InvokeEvent(**body)
+    except TypeError as ex:
+        print(f"Message body missing required keys: {str(ex)}")
+        return None
+
+    start_controller(payload=json.dumps(invoke_event))
 
     messages = None
     while not messages:

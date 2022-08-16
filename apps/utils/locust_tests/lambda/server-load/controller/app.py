@@ -58,14 +58,14 @@ def handler(event, context):
         record = event["Records"][0]
     except IndexError:
         print("Invalid queue message, no records found")
-        return
+        return None
 
     # We extract the body, and attempt to convert from JSON
     try:
         body = json.loads(record["body"])
     except json.JSONDecodeError:
         print("Record body was not valid JSON")
-        return
+        return None
 
     # We then attempt to extract an InvokeEvent instance from
     # the JSON body
@@ -73,7 +73,7 @@ def handler(event, context):
         invoke_event = InvokeEvent(**body)
     except TypeError as ex:
         print(f"Message body missing required keys: {str(ex)}")
-        return
+        return None
 
     message_body = json.dumps({"ip_address": ip_address})
 
