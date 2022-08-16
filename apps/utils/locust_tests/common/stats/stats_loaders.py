@@ -136,11 +136,8 @@ class StatsFileLoader(StatsLoader):
     def __verify_metadata(self, loaded_metadata: StatsMetadata):
         return all(
             [
-                loaded_metadata.environment == self.stats_config.stats_env,
                 self.stats_config.stats_compare_tag in loaded_metadata.tags,
-                loaded_metadata.num_total_users == self.metadata.num_total_users,
-                loaded_metadata.num_users_per_second == self.metadata.num_users_per_second,
-                loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
+                loaded_metadata.hash == self.metadata.hash,
                 # Pick some delta that the runtimes should be under -- in this case, we're using 3
                 # seconds
                 # TODO: Determine the right delta for checking for matching runtimes
@@ -236,31 +233,14 @@ class StatsAthenaLoader(StatsLoader):
         return self.__get_athena_query_result(query_execution_id)
 
     def __get_where_clause(self) -> str:
-        # The following StatsMetadata fields need to be excluded from having their
-        # equality check being auto-generated as they either should not be checked
-        # (i.e. timestamp) or require a different type of check
-        fields_to_exclude = ["timestamp", "tags", "total_runtime"]
-        filtered_fields = [
-            field for field in fields(StatsMetadata) if not field.name in fields_to_exclude
-        ]
-        # Automatically generate a list of equality checks for all of the fields that are
-        # necessary to validate to ensure that stats can be compared
-        generated_checks = [self.__generate_check_str(field) for field in filtered_fields]
         explicit_checks = [
             f"'{self.stats_config.stats_compare_tag}' IN metadata.tags",
+            f"metadata.hash='{self.metadata.hash}'",
             # TODO: Determine the right delta for checking for matching runtimes
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
         ]
 
-        return " AND ".join(generated_checks + explicit_checks)
-
-    def __generate_check_str(self, field: Field) -> str:
-        instance_value = getattr(self.metadata, field.name)
-        # Anything that's a string should be surrounded by single quotes to denote it as a string
-        # in SQL. Otherwise, no quotes should surround it
-        rhs_operand = f"'{instance_value}'" if issubclass(field.type, str) else f"{instance_value}"
-
-        return f"metadata.{field.name}={rhs_operand}"
+        return " AND ".join(explicit_checks)
 
     def __get_raw_json_list(self, query_result: List[Dict[str, List[Dict[str, str]]]]) -> List[str]:
         # The data is returned as an array of dicts, each with a 'Data' key. These 'Data'

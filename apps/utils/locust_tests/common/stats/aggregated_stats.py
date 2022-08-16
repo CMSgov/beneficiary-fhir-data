@@ -1,5 +1,6 @@
 """Members of this file/module should be related to the collection of performance statistics during
 a test run as well as the representation of those statistics via dataclasses or other suitable objects"""
+import hashlib
 import time
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Union
@@ -67,14 +68,16 @@ class StatsCollector(object):
         Returns:
             AggregatedStats: An instance of AggregatedStats representing a snapshot of all stats at the current time
         """
+        tasks = self.__get_task_stats_list()
         return AggregatedStats(
             metadata=StatsMetadata.from_locust_env(
                 timestamp=int(time.time()),
                 tags=self.stats_tags,
                 environment=self.running_env,
+                tasks_names=[task.task_name for task in tasks],
                 locust_env=self.locust_env,
             ),
-            tasks=self.__get_task_stats_list(),
+            tasks=tasks,
         )
 
 
@@ -193,6 +196,10 @@ class StatsMetadata:
     """The number of users spawned per second when the test run started"""
     total_runtime: float
     """The total runtime of the test run"""
+    hash: str
+    """A hash that encodes various information about the running tests to ensure that comparisons
+    can be made. Two (or more) AggregatedStats instances having the same hash means that they are
+    comparable"""
 
     @classmethod
     def from_locust_env(
@@ -200,6 +207,7 @@ class StatsMetadata:
         timestamp: int,
         tags: List[str],
         environment: StatsEnvironment,
+        tasks_names: List[str],
         locust_env: Environment,
     ) -> "StatsMetadata":
         """A class method that constructs an instance of StatsMetadata by computing its fields from a given
@@ -209,6 +217,7 @@ class StatsMetadata:
             timestamp (int): A Unix timestamp indicating the time that the stats were collected
             tag (str): A simple string tag that is used as a partitioning tag
             environment (StatsEnvironment): The environment that the test run was started in
+            tasks_names (str): A List of the names of all of the tasks that ran
             locust_env (Environment): The current Locust environment
 
         Raises:
@@ -226,15 +235,51 @@ class StatsMetadata:
         if not locust_env.stats.last_request_timestamp:
             raise ValueError("No requests were ran, stats cannot be aggregated")
 
+        ran_user_classes = [user_class.__name__ for user_class in locust_env.user_classes]
+        num_users = locust_env.parsed_options.num_users
+        spawn_rate = locust_env.parsed_options.spawn_rate
+        stats_reset_after_spawn = locust_env.reset_stats
+
         return cls(
             timestamp,
             tags,
             environment,
-            stats_reset_after_spawn=locust_env.reset_stats,
-            num_total_users=locust_env.parsed_options.num_users,
-            num_users_per_second=locust_env.parsed_options.spawn_rate,
+            stats_reset_after_spawn=stats_reset_after_spawn,
+            num_total_users=num_users,
+            num_users_per_second=spawn_rate,
             total_runtime=locust_env.stats.last_request_timestamp - locust_env.stats.start_time,
+            hash=cls.__generate_hash_str(
+                user_classes_names=ran_user_classes,
+                tasks_names=tasks_names,
+                num_users=num_users,
+                spawn_rate=spawn_rate,
+                stats_reset_after_spawn=stats_reset_after_spawn,
+                environment=environment,
+            ),
         )
+
+    @classmethod
+    def __generate_hash_str(
+        cls,
+        user_classes_names: List[str],
+        tasks_names: List[str],
+        num_users: int,
+        spawn_rate: int,
+        stats_reset_after_spawn: bool,
+        environment: StatsEnvironment,
+    ):
+        # Generate a SHA256 hash string from various bits of information
+        str_to_hash = "".join(
+            [
+                "".join(sorted(user_classes_names)),
+                "".join(sorted(tasks_names)),
+                str(num_users),
+                str(spawn_rate),
+                str(stats_reset_after_spawn),
+                str(environment),
+            ]
+        )
+        return hashlib.sha256(str.encode(str_to_hash, encoding="utf-8")).hexdigest()
 
 
 @dataclass
