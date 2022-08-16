@@ -46,16 +46,20 @@ def _(environment: Environment, **kwargs) -> None:
     if not environment.parsed_options:
         return
 
-    stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
-    if stats_config:
-        # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
-        stats_collector = StatsCollector(
-            environment, stats_config.stats_store_tags, stats_config.stats_env
-        )
-        stats = stats_collector.collect_stats()
+    try:
+        stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
+    except ValueError as exc:
+        logging.getLogger().warning("%s", str(exc))
+        return
 
-        stats_compare.do_stats_comparison(environment, stats_config, stats)
-        stats_writers.write_stats(stats_config, stats)
+    # If stats_config is valid, get the aggregated stats of the stopping test run
+    stats_collector = StatsCollector(
+        environment, stats_config.stats_store_tags, stats_config.stats_env
+    )
+    stats = stats_collector.collect_stats()
+
+    stats_compare.do_stats_comparison(environment, stats_config, stats)
+    stats_writers.write_stats(stats_config, stats)
 
 
 class BFDUserBase(FastHttpUser):
