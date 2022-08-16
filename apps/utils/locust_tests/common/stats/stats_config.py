@@ -1,10 +1,11 @@
 import dataclasses
-import logging
 import re
 from argparse import Namespace
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, Optional, TypeVar
+
+from locust.argument_parser import LocustArgumentParser
 
 E = TypeVar("E", bound=Enum)
 
@@ -23,9 +24,11 @@ class StatsEnvironment(str, Enum):
 
     TEST = "test"
     """Indicates that the running environment is in the TEST environment"""
-    # TODO: PROD_SBX may be "prod-sbx" or "prod_sbx" depending on context (specifically, Glue Table partition columns)
-    # so a better way of handling its string representation should be considered. For now, "prod-sbx" is the only
-    # string representation expected to be encountered by this code and other contexts
+
+    # TODO: PROD_SBX may be "prod-sbx" or "prod_sbx" depending on context (specifically, Glue Table
+    # partition columns) so a better way of handling its string representation should be considered.
+    # For now, "prod-sbx" is the only string representation expected to be encountered by this code
+    # and other contexts
     PROD_SBX = "prod-sbx"
     """Indicates that the running environment is in the PROD-SBX environment"""
     PROD = "prod"
@@ -36,7 +39,8 @@ class StatsComparisonType(str, Enum):
     """Enumeration for each possible type of stats comparison"""
 
     PREVIOUS = "previous"
-    """Indicates that the comparison will be against the most recent, previous run under a given tag"""
+    """Indicates that the comparison will be against the most recent, previous run under a given
+    tag"""
     AVERAGE = "average"
     """Indicates that the comparison will be against the average of all runs under a given tag"""
 
@@ -63,11 +67,134 @@ class StatsConfiguration:
     Also used as part of the file path when storing stats in S3"""
     stats_store_s3_table: Optional[str]
     """Name of the table to query using Athena if store is s3 and compare is set.
-    Also used as part of the file path when storing stats in S3"""
+    jAlso used as part of the file path when storing stats in S3"""
     stats_compare: Optional[StatsComparisonType]
     """Indicates the type of performance stats comparison that will be done"""
     stats_compare_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
+
+    @classmethod
+    def register_custom_args(cls, parser: LocustArgumentParser) -> None:
+        """Registers commnad-line arguments representing the fields of this dataclass
+
+        Args:
+            parser (LocustArgumentParser): The argument parser to register custom arguments to
+        """
+        stats_group = parser.add_argument_group(
+            title="stats",
+            description="Argparse group for stats collection and comparison related arguments",
+        )
+
+        # Ensure only file _or_ S3 storage can be selected, not both
+        storage_type_group = stats_group.add_mutually_exclusive_group()
+        storage_type_group.add_argument(
+            "--stats-store-file",
+            help="Specifies that stats will be written to a local file",
+            dest="stats_store",
+            env_var="LOCUS_STATS_STORE_TO_FILE",
+            action="store_const",
+            const=StatsStorageType.FILE,
+        )
+        storage_type_group.add_argument(
+            "--stats-store-s3",
+            help="Specifies that stats will be written to an S3 bucket",
+            dest="stats_store",
+            env_var="LOCUS_STATS_STORE_TO_S3",
+            action="store_const",
+            const=StatsStorageType.FILE,
+        )
+
+        stats_group.add_argument(
+            "--stats-env",
+            type=cls.__env_from_value,
+            help="Specifies the test running environment which the tests are running against",
+            dest="stats_env",
+            env_var="LOCUST_STATS_ENVIRONMENT",
+        )
+        stats_group.add_argument(
+            "--stats-store-tag",
+            type=cls.__validate_tag,
+            help=(
+                "Specifies the tag under which collected statistics will be stored. Can be"
+                " specified multiple times"
+            ),
+            dest="stats_store_tag",
+            env_var="LOCUS_STATS_STORE_TAG",
+            action="append",
+        )
+        stats_group.add_argument(
+            "--stats-store-file-path",
+            type=str,
+            help=(
+                "Specifies the parent directory where JSON stats will be written to. Only used if"
+                ' --stats-store is "FILE"'
+            ),
+            dest="stats_store_file_path",
+            env_var="LOCUS_STATS_STORE_FILE_PATH",
+        )
+        stats_group.add_argument(
+            "--stats-store-s3-bucket",
+            type=cls.__validate_tag,
+            help=(
+                "Specifies the S3 bucket that JSON stats will be written to. Only used if"
+                ' --stats-store is "S3"'
+            ),
+            dest="stats_store_s3_bucket",
+            env_var="LOCUS_STATS_STORE_S3_BUCKET",
+        )
+        stats_group.add_argument(
+            "--stats-store-s3-database",
+            type=cls.__validate_tag,
+            help=(
+                "Specifies the Athena database that is queried upon when comparing statistics. Also"
+                " used as part of the S3 key/path when storing stats to S3"
+            ),
+            dest="stats_store_s3_database",
+            env_var="LOCUS_STATS_STORE_S3_DATABASE",
+        )
+        stats_group.add_argument(
+            "--stats-store-s3-table",
+            type=cls.__validate_tag,
+            help=(
+                "Specifies the Athena table that is queried upon when comparing statistics. Also"
+                " used as part of the S3 key/path when storing stats to S3"
+            ),
+            dest="stats_store_s3_table",
+            env_var="LOCUS_STATS_STORE_S3_TABLE",
+        )
+
+        # Ensure that only one type of comparison can be chosen via arguments
+        compare_type_group = stats_group.add_mutually_exclusive_group()
+        compare_type_group.add_argument(
+            "--stats-compare-previous",
+            help=(
+                "Specifies that the current run's performance statistics will be compared against"
+                " the previous matching run's performance statistics"
+            ),
+            dest="stats_compare",
+            env_var="LOCUST_STATS_COMPARE_PREVIOUS",
+            action="store_const",
+            const=StatsComparisonType.PREVIOUS,
+        )
+        compare_type_group.add_argument(
+            "--stats-compare-average",
+            help=(
+                "Specifies that the current run's performance statistics will be compared against"
+                " an average of the last, by default, 5 matching runs"
+            ),
+            dest="stats_compare",
+            env_var="LOCUST_STATS_COMPARE_AVERAGE",
+            action="store_const",
+            const=StatsComparisonType.AVERAGE,
+        )
+
+        stats_group.add_argument(
+            "--stats-compare-tag",
+            type=cls.__validate_tag,
+            help="Specifies the tag that will matching runs will be found under to compare against",
+            dest="stats_compare_tag",
+            env_var="LOCUST_STATS_COMPARE_TAG",
+        )
 
     @classmethod
     def from_parsed_opts(cls, parsed_opts: Namespace) -> "StatsConfiguration":
@@ -80,33 +207,34 @@ class StatsConfiguration:
         """
         opts_as_dict = vars(parsed_opts)
         common_keys = opts_as_dict.keys() & dataclasses.fields(StatsConfiguration)
-        stats_args: Dict[str, Any] = {k:v for k,v in opts_as_dict if k in common_keys}
+        stats_args: Dict[str, Any] = {k: v for k, v in opts_as_dict if k in common_keys}
 
         try:
             stats_config = StatsConfiguration(**stats_args)
         except ValueError as exc:
-            raise ValueError(f'Unable to create instance of StatsConfiguration from given arguments: {str(exc)}') from exc
+            raise ValueError(
+                f"Unable to create instance of StatsConfiguration from given arguments: {str(exc)}"
+            ) from exc
 
         return stats_config
 
     @staticmethod
-    def __enum_from_val(val: str, enum_type: Type[E], field_name: str) -> E:
+    def __env_from_value(val: str) -> StatsEnvironment:
         try:
-            return enum_type[val.upper()]
+            return StatsEnvironment[val.upper()]
         except KeyError:
             raise ValueError(
-                f'"{field_name}" must be one of: {", ".join([e.name for e in enum_type])}'
+                f'Value must be one of: {", ".join([e.name for e in StatsEnvironment])}'
             ) from None
 
     @staticmethod
-    def __validate_tag(tag: str, field_name: str) -> str:
+    def __validate_tag(tag: str) -> str:
         # Tags must follow the BFD Insights data convention constraints for
         # partition/folders names, as it is used as a partition folder when uploading
         # to S3
         if not re.fullmatch("[a-z0-9_]+", tag) or not tag:
             raise ValueError(
-                f'"{field_name}" must only consist of lower-case letters, numbers and the "_"'
-                " character"
+                'Value must only consist of lower-case letters, numbers and the "_" character'
             ) from None
 
         return tag
