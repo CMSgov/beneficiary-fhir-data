@@ -22,7 +22,6 @@ class ControllerResponse:
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
-# TODO: Would this be better using an ARN instead?
 controller_lambda_name = os.environ.get("CONTROLLER_LAMBDA_NAME")
 node_lambda_name = os.environ.get("NODE_LAMBDA_NAME")
 

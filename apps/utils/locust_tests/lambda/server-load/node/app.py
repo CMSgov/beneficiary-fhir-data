@@ -1,26 +1,24 @@
 """
-A lambda function that starts a controller node which coordinates tests between worker nodes.
+A lambda function that starts a worker node which coordinates tests between a swarm of worker nodes.
 This is a modified version of the `server-regression` lambda.
 """
 
 import json
 import os
-import socket
 import subprocess
+import urllib.parse
 from dataclasses import dataclass
 from typing import Optional
 
 import boto3
 from botocore.config import Config
 
-ip_address = socket.gethostbyname(socket.gethostname())
-
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
-locust_port = os.environ.get("LOCUST_PORT", "5557")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
 
 boto_config = Config(region_name="us-east-1")
 ssm_client = boto3.client("ssm", config=boto_config)
+rds_client = boto3.client("rds", config=boto_config)
 sqs = boto3.resource("sqs", config=boto_config)
 
 queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
@@ -33,7 +31,8 @@ class InvokeEvent:
     """
 
     host: str
-    users: int
+    locust_ip: str
+    locust_port: int = 5557
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
@@ -49,9 +48,22 @@ def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
         return None
 
 
+def get_rds_db_uri(cluster_id: str) -> Optional[str]:
+    """
+    Gets the URI for the reader instance.
+    """
+    response = rds_client.describe_db_clusters(DBClusterIdentifier=cluster_id)
+
+    try:
+        return response["DBClusters"][0]["ReaderEndpoint"]
+    except KeyError:
+        print(f'DB URI not found for cluster ID "{cluster_id}"')
+        return None
+
+
 def handler(event, context):
     """
-    Handles execution of a controller node.
+    Handles execution of a worker node.
     """
     # We take only the first record, if it exists
     try:
@@ -75,18 +87,47 @@ def handler(event, context):
         print(f"Message body missing required keys: {str(ex)}")
         return
 
-    message_body = json.dumps({"ip_address": ip_address})
+    # Assuming we get this far, invoke_event should have the information
+    # required to run the lambda:
+    cluster_id = get_ssm_parameter(f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier")
+    username = get_ssm_parameter(
+        f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+    )
+    raw_password = get_ssm_parameter(
+        f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+    )
+    cert_key = get_ssm_parameter(
+        f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
+    )
+    cert = get_ssm_parameter(
+        f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
+    )
 
-    queue.send_message(MessageBody=message_body, DelaySeconds=1)
+    if not cluster_id or not username or not raw_password or not cert_key or not cert:
+        return
+
+    cert_path = "/tmp/bfd_test_cert.pem"
+    with open(cert_path, "w", encoding="utf-8") as file:
+        file.write(cert_key + cert)
+
+    password = urllib.parse.quote(raw_password)
+    db_uri = get_rds_db_uri(cluster_id)
+
+    if not db_uri:
+        return
+
+    db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
     process = subprocess.run(
         [
             "locust",
             "--locustfile=/var/task/high_volume_suite.py",
             f"--host={invoke_event.host}",
-            f"--users={invoke_event.users}",
-            "--master",
-            f"--master-bind-port={locust_port}",
+            f"--database-uri={db_dsn}",
+            f"--client-cert-path={cert_path}",
+            "--worker",
+            f"--master-host={invoke_event.locust_ip}",
+            f"--master-port={invoke_event.locust_port}",
             "--headless",
             "--only-summary",
         ],
