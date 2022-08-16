@@ -131,6 +131,7 @@ class StatsConfiguration:
             ),
             dest="stats_store_file_path",
             env_var="LOCUS_STATS_STORE_FILE_PATH",
+            default='./'
         )
         stats_group.add_argument(
             "--stats-store-s3-bucket",
