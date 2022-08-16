@@ -150,6 +150,10 @@ public abstract class ClaimTransformerFieldTester<
       verifyStringFieldLengthLimitsEnforced(
           wrappedSetter, wrappedFieldLabel, minLength, maxLength, maxLength + 1);
     }
+    if (ignoreEmpty) {
+      verifyFieldTransformationSucceeds(
+          claimBuilder -> wrappedSetter.accept(claimBuilder, ""), wrappedGetter, null);
+    }
     return this;
   }
 
