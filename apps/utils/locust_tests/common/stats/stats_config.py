@@ -145,7 +145,7 @@ class StatsConfiguration:
         )
         stats_group.add_argument(
             "--stats-store-s3-database",
-            type=cls.__validate_tag,
+            type=str,
             help=(
                 "Specifies the Athena database that is queried upon when comparing statistics. Also"
                 " used as part of the S3 key/path when storing stats to S3"
@@ -155,7 +155,7 @@ class StatsConfiguration:
         )
         stats_group.add_argument(
             "--stats-store-s3-table",
-            type=cls.__validate_tag,
+            type=str,
             help=(
                 "Specifies the Athena table that is queried upon when comparing statistics. Also"
                 " used as part of the S3 key/path when storing stats to S3"
