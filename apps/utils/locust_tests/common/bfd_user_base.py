@@ -50,7 +50,7 @@ def _(environment: Environment, **kwargs) -> None:
     if stats_config:
         # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
         stats_collector = StatsCollector(
-            environment, stats_config.stats_store_tag, stats_config.stats_env
+            environment, stats_config.stats_store_tags, stats_config.stats_env
         )
         stats = stats_collector.collect_stats()
 

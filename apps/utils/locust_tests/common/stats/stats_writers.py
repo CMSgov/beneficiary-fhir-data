@@ -43,10 +43,9 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
         raise ValueError("AggregatedStats instance must have metadata to write to file")
 
     env_name = stats.metadata.environment.name.replace("-", "_")
-    store_tag = stats.metadata.tag
     path = stats_config.stats_store_file_path or ""
     with open(
-        os.path.join(path, f"{env_name}-{store_tag}-{int(time.time())}.stats.json"),
+        os.path.join(path, f"{env_name}-{int(time.time())}.stats.json"),
         mode="x",
         encoding="utf-8",
     ) as json_file:
@@ -80,9 +79,7 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
         )
 
     env_name = stats.metadata.environment.name.replace("-", "_")
-    store_tag = stats.metadata.tag
-
-    s3_path = f"databases/{stats_config.stats_store_s3_database}/{stats_config.stats_store_s3_table}/env={env_name}/tag={store_tag}/{int(time.time())}.stats.json"
+    s3_path = f"databases/{stats_config.stats_store_s3_database}/{stats_config.stats_store_s3_table}/env={env_name}/{int(time.time())}.stats.json"
     try:
         put_response = __s3_client.put_object(
             Bucket=stats_config.stats_store_s3_bucket, Key=s3_path, Body=json.dumps(asdict(stats))

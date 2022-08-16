@@ -21,7 +21,7 @@ class StatsCollector(object):
     def __init__(
         self,
         locust_env: Environment,
-        stats_tag: str,
+        stats_tags: List[str],
         running_env: StatsEnvironment = StatsEnvironment.TEST,
     ) -> None:
         """Creates a new instance of StatsCollector given the current Locust environment and a list of percentiles to report.
@@ -34,7 +34,7 @@ class StatsCollector(object):
         super().__init__()
         self.locust_env = locust_env
 
-        self.stats_tag = stats_tag
+        self.stats_tags = stats_tags
         self.running_env = running_env
 
     def __sort_stats(self, stats: Dict[Any, StatsEntry]) -> List[StatsEntry]:
@@ -70,7 +70,7 @@ class StatsCollector(object):
         return AggregatedStats(
             metadata=StatsMetadata.from_locust_env(
                 timestamp=int(time.time()),
-                tag=self.stats_tag,
+                tags=self.stats_tags,
                 environment=self.running_env,
                 locust_env=self.locust_env,
             ),
@@ -177,13 +177,12 @@ class TaskStats:
 
 @dataclass
 class StatsMetadata:
-    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated performance stats
-    """
+    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated performance stats"""
 
     timestamp: int
     """A timestamp indicating the time a stats snapshot was collected"""
-    tag: str
-    """The tag that partitions or buckets the statistics"""
+    tags: List[str]
+    """A list of simple string tags that partition or bucket emitted statistics"""
     environment: StatsEnvironment
     """The environment that the stats were collected from"""
     stats_reset_after_spawn: bool
@@ -199,7 +198,7 @@ class StatsMetadata:
     def from_locust_env(
         cls,
         timestamp: int,
-        tag: str,
+        tags: List[str],
         environment: StatsEnvironment,
         locust_env: Environment,
     ) -> "StatsMetadata":
@@ -229,7 +228,7 @@ class StatsMetadata:
 
         return cls(
             timestamp,
-            tag,
+            tags,
             environment,
             stats_reset_after_spawn=locust_env.reset_stats,
             num_total_users=locust_env.parsed_options.num_users,

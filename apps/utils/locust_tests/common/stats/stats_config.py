@@ -3,7 +3,7 @@ import re
 from argparse import Namespace
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 
 from locust.argument_parser import LocustArgumentParser
 
@@ -54,8 +54,8 @@ class StatsConfiguration:
     """The storage type that the stats will be written to"""
     stats_env: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
-    stats_store_tag: str
-    """A simple string tag that is used to partition collected statistics when stored"""
+    stats_store_tags: List[str]
+    """A simple List of string tags that are used to partition collected statistics when stored"""
     stats_store_file_path: Optional[str]
     """The local parent directory where JSON files will be written to.
     Used only if type is file, ignored if type is s3"""
@@ -115,11 +115,11 @@ class StatsConfiguration:
             "--stats-store-tag",
             type=cls.__validate_tag,
             help=(
-                "Specifies the tag under which collected statistics will be stored. Can be"
+                "Specifies the tags under which collected statistics will be stored. Can be"
                 " specified multiple times"
             ),
-            dest="stats_store_tag",
-            env_var="LOCUS_STATS_STORE_TAG",
+            dest="stats_store_tags",
+            env_var="LOCUS_STATS_STORE_TAGS",
             action="append",
         )
         stats_group.add_argument(

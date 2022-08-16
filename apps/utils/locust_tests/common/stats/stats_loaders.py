@@ -137,11 +137,12 @@ class StatsFileLoader(StatsLoader):
         return all(
             [
                 loaded_metadata.environment == self.stats_config.stats_env,
-                loaded_metadata.tag == self.stats_config.stats_compare_tag,
+                self.stats_config.stats_compare_tag in loaded_metadata.tags,
                 loaded_metadata.num_total_users == self.metadata.num_total_users,
                 loaded_metadata.num_users_per_second == self.metadata.num_users_per_second,
                 loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
-                # Pick some delta that the runtimes should be under -- in this case, we're using 3 seconds
+                # Pick some delta that the runtimes should be under -- in this case, we're using 3
+                # seconds
                 # TODO: Determine the right delta for checking for matching runtimes
                 loaded_metadata.total_runtime - self.metadata.total_runtime < TOTAL_RUNTIME_DELTA,
             ]
@@ -238,7 +239,7 @@ class StatsAthenaLoader(StatsLoader):
         # The following StatsMetadata fields need to be excluded from having their
         # equality check being auto-generated as they either should not be checked
         # (i.e. timestamp) or require a different type of check
-        fields_to_exclude = ["timestamp", "tag", "total_runtime"]
+        fields_to_exclude = ["timestamp", "tags", "total_runtime"]
         filtered_fields = [
             field for field in fields(StatsMetadata) if not field.name in fields_to_exclude
         ]
@@ -246,7 +247,7 @@ class StatsAthenaLoader(StatsLoader):
         # necessary to validate to ensure that stats can be compared
         generated_checks = [self.__generate_check_str(field) for field in filtered_fields]
         explicit_checks = [
-            f"metadata.tag='{self.stats_config.stats_compare_tag}'",
+            f"'{self.stats_config.stats_compare_tag}' IN metadata.tags",
             # TODO: Determine the right delta for checking for matching runtimes
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
         ]
