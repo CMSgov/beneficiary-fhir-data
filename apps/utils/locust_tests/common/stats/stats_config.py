@@ -206,8 +206,10 @@ class StatsConfiguration:
             None otherwise
         """
         opts_as_dict = vars(parsed_opts)
-        common_keys = opts_as_dict.keys() & dataclasses.fields(StatsConfiguration)
-        stats_args: Dict[str, Any] = {k: v for k, v in opts_as_dict if k in common_keys}
+        common_keys = opts_as_dict.keys() & {
+            field.name for field in dataclasses.fields(StatsConfiguration)
+        }
+        stats_args: Dict[str, Any] = {k: v for k, v in opts_as_dict.items() if k in common_keys}
 
         try:
             stats_config = StatsConfiguration(**stats_args)
