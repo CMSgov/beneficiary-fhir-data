@@ -302,7 +302,7 @@
 				<!-- In-memory database that is used in some tests to speed things up. -->
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<!-- The 2.5.x series is the last to support Java 8. -->
+				<!-- The 2.7.x series. -->
 				<version>2.7.0</version>
 				<scope>test</scope>
 			</dependency>
@@ -654,9 +654,11 @@ checkJavaFormat
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<!-- Use the versions-maven-plugin plugin to help ensure that checking
-							for new versions to update dependencies to don't include alphas.
-							 In the apps directory, run: "mvn versions:display-dependency-updates"-->
+			<!-- This plugin configuration allows us to scan all of the pom files
+				 to find any dependencies that have newer versions available
+				 that are not alpha, beta, or other commonly used pre-release version tags.
+				 To invoke this plugin to find the out of data dependencies,
+				 run: "mvn versions:display-dependency-updates" from the apps folder. -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
