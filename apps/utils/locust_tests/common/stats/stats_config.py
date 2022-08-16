@@ -101,7 +101,7 @@ class StatsConfiguration:
             dest="stats_store",
             env_var="LOCUS_STATS_STORE_TO_S3",
             action="store_const",
-            const=StatsStorageType.FILE,
+            const=StatsStorageType.S3,
         )
 
         stats_group.add_argument(
