@@ -198,6 +198,8 @@ class StatsMetadata:
     """The runtime requested by the user via --spawned-runtime or --runtime"""
     total_runtime: float
     """The actual, total runtime of the test run"""
+    user_classes: List[str]
+    """A List of the user classes ran during the test run"""
     hash: str
     """A hash that encodes various information about the running tests to ensure that comparisons
     can be made. Two (or more) AggregatedStats instances having the same hash means that they are
@@ -254,6 +256,7 @@ class StatsMetadata:
             num_users_per_second=spawn_rate,
             requested_runtime=requested_runtime,
             total_runtime=locust_env.stats.last_request_timestamp - locust_env.stats.start_time,
+            user_classes=ran_user_classes,
             hash=cls.__generate_hash_str(
                 user_classes_names=ran_user_classes,
                 tasks_names=tasks_names,
