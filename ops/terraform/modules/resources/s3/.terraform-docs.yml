@@ -1,0 +1,70 @@
+formatter: markdown table
+sections:
+  show:
+    - requirements
+    - inputs
+    - resources
+    - data-sources
+
+# this `content` string is implemented with as a golang template https://pkg.go.dev/text/template
+# updates here correspond to `{{ .Content }}` in `output.template` setting below
+content: |-
+    # S3 Bucket module
+    
+    This module provisions relatively hardened S3 Buckets by default:
+    - server side encryption is enabled
+    - bucket access logs are enabled
+    - block public access is enabled
+    - all requests require Secure Socket Layer
+    - versioning is enabled
+
+    
+    ### Bucket naming
+
+    We are following the standard OEDA/CMS naming convention for AWS resources.
+      
+      > $project-[$sub-project]-$env-[$sub-env]-$role-[$resource-type]-[$aws-acct-number]
+    
+    This allows for easy identification of resource ownership and purpose.
+
+    Examples:
+    
+      ```sh
+      bfd-test-foo-1234567890      # s3 bucket holding foo- only decryptable in the test environment
+      bfd-prod-sbx-foo-1234567890  # where prod-sbx is $env-$sub-env
+      ```
+    
+    #### References
+
+    - https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
+
+    {{ .Requirements }}
+
+    {{ .Inputs }}
+
+    {{ .Resources }}
+
+output:
+  file: README.md
+  mode: inject
+  template: |-
+    <!-- BEGIN_TF_DOCS -->
+    <!-- GENERATED WITH `terraform-docs .`
+         Manually updating the README.md will be overwritten.
+         For more details, see the file '.terraform-docs.yml' or
+         https://terraform-docs.io/user-guide/configuration/
+    -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->
+
+sort:
+  enabled: true
+  by: required
+
+settings:
+  indent: 2
+  espace: false
+  default: true
+  required: true
+  type: true
