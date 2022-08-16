@@ -194,8 +194,10 @@ class StatsMetadata:
     """The number of users spawned running Tasks during the test run"""
     num_users_per_second: float
     """The number of users spawned per second when the test run started"""
+    requested_runtime: int
+    """The runtime requested by the user via --spawned-runtime or --runtime"""
     total_runtime: float
-    """The total runtime of the test run"""
+    """The actual, total runtime of the test run"""
     hash: str
     """A hash that encodes various information about the running tests to ensure that comparisons
     can be made. Two (or more) AggregatedStats instances having the same hash means that they are
@@ -239,6 +241,9 @@ class StatsMetadata:
         num_users = locust_env.parsed_options.num_users
         spawn_rate = locust_env.parsed_options.spawn_rate
         stats_reset_after_spawn = locust_env.reset_stats
+        requested_runtime = int(
+            locust_env.parsed_options.spawned_runtime or locust_env.parsed_options.runtime
+        )
 
         return cls(
             timestamp,
@@ -247,11 +252,13 @@ class StatsMetadata:
             stats_reset_after_spawn=stats_reset_after_spawn,
             num_total_users=num_users,
             num_users_per_second=spawn_rate,
+            requested_runtime=requested_runtime,
             total_runtime=locust_env.stats.last_request_timestamp - locust_env.stats.start_time,
             hash=cls.__generate_hash_str(
                 user_classes_names=ran_user_classes,
                 tasks_names=tasks_names,
                 num_users=num_users,
+                requested_runtime=requested_runtime,
                 spawn_rate=spawn_rate,
                 stats_reset_after_spawn=stats_reset_after_spawn,
                 environment=environment,
@@ -264,6 +271,7 @@ class StatsMetadata:
         user_classes_names: List[str],
         tasks_names: List[str],
         num_users: int,
+        requested_runtime: int,
         spawn_rate: int,
         stats_reset_after_spawn: bool,
         environment: StatsEnvironment,
@@ -274,6 +282,7 @@ class StatsMetadata:
                 "".join(sorted(user_classes_names)),
                 "".join(sorted(tasks_names)),
                 str(num_users),
+                str(requested_runtime),
                 str(spawn_rate),
                 str(stats_reset_after_spawn),
                 str(environment),
