@@ -4,7 +4,7 @@ import re
 from argparse import Namespace
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Type, TypeVar
+from typing import Any, Dict, Optional, Type, TypeVar
 
 E = TypeVar("E", bound=Enum)
 
@@ -43,132 +43,49 @@ class StatsComparisonType(str, Enum):
 
 @dataclass
 class StatsConfiguration:
-    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared"""
+    """Dataclass that holds data about where and how aggregated performance statistics are stored
+    and compared"""
 
-    store: StatsStorageType
+    stats_store: StatsStorageType
     """The storage type that the stats will be written to"""
-    env: StatsEnvironment
+    stats_env: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
-    store_tag: str
+    stats_store_tag: str
     """A simple string tag that is used to partition collected statistics when stored"""
-    path: Optional[str]
+    stats_store_file_path: Optional[str]
     """The local parent directory where JSON files will be written to.
     Used only if type is file, ignored if type is s3"""
-    bucket: Optional[str]
+    stats_store_s3_bucket: Optional[str]
     """The AWS S3 Bucket that the JSON will be written to.
     Used only if type is s3, ignored if type is file"""
-    database: Optional[str]
+    stats_store_s3_database: Optional[str]
     """Name of the Athena database that is queried upon when comparing statistics.
     Also used as part of the file path when storing stats in S3"""
-    table: Optional[str]
+    stats_store_s3_table: Optional[str]
     """Name of the table to query using Athena if store is s3 and compare is set.
     Also used as part of the file path when storing stats in S3"""
-    compare: Optional[StatsComparisonType]
+    stats_compare: Optional[StatsComparisonType]
     """Indicates the type of performance stats comparison that will be done"""
-    comp_tag: Optional[str]
+    stats_compare_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
 
-    def to_key_val_str(self) -> str:
-        """Returns a key-value string representation of this StatsConfiguration instance.
-        Used to serialize this object to config.
-
-        Returns:
-            str: The key-value string representation of this object.
-        """
-        as_dict = dataclasses.asdict(self)
-        dict_non_empty = {k: v for k, v in as_dict.items() if v is not None and v != ""}
-        return ";".join(
-            [
-                f"{k}={str(v) if not isinstance(v, Enum) else v.name}"
-                for k, v in dict_non_empty.items()
-            ]
-        )
-
     @classmethod
-    def from_key_val_str(cls, key_val_str: str) -> "StatsConfiguration":
-        """Constructs a concrete instance of StatsConfiguration from a given string in key-value format seperated
-        by semi-colons ("key1=value1;key2=value2").
-
-        Args:
-            key_val_str (str): The key-value representation of this object.
-
-        Raises:
-            ValueError: Raised if the passed string does not follow the proper format.
+    def from_parsed_opts(cls, parsed_opts: Namespace) -> "StatsConfiguration":
+        """Constructs an instance of StatsConfiguration from a parsed options Namespace. This will
+        typically be the Locust Environment.parsed_options Namespace.
 
         Returns:
-            StatsConfiguration: Returns a concrete instance of StatsConfiguration with the values specified in the key-value string.
+            Optional[StatsConfiguration]: A StatsConfiguration instance if "stats_config" is valid,
+            None otherwise
         """
-        key_vals_list = key_val_str.split(";")
-        # Create a dictionary from the list of split key-value pairs by parsing each
-        # "key=value" string in the list into {'key': 'value'}.
-        # Empty values are simply considered to be empty strings.
-        config_dict = {
-            k: str(v or "") for k, v in (key_val.split("=") for key_val in key_vals_list)
-        }
+        opts_as_dict = vars(parsed_opts)
+        common_keys = opts_as_dict.keys() & dataclasses.fields(StatsConfiguration)
+        stats_args: Dict[str, Any] = {k:v for k,v in opts_as_dict if k in common_keys}
 
-        # Check for required parameters, like type, tag, environment
-        if not set(["store", "store_tag", "env"]).issubset(set(config_dict.keys())):
-            raise ValueError('"store", "store_tag", and "env" must be specified') from None
-
-        # Handle all of the enum-backed fields
-        storage_type = cls.__enum_from_val(config_dict["store"], StatsStorageType, "store")
-        stats_environment = cls.__enum_from_val(config_dict["env"], StatsEnvironment, "env")
-        compare_type = (
-            cls.__enum_from_val(config_dict["compare"], StatsComparisonType, "compare")
-            if "compare" in config_dict
-            else None
-        )
-
-        # Validate all of the tags passed in
-        storage_tag = cls.__validate_tag(config_dict["store_tag"], "store_tag")
-        comparison_tag = (
-            cls.__validate_tag(config_dict["comp_tag"], "comp_tag")
-            if "comp_tag" in config_dict
-            else storage_tag
-        )
-
-        # Validate necessary parameters if S3 is specified
-        if storage_type == StatsStorageType.S3:
-            # Validate that parameters necessary to store stats in S3
-            # are specified if S3 is the store
-            if not "bucket" in config_dict:
-                raise ValueError('"bucket" must be specified if "store" is "s3"') from None
-            if not "database" in config_dict:
-                raise ValueError('"database" must be specified if "store" is "s3"') from None
-            if not "table" in config_dict:
-                raise ValueError('"table" must be specified if "store" is "s3"') from None
-
-        return cls(
-            store=storage_type,
-            env=stats_environment,
-            store_tag=storage_tag,
-            path=config_dict.get("path") or "./",
-            bucket=config_dict.get("bucket"),
-            database=config_dict.get("database"),
-            table=config_dict.get("table"),
-            compare=compare_type,
-            comp_tag=comparison_tag,
-        )
-
-    @classmethod
-    def from_parsed_opts(cls, parsed_opts: Namespace) -> Optional["StatsConfiguration"]:
-        """Constructs an instance of StatsConfiguration from a parsed options Namespace, specifically
-        from a "stats_config" option. This will typically be the Locust Environment.parsed_options Namespace.
-
-        Returns:
-            Optional[StatsConfiguration]: A StatsConfiguration instance if "stats_config" is valid, None otherwise
-        """
-        # Check to make sure that stats_config was passed-in -- if not, return
-        if not parsed_opts.stats_config:
-            return None
-
-        stats_config_str = str(parsed_opts.stats_config)
         try:
-            stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
-        except ValueError as e:
-            logger = logging.getLogger()
-            logger.warning('--stats-config was invalid: "%s"', e)
-            return None
+            stats_config = StatsConfiguration(**stats_args)
+        except ValueError as exc:
+            raise ValueError(f'Unable to create instance of StatsConfiguration from given arguments: {str(exc)}') from exc
 
         return stats_config
 

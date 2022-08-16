@@ -31,6 +31,7 @@ TOTAL_RUNTIME_DELTA = 3.0
 """The delta under which two AggregatedStats instances are considered able to
 be compared"""
 
+
 class StatsLoader(ABC):
     """Loads AggregatedStats depending on what type of comparison is requested"""
 
@@ -44,7 +45,7 @@ class StatsLoader(ABC):
         Returns:
             AggregatedStats: An AggregatedStats instance representing the set of stats requested to load
         """
-        is_avg_compare = self.stats_config.compare == StatsComparisonType.AVERAGE
+        is_avg_compare = self.stats_config.stats_compare == StatsComparisonType.AVERAGE
         return self.load_average() if is_avg_compare else self.load_previous()
 
     @abstractmethod
@@ -80,7 +81,7 @@ class StatsLoader(ABC):
         """
         return (
             StatsFileLoader(stats_config, metadata)
-            if stats_config.store == StatsStorageType.FILE
+            if stats_config.stats_store == StatsStorageType.FILE
             else StatsAthenaLoader(stats_config, metadata)
         )
 
@@ -116,7 +117,11 @@ class StatsFileLoader(StatsLoader):
         return _get_average_all_stats(verified_stats)
 
     def __load_stats_from_files(self, suffix: str = ".stats.json") -> List[AggregatedStats]:
-        path = self.stats_config.path if self.stats_config and self.stats_config.path else ""
+        path = (
+            self.stats_config.stats_store_file_path
+            if self.stats_config and self.stats_config.stats_store_file_path
+            else ""
+        )
         stats_files = [
             os.path.join(path, file) for file in os.listdir(path) if file.endswith(suffix)
         ]
@@ -131,8 +136,8 @@ class StatsFileLoader(StatsLoader):
     def __verify_metadata(self, loaded_metadata: StatsMetadata):
         return all(
             [
-                loaded_metadata.environment == self.stats_config.env,
-                loaded_metadata.tag == self.stats_config.comp_tag,
+                loaded_metadata.environment == self.stats_config.stats_env,
+                loaded_metadata.tag == self.stats_config.stats_compare_tag,
                 loaded_metadata.num_total_users == self.metadata.num_total_users,
                 loaded_metadata.num_users_per_second == self.metadata.num_users_per_second,
                 loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
@@ -153,7 +158,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_previous(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.database}"."{self.stats_config.table}" '
+            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -163,7 +168,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_average(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.database}"."{self.stats_config.table}" '
+            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()}"
         )
 
@@ -181,13 +186,13 @@ class StatsAthenaLoader(StatsLoader):
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
         return self.client.start_query_execution(
             QueryString=query,
-            QueryExecutionContext={"Database": self.stats_config.database},
+            QueryExecutionContext={"Database": self.stats_config.stats_store_s3_database},
             # This method requires an OutputLocation, so we're using the "adhoc"
             # path defined in the BFD Insights data organization standards to
             # store query results
             ResultConfiguration={
                 "OutputLocation": (
-                    f"s3://{self.stats_config.bucket}/adhoc/query_results/{self.stats_config.database}/{self.stats_config.table}"
+                    f"s3://{self.stats_config.stats_store_s3_bucket}/adhoc/query_results/{self.stats_config.stats_store_s3_database}/{self.stats_config.stats_store_s3_table}"
                 )
             },
             # The workgroup should always be "bfd" if we're targeting BFD Insights
@@ -241,7 +246,7 @@ class StatsAthenaLoader(StatsLoader):
         # necessary to validate to ensure that stats can be compared
         generated_checks = [self.__generate_check_str(field) for field in filtered_fields]
         explicit_checks = [
-            f"metadata.tag='{self.stats_config.comp_tag}'",
+            f"metadata.tag='{self.stats_config.stats_compare_tag}'",
             # TODO: Determine the right delta for checking for matching runtimes
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
         ]

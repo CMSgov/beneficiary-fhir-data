@@ -44,7 +44,7 @@ class StatCompareResult:
 def do_stats_comparison(
     environment: Environment, stats_config: StatsConfiguration, stats: AggregatedStats
 ) -> None:
-    if not stats_config.compare:
+    if not stats_config.stats_compare:
         return
 
     logger = logging.getLogger()
@@ -54,8 +54,8 @@ def do_stats_comparison(
     except RuntimeError as ex:
         logger.error(
             "%s stats were unable to be loaded from %s due to: %s",
-            str(stats_config.compare),
-            str(stats_config.store),
+            str(stats_config.stats_compare),
+            str(stats_config.stats_store),
             str(ex),
         )
         return
@@ -67,8 +67,8 @@ def do_stats_comparison(
         if not failed_stats_results:
             logger.info(
                 'Comparison against %s stats under "%s" tag passed',
-                stats_config.compare.value,
-                stats_config.comp_tag,
+                stats_config.stats_compare.value,
+                stats_config.stats_compare_tag,
             )
         else:
             # If we get here, that means some tasks have stats exceeding the threshold percent
@@ -78,15 +78,15 @@ def do_stats_comparison(
             logger.error(
                 'Comparison against %s stats under "%s" tag failed; following tasks had stats that'
                 " exceeded %.2f%% of the baseline: %s",
-                stats_config.compare.value,
-                stats_config.comp_tag,
+                stats_config.stats_compare.value,
+                stats_config.stats_compare_tag,
                 DEFAULT_DEVIANCE_FAILURE_THRESHOLD,
                 failed_stats_results,
             )
     else:
         logger.warning(
             'No applicable performance statistics under tag "%s" to compare against',
-            stats_config.comp_tag,
+            stats_config.stats_compare_tag,
         )
 
 

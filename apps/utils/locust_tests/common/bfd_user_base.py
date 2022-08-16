@@ -49,7 +49,9 @@ def _(environment: Environment, **kwargs) -> None:
     stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
     if stats_config:
         # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
-        stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
+        stats_collector = StatsCollector(
+            environment, stats_config.stats_store_tag, stats_config.stats_env
+        )
         stats = stats_collector.collect_stats()
 
         stats_compare.do_stats_comparison(environment, stats_config, stats)
