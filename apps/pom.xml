@@ -302,8 +302,7 @@
 				<!-- In-memory database that is used in some tests to speed things up. -->
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<!-- The 2.7.x series. -->
-				<version>2.7.0</version>
+				<version>${hsqldb.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
