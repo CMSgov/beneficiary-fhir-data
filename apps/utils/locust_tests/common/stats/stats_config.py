@@ -135,7 +135,7 @@ class StatsConfiguration:
         )
         stats_group.add_argument(
             "--stats-store-s3-bucket",
-            type=cls.__validate_tag,
+            type=str,
             help=(
                 "Specifies the S3 bucket that JSON stats will be written to. Only used if"
                 ' --stats-store is "S3"'
