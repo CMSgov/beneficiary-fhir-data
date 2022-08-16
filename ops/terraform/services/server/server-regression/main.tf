@@ -108,11 +108,12 @@ resource "aws_glue_crawler" "this" {
 }
 
 resource "aws_lambda_permission" "allow_s3_glue_trigger" {
-  statement_id  = "bfd-${local.env}-${local.service}-glue-trigger-allow-s3"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.glue_trigger.arn
-  principal     = "s3.amazonaws.com"
-  source_arn    = data.aws_s3_bucket.insights.arn
+  statement_id   = "bfd-${local.env}-${local.service}-glue-trigger-allow-s3"
+  action         = "lambda:InvokeFunction"
+  function_name  = aws_lambda_function.glue_trigger.arn
+  principal      = "s3.amazonaws.com"
+  source_arn     = data.aws_s3_bucket.insights.arn
+  source_account = local.account_id
 }
 
 resource "aws_lambda_function" "glue_trigger" {

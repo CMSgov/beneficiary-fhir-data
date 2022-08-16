@@ -296,6 +296,8 @@ mappings:
   - from: idrDtlFromDate
   - from: idrDtlToDate
   - from: idrProcCode
+    transformerOptions:
+      ignoreEmptyString: true
   - from: idrModOne
   - from: idrModTwo
   - from: idrModThree
