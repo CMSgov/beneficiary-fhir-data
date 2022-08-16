@@ -131,7 +131,7 @@ class StatsConfiguration:
             ),
             dest="stats_store_file_path",
             env_var="LOCUS_STATS_STORE_FILE_PATH",
-            default='./'
+            default="./",
         )
         stats_group.add_argument(
             "--stats-store-s3-bucket",
@@ -192,7 +192,7 @@ class StatsConfiguration:
         stats_group.add_argument(
             "--stats-compare-tag",
             type=cls.__validate_tag,
-            help="Specifies the tag that will matching runs will be found under to compare against",
+            help="Specifies the tag that matching runs will be found under to compare against",
             dest="stats_compare_tag",
             env_var="LOCUST_STATS_COMPARE_TAG",
         )
