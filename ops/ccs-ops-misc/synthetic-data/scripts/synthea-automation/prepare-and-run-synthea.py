@@ -6,10 +6,10 @@
 # 1: previous end state properties file location
 # 2: file system location of synthea folder
 # 3: number of beneficiaries to be generated
-# 4: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
+# 4: db usernames and passwords for each environment DB, in this format (including quotes): "testUsername,testPassword,prodSbxUsername,prodSbxPassword,prodUsername,prodPassword"
 # 5: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
 #
-# Example runstring (with test db stored as an env variable TEST_DB): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $TEST_DB
+# Example runstring (with db usernames and passwords as an env variable DB_STRING): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $DB_STRING
 #
 # The script will enact the following steps:
 #
@@ -30,6 +30,8 @@
 #
 # If any step of the above fails, a message describing the failure will be printed to stdout along with a standard message on a new line "Returning with exit code 1"
 # If all steps succeed, the script will print to stdout "Returning with exit code 0 (No errors)"
+#
+# Note: If running locally, you will need to be connected to the VPN in order to successfully connect to the database
 #
 # Requires psycopg2 installed
 #
@@ -76,7 +78,7 @@ def validate_and_run(args):
     end_state_properties_file = read_file_lines(end_state_file_path)
     
     #Validate the ranges - number to be generated
-    test_db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-test-aurora-cluster.cluster-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+    test_db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-test-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
     prod_sbx_db_string = f"postgres://{db_data[2]}:{db_data[3]}@bfd-prod-sbx-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
     prod_string = f"postgres://{db_data[4]}:{db_data[5]}@bfd-prod-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
 
@@ -85,6 +87,7 @@ def validate_and_run(args):
         test_validation_result = check_ranges(end_state_properties_file, generated_benes, test_db_string)
         print("Running validations for prod-sbx...")
         prod_sbx_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_sbx_db_string)
+        ## Note this one step takes a while (near 30 mins), due to checking for non-indexed fields on very big tables
         print("Running validations for prod...")
         test_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_string)
         
@@ -277,7 +280,8 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     mbi_start = get_props_value(properties_file, "exporter.bfd.mbi_start")
     overall_validation_result = overall_validation_result and check_single_doesnt_exist('beneficiaries', 'mbi_num', mbi_start, db_string)
         
-    ## Ensure no mbi_hash has more than one bene_id associated with it from any previous loads
+    ## Ensure no (synthetic) mbi_num has more than one bene_id associated with it from any previous loads
+    ## this takes about 30 seconds in test as of this writing, and 2 seconds in the other envs, but this will increase as more data is added
     query = 'select count(*) from ('\
             'select count(*) bene_id_count from ('\
             'select distinct bene_id, mbi_num '\
@@ -410,6 +414,6 @@ if __name__ == "__main__":
     # arg1: previous end state properties file location
     # arg2: file system location of synthea folder
     # arg3: number of items to be generated
-    # arg4: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
+    # arg4: db usernames and passwords for all envs (see documentation above)
     # arg5: (optional) skip validation, useful if re-generating a bad batch, True or False, defaults to False
     validate_and_run(sys.argv[1:])
