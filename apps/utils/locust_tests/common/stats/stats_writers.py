@@ -66,16 +66,16 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
         raise ValueError("AggregatedStats instance must have metadata to write to S3")
 
     if not stats_config.stats_store_s3_bucket:
-        raise ValueError("--stats-config must specify a S3 bucket to store to")
+        raise ValueError("--stats-store-s3-bucket must be specified")
 
     if not stats_config.stats_store_s3_database:
         raise ValueError(
-            "--stats-config must specify a database that stats will be stored under in S3"
+            "--stats-store-s3-database must be specified"
         )
 
     if not stats_config.stats_store_s3_table:
         raise ValueError(
-            "--stats-config must specify a table that stats will be stored under in S3"
+            "--stats-store-s3-table must be specified"
         )
 
     stats_hash = stats.metadata.hash

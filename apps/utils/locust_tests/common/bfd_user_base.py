@@ -49,7 +49,7 @@ def _(environment: Environment, **kwargs) -> None:
     try:
         stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
     except ValueError as exc:
-        logging.getLogger().warning("%s", str(exc))
+        logging.getLogger().warning("Unable to get stats configuration: %s", str(exc))
         return
 
     # If stats_config is valid, get the aggregated stats of the stopping test run
