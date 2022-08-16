@@ -234,7 +234,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def __get_where_clause(self) -> str:
         explicit_checks = [
-            f"'{self.stats_config.stats_compare_tag}' IN metadata.tags",
+            f"contains(metadata.tags, '{self.stats_config.stats_compare_tag}')",
             f"metadata.hash='{self.metadata.hash}'",
             # TODO: Determine the right delta for checking for matching runtimes
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
