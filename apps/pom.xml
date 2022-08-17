@@ -91,6 +91,7 @@
 		<metrics.version>4.2.11</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
+		<aws-opentelemetry-agent.version>1.16.0</aws-opentelemetry-agent.version>
 		<aws-java-sdk-bom.version>1.12.278</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
@@ -146,6 +147,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- https://mvnrepository.com/artifact/software.amazon.opentelemetry/aws-opentelemetry-agent -->
+			<dependency>
+				<groupId>software.amazon.opentelemetry</groupId>
+				<artifactId>aws-opentelemetry-agent</artifactId>
+				<version>${aws-opentelemetry-agent.version}</version>
+				<type>pom</type>
+			</dependency>
 			<dependency>
 				<!-- The newrelic.jar javaagent dependency -->
 				<groupId>com.newrelic.agent.java</groupId>

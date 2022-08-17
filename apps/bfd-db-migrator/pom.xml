@@ -108,6 +108,11 @@
 			<artifactId>HikariCP</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>software.amazon.opentelemetry</groupId>
+			<artifactId>aws-opentelemetry-agent</artifactId>
+			<version>${aws-opentelemetry-agent.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
 		</dependency>

@@ -27,6 +27,11 @@
 			<artifactId>newrelic-agent</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>software.amazon.opentelemetry</groupId>
+			<artifactId>aws-opentelemetry-agent</artifactId>
+			<version>${aws-opentelemetry-agent.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Jetty is the embedded web server that this project uses to run WARs. -->
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
