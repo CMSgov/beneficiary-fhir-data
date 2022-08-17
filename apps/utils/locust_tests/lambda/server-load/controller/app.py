@@ -8,7 +8,6 @@ import os
 import socket
 import subprocess
 from dataclasses import dataclass
-from typing import Optional
 
 import boto3
 from botocore.config import Config
@@ -20,7 +19,6 @@ locust_port = os.environ.get("LOCUST_PORT", "5557")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
 
 boto_config = Config(region_name="us-east-1")
-ssm_client = boto3.client("ssm", config=boto_config)
 sqs = boto3.resource("sqs", config=boto_config)
 
 queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
@@ -34,19 +32,6 @@ class InvokeEvent:
 
     host: str
     users: int
-
-
-def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
-    """
-    Gets a named SSM parameter.
-    """
-    response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
-
-    try:
-        return response["Parameter"]["Value"]
-    except KeyError:
-        print(f'SSM parameter "{name}" not found or empty')
-        return None
 
 
 def handler(event, context):

@@ -14,14 +14,10 @@ import boto3
 from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
-sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
 
 boto_config = Config(region_name="us-east-1")
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
-sqs = boto3.resource("sqs", config=boto_config)
-
-queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
 
 @dataclass

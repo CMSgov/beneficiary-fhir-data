@@ -37,7 +37,6 @@ node_lambda_name = os.environ.get("NODE_LAMBDA_NAME")
 
 boto_config = Config(region_name="us-east-1")
 
-ssm = boto3.resource("ssm", config=boto_config)
 sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
