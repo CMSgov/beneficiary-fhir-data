@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +63,8 @@ public final class ServerProcess implements AutoCloseable {
 
     // Wait for it to start both Jetty and the app.
     try {
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
     } catch (ConditionTimeoutException e) {
       // Add some additional logging detail.
       throw new ConditionTimeoutException(
