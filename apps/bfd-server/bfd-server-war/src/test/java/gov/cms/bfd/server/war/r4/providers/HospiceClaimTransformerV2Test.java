@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -86,7 +87,8 @@ public final class HospiceClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 includeTaxNumber,
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -121,7 +123,8 @@ public final class HospiceClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim));
   }
 

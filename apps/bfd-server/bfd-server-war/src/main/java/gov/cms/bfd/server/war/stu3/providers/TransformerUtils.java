@@ -3225,8 +3225,7 @@ public final class TransformerUtils {
       Object rifRecord,
       Optional<Boolean> includeTaxNumbers,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup)
-      throws IOException {
+      NPIOrgLookup npiOrgLookup) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType

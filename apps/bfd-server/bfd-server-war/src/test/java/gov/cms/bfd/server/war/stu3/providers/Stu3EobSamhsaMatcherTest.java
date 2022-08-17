@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -131,7 +132,8 @@ public final class Stu3EobSamhsaMatcherTest {
                         new MetricRegistry(),
                         r,
                         Optional.empty(),
-                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                        NPIOrgLookup.createNpiOrgLookupForTesting());
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -810,7 +812,8 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               sampleRifRecordForClaimType,
               Optional.empty(),
-              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+              NPIOrgLookup.createNpiOrgLookupForTesting());
 
       return sampleEobForClaimType;
     }

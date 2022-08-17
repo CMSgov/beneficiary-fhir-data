@@ -2988,7 +2988,8 @@ public final class TransformerUtilsV2 {
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
       Optional<String> fiDocClmControlNum,
-      Optional<LocalDate> fiClmProcDt) {
+      Optional<LocalDate> fiClmProcDt,
+      Optional<String> npiOrgName) {
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
@@ -3004,7 +3005,8 @@ public final class TransformerUtilsV2 {
                     CcwCodebookVariable.FI_CLM_PROC_DT, procDt)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
-    addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
+    addProviderSlice(
+        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated, npiOrgName);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -3406,7 +3408,8 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
-      Optional<Instant> lastUpdated) {
+      Optional<Instant> lastUpdated,
+      Optional<String> name) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
 
@@ -3432,6 +3435,10 @@ public final class TransformerUtilsV2 {
 
       // Set active to value of true
       provider.setActive(true);
+
+      if (!name.isEmpty()) {
+        provider.setName(value.get());
+      }
 
       setLastUpdated(provider, lastUpdated);
 

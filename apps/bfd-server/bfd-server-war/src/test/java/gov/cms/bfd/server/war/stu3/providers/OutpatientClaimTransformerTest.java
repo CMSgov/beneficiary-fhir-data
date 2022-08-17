@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
@@ -58,7 +59,8 @@ public final class OutpatientClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob);
   }
@@ -90,7 +92,8 @@ public final class OutpatientClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob);
   }
@@ -129,7 +132,8 @@ public final class OutpatientClaimTransformerTest {
                       new TransformerContext(
                           new MetricRegistry(),
                           Optional.empty(),
-                          FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                          FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                          NPIOrgLookup.createNpiOrgLookupForTesting()),
                       claim);
               assertMatches(claim, eob);
             });

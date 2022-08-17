@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
@@ -49,7 +50,8 @@ public final class SNFClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
 
     assertMatches(claim, eob);

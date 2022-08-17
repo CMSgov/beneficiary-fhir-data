@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -433,7 +434,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim),
         eob);
   }
@@ -1484,7 +1486,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
@@ -2087,7 +2090,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
                 new TransformerContext(
                     PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                     Optional.of(false),
-                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                    NPIOrgLookup.createNpiOrgLookupForTesting()),
                 claim),
         searchResults);
   }

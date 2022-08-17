@@ -38,7 +38,7 @@ public class HHAClaimTransformerV2 {
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim, );
 
     timer.stop();
     return eob;

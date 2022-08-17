@@ -26,6 +26,7 @@ public class TransformerContext {
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param includeTaxNumbers the {@link Optional} populated with an {@link Boolean} to use
    * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use
+   * @param npiOrgLookup {@link NPIOrgLookup} to use
    */
   public TransformerContext(
       MetricRegistry metricRegistry,
@@ -51,5 +52,10 @@ public class TransformerContext {
   /** @return the {@link FdaDrugCodeDisplayLookup} */
   public FdaDrugCodeDisplayLookup getDrugCodeDisplayLookup() {
     return drugCodeDisplayLookup;
+  }
+
+  /** @return the {@link NPIOrgLookup} */
+  public NPIOrgLookup getNPIOrgLookup() {
+    return npiOrgLookup;
   }
 }
