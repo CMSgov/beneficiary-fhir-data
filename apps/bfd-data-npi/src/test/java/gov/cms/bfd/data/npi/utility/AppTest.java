@@ -1,6 +1,7 @@
 package gov.cms.bfd.data.npi.utility;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 
 import java.io.IOException;

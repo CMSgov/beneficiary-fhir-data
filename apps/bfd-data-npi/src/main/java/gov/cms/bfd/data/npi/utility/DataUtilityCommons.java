@@ -159,6 +159,10 @@ public class DataUtilityCommons {
               }
             });
 
+    if (matchingFiles.length == 0) {
+      throw new IllegalStateException("No NPI file found");
+    }
+
     if (matchingFiles.length > 1) {
       throw new IllegalStateException("More than one NPI file found");
     }
@@ -237,14 +241,21 @@ public class DataUtilityCommons {
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
-      // skip first line which is header
-      reader.readLine();
-      for (String line; (line = reader.readLine()) != null; ) {
-        String[] fields = line.split(",");
+      // Get indexes according to header
+      String line = reader.readLine();
+      String[] fields = line.split(",");
+      Map<String, Integer> indexes = getIndexNumbers(fields);
+      Integer npiIndex = getIndexNumberForField(indexes, "NPI");
+      Integer entityTypeCodeIndex = getIndexNumberForField(indexes, "Entity Type Code");
+      Integer orgNameIndex =
+          getIndexNumberForField(indexes, "Provider Organization Name (Legal Business Name)");
 
-        String orgName = fields[4].trim().replace("\"", "");
-        String npi = fields[0].trim().replace("\"", "");
-        String entityTypeCode = fields[1].trim().replace("\"", "");
+      while ((line = reader.readLine()) != null) {
+        fields = line.split(",");
+
+        String orgName = fields[orgNameIndex].trim().replace("\"", "");
+        String npi = fields[npiIndex].trim().replace("\"", "");
+        String entityTypeCode = fields[entityTypeCodeIndex].trim().replace("\"", "");
 
         // entity type code 2 is organization
         if (!Strings.isNullOrEmpty(entityTypeCode) && Integer.parseInt(entityTypeCode) == 2) {
@@ -253,6 +264,38 @@ public class DataUtilityCommons {
         }
       }
     }
+  }
+
+  /**
+   * sets the index number to their header value.
+   *
+   * @param fields the string array of header values.
+   * @return map of indexes and field names
+   */
+  private static Map<String, Integer> getIndexNumbers(String[] fields) {
+    Map<String, Integer> indexNumbers = new HashMap<String, Integer>();
+    Integer indexCounter = 0;
+    for (String field : fields) {
+      indexNumbers.put(field.trim().replace("\"", ""), indexCounter++);
+    }
+
+    return indexNumbers;
+  }
+
+  /**
+   * gets the index number according to their field name.
+   *
+   * @param fieldName the header value to check.
+   * @param indexNumbers the map of header values and indexes.
+   * @return int of index
+   */
+  private static int getIndexNumberForField(Map<String, Integer> indexNumbers, String fieldName) {
+    if (indexNumbers.containsKey(fieldName)) {
+      return indexNumbers.get(fieldName);
+    }
+
+    throw new IllegalStateException(
+        "NPI Org File Processing Error: Cannot field fieldname " + fieldName);
   }
 
   /**
