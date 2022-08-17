@@ -72,9 +72,13 @@ class StatsConfiguration:
     """Indicates the type of performance stats comparison that will be done"""
     stats_compare_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
-    stats_compare_load_limit: Optional[int]
+    stats_compare_load_limit: int
     """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
     comparisons"""
+    stats_compare_fail_threshold: float
+    """Indicates the percent threshold where a performance statistic is considered to have exceeded
+    the baseline and is considered a failure, i.e. x is stats_compare_fail_threshold% of y, or
+    (x/y)*100.0 > stats_compare_fail_threshold"""
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
@@ -210,6 +214,17 @@ class StatsConfiguration:
             dest="stats_compare_load_limit",
             env_var="LOCUST_STATS_COMPARE_LOAD_LIMIT",
             default=5,
+        )
+        stats_group.add_argument(
+            "--stats-compare-fail-threshold",
+            type=float,
+            help=(
+                "Specifies the percent threshold that a particular performance statistic must be of"
+                " the baseline to be considered a failure. Defaults to 200.0, i.e. 2x, 200%, etc."
+            ),
+            dest="stats_compare_fail_threshold",
+            env_var="LOCUST_STATS_COMPARE_FAIL_THRESHOLD",
+            default=200.0,
         )
 
     @classmethod

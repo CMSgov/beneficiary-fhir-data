@@ -19,9 +19,6 @@ TaskStatsOrPercentiles = Union[TaskStats, ResponseTimePercentiles]
 """Type indicating a value that is either a TaskStats instance or a response time
 percentiles dictionary"""
 
-DEFAULT_DEVIANCE_FAILURE_THRESHOLD = 500.0
-"""The default percent threshold that stats should not exceed or be worse than compared to a previous or average run"""
-
 
 @dataclass
 class StatCompareResult:
@@ -62,7 +59,7 @@ def do_stats_comparison(
 
     if previous_stats:
         failed_stats_results = validate_aggregated_stats(
-            previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD
+            previous_stats, stats, stats_config.stats_compare_fail_threshold
         )
         if not failed_stats_results:
             logger.info(
@@ -80,7 +77,7 @@ def do_stats_comparison(
                 " exceeded %.2f%% of the baseline: %s",
                 stats_config.stats_compare.value,
                 stats_config.stats_compare_tag,
-                DEFAULT_DEVIANCE_FAILURE_THRESHOLD,
+                stats_config.stats_compare_fail_threshold,
                 failed_stats_results,
             )
     else:
@@ -154,7 +151,7 @@ def get_stats_above_threshold(
 def validate_aggregated_stats(
     previous: AggregatedStats,
     current: AggregatedStats,
-    threshold: float = DEFAULT_DEVIANCE_FAILURE_THRESHOLD,
+    threshold: float,
 ) -> Dict[str, List[StatCompareResult]]:
     """Validates and compares the given AggregatedStats instances against each other, checking each of their common
     TaskStats and returning a dictionary of the name of those tasks that exceed the given threshold to the actual stats
