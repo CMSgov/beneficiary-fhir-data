@@ -110,6 +110,35 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
   become: true
+  
+- name: Create AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  loop:
+    - "{{ data_server_dir }}/aws_otel_java"
+
+- name: Find AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray JAR
+  find:
+    paths: "{{ data_server_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+    pattern: aws-opentelemetry-agent.jar*.jar
+  register: find_opentelemetry_agent
+
+- name: Copy AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray  JAR
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ data_server_dir }}/aws_otel_java/aws-opentelemetry-agent.jar"
+    remote_src: true
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r,o=r
+  with_items:
+    - "{{ find_opentelemetry_agent.files }}"
+  become: true
 
 ### Logrotate Stuff
 - name: Configure bfd-server Log Rotation
