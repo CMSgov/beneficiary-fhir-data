@@ -282,22 +282,23 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
         
     ## Ensure no (synthetic) mbi_num has more than one bene_id associated with it from any previous loads
     ## this takes about 30 seconds in test as of this writing, and 2 seconds in the other envs, but this will increase as more data is added
+    ## Takes the union of beneficiaries, bene_history, and medicare_beneid_history and checks if any mbi numbers resolve to more than one bene id, then returns the count
     query = 'select count(*) from ('\
-            'select count(*) bene_id_count from ('\
-            'select distinct bene_id, mbi_num '\
-            'from public.beneficiaries '\
-            'where bene_id < 0 and mbi_num IS NOT NULL '\
-            'union '\
-            'select distinct bene_id, mbi_num '\
-            'from public.beneficiaries_history '\
-            'where bene_id < 0 and mbi_num IS NOT NULL '\
-            'union '\
-            'select distinct bene_id, mbi_num '\
-            'from public.medicare_beneficiaryid_history '\
-            'where bene_id < 0 and mbi_num IS NOT NULL '\
-            ') as foo '\
-            'group by mbi_num '\
-            'having count(*) > 1'\
+            '  select count(*) bene_id_count from ('\
+            '    select distinct bene_id, mbi_num '\
+            '    from public.beneficiaries '\
+            '    where bene_id < 0 and mbi_num IS NOT NULL '\
+            '   union '\
+            '    select distinct bene_id, mbi_num '\
+            '    from public.beneficiaries_history '\
+            '    where bene_id < 0 and mbi_num IS NOT NULL '\
+            '   union '\
+            '    select distinct bene_id, mbi_num '\
+            '    from public.medicare_beneficiaryid_history '\
+            '    where bene_id < 0 and mbi_num IS NOT NULL '\
+            '  ) as foo '\
+            '  group by mbi_num '\
+            '  having count(*) > 1'\
             ') as s'
     result = _execute_single_count_query(db_string, query)
     ## There is one duplicate in the db for testing on purpose, so ignore that one
