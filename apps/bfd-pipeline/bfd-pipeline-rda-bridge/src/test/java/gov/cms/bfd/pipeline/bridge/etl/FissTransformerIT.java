@@ -395,6 +395,7 @@ public class FissTransformerIT {
                   .setBeneZPayer(
                       FissBeneZPayer.newBuilder()
                           .setPayersIdEnum(FissPayersCode.PAYERS_CODE_MEDICARE)
+                          .setRdaPosition(1)
                           .setPayersName("MEDICARE")
                           .setBeneFirstName("Firstname")
                           .setBeneMidInit("M")
@@ -408,9 +409,14 @@ public class FissTransformerIT {
           .setPrincipleDiag(PRNCPAL_DGNS_CD)
           .setNpiNumber(ORG_NPI_NUM)
           .addFissProcCodes(
-              FissProcedureCode.newBuilder().setProcCd(ICD_PRCDR_CD1).setProcDt(PRCDR_DT1).build())
+              FissProcedureCode.newBuilder()
+                  .setRdaPosition(1)
+                  .setProcCd(ICD_PRCDR_CD1)
+                  .setProcDt(PRCDR_DT1)
+                  .build())
           .addFissDiagCodes(
               FissDiagnosisCode.newBuilder()
+                  .setRdaPosition(1)
                   .setDiagCd2(ICD_DGNS_CD1)
                   .setDiagPoaIndEnumValue(CLM_POA_IND_SW1)
                   .build())

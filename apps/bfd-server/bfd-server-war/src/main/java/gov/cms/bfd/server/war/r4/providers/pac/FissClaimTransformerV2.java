@@ -318,7 +318,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             diagnosisCode -> {
               Claim.DiagnosisComponent component =
                   new Claim.DiagnosisComponent()
-                      .setSequence(diagnosisCode.getPriority() + 1)
+                      .setSequence(diagnosisCode.getRdaPosition())
                       .setDiagnosis(
                           new CodeableConcept()
                               .setCoding(
@@ -361,7 +361,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
         .map(
             procCode ->
                 new Claim.ProcedureComponent()
-                    .setSequence((procCode.getPriority() + 1))
+                    .setSequence((procCode.getRdaPosition()))
                     .setDate(
                         procCode.getProcDate() == null
                             ? null
@@ -380,7 +380,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             payer -> {
               Claim.InsuranceComponent component =
                   new Claim.InsuranceComponent()
-                      .setSequence(payer.getPriority() + 1)
+                      .setSequence(payer.getRdaPosition())
                       .setFocal(Objects.equals(payer.getPayersName(), MEDICARE));
 
               if (payer.getPayersName() != null) {

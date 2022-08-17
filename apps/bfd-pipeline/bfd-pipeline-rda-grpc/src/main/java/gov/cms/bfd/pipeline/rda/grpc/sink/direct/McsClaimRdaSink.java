@@ -63,7 +63,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
     final RdaMcsClaim claim = change.getClaim();
     final var locations = new StringList();
     claim.getLocations().stream()
-        .sorted(Comparator.comparing(RdaMcsLocation::getPriority))
+        .sorted(Comparator.comparing(RdaMcsLocation::getRdaPosition))
         .forEach(loc -> locations.addIfNonEmpty(loc.getIdrLocCode()));
     return RdaClaimMessageMetaData.builder()
         .sequenceNumber(change.getSequenceNumber())
@@ -71,7 +71,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .claimId(claim.getIdrClmHdIcn())
         .mbiRecord(claim.getMbiRecord())
         .claimState(claim.getIdrStatusCode())
-        .receivedDate(claim.getLastUpdated())
+        .lastUpdated(claim.getLastUpdated())
         .locations(locations)
         .transactionDate(claim.getIdrStatusDate())
         .phase(change.getSource().getPhase())

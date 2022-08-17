@@ -7,7 +7,7 @@ mappings:
     schema: rda
     primaryKeyColumns:
     - idrClmHdIcn
-    - priority
+    - rdaPosition
     columns:
     - name: idrClmHdIcn
       sqlType: varchar(15)
@@ -16,18 +16,11 @@ mappings:
       comment: 'Internal Claim Control Number: This field contains a numeric value
         that identifies a claim throughout the processing cycle and allows for a linkage
         between the claim and the beneficiary for whom it was submitted.'
-    - name: priority
-      sqlType: smallint
-      javaType: short
-      nullable: false
     - name: rdaPosition
       sqlType: smallint
       javaType: short
       nullable: false
       dbName: rda_position
-    - name: lastUpdated
-      sqlType: timestamp with time zone
-      dbName: last_updated
     - name: idrAdjDate
       sqlType: date
       dbName: idr_adj_date
@@ -83,13 +76,9 @@ mappings:
   transformations:
   - from: PARENT
     to: idrClmHdIcn
-  - from: INDEX
-    to: priority
   - from: rdaPosition
     transformer: UintToShort
     optionalComponents: None
-  - from: NOW
-    to: lastUpdated
   - from: idrAdjDate
   - from: idrXrefIcn
   - from: idrAdjClerk

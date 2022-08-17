@@ -244,7 +244,7 @@ public class FissClaimRdaSinkTest {
     assertEquals("dcn", metaData.getClaimId());
     assertSame(mbiRecord, metaData.getMbiRecord());
     assertEquals("A", metaData.getClaimState());
-    assertEquals(now, metaData.getReceivedDate());
+    assertEquals(now, metaData.getLastUpdated());
     assertEquals(StringList.ofNonEmpty("B", "C"), metaData.getLocations());
     assertEquals(transactionDate, metaData.getTransactionDate());
   }

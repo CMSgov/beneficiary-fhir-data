@@ -321,7 +321,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
               String icdVersion = diagCode.getIdrDiagIcdType().equals("0") ? "10" : "9-cm";
 
               return new Claim.DiagnosisComponent()
-                  .setSequence(diagCode.getPriority() + 1)
+                  .setSequence(diagCode.getRdaPosition())
                   .setDiagnosis(
                       new CodeableConcept()
                           .setCoding(
@@ -348,7 +348,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             detail -> {
               Claim.ItemComponent item =
                   new Claim.ItemComponent()
-                      .setSequence(detail.getPriority() + 1)
+                      .setSequence(detail.getIdrDtlNumber())
                       .setProductOrService(
                           new CodeableConcept(
                               new Coding(BBCodingSystems.HCPCS, detail.getIdrProcCode(), null)))
@@ -374,7 +374,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                         matchingCode.ifPresent(
                             diagnosisCode ->
                                 item.setDiagnosisSequence(
-                                    List.of(new PositiveIntType(diagnosisCode.getPriority() + 1))));
+                                    List.of(new PositiveIntType(diagnosisCode.getRdaPosition()))));
                       });
 
               return item;

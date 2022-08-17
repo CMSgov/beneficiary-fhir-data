@@ -199,7 +199,7 @@ public class McsClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     final RdaMcsDetail detail = new RdaMcsDetail();
     detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    detail.setPriority((short) 0);
+    detail.setIdrDtlNumber((short) 0);
     detail.setIdrDtlStatus("F");
     detail.setIdrDtlFromDate(LocalDate.of(2020, 1, 9));
     detail.setIdrDtlToDate(LocalDate.of(2020, 1, 10));
@@ -219,7 +219,6 @@ public class McsClaimTransformerTest {
     detail.setIdrKPosCity("123456789012345678901234567890");
     detail.setIdrKPosState("12");
     detail.setIdrKPosZip("123456789012345");
-    detail.setLastUpdated(clock.instant());
     claim.getDetails().add(detail);
     claimBuilder
         .setIdrClmHdIcn("123456789012345")
@@ -251,7 +250,7 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
     RdaMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
-        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getPriority);
+        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getIdrDtlNumber);
   }
 
   /**
@@ -266,17 +265,15 @@ public class McsClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
     diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 0);
+    diagCode.setRdaPosition((short) 1);
     diagCode.setIdrDiagIcdType("9");
     diagCode.setIdrDiagCode("1234567");
-    diagCode.setLastUpdated(clock.instant());
     claim.getDiagCodes().add(diagCode);
     diagCode = new RdaMcsDiagnosisCode();
     diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 1);
+    diagCode.setRdaPosition((short) 2);
     diagCode.setIdrDiagIcdType("0");
     diagCode.setIdrDiagCode("jdsyejs");
-    diagCode.setLastUpdated(clock.instant());
     claim.getDiagCodes().add(diagCode);
     claimBuilder
         .setIdrClmHdIcn("123456789012345")
@@ -285,12 +282,14 @@ public class McsClaimTransformerTest {
         .addMcsDiagnosisCodes(
             McsDiagnosisCode.newBuilder()
                 .setIdrClmHdIcn("123456789012345")
+                .setRdaPosition(1)
                 .setIdrDiagCode("1234567")
                 .setIdrDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9)
                 .build())
         .addMcsDiagnosisCodes(
             McsDiagnosisCode.newBuilder()
                 .setIdrClmHdIcn("123456789012345")
+                .setRdaPosition(2)
                 .setIdrDiagCode("jdsyejs")
                 .setIdrDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                 .build());
@@ -298,7 +297,7 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
     RdaMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
-        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getPriority);
+        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getIdrDtlNumber);
   }
 
   @Test
@@ -1555,7 +1554,6 @@ public class McsClaimTransformerTest {
       assertEquals(1, claim.getAdjustments().size());
       RdaMcsAdjustment answer = claim.getAdjustments().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -1580,7 +1578,6 @@ public class McsClaimTransformerTest {
       assertEquals(1, claim.getAudits().size());
       RdaMcsAudit answer = claim.getAudits().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -1605,7 +1602,6 @@ public class McsClaimTransformerTest {
       assertEquals(1, claim.getDetails().size());
       RdaMcsDetail answer = claim.getDetails().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -1632,7 +1628,6 @@ public class McsClaimTransformerTest {
       assertEquals(1, claim.getDiagCodes().size());
       RdaMcsDiagnosisCode answer = claim.getDiagCodes().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -1657,7 +1652,6 @@ public class McsClaimTransformerTest {
       assertEquals(1, claim.getLocations().size());
       RdaMcsLocation answer = claim.getLocations().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 

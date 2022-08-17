@@ -432,6 +432,7 @@ public class McsTransformerIT {
           .setIdrTotBilledAmt(NCH_CARR_CLM_SBMTD_CHRG_AMT)
           .addMcsDiagnosisCodes(
               McsDiagnosisCode.newBuilder()
+                  .setRdaPosition(1)
                   .setIdrClmHdIcn(CARR_CLM_CNTL_NUM)
                   .setIdrDiagCode(ICD_DGNS_CD1)
                   .setIdrDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
