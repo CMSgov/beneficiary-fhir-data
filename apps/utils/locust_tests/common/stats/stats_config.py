@@ -3,11 +3,9 @@ import re
 from argparse import Namespace
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional
 
 from locust.argument_parser import LocustArgumentParser
-
-E = TypeVar("E", bound=Enum)
 
 
 class StatsStorageType(str, Enum):
