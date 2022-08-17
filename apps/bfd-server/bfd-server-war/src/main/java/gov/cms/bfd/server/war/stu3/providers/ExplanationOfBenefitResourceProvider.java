@@ -21,6 +21,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
@@ -83,6 +84,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   private Stu3EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
   private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  private NPIOrgLookup npiOrgLookup;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -112,6 +114,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   @Inject
   public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+  }
+
+  /** @param npiOrgLookup the {@link NPIOrgLookup} to use */
+  @Inject
+  public void setnpiOrgLookup(NPIOrgLookup npiOrgLookup) {
+    this.npiOrgLookup = npiOrgLookup;
   }
 
   /** {@inheritDoc} */
@@ -192,7 +200,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
             .getTransformer()
             .transform(
                 new TransformerContext(
-                    metricRegistry, Optional.of(includeTaxNumbers), drugCodeDisplayLookup),
+                    metricRegistry,
+                    Optional.of(includeTaxNumbers),
+                    drugCodeDisplayLookup,
+                    npiOrgLookup),
                 claimEntity);
 
     // Add bene_id to MDC logs
@@ -300,56 +311,64 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
               ClaimType.CARRIER,
               findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.DME))
       eobs.addAll(
           transformToEobs(
               ClaimType.DME,
               findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.HHA))
       eobs.addAll(
           transformToEobs(
               ClaimType.HHA,
               findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.HOSPICE))
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
               findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.INPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
               findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.OUTPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.PDE))
       eobs.addAll(
           transformToEobs(
               ClaimType.PDE,
               findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
           transformToEobs(
               ClaimType.SNF,
               findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated, serviceDate),
               Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup));
+              drugCodeDisplayLookup,
+              npiOrgLookup));
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
       filterSamhsa(eobs);
@@ -482,7 +501,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
       ClaimType claimType,
       List<?> claims,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
     return claims.stream()
         .map(
             c ->
@@ -490,7 +510,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
                     .getTransformer()
                     .transform(
                         new TransformerContext(
-                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
+                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
                         c))
         .collect(Collectors.toList());
   }

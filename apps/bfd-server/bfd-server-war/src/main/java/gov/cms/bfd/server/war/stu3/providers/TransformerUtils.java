@@ -6,6 +6,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -3223,13 +3224,16 @@ public final class TransformerUtils {
       MetricRegistry metricRegistry,
       Object rifRecord,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup)
+      throws IOException {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType
             .getTransformer()
             .transform(
-                new TransformerContext(metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
+                new TransformerContext(
+                    metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
                 rifRecord);
       }
     }

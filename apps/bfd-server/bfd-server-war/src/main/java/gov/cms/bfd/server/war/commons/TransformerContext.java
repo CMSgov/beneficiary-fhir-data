@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import java.util.Optional;
 
 /**
@@ -18,6 +19,9 @@ public class TransformerContext {
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return */
+  private final NPIOrgLookup npiOrgLookup;
+
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param includeTaxNumbers the {@link Optional} populated with an {@link Boolean} to use
@@ -26,10 +30,12 @@ public class TransformerContext {
   public TransformerContext(
       MetricRegistry metricRegistry,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
     this.metricRegistry = metricRegistry;
     this.includeTaxNumbers = includeTaxNumbers;
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+    this.npiOrgLookup = npiOrgLookup;
   }
 
   /** @return the {@link MetricRegistry} */
