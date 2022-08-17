@@ -134,8 +134,14 @@ public class DataUtilityCommons {
     URL ndctextZipUrl = new URL(fileName);
     if (!Files.isReadable(downloadedNpiZipFile)) {
       // connectionTimeout, readTimeout = 10 seconds
+      final Integer connectionTimeout = 100000;
+      final Integer readTimeout = 100000;
+
       FileUtils.copyURLToFile(
-          ndctextZipUrl, new File(downloadedNpiZipFile.toFile().getAbsolutePath()), 100000, 100000);
+          ndctextZipUrl,
+          new File(downloadedNpiZipFile.toFile().getAbsolutePath()),
+          connectionTimeout,
+          readTimeout);
     }
 
     // unzip NPI file.  Zip file contains these files
