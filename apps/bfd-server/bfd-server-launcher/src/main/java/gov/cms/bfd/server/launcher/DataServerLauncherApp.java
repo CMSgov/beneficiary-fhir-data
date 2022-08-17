@@ -77,10 +77,11 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
-  /** MDC key for the http output size in bytes */
+  /** MDC key for the http output size in bytes. */
   public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
       "http_access_response_output_size_in_bytes";
 
+  /** The Jetty Server instance that will do most of our work. * */
   private static Server server;
 
   /**
@@ -317,7 +318,7 @@ public final class DataServerLauncherApp {
    */
   private static class BfdRequestLog extends CustomRequestLog {
     /**
-     * Construct a BFD Request Log
+     * Construct a BFD Request Log.
      *
      * @param accessLogFileName filename for the unstructured log 'access.log'
      * @param accessLogFormat format for the unstructured log 'access.log'

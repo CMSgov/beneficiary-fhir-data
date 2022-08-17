@@ -17,8 +17,10 @@ import gov.cms.bfd.model.rda.RdaMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
 import gov.cms.mpsm.rda.v1.mcs.McsAudit;
 import gov.cms.mpsm.rda.v1.mcs.McsAuditIndicator;
@@ -174,7 +176,14 @@ public class McsClaimTransformerTest {
     changeBuilder
         .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
         .setSeq(42)
-        .setClaim(claimBuilder.build());
+        .setClaim(claimBuilder.build())
+        .setSource(
+            RecordSource.newBuilder()
+                .setPhase("P1")
+                .setPhaseSeqNum(0)
+                .setExtractDate("1970-01-01")
+                .setTransmissionTimestamp("1970-01-01T00:00:00.000001Z")
+                .build());
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
@@ -1025,6 +1034,17 @@ public class McsClaimTransformerTest {
   // endregion McsDiagnosisCode
 
   // region McsDetail
+
+  /** Verifies that {@link RdaMcsDetail#idrDtlNumber} is initialized properly. */
+  @Test
+  public void testDetailIdrDtlNumber() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyUIntFieldToShortFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlNumber,
+            RdaMcsDetail::getIdrDtlNumber,
+            RdaMcsDetail.Fields.idrDtlNumber);
+  }
+
   @Test
   public void testDetailIdrDtlStatus() {
     new McsClaimTransformerTest.DetailFieldTester()

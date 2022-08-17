@@ -28,6 +28,9 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 
   @XmlAttribute private int sequenceId;
 
+  @XmlAttribute(name = "syntheticData", required = false)
+  private boolean syntheticData = false;
+
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
 
@@ -36,11 +39,17 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
-  public DataSetManifest(String timestampText, int sequenceId, List<DataSetManifestEntry> entries) {
+  public DataSetManifest(
+      String timestampText,
+      int sequenceId,
+      boolean syntheticData,
+      List<DataSetManifestEntry> entries) {
     this.timestampText = timestampText;
     this.sequenceId = sequenceId;
+    this.syntheticData = syntheticData;
     this.entries = entries;
     this.entries.forEach(entry -> entry.parentManifest = this);
   }
@@ -50,10 +59,15 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestamp the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
-  public DataSetManifest(Instant timestamp, int sequenceId, List<DataSetManifestEntry> entries) {
-    this(DateTimeFormatter.ISO_INSTANT.format(timestamp), sequenceId, entries);
+  public DataSetManifest(
+      Instant timestamp,
+      int sequenceId,
+      boolean syntheticData,
+      List<DataSetManifestEntry> entries) {
+    this(DateTimeFormatter.ISO_INSTANT.format(timestamp), sequenceId, syntheticData, entries);
   }
 
   /**
@@ -61,10 +75,15 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
-  public DataSetManifest(String timestampText, int sequenceId, DataSetManifestEntry... entries) {
-    this(timestampText, sequenceId, Arrays.asList(entries));
+  public DataSetManifest(
+      String timestampText,
+      int sequenceId,
+      boolean syntheticData,
+      DataSetManifestEntry... entries) {
+    this(timestampText, sequenceId, syntheticData, Arrays.asList(entries));
   }
 
   /**
@@ -72,10 +91,16 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestamp the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
-  public DataSetManifest(Instant timestamp, int sequenceId, DataSetManifestEntry... entries) {
-    this(DateTimeFormatter.ISO_INSTANT.format(timestamp), sequenceId, Arrays.asList(entries));
+  public DataSetManifest(
+      Instant timestamp, int sequenceId, boolean syntheticData, DataSetManifestEntry... entries) {
+    this(
+        DateTimeFormatter.ISO_INSTANT.format(timestamp),
+        sequenceId,
+        syntheticData,
+        Arrays.asList(entries));
   }
 
   /** This default constructor is required by JAX-B, and should not otherwise be used. */
@@ -114,6 +139,14 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
+   * @return the {@link boolean} denoting if the data is synthetic based on the {@link
+   *     DataSetManifest}
+   */
+  public boolean isSyntheticData() {
+    return syntheticData;
+  }
+
+  /**
    * @return a {@link DataSetManifestId} that models this {@link DataSetManifest}'s identity and
    *     ordering
    */
@@ -141,6 +174,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     builder.append(timestampText);
     builder.append(", sequenceId=");
     builder.append(sequenceId);
+    builder.append(", syntheticData=");
+    builder.append(syntheticData);
     builder.append(", entries=");
     builder.append(entries);
     builder.append("]");
@@ -159,6 +194,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 
     @XmlAttribute private final RifFileType type;
 
+    @XmlTransient private final String exportType;
+
     /**
      * Constructs a new {@link DataSetManifestEntry} instance.
      *
@@ -169,6 +206,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.parentManifest = null;
       this.name = name;
       this.type = type;
+      this.exportType = null;
     }
 
     /** This default constructor is required by JAX-B, and should not otherwise be used. */
@@ -176,6 +214,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     private DataSetManifestEntry() {
       this.name = null;
       this.type = null;
+      this.exportType = null;
     }
 
     /** @return the {@link DataSetManifest} that this {@link DataSetManifestEntry} is a part of */
@@ -244,6 +283,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * @param timestampText a {@link String} representation of the {@link
      *     DataSetManifest#getTimestamp()} value
      * @param sequenceId the {@link DataSetManifest#getSequenceId()} value
+     * @param syntheticData the {@link DataSetManifest#isSyntheticData()} value
      */
     private DataSetManifestId(String timestampText, int sequenceId) {
       this.timestampText = timestampText;

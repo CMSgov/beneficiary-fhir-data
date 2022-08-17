@@ -104,7 +104,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return Patient.class;
@@ -133,7 +133,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (patientId.getVersionIdPartAsLong() != null) {
       throw new IllegalArgumentException();
     }
-    Long beneficiaryId = Long.parseLong(patientId.getIdPart());
+    Long beneficiaryId = patientId.getIdPartAsLong();
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+	targetNamespace="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="dataSetManifest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="entry">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="type" type="xs:string" use="required" />
+            <xs:attribute name="exportType" type="xs:string" use="optional" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="timestamp" type="xs:dateTime" use="required" />
+      <xs:attribute name="sequenceId" type="xs:integer" use="required" />
+      <xs:attribute name="syntheticData" type="xs:boolean" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

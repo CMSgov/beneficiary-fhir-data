@@ -76,6 +76,11 @@
 		<!-- The version of Java that we'll use for everything. -->
 		<javaSourceVersion>11</javaSourceVersion>
 
+		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
+			they are reproducible bit-by-bit no matter when/where they are generated.
+			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+		<project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
+
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -83,39 +88,44 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.1.29</metrics.version>
-		<newrelic.version>0.5.0</newrelic.version>
+		<metrics.version>4.2.11</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.245</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.278</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
-		<hibernate.version>5.6.1.Final</hibernate.version>
-		<junit.version>5.8.2</junit.version>
+		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
+		but not all (in particular, entity-manager does not have a 6.0 version available yet).
+		Staying on latest 5.x version until all components have 6.0 versions available. -->
+		<hibernate.version>5.6.10.Final</hibernate.version>
+		<junit.version>5.9.0</junit.version>
 		<jackson.version>2.13.3</jackson.version>
-		<mockito.version>4.2.0</mockito.version>
-		<postgresql.version>42.2.20</postgresql.version>
-		<hsqldb.version>2.6.0</hsqldb.version>
-		<slf4j.version>1.7.7</slf4j.version>
-		<hikari.version>4.0.3</hikari.version>
+		<mockito.version>4.6.1</mockito.version>
+		<postgresql.version>42.4.1</postgresql.version>
+		<hsqldb.version>2.7.0</hsqldb.version>
+		<slf4j.version>1.7.36</slf4j.version>
+		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelicAgent.version>7.5.0</newrelicAgent.version>
-		<checkstyle.version>10.1</checkstyle.version>
+		<newrelic.agent.version>7.9.0</newrelic.agent.version>
+		<checkstyle.version>10.3.2</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
 		<logback.classic.version>1.2.11</logback.classic.version>
-		<postgres.driver.version>42.4.0</postgres.driver.version>
+		<zjsonpatch.version>0.4.12</zjsonpatch.version>
 
 		<!--  Dependencies required for org.apache.commons -->
 		<commons.lang3.version>3.12.0</commons.lang3.version>
-        <commons.csv.version>1.2</commons.csv.version>
-		<commons.io.version>2.7</commons.io.version>
-		<commons.collections4.version>4.1</commons.collections4.version>
-	
+		<commons.csv.version>1.9.0</commons.csv.version>
+		<commons.io.version>2.11.0</commons.io.version>
+		<commons.collections4.version>4.4</commons.collections4.version>
+		<commons-codec.version>1.15</commons-codec.version>
+		<hamcrest-library.version>2.2</hamcrest-library.version>
+		<awaitility.version>4.2.0</awaitility.version>
+		<lombok.version>1.18.24</lombok.version>
 
-        <!-- Dependencies required for connecting to a gRPC API -->
-        <grpc_java.version>1.47.0</grpc_java.version>
-        <protoc.version>3.21.2</protoc.version>
-        <protobuf.version>3.21.2</protobuf.version>
+		<!-- Dependencies required for connecting to a gRPC API -->
+		<grpc_java.version>1.48.1</grpc_java.version>
+		<protoc.version>3.21.2</protoc.version>
+		<protobuf.version>3.21.2</protobuf.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -140,7 +150,7 @@
 				<!-- The newrelic.jar javaagent dependency -->
 				<groupId>com.newrelic.agent.java</groupId>
 				<artifactId>newrelic-agent</artifactId>
-				<version>${newrelicAgent.version}</version>
+				<version>${newrelic.agent.version}</version>
 			</dependency>
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
@@ -228,10 +238,11 @@
 					Hibernate is used for that in our projects.) -->
 				<artifactId>hibernate-jpa-2.1-api</artifactId>
 				<groupId>org.hibernate.javax.persistence</groupId>
-				<version>1.0.0.Final</version>
+				<version>1.0.2.Final</version>
 			</dependency>
+
 			<dependency>
-				<!-- Hibernate's JPA implementation is used to manage most database usage 
+				<!-- Hibernate's JPA implementation is used to manage most database usage
 					in our applications. -->
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
@@ -259,6 +270,12 @@
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
+
+			<!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
+			jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
+			and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
+			Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
+			these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
@@ -279,14 +296,13 @@
 				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>${postgres.driver.version}</version>
+				<version>${postgresql.version}</version>
 			</dependency>
 			<dependency>
 				<!-- In-memory database that is used in some tests to speed things up. -->
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<!-- The 2.5.x series is the last to support Java 8. -->
-				<version>2.5.2</version>
+				<version>${hsqldb.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -294,7 +310,7 @@
 					for details. -->
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
-				<version>3.3.0</version>
+				<version>${hikari.version}</version>
 			</dependency>
 
 			<dependency>
@@ -315,7 +331,7 @@
 				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
 				 <groupId>org.projectlombok</groupId>
 				 <artifactId>lombok</artifactId>
-				 <version>1.18.20</version>
+				 <version>${lombok.version}</version>
 				 <scope>provided</scope>
 			 </dependency>
 
@@ -552,7 +568,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.2.2</version>
 					<configuration>
 						<!-- Add some extra information to the JAR manifests. Helpful for folks 
 							looking at a JAR, trying to figure out what it is. -->
@@ -567,7 +583,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -577,7 +593,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -637,6 +653,19 @@ checkJavaFormat
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<!-- This plugin configuration allows us to scan all of the pom files
+				 to find any dependencies that have newer versions available
+				 that are not alpha, beta, or other commonly used pre-release version tags.
+				 To invoke this plugin to find the out of data dependencies,
+				 run: "mvn versions:display-dependency-updates" from the apps folder. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.11.0</version>
+				<configuration>
+					<rulesUri>file://${project.basedir}/rules.xml</rulesUri>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -655,6 +684,8 @@ checkJavaFormat
 									<message>Undefined plugin versions can lead to un-reproducible
 										builds.</message>
 									<banTimestamps>false</banTimestamps>
+									<!-- Allow SNAPSHOT version of this plugin since we build it in our own project rather than pulling from a repository. -->
+									<unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin</unCheckedPluginList>
 								</requirePluginVersions>
 							</rules>
 						</configuration>
@@ -724,6 +755,13 @@ checkJavaFormat
 					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
 					<excludePackageNames>gov.cms.mpsm.rda.*;*.grpc.*</excludePackageNames>
 					<quiet>true</quiet>
+					<!-- This notimestamp option does not make our *-javadoc.jar files completely
+						reproducible, but the option is recommended by Maven for a reproducible
+						build in general. However, we are not using the javadocs in any of the war
+						and zip artifacts that we need to be reproducible.
+						See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
+					 -->
+					<notimestamp>true</notimestamp>
 				</configuration>
 				<executions>
 					<execution>

@@ -3,12 +3,25 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Professional and Non Clinician Diagnosis <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBClaimProfessionalAndNonClinicianDiagnosisType.html">
- * ValueSet: C4BB Claim Professional And Non Clinician Diagnosis Type</a>
+ * ValueSet: C4BB Claim Professional And Non Clinician Diagnosis Type</a>.
  */
 public enum C4BBClaimProfessionalAndNonClinicianDiagnosisType {
+  /**
+   * The single medical diagnosis that is most relevant to the patient's chief complaint or need for
+   * treatment.*
+   */
   PRINCIPAL,
+  /**
+   * Required when necessary to report additional diagnoses on professional and non-clinician
+   * claims. *
+   */
   SECONDARY;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
       case PRINCIPAL:
@@ -18,6 +31,11 @@ public enum C4BBClaimProfessionalAndNonClinicianDiagnosisType {
     }
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case PRINCIPAL:
@@ -29,6 +47,11 @@ public enum C4BBClaimProfessionalAndNonClinicianDiagnosisType {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case PRINCIPAL:
@@ -40,6 +63,11 @@ public enum C4BBClaimProfessionalAndNonClinicianDiagnosisType {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case PRINCIPAL:

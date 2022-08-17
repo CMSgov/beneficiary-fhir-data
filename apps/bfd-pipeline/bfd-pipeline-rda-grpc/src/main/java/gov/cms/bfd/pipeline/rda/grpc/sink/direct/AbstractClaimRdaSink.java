@@ -14,8 +14,8 @@ import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
@@ -248,6 +248,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       String apiVersion, TMessage change, List<DataTransformer.ErrorMessage> errors)
       throws IOException;
 
+  /**
+   * Updates the {@link RdaApiProgress} table with the sequence number for the most recently added
+   * claim of a given type.
+   *
+   * @param lastSequenceNumber The sequence number of the most recently added claim of a given type.
+   */
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
@@ -324,7 +330,16 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       throws DataTransformer.TransformationException;
 
   /**
-   * Uses {@link EntityManager#merge} to write each claim and its associated meta data to the
+   * Implementation specific method to count the number of expected inserts that will be used to
+   * load all the data into the database. Used for metrics and analysis.
+   *
+   * @param claim The claim data to be inserted
+   * @return The calculated number of expected insert statements needed for the claim data.
+   */
+  abstract int getInsertCount(TClaim claim);
+
+  /**
+   * Uses {@link EntityManager#merge} to write each claim and its associated metadata to the
    * database.
    *
    * @param maxSeq highest sequence number from claims in the collection
@@ -333,6 +348,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
     boolean commit = false;
     final Timer.Context timerContext = metrics.dbUpdateTime.time();
+    int insertCount = 0;
+
     try {
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
@@ -340,6 +357,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           var metaData = createMetaData(change);
           entityManager.merge(metaData);
           entityManager.merge(change.getClaim());
+          insertCount += getInsertCount(change.getClaim());
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
@@ -358,6 +376,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       entityManager.clear();
       timerContext.stop();
       metrics.dbBatchSize.update(changes.size());
+      metrics.insertCount.update(insertCount);
     }
   }
 
@@ -369,7 +388,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   private long maxSequenceInBatch(Collection<RdaChange<TClaim>> claims) {
     OptionalLong value = claims.stream().mapToLong(RdaChange::getSequenceNumber).max();
-    if (!value.isPresent()) {
+    if (value.isEmpty()) {
       // This should never happen! But if it does, we'll shout about it rather than throw an
       // exception
       logger.warn("processed an empty batch!");
@@ -425,9 +444,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
+    /** The number of insert statements executed */
+    private final Histogram insertCount;
 
     /**
-     * Initializes all of the metrics.
+     * Initializes all the metrics.
      *
      * @param klass used to derive metric names
      * @param appMetrics where to store the metrics
@@ -449,6 +470,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
+      insertCount = appMetrics.histogram(MetricRegistry.name(base, "insertCount"));
     }
 
     /**

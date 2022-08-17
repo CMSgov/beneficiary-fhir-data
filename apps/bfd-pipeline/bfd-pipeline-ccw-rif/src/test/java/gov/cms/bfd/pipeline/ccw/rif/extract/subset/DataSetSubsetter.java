@@ -198,7 +198,7 @@ public final class DataSetSubsetter {
         printerEntry.getValue().close();
       }
 
-      DataSetManifest manifest = new DataSetManifest(timestamp, 1, entries);
+      DataSetManifest manifest = new DataSetManifest(timestamp, 1, false, entries);
       JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
       Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
       FileWriter writer = new FileWriter(outputDirectory.resolve("1_manifest.xml").toFile());
