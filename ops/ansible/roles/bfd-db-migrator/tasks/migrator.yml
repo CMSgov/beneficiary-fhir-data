@@ -86,8 +86,8 @@
     src: "{{ item.path }}"
     dest: "{{ db_migrator_dir }}/aws_otel_java/aws-opentelemetry-agent.jar"
     remote_src: true
-    owner: "{{ db_migrator_dir }}"
-    group: "{{ db_migrator_dir }}"
+    owner: "{{ db_migrator_user }}"
+    group: "{{ db_migrator_user }}"
     mode: u=rw,g=r,o=r
   with_items:
     - "{{ find_opentelemetry_agent.files }}"

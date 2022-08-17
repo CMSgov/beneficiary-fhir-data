@@ -110,7 +110,7 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
   become: true
-  
+
 - name: Create AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray Directories
   file:
     path: "{{ item }}"
@@ -125,7 +125,7 @@
 - name: Find AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray JAR
   find:
     paths: "{{ data_server_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
-    pattern: aws-opentelemetry-agent.jar*.jar
+    pattern: aws-opentelemetry-agent*.jar
   register: find_opentelemetry_agent
 
 - name: Copy AWS Distro for OpenTelemetry Java Auto-Instrumentation and X-Ray  JAR
