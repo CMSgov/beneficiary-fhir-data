@@ -4,8 +4,8 @@ import json
 import os
 import time
 from abc import ABC, abstractmethod
-from dataclasses import Field, fields
-from functools import reduce
+from dataclasses import fields
+from functools import cmp_to_key, reduce
 from statistics import mean
 from typing import Any, Dict, List, Optional
 
@@ -113,8 +113,15 @@ class StatsFileLoader(StatsLoader):
             for stats in stats_list
             if stats.metadata and self.__verify_metadata(stats.metadata)
         ]
+        limited_stats = sorted(
+            verified_stats,
+            key=cmp_to_key(
+                lambda item1, item2: item1.metadata.timestamp - item2.metadata.timestamp  # type: ignore
+            ),
+            reverse=True
+        )[: self.stats_config.stats_compare_load_limit]
 
-        return _get_average_all_stats(verified_stats)
+        return _get_average_all_stats(limited_stats)
 
     def __load_stats_from_files(self, suffix: str = ".stats.json") -> List[AggregatedStats]:
         path = (
@@ -167,7 +174,9 @@ class StatsAthenaLoader(StatsLoader):
     def load_average(self) -> Optional[AggregatedStats]:
         query = (
             f'SELECT cast(tasks as JSON) FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
-            f"WHERE {self.__get_where_clause()}"
+            f"WHERE {self.__get_where_clause()} "
+            "ORDER BY metadata.timestamp DESC "
+            f"LIMIT {self.stats_config.stats_compare_load_limit}"
         )
 
         queried_stats = self.__get_stats_from_query(query)

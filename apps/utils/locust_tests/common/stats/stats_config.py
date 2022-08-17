@@ -72,6 +72,9 @@ class StatsConfiguration:
     """Indicates the type of performance stats comparison that will be done"""
     stats_compare_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
+    stats_compare_load_limit: Optional[int]
+    """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
+    comparisons"""
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
@@ -195,6 +198,18 @@ class StatsConfiguration:
             help="Specifies the tag that matching runs will be found under to compare against",
             dest="stats_compare_tag",
             env_var="LOCUST_STATS_COMPARE_TAG",
+        )
+        stats_group.add_argument(
+            "--stats-compare-load-limit",
+            type=int,
+            help=(
+                "Specifies the limit for number of previous stats to load when when doing"
+                " comparisons, defaults to 5. Used solely for limiting stats loaded during average"
+                " comparisons"
+            ),
+            dest="stats_compare_load_limit",
+            env_var="LOCUST_STATS_COMPARE_LOAD_LIMIT",
+            default=5,
         )
 
     @classmethod
