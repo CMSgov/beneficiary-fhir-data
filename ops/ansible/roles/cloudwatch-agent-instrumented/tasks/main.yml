@@ -14,8 +14,8 @@
 
 - name: cwagent | Copy OpenTelemetry agent configuration file
   template:
-    src: 'templates/cw-opentel.yaml.j2'
-    dest: "/tmp/cw-opentel-base.yaml"
+    src: 'templates/cwagent-opentel-base.yaml.j2'
+    dest: "/opt/aws/amazon-cloudwatch-agent/cwagent-otel-collector/etc/cwagent-otel-collector.d/cwagent-opentel-base.yaml"
     mode: u=rw,g=r,o=r
   become: true
   tags:
@@ -28,7 +28,7 @@
     - pre-ami
 
 - name: Configure and launch CloudWatch unified agent OpenTelemetry process
-  shell: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o file:/tmp/cw-opentel-base.yaml -s"
+  shell: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o file:/opt/aws/amazon-cloudwatch-agent/cwagent-otel-collector/etc/cwagent-otel-collector.d/cwagent-opentel-base.yaml -s"
   become: true
   tags:
     - pre-ami
