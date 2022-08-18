@@ -27,12 +27,12 @@ mappings:
       comment: 'Cutback Audit: This item is used to identify the audit number, which
         indicates the reason for denial.'
     - name: idrJAuditInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_j_audit_ind
       comment: 'Cutback Audit Indicator: The value in this field indicates if the
         number displayed in the J-AUDIT-NUM field is an audit or edit'
     - name: idrJAuditDisp
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_j_audit_disp
       comment: 'Cutback Audit Disposition: This item is used to identify the disposition
         of the J-AUDIT-NUM field.'

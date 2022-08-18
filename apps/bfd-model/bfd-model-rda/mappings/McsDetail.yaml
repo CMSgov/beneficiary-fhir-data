@@ -177,7 +177,7 @@ mappings:
       dbName: idr_k_pos_zip
       comment: 'POS Zip Code: This field carries the zip code portion of the POS address.'
     - name: idrTos
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_tos
       comment: 'Procedure Code - Type of Service: TOS: This is a one-character code
         that identifies the type of service designated to a particular procedure code
