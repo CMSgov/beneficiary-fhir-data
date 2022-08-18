@@ -59,4 +59,5 @@ exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.s
 	-javaagent:{{ data_pipeline_dir }}/aws_otel_java/aws-opentelemetry-agent.jar \
 	-Xshare:off \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
+	-Dotel.instrumentation.dropwizard-metrics.enabled=true \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"

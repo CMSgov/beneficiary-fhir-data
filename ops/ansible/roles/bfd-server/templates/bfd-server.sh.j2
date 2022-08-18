@@ -149,7 +149,7 @@ JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 # 3... 2... 1... launch!
 bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
-  -javaagent:{{ data_server_dir }}/aws_otel_java/aws-opentelemetry-agent.jar\
+  -javaagent:{{ data_server_dir }}/aws_otel_java/aws-opentelemetry-agent.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
   "-DbfdServer.db.url=${DB_URL}" \
@@ -159,4 +159,5 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
   "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
   "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
+  "-Dotel.instrumentation.dropwizard-metrics.enabled=true" \
   >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
