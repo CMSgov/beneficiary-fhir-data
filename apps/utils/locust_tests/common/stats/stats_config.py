@@ -73,10 +73,14 @@ class StatsConfiguration:
     stats_compare_load_limit: int
     """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
     comparisons"""
-    stats_compare_fail_threshold: float
+    stats_compare_total_threshold: float
     """Indicates the percent threshold where a performance statistic is considered to have exceeded
-    the baseline and is considered a failure, i.e. x is stats_compare_fail_threshold% of y, or
-    (x/y)*100.0 > stats_compare_fail_threshold"""
+    the baseline and is considered a failure for a given stat in the aggregated totals, i.e. x is
+    stats_compare_total_threshold% of y, or (x/y)*100.0 > stats_compare_total_threshold"""
+    stats_compare_task_threshold: float
+    """Indicates the percent threshold where a performance statistic is considered to have exceeded
+    the baseline and is considered a failure for a given Locust Task, i.e. x is
+    stats_compare_task_threshold% of y, or (x/y)*100.0 > stats_compare_task_threshold"""
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
@@ -214,15 +218,28 @@ class StatsConfiguration:
             default=5,
         )
         stats_group.add_argument(
-            "--stats-compare-fail-threshold",
+            "--stats-compare-total-threshold",
             type=float,
             help=(
                 "Specifies the percent threshold that a particular performance statistic must be of"
-                " the baseline to be considered a failure. Defaults to 200.0, i.e. 2x, 200%, etc."
+                " the baseline to be considered a failure for the aggregated total statistics."
+                " Defaults to 200.0, i.e. 2x, 200%, etc."
             ),
-            dest="stats_compare_fail_threshold",
-            env_var="LOCUST_STATS_COMPARE_FAIL_THRESHOLD",
+            dest="stats_compare_total_threshold",
+            env_var="LOCUST_STATS_COMPARE_TOTAL_THRESHOLD",
             default=200.0,
+        )
+        stats_group.add_argument(
+            "--stats-compare-task-threshold",
+            type=float,
+            help=(
+                "Specifies the percent threshold that a particular performance statistic must be of"
+                " the baseline to be considered a failure for a given, singular Locust Task."
+                " Defaults to 500.0, i.e. 5x, 500%, etc."
+            ),
+            dest="stats_compare_task_threshold",
+            env_var="LOCUST_STATS_COMPARE_TASK_THRESHOLD",
+            default=500.0,
         )
 
     @classmethod

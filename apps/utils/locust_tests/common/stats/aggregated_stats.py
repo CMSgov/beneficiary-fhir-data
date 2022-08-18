@@ -77,6 +77,7 @@ class StatsCollector(object):
                 tasks_names=[task.task_name for task in tasks],
                 locust_env=self.locust_env,
             ),
+            totals=TaskStats.from_stats_entry(self.locust_env.stats.total),
             tasks=tasks,
         )
 
@@ -300,19 +301,32 @@ class AggregatedStats:
     metadata necessary for comparison and storage"""
 
     metadata: Optional[StatsMetadata]
-    """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task statistics"""
+    """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task
+    statistics"""
+    totals: TaskStats
+    """The aggregated totals of performance statistics for every task ran"""
     tasks: List[TaskStats]
     """A list of TaskStats where each entry represents the performance statistics of each Task"""
 
-    def __post_init__(self):
+    def __init__(
+        self,
+        metadata: Optional[Union[StatsMetadata, Dict[str, Any]]],
+        totals: Union[TaskStats, Dict[str, Any]],
+        tasks: Union[List[TaskStats], List[Dict[str, Any]]],
+    ):
         # Support conversion directly from a nested dictionary, such as when loading from JSON files
         # or from Athena
-        try:
-            self.metadata = StatsMetadata(**self.metadata)  # type: ignore
-        except TypeError:
-            pass
+        if isinstance(metadata, dict):
+            self.metadata = StatsMetadata(**metadata)
+        else:
+            self.metadata = metadata
 
-        try:
-            self.tasks = [TaskStats(**task_dict) for task_dict in self.tasks]  # type: ignore
-        except TypeError:
-            pass
+        if isinstance(totals, dict):
+            self.totals = TaskStats(**totals)
+        else:
+            self.totals = totals
+
+        if all(isinstance(x, dict) for x in tasks):
+            self.tasks = [TaskStats(**task_dict) for task_dict in tasks]  # type: ignore
+        else:
+            self.tasks = tasks  # type: ignore

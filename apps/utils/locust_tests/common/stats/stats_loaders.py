@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import fields
 from functools import cmp_to_key, reduce
 from statistics import mean
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from gevent import monkey
 
@@ -118,7 +118,7 @@ class StatsFileLoader(StatsLoader):
             key=cmp_to_key(
                 lambda item1, item2: item1.metadata.timestamp - item2.metadata.timestamp  # type: ignore
             ),
-            reverse=True
+            reverse=True,
         )[: self.stats_config.stats_compare_load_limit]
 
         return _get_average_all_stats(limited_stats)
@@ -163,7 +163,8 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_previous(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
+            f"SELECT cast(totals as JSON), cast(tasks as JSON) "
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -173,7 +174,8 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_average(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
+            f"SELECT cast(totals as JSON), cast(tasks as JSON) "
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} "
             "ORDER BY metadata.timestamp DESC "
             f"LIMIT {self.stats_config.stats_compare_load_limit}"
@@ -187,8 +189,8 @@ class StatsAthenaLoader(StatsLoader):
         if not query_result:
             raise RuntimeError("Athena query result was empty or query failed")
 
-        raw_json_list = self.__get_raw_json_list(query_result)
-        return self.__stats_from_json_list(raw_json_list)
+        raw_json_data = self.__get_raw_json_data(query_result)
+        return self.__stats_from_json_data(raw_json_data)
 
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
         return self.client.start_query_execution(
@@ -251,19 +253,22 @@ class StatsAthenaLoader(StatsLoader):
 
         return " AND ".join(explicit_checks)
 
-    def __get_raw_json_list(self, query_result: List[Dict[str, List[Dict[str, str]]]]) -> List[str]:
-        # The data is returned as an array of dicts, each with a 'Data' key. These 'Data'
-        # dicts values are arrays of dicts with the key being the data type and the value being
-        # the actual returned result. The first dict in the array is the column names, and subsequent
-        # items are the data
+    def __get_raw_json_data(
+        self, query_result: List[Dict[str, List[Dict[str, str]]]]
+    ) -> List[Tuple[str, str]]:
+        # The data is returned as an array of dicts, each with a 'Data' key. These 'Data' dicts
+        # values are arrays of dicts with the key being the data type and the value being the actual
+        # returned result. The first 'Data' dict in the array is the column names, and subsequent
+        # 'Data' dict entries in the array are actual values
 
         # We make a few assumptions:
-        # 1. The first item is always the column names
+        # 1. The first 'Data' dict in the array is always the column names
         # 2. The data returned is always of the type `VarCharValue`
-        # 3. We are only retrieving a single column
-        return [item["Data"][0]["VarCharValue"] for item in query_result[1:]]
+        # 3. We are only retrieving two columns
+        raw_data = [item["Data"] for item in query_result[1:]]
+        return [(data[0]["VarCharValue"], data[1]["VarCharValue"]) for data in raw_data]
 
-    def __stats_from_json_list(self, raw_json_list: List[str]) -> List[AggregatedStats]:
+    def __stats_from_json_data(self, raw_json_data: List[Tuple[str, str]]) -> List[AggregatedStats]:
         # This is bad, but Athena does not have any way to sanely export structs in such
         # a way that we can use a standard parser (JSON, CSV, etc.); either we export in
         # their JSON-ish proprietary format and keep the names of fields but have no way
@@ -272,20 +277,22 @@ class StatsAthenaLoader(StatsLoader):
         # can use a JSON parser to parse a JSON array and we can assume stable order, we are
         # sticking with getting results as a JSON array and working from there.
 
-        # The serialization from a TaskStats array will give a list of values, so the serialized
+        # The serialization from will give a list of values, so the serialized
         # list will be a list of lists of lists (in inner to outer order:
         # TaskStats -> AggregatedStats -> List[AggregatedStats])
-        serialized_list: List[List[List[Any]]] = [
-            json.loads(json_str) for json_str in raw_json_list
+        serialized_tuples: List[Tuple[List[Any], List[List[Any]]]] = [
+            (json.loads(raw_json_totals), json.loads(raw_json_tasks))
+            for raw_json_totals, raw_json_tasks in raw_json_data
         ]
-        # The metadata is unnecessary here since by the time we've gotten here the metadata for each of the
-        # tasks we're serializing here has already been checked
+        # The metadata is unnecessary here since by the time we've gotten here the metadata for each
+        # of the tasks we're serializing here has already been checked
         return [
             AggregatedStats(
                 metadata=None,
-                tasks=[TaskStats.from_list(values_list) for values_list in agg_tasks_list],
+                totals=TaskStats.from_list(totals_as_list),
+                tasks=[TaskStats.from_list(task_vals_list) for task_vals_list in tasks_as_lists],
             )
-            for agg_tasks_list in serialized_list
+            for totals_as_list, tasks_as_lists in serialized_tuples
         ]
 
 
@@ -345,7 +352,12 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
 def _get_average_all_stats(all_stats: List[AggregatedStats]) -> Optional[AggregatedStats]:
     partitioned_task_stats = _bucket_tasks_by_name(all_stats)
     averaged_tasks = [_get_average_task_stats(tasks) for tasks in partitioned_task_stats.values()]
+    averaged_totals = _get_average_task_stats([stat.totals for stat in all_stats])
 
     # With an averaged aggregated stats there really is no such thing as metadata
     # since it's the result of many
-    return AggregatedStats(metadata=None, tasks=averaged_tasks) if averaged_tasks else None
+    return (
+        AggregatedStats(metadata=None, totals=averaged_totals, tasks=averaged_tasks)
+        if averaged_tasks
+        else None
+    )

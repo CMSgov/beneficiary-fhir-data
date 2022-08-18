@@ -3,7 +3,7 @@ of performance statistics against a previous set of statistics or an average of 
 previous statistics"""
 import logging
 from dataclasses import asdict, dataclass
-from typing import Dict, List, Set, Union
+from typing import Dict, List, Set, Tuple, Union
 
 from locust.env import Environment
 
@@ -58,27 +58,41 @@ def do_stats_comparison(
         return
 
     if previous_stats:
-        failed_stats_results = validate_aggregated_stats(
-            previous_stats, stats, stats_config.stats_compare_fail_threshold
+        totals_failed_stats, tasks_failed_stats = validate_aggregated_stats(
+            previous_stats,
+            stats,
+            stats_config.stats_compare_total_threshold,
+            stats_config.stats_compare_task_threshold,
         )
-        if not failed_stats_results:
+        if not tasks_failed_stats and not totals_failed_stats:
             logger.info(
                 'Comparison against %s stats under "%s" tag passed',
                 stats_config.stats_compare.value,
                 stats_config.stats_compare_tag,
             )
-        else:
-            # If we get here, that means some tasks have stats exceeding the threshold percent
-            # between the previous/average run and the current. Fail the test run, and log the
-            # failing tasks along with their relative stat percents
-            environment.process_exit_code = 1
+            return
+
+        # If we get here, that means some tasks or some totals stats have stats exceeding the
+        # threshold percent between the previous/average run and the current. Fail the test run, and
+        # log the failing tasks and/or totals along with their relative stat percents
+        environment.process_exit_code = 1
+        logger.error(
+            'Comparison against %s stats under "%s" tag failed:',
+            str(stats_config.stats_compare.value),
+            stats_config.stats_compare_tag,
+        )
+
+        if tasks_failed_stats:
             logger.error(
-                'Comparison against %s stats under "%s" tag failed; following tasks had stats that'
-                " exceeded %.2f%% of the baseline: %s",
-                stats_config.stats_compare.value,
-                stats_config.stats_compare_tag,
-                stats_config.stats_compare_fail_threshold,
-                failed_stats_results,
+                "Following tasks had stats that exceeded %.2f%% of the baseline: %s",
+                stats_config.stats_compare_task_threshold,
+                tasks_failed_stats,
+            )
+        if totals_failed_stats:
+            logger.error(
+                "Totals had stats that exceeded %.2f%% of the baseline: %s",
+                stats_config.stats_compare_total_threshold,
+                totals_failed_stats,
             )
     else:
         logger.warning(
@@ -151,8 +165,9 @@ def get_stats_above_threshold(
 def validate_aggregated_stats(
     previous: AggregatedStats,
     current: AggregatedStats,
-    threshold: float,
-) -> Dict[str, List[StatCompareResult]]:
+    totals_threshold: float,
+    task_threshold: float,
+) -> Tuple[List[StatCompareResult], Dict[str, List[StatCompareResult]]]:
     """Validates and compares the given AggregatedStats instances against each other, checking each of their common
     TaskStats and returning a dictionary of the name of those tasks that exceed the given threshold to the actual stats
     that failed
@@ -160,7 +175,8 @@ def validate_aggregated_stats(
     Args:
         previous (AggregatedStats): A previous run or average of all previous runs that will be compared against for the curren run
         current (AggregatedStats): The current run's stats
-        threshold (float, optional): A percent threshold that the current run's task's stats must not exceed/be worse than. Defaults to DEFAULT_PERCENT_THRESHOLD
+        total_threshold (float, optional): A percent threshold that the current run's total, aggregated stats must not exceed/be worse than.
+        task_threshold (float, optional): A percent threshold that the current run's task's stats must not exceed/be worse than.
 
     Returns:
         Dict[str, List[StatCompareResult]]: A dictionary of failing task names to the stats that failed along with their comparison results
@@ -175,11 +191,17 @@ def validate_aggregated_stats(
         cur_task = cur_tasks[task]
 
         deltas = get_stats_compare_results(prev_task, cur_task)
-        failed_deltas = get_stats_above_threshold(deltas, threshold)
+        failed_deltas = get_stats_above_threshold(deltas, task_threshold)
         if failed_deltas:
             failed_tasks_with_percents[task] = failed_deltas
 
-    return failed_tasks_with_percents
+    # Compare totals
+    prev_totals = previous.totals
+    cur_totals = current.totals
+    totals_results = get_stats_compare_results(prev_totals, cur_totals)
+    failed_totals = get_stats_above_threshold(totals_results, totals_threshold)
+
+    return (failed_totals, failed_tasks_with_percents)
 
 
 def _compute_results_list(
