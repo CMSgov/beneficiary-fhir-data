@@ -209,7 +209,7 @@ def handler(event, context):
     send_pipeline_signal(
         signal_queue_url=signal_queue_url,
         result=TestResult.SUCCESS if process.returncode == 0 else TestResult.FAILURE,
-        message="Pipeline run succeeded, check the CloudWatch logs for more information",
+        message="Pipeline run finished, check the CloudWatch logs for more information",
         context=context,
     )
 
