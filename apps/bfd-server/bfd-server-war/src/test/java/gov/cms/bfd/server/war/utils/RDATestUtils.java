@@ -165,37 +165,35 @@ public class RDATestUtils {
         Set.of(
             RdaFissProcCode.builder()
                 .dcn("123456")
-                .priority((short) 0)
+                .rdaPosition((short) 1)
                 .procCode("CODEABC")
                 .procFlag("FLAG")
                 .procDate(LocalDate.ofEpochDay(200))
-                .lastUpdated(Instant.ofEpochMilli(0))
                 .build(),
             RdaFissProcCode.builder()
                 .dcn("123456")
-                .priority((short) 1)
+                .rdaPosition((short) 2)
                 .procCode("CODECBA")
                 .procFlag("FLA2")
-                .lastUpdated(Instant.ofEpochMilli(0))
                 .build());
 
     Set<RdaFissDiagnosisCode> diagnosisCodes =
         Set.of(
             RdaFissDiagnosisCode.builder()
                 .dcn("123456")
-                .priority((short) 0)
+                .rdaPosition((short) 1)
                 .diagCd2("admitcd")
                 .diagPoaInd("Z")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn("123456")
-                .priority((short) 1)
+                .rdaPosition((short) 2)
                 .diagCd2("other")
                 .diagPoaInd("U")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn("123456")
-                .priority((short) 2)
+                .rdaPosition((short) 3)
                 .diagCd2("princcd")
                 .diagPoaInd("n")
                 .build());
@@ -204,7 +202,7 @@ public class RDATestUtils {
         Set.of(
             RdaFissPayer.builder()
                 .dcn("123456")
-                .priority((short) 0)
+                .rdaPosition((short) 1)
                 .beneFirstName("jim")
                 .beneMidInit("k")
                 .beneLastName("baker")
@@ -215,7 +213,7 @@ public class RDATestUtils {
                 .build(),
             RdaFissPayer.builder()
                 .dcn("123456")
-                .priority((short) 1)
+                .rdaPosition((short) 2)
                 .insuredName("BAKER  JIM  K")
                 .payerType(RdaFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
@@ -264,30 +262,29 @@ public class RDATestUtils {
         Set.of(
             RdaFissProcCode.builder()
                 .dcn("123457")
-                .priority((short) 0)
+                .rdaPosition((short) 1)
                 .procCode("CODEABD")
                 .procFlag("FLAC")
                 .procDate(LocalDate.ofEpochDay(211))
-                .lastUpdated(Instant.ofEpochMilli(5000))
                 .build());
 
     Set<RdaFissDiagnosisCode> diagnosisCodes =
         Set.of(
             RdaFissDiagnosisCode.builder()
                 .dcn("123457")
-                .priority((short) 0)
+                .rdaPosition((short) 1)
                 .diagCd2("princcc")
                 .diagPoaInd("Y")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn("123457")
-                .priority((short) 1)
+                .rdaPosition((short) 2)
                 .diagCd2("other2")
                 .diagPoaInd("w")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn("123457")
-                .priority((short) 2)
+                .rdaPosition((short) 3)
                 .diagCd2("admitcc")
                 .diagPoaInd("1")
                 .build());
@@ -296,7 +293,7 @@ public class RDATestUtils {
         Set.of(
             RdaFissPayer.builder()
                 .dcn("123457")
-                .priority((short) 0)
+                .rdaPosition((short) 1)
                 .beneFirstName("alice")
                 .beneMidInit("r")
                 .beneLastName("smith")
@@ -307,7 +304,7 @@ public class RDATestUtils {
                 .build(),
             RdaFissPayer.builder()
                 .dcn("123457")
-                .priority((short) 1)
+                .rdaPosition((short) 2)
                 .insuredName("SMITH  ALICE  R")
                 .payerType(RdaFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
@@ -364,14 +361,14 @@ public class RDATestUtils {
     Set<RdaMcsDetail> procCodes =
         Set.of(
             RdaMcsDetail.builder()
-                .priority((short) 0)
+                .idrDtlNumber((short) 1)
                 .idrClmHdIcn("654321")
                 .idrDtlToDate(LocalDate.ofEpochDay(208))
                 .idrProcCode("FDSAE")
                 .idrModOne("A")
                 .build(),
             RdaMcsDetail.builder()
-                .priority((short) 1)
+                .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654321")
                 .idrProcCode("FDAAA")
                 .idrModTwo("B")
@@ -381,10 +378,8 @@ public class RDATestUtils {
 
     claim.setDiagCodes(
         Set.of(
-            new RdaMcsDiagnosisCode(
-                "654321", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
-            new RdaMcsDiagnosisCode(
-                "654321", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+            new RdaMcsDiagnosisCode("654321", (short) 1, "0", "HF3IJIF"),
+            new RdaMcsDiagnosisCode("654321", (short) 2, "1", "HF3IJIG")));
 
     return claim;
   }
@@ -434,14 +429,14 @@ public class RDATestUtils {
     Set<RdaMcsDetail> procCodes =
         Set.of(
             RdaMcsDetail.builder()
-                .priority((short) 0)
+                .idrDtlNumber((short) 1)
                 .idrClmHdIcn("654323")
                 .idrDtlToDate(LocalDate.ofEpochDay(208))
                 .idrProcCode("FDSAE")
                 .idrModOne("A")
                 .build(),
             RdaMcsDetail.builder()
-                .priority((short) 1)
+                .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654323")
                 .idrProcCode("FDAAA")
                 .idrModTwo("B")
@@ -451,10 +446,8 @@ public class RDATestUtils {
 
     claim.setDiagCodes(
         Set.of(
-            new RdaMcsDiagnosisCode(
-                "654323", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
-            new RdaMcsDiagnosisCode(
-                "654323", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+            new RdaMcsDiagnosisCode("654323", (short) 1, "0", "HF3IJIF"),
+            new RdaMcsDiagnosisCode("654323", (short) 2, "1", "HF3IJIG")));
 
     return claim;
   }
