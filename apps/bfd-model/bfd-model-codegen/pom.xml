@@ -16,6 +16,10 @@
 		classes and parsing code based on field layouts defined in Excel.
 	</description>
 
+	<properties>
+		<auto-service.version>1.0.1</auto-service.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<!-- The annotations are in a separate project, to avoid forcing all of 
@@ -37,7 +41,7 @@
 				annotated with `@AutoService`. -->
 			<groupId>com.google.auto.service</groupId>
 			<artifactId>auto-service</artifactId>
-			<version>1.0-rc3</version>
+			<version>${auto-service.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -49,7 +53,7 @@
 			<!-- Makes programmatically generating Java sources much simpler. -->
 			<groupId>com.squareup</groupId>
 			<artifactId>javapoet</artifactId>
-			<version>1.9.0</version>
+			<version>${javapoet.version}</version>
 		</dependency>
 
 		<dependency>

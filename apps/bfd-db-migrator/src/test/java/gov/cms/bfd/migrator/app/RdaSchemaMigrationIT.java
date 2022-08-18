@@ -42,7 +42,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.tool.schema.Action;
 import org.junit.jupiter.api.AfterAll;
@@ -81,7 +81,7 @@ public class RdaSchemaMigrationIT {
 
     // Await start/finish of application
     try {
-      Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(
           "Migration application failed to start within timeout, STDOUT:\n"
