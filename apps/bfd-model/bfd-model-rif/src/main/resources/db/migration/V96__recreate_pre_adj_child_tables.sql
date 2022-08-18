@@ -21,7 +21,7 @@ alter table rda.claim_message_meta_data ${logic.alter-rename-column} received_da
  */
 CREATE TABLE rda.fiss_audit_trails (
    dcn varchar(23) NOT NULL,
-   badt_status char(1),
+   badt_status varchar(1),
    badt_loc varchar(5),
    badt_oper_id varchar(9),
    badt_reas varchar(5),
@@ -117,8 +117,8 @@ CREATE TABLE rda.mcs_audits (
     idr_clm_hd_icn varchar(15) NOT NULL,
     rda_position smallint NOT NULL,
     idr_j_audit_num int,
-    idr_j_audit_ind char(1),
-    idr_j_audit_disp char(1),
+    idr_j_audit_ind varchar(1),
+    idr_j_audit_disp varchar(1),
     CONSTRAINT mcs_audits_key PRIMARY KEY (idr_clm_hd_icn, rda_position),
     CONSTRAINT mcs_audits_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );
@@ -147,7 +147,7 @@ CREATE TABLE rda.mcs_details (
      idr_k_pos_city varchar(30),
      idr_k_pos_state varchar(2),
      idr_k_pos_zip varchar(15),
-     idr_tos char(1),
+     idr_tos varchar(1),
      idr_two_digit_pos varchar(2),
      idr_dtl_rend_type varchar(2),
      idr_dtl_rend_spec varchar(2),
@@ -191,7 +191,7 @@ CREATE TABLE rda.mcs_locations (
    idr_loc_clerk varchar(4),
    idr_loc_code varchar(3),
    idr_loc_date date,
-   idr_loc_actv_code char(1),
+   idr_loc_actv_code varchar(1),
    CONSTRAINT mcs_locations_key PRIMARY KEY (idr_clm_hd_icn, rda_position),
    CONSTRAINT mcs_locations_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );

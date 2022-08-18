@@ -255,9 +255,9 @@ public class RdaSchemaMigrationIT {
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
 
-    assertEquals("0:F,1:G", summarizeFissProcCodes(resultClaim));
-    assertEquals("0:Q,1:R", summarizeFissDiagCodes(resultClaim));
-    assertEquals("0:BeneZ:1.23,1:Insured:4.56", summarizeFissPayers(resultClaim));
+    assertEquals("1:F,2:G", summarizeFissProcCodes(resultClaim));
+    assertEquals("1:Q,2:R", summarizeFissDiagCodes(resultClaim));
+    assertEquals("1:BeneZ:1.23,2:Insured:4.56", summarizeFissPayers(resultClaim));
 
     // Remove a procCode and diagCode and modify the remaining ones, update, and read back to verify
     // all records updated correctly.
@@ -275,9 +275,9 @@ public class RdaSchemaMigrationIT {
             .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
             .getResultList()
             .get(0);
-    assertEquals("0:H", summarizeFissProcCodes(resultClaim));
-    assertEquals("1:S", summarizeFissDiagCodes(resultClaim));
-    assertEquals("1:Insured:7.89", summarizeFissPayers(resultClaim));
+    assertEquals("1:H", summarizeFissProcCodes(resultClaim));
+    assertEquals("2:S", summarizeFissDiagCodes(resultClaim));
+    assertEquals("2:Insured:7.89", summarizeFissPayers(resultClaim));
   }
 
   /**
@@ -317,8 +317,8 @@ public class RdaSchemaMigrationIT {
         entityManager.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
     assertEquals(1, resultClaims.size());
     RdaMcsClaim resultClaim = resultClaims.get(0);
-    assertEquals("0:P,1:Q,2:R", summarizeMcsDetails(resultClaim));
-    assertEquals("0:T:0,1:U:1,2:V:2", summarizeMcsDiagCodes(resultClaim));
+    assertEquals("1:P,2:Q,3:R", summarizeMcsDetails(resultClaim));
+    assertEquals("1:T:1,2:U:2,3:V:3", summarizeMcsDiagCodes(resultClaim));
 
     // Remove a detail and diagCode and modify the remaining ones, update, and read back to verify
     // all records updated correctly.
@@ -336,8 +336,8 @@ public class RdaSchemaMigrationIT {
     assertEquals(1, resultClaims.size());
     resultClaim = resultClaims.get(0);
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
-    assertEquals("0:P,2:S", summarizeMcsDetails(resultClaim));
-    assertEquals("0:W:0,1:U:1", summarizeMcsDiagCodes(resultClaim));
+    assertEquals("1:P,3:S", summarizeMcsDetails(resultClaim));
+    assertEquals("1:W:1,2:U:2", summarizeMcsDiagCodes(resultClaim));
   }
 
   /** Ensure that the MBI cache relationships work properly in FISS claim entities. */
