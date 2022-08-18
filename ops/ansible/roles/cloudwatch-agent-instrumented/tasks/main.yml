@@ -14,8 +14,8 @@
 
 - name: cwagent | Copy OpenTelemetry agent configuration file
   template:
-    src: 'templates/cw-opentel.json.j2'
-    dest: "/tmp/cw-opentel-base.json"
+    src: 'templates/cw-opentel.yaml.j2'
+    dest: "/tmp/cw-opentel-base.yaml"
     mode: u=rw,g=r,o=r
   become: true
   tags:
