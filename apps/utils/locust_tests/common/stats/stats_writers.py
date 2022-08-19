@@ -43,13 +43,16 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
         raise ValueError("AggregatedStats instance must have metadata to write to file")
 
     stats_hash = stats.metadata.hash
-    path = stats_config.stats_store_file_path or ""
+    parent_path = stats_config.stats_store_file_path or "./"
+    full_path = os.path.join(parent_path, f"{int(time.time())}-{stats_hash}.stats.json")
     with open(
-        os.path.join(path, f"{int(time.time())}-{stats_hash}.stats.json"),
+        full_path,
         mode="x",
         encoding="utf-8",
     ) as json_file:
         json_file.write(json.dumps(asdict(stats), indent=4))
+
+    logging.getLogger().info("Wrote aggregated performance statistics to file path: %s", full_path)
 
 
 def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
@@ -69,14 +72,10 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
         raise ValueError("--stats-store-s3-bucket must be specified")
 
     if not stats_config.stats_store_s3_database:
-        raise ValueError(
-            "--stats-store-s3-database must be specified"
-        )
+        raise ValueError("--stats-store-s3-database must be specified")
 
     if not stats_config.stats_store_s3_table:
-        raise ValueError(
-            "--stats-store-s3-table must be specified"
-        )
+        raise ValueError("--stats-store-s3-table must be specified")
 
     stats_hash = stats.metadata.hash
     s3_path = "/".join(
@@ -93,6 +92,11 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
             Bucket=stats_config.stats_store_s3_bucket, Key=s3_path, Body=json.dumps(asdict(stats))
         )
 
+        logging.getLogger().info(
+            'Wrote aggregated performance statistics to s3 bucket "%s" at path: %s',
+            stats_config.stats_store_s3_bucket,
+            s3_path,
+        )
         if not put_response:
             raise RuntimeError(
                 f"Storing stats to {s3_path} failed as an invalid response from AWS was returned"
