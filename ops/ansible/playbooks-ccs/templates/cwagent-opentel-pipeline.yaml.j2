@@ -22,10 +22,11 @@ processors:
 exporters:
   awsxray:
   awsemf:
-    log_group_name: '{{ env }}/AOTLogGroup'
-    log_stream_name: '{{ env }}/AOTLogStream'
-    namespace: '{{ env }}/AOTMetricNS'
+    log_group_name: 'bfd-{{ env }}/bfd-pipeline/AOTLogGroup'
+    log_stream_name: 'bfd-{{ env }}/bfd-pipeline/AOTLogStream'
+    namespace: 'bfd-{{ env }}/bfd-pipeline/AOTMetricNS'
     dimension_rollup_option: 1
+    
 service:
   pipelines:
     traces:
