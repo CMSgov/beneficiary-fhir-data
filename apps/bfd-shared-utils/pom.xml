@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
 			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>${newrelic.version}</version>
+			<version>${dropwizard-metrics-newrelic.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>

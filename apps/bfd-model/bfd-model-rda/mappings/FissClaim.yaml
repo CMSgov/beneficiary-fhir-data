@@ -1,0 +1,612 @@
+mappings:
+- id: FissClaim
+  messageClassName: gov.cms.mpsm.rda.v1.fiss.FissClaim
+  entityClassName: gov.cms.bfd.model.rda.RdaFissClaim
+  transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.FissClaimParser
+  table:
+    name: fiss_claims
+    schema: rda
+    primaryKeyColumns:
+    - dcn
+    additionalFieldNames:
+    - name: mbi
+    columns:
+    - name: dcn
+      sqlType: varchar(23)
+      nullable: false
+      comment: 'Document Control Number: This field is the identification number for
+        a claim. It provides a reference number for the control and monitoring of
+        specific claims, and to differentiate between claims for the beneficiary;
+        it may be used to access data for the record depending on the copybook it
+        used for. This is a unique field created by the system.'
+    - name: sequenceNumber
+      sqlType: bigint
+      nullable: false
+      dbName: sequence_number
+    - name: hicNo
+      sqlType: varchar(12)
+      nullable: false
+      dbName: hic_no
+      comment: 'Health Insurance Claim Number: This field identifies the patient/beneficiary
+        number associated with a claim record, which is assigned to the beneficiary
+        by the Centers for Medicare and Medicaid Services (CMS), and may be used to
+        access data for the record depending on the copybook it is used in.'
+    - name: currStatus
+      sqlType: varchar(1)
+      javaType: char
+      nullable: false
+      dbName: curr_status
+      comment: 'Current Status: This field identifies the current condition of the
+        claim (paid, reject, deny, etc.); for the record depending on the copybook
+        it is used in.'
+    - name: currLoc1
+      sqlType: varchar(1)
+      javaType: char
+      nullable: false
+      dbName: curr_loc1
+    - name: currLoc2
+      sqlType: varchar(5)
+      nullable: false
+      dbName: curr_loc2
+    - name: provStateCd
+      sqlType: varchar(2)
+      dbName: prov_state_cd
+      comment: 'Provider State Code: This field contains the locality state code of
+        the provider portion of the provider identification.'
+    - name: provTypFacilCd
+      sqlType: varchar(1)
+      dbName: prov_typ_facil_cd
+      comment: 'Provider Type Facility Code: This field is the first position within
+        the Provider Identification group level field, it identifies the provider
+        facility type code.'
+    - name: provEmerInd
+      sqlType: varchar(1)
+      dbName: prov_emer_ind
+      comment: 'Provider Emergency Indicator: This field is the 4th position of the
+        Provider Identification group level field, it identifies the code indicating
+        the priority of the admission.'
+    - name: provDeptId
+      sqlType: varchar(3)
+      dbName: prov_dept_id
+      comment: 'Provider Department Identification: This field is the 7th through
+        9th positions of the Provider Identification group level field, indicating
+        the department identification of the provider.'
+    - name: medaProvId
+      sqlType: varchar(13)
+      comment: 'Medicare Provider ID: This field identifies the Medicare Provider
+        number as assigned by CMS for identification of the provider rendering Medicare
+        services.'
+      dbName: meda_prov_id
+    - name: medaProv_6
+      sqlType: varchar(6)
+      dbName: meda_prov_6
+      comment: 'Medicare Provider Number 1-6: This group level field contains the
+        locality state code and the identification number of the provider.'
+    - name: totalChargeAmount
+      sqlType: decimal(11,2)
+      dbName: total_charge_amount
+      comment: 'Total Charge Amount: This field identifies the total billed charges
+        for the claims in the indicated bill category.'
+    - name: receivedDate
+      sqlType: date
+      dbName: received_date
+    - name: currTranDate
+      sqlType: date
+      dbName: curr_tran_date
+    - name: admitDiagCode
+      sqlType: varchar(7)
+      dbName: admit_diag_code
+    - name: principleDiag
+      sqlType: varchar(7)
+      dbName: principle_diag
+      comment: 'Principal Diagnosis Code: This field identifies the ICD-9-CM code
+        relating to the condition established after study to be chiefly responsible
+        for treatment identified in the claim; for the record depending on the copybook
+        it is used in.'
+    - name: npiNumber
+      sqlType: varchar(10)
+      dbName: npi_number
+      comment: 'National Provider Identification (NPI) Number: This field contains
+        the number as assigned by the Centers for Medicare and Medicaid Services (CMS)
+        and is used to identify health plans, providers, and clearinghouses for the
+        copybook it is used in, and may be used to access data for the record. The
+        NPI, which contains no embedded information about the health care provider
+        it identifies, never changes. It may be deactivated and then reactivated,
+        but it does not expire. Individual providers will be assigned one NPI number
+        and organizations will be assigned one NPI number; however, organizations
+        may define themselves as having subparts and receive multiple NPIs. This field
+        may be used to Cross walk to the Online Survey Certification and Reporting
+        System (OSCAR) number.'
+    - name: fedTaxNumber
+      sqlType: varchar(10)
+      dbName: fed_tax_number
+    - name: lastUpdated
+      sqlType: timestamp with time zone
+      dbName: last_updated
+    - name: pracLocAddr1
+      sqlType: varchar(max)
+      dbName: prac_loc_addr1
+      comment: 'Practice Location Address 1: This field identifies the first address
+        of the Provider practice hospital location extracted from the Provider Enrollment
+        Chain and Ownership System (PECOS) file.'
+    - name: pracLocAddr2
+      sqlType: varchar(max)
+      dbName: prac_loc_addr2
+      comment: 'Practice Location Address 2: This field identifies the second address
+        of the Provider practice hospital location extracted from the Provider Enrollment
+        Chain and Ownership System (PECOS) file.'
+    - name: pracLocCity
+      sqlType: varchar(max)
+      dbName: prac_loc_city
+      comment: 'Practice Location City: This field identifies the city address of
+        the Provider practice hospital location extracted from the Provider Enrollment
+        Chain and Ownership System (PECOS) file.'
+    - name: pracLocState
+      sqlType: varchar(2)
+      dbName: prac_loc_state
+      comment: 'Practice Location State: This field identifies the state address of
+        the Provider practice hospital location extracted from the Provider Enrollment
+        Chain and Ownership System (PECOS) file.'
+    - name: pracLocZip
+      sqlType: varchar(15)
+      dbName: prac_loc_zip
+      comment: 'Practice Location Zip: This field identifies the zip code address
+        of the Provider practice hospital location extracted from the Provider Enrollment
+        Chain and Ownership System (PECOS) file.'
+    - name: stmtCovFromDate
+      sqlType: date
+      dbName: stmt_cov_from_date
+    - name: stmtCovToDate
+      sqlType: date
+      dbName: stmt_cov_to_date
+    - name: lobCd
+      sqlType: varchar(1)
+      dbName: lob_cd
+      comment: 'Location of Bill Code: This field indicates the type of facility of
+        the corresponding Bill Type Code group field.'
+    - name: servTypeCdMapping
+      enumType: ServTypeCdMapping
+      sqlType: varchar(20)
+      dbName: serv_type_cd_mapping
+    - name: servTypeCd
+      sqlType: varchar(1)
+      dbName: serv_type_cd
+    - name: freqCd
+      sqlType: varchar(1)
+      dbName: freq_cd
+      comment: 'Bill Frequency: This field contains the frequency code indicating
+        the adjustment type. This is the last position of the Bill Type Code group
+        field.'
+    - name: billTypCd
+      sqlType: varchar(3)
+      dbName: bill_typ_cd
+      comment: 'Billing Type Code: This field is the group level name of the data
+        containing the type of facility, bill classification, and frequency of the
+        claim in a particular period of care.'
+    - name: apiSource
+      sqlType: varchar(24)
+      comment: String specifying the source of the data contained in this record.
+        Generally this will be the version string returned by the RDA API server but
+        when populating data from mock server it will also include information about
+        the mode the server was running in.
+      dbName: api_source
+    - name: rejectCd
+      sqlType: varchar(5)
+      comment: 'Reject Code: This field contains the reason code that identifies why
+        the claim is being denied; for the record depending on the copybook it is
+        used in.'
+      dbName: reject_cd
+    - name: fullPartDenInd
+      sqlType: varchar(1)
+      comment: 'Fully or Partially Denied Indicator: This is a field that indicates
+        whether a claim was fully or partially denied; for the record depending on
+        the copybook it is used in.'
+      dbName: full_part_den_ind
+    - name: nonPayInd
+      sqlType: varchar(2)
+      comment: 'Non-Pay Code Indicator: This field identifies the reason for Medicare''s
+        decision not to make payment. The code had been expanded from one to two position
+        field, and the second position can be a blank.'
+      dbName: non_pay_ind
+    - name: xrefDcnNbr
+      sqlType: varchar(23)
+      comment: 'Cross-reference Document Control Number: This field is the identification
+        number of the claim to be adjusted. This is only used on cancel and adjustment
+        transactions. It provides a cross-reference number for the control and monitoring
+        of specific claims, and to differentiate between claims for the beneficiary.
+        This is a unique field created by the system.'
+      dbName: xref_dcn_nbr
+    - name: adjReqCd
+      sqlType: char(1)
+      comment: 'Adjustment Requestor Identification: This field identifies the entity
+        responsible for the origin of the claim adjustment'
+      dbName: adj_req_cd
+    - name: adjReasCd
+      sqlType: varchar(2)
+      comment: 'Adjustment Reason Code: This field identifies the type of adjustment
+        being performed on the claim. For automated claims, the system sets this field.
+        For manual adjustments, the employee enters this field.'
+      dbName: adj_reas_cd
+    - name: cancelXrefDcn
+      sqlType: varchar(23)
+      comment: 'Cancel Cross-reference Document Control Number: This field is the
+        identification number of the canceled claim and is only used on cancel and
+        adjustment transactions. It provides a cross-reference number for the control
+        and monitoring of specific claims, and to differentiate between claims for
+        the beneficiary. This is a unique field created by the system when a match
+        is found during the re-imaging process and is located on claim page 2 as the
+        AD.DCN.'
+      dbName: cancel_xref_dcn
+    - name: cancelDate
+      sqlType: date
+      comment: Cancel Date
+      dbName: cancel_date
+    - name: cancAdjCd
+      sqlType: char(1)
+      comment: 'Cancel Adjustment Code: This field identifies the reason for a cancel
+        without a corresponding repayment.'
+      dbName: canc_adj_cd
+    - name: originalXrefDcn
+      sqlType: varchar(23)
+      comment: 'Original Cross-Reference Document Control Number: This field identifies
+        an internal field containing the original XREF DCN found on claim page 6.'
+      dbName: original_xref_dcn
+    - name: paidDt
+      sqlType: date
+      comment: Paid Date
+      dbName: paid_dt
+    - name: admDate
+      sqlType: date
+      comment: Admission Date
+      dbName: adm_date
+    - name: admSource
+      sqlType: char(1)
+      comment: 'Source of Admission: This field identifies the way a patient was referred
+        to the hospital for admission.'
+      dbName: adm_source
+    - name: primaryPayerCode
+      sqlType: char(1)
+      comment: 'Primary Payer Code: This field identifies the primary payer as qualified
+        by the payer. For example: When a ''Z'' is entered as the primary payer code
+        identifying Medicare as a payer, and the payer name Medicare must be entered
+        as well.'
+      dbName: primary_payer_code
+    - name: attendPhysId
+      sqlType: varchar(16)
+      comment: Attending Physician NPI
+      dbName: attend_phys_id
+    - name: attendPhysLname
+      sqlType: varchar(17)
+      comment: 'Attending Physician Last Name: This field identifies the last name
+        of the attending physician.'
+      dbName: attend_phys_lname
+    - name: attendPhysFname
+      sqlType: varchar(18)
+      comment: 'Attending Physician First Name: This field identifies the first name
+        of the attending physician.'
+      dbName: attend_phys_fname
+    - name: attendPhysMint
+      sqlType: varchar(1)
+      comment: 'Attending Physician Middle Initial: This field identifies the middle
+        initial of the attending physician.'
+      dbName: attend_phys_mint
+    - name: attendPhysFlag
+      sqlType: char(1)
+      comment: 'Attending Physician Flag: This field identifies whether an attending
+        physician identification number is present.'
+      dbName: attend_phys_flag
+    - name: operatingPhysId
+      sqlType: varchar(16)
+      comment: Operating Physician NPI
+      dbName: operating_phys_id
+    - name: operPhysLname
+      sqlType: varchar(17)
+      comment: 'Operating Physician Last Name: This field identifies the last name
+        of the operating physician.'
+      dbName: oper_phys_lname
+    - name: operPhysFname
+      sqlType: varchar(18)
+      comment: 'Operating Physician First Name: This field identifies the first name
+        of the operating physician.'
+      dbName: oper_phys_fname
+    - name: operPhysMint
+      sqlType: varchar(1)
+      comment: 'Operating Physician Middle Initial: This field identifies the middle
+        initial of the operating physician.'
+      dbName: oper_phys_mint
+    - name: operPhysFlag
+      sqlType: char(1)
+      comment: 'Operating Physician Flag: This field identifies whether an operating
+        physician identification number is present.'
+      dbName: oper_phys_flag
+    - name: othPhysId
+      sqlType: varchar(16)
+      comment: Other Physician NPI
+      dbName: oth_phys_id
+    - name: othPhysLname
+      sqlType: varchar(17)
+      comment: 'Other Physician Last Name: This field identifies the last name of
+        the assisting licensed physician.'
+      dbName: oth_phys_lname
+    - name: othPhysFname
+      sqlType: varchar(18)
+      comment: 'Other Physician First Name: This field identifies the first name of
+        the assisting licensed physician.'
+      dbName: oth_phys_fname
+    - name: othPhysMint
+      sqlType: varchar(1)
+      comment: 'Other Physician Middle Initial: This field identifies the middle initial
+        of the assisting licensed physician.'
+      dbName: oth_phys_mint
+    - name: othPhysFlag
+      sqlType: char(1)
+      comment: 'Other Physician Flag: This field identifies whether an assisting licensed
+        physician identification number is present.'
+      dbName: oth_phys_flag
+    - name: xrefHicNbr
+      sqlType: varchar(12)
+      comment: 'Cross-Reference Health Insurance Claim Number: This field identifies
+        an internal field used to hold the original HIC number when a cross-reference
+        HIC is utilized.'
+      dbName: xref_hic_nbr
+    - name: procNewHicInd
+      sqlType: char(1)
+      comment: 'Process new Health Insurance Claim Number: This field identifies that
+        an entry is required in this field when the HIC number is incorrect on the
+        claim that is being entered.'
+      dbName: proc_new_hic_ind
+    - name: newHic
+      sqlType: varchar(12)
+      comment: 'New Health Insurance Claim Number: This field identifies the correct
+        HIC number to be entered, when a Y has been entered in the Process New Health
+        Insurance Claim field. The system processes the claim based on this HIC number
+        entered and establishes a Beneficiary File for this new HIC number.'
+      dbName: new_hic
+    - name: reposInd
+      sqlType: char(1)
+      comment: 'Repository Indicator: If the claim is submitted electronically and
+        the submitted subscriber primary identifier has been moved to the repository
+        HIC field, this field indicates this move was made.'
+      dbName: repos_ind
+    - name: reposHic
+      sqlType: varchar(12)
+      comment: 'Repository HIC: If the claim is submitted electronically, this field
+        identifies the submitted subscriber primary identifier. This value may or
+        may not be the beneficiary''s valid HIC number.'
+      dbName: repos_hic
+    - name: mbiSubmBeneInd
+      sqlType: char(1)
+      comment: 'Health Insurance Claim (HIC) Number or Medicare Beneficiary Identify
+        (MBI): This field describes the HIC or MBI Beneficiary indicator.'
+      dbName: mbi_subm_bene_ind
+    - name: adjMbiInd
+      sqlType: char(1)
+      comment: 'Adjustment Medicare Beneficiary Identifier (MBI) Indicator: This field
+        identifies the adjustment/cancel claim that was submitted with a Health Insurance
+        Claim (HIC) Number or MBI number.'
+      dbName: adj_mbi_ind
+    - name: adjMbi
+      sqlType: varchar(11)
+      comment: 'Adjustment Medicare Beneficiary Identifier: This field identifies
+        the MBI number submitted on the adjustment/cancel claim'
+      dbName: adj_mbi
+    - name: medicalRecordNo
+      sqlType: varchar(17)
+      comment: 'Medical Record Number: This field identifies the number assigned to
+        the patient''s medical/health record by the provider.'
+      dbName: medical_record_no
+    joins:
+    - fieldName: mbiRecord
+      entityClass: gov.cms.bfd.model.rda.Mbi
+      joinColumnName: mbi_id
+      joinType: ManyToOne
+      fetchType: EAGER
+      properties:
+      - name: mbi
+        fieldName: mbi
+        javaType: String
+      - name: mbiHash
+        fieldName: hash
+        javaType: String
+    comment: FISS (Fiscal Intermediary Shared Systems) Claim
+  enumTypes:
+  - name: ServTypeCdMapping
+    values:
+    - Normal
+    - Clinic
+    - SpecialFacility
+    - Unrecognized
+  transformations:
+  - from: dcn
+    optionalComponents: None
+  - from: hicNo
+    optionalComponents: None
+  - from: currStatus
+    optionalComponents: None
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissClaimStatus
+  - from: currLoc1
+    optionalComponents: None
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissProcessingType
+  - from: currLoc2
+    optionalComponents: None
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2
+  - from: provStateCd
+  - from: provTypFacilCd
+  - from: provEmerInd
+  - from: provDeptId
+  - from: medaProvId
+  - from: medaProv6
+    to: medaProv_6
+  - from: totalChargeAmount
+  - from: recdDtCymd
+    to: receivedDate
+  - from: currTranDtCymd
+    to: currTranDate
+  - from: admDiagCode
+    to: admitDiagCode
+  - from: principleDiag
+  - from: npiNumber
+  - from: fedTaxNb
+    to: fedTaxNumber
+  - from: pracLocAddr1
+  - from: pracLocAddr2
+  - from: pracLocCity
+  - from: pracLocState
+  - from: pracLocZip
+  - from: stmtCovFromCymd
+    to: stmtCovFromDate
+  - from: stmtCovToCymd
+    to: stmtCovToDate
+  - from: lobCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType
+  - from: servTypeCdEnum
+    to: servTypeCdMapping
+    transformer: EnumValueIfPresent
+    transformerOptions:
+      enumName: ServTypeCdMapping
+      enumValue: Normal
+  - from: servTypeCdForClinicsEnum
+    to: servTypeCdMapping
+    transformer: EnumValueIfPresent
+    transformerOptions:
+      enumName: ServTypeCdMapping
+      enumValue: Clinic
+  - from: servTypeCdForSpecialFacilitiesEnum
+    to: servTypeCdMapping
+    transformer: EnumValueIfPresent
+    transformerOptions:
+      enumName: ServTypeCdMapping
+      enumValue: SpecialFacility
+  - from: servTypCdUnrecognized
+    to: servTypeCdMapping
+    transformer: EnumValueIfPresent
+    transformerOptions:
+      enumName: ServTypeCdMapping
+      enumValue: Unrecognized
+  - from: servTypeCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassification
+      hasUnrecognized: false
+  - from: servTypeCdForClinics
+    to: servTypeCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics
+      hasUnrecognized: false
+  - from: servTypeCdForSpecialFacilities
+    to: servTypeCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForSpecialFacilities
+      hasUnrecognized: false
+  - from: servTypCdUnrecognized
+    to: servTypeCd
+  - from: freqCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillFrequency
+  - from: billTypCd
+  - from: rejectCd
+  - from: fullPartDenInd
+  - from: nonPayInd
+  - from: xrefDcnNbr
+  - from: adjReqCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode
+  - from: adjReasCd
+  - from: cancelXrefDcn
+  - from: cancelDateCymd
+    to: cancelDate
+  - from: cancAdjCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissCancelAdjustmentCode
+  - from: originalXrefDcn
+  - from: paidDtCymd
+    to: paidDt
+  - from: admDateCymd
+    to: admDate
+  - from: admSource
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission
+  - from: primaryPayerCode
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+  - from: attendPhysId
+  - from: attendPhysLname
+  - from: attendPhysFname
+  - from: attendPhysMint
+  - from: attendPhysFlag
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag
+  - from: operatingPhysId
+  - from: operPhysLname
+  - from: operPhysFname
+  - from: operPhysMint
+  - from: operPhysFlag
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag
+  - from: othPhysId
+  - from: othPhysLname
+  - from: othPhysFname
+  - from: othPhysMint
+  - from: othPhysFlag
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag
+  - from: xrefHicNbr
+  - from: procNewHicInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissProcessNewHealthInsuranceClaimNumberIndicator
+  - from: newHic
+  - from: reposInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator
+  - from: reposHic
+  - from: mbiSubmBeneInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier
+  - from: adjMbiInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator
+  - from: adjMbi
+  - from: medicalRecordNo
+  - from: NOW
+    to: lastUpdated
+  arrays:
+  - from: fissProcCodes
+    to: procCodes
+    mapping: FissProcCode
+    namePrefix: procCode
+  - from: fissDiagCodes
+    to: diagCodes
+    mapping: FissDiagnosisCode
+    namePrefix: diagCode
+  - from: fissPayers
+    to: payers
+    mapping: FissPayer
+    namePrefix: payer
+  - from: fissAuditTrail
+    to: auditTrail
+    mapping: FissAuditTrail
+    namePrefix: auditTrail
+  externalTransformations:
+  - applyMbiCache

@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rda.RdaFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
@@ -186,7 +187,7 @@ public class FissClaimTransformerTest {
         .setClaim(claimBuilder.build())
         .setSource(
             RecordSource.newBuilder()
-                .setPhase("p1")
+                .setPhase("P1")
                 .setPhaseSeqNum(0)
                 .setExtractDate("1970-01-01")
                 .setTransmissionTimestamp("1970-01-01T00:00:00.000001Z")

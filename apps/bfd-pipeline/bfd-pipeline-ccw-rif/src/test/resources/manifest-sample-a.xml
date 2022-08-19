@@ -13,6 +13,6 @@
 	<!-- Copy from 
 		https://github.com/HHSIDEAlab/bluebutton-data-pipeline/raw/cbbd-55-s3-support/bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-a-bcarrier.txt
 	-->
-	<entry name="sample-a-bcarrier.txt" type="CARRIER" />
+	<entry name="sample-a-bcarrier.txt" type="CARRIER" exportType="UPDATE" />
 
 </dataSetManifest>

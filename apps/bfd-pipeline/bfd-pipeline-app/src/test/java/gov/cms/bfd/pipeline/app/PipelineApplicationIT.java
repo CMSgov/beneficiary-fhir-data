@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
@@ -108,7 +108,7 @@ public final class PipelineApplicationIT {
 
       // Wait for it to start scanning.
       Awaitility.await()
-          .atMost(Duration.ONE_MINUTE)
+          .atMost(Durations.ONE_MINUTE)
           .until(() -> hasCcwRifLoadJobFailed(appRunConsumer));
 
       // Stop the application.
@@ -152,7 +152,7 @@ public final class PipelineApplicationIT {
       // Wait for it to start scanning.
       try {
         Awaitility.await()
-            .atMost(Duration.ONE_MINUTE)
+            .atMost(Durations.ONE_MINUTE)
             .until(() -> hasCcwRifLoadJobCompleted(appRunConsumer));
       } catch (ConditionTimeoutException e) {
         throw new RuntimeException(
@@ -231,7 +231,7 @@ public final class PipelineApplicationIT {
       try {
         // Wait for it to process a data set.
         Awaitility.await()
-            .atMost(Duration.ONE_MINUTE)
+            .atMost(Durations.ONE_MINUTE)
             .until(() -> hasADataSetBeenProcessed(appRunConsumer));
       } catch (ConditionTimeoutException e) {
         throw new RuntimeException(
@@ -277,7 +277,7 @@ public final class PipelineApplicationIT {
                 // Wait for it to start scanning.
                 try {
                   Awaitility.await()
-                      .atMost(Duration.ONE_MINUTE)
+                      .atMost(Durations.ONE_MINUTE)
                       .until(
                           () ->
                               hasRdaFissLoadJobCompleted(appRunConsumer)
@@ -333,7 +333,7 @@ public final class PipelineApplicationIT {
                 // Wait for it to start scanning.
                 try {
                   Awaitility.await()
-                      .atMost(Duration.ONE_MINUTE)
+                      .atMost(Durations.ONE_MINUTE)
                       .until(
                           () ->
                               hasRdaFissLoadJobCompleted(appRunConsumer)
