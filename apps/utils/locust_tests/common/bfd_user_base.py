@@ -18,6 +18,9 @@ from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 
 COMPARISONS_METADATA_PATH = None
+"""The path to a given stats comparison metadata JSON file for a particular test suite. Should be
+overriden in modules (Locustfiles) that import bfd_user_base. Also overriden by the value of
+--stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener
