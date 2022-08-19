@@ -59,9 +59,6 @@
       become: true
       tags:
         - post-ami
-        
-  handlers:
-    - import_tasks: handlers/main.yml
 
     - name: cwagent Copy OpenTelemetry agent configuration file
       template:
@@ -77,3 +74,7 @@
       become: true
       tags:
         - post-ami
+        
+  handlers:
+    - import_tasks: handlers/main.yml
+
