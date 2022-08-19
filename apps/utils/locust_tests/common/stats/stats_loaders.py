@@ -351,8 +351,13 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
 
 def _get_average_all_stats(all_stats: List[AggregatedStats]) -> Optional[AggregatedStats]:
     partitioned_task_stats = _bucket_tasks_by_name(all_stats)
-    averaged_tasks = [_get_average_task_stats(tasks) for tasks in partitioned_task_stats.values()]
-    averaged_totals = _get_average_task_stats([stat.totals for stat in all_stats])
+    try:
+        averaged_tasks = [
+            _get_average_task_stats(tasks) for tasks in partitioned_task_stats.values()
+        ]
+        averaged_totals = _get_average_task_stats([stat.totals for stat in all_stats])
+    except ValueError:
+        return None
 
     # With an averaged aggregated stats there really is no such thing as metadata
     # since it's the result of many
