@@ -15,6 +15,7 @@ truncate table rda.message_errors;
 truncate table rda.rda_api_progress;
 -- Not truncating the metadata or MBI tables
 alter table rda.claim_message_meta_data ${logic.alter-rename-column} received_date ${logic.rename-to} last_updated;
+alter index rda.claim_message_meta_data_received_date_idx rename to claim_message_meta_data_last_updated_idx;
 
 /*
  * fiss_audit_trails
