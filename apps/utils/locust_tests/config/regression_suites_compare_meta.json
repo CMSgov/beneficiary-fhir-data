@@ -21,7 +21,7 @@
     {
       "name": "min_response_time",
       "better_if": "SMALLER",
-      "warn_percent": 150,
+      "warn_percent": 2500,
       "fail_percent": 5000
     },
     {
