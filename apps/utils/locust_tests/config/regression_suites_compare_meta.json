@@ -125,14 +125,14 @@
     {
       "name": "min_response_time",
       "better_if": "SMALLER",
-      "warn_percent": 300,
-      "fail_percent": 500
+      "warn_percent": 500,
+      "fail_percent": 1000
     },
     {
       "name": "max_response_time",
       "better_if": "SMALLER",
-      "warn_percent": 300,
-      "fail_percent": 500
+      "warn_percent": 500,
+      "fail_percent": 1000
     },
     {
       "name": "total_reqs_per_second",
