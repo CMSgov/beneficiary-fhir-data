@@ -17,6 +17,8 @@ from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 
+COMPARISONS_METADATA_PATH = None
+
 
 @events.init_command_line_parser.add_listener
 def _(parser: LocustArgumentParser, **kwargs) -> None:
@@ -43,13 +45,16 @@ def _(environment: Environment, **kwargs) -> None:
 
     validation.check_sla_validation(environment)
 
+    logger = logging.getLogger()
+
     if not environment.parsed_options:
+        logger.warning("No parsed options found -- is Locust running as a Library?")
         return
 
     try:
         stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
     except ValueError as exc:
-        logging.getLogger().warning("Unable to get stats configuration: %s", str(exc))
+        logger.warning("Unable to get stats configuration: %s", str(exc))
         return
 
     # If stats_config is valid, get the aggregated stats of the stopping test run
@@ -58,8 +63,15 @@ def _(environment: Environment, **kwargs) -> None:
     )
     stats = stats_collector.collect_stats()
 
-    stats_compare.do_stats_comparison(environment, stats_config, stats)
-    stats_writers.write_stats(stats_config, stats)
+    try:
+        stats_compare.do_stats_comparison(
+            environment,
+            stats_config,
+            stats_config.stats_compare_meta_file or COMPARISONS_METADATA_PATH,
+            stats,
+        )
+    finally:
+        stats_writers.write_stats(stats_config, stats)
 
 
 class BFDUserBase(FastHttpUser):
