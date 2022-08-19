@@ -203,7 +203,7 @@ public class FissTransformer extends AbstractTransformer {
             RecordSource.newBuilder()
                 // Hardcoding values for test data, this data is only used in production for
                 // analysis
-                .setPhase("p1")
+                .setPhase("P1")
                 .setPhaseSeqNum(0)
                 .setExtractDate(LocalDate.now().minusDays(2).toString())
                 .setTransmissionTimestamp(Instant.now().minus(1, ChronoUnit.DAYS).toString())

@@ -39,6 +39,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
@@ -58,6 +59,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestamp the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
@@ -73,6 +75,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
@@ -88,6 +91,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @param timestamp the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
+   * @param syntheticData the value to use for {@link #isSyntheticData()}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
@@ -190,6 +194,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 
     @XmlAttribute private final RifFileType type;
 
+    @XmlTransient private final String exportType;
+
     /**
      * Constructs a new {@link DataSetManifestEntry} instance.
      *
@@ -200,6 +206,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.parentManifest = null;
       this.name = name;
       this.type = type;
+      this.exportType = null;
     }
 
     /** This default constructor is required by JAX-B, and should not otherwise be used. */
@@ -207,6 +214,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     private DataSetManifestEntry() {
       this.name = null;
       this.type = null;
+      this.exportType = null;
     }
 
     /** @return the {@link DataSetManifest} that this {@link DataSetManifestEntry} is a part of */

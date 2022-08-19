@@ -38,6 +38,7 @@ public class DataSetManifestFactory {
    * Constructs a new {@link DataSetManifestFactory} instance.
    *
    * @return the {@link DataSetManifestFactory}
+   * @throws SAXException (any errors encountered will be bubbled up).
    */
   public static DataSetManifestFactory newInstance() throws SAXException {
     if (thisInstance == null) {
@@ -52,8 +53,9 @@ public class DataSetManifestFactory {
    * @param manifestFilename the {@link String} XML filename to read/parse
    * @return the {@link DataSetManifest}
    * @throws JAXBException (any errors encountered will be bubbled up).
+   * @throws SAXException (any errors encountered will be bubbled up).
    */
-  public DataSetManifest parseManifest(String manifestFilename) throws JAXBException {
+  public DataSetManifest parseManifest(String manifestFilename) throws JAXBException, SAXException {
     InputStream manifestStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream(manifestFilename);
     return parseManifest(manifestStream);
@@ -65,11 +67,12 @@ public class DataSetManifestFactory {
    * valid.
    *
    * @param manifestStream the {@link InputStream} stream of XML to read/parse
-   * @return the {@link DataSetManifest}
    * @throws JAXBException (any errors encountered will be bubbled up).
+   * @throws SAXException (any errors encountered will be bubbled up).
    * @return the {@link DataSetManifest}
    */
-  public static DataSetManifest parseManifest(InputStream manifestStream) throws JAXBException {
+  public static DataSetManifest parseManifest(InputStream manifestStream)
+      throws JAXBException, SAXException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
     jaxbUnmarshaller.setSchema(schema);
