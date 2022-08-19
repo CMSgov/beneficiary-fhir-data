@@ -40,44 +40,50 @@ class StatsLoader(ABC):
         self.metadata = metadata
 
     def load(self) -> Optional[AggregatedStats]:
-        """Loads an AggregatedStats instance constructed based on what type of comparison is required
+        """Loads an AggregatedStats instance constructed based on what type of comparison is
+        required
 
         Returns:
-            AggregatedStats: An AggregatedStats instance representing the set of stats requested to load
+            AggregatedStats: An AggregatedStats instance representing the set of stats requested to
+            load
         """
         is_avg_compare = self.stats_config.stats_compare == StatsComparisonType.AVERAGE
         return self.load_average() if is_avg_compare else self.load_previous()
 
     @abstractmethod
     def load_previous(self) -> Optional[AggregatedStats]:
-        """Loads an AggregatedStats instance constructed based on the most recent, previous test suite runs'
-        stats under the tag specified by the user
+        """Loads an AggregatedStats instance constructed based on the most recent, previous test
+        suite runs' stats under the tag specified by the user
 
         Returns:
-            AggregatedStats: An AggregatedStats instance representing the stats of the previous test suite run
+            AggregatedStats: An AggregatedStats instance representing the stats of the previous test
+            suite run
         """
         pass
 
     @abstractmethod
     def load_average(self) -> Optional[AggregatedStats]:
-        """Loads an AggregatedStats instance constructed based on the the average of all of the previous test suite
-        runs' stats under the tag specified by the user
+        """Loads an AggregatedStats instance constructed based on the the average of all of the
+        previous test suite runs' stats under the tag specified by the user
 
         Returns:
-            AggregatedStats: An AggregatedStats instance representing the stats of all specified previous test suite runs
+            AggregatedStats: An AggregatedStats instance representing the stats of all specified
+            previous test suite runs
         """
         pass
 
     @staticmethod
     def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> "StatsLoader":
-        """Construct a new concrete instance of StatsLoader that will load from the appropriate store as
-        specified in stats_config
+        """Construct a new concrete instance of StatsLoader that will load from the appropriate
+        store as specified in stats_config
 
         Args:
-            stats_config (StatsConfiguration): The configuration specified for storing and comparing statistics
+            stats_config (StatsConfiguration): The configuration specified for storing and comparing
+            statistics
 
         Returns:
-            StatsLoader: A concrete instance of StatsLoader that will load from the store specified in configuration
+            StatsLoader: A concrete instance of StatsLoader that will load from the store specified
+            in configuration
         """
         return (
             StatsFileLoader(stats_config, metadata)
@@ -87,7 +93,8 @@ class StatsLoader(ABC):
 
 
 class StatsFileLoader(StatsLoader):
-    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
+    """Child class of StatsLoader that loads aggregated task stats from the local file system
+    through JSON files"""
 
     def load_previous(self) -> Optional[AggregatedStats]:
         # Get a list of all AggregatedStats from stats.json files under path
@@ -201,7 +208,9 @@ class StatsAthenaLoader(StatsLoader):
             # store query results
             ResultConfiguration={
                 "OutputLocation": (
-                    f"s3://{self.stats_config.stats_store_s3_bucket}/adhoc/query_results/{self.stats_config.stats_store_s3_database}/{self.stats_config.stats_store_s3_table}"
+                    f"s3://{self.stats_config.stats_store_s3_bucket}/adhoc/query_results/"
+                    f"{self.stats_config.stats_store_s3_database}/"
+                    f"{self.stats_config.stats_store_s3_table}"
                 )
             },
             # The workgroup should always be "bfd" if we're targeting BFD Insights

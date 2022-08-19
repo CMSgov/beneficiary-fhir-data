@@ -1,5 +1,6 @@
 """Members of this file/module should be related to the collection of performance statistics during
-a test run as well as the representation of those statistics via dataclasses or other suitable objects"""
+a test run as well as the representation of those statistics via dataclasses or other suitable
+objects"""
 import hashlib
 import time
 from dataclasses import dataclass, fields
@@ -11,13 +12,13 @@ from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
 from common.stats.stats_config import StatsEnvironment
 
 ResponseTimePercentiles = Dict[str, Union[int, float]]
-"""A type representing a dictionary of stringified percentile keys to their integer or floating-point
-values"""
+"""A type representing a dictionary of stringified percentile keys to their integer or
+floating-point values"""
 
 
 class StatsCollector(object):
-    """Used to collect a snapshot of aggregated performance statistics of all tasks, or endpoints, that
-    ran in the current Locust environment"""
+    """Used to collect a snapshot of aggregated performance statistics of all tasks, or endpoints,
+    that ran in the current Locust environment"""
 
     def __init__(
         self,
@@ -25,12 +26,15 @@ class StatsCollector(object):
         stats_tags: List[str],
         running_env: StatsEnvironment = StatsEnvironment.TEST,
     ) -> None:
-        """Creates a new instance of StatsCollector given the current Locust environment and a list of percentiles to report.
+        """Creates a new instance of StatsCollector given the current Locust environment and a list
+        of percentiles to report.
 
         Args:
             locust_env (Environment): Current Locust environment
-            stats_tag (str): A string which tags the output JSON; used to distinguish between separate test runs
-            running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the current testing environment; either TEST or PROD. Defaults to TEST.
+            stats_tag (str): A string which tags the output JSON; used to distinguish between
+            separate test runs
+            running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the
+            current testing environment; either TEST or PROD. Defaults to TEST.
         """
         super().__init__()
         self.locust_env = locust_env
@@ -50,10 +54,12 @@ class StatsCollector(object):
         return [stats[key] for key in sorted(stats.keys())]
 
     def __get_task_stats_list(self) -> List["TaskStats"]:
-        """Returns a list of TaskStats representing the performance statistics of _all_ Locust tasks that ran
+        """Returns a list of TaskStats representing the performance statistics of _all_ Locust tasks
+        that ran
 
         Returns:
-            List[TaskStats]: A List of TaskStats that represent the performance statistics of all Locust tasks
+            List[TaskStats]: A List of TaskStats that represent the performance statistics of all
+            Locust tasks
         """
         stats = self.locust_env.stats
         return [
@@ -62,11 +68,12 @@ class StatsCollector(object):
         ]
 
     def collect_stats(self) -> "AggregatedStats":
-        """A method that returns an AggregatedStats instance representing a snapshot of the aggregated performance
-        statistics of the current Locust environment at current time.
+        """A method that returns an AggregatedStats instance representing a snapshot of the
+        aggregated performance statistics of the current Locust environment at current time.
 
         Returns:
-            AggregatedStats: An instance of AggregatedStats representing a snapshot of all stats at the current time
+            AggregatedStats: An instance of AggregatedStats representing a snapshot of all stats at
+            the current time
         """
         tasks = self.__get_task_stats_list()
         return AggregatedStats(
@@ -107,8 +114,8 @@ class TaskStats:
     total_fails_per_sec: float
     """The average number of failures-per-second of this Task's requests over the test run"""
     response_time_percentiles: ResponseTimePercentiles
-    """A dictionary of response time percentiles indicating the percentage of requests that completed
-    in a particular timeframe"""
+    """A dictionary of response time percentiles indicating the percentage of requests that
+    completed in a particular timeframe"""
 
     @classmethod
     def from_stats_entry(cls, stats_entry: StatsEntry) -> "TaskStats":
@@ -119,7 +126,8 @@ class TaskStats:
             stats_entry (StatsEntry): A Locust StatsEntry instance encapsulating a Task's stats
 
         Returns:
-            TaskStats: A TaskStats dataclass instance that encapsulates the most important stats of a given Task
+            TaskStats: A TaskStats dataclass instance that encapsulates the most important stats of
+            a given Task
         """
         return cls(
             task_name=stats_entry.name,
@@ -159,11 +167,12 @@ class TaskStats:
 
     @classmethod
     def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> ResponseTimePercentiles:
-        """Returns a dictionary of response time percentiles indicating the percentage of requests that completed
-        in a particular timeframe
+        """Returns a dictionary of response time percentiles indicating the percentage of requests
+        that completed in a particular timeframe
 
         Args:
-            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's statistics
+            stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's
+            statistics
 
         Returns:
             Dict[str, int]: A dictionary of response time percentiles
@@ -181,7 +190,8 @@ class TaskStats:
 
 @dataclass
 class StatsMetadata:
-    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated performance stats"""
+    """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated
+    performance stats"""
 
     timestamp: int
     """A timestamp indicating the time a stats snapshot was collected"""
@@ -215,8 +225,8 @@ class StatsMetadata:
         tasks_names: List[str],
         locust_env: Environment,
     ) -> "StatsMetadata":
-        """A class method that constructs an instance of StatsMetadata by computing its fields from a given
-        Locust environment
+        """A class method that constructs an instance of StatsMetadata by computing its fields from
+        a given Locust environment
 
         Args:
             timestamp (int): A Unix timestamp indicating the time that the stats were collected
@@ -226,10 +236,12 @@ class StatsMetadata:
             locust_env (Environment): The current Locust environment
 
         Raises:
-            ValueError: If no parsed_options exist on locust_env, or if there is no last_request_timestamp
+            ValueError: If no parsed_options exist on locust_env, or if there is no
+            last_request_timestamp
 
         Returns:
-            StatsMetadata: A StatsMetadata instance encapsulating all of the necessary metadata to store and compare statistics
+            StatsMetadata: A StatsMetadata instance encapsulating all of the necessary metadata to
+            store and compare statistics
         """
         if not locust_env.parsed_options:
             raise ValueError(

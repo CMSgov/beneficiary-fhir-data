@@ -21,6 +21,13 @@ __s3_client = boto3.client("s3")
 
 
 def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    """Writes aggregated performance stats to user-specified storage
+
+    Args:
+        stats_config (StatsConfiguration): The user-specified configuration for stats-related
+        operations from the command-line or from configuration files
+        stats (AggregatedStats): The current run's aggregated stats
+    """
     logger = logging.getLogger()
     if stats_config.stats_store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
