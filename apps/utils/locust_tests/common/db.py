@@ -13,10 +13,10 @@ import psycopg2
 
 LIMIT = 100000
 """Global limit on the number of records to return"""
-REGRESSION_BENE_RANGE_START = -10000010050000
+REGRESSION_BENE_RANGE_START = -10000000019999
 """Beginning of the beneficiary range used by the Regression Suite in each environment for
 consistent data"""
-REGRESSION_BENE_RANGE_END = -10000010009985
+REGRESSION_BENE_RANGE_END = -10000000000001
 """End of the beneficiary range used by the Regression Suite in each environment for
 consistent data"""
 
