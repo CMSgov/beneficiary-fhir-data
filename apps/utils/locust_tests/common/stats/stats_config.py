@@ -251,11 +251,11 @@ class StatsConfiguration:
     @staticmethod
     def __env_from_value(val: str) -> StatsEnvironment:
         try:
-            return StatsEnvironment[val.upper()]
-        except KeyError:
+            return StatsEnvironment(val.lower())
+        except ValueError as exc:
             raise ValueError(
-                f'Value must be one of: {", ".join([e.name for e in StatsEnvironment])}'
-            ) from None
+                f'Value must be one of: {", ".join([e.value for e in StatsEnvironment])}'
+            ) from exc
 
     @staticmethod
     def __validate_tag(tag: str) -> str:
