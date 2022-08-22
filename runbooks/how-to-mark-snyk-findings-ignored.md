@@ -1,0 +1,14 @@
+Follow this runbook to mark a SNYK finding that has is determined not to be a vulnerability or that is considered an
+acceptable risk as 'Ignored' in the [SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda).
+
+1. SNYK findings can be ignored when two lead engineers from either the BFD team or CMS agree on the justification.
+   Have a discussion about why the finding does not apply to BFD or why the risk of the finding is acceptable.
+
+2. Draft a concise description of the justification for marking the finding as 'Ignored'.
+
+3. From the [SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda) click the 'Ignore' button for the finding and
+   provide the justification as well as the usernames of the engineers that consulted on the justification. Select
+   the appropriate categorization:
+   1. 'Ignore Permanently' should be used for findings that are not planned to ever be addressed.
+   2. 'Ignore Temporarily' should be used for findings that are planned to be addressed in the next PI at the latest.
+      When selecting this option the JIRA ticket number for the remediation must be provided in the description. 
