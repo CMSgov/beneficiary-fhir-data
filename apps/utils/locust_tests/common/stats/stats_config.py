@@ -123,7 +123,7 @@ class StatsConfiguration:
                 " specified multiple times"
             ),
             dest="stats_store_tags",
-            env_var="LOCUS_STATS_STORE_TAGS",
+            env_var="LOCUS_STATS_STORE_TAG",
             action="append",
         )
         stats_group.add_argument(
