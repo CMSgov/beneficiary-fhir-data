@@ -45,26 +45,26 @@
     {
       "name": "0.66",
       "better_if": "SMALLER",
-      "warn_percent": 150,
-      "fail_percent": 200
+      "warn_percent": 175,
+      "fail_percent": 250
     },
     {
       "name": "0.75",
       "better_if": "SMALLER",
-      "warn_percent": 150,
-      "fail_percent": 200
+      "warn_percent": 200,
+      "fail_percent": 300
     },
     {
       "name": "0.8",
       "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
+      "warn_percent": 300,
+      "fail_percent": 500
     },
     {
       "name": "0.9",
       "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
+      "warn_percent": 300,
+      "fail_percent": 500
     },
     {
       "name": "0.95",
@@ -155,20 +155,20 @@
     {
       "name": "0.75",
       "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
+      "warn_percent": 300,
+      "fail_percent": 500
     },
     {
       "name": "0.8",
       "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
+      "warn_percent": 300,
+      "fail_percent": 500
     },
     {
       "name": "0.9",
       "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
+      "warn_percent": 300,
+      "fail_percent": 500
     },
     {
       "name": "0.95",
