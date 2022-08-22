@@ -32,10 +32,6 @@ import lombok.experimental.FieldNameConstants;
 @IdClass(MessageError.PK.class)
 @Table(name = "message_errors", schema = "rda")
 public class MessageError {
-  public enum ClaimType {
-    FISS,
-    MCS
-  }
 
   /** The message sequence number. */
   @Id
@@ -82,8 +78,9 @@ public class MessageError {
   @Column(name = "message", nullable = false, columnDefinition = "jsonb")
   private String message;
 
-  @Column(name = "outdated", nullable = false)
-  private boolean obsolete;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", length = 20, nullable = false)
+  private Status status;
 
   /** Hibernate used method to set certain values only on insert */
   @PrePersist
@@ -96,6 +93,17 @@ public class MessageError {
   @PreUpdate
   protected void onUpdate() {
     updatedDate = Instant.now();
+  }
+
+  public enum ClaimType {
+    FISS,
+    MCS
+  }
+
+  public enum Status {
+    UNRESOLVED,
+    RESOLVED,
+    OBSOLETE
   }
 
   /** PK class for the MessageError table */

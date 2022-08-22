@@ -116,7 +116,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     MessageError.ClaimType type = MessageError.ClaimType.valueOf(claimType.toUpperCase());
 
-    List<MessageError> messageErrors = dao.findAllMessageErrorsByClaimTypeAndNotObsolete(type);
+    List<MessageError> messageErrors =
+        dao.findAllMessageErrorsByClaimTypeAndStatus(type, MessageError.Status.UNRESOLVED);
 
     final Set<Long> sequenceNumbers =
         messageErrors.stream().map(MessageError::getSequenceNumber).collect(Collectors.toSet());
@@ -176,16 +177,17 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
               int processed = submitBatchToSink(apiVersion, sink, batch);
               processResult.addCount(processed);
 
-              if (processed > 0 && dao.delete(startingSequenceNumber, type) > 0) {
+              if (processed > 0
+                  && dao.updateState(startingSequenceNumber, type, MessageError.Status.RESOLVED)
+                      > 0) {
                 log.info(
-                    "{} claim with sequence ({}) processed successfully, removed DLQ entry",
+                    "{} claim with sequence ({}) processed successfully, marking as resolved",
                     claimType,
                     startingSequenceNumber);
               }
             } else {
               // We didn't get the sequence number we wanted, which means it's obsolete
-              // "Soft delete" the MessageError for later analysis
-              if (dao.softDelete(startingSequenceNumber, type) > 0) {
+              if (dao.updateState(startingSequenceNumber, type, MessageError.Status.OBSOLETE) > 0) {
                 log.info(
                     "{} claim with sequence({}) was not returned, marking as obsolete",
                     claimType,
@@ -239,25 +241,19 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     private final EntityManager entityManager;
 
-    public List<MessageError> findAllMessageErrorsByClaimTypeAndNotObsolete(
-        MessageError.ClaimType claimType) {
+    public List<MessageError> findAllMessageErrorsByClaimTypeAndStatus(
+        MessageError.ClaimType claimType, MessageError.Status status) {
       return entityManager
           .createQuery(
-              "select error from MessageError error where error.claimType = :claimType and error.obsolete = false",
+              "select error from MessageError error where error.claimType = :claimType and error.status = :status",
               MessageError.class)
           .setParameter("claimType", claimType)
+          .setParameter("status", status)
           .getResultList();
     }
 
-    public long softDelete(Long sequenceNumber, MessageError.ClaimType type) {
-      return delete(sequenceNumber, type, true);
-    }
-
-    public long delete(Long sequenceNumber, MessageError.ClaimType type) {
-      return delete(sequenceNumber, type, false);
-    }
-
-    private long delete(long sequenceNumber, MessageError.ClaimType type, boolean softDelete) {
+    public long updateState(
+        Long sequenceNumber, MessageError.ClaimType type, MessageError.Status status) {
       long entitiesAffected = 0L;
 
       entityManager.getTransaction().begin();
@@ -266,12 +262,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
           entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
 
       if (messageError != null) {
-        if (softDelete) {
-          messageError.setObsolete(true);
-          entityManager.merge(messageError);
-        } else {
-          entityManager.remove(messageError);
-        }
+        messageError.setStatus(status);
+        entityManager.merge(messageError);
         entitiesAffected = 1L;
       }
 

@@ -105,7 +105,8 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(FISS_MOCK_MESSAGE_ERRORS)
         .when(mockDao)
-        .findAllMessageErrorsByClaimTypeAndNotObsolete(MessageError.ClaimType.FISS);
+        .findAllMessageErrorsByClaimTypeAndStatus(
+            MessageError.ClaimType.FISS, MessageError.Status.UNRESOLVED);
 
     TestUtils.setField(sourceSpy, "dao", mockDao);
 
@@ -138,7 +139,8 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(MCS_MOCK_MESSAGE_ERRORS)
         .when(mockDao)
-        .findAllMessageErrorsByClaimTypeAndNotObsolete(MessageError.ClaimType.MCS);
+        .findAllMessageErrorsByClaimTypeAndStatus(
+            MessageError.ClaimType.MCS, MessageError.Status.UNRESOLVED);
 
     TestUtils.setField(sourceSpy, "dao", mockDao);
 
@@ -217,7 +219,9 @@ public class DLQGrpcRdaSourceTest {
         .callService(mockChannel, mockCallOptions, FISS_ERROR_TWO_SEQ - 1);
 
     // Mock for deleting the only sequence that should have been found and processed
-    doReturn(1L).when(mockDao).delete(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS);
+    doReturn(1L)
+        .when(mockDao)
+        .updateState(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS, MessageError.Status.RESOLVED);
 
     // Force our mock dao into the source object using reflection hackery
     TestUtils.setField(sourceSpy, "dao", mockDao);
@@ -237,11 +241,12 @@ public class DLQGrpcRdaSourceTest {
     // In the end, 1 sequence should have been deleted (5), and the other marked obsolete (15)
     assertEquals(expectedResult, actualResult);
 
-    verify(mockDao, times(1)).delete(anyLong(), any(MessageError.ClaimType.class));
-    verify(mockDao).delete(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS);
-
-    verify(mockDao, times(1)).softDelete(anyLong(), any(MessageError.ClaimType.class));
-    verify(mockDao).softDelete(FISS_ERROR_TWO_SEQ, MessageError.ClaimType.FISS);
+    verify(mockDao, times(2))
+        .updateState(anyLong(), any(MessageError.ClaimType.class), any(MessageError.Status.class));
+    verify(mockDao)
+        .updateState(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS, MessageError.Status.RESOLVED);
+    verify(mockDao)
+        .updateState(FISS_ERROR_TWO_SEQ, MessageError.ClaimType.FISS, MessageError.Status.OBSOLETE);
 
     verify(mockSink, times(2)).shutdown(any(Duration.class));
   }
