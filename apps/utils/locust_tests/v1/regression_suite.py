@@ -11,14 +11,12 @@ from typing import Dict, List
 from locust import events, tag, task
 from locust.env import Environment
 
-from common import data, db, validation
-from common import bfd_user_base
-from common.bfd_user_base import BFDUserBase
+from common import data, db
+from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-bfd_user_base.COMPARISONS_METADATA_PATH = "./config/regression_suites_compare_meta.json"
 
 master_bene_ids: List[str] = []
 master_contract_data: List[Dict[str, str]] = []
@@ -58,7 +56,7 @@ def _(environment: Environment, **kwargs):
     )
 
 
-validation.set_validation_goal(validation.ValidationGoal.SLA_V1_BASELINE)
+set_comparisons_metadata_path("./config/regression_suites_compare_meta.json")
 
 
 class TestLoadShape(UserInitAwareLoadShape):

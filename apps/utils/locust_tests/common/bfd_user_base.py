@@ -17,10 +17,10 @@ from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 
-COMPARISONS_METADATA_PATH = None
+_COMPARISONS_METADATA_PATH = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be
-overriden in modules (Locustfiles) that import bfd_user_base. Also overriden by the value of
---stats-compare-meta-file"""
+overriden in modules (Locustfiles) that import bfd_user_base using set_comparisons_metadata_path().
+Also overriden by the value of --stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener
@@ -70,13 +70,23 @@ def _(environment: Environment, **kwargs) -> None:
         final_result = stats_compare.do_stats_comparison(
             environment,
             stats_config,
-            stats_config.stats_compare_meta_file or COMPARISONS_METADATA_PATH,
+            stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH,
             stats,
         )
         stats.metadata.compare_result = final_result  # type: ignore
     finally:
         stats_writers.write_stats(stats_config, stats)
 
+def set_comparisons_metadata_path(path: str) -> None:
+    """Sets the file path used to define metadata about stat comparisons (i.e. failure and warning
+    percent ratio thresholds, etc.) for a given Locustfile/test suite. Should be called in the
+    Locustfile's module scope
+
+    Args:
+        path (str): Path to a JSON file describing stat comparison metadata
+    """
+    global _COMPARISONS_METADATA_PATH
+    _COMPARISONS_METADATA_PATH = path
 
 class BFDUserBase(FastHttpUser):
     """Base Class for Locust tests against BFD.
