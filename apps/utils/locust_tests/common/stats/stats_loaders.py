@@ -11,7 +11,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from gevent import monkey
 
-from common.stats.aggregated_stats import AggregatedStats, StatsMetadata, TaskStats
+from common.stats.aggregated_stats import (
+    AggregatedStats,
+    FinalCompareResult,
+    StatsMetadata,
+    TaskStats,
+)
 from common.stats.stats_config import (
     StatsComparisonType,
     StatsConfiguration,
@@ -142,7 +147,7 @@ class StatsFileLoader(StatsLoader):
 
         aggregated_stats_list = []
         for stats_file in stats_files:
-            with open(stats_file) as json_file:
+            with open(stats_file, encoding="utf-8") as json_file:
                 aggregated_stats_list.append(AggregatedStats(**json.load(json_file)))
 
         return aggregated_stats_list
@@ -152,6 +157,8 @@ class StatsFileLoader(StatsLoader):
             [
                 self.stats_config.stats_compare_tag in loaded_metadata.tags,
                 loaded_metadata.hash == self.metadata.hash,
+                loaded_metadata.compare_result
+                in (FinalCompareResult.NOT_APPLICABLE, FinalCompareResult.PASSED),
                 # Pick some delta that the runtimes should be under -- in this case, we're using 3
                 # seconds
                 # TODO: Determine the right delta for checking for matching runtimes
@@ -256,6 +263,10 @@ class StatsAthenaLoader(StatsLoader):
         explicit_checks = [
             f"contains(metadata.tags, '{self.stats_config.stats_compare_tag}')",
             f"metadata.hash='{self.metadata.hash}'",
+            (
+                f"(metadata.compare_result='{FinalCompareResult.NOT_APPLICABLE.value}' OR "
+                f"metadata.compare_result='{FinalCompareResult.PASSED.value}')"
+            ),
             # TODO: Determine the right delta for checking for matching runtimes
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
         ]
@@ -297,7 +308,6 @@ class StatsAthenaLoader(StatsLoader):
         # of the tasks we're serializing here has already been checked
         return [
             AggregatedStats(
-                metadata=None,
                 totals=TaskStats.from_list(totals_as_list),
                 tasks=[TaskStats.from_list(task_vals_list) for task_vals_list in tasks_as_lists],
             )
@@ -368,10 +378,4 @@ def _get_average_all_stats(all_stats: List[AggregatedStats]) -> Optional[Aggrega
     except ValueError:
         return None
 
-    # With an averaged aggregated stats there really is no such thing as metadata
-    # since it's the result of many
-    return (
-        AggregatedStats(metadata=None, totals=averaged_totals, tasks=averaged_tasks)
-        if averaged_tasks
-        else None
-    )
+    return AggregatedStats(totals=averaged_totals, tasks=averaged_tasks) if averaged_tasks else None

@@ -67,12 +67,13 @@ def _(environment: Environment, **kwargs) -> None:
     stats = stats_collector.collect_stats()
 
     try:
-        stats_compare.do_stats_comparison(
+        final_result = stats_compare.do_stats_comparison(
             environment,
             stats_config,
             stats_config.stats_compare_meta_file or COMPARISONS_METADATA_PATH,
             stats,
         )
+        stats.metadata.compare_result = final_result  # type: ignore
     finally:
         stats_writers.write_stats(stats_config, stats)
 

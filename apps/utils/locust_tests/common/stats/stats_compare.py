@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from locust.env import Environment
 
-from common.stats.aggregated_stats import AggregatedStats, TaskStats
+from common.stats.aggregated_stats import AggregatedStats, FinalCompareResult, TaskStats
 from common.stats.stats_config import StatsComparisonType, StatsConfiguration
 from common.stats.stats_loaders import StatsLoader
 
@@ -90,7 +90,7 @@ def do_stats_comparison(
     stats_config: StatsConfiguration,
     stats_metadata_path: Optional[str],
     stats: AggregatedStats,
-) -> None:
+) -> FinalCompareResult:
     """Compares the current run's stats (totals and all tasks) against a user-configured baseline,
     logging the result
 
@@ -100,15 +100,19 @@ def do_stats_comparison(
         stats_metadata_path (str): The path to the JSON file describing the comparison metadata for
         totals and tasks
         stats (AggregatedStats): The current run's stats
+
+    Returns:
+        FinalCompareResult: The overall result of the comparison between the baseline and current
+        run
     """
     if not stats_config.stats_compare:
-        return
+        return FinalCompareResult.NOT_APPLICABLE
 
     logger = logging.getLogger()
 
     if not stats_metadata_path:
         logger.error("No comparison metadata file found -- stats cannot be compared.")
-        return
+        return FinalCompareResult.NOT_APPLICABLE
 
     stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
     try:
@@ -120,92 +124,95 @@ def do_stats_comparison(
             str(stats_config.stats_store.value),
             str(ex),
         )
-        return
+        return FinalCompareResult.NOT_APPLICABLE
 
-    if previous_stats:
-        logger.info(
-            'Comparing current run\'s aggregated stats against %s stats from tag "%s" from %s'
-            " storage...",
-            "previous"
-            if stats_config.stats_compare == StatsComparisonType.PREVIOUS
-            else f"average (last {stats_config.stats_compare_load_limit})",
-            stats_config.stats_compare_tag,
-            stats_config.stats_store.value,
-        )
-        all_comparisons_meta = _load_stats_comparison_metadata(stats_metadata_path)
-        totals_exceeded_results, tasks_exceeded_results = validate_aggregated_stats(
-            previous_stats, stats, all_comparisons_meta
-        )
-
-        # We don't want null values (for example, thresholds if the stat comparison passed)
-        # to appear in the logged JSON. The default JSON dumper does not have any built-in logic
-        # for simply ignoring nulls, so we must remove them from the dictionary when converting
-        # a StatComparison to a dict
-        def ignore_nulls_factory(data_class):
-            return {k: v for (k, v) in data_class if v is not None}
-
-        logger.info(
-            "Totals comparison results: %s",
-            json.dumps(
-                [asdict(x, dict_factory=ignore_nulls_factory) for x in totals_exceeded_results]
-            ),
-        )
-        logger.info(
-            "Tasks comparison results: %s",
-            json.dumps(
-                {
-                    k: [asdict(meta_dict, dict_factory=ignore_nulls_factory) for meta_dict in v]
-                    for k, v in tasks_exceeded_results.items()
-                }
-            ),
-        )
-
-        # Look at _all_ of the stat comparisons and check for failures and warnings results;
-        # the generator in this reduction simply flattens the totals and individual tasks
-        # comparisons so that we do not have to repeat ourselves. The reduce will take the resulting
-        # list of boolean tuples and collapse them into a single tuple of _all_ of them OR'd
-        # together.
-        any_failures, any_warnings = functools.reduce(
-            lambda a, b: (a[0] or b[0], a[1] or b[1]),
-            (
-                (x.result == StatCompareResult.FAILURE, x.result == StatCompareResult.WARNING)
-                for x in [
-                    *totals_exceeded_results,
-                    *itertools.chain.from_iterable(tasks_exceeded_results.values()),
-                ]
-            ),
-        )
-        if any_failures or any_warnings:
-            # If we get here, that means some tasks or some totals stats have stats exceeding the
-            # threshold percent between the previous/average run and the current.
-            if any_warnings:
-                logger.warning(
-                    'Some comparisons against %s stats under "%s" tag exceeded their warn '
-                    "thresholds, see result JSON in log above",
-                    str(stats_config.stats_compare.value),
-                    stats_config.stats_compare_tag,
-                )
-
-            if any_failures:
-                logger.error(
-                    'Some comparisons against %s stats under "%s" tag exceeded their failure '
-                    "thresholds, see result JSON in log above. Returning exit code 1 to indicate "
-                    "failure",
-                    str(stats_config.stats_compare.value),
-                    stats_config.stats_compare_tag,
-                )
-                environment.process_exit_code = 1
-        else:
-            logger.info(
-                'Comparison against %s stats under "%s" tag passed, see JSON in log above',
-                stats_config.stats_compare.value,
-                stats_config.stats_compare_tag,
-            )
-    else:
+    if not previous_stats:
         logger.warning(
             'No applicable performance statistics under tag "%s" to compare against',
             stats_config.stats_compare_tag,
         )
+        return FinalCompareResult.NOT_APPLICABLE
+
+    logger.info(
+        'Comparing current run\'s aggregated stats against %s stats from tag "%s" from %s'
+        " storage...",
+        "previous"
+        if stats_config.stats_compare == StatsComparisonType.PREVIOUS
+        else f"average (last {stats_config.stats_compare_load_limit})",
+        stats_config.stats_compare_tag,
+        stats_config.stats_store.value,
+    )
+    all_comparisons_meta = _load_stats_comparison_metadata(stats_metadata_path)
+    totals_exceeded_results, tasks_exceeded_results = validate_aggregated_stats(
+        previous_stats, stats, all_comparisons_meta
+    )
+
+    # We don't want null values (for example, thresholds if the stat comparison passed)
+    # to appear in the logged JSON. The default JSON dumper does not have any built-in logic
+    # for simply ignoring nulls, so we must remove them from the dictionary when converting
+    # a StatComparison to a dict
+    def ignore_nulls_factory(data_class):
+        return {k: v for (k, v) in data_class if v is not None}
+
+    logger.info(
+        "Totals comparison results: %s",
+        json.dumps([asdict(x, dict_factory=ignore_nulls_factory) for x in totals_exceeded_results]),
+    )
+    logger.info(
+        "Tasks comparison results: %s",
+        json.dumps(
+            {
+                k: [asdict(meta_dict, dict_factory=ignore_nulls_factory) for meta_dict in v]
+                for k, v in tasks_exceeded_results.items()
+            }
+        ),
+    )
+
+    # Look at _all_ of the stat comparisons and check for failures and warnings results;
+    # the generator in this reduction simply flattens the totals and individual tasks
+    # comparisons so that we do not have to repeat ourselves. The reduce will take the resulting
+    # list of boolean tuples and collapse them into a single tuple of _all_ of them OR'd
+    # together.
+    any_failures, any_warnings = functools.reduce(
+        lambda a, b: (a[0] or b[0], a[1] or b[1]),
+        (
+            (x.result == StatCompareResult.FAILURE, x.result == StatCompareResult.WARNING)
+            for x in [
+                *totals_exceeded_results,
+                *itertools.chain.from_iterable(tasks_exceeded_results.values()),
+            ]
+        ),
+    )
+    if any_failures or any_warnings:
+        # If we get here, that means some tasks or some totals stats have stats exceeding the
+        # threshold percent between the previous/average run and the current.
+        if any_warnings:
+            logger.warning(
+                'Some comparisons against %s stats under "%s" tag exceeded their warn '
+                "thresholds, see result JSON in log above",
+                str(stats_config.stats_compare.value),
+                stats_config.stats_compare_tag,
+            )
+
+        if any_failures:
+            logger.error(
+                'Some comparisons against %s stats under "%s" tag exceeded their failure '
+                "thresholds, see result JSON in log above. Returning exit code 1 to indicate "
+                "failure",
+                str(stats_config.stats_compare.value),
+                stats_config.stats_compare_tag,
+            )
+            environment.process_exit_code = 1
+
+            return FinalCompareResult.FAILED
+    else:
+        logger.info(
+            'Comparison against %s stats under "%s" tag passed, see JSON in log above',
+            stats_config.stats_compare.value,
+            stats_config.stats_compare_tag,
+        )
+
+    return FinalCompareResult.PASSED
 
 
 def get_stats_compare_results(

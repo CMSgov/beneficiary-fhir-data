@@ -4,6 +4,7 @@ objects"""
 import hashlib
 import time
 from dataclasses import dataclass, fields
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 from locust.env import Environment
@@ -188,6 +189,23 @@ class TaskStats:
         }
 
 
+class FinalCompareResult(str, Enum):
+    """Enum that indicates the _overall_ result of a given AggregatedStats' comparison with a
+    baseline AggregatedStats. Used to filter out runs that did not pass comparison against a
+    baseline, but may want to be stored for future analysis"""
+
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    """Indicates the run either was explicitly not compared against a baseline (i.e. the user did
+    not specify to compare against anything) or there was no such baseline to compare against (i.e.
+    it was the first ever run)"""
+    PASSED = "PASSED"
+    """Indicates that the run passed comparison against a baseline; this means _all_ stats
+    passed comparison for the totals _and_ each task"""
+    FAILED = "FAILED"
+    """Indicates that the run failed comparison against a baseline; this means at least _one_ stat
+    exceeded its failure threshold for its percent ratio against the baseline's equivalent stat"""
+
+
 @dataclass
 class StatsMetadata:
     """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated
@@ -215,6 +233,9 @@ class StatsMetadata:
     """A hash that encodes various information about the running tests to ensure that comparisons
     can be made. Two (or more) AggregatedStats instances having the same hash means that they are
     comparable"""
+    compare_result: FinalCompareResult = FinalCompareResult.NOT_APPLICABLE
+    """Indicates the result of comparison against a baseline. Used to filter out failures when
+    doing comparisons during load"""
 
     @classmethod
     def from_locust_env(
@@ -322,9 +343,9 @@ class AggregatedStats:
 
     def __init__(
         self,
-        metadata: Optional[Union[StatsMetadata, Dict[str, Any]]],
         totals: Union[TaskStats, Dict[str, Any]],
         tasks: Union[List[TaskStats], List[Dict[str, Any]]],
+        metadata: Optional[Union[StatsMetadata, Dict[str, Any]]] = None,
     ):
         # Support conversion directly from a nested dictionary, such as when loading from JSON files
         # or from Athena
