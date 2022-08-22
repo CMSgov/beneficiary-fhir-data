@@ -37,30 +37,6 @@
       "fail_percent": 200
     },
     {
-      "name": "0.5",
-      "better_if": "SMALLER",
-      "warn_percent": 150,
-      "fail_percent": 200
-    },
-    {
-      "name": "0.66",
-      "better_if": "SMALLER",
-      "warn_percent": 175,
-      "fail_percent": 250
-    },
-    {
-      "name": "0.75",
-      "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
-    },
-    {
-      "name": "0.8",
-      "better_if": "SMALLER",
-      "warn_percent": 300,
-      "fail_percent": 500
-    },
-    {
       "name": "0.9",
       "better_if": "SMALLER",
       "warn_percent": 300,
@@ -139,30 +115,6 @@
       "better_if": "LARGER",
       "warn_percent": 150,
       "fail_percent": 200
-    },
-    {
-      "name": "0.5",
-      "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
-    },
-    {
-      "name": "0.66",
-      "better_if": "SMALLER",
-      "warn_percent": 200,
-      "fail_percent": 300
-    },
-    {
-      "name": "0.75",
-      "better_if": "SMALLER",
-      "warn_percent": 300,
-      "fail_percent": 500
-    },
-    {
-      "name": "0.8",
-      "better_if": "SMALLER",
-      "warn_percent": 300,
-      "fail_percent": 500
     },
     {
       "name": "0.9",
