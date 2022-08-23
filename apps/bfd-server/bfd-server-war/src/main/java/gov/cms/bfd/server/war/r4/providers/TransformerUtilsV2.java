@@ -2977,6 +2977,7 @@ public final class TransformerUtilsV2 {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> npiOrgName,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -2988,8 +2989,7 @@ public final class TransformerUtilsV2 {
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
       Optional<String> fiDocClmControlNum,
-      Optional<LocalDate> fiClmProcDt,
-      Optional<String> npiOrgName) {
+      Optional<LocalDate> fiClmProcDt) {
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
@@ -3006,7 +3006,7 @@ public final class TransformerUtilsV2 {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(
-        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated, npiOrgName);
+        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, npiOrgName, lastUpdated);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -3408,8 +3408,8 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
-      Optional<Instant> lastUpdated,
-      Optional<String> name) {
+      Optional<String> npiOrgName,
+      Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
 
@@ -3429,16 +3429,17 @@ public final class TransformerUtilsV2 {
       // Certain types have specific systems
       if (type == C4BBOrganizationIdentifierType.NPI) {
         id.setSystem(TransformerConstants.CODING_NPI_US);
+        if (!npiOrgName.isEmpty()) {
+          provider.setName(npiOrgName.get());
+        } else {
+          provider.setName("UNKNOWN");
+        }
       }
 
       provider.addIdentifier(id);
 
       // Set active to value of true
       provider.setActive(true);
-
-      if (!name.isEmpty()) {
-        provider.setName(value.get());
-      }
 
       setLastUpdated(provider, lastUpdated);
 
@@ -3452,8 +3453,9 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
+      Optional<String> npiOrgName,
       Optional<Instant> lastupdated) {
-    addProviderSlice(eob, type, Optional.of(value), lastupdated);
+    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated);
   }
 
   /**

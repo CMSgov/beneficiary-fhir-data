@@ -646,17 +646,18 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare3.equalsDeep(member3));
 
     // Fourth member
-    CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, eob.getCareTeam());
-    CareTeamComponent compare4 =
-        TransformerTestUtilsV2.createNpiCareTeamMember(
-            4,
-            "1497758544",
-            "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-            "primary",
-            "Primary provider");
-    compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
+    // CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4,
+    // eob.getCareTeam());
+    // CareTeamComponent compare4 =
+    //     TransformerTestUtilsV2.createNpiCareTeamMember(
+    //         4,
+    //         "1497758544",
+    //         "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+    //         "primary",
+    //         "Primary provider");
+    // compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
 
-    assertTrue(compare4.equalsDeep(member4));
+    // assertTrue(compare4.equalsDeep(member4));
   }
 
   @Test
