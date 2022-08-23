@@ -21,8 +21,6 @@ locals {
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
   nonsensitive_map           = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))
   nonsensitive_config        = { for key, value in local.nonsensitive_map : split("/", key)[5] => value }
-  sensitive_map              = zipmap(data.aws_ssm_parameters_by_path.sensitive.names, data.aws_ssm_parameters_by_path.sensitive.values)
-  sensitive_config           = { for key, value in local.sensitive_map : split("/", key)[5] => value }
 
   # Data source lookups
   kms_key_arn           = data.aws_kms_key.cmk.arn

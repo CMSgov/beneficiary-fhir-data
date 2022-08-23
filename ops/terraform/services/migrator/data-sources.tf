@@ -60,8 +60,3 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 data "aws_ssm_parameters_by_path" "nonsensitive" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive"
 }
-
-data "aws_ssm_parameters_by_path" "sensitive" {
-  path            = "/bfd/${local.env}/${local.service}/sensitive"
-  with_decryption = true
-}
