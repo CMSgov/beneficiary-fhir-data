@@ -13,8 +13,8 @@ resource "aws_iam_policy" "ecr" {
             "Resource": "*"
         }
     ]
-}   
-EOF  
+}
+EOF
 }
 
 resource "aws_iam_policy" "ssm" {
@@ -37,7 +37,7 @@ resource "aws_iam_policy" "ssm" {
             ]
         }
     ]
-} 
+}
 EOF
 }
 
@@ -58,8 +58,8 @@ resource "aws_iam_policy" "kms" {
             ]
         }
     ]
-}    
-EOF  
+}
+EOF
 }
 
 resource "aws_iam_policy" "rds" {
@@ -79,8 +79,8 @@ resource "aws_iam_policy" "rds" {
             ]
         }
     ]
-}    
-EOF  
+}
+EOF
 }
 
 resource "aws_iam_policy" "logs" {
@@ -107,10 +107,10 @@ resource "aws_iam_policy" "logs" {
         }
     ]
 }
-EOF  
+EOF
 }
 
-resource "aws_iam_role" "this" {
+resource "aws_iam_role" "lambda" {
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"
   description = "Role for lambda profile use for ${local.service} in ${local.env}"

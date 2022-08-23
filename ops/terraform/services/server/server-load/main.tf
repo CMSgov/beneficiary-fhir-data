@@ -53,9 +53,9 @@ resource "aws_lambda_function" "controller" {
     }
   }
 
-  role = aws_iam_role.this.arn
+  role = aws_iam_role.lambda.arn
   vpc_config {
-    security_group_ids = [aws_security_group.this.id]
+    security_group_ids = [aws_security_group.lambda.id]
     subnet_ids         = data.aws_subnets.main.ids
   }
 }
@@ -78,9 +78,9 @@ resource "aws_lambda_function" "node" {
     }
   }
 
-  role = aws_iam_role.this.arn
+  role = aws_iam_role.lambda.arn
   vpc_config {
-    security_group_ids = [aws_security_group.this.id]
+    security_group_ids = [aws_security_group.lambda.id]
     subnet_ids         = data.aws_subnets.main.ids
   }
 }
@@ -105,9 +105,9 @@ resource "aws_lambda_function" "broker" {
     }
   }
 
-  role = aws_iam_role.this.arn
+  role = aws_iam_role.lambda.arn
   vpc_config {
-    security_group_ids = [aws_security_group.this.id]
+    security_group_ids = [aws_security_group.lambda.id]
     subnet_ids         = data.aws_subnets.main.ids
   }
 }
