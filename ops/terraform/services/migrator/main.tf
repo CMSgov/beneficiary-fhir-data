@@ -73,3 +73,17 @@ resource "aws_instance" "this" {
     migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
   })
 }
+
+# BFD Migrator CloudWatch Dashboard
+resource "aws_cloudwatch_dashboard" "bfd_migrator_dashboard" {
+  dashboard_name = "bfd-${local.env}-${local.service}-opentelemetry"
+  dashboard_body = templatefile("${path.module}/templates/dashboard.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}" })
+}
+resource "aws_cloudwatch_dashboard" "bfd_migrator_opentelemetry_dashboard" {
+  dashboard_name = "bfd-${local.env}-${local.service}-opentelemetry"
+  dashboard_body = templatefile("${path.module}/templates/opentelemetry-dashboard.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}" })
+}
+resource "aws_cloudwatch_dashboard" "bfd_migrator_aws_services_dashboard" {
+  dashboard_name = "bfd-${local.env}-${local.service}-aws-services"
+  dashboard_body = templatefile("${path.module}/templates/bfd-dashboards.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}" })
+}
