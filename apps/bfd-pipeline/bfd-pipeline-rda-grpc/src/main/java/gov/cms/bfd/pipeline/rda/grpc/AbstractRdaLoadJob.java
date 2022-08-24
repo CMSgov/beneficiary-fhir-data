@@ -199,18 +199,23 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      */
     @Nullable private final Long startingMcsSeqNum;
 
+    /** Determines if the DLQ should be processed for subsequent job runs. */
+    private final boolean processDLQ;
+
     @Builder
     private Config(
         Duration runInterval,
         int batchSize,
         int writeThreads,
         @Nullable Long startingFissSeqNum,
-        @Nullable Long startingMcsSeqNum) {
+        @Nullable Long startingMcsSeqNum,
+        boolean processDLQ) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
       this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
       this.startingFissSeqNum = startingFissSeqNum;
       this.startingMcsSeqNum = startingMcsSeqNum;
+      this.processDLQ = processDLQ;
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
@@ -224,6 +229,10 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
 
     public Optional<Long> getStartingMcsSeqNum() {
       return Optional.ofNullable(startingMcsSeqNum);
+    }
+
+    public boolean shouldProcessDLQ() {
+      return processDLQ;
     }
   }
 

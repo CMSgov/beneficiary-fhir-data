@@ -56,3 +56,7 @@ data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 600
 # Sets the job to use 20 threads to load data
 data_pipeline_rda_job_write_threads: 20
+
+# Set to true to enable DLQ processing, which reads messages off the MessageErrors table and
+# attempts to reprocess them from the RDA API.
+data_pipeline_rda_process_dlq: false

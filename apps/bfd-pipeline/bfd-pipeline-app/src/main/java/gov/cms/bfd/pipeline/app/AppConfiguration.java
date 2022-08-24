@@ -225,6 +225,13 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       "RDA_JOB_STARTING_MCS_SEQ_NUM";
 
   /**
+   * The name of the environment variable that should be used to determine if the {@link
+   * gov.cms.bfd.pipeline.rda.grpc.source.DLQGrpcRdaSource} task should be run on subsequent job
+   * runs.
+   */
+  public static final String ENV_VAR_KEY_PROCESS_DLQ = "RDA_JOB_PROCESS_DLQ";
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * gov.cms.bfd.pipeline.rda.grpc.RdaServerJob.Config.ServerMode} value for the in-process RDA API
    * server.
@@ -493,6 +500,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(jobConfig::startingFissSeqNum);
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingMcsSeqNum);
+    readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
     final RdaSourceConfig grpcConfig =
         RdaSourceConfig.builder()
             .serverType(

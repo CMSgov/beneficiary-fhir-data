@@ -22,6 +22,7 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 /**
  * A single combined configuration object to hold the configuration settings for the various
@@ -73,16 +74,25 @@ public class RdaLoadOptions implements Serializable {
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public RdaFissClaimLoadJob createFissClaimsLoadJob(PipelineApplicationState appState) {
+    Callable<RdaSource<FissClaimChange, RdaChange<RdaFissClaim>>> preJobTaskFactory;
+
+    if (jobConfig.shouldProcessDLQ()) {
+      preJobTaskFactory =
+          () ->
+              new DLQGrpcRdaSource<>(
+                  appState.getEntityManagerFactory().createEntityManager(),
+                  (seqNumber, fissClaimChange) -> seqNumber == fissClaimChange.getSeq(),
+                  grpcConfig,
+                  new FissClaimStreamCaller(),
+                  appState.getMetrics(),
+                  "fiss");
+    } else {
+      preJobTaskFactory = EmptyRdaSource::new;
+    }
+
     return new RdaFissClaimLoadJob(
         jobConfig,
-        () ->
-            new DLQGrpcRdaSource<>(
-                appState.getEntityManagerFactory().createEntityManager(),
-                (seqNumber, fissClaimChange) -> seqNumber == fissClaimChange.getSeq(),
-                grpcConfig,
-                new FissClaimStreamCaller(),
-                appState.getMetrics(),
-                "fiss"),
+        preJobTaskFactory,
         () ->
             new StandardGrpcRdaSource<>(
                 grpcConfig,
@@ -133,16 +143,25 @@ public class RdaLoadOptions implements Serializable {
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
+    Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTaskFactory;
+
+    if (jobConfig.shouldProcessDLQ()) {
+      preJobTaskFactory =
+          () ->
+              new DLQGrpcRdaSource<>(
+                  appState.getEntityManagerFactory().createEntityManager(),
+                  (seqNumber, mcsClaimChange) -> seqNumber == mcsClaimChange.getSeq(),
+                  grpcConfig,
+                  new McsClaimStreamCaller(),
+                  appState.getMetrics(),
+                  "mcs");
+    } else {
+      preJobTaskFactory = EmptyRdaSource::new;
+    }
+
     return new RdaMcsClaimLoadJob(
         jobConfig,
-        () ->
-            new DLQGrpcRdaSource<>(
-                appState.getEntityManagerFactory().createEntityManager(),
-                (seqNumber, mcsClaimChange) -> seqNumber == mcsClaimChange.getSeq(),
-                grpcConfig,
-                new McsClaimStreamCaller(),
-                appState.getMetrics(),
-                "mcs"),
+        preJobTaskFactory,
         () ->
             new StandardGrpcRdaSource<>(
                 grpcConfig,
@@ -201,5 +220,23 @@ public class RdaLoadOptions implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(jobConfig, grpcConfig);
+  }
+
+  /**
+   * Empty source for stubbing
+   *
+   * @param <TMessage> The message type for received source messages
+   * @param <TClaim> The object type for transformed claims
+   */
+  private static class EmptyRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
+
+    @Override
+    public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
+        throws ProcessingException {
+      return 0;
+    }
+
+    @Override
+    public void close() throws Exception {}
   }
 }

@@ -68,3 +68,7 @@ data_pipeline_rda_job_starting_fiss_seq_num: 0
 # sequence number in the database.
 # In TEST this is being forced to zero so we can evaluate pipeline ingestion rate.
 data_pipeline_rda_job_starting_mcs_seq_num: 0
+
+# Set to true to enable DLQ processing, which reads messages off the MessageErrors table and
+# attempts to reprocess them from the RDA API.
+data_pipeline_rda_process_dlq: false

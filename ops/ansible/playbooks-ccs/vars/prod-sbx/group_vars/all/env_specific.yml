@@ -81,3 +81,7 @@ data_pipeline_ccw_rif_job_enabled: true
 data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 3600
 
+# Set to true to enable DLQ processing, which reads messages off the MessageErrors table and
+# attempts to reprocess them from the RDA API.
+data_pipeline_rda_process_dlq: false
+
