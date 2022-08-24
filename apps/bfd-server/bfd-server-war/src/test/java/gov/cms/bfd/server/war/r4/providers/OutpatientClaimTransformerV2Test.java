@@ -382,7 +382,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R5555", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -399,7 +401,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "I9999", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "I9999", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "I9999", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -416,7 +420,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R2222", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -433,7 +439,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R3333", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -450,7 +458,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R1122", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R1122", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R1122", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "patientreasonforvisit",

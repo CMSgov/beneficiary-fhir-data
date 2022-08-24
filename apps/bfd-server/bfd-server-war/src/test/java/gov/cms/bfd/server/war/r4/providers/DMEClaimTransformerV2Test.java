@@ -251,7 +251,9 @@ public final class DMEClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R5555", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -268,7 +270,9 @@ public final class DMEClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R6666", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R6666", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R6666", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -285,7 +289,9 @@ public final class DMEClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "G6666", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "G6666", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "G6666", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

@@ -1274,7 +1274,7 @@ public final class TransformerTestUtilsV2 {
    * Helper that creates a {@link DiagnosisComponent} for testing
    *
    * @param seq The sequence number
-   * @param code A coding to use for the Diagnosis CodeableConcept
+   * @param codes A list of codings to use for the Diagnosis CodeableConcept
    * @param type A coding to use for the Diagnosis Type
    * @param poasw Nullable - The increment for the "Present on Admission" extension
    * @param poaval Nullable - The type for the "Present on Admission" extension
@@ -1282,11 +1282,11 @@ public final class TransformerTestUtilsV2 {
    * @return
    */
   static DiagnosisComponent createDiagnosis(
-      int seq, Coding code, Coding type, Integer poasw, String poaval, String poa) {
+      int seq, List<Coding> codes, Coding type, Integer poasw, String poaval, String poa) {
     DiagnosisComponent diag =
         new DiagnosisComponent()
             .setSequence(seq)
-            .setDiagnosis(new CodeableConcept().setCoding(Arrays.asList(code)))
+            .setDiagnosis(new CodeableConcept().setCoding(codes))
             .setType(Arrays.asList(new CodeableConcept().setCoding(Arrays.asList(type))));
 
     if (poasw != null) {
@@ -1306,14 +1306,14 @@ public final class TransformerTestUtilsV2 {
 
   /** Creates a {@link DiagnosisComponent} using the "clm_poa_ind_sw" type */
   static DiagnosisComponent createDiagnosis(
-      int seq, Coding code, Coding type, Integer poasw, String poaval) {
-    return createDiagnosis(seq, code, type, poasw, poaval, "clm_poa_ind_sw");
+      int seq, List<Coding> codes, Coding type, Integer poasw, String poaval) {
+    return createDiagnosis(seq, codes, type, poasw, poaval, "clm_poa_ind_sw");
   }
 
   /** Creates a {@link DiagnosisComponent} using the "clm_e_poa_ind_sw" (external) type */
   static DiagnosisComponent createExDiagnosis(
-      int seq, Coding code, Coding type, Integer poasw, String poaval) {
-    return createDiagnosis(seq, code, type, poasw, poaval, "clm_e_poa_ind_sw");
+      int seq, List<Coding> codes, Coding type, Integer poasw, String poaval) {
+    return createDiagnosis(seq, codes, type, poasw, poaval, "clm_e_poa_ind_sw");
   }
 
   /**

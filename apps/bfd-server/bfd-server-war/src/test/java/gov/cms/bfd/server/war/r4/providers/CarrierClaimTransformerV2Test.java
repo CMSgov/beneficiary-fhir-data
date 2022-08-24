@@ -465,7 +465,9 @@ public class CarrierClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "H5555", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H5555", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "H5555", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -480,7 +482,9 @@ public class CarrierClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "H8888", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H8888", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "H8888", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -497,7 +501,9 @@ public class CarrierClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "H66666", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H66666", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "H66666", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -514,7 +520,9 @@ public class CarrierClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "H77777", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H77777", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "H77777", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -531,7 +539,9 @@ public class CarrierClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "H12345", null),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H12345", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "H12345", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

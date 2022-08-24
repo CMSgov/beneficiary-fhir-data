@@ -131,12 +131,32 @@ public class DiagnosisUtilV2 {
   static CodeableConcept toCodeableConcept(Diagnosis diag) {
     CodeableConcept codeableConcept = new CodeableConcept();
 
+    // Add an additional coding for CARIN conformance for ICD-10-cm
+    String system = diag.getFhirSystem();
+    if (system == "http://hl7.org/fhir/sid/icd-10") {
+      toCodingSystem(codeableConcept, system + "-cm", diag.getCode());
+    }
+    toCodingSystem(codeableConcept, system, diag.getCode());
+
+    return codeableConcept;
+  }
+
+  /**
+   * Creates a {@link Coding} from an R4 {@link CodeableConcept}
+   *
+   * @param codeableConcept The codeableConcept to create a Coding for
+   * @param system The system
+   * @param system The code
+   * @return
+   */
+  static CodeableConcept toCodingSystem(
+      CodeableConcept codeableConcept, String system, String code) {
     codeableConcept
         .addCoding()
-        .setSystem(diag.getFhirSystem())
-        .setCode(diag.getCode())
+        .setSystem(system)
+        .setCode(code)
         // TODO: This code should be pulled out to a common library
-        .setDisplay(retrieveIcdCodeDisplay(diag.getCode()));
+        .setDisplay(retrieveIcdCodeDisplay(code));
 
     return codeableConcept;
   }
