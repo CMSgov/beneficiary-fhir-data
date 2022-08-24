@@ -4,6 +4,13 @@ resource "aws_security_group" "lambda" {
   tags        = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}-lambda" })
   vpc_id      = data.aws_vpc.main.id
 
+  ingress {
+    protocol  = "-1"
+    self      = true # The security group itself will be added as a source to this ingress rule.
+    from_port = 0
+    to_port   = 0
+  }
+
   egress {
     from_port   = 0
     protocol    = "-1"

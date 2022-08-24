@@ -1,22 +1,3 @@
-resource "aws_iam_policy" "ecr" {
-  name        = "bfd-${local.env}-${local.service}-ecr"
-  description = "Permissions to describe ${local.service} ECR images"
-  policy      = <<-EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeImages"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-EOF
-}
-
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common and /bfd/${local.env}/server SSM hierarchies"
@@ -111,6 +92,7 @@ EOF
 }
 
 resource "aws_iam_role" "lambda" {
+  # TODO: Hack this up to tighten for each lambda
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"
   description = "Role for lambda profile use for ${local.service} in ${local.env}"
@@ -133,7 +115,6 @@ resource "aws_iam_role" "lambda" {
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
     "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
-    aws_iam_policy.ecr.arn,
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,

@@ -44,7 +44,7 @@ resource "aws_lambda_function" "controller" {
   image_uri    = local.docker_image_uri_controller
   package_type = "Image"
 
-  memory_size = 2048
+  memory_size = 2048 # TODO: Verify memory size
   timeout     = local.lambda_timeout_seconds
   environment {
     variables = {
