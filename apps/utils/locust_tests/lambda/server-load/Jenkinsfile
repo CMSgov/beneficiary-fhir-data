@@ -43,7 +43,9 @@ spec:
                     sh 'git config --global --add safe.directory "$WORKSPACE"'
 
                     // Setup AWS Credentials
-                    awsAuth.assumeRole()
+                    script {
+                        awsAuth.assumeRole()
+                    }
 
                     // Execute the existing build-push script
                     dir('apps/utils/locust_tests') {
