@@ -260,20 +260,22 @@ def validate_aggregated_stats(
     cur_tasks = {task.task_name: task for task in current.tasks}
     common_tasks = prev_tasks.keys() & cur_tasks.keys()
 
-    tasks_exceeded_results = {}
+    # all_tasks_results will be a dictionary of all of the StatCompareResults for _each individual
+    # task_ keyed by the name of said Task
+    all_tasks_results = {}
     for task in common_tasks:
         prev_task = prev_tasks[task]
         cur_task = cur_tasks[task]
 
         compare_results = get_stats_compare_results(prev_task, cur_task, all_comparisons_meta.tasks)
-        tasks_exceeded_results[task] = compare_results
+        all_tasks_results[task] = compare_results
 
     # Compare totals
     prev_totals = previous.totals
     cur_totals = current.totals
     totals_results = get_stats_compare_results(prev_totals, cur_totals, all_comparisons_meta.totals)
 
-    return (totals_results, tasks_exceeded_results)
+    return (totals_results, all_tasks_results)
 
 
 def _load_stats_comparison_metadata(path: str) -> AllComparisonMetadata:
