@@ -39,7 +39,7 @@ def _execute(uri: str, query: str) -> List:
     return results
 
 
-def __get_regression_query(select_query: str) -> str:
+def _get_regression_query(select_query: str) -> str:
     return " ".join(
         [
             select_query,
@@ -51,17 +51,46 @@ def __get_regression_query(select_query: str) -> str:
 
 
 def get_regression_bene_ids(uri: str) -> List[str]:
-    bene_query = __get_regression_query('SELECT "bene_id" FROM "beneficiaries"')
+    """Retrieves a list of beneficiary IDs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+    """
+    bene_query = _get_regression_query('SELECT "bene_id" FROM "beneficiaries"')
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
 def get_regression_hashed_mbis(uri: str) -> List[str]:
-    mbi_query = __get_regression_query('SELECT "mbi_hash" FROM "beneficiaries"')
+    """Retrieves a list of hashed MBIs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic hashed MBIs used for the regression suites
+    """
+    mbi_query = _get_regression_query('SELECT "mbi_hash" FROM "beneficiaries"')
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
 def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
-    contract_id_query = __get_regression_query(
+    """Retrieves a list of contract IDs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order, and
+    any empty values are excluded
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[Dict[str, str]]: A list of dicts with 3 keys, "id", "month", and "year", corresponding
+        to the contract ID, the contract month, and contract year, respectively
+    """
+    contract_id_query = _get_regression_query(
         'SELECT "partd_contract_number_id", "year_month" FROM "beneficiary_monthly"'
     )
 
