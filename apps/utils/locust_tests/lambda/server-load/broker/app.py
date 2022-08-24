@@ -43,12 +43,15 @@ lambda_client = boto3.client("lambda", config=boto_config)
 queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
 
-def start_controller(payload: str):
+def start_controller(payload: InvokeEvent):
     """
     Invokes the lambda function that runs the main Locust test instance.
+
     """
+    payload_json = json.dumps(payload)
+
     response = lambda_client.invoke(
-        FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload
+        FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload_json
     )
     if response.StatusCode != 202:
         print(
@@ -120,7 +123,7 @@ def handler(event, context):
         print(f"Message body missing required keys: {str(ex)}")
         return None
 
-    start_controller(payload=json.dumps(invoke_event))
+    start_controller(payload=invoke_event)
 
     messages = None
     while not messages:
