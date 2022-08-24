@@ -30,7 +30,7 @@ data "aws_launch_template" "template" {
   name = "bfd-${local.env}-fhir"
 }
 
-data "aws_auto_scaling_group" "asg" {
+data "aws_autoscaling_group" "asg" {
   name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
 }
 

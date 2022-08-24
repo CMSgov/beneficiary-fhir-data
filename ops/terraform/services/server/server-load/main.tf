@@ -100,8 +100,8 @@ resource "aws_lambda_function" "broker" {
     variables = {
       BFD_ENVIRONMENT        = local.env
       SQS_QUEUE_NAME         = resource.aws_sqs_queue.broker.name
-      CONTROLLER_LAMBDA_NAME = resource.aws_lambda_function.controller.name
-      NODE_LAMBDA_NAME       = resource.aws_lambda_function.node.name
+      CONTROLLER_LAMBDA_NAME = resource.aws_lambda_function.controller.function_name
+      NODE_LAMBDA_NAME       = resource.aws_lambda_function.node.function_name
     }
   }
 
@@ -132,7 +132,7 @@ resource "aws_sqs_queue" "broker" {
 # Send scaling event notifications to the broker's SQS queue
 resource "aws_autoscaling_lifecycle_hook" "scaling_hook" {
   name                    = "${local.queue_name}-scaling-hook"
-  autoscaling_group_name  = data.aws_auto_scaling_group.asg.name
+  autoscaling_group_name  = data.aws_autoscaling_group.asg.name
   notification_target_arn = aws_sqs_queue.broker.arn
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_LAUNCHING"
 }
