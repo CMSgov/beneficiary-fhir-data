@@ -134,7 +134,7 @@ public class DiagnosisUtilV2 {
     // Add an additional coding for CARIN conformance for ICD-10-cm
     String system = diag.getFhirSystem();
     if (system == "http://hl7.org/fhir/sid/icd-10") {
-      toCodingSystem(codeableConcept, system + "-cm", diag.getCode());
+      toCodingSystem(codeableConcept, "http://hl7.org/fhir/sid/icd-10-cm", diag.getCode());
     }
     toCodingSystem(codeableConcept, system, diag.getCode());
 
