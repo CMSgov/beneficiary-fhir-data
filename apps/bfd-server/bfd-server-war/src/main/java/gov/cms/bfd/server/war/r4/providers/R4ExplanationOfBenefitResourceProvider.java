@@ -74,7 +74,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
   /**
    * The header key used to determine whether or not tax numbers should be included in responses.
    *
@@ -121,7 +121,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return ExplanationOfBenefit.class;

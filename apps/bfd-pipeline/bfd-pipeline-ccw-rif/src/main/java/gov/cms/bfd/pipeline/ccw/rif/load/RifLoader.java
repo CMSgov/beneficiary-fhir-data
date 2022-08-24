@@ -365,8 +365,9 @@ public final class RifLoader {
       PostgreSqlCopyInserter postgresBatch) {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
     MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
-
     RifFileType rifFileType = fileEvent.getFile().getFileType();
+    // keep track if we are processing synthetic data
+    boolean isSyntheticData = fileEvent.getParentFilesEvent().isSyntheticData();
 
     if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
@@ -409,6 +410,7 @@ public final class RifLoader {
        */
       LoadedBatchBuilder loadedBatchBuilder =
           new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
+
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         RecordAction recordAction = rifRecordEvent.getRecordAction();
         RifRecordBase record = rifRecordEvent.getRecord();
@@ -437,11 +439,10 @@ public final class RifLoader {
           timerIdempotencyQuery.close();
 
           // Log if we have a non-2022 enrollment year INSERT
-          if (isBackdatedBene(rifRecordEvent)) {
-            Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
+          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
             LOGGER.info(
                 "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
-                bene.getBeneficiaryId());
+                ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
           }
 
           if (recordInDb == null) {
@@ -457,18 +458,17 @@ public final class RifLoader {
             loadAction = LoadAction.INSERTED;
 
             // Log if we have a non-2022 enrollment year INSERT
-            if (isBackdatedBene(rifRecordEvent)) {
-              Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
+            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               LOGGER.info(
                   "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
-                  bene.getBeneficiaryId());
+                  ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
             // Skip this record if the year is not 2022 and its an update.
-            if (isBackdatedBene(rifRecordEvent)) {
+            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               /*
                * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
                * it in the DB.
@@ -566,7 +566,6 @@ public final class RifLoader {
       Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
       return isBackdatedBene(bene);
     }
-
     // Not currently worried about other types of records
     return false;
   }
@@ -592,8 +591,6 @@ public final class RifLoader {
     if (BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get())) {
       return false;
     }
-
-    // Otherwise we do want to filter it
     return true;
   }
 

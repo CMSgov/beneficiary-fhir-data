@@ -49,7 +49,17 @@ def do_stats_comparison(
 
     logger = logging.getLogger()
     stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
-    previous_stats = stats_loader.load()
+    try:
+        previous_stats = stats_loader.load()
+    except RuntimeError as ex:
+        logger.error(
+            "%s stats were unable to be loaded from %s due to: %s",
+            str(stats_config.compare),
+            str(stats_config.store),
+            str(ex),
+        )
+        return
+
     if previous_stats:
         failed_stats_results = validate_aggregated_stats(
             previous_stats, stats, DEFAULT_DEVIANCE_FAILURE_THRESHOLD
@@ -74,7 +84,7 @@ def do_stats_comparison(
                 failed_stats_results,
             )
     else:
-        logger.warn(
+        logger.warning(
             'No applicable performance statistics under tag "%s" to compare against',
             stats_config.comp_tag,
         )

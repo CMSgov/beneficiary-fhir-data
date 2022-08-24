@@ -16,11 +16,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
   private static final String MDC_KEY_PREFIX = "database_query";
 
-  /**
-   * @see
-   *     net.ttddyy.dsproxy.listener.QueryExecutionListener#afterQuery(net.ttddyy.dsproxy.ExecutionInfo,
-   *     java.util.List)
-   */
+  /** {@inheritDoc} */
   @Override
   public void afterQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
     /*
@@ -107,11 +103,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
         execInfo.getDataSourceName());
   }
 
-  /**
-   * @see
-   *     net.ttddyy.dsproxy.listener.QueryExecutionListener#beforeQuery(net.ttddyy.dsproxy.ExecutionInfo,
-   *     java.util.List)
-   */
+  /** {@inheritDoc} */
   @Override
   public void beforeQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
     // Nothing to do here.

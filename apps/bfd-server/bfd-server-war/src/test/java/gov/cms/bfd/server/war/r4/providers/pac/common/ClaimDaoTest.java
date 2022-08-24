@@ -554,6 +554,7 @@ class ClaimDaoTest {
 
   /** A helper class to use for testing methods in place of actual resources. */
   private static class MockClaimType extends AbstractResourceTypeV2<IBaseResource, Long> {
+    /** A mock claim type for testing. */
     public MockClaimType() {
       super(
           "mock",

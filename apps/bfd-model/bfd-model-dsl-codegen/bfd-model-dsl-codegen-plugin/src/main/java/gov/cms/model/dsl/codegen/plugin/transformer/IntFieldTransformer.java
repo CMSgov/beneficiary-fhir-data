@@ -1,6 +1,7 @@
 package gov.cms.model.dsl.codegen.plugin.transformer;
 
 import com.squareup.javapoet.CodeBlock;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.model.dsl.codegen.plugin.accessor.Getter;
 import gov.cms.model.dsl.codegen.plugin.accessor.Setter;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
@@ -12,9 +13,8 @@ public class IntFieldTransformer implements FieldTransformer {
   /**
    * {@inheritDoc}
    *
-   * <p>Generate code to call either {@link
-   * gov.cms.model.dsl.codegen.library.DataTransformer#copyOptionalInt} when the field is optional.
-   * Required int fields are unsupported so an exception is thrown to indicate the error.
+   * <p>Generate code to call either {@link DataTransformer#copyOptionalInt} when the field is
+   * optional or {@link DataTransformer#copyInt} when it is not optional.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column
@@ -32,16 +32,21 @@ public class IntFieldTransformer implements FieldTransformer {
       TransformationBean transformation,
       Getter getter,
       Setter setter) {
-    if (!transformation.isOptional()) {
-      throw new IllegalArgumentException("non-optional ints are not currently supported");
-    }
-    return CodeBlock.builder()
-        .addStatement(
-            "$L.copyOptionalInt($L, $L, $L)",
-            TRANSFORMER_VAR,
-            getter.createHasRef(transformation),
-            getter.createGetRef(transformation),
-            setter.createSetRef(column))
-        .build();
+    return transformation.isOptional()
+        ? CodeBlock.builder()
+            .addStatement(
+                "$L.copyOptionalInt($L, $L, $L)",
+                TRANSFORMER_VAR,
+                getter.createHasRef(transformation),
+                getter.createGetRef(transformation),
+                setter.createSetRef(column))
+            .build()
+        : CodeBlock.builder()
+            .addStatement(
+                "$L.copyInt($L, $L)",
+                TRANSFORMER_VAR,
+                getter.createGetCall(transformation),
+                setter.createSetRef(column))
+            .build();
   }
 }

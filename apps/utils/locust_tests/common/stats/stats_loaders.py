@@ -27,6 +27,9 @@ import boto3
 AthenaQueryRowResult = Dict[str, List[Dict[str, str]]]
 """Type representing a single row result from the result of an Athena query"""
 
+TOTAL_RUNTIME_DELTA = 3.0
+"""The delta under which two AggregatedStats instances are considered able to
+be compared"""
 
 class StatsLoader(ABC):
     """Loads AggregatedStats depending on what type of comparison is requested"""
@@ -83,8 +86,7 @@ class StatsLoader(ABC):
 
 
 class StatsFileLoader(StatsLoader):
-    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files
-    """
+    """Child class of StatsLoader that loads aggregated task stats from the local file system through JSON files"""
 
     def load_previous(self) -> Optional[AggregatedStats]:
         # Get a list of all AggregatedStats from stats.json files under path
@@ -134,8 +136,9 @@ class StatsFileLoader(StatsLoader):
                 loaded_metadata.num_total_users == self.metadata.num_total_users,
                 loaded_metadata.num_users_per_second == self.metadata.num_users_per_second,
                 loaded_metadata.stats_reset_after_spawn == self.metadata.stats_reset_after_spawn,
-                # Pick some delta that the runtimes should be under -- in this case, we're using 1 second
-                loaded_metadata.total_runtime - self.metadata.total_runtime < 1.0,
+                # Pick some delta that the runtimes should be under -- in this case, we're using 3 seconds
+                # TODO: Determine the right delta for checking for matching runtimes
+                loaded_metadata.total_runtime - self.metadata.total_runtime < TOTAL_RUNTIME_DELTA,
             ]
         )
 
@@ -150,7 +153,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_previous(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" '
+            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.database}"."{self.stats_config.table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -160,7 +163,7 @@ class StatsAthenaLoader(StatsLoader):
 
     def load_average(self) -> Optional[AggregatedStats]:
         query = (
-            f'SELECT cast(tasks as JSON) FROM "bfd"."{self.stats_config.athena_tbl}" '
+            f'SELECT cast(tasks as JSON) FROM "{self.stats_config.database}"."{self.stats_config.table}" '
             f"WHERE {self.__get_where_clause()}"
         )
 
@@ -178,18 +181,17 @@ class StatsAthenaLoader(StatsLoader):
     def __start_athena_query(self, query: str) -> Dict[str, Any]:
         return self.client.start_query_execution(
             QueryString=query,
-            # The database should _always_ be "bfd", so we're hardcoding it here
-            QueryExecutionContext={"Database": "bfd"},
+            QueryExecutionContext={"Database": self.stats_config.database},
             # This method requires an OutputLocation, so we're using the "adhoc"
             # path defined in the BFD Insights data organization standards to
             # store query results
             ResultConfiguration={
                 "OutputLocation": (
-                    f"s3://{self.stats_config.bucket}/adhoc/query_results/test_performance_stats/"
+                    f"s3://{self.stats_config.bucket}/adhoc/query_results/{self.stats_config.database}/{self.stats_config.table}"
                 )
             },
-            # The workgroup should also always be "bfd" if we're targeting the "bfd"
-            # database
+            # The workgroup should always be "bfd" if we're targeting BFD Insights
+            # databases
             WorkGroup="bfd",
         )
 
@@ -240,7 +242,8 @@ class StatsAthenaLoader(StatsLoader):
         generated_checks = [self.__generate_check_str(field) for field in filtered_fields]
         explicit_checks = [
             f"metadata.tag='{self.stats_config.comp_tag}'",
-            f"(metadata.total_runtime - {self.metadata.total_runtime}) < 1.0",
+            # TODO: Determine the right delta for checking for matching runtimes
+            f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",
         ]
 
         return " AND ".join(generated_checks + explicit_checks)
