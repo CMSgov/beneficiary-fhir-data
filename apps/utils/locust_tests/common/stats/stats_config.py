@@ -65,7 +65,7 @@ class StatsConfiguration:
     Also used as part of the file path when storing stats in S3"""
     stats_store_s3_table: Optional[str]
     """Name of the table to query using Athena if store is s3 and compare is set.
-    jAlso used as part of the file path when storing stats in S3"""
+    Also used as part of the file path when storing stats in S3"""
     stats_compare: Optional[StatsComparisonType]
     """Indicates the type of performance stats comparison that will be done"""
     stats_compare_tag: Optional[str]
