@@ -17,18 +17,21 @@ DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$GIT_SHORT_HASH"}"
 DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
 docker build . \
+  --file ./lambda/server-load/Dockerfile \
   --target broker \
   --tag "${IMAGE_NAME_BROKER}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_BROKER}:${DOCKER_TAG_LATEST}" \
   --platform "linux/amd64"
 
 docker build . \
+  --file ./lambda/server-load/Dockerfile \
   --target controller \
   --tag "${IMAGE_NAME_CONTROLLER}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_CONTROLLER}:${DOCKER_TAG_LATEST}" \
   --platform "linux/amd64"
 
 docker build . \
+  --file ./lambda/server-load/Dockerfile \
   --target node \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG_LATEST}" \
