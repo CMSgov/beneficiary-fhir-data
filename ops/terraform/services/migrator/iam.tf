@@ -4,6 +4,7 @@ data "aws_iam_policy" "cloudwatch_agent_policy" {
   arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+# TODO: This should be removed as of BFD-1786
 data "aws_iam_policy" "ansible_vault_ro" {
   arn = "arn:aws:iam::${local.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
@@ -22,6 +23,16 @@ resource "aws_iam_policy" "sqs" {
                   "sqs:SendMessage"
               ],
               "Resource": "${aws_sqs_queue.this.arn}"
+          },
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "kms:Encrypt",
+                  "kms:GenerateDataKey"
+              ],
+              "Resource": [
+                  "${local.kms_key_arn}"
+              ]
           }
       ]
   }
@@ -53,7 +64,7 @@ resource "aws_iam_policy" "ssm" {
                 "kms:Decrypt"
             ],
             "Resource": [
-                "${data.aws_kms_key.main.arn}"
+                "${local.kms_key_arn}"
             ]
         }
     ]
