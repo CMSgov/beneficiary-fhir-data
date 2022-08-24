@@ -66,7 +66,6 @@ resource "aws_iam_policy" "ssm" {
 EOF
 }
 
-
 resource "aws_iam_role" "this" {
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"

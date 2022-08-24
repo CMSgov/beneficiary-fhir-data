@@ -78,7 +78,6 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
   policy_arn = data.aws_iam_policy.cloudwatch_xray_policy.arn
 }
 
-
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${var.env_config.env}-${local.service}-ssm-parameters"
   description = "Permissions to /bfd/${var.env_config.env}/common/nonsensitive, /bfd/${var.env_config.env}/${local.service} SSM hierarchies"
@@ -118,6 +117,3 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.ssm.arn
 }
-
-
-
