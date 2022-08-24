@@ -91,7 +91,7 @@ def runServerRegression(Map args = [:]) {
         'suite_version': 'v2',
         'spawn_rate': 10,
         'users': 10,
-        'spawned_runtime': '1m',
+        'spawned_runtime': '30s',
         'compare_tag': sanitizedBranchName,
         'store_tags': [sanitizedBranchName, "build${currentBuildId}__${sanitizedBranchName}"]
     ])
