@@ -43,23 +43,7 @@ spec:
                     sh 'git config --global --add safe.directory "$WORKSPACE"'
 
                     // Setup AWS Credentials
-                    withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-                        withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'ROLE')]) {
-                            script {
-                                env.SESSION_NAME = env.JOB_NAME
-                                awsCredentials = sh(
-                                    returnStdout: true,
-                                    script: 'aws sts assume-role --role-arn "$ROLE" \
-                                            --role-session-name "$SESSION_NAME" \
-                                            --output text --query Credentials'
-                                ).trim().split(/\s+/)
-                                env.AWS_DEFAULT_REGION = 'us-east-1'
-                                env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-                                env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-                                env.AWS_SESSION_TOKEN = awsCredentials[3]
-                            }
-                        }
-                    }
+                    awsAuth.assumeRole()
 
                     // Execute the existing build-push script
                     dir('apps/utils/locust_tests') {
