@@ -9,7 +9,7 @@
 set -euo pipefail
 
 AWS_REGION="${AWS_REGION:-us-east-1}"
-SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ env }}-db-migrator" --region "$AWS_REGION" --output text)"
+SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ sqs_queue_name }}" --region "$AWS_REGION" --output text)"
 MIGRATOR_SERVICE_NAME="{{ db_migrator_service_name_override | default('bfd-db-migrator.service', true) }}"
 MONITOR_HEARTBEAT_INTERVAL_SECONDS="{{ migrator_monitor_heartbeat_interval_seconds | default('300', true) }}"
 
