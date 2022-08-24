@@ -7,6 +7,22 @@
             "x": 0,
             "type": "text",
             "properties": {
+                "markdown": "# Dashboard Directory \n\n
+                [button:SLI Dashboard]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-prod)\n
+                [button:BFD Application Log Metrics]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-prod)\n
+                [button:Host Metrics]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-prod)\n
+                [button:AWS Service Dashboards]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-prod)\n
+                [button:OpenTelemetry Metrics]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-prod)\n\n
+                # Oh Wait there's more\nHere are BFD's SLO Definitions: [insert finalized document link]()\nUseful troubleshooting runbooks:"
+                }
+        },
+        {
+            "height": 1,
+            "width": 24,
+            "y": 65,
+            "x": 0,
+            "type": "text",
+            "properties": {
                 "markdown": "# Service Metrics"
             }
         },

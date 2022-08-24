@@ -1,6 +1,6 @@
-variable "env_config" {
+variable "env" {
   description = "All high-level info for the whole vpc"
-  type        = object({ env = string, tags = map(string), vpc_id = string, zone_id = string, azs = list(string) })
+  type        = string
 }
 
 variable "dashboard_name" {

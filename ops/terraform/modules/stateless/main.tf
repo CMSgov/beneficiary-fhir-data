@@ -401,5 +401,5 @@ module "bfd_dashboards" {
   source              = "../resources/bfd_cw_dashboards"
   dashboard_name      = var.dashboard_name
   dashboard_namespace = var.dashboard_namespace
-  asg                 = module.fhir_asg.asg_id
+  env = var.env_config.env
 }

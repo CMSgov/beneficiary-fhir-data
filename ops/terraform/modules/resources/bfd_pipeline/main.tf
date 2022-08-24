@@ -285,7 +285,7 @@ resource "aws_cloudwatch_dashboard" "bfd_pipeline_dashboard" {
 # BFD Pipeline CloudWatch Dashboard
 resource "aws_cloudwatch_dashboard" "bfd_pipeline_aws_services_dashboard" {
   dashboard_name = "bfd-pipeline-${var.env_config.env}"
-  dashboard_body = templatefile("${path.module}/templates/aws-services-dashboard.tpl", { dashboard_namespace = "bfd-${var.env_config.env}/bfd-pipeline" })
+  dashboard_body = templatefile("${path.module}/templates/aws-services-dashboard.tpl", { dashboard_namespace = "bfd-${var.env_config.env}/bfd-pipeline", env = var.env_config.env })
 }
 # BFD Pipeline CloudWatch Dashboard
 resource "aws_cloudwatch_dashboard" "bfd_pipeline_opentelemetry_dashboard" {

@@ -702,6 +702,6 @@
                 "period": 300,
                 "title": "Dropwizard Pools Metaspace"
             }
-        },
+        }
     ]
 }
