@@ -1,3 +1,20 @@
+#
+# Script for creating a file that describes which bene ids were generated 
+# and what claim types were associated with each bene id. 
+# Will overwrite any characteristics.csv at output location, assuming queries succeed
+#
+# Args:
+# 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
+# 2: bene id end (exclusive, taken from new output end state properties)
+# 3: db data string (db username and password for target environment DB, in this format (including quotes): "dbUsername,dbPassword")
+# 4: file system location to write the characteristics file
+# 5: which environment to check, should be a single value from the list of [test sbx prod]
+#
+# Example runstring: python3 ./generate-characteristics-file.py -10000008009988 -10000010009985 "dbUsername,dbPassword" ~/Documents/Test/ test
+#
+# Requires psycopg2 installed
+#
+
 import sys
 import psycopg2
 import re
@@ -12,8 +29,22 @@ def generate_characteristics_file(args):
     
     bene_id_start = args[0]
     bene_id_end = args[1]
-    db_string = args[2]
+    db_data = args[2].split(',')
     output_path = args[3]
+    env = args[4]
+    
+    db_string = ""
+    
+    if "test" == env:
+        db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-test-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+    elif "prd-sbx" == env or "sbx" == env:
+        db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-prod-sbx-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+    elif "prd" == env:
+        db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-prod-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+    else:
+        print(f"(Validation Failure) Unknown environment string {env}")
+        print("Returning with exit code 1")
+        sys.exit(1)
     
     header = ['Beneficiary Id','MBI Unhashed','Part D Contract Number','Carrier Claims Total','DME Claims Total','HHA Claims Total','Hospice Claims Total','Inpatient Claims Total','Outpatient Claims Total','SNF Claims Total','Part D Events Total']
     
@@ -152,13 +183,4 @@ def _execute_query(uri: str, query: str):
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
-    # 3 args:
-    # arg1: bene id starting point for the load to check. The characteristics file generation will assume everything from this point on (counting down, as the synthea bene ids are negative) is new in the db. This can be mined from the synthea properties file used for the generation
-    # arg2: bene id ending point; this should be the number from end-state.properties for bene_id
-    # arg2: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
-    # arg3: file system location to output the characteristics file
-    """
-    Notes:
-    - Will overwrite any characteristics.csv at output location, assuming queries succeed
-    """
     generate_characteristics_file(sys.argv[1:])

@@ -3,6 +3,8 @@
 from locust.argument_parser import LocustArgumentParser
 from locust.util.timespan import parse_timespan
 
+from .stats.stats_config import StatsConfiguration
+
 
 def register_custom_args(parser: LocustArgumentParser):
     parser.add_argument(
@@ -55,13 +57,5 @@ def register_custom_args(parser: LocustArgumentParser):
         env_var="LOCUST_DATA_TABLE_SAMPLE_PERCENT",
         default=0.25,
     )
-    parser.add_argument(
-        "--stats-config",
-        type=str,
-        help=(
-            '"<If set, stores stats in JSON to S3 or local file. Key-value list seperated by'
-            ' semi-colons. See README.>" (Optional)'
-        ),
-        dest="stats_config",
-        env_var="LOCUST_STATS_CONFIG",
-    )
+
+    StatsConfiguration.register_custom_args(parser)

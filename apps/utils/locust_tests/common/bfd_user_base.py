@@ -17,6 +17,11 @@ from common.stats.aggregated_stats import StatsCollector
 from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 
+_COMPARISONS_METADATA_PATH = None
+"""The path to a given stats comparison metadata JSON file for a particular test suite. Should be
+overriden in modules (Locustfiles) that import bfd_user_base using set_comparisons_metadata_path().
+Also overriden by the value of --stats-compare-meta-file"""
+
 
 @events.init_command_line_parser.add_listener
 def _(parser: LocustArgumentParser, **kwargs) -> None:
@@ -43,18 +48,45 @@ def _(environment: Environment, **kwargs) -> None:
 
     validation.check_sla_validation(environment)
 
+    logger = logging.getLogger()
+
     if not environment.parsed_options:
+        logger.warning("No parsed options found -- is Locust running as a Library?")
         return
 
-    stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
-    if stats_config:
-        # If --stats-config was set and it is valid, get the aggregated stats of the stopping test run
-        stats_collector = StatsCollector(environment, stats_config.store_tag, stats_config.env)
-        stats = stats_collector.collect_stats()
+    try:
+        stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
+    except ValueError as exc:
+        logger.warning("Unable to get stats configuration: %s", str(exc))
+        return
 
-        stats_compare.do_stats_comparison(environment, stats_config, stats)
+    # If stats_config is valid, get the aggregated stats of the stopping test run
+    stats_collector = StatsCollector(
+        environment, stats_config.stats_store_tags, stats_config.stats_env
+    )
+    stats = stats_collector.collect_stats()
+
+    try:
+        final_result = stats_compare.do_stats_comparison(
+            environment,
+            stats_config,
+            stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH,
+            stats,
+        )
+        stats.metadata.compare_result = final_result  # type: ignore
+    finally:
         stats_writers.write_stats(stats_config, stats)
 
+def set_comparisons_metadata_path(path: str) -> None:
+    """Sets the file path used to define metadata about stat comparisons (i.e. failure and warning
+    percent ratio thresholds, etc.) for a given Locustfile/test suite. Should be called in the
+    Locustfile's module scope
+
+    Args:
+        path (str): Path to a JSON file describing stat comparison metadata
+    """
+    global _COMPARISONS_METADATA_PATH
+    _COMPARISONS_METADATA_PATH = path
 
 class BFDUserBase(FastHttpUser):
     """Base Class for Locust tests against BFD.
