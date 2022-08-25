@@ -1,4 +1,4 @@
-Follow this runbook to mark a SNYK finding that has is determined not to be a vulnerability or that is considered an
+Follow this runbook to mark a SNYK finding that has been determined not to be a vulnerability or that is considered an
 acceptable risk as 'Ignored' in the [SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda).
 
 1. SNYK findings can be ignored when two lead engineers from either the BFD team or CMS agree on the justification.
