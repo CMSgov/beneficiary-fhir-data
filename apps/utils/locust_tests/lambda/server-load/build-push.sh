@@ -47,16 +47,19 @@ aws ssm put-parameter \
   --name "$SSM_IMAGE_TAG_BROKER" \
   --value "${IMAGE_NAME_BROKER}:${DOCKER_TAG}" \
   --overwrite \
+  --type String \
   --region "$AWS_REGION"
 
 aws ssm put-parameter \
   --name "$SSM_IMAGE_TAG_CONTROLLER" \
   --value "${IMAGE_NAME_CONTROLLER}:${DOCKER_TAG}" \
   --overwrite \
+  --type String \
   --region "$AWS_REGION"
 
 aws ssm put-parameter \
   --name "$SSM_IMAGE_TAG_NODE" \
   --value "${IMAGE_NAME_NODE}:${DOCKER_TAG}" \
   --overwrite \
+  --type String \
   --region "$AWS_REGION"
