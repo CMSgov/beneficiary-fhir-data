@@ -61,24 +61,11 @@ def handler(event, context):
     """
     Handles execution of a worker node.
     """
-    # We take only the first record, if it exists
-    try:
-        record = event["Records"][0]
-    except IndexError:
-        print("Invalid queue message, no records found")
-        return
-
-    # We extract the body, and attempt to convert from JSON
-    try:
-        body = json.loads(record["body"])
-    except json.JSONDecodeError:
-        print("Record body was not valid JSON")
-        return
 
     # We then attempt to extract an InvokeEvent instance from
     # the JSON body
     try:
-        invoke_event = InvokeEvent(**body)
+        invoke_event = InvokeEvent(**event)
     except TypeError as ex:
         print(f"Message body missing required keys: {str(ex)}")
         return
