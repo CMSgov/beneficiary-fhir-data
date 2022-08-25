@@ -1,9 +1,10 @@
 Follow this runbook for each SNYK finding that appears in the
 [SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda) that does not have an associated SNYK bot PR automatically
-created in github.
+created in github, for those findings that *do* have a SNYK-bot PR follow the
+[Resolving SNKY-bot PRs](how-to-resolve-snyk-bot-prs.md).
 
 1. Is this a licensing finding? If yes, the finding can be marked as 'Ignored' by following the
-   [Ignore SNYK Findings Runbook](snyk-how-to-mark-snyk-findings-ignored.md).
+   [Ignore SNYK Findings Runbook](how-to-mark-snyk-findings-ignored.md).
 
 2. For all other findings, including infrastructure findings and Maven dependency updates that do not have a SNYK bot PR:
     - Create a JIRA ticket or modify the AC of an existing ticket to capture the task of remediating the finding.
