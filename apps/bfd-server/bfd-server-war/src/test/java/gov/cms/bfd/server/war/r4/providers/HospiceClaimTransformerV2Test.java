@@ -207,7 +207,7 @@ public final class HospiceClaimTransformerV2Test {
 
     ident = new Identifier();
     ident
-        .setValue("999999999")
+        .setValue("0000000000")
         .setSystem("http://hl7.org/fhir/sid/us-npi")
         .getType()
         .addCoding()

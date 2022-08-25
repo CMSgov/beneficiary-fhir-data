@@ -434,6 +434,36 @@ public final class TransformerUtils {
 
   /**
    * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
+   * will be set to a {@link CodeableConcept} containing a single {@link Coding}, with the specified
+   * system and code.
+   *
+   * <p>Data Architecture Note: The {@link CodeableConcept} might seem extraneous -- why not just
+   * add the {@link Coding} directly to the {@link Extension}? The main reason for doing it this way
+   * is consistency: this is what FHIR seems to do everywhere.
+   *
+   * @param fhirElement the FHIR element to add the {@link Extension} to
+   * @param extensionUrl the {@link Extension#getUrl()} to use
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingDisplay the {@link Coding#getDisplay()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   */
+  static void addExtensionCoding(
+      IBaseHasExtensions fhirElement,
+      String extensionUrl,
+      String codingSystem,
+      Optional<String> codingDisplay,
+      String codingCode) {
+    IBaseExtension<?, ?> extension = fhirElement.addExtension();
+    extension.setUrl(extensionUrl);
+    if (!codingDisplay.isPresent())
+      extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
+    else
+      extension.setValue(
+          new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay.get()));
+  }
+
+  /**
+   * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
    * will be set to a {@link Quantity} with the specified system and value.
    *
    * @param fhirElement the FHIR element to add the {@link Extension} to

@@ -82,7 +82,7 @@
   "organization" : {
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "999999999"
+      "value" : "0000000000"
     }
   },
   "facility" : {
@@ -96,7 +96,7 @@
     } ],
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "999999999"
+      "value" : "0000000000"
     }
   },
   "information" : [ {

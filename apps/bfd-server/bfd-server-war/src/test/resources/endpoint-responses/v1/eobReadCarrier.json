@@ -181,8 +181,7 @@
       "url" : "http://hl7.org/fhir/sid/us-npi",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
-        "code" : "1497758544",
-        "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+        "code" : "1497758544"
       }
     } ],
     "sequence" : 2,
