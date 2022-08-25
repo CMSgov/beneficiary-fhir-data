@@ -148,6 +148,7 @@ def handler(event, context):
     while not scaling_event:
         start_worker(controller_ip=controller_response.ip_address)
         # Check for a scaling event
-        scaling_event = check_queue(timeout=1)
+        # TODO: Make timeout an environment variable with sane default
+        scaling_event = check_queue(timeout=10)
 
     return
