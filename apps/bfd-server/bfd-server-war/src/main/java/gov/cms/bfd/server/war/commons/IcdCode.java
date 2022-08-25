@@ -14,7 +14,7 @@ public abstract class IcdCode {
   /** The {@link Coding#getSystem()} used for ICD-10 diagnosis codes. */
   public static final String CODING_SYSTEM_ICD_10 = "http://hl7.org/fhir/sid/icd-10";
 
-  /** The {@link Coding#getSystem()} used for ICD-10 diagnosis codes. */
+  /** The {@link Coding#getSystem()} used for ICD-10-CM diagnosis codes. */
   public static final String CODING_SYSTEM_ICD_10_CM = "http://hl7.org/fhir/sid/icd-10-cm";
 
   private final String icdCode;
