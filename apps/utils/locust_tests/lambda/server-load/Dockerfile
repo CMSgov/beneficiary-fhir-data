@@ -20,6 +20,7 @@ CMD [ "app.handler" ]
 # Copy function code
 FROM base as controller
 COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
+COPY --from=python /var/lang/bin /var/lang/bin
 COPY . ${LAMBDA_TASK_ROOT}
 # Copy function code
 RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/controller.py" "${LAMBDA_TASK_ROOT}/app.py"
@@ -28,6 +29,7 @@ CMD [ "app.handler" ]
 # Copy function code
 FROM base as node
 COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
+COPY --from=python /var/lang/bin /var/lang/bin
 COPY . ${LAMBDA_TASK_ROOT}
 # Copy function code
 RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/node.py" "${LAMBDA_TASK_ROOT}/app.py"
