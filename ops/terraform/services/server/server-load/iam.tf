@@ -1,3 +1,25 @@
+resource "aws_iam_policy" "lambda" {
+  name        = "bfd-${local.env}-${local.service}-lambda-invocation"
+  description = "Permissions to invoke controller and node lambdas in ${local.env}"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Resource": [
+              "arn:aws:lambda:us-east-1:${local.account_id}:function:bfd-${local.env}-server-load-controller",
+              "arn:aws:lambda:us-east-1:${local.account_id}:function:bfd-${local.env}-server-load-node"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common and /bfd/${local.env}/server SSM hierarchies"
@@ -93,7 +115,7 @@ EOF
 
 resource "aws_iam_policy" "sqs" {
   name        = "bfd-${local.env}-${local.service}-sqs"
-  description = "Permissions to use ${local.pipeline_signal_queue_name} SQS queue"
+  description = "Permissions to use ${local.queue_name}-broker SQS queue"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -130,6 +152,7 @@ resource "aws_iam_role" "lambda" {
   path        = "/"
   description = "Role for lambda profile use for ${local.service} in ${local.env}"
 
+  # TODO: this is probably unacceptable. Separate concerns for the lambda principal and asg principal
   assume_role_policy = <<-EOF
   {
       "Version": "2012-10-17",
@@ -139,6 +162,13 @@ resource "aws_iam_role" "lambda" {
               "Effect": "Allow",
               "Principal": {
                   "Service": "lambda.amazonaws.com"
+              }
+          },
+          {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "autoscaling.amazonaws.com"
               }
           }
       ]
@@ -152,6 +182,7 @@ resource "aws_iam_role" "lambda" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.logs.arn,
-    aws_iam_policy.sqs.arn
+    aws_iam_policy.sqs.arn,
+    aws_iam_policy.lambda.arn
   ]
 }

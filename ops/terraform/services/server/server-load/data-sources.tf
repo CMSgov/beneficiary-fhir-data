@@ -26,6 +26,7 @@ data "aws_subnets" "main" {
   }
 }
 
+# TODO: Consider hoisting these pieces into the server definition
 data "aws_launch_template" "template" {
   name = "bfd-${local.env}-fhir"
 }

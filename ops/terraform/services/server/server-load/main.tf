@@ -135,4 +135,5 @@ resource "aws_autoscaling_lifecycle_hook" "scaling_hook" {
   autoscaling_group_name  = data.aws_autoscaling_group.asg.name
   notification_target_arn = aws_sqs_queue.broker.arn
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_LAUNCHING"
+  role_arn                = aws_iam_role.lambda.arn
 }
