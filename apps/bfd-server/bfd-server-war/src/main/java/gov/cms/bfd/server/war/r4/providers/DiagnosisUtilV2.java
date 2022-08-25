@@ -135,9 +135,9 @@ public class DiagnosisUtilV2 {
     // Add an additional coding for CARIN conformance for ICD-10-cm
     String system = diag.getFhirSystem();
     if (system == IcdCode.CODING_SYSTEM_ICD_10) {
-      toCodingSystem(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, diag.getCode());
+      addCodingToCodeableConcept(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, diag.getCode());
     }
-    toCodingSystem(codeableConcept, system, diag.getCode());
+    addCodingToCodeableConcept(codeableConcept, system, diag.getCode());
 
     return codeableConcept;
   }
@@ -145,12 +145,12 @@ public class DiagnosisUtilV2 {
   /**
    * Creates a {@link Coding} from an R4 {@link CodeableConcept}
    *
-   * @param codeableConcept The codeableConcept to create a Coding for
+   * @param codeableConcept The codeableConcept to add Codings for
    * @param system The system
    * @param system The code
    * @return
    */
-  static CodeableConcept toCodingSystem(
+  static CodeableConcept addCodingToCodeableConcept(
       CodeableConcept codeableConcept, String system, String code) {
     codeableConcept
         .addCoding()
