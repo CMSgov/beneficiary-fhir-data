@@ -2,7 +2,8 @@
 
 ## BFD-1894: Add CARIN conformant coding system in Diagnosis Coding list element in V2
 
-Add an additional coding for ICD-10 diagnoses with ICD-10-CM codes to be in compliance with CARIN.
+Add an additional coding for ICD diagnoses codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. http://hl7.org/fhir/sid/icd-10-cm)
+The existing coding has been left in place for backwards compatibility
 
 New diagnosis:
 ```json
