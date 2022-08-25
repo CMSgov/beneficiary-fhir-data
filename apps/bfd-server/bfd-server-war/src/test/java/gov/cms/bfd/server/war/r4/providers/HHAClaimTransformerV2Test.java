@@ -476,7 +476,8 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", null)),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -492,8 +493,14 @@ public class HHAClaimTransformerV2Test {
             // Order doesn't matter
             diag2.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B20", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B20", null)),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -511,8 +518,8 @@ public class HHAClaimTransformerV2Test {
             // Order doesn't matter
             diag3.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B05", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", "MEASLES"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B05", "MEASLES")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -530,8 +537,8 @@ public class HHAClaimTransformerV2Test {
             // Order doesn't matter
             diag4.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B30", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B30", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B30", "VIRAL CONJUNCTIVITIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B30", "VIRAL CONJUNCTIVITIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

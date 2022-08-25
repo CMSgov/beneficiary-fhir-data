@@ -334,7 +334,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "H5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -349,10 +350,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "H8888"
+        "code" : "B20",
+        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H8888"
+        "code" : "B20",
+        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
       } ]
     },
     "type" : [ {
@@ -367,10 +370,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "R2222"
+        "code" : "B05",
+        "display" : "MEASLES"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     },
     "type" : [ {
@@ -385,10 +390,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "R3333"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       } ]
     },
     "type" : [ {

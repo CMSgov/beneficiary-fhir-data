@@ -677,7 +677,11 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B20", null)),
+            Arrays.asList(
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-9-cm",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -694,7 +698,8 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", null)),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -711,7 +716,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A52", null)),
+            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -728,7 +733,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B05", null)),
+            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B05", "MEASLES")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -745,7 +750,8 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B15", null)),
+            Arrays.asList(
+                new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B15", "ACUTE HEPATITIS A")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",

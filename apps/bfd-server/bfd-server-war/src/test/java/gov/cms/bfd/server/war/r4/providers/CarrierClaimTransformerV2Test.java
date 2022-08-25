@@ -466,8 +466,9 @@ public class CarrierClaimTransformerV2Test {
             // Order doesn't matter
             diag1.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A02", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", null)),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A02", "OTHER SALMONELLA INFECTIONS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", "OTHER SALMONELLA INFECTIONS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -483,8 +484,8 @@ public class CarrierClaimTransformerV2Test {
             // Order doesn't matter
             diag2.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", "AMEBIASIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -502,8 +503,8 @@ public class CarrierClaimTransformerV2Test {
             // Order doesn't matter
             diag3.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B04", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B04", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B04", "MONKEYPOX"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B04", "MONKEYPOX")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -521,8 +522,8 @@ public class CarrierClaimTransformerV2Test {
             // Order doesn't matter
             diag4.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B05", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", "MEASLES"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B05", "MEASLES")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -540,8 +541,8 @@ public class CarrierClaimTransformerV2Test {
             // Order doesn't matter
             diag5.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

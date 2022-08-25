@@ -695,8 +695,14 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag1.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A05", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A05", null)),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm",
+                    "A05",
+                    "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "A05",
+                    "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\"")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "admitting",
@@ -714,8 +720,8 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag2.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A40", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A40", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A40", "STREPTOCOCCAL SEPSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -733,8 +739,8 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag3.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -752,8 +758,8 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag4.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", "AMEBIASIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -771,8 +777,8 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag5.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", "RESPIRATORY TUBERCULOSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -790,8 +796,14 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag6.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B20", "HEADACHE"),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B20", "HEADACHE")),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -809,8 +821,10 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag7.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A01", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A01", null)),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A01", "TYPHOID AND PARATYPHOID FEVERS"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "A01", "TYPHOID AND PARATYPHOID FEVERS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -828,8 +842,9 @@ public final class InpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag8.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A02", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", null)),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A02", "OTHER SALMONELLA INFECTIONS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", "OTHER SALMONELLA INFECTIONS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",

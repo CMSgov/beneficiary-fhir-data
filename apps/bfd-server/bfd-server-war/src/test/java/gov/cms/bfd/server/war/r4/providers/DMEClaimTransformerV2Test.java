@@ -252,8 +252,8 @@ public final class DMEClaimTransformerV2Test {
             // Order doesn't matter
             diag1.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B04", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B04", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B04", "MONKEYPOX"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B04", "MONKEYPOX")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -271,8 +271,8 @@ public final class DMEClaimTransformerV2Test {
             // Order doesn't matter
             diag2.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A37", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A37", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A37", "WHOOPING COUGH"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A37", "WHOOPING COUGH")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -290,8 +290,8 @@ public final class DMEClaimTransformerV2Test {
             // Order doesn't matter
             diag3.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A25", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A25", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A25", "RAT-BITE FEVERS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A25", "RAT-BITE FEVERS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

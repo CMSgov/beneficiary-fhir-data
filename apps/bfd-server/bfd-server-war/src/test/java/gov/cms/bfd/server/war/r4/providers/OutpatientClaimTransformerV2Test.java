@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public final class OutpatientClaimTransformerV2Test {
@@ -439,8 +440,8 @@ public final class OutpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag4.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", "RESPIRATORY TUBERCULOSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -458,8 +459,14 @@ public final class OutpatientClaimTransformerV2Test {
             // Order doesn't matter
             diag5.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B20", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "B20", null)),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "patientreasonforvisit",
@@ -1356,7 +1363,7 @@ public final class OutpatientClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  // @Disabled
+  @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
