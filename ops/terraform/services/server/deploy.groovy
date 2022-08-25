@@ -92,8 +92,8 @@ def runServerRegression(Map args = [:]) {
         'spawn_rate': 10,
         'users': 10,
         'spawned_runtime': '30s',
-        'compare_tag': "build${lastSuccessfulBuildID}__${sanitizedBranchName}",
-        'store_tag': "build${currentBuildId}__${sanitizedBranchName}"
+        'compare_tag': sanitizedBranchName,
+        'store_tags': [sanitizedBranchName, "build${currentBuildId}__${sanitizedBranchName}"]
     ])
     awsSqs.sendMessage(
         sqsQueueUrl: lamdaSqsQueueUrl,
