@@ -45,34 +45,13 @@ class StatsComparisonType(str, Enum):
 
 @dataclass
 class StatsConfiguration:
-<<<<<<< HEAD
-    """Dataclass that holds data about where and how aggregated performance statistics are stored and compared"""
-=======
     """Dataclass that holds data about where and how aggregated performance statistics are stored
     and compared"""
->>>>>>> cbrune/bfd-1922-add-pipeline-files
 
     stats_store: StatsStorageType
     """The storage type that the stats will be written to"""
     stats_env: StatsEnvironment
     """The test running environment from which the statistics will be collected"""
-<<<<<<< HEAD
-    store_tag: str
-    """A simple string tag that is used to partition collected statistics when stored"""
-    path: Optional[str]
-    """The local parent directory where JSON files will be written to.
-    Used only if type is file, ignored if type is s3"""
-    bucket: Optional[str]
-    """The AWS S3 Bucket that the JSON will be written to.
-    Used only if type is s3, ignored if type is file"""
-    database: Optional[str]
-    """Name of the Athena database that is queried upon when comparing statistics.
-    Also used as part of the file path when storing stats in S3"""
-    table: Optional[str]
-    """Name of the table to query using Athena if store is s3 and compare is set.
-    Also used as part of the file path when storing stats in S3"""
-    compare: Optional[StatsComparisonType]
-=======
     stats_store_tags: List[str]
     """A simple List of string tags that are used to partition collected statistics when stored"""
     stats_store_file_path: Optional[str]
@@ -88,35 +67,15 @@ class StatsConfiguration:
     """Name of the table to query using Athena if store is s3 and compare is set.
     Also used as part of the file path when storing stats in S3"""
     stats_compare: Optional[StatsComparisonType]
->>>>>>> cbrune/bfd-1922-add-pipeline-files
     """Indicates the type of performance stats comparison that will be done"""
     stats_compare_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
-<<<<<<< HEAD
-
-    def to_key_val_str(self) -> str:
-        """Returns a key-value string representation of this StatsConfiguration instance.
-        Used to serialize this object to config.
-
-        Returns:
-            str: The key-value string representation of this object.
-        """
-        as_dict = dataclasses.asdict(self)
-        dict_non_empty = {k: v for k, v in as_dict.items() if v is not None and v != ""}
-        return ";".join(
-            [
-                f"{k}={str(v) if not isinstance(v, Enum) else v.name}"
-                for k, v in dict_non_empty.items()
-            ]
-        )
-=======
     stats_compare_load_limit: int
     """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
     comparisons"""
     stats_compare_meta_file: Optional[str]
     """Indicates the path to a JSON file containing metadata about how stats should be compared for
     the running test suite. Overrides the default specified by the test suite, if any"""
->>>>>>> cbrune/bfd-1922-add-pipeline-files
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
@@ -234,29 +193,6 @@ class StatsConfiguration:
             const=StatsComparisonType.AVERAGE,
         )
 
-<<<<<<< HEAD
-        # Validate necessary parameters if S3 is specified
-        if storage_type == StatsStorageType.S3:
-            # Validate that parameters necessary to store stats in S3
-            # are specified if S3 is the store
-            if not "bucket" in config_dict:
-                raise ValueError('"bucket" must be specified if "store" is "s3"') from None
-            if not "database" in config_dict:
-                raise ValueError('"database" must be specified if "store" is "s3"') from None
-            if not "table" in config_dict:
-                raise ValueError('"table" must be specified if "store" is "s3"') from None
-
-        return cls(
-            store=storage_type,
-            env=stats_environment,
-            store_tag=storage_tag,
-            path=config_dict.get("path") or "./",
-            bucket=config_dict.get("bucket"),
-            database=config_dict.get("database"),
-            table=config_dict.get("table"),
-            compare=compare_type,
-            comp_tag=comparison_tag,
-=======
         stats_group.add_argument(
             "--stats-compare-tag",
             type=cls.__validate_tag,
@@ -286,7 +222,6 @@ class StatsConfiguration:
             ),
             dest="stats_compare_meta_file",
             env_var="LOCUST_STATS_COMPARE_META_FILE",
->>>>>>> cbrune/bfd-1922-add-pipeline-files
         )
 
     @classmethod
@@ -305,19 +240,11 @@ class StatsConfiguration:
         stats_args: Dict[str, Any] = {k: v for k, v in opts_as_dict.items() if k in common_keys}
 
         try:
-<<<<<<< HEAD
-            stats_config = StatsConfiguration.from_key_val_str(stats_config_str)
-        except ValueError as e:
-            logger = logging.getLogger()
-            logger.warning('--stats-config was invalid: "%s"', e)
-            return None
-=======
             stats_config = StatsConfiguration(**stats_args)
         except ValueError as exc:
             raise ValueError(
                 f"Unable to create instance of StatsConfiguration from given arguments: {str(exc)}"
             ) from exc
->>>>>>> cbrune/bfd-1922-add-pipeline-files
 
         return stats_config
 
