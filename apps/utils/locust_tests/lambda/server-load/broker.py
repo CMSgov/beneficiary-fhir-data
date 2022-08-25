@@ -4,7 +4,7 @@ until a scaling event occurs.
 """
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, List, Optional
 
 import boto3
@@ -48,7 +48,7 @@ def start_controller(payload: InvokeEvent):
     Invokes the lambda function that runs the main Locust test instance.
 
     """
-    payload_json = json.dumps(payload.__dict__)
+    payload_json = json.dumps(asdict(payload))
 
     response = lambda_client.invoke(
         FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload_json
