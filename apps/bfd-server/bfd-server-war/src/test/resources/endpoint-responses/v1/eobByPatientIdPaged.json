@@ -1238,7 +1238,7 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "000000000"
+          "value" : "0000000000"
         }
       },
       "facility" : {
@@ -1252,7 +1252,7 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "000000000"
+          "value" : "0000000000"
         }
       },
       "information" : [ {
@@ -3679,7 +3679,8 @@
           "url" : "http://hl7.org/fhir/sid/us-npi",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
-            "code" : "0000000000"
+            "code" : "1497758544",
+            "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
           }
         } ],
         "sequence" : 2,
