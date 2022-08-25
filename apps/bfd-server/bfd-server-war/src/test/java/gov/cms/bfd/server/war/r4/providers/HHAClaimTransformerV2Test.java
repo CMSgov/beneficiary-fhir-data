@@ -476,8 +476,7 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", "STREPTOCOCCAL SEPSIS")),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -492,7 +491,7 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10-cm",
                     "B20",
@@ -517,7 +516,7 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", "MEASLES"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "B05", "MEASLES")),
             new Coding(
@@ -536,7 +535,7 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B30", "VIRAL CONJUNCTIVITIS"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "B30", "VIRAL CONJUNCTIVITIS")),
             new Coding(

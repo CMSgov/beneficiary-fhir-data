@@ -694,7 +694,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10-cm",
                     "A05",
@@ -719,7 +719,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A40", "STREPTOCOCCAL SEPSIS"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
@@ -738,7 +738,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
@@ -757,7 +757,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", "AMEBIASIS"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS")),
             new Coding(
@@ -776,7 +776,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", "RESPIRATORY TUBERCULOSIS"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS")),
             new Coding(
@@ -795,7 +795,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag6.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10-cm",
                     "B20",
@@ -820,7 +820,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag7.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10-cm", "A01", "TYPHOID AND PARATYPHOID FEVERS"),
                 new Coding(
@@ -841,7 +841,7 @@ public final class InpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag8.getSequence(),
-            Arrays.asList(
+            List.of(
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10-cm", "A02", "OTHER SALMONELLA INFECTIONS"),
                 new Coding("http://hl7.org/fhir/sid/icd-10", "A02", "OTHER SALMONELLA INFECTIONS")),
