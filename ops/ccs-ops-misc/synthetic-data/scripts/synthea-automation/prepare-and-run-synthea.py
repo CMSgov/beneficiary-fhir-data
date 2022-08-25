@@ -10,7 +10,7 @@
 # 5: which environments to load/validate, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
 # 6: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
 #
-# Example runstring (with db usernames and passwords as an env variable DB_STRING): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $DB_STRING
+# Example runstring (with db usernames and passwords as an env variable DB_STRING): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $DB_STRING "test,sbx"
 #
 # The script will enact the following steps:
 #
