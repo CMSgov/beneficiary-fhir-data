@@ -18,7 +18,8 @@ public final class DataUtilityCommonsTest {
   @Test
   public void getFDADrugCodesThrowsExceptionWhenFileIsNotADirectory() {
     String outputDir = "../temp/";
-    Path tempDir = Paths.get(outputDir); 
+    Path tempDir = Paths.get(outputDir);
+ 
     try (MockedStatic<Paths> paths = Mockito.mockStatic(Paths.class)) {
       try (MockedStatic<Path> path = Mockito.mockStatic(Path.class)) {
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class)) {
