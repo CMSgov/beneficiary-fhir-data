@@ -48,7 +48,7 @@ def start_controller(payload: InvokeEvent):
     Invokes the lambda function that runs the main Locust test instance.
 
     """
-    payload_json = json.dumps(payload)
+    payload_json = json.dumps(payload.__dict__)
 
     response = lambda_client.invoke(
         FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload_json
