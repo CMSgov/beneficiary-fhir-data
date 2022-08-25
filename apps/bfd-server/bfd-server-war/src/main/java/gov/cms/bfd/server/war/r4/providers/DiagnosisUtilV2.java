@@ -4,6 +4,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInpatientInstitutionalDiagnosisType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimOutpatientInstitutionalDiagnosisType;
@@ -133,8 +134,8 @@ public class DiagnosisUtilV2 {
 
     // Add an additional coding for CARIN conformance for ICD-10-cm
     String system = diag.getFhirSystem();
-    if (system == "http://hl7.org/fhir/sid/icd-10") {
-      toCodingSystem(codeableConcept, "http://hl7.org/fhir/sid/icd-10-cm", diag.getCode());
+    if (system == IcdCode.CODING_SYSTEM_ICD_10) {
+      toCodingSystem(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, diag.getCode());
     }
     toCodingSystem(codeableConcept, system, diag.getCode());
 
