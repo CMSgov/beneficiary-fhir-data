@@ -18,7 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
 /**
- * JPA class for the {@code FissProcCodes} table. */
+ * JPA class for the {@code FissProcCodes} table.
+ */
 @Entity
 @Builder
 @AllArgsConstructor
@@ -71,7 +72,8 @@ public class FissProcCode implements Serializable {
   private LocalDate procDate;
 
   /**
-   * Illustrates string column auto-converted into long in entity class. */
+   * Illustrates string column auto-converted into long in entity class.
+   */
   @Column(
       name = "`longString`",
       nullable = true,
@@ -142,7 +144,8 @@ public class FissProcCode implements Serializable {
   }
 
   /**
-   * PK class for the FissProcCodes table */
+   * PK class for the FissProcCodes table
+   */
   @Getter
   @EqualsAndHashCode
   @NoArgsConstructor

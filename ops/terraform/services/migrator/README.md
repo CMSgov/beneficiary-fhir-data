@@ -31,16 +31,11 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | Provided AMI ID for the migrator. | `string` | n/a | yes |
-| <a name="input_git_branch_name"></a> [git\_branch\_name](#input\_git\_branch\_name) | Source branch for this migrator deployment | `string` | n/a | yes |
+| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | Provided AMI ID for the migrator. | `string` | `null` | no |
 | <a name="input_create_migrator_instance"></a> [create\_migrator\_instance](#input\_create\_migrator\_instance) | When true, create the migrator instance | `bool` | `false` | no |
-| <a name="input_instance_type_override"></a> [instance\_type\_override](#input\_instance\_type\_override) | Valid instance type. See [ec2 instance types](https://aws.amazon.com/ec2/instance-types/) | `string` | `null` | no |
-| <a name="input_migrator_monitor_enabled_override"></a> [migrator\_monitor\_enabled\_override](#input\_migrator\_monitor\_enabled\_override) | When true, migrator system emits signals to SQS. Defaults to `true` | `bool` | `null` | no |
-| <a name="input_migrator_monitor_heartbeat_interval_seconds_override"></a> [migrator\_monitor\_heartbeat\_interval\_seconds\_override](#input\_migrator\_monitor\_heartbeat\_interval\_seconds\_override) | Sets interval for migrator monitor heartbeat in seconds. Defaults to `300` | `number` | `null` | no |
-| <a name="input_rds_cluster_identifier_override"></a> [rds\_cluster\_identifier\_override](#input\_rds\_cluster\_identifier\_override) | RDS Cluster identifier. Defaults to environment-specific RDS cluster. | `string` | `null` | no |
-| <a name="input_security_group_ids_extra"></a> [security\_group\_ids\_extra](#input\_security\_group\_ids\_extra) | Extra security group IDs | `list(string)` | `[]` | no |
-| <a name="input_sqs_queue_name_override"></a> [sqs\_queue\_name\_override](#input\_sqs\_queue\_name\_override) | SQS Queue Name. Defaults to environment-specific SQS Queue. | `string` | `null` | no |
-| <a name="input_volume_size_override"></a> [volume\_size\_override](#input\_volume\_size\_override) | Root volume size override. | `number` | `null` | no |
+| <a name="input_git_repo_version"></a> [git\_repo\_version](#input\_git\_repo\_version) | Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version) | `string` | `"master"` | no |
+| <a name="input_migrator_monitor_enabled_override"></a> [migrator\_monitor\_enabled\_override](#input\_migrator\_monitor\_enabled\_override) | When true, migrator system emits signals to SQS. Defaults to `true` via locals | `bool` | `null` | no |
+| <a name="input_migrator_monitor_heartbeat_interval_seconds_override"></a> [migrator\_monitor\_heartbeat\_interval\_seconds\_override](#input\_migrator\_monitor\_heartbeat\_interval\_seconds\_override) | Sets interval for migrator monitor heartbeat in seconds. Defaults to `300` via locals | `number` | `null` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
@@ -74,20 +69,22 @@ https://terraform-docs.io/user-guide/configuration/
 |------|------|
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.sqs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_instance.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_sqs_queue.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sqs_queue) | resource |
-| [aws_ami.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy.ansible_vault_ro](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_key_pair.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/key_pair) | data source |
-| [aws_kms_key.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_rds_cluster.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_ssm_parameters_by_path.nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_ssm_parameters_by_path.nonsensitive_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_subnet.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 | [external_external.rds](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |

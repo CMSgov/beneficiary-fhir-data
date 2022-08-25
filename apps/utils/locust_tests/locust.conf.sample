@@ -9,9 +9,13 @@ host = "http://test.bfd.cms.gov/"
 users = 100
 
 # These parameters are custom-defined parameters needed to run BFD-specific tests.
-# See common/bfd_user_base.py's custom_args() function for their implementation
+# See the README for more information
 spawned-runtime = 10s
 database-uri = postgres://.../bfd
 table-sample-percent = 0.25
-stats-config = "store=file;env=TEST;store_tag=some_format;compare=previous"
 client-cert-path = /some/path/to/client/cert
+stats-store-file = true
+stats-env = TEST
+stats-store-tag = some_tag
+stats-store-tag = some_tag2
+stats-compare-previous = true
