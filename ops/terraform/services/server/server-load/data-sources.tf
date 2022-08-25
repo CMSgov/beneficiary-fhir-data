@@ -34,22 +34,30 @@ data "aws_autoscaling_group" "asg" {
   name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
 }
 
-data "aws_ecr_repository" "ecr" {
-  name = "bfd-mgmt-${local.service}"
+data "aws_ecr_repository" "ecr_broker" {
+  name = "bfd-mgmt-${local.service}-broker"
+}
+
+data "aws_ecr_repository" "ecr_controller" {
+  name = "bfd-mgmt-${local.service}-controller"
+}
+
+data "aws_ecr_repository" "ecr_node" {
+  name = "bfd-mgmt-${local.service}-node"
 }
 
 data "aws_ecr_image" "image_node" {
-  repository_name = data.aws_ecr_repository.ecr.name
+  repository_name = data.aws_ecr_repository.ecr_node.name
   image_tag       = local.docker_image_tag_node
 }
 
 data "aws_ecr_image" "image_controller" {
-  repository_name = data.aws_ecr_repository.ecr.name
+  repository_name = data.aws_ecr_repository.ecr_controller.name
   image_tag       = local.docker_image_tag_controller
 }
 
 data "aws_ecr_image" "image_broker" {
-  repository_name = data.aws_ecr_repository.ecr.name
+  repository_name = data.aws_ecr_repository.ecr_broker.name
   image_tag       = local.docker_image_tag_broker
 }
 
