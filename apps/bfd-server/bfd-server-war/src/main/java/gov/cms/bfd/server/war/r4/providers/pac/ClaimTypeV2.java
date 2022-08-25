@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.List;
@@ -24,7 +25,8 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.dcn,
           RdaFissClaim.Fields.stmtCovToDate,
-          FissClaimTransformerV2::transform);
+          FissClaimTransformerV2::transform,
+          Optional.empty());
 
   /** Instance for MCS claims. */
   public static final ClaimTypeV2<RdaMcsClaim> M =
@@ -35,7 +37,13 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
           RdaMcsClaim.Fields.idrHdrToDateOfSvc,
-          McsClaimTransformerV2::transform);
+          McsClaimTransformerV2::transform,
+          Optional.of(
+              new ServiceDateSubquerySpec(
+                  RdaMcsClaim.Fields.details,
+                  RdaMcsDetail.class,
+                  RdaMcsDetail.Fields.idrDtlToDate,
+                  RdaMcsDetail.Fields.idrDtlToDate)));
 
   /** Immutable list of all possible instances of this class. */
   private static final List<ClaimTypeV2<?>> VALUES = List.of(F, M);
@@ -60,7 +68,8 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       String entityEndDateAttribute,
-      ResourceTransformer<Claim> transformer) {
+      ResourceTransformer<Claim> transformer,
+      Optional<ServiceDateSubquerySpec> serviceDateJoinSpec) {
     super(
         nameForParsing,
         nameForMetrics,
@@ -68,7 +77,8 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
         entityMbiRecordAttribute,
         entityIdAttribute,
         entityEndDateAttribute,
-        transformer);
+        transformer,
+        serviceDateJoinSpec);
   }
 
   /**

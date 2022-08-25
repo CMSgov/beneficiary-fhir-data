@@ -29,10 +29,13 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   protected final String entityEndDateAttribute;
   /** The {@link ResourceTransformer} to convert an entity into a response object. */
   protected final ResourceTransformer<TResource> transformer;
+  /** When populated this attribute defines values needed to produce a service data sub-query. */
+  protected final Optional<ServiceDateSubquerySpec> serviceDateSubquerySpec;
 
   /**
    * Constructor intended for use by derived classes to set values in common fields.
    *
+   * @param nameForParsing value for {@link ResourceTypeV2#getNameForMetrics()}
    * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
@@ -40,6 +43,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
    * @param entityEndDateAttribute the attribute name for the service end date on the entity class
    * @param transformer the transformer used to convert from the given entity to the associated
    *     resource type
+   * @param serviceDateSubquerySpec value for {@link ResourceTypeV2#getServiceDateSubquerySpec()}
    */
   protected AbstractResourceTypeV2(
       String nameForParsing,
@@ -48,7 +52,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       String entityEndDateAttribute,
-      ResourceTransformer<TResource> transformer) {
+      ResourceTransformer<TResource> transformer,
+      Optional<ServiceDateSubquerySpec> serviceDateSubquerySpec) {
     this.nameForParsing = nameForParsing;
     this.nameForMetrics = nameForMetrics;
     this.entityClass = entityClass;
@@ -56,6 +61,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     this.entityIdAttribute = entityIdAttribute;
     this.entityEndDateAttribute = entityEndDateAttribute;
     this.transformer = transformer;
+    this.serviceDateSubquerySpec = serviceDateSubquerySpec;
   }
 
   @Override
@@ -88,6 +94,11 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     return transformer;
   }
 
+  @Override
+  public Optional<ServiceDateSubquerySpec> getServiceDateSubquerySpec() {
+    return serviceDateSubquerySpec;
+  }
+
   /**
    * Scans the provided instances to find the first one whose {@link
    * AbstractResourceTypeV2#nameForParsing} is equal to the provided string.
@@ -95,7 +106,10 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
    * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#nameForParsing} value to parse
    *     search for
    * @param values The specific instances to search
-   * @return the {@link AbstractResourceTypeV2} represented by the specified {@link String}
+   * @return the {@link AbstractResourceTypeV2} instance represented by the specified {@link String}
+   * @param <TResource> the {@link IBaseResource} type of the returned {@link
+   *     AbstractResourceTypeV2}
+   * @param <TSubclass> the subclass extending {@link AbstractResourceTypeV2} being returned
    */
   public static <
           TResource extends IBaseResource, TSubclass extends AbstractResourceTypeV2<TResource, ?>>

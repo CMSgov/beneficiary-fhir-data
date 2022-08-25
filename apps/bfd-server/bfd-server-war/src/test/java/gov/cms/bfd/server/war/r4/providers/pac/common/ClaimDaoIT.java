@@ -2,16 +2,27 @@ package gov.cms.bfd.server.war.r4.providers.pac.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.pac.ClaimResponseTypeV2;
 import gov.cms.bfd.server.war.r4.providers.pac.ClaimTypeV2;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class ClaimDaoIT {
   private static final RDATestUtils testUtils = new RDATestUtils();
@@ -61,7 +72,7 @@ public class ClaimDaoIT {
   public void verifyQueryWithKnownMbiHashFindsMatch() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
     testUtils.seedData(false);
-    var claims = runFissMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
+    var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
     assertEquals(2, claims.size());
   }
 
@@ -70,7 +81,7 @@ public class ClaimDaoIT {
   public void verifyQueryWithUnknownMbiHashFindsNothing() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
     testUtils.seedData(false);
-    var claims = runFissMbiHashQuery(claimDao, "not-an-mbi-hash");
+    var claims = runMcsMbiHashQuery(claimDao, "not-an-mbi-hash");
     assertEquals(0, claims.size());
   }
 
@@ -82,7 +93,7 @@ public class ClaimDaoIT {
   public void verifyQueryWithOldHashDisabledIgnoresOldHash() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
     testUtils.seedData(true);
-    var claims = runFissMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
+    var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
     assertEquals(0, claims.size());
   }
 
@@ -94,7 +105,7 @@ public class ClaimDaoIT {
   public void verifyQueryWithOldHashEnabledFindsHash() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
     testUtils.seedData(true);
-    var claims = runFissMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
+    var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
     assertEquals(2, claims.size());
   }
 
@@ -106,7 +117,7 @@ public class ClaimDaoIT {
   public void verifyQueryWithOldHashEnabledFindsOldHash() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
     testUtils.seedData(true);
-    var claims = runFissMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
+    var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
     assertEquals(2, claims.size());
   }
 
@@ -118,8 +129,127 @@ public class ClaimDaoIT {
   public void verifyQueryWithOldHashEnabledAndUnknownHashFindsNothing() {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
     testUtils.seedData(true);
-    var claims = runFissMbiHashQuery(claimDao, "not-a-hash");
+    var claims = runMcsMbiHashQuery(claimDao, "not-a-hash");
     assertEquals(0, claims.size());
+  }
+
+  /**
+   * Generates parameters for {@link ClaimDaoIT#testMcsServiceDateQuery}.
+   *
+   * @return all test parameters
+   */
+  private static Stream<McsServiceDateQueryParam> getMcsServiceDateQueryParameters() {
+    final var goodMbiHash = RDATestUtils.MBI_HASH;
+    final var badMbiHash = "not-a-valid-hash";
+    return Stream.of(
+        new McsServiceDateQueryParam(
+            "no-dates-matches-all",
+            goodMbiHash,
+            null,
+            null,
+            List.of(
+                "both-same",
+                "claim-earlier",
+                "claim-empty-dtl",
+                "claim-only",
+                "detail-earlier",
+                "detail-only",
+                "multi-detail",
+                "no-dates")),
+        new McsServiceDateQueryParam(
+            "bad-mbi-matches-none-no-dates", badMbiHash, null, null, List.of()),
+        new McsServiceDateQueryParam(
+            "bad-mbi-matches-none-last-updated",
+            badMbiHash,
+            new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            null,
+            List.of()),
+        new McsServiceDateQueryParam(
+            "bad-mbi-matches-none-service-date",
+            badMbiHash,
+            null,
+            new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            List.of()),
+        new McsServiceDateQueryParam(
+            "lastUpdated-mismatch",
+            goodMbiHash,
+            new DateRangeParam(new DateParam("gt2022-08-03"), null),
+            new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            List.of()),
+        new McsServiceDateQueryParam(
+            "lastUpdated-matches-3",
+            goodMbiHash,
+            new DateRangeParam(new DateParam("ge2022-06-06T00:00:00Z"), null),
+            new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            List.of("claim-earlier", "detail-earlier", "multi-detail")),
+        new McsServiceDateQueryParam(
+            "serviceDate-matches-all-dated",
+            goodMbiHash,
+            null,
+            new DateRangeParam(new DateParam("ge2022-05-25"), new DateParam("le2022-06-01")),
+            List.of(
+                "both-same",
+                "claim-earlier",
+                "claim-empty-dtl",
+                "claim-only",
+                "detail-earlier",
+                "detail-only",
+                "multi-detail")),
+        new McsServiceDateQueryParam(
+            "serviceDate-matches-3",
+            goodMbiHash,
+            null,
+            new DateRangeParam(new DateParam("ge2022-05-28"), new DateParam("le2022-05-30")),
+            List.of("both-same", "claim-earlier", "detail-earlier")));
+  }
+
+  /**
+   * Establishes a known set of MCS claims and runs a query using the given test parameters.
+   *
+   * @param testParam defines the test case to run
+   */
+  @ParameterizedTest()
+  @MethodSource("getMcsServiceDateQueryParameters")
+  protected void testMcsServiceDateQuery(McsServiceDateQueryParam testParam) {
+    final ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    testUtils.seedMbiRecord();
+    testUtils.seedMcsClaimForServiceIdTest("no-dates", LocalDate.of(2022, 6, 1), null, List.of());
+    testUtils.seedMcsClaimForServiceIdTest(
+        "claim-only", LocalDate.of(2022, 6, 2), LocalDate.of(2022, 5, 25), List.of());
+    testUtils.seedMcsClaimForServiceIdTest(
+        "claim-empty-dtl",
+        LocalDate.of(2022, 6, 3),
+        LocalDate.of(2022, 5, 26),
+        Arrays.asList(null, null));
+    testUtils.seedMcsClaimForServiceIdTest(
+        "detail-only", LocalDate.of(2022, 6, 4), null, List.of(LocalDate.of(2022, 5, 27)));
+    testUtils.seedMcsClaimForServiceIdTest(
+        "both-same",
+        LocalDate.of(2022, 6, 5),
+        LocalDate.of(2022, 5, 28),
+        List.of(LocalDate.of(2022, 5, 28)));
+    testUtils.seedMcsClaimForServiceIdTest(
+        "claim-earlier",
+        LocalDate.of(2022, 6, 6),
+        LocalDate.of(2022, 5, 15),
+        List.of(LocalDate.of(2022, 5, 29)));
+    testUtils.seedMcsClaimForServiceIdTest(
+        "detail-earlier",
+        LocalDate.of(2022, 6, 7),
+        LocalDate.of(2022, 5, 30),
+        List.of(LocalDate.of(2022, 5, 15)));
+    testUtils.seedMcsClaimForServiceIdTest(
+        "multi-detail",
+        LocalDate.of(2022, 6, 8),
+        LocalDate.of(2022, 6, 1),
+        Arrays.asList(
+            LocalDate.of(2022, 5, 15), LocalDate.of(2022, 5, 20), null, LocalDate.of(2022, 6, 1)));
+    final var claims =
+        runMcsServiceDateQuery(
+            claimDao, testParam.mbiHash, testParam.lastUpdatedParam, testParam.serviceDateParam);
+    assertEquals(
+        testParam.expectedClaimIds,
+        claims.stream().map(RdaMcsClaim::getIdrClmHdIcn).collect(Collectors.toList()));
   }
 
   /**
@@ -141,7 +271,44 @@ public class ClaimDaoIT {
    * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI
    *     hash.
    */
-  private List<RdaFissClaim> runFissMbiHashQuery(ClaimDao claimDao, String mbiHash) {
-    return claimDao.findAllByMbiAttribute(ClaimTypeV2.F, mbiHash, true, null, null);
+  private List<RdaMcsClaim> runMcsMbiHashQuery(ClaimDao claimDao, String mbiHash) {
+    return claimDao.findAllByMbiAttribute(ClaimTypeV2.M, mbiHash, true, null, null);
+  }
+
+  /**
+   * Helper function to run the MBI hash lookup method on the {@link ClaimDao} with the given date
+   * range parameters.
+   *
+   * @param claimDao The {@link ClaimDao} to execute the query on.
+   * @param serviceDate The service date {@link DateRangeParam}
+   * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI
+   *     hash and satisfying the date requirement.
+   */
+  private List<RdaMcsClaim> runMcsServiceDateQuery(
+      ClaimDao claimDao,
+      String mbiHash,
+      @Nullable DateRangeParam lastUpdated,
+      @Nullable DateRangeParam serviceDate) {
+    return claimDao.findAllByMbiAttribute(ClaimTypeV2.M, mbiHash, true, lastUpdated, serviceDate);
+  }
+
+  /** Parameter object defining a test case for {@link ClaimDaoIT#testMcsServiceDateQuery}. */
+  @AllArgsConstructor
+  private static class McsServiceDateQueryParam {
+    /** Meaningful name for test case. Used for toString() method. */
+    private final String testName;
+    /** MBI hash value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
+    private final String mbiHash;
+    /** lastUpdatedParam value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
+    @Nullable private final DateRangeParam lastUpdatedParam;
+    /** serviceDateParam value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
+    @Nullable private final DateRangeParam serviceDateParam;
+    /** List of claimId values expected in the query result. */
+    private final List<String> expectedClaimIds;
+
+    @Override
+    public String toString() {
+      return testName;
+    }
   }
 }

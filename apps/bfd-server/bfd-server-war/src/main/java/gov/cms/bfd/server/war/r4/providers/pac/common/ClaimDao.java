@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
@@ -10,33 +8,37 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 /** Provides common logic for performing DB interactions */
+@EqualsAndHashCode
+@AllArgsConstructor
 public class ClaimDao {
 
+  /** Query name for logging MDC */
   static final String CLAIM_BY_MBI_QUERY = "claim_by_mbi";
+  /** Query name for logging MDC */
   static final String CLAIM_BY_ID_QUERY = "claim_by_id";
 
+  /** {@link EntityManager} used for database access. */
   private final EntityManager entityManager;
+  /** {@link MetricRegistry} for metrics. */
   private final MetricRegistry metricRegistry;
+  /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
-
-  public ClaimDao(
-      EntityManager entityManager, MetricRegistry metricRegistry, boolean isOldMbiHashEnabled) {
-    this.entityManager = entityManager;
-    this.metricRegistry = metricRegistry;
-    this.isOldMbiHashEnabled = isOldMbiHashEnabled;
-  }
 
   /**
    * Gets an entity by it's ID for the given claim type.
@@ -90,38 +92,53 @@ public class ClaimDao {
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
     final Class<T> entityClass = resourceType.getEntityClass();
-    final String mbiRecordAttributeName = resourceType.getEntityMbiRecordAttribute();
     final String idAttributeName = resourceType.getEntityIdAttribute();
-    final String endDateAttributeName = resourceType.getEntityEndDateAttribute();
-
     final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    final CriteriaQuery<T> criteria = builder.createQuery(entityClass);
-    final Root<T> root = criteria.from(entityClass);
+    final CriteriaQuery<T> claimsQuery = builder.createQuery(entityClass);
+    final List<Predicate> predicates = new ArrayList<>();
 
-    criteria.select(root);
-    criteria.where(
-        builder.and(
-            createMbiPredicate(
-                root.get(mbiRecordAttributeName),
-                mbiSearchValue,
-                isMbiSearchValueHashed,
-                isOldMbiHashEnabled,
-                builder),
-            lastUpdated == null
-                ? builder.and()
-                : createDateRangePredicate(root, lastUpdated, builder),
-            serviceDate == null
-                ? builder.and()
-                : serviceDateRangePredicate(root, serviceDate, builder, endDateAttributeName)));
+    final Root<T> claim = claimsQuery.from(entityClass);
+
+    claimsQuery.select(claim);
+
+    if (resourceType.getServiceDateSubquerySpec().isPresent() && isDateRangePresent(serviceDate)) {
+      // This is a very specific case that uses a sub-query as its only where clause predicate.
+      // In this case all of the conditions are handled in the sub-query.
+      predicates.add(
+          createSubqueryPredicateForMbiLookup(
+              builder,
+              claimsQuery,
+              claim,
+              resourceType,
+              resourceType.getServiceDateSubquerySpec().get(),
+              mbiSearchValue,
+              isMbiSearchValueHashed,
+              lastUpdated,
+              serviceDate));
+    } else {
+      // Normal case where we do a simple query with all the conditions in its where clause.
+      predicates.addAll(
+          createStandardPredicatesForMbiLookup(
+              builder,
+              claim,
+              resourceType,
+              mbiSearchValue,
+              isMbiSearchValueHashed,
+              lastUpdated,
+              serviceDate));
+    }
+
+    claimsQuery.where(predicates.toArray(new Predicate[0]));
+
     // This sort will ensure predictable responses for any current/future testing needs
-    criteria.orderBy(builder.asc(root.get(idAttributeName)));
+    claimsQuery.orderBy(builder.asc(claim.get(idAttributeName)));
 
     List<T> claimEntities = null;
 
     Timer.Context timerClaimQuery =
         getTimerForResourceQuery(resourceType, CLAIM_BY_MBI_QUERY).time();
     try {
-      claimEntities = entityManager.createQuery(criteria).getResultList();
+      claimEntities = entityManager.createQuery(claimsQuery).getResultList();
     } finally {
       logQueryMetric(
           resourceType,
@@ -131,6 +148,123 @@ public class ClaimDao {
     }
 
     return claimEntities;
+  }
+
+  /**
+   * Builds a list of predicates for standard MBI and date range restrictions on search. Used for
+   * FISS claim lookup and for MCS claim lookup when no service date restriction is in place.
+   *
+   * @param builder The {@link CriteriaBuilder} being used in current query.
+   * @param claim The {@link Root} for the claim in the query
+   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
+   * @param mbiSearchValue The desired value of the mbi attribute be searched on.
+   * @param isMbiSearchValueHashed True if the mbiSearchValue is a hashed MBI.
+   * @param lastUpdated The range of lastUpdated values to search on.
+   * @param serviceDate The range of the desired service date to search on.
+   * @return a {@link Predicate} to be used in query where clause
+   * @param <T> The entity type being retrieved.
+   */
+  @VisibleForTesting
+  <T> List<Predicate> createStandardPredicatesForMbiLookup(
+      CriteriaBuilder builder,
+      Root<T> claim,
+      ResourceTypeV2<?, T> resourceType,
+      String mbiSearchValue,
+      boolean isMbiSearchValueHashed,
+      DateRangeParam lastUpdated,
+      DateRangeParam serviceDate) {
+    final String mbiRecordAttributeName = resourceType.getEntityMbiRecordAttribute();
+    final String endDateAttributeName = resourceType.getEntityEndDateAttribute();
+    final List<Predicate> predicates = new ArrayList<>();
+    final Path<Object> mbiRecord = claim.get(mbiRecordAttributeName);
+    predicates.add(createMbiPredicate(mbiRecord, mbiSearchValue, isMbiSearchValueHashed, builder));
+    if (isDateRangePresent(lastUpdated)) {
+      predicates.add(lastUpdatedDateRangePredicate(claim, lastUpdated, builder));
+    }
+    if (isDateRangePresent(serviceDate)) {
+      predicates.add(serviceDateRangePredicate(claim, serviceDate, builder, endDateAttributeName));
+    }
+    return predicates;
+  }
+
+  /**
+   * Shorthand for checking that a date range parameter has been populated by our caller.
+   *
+   * @param dateRangeParam the param to check
+   * @return true if the param contains a date range
+   */
+  private boolean isDateRangePresent(DateRangeParam dateRangeParam) {
+    return dateRangeParam != null && !dateRangeParam.isEmpty();
+  }
+
+  /**
+   * Builds a predicate containing an {@code in} clause for the given search criteria. The subquery
+   * returns a set of claim ids with correct MBI, lastUpdated, and service date.
+   *
+   * <p>This example illustrates the type of claim returned for MCS.
+   *
+   * <pre>
+   * where c.idr_clm_hd_icn in (
+   *   select mc.idr_clm_hd_icn
+   *       from rda.mcs_claims mc
+   *       join rda.mbi_cache mbi on mbi.mbi_id = mc.mbi_id
+   *       left join rda.mcs_details md on md.idr_clm_hd_icn = mc.idr_clm_hd_icn
+   *       where mbi.hash = :'mbi_hash'
+   *       group by mc.idr_clm_hd_icn, mc.idr_hdr_to_date_of_svc
+   *       having ((max(md.idr_dtl_to_date) is not null) and (max(md.idr_dtl_to_date) >= :'min_date'))
+   *              or ((mc.idr_hdr_to_date_of_svc is not null) and (mc.idr_hdr_to_date_of_svc >= :'min_date')));
+   * </pre>
+   *
+   * @param builder The {@link CriteriaBuilder} being used in current query.
+   * @param claimsQuery The {@link CriteriaQuery} for the outer query that will use this predicate
+   * @param outerClaim The {@link Root} for the claim in the outer query
+   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
+   * @param subquerySpec The {@link
+   *     gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2.ServiceDateSubquerySpec}
+   *     defining the subquery
+   * @param mbiSearchValue The desired value of the mbi attribute be searched on.
+   * @param isMbiSearchValueHashed True if the mbiSearchValue is a hashed MBI.
+   * @param lastUpdated The range of lastUpdated values to search on.
+   * @param serviceDate The range of the desired service date to search on.
+   * @return a {@link Predicate} to be used in outer query where clause
+   * @param <T> The entity type being retrieved.
+   */
+  @VisibleForTesting
+  <T> Predicate createSubqueryPredicateForMbiLookup(
+      CriteriaBuilder builder,
+      CriteriaQuery<T> claimsQuery,
+      Root<T> outerClaim,
+      ResourceTypeV2<?, T> resourceType,
+      ResourceTypeV2.ServiceDateSubquerySpec subquerySpec,
+      String mbiSearchValue,
+      boolean isMbiSearchValueHashed,
+      DateRangeParam lastUpdated,
+      DateRangeParam serviceDate) {
+    final List<Predicate> predicates = new ArrayList<>();
+    final Subquery<String> claimIdsQuery = claimsQuery.subquery(String.class);
+    final Root<?> innerClaim = claimIdsQuery.from(resourceType.getEntityClass());
+    final Join<?, ?> innerDetails =
+        innerClaim.join(subquerySpec.getDetailJoinAttribute(), JoinType.LEFT);
+    final Path<?> innerClaimMbiRecord = innerClaim.get(resourceType.getEntityMbiRecordAttribute());
+    final Path<String> innerClaimId = innerClaim.get(resourceType.getEntityIdAttribute());
+    final Path<LocalDate> innerClaimDate = innerClaim.get(resourceType.getEntityEndDateAttribute());
+    final Path<LocalDate> innerDetailsDate =
+        innerDetails.<LocalDate>get(subquerySpec.getDateAttribute());
+    final Path<Object> outerClaimId = outerClaim.get(resourceType.getEntityIdAttribute());
+
+    claimIdsQuery.select(innerClaimId);
+    predicates.add(
+        createMbiPredicate(innerClaimMbiRecord, mbiSearchValue, isMbiSearchValueHashed, builder));
+    if (isDateRangePresent(lastUpdated)) {
+      predicates.add(lastUpdatedDateRangePredicate(innerClaim, lastUpdated, builder));
+    }
+    claimIdsQuery.where(predicates.toArray(new Predicate[0]));
+    claimIdsQuery.groupBy(innerClaimId, innerClaimDate);
+    claimIdsQuery.having(
+        builder.or(
+            serviceDateRangePredicate(builder, serviceDate, innerClaimDate),
+            serviceDateRangePredicate(builder, serviceDate, builder.greatest(innerDetailsDate))));
+    return outerClaimId.in(claimIdsQuery);
   }
 
   /**
@@ -163,7 +297,6 @@ public class ClaimDao {
       Path<?> root,
       String mbiSearchValue,
       boolean isMbiSearchValueHashed,
-      boolean isOldMbiHashEnabled,
       CriteriaBuilder builder) {
     final String mbiValueAttributeName = isMbiSearchValueHashed ? Mbi.Fields.hash : Mbi.Fields.mbi;
     var answer = builder.equal(root.get(mbiValueAttributeName), mbiSearchValue);
@@ -175,7 +308,7 @@ public class ClaimDao {
   }
 
   /**
-   * Helper method to create a date range predicat to make mocking easier.
+   * Helper method to create a date range predicate to make mocking easier.
    *
    * @param root The root path of the entity to get attributes from.
    * @param dateRange The date range to search for.
@@ -183,9 +316,24 @@ public class ClaimDao {
    * @return A {@link Predicate} that checks for the given date range.
    */
   @VisibleForTesting
-  Predicate createDateRangePredicate(
+  Predicate lastUpdatedDateRangePredicate(
       Root<?> root, DateRangeParam dateRange, CriteriaBuilder builder) {
-    return QueryUtils.createLastUpdatedPredicateInstant(builder, root, dateRange);
+    return QueryUtils.createLastUpdatedPredicate(builder, root, dateRange);
+  }
+
+  /**
+   * Helper method to create a service date range predicate.
+   *
+   * @param root The root path of the entity to get attributes from.
+   * @param serviceDate The service date to search for.
+   * @param builder The builder to use for creating predicates.
+   * @param endDateExpression An expression defining the date value to test.
+   * @return A {@link Predicate} that checks for the given service date range.
+   */
+  @VisibleForTesting
+  Predicate serviceDateRangePredicate(
+      CriteriaBuilder builder, DateRangeParam dateRange, Expression<LocalDate> dateExpression) {
+    return QueryUtils.createDateRangePredicate(builder, dateRange, dateExpression);
   }
 
   /**
@@ -203,57 +351,8 @@ public class ClaimDao {
       DateRangeParam serviceDate,
       CriteriaBuilder builder,
       String endDateAttributeName) {
-    Path<LocalDate> serviceDateEndPath = root.get(endDateAttributeName);
-
-    List<Predicate> predicates = new ArrayList<>();
-
-    DateParam lowerBound = serviceDate.getLowerBound();
-
-    if (lowerBound != null) {
-      LocalDate from = lowerBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
-
-      if (ParamPrefixEnum.GREATERTHAN.equals(lowerBound.getPrefix())) {
-        predicates.add(builder.greaterThan(serviceDateEndPath, from));
-      } else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS.equals(lowerBound.getPrefix())) {
-        predicates.add(builder.greaterThanOrEqualTo(serviceDateEndPath, from));
-      } else {
-        throw new IllegalArgumentException(
-            String.format("Unsupported prefix supplied %s", lowerBound.getPrefix()));
-      }
-    }
-
-    DateParam upperBound = serviceDate.getUpperBound();
-
-    if (upperBound != null) {
-      LocalDate to = upperBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
-
-      if (ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(upperBound.getPrefix())) {
-        predicates.add(builder.lessThanOrEqualTo(serviceDateEndPath, to));
-      } else if (ParamPrefixEnum.LESSTHAN.equals(upperBound.getPrefix())) {
-        predicates.add(builder.lessThan(serviceDateEndPath, to));
-      } else {
-        throw new IllegalArgumentException(
-            String.format("Unsupported prefix supplied %s", upperBound.getPrefix()));
-      }
-    }
-
-    return builder.and(predicates.toArray(new Predicate[0]));
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ClaimDao claimDao = (ClaimDao) o;
-    return Objects.equals(entityManager, claimDao.entityManager)
-        && Objects.equals(metricRegistry, claimDao.metricRegistry);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public int hashCode() {
-    return Objects.hash(entityManager, metricRegistry);
+    return QueryUtils.createDateRangePredicate(
+        builder, serviceDate, root.get(endDateAttributeName));
   }
 
   /**

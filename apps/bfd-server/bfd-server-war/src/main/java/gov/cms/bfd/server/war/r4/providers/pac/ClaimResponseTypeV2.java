@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.List;
@@ -25,7 +26,8 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.dcn,
           RdaFissClaim.Fields.stmtCovToDate,
-          FissClaimResponseTransformerV2::transform);
+          FissClaimResponseTransformerV2::transform,
+          Optional.empty());
 
   /** Instance for MCS claims. */
   public static final ClaimResponseTypeV2<RdaMcsClaim> M =
@@ -36,7 +38,13 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
           RdaMcsClaim.Fields.idrHdrToDateOfSvc,
-          McsClaimResponseTransformerV2::transform);
+          McsClaimResponseTransformerV2::transform,
+          Optional.of(
+              new ServiceDateSubquerySpec(
+                  RdaMcsClaim.Fields.details,
+                  RdaMcsDetail.class,
+                  RdaMcsDetail.Fields.idrDtlToDate,
+                  RdaMcsDetail.Fields.idrDtlToDate)));
 
   /** Immutable list of all possible instances of this class. */
   private static final List<ClaimResponseTypeV2<?>> VALUES = List.of(F, M);
@@ -61,7 +69,8 @@ public final class ClaimResponseTypeV2<TEntity>
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       String entityEndDateAttribute,
-      ResourceTransformer<ClaimResponse> transformer) {
+      ResourceTransformer<ClaimResponse> transformer,
+      Optional<ServiceDateSubquerySpec> serviceDateJoinSpec) {
     super(
         nameForParsing,
         nameForMetrics,
@@ -69,7 +78,8 @@ public final class ClaimResponseTypeV2<TEntity>
         entityMbiRecordAttribute,
         entityIdAttribute,
         entityEndDateAttribute,
-        transformer);
+        transformer,
+        serviceDateJoinSpec);
   }
 
   /**
