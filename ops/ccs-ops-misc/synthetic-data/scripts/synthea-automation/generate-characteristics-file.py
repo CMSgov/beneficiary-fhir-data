@@ -6,13 +6,12 @@
 # Args:
 # 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
 # 2: bene id end (exclusive, taken from new output end state properties)
-# 3: db data string (db username and password for target environment DB, in this format (including quotes): "dbUsername,dbPassword")
-# 4: file system location to write the characteristics file
-# 5: which environment to check, should be a single value from the list of [test sbx prod]
+# 3: file system location to write the characteristics file
+# 4: which environment to check, should be a single value from the list of [test sbx prod]
 #
-# Example runstring: python3 ./generate-characteristics-file.py -10000008009988 -10000010009985 "dbUsername,dbPassword" ~/Documents/Test/ test
+# Example runstring: python3 ./generate-characteristics-file.py -10000008009988 -10000010009985 ~/Documents/Test/ test
 #
-# Requires psycopg2 installed
+# Requires psycopg2 and boto3 installed
 #
 
 import sys
@@ -20,6 +19,8 @@ import psycopg2
 import re
 import csv
 from pathlib import Path
+
+import ssmutil
 
 def generate_characteristics_file(args):
     """
@@ -29,18 +30,17 @@ def generate_characteristics_file(args):
     
     bene_id_start = args[0]
     bene_id_end = args[1]
-    db_data = args[2].split(',')
-    output_path = args[3]
-    env = args[4]
+    output_path = args[2]
+    env = args[3]
     
     db_string = ""
-    
+
     if "test" == env:
-        db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-test-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+        db_string = ssmutil.get_ssm_db_string("test")
     elif "prd-sbx" == env or "sbx" == env:
-        db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-prod-sbx-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
-    elif "prd" == env:
-        db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-prod-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+        db_string = ssmutil.get_ssm_db_string("prod-sbx")
+    elif "prd" == env or "prod" == env:
+        db_string = ssmutil.get_ssm_db_string("prod")
     else:
         print(f"(Validation Failure) Unknown environment string {env}")
         print("Returning with exit code 1")
