@@ -278,11 +278,12 @@ try {
 						if (hasRegressionRunSucceeded) {
 							println 'Regression suite passed, proceeding to next stage...'
 						} else {
-							// TODO: Regression suite is currently inconsistent, so failing builds automatically
-							// would cause false negatives. Uncomment the line below when the regression suite is
-							// more consistent
-
-							// error('Regression suite failed, check the CloudWatch logs above for more details')
+							try {
+								input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+								echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+							} catch(err) {
+								error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+							}
 						}
 					}
 				}
@@ -367,11 +368,12 @@ try {
 							if (hasRegressionRunSucceeded) {
 								println 'Regression suite passed, proceeding to next stage...'
 							} else {
-								// TODO: Regression suite is currently inconsistent, so failing builds automatically
-								// would cause false negatives. Uncomment the line below when the regression suite is
-								// more consistent
-
-								// error('Regression suite failed, check the CloudWatch logs above for more details')
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
 							}
 						}
 					}
@@ -426,18 +428,22 @@ try {
 								dockerImageTagOverride: params.server_regression_image_override
 							)
 
-							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
-							// awsAssumeRole()
-							// hasRegressionRunSucceeded = serverScripts.runServerRegression(
-							// 	bfdEnv: bfdEnv,
-							// 	gitBranchName: gitBranchName
-							// )
+							awsAssumeRole()
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
+							)
 
-							// if (hasRegressionRunSucceeded) {
-							// 	println 'Regression suite passed, proceeding to next stage...'
-							// } else {
-							// 	error('Regression suite failed, check the CloudWatch logs above for more details')
-							// }
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
+							}
 						}
 					}
 				} else {

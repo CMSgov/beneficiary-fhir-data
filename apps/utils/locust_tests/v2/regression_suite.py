@@ -5,8 +5,8 @@ from typing import Dict, List
 from locust import events, tag, task
 from locust.env import Environment
 
-from common import data, db, validation
-from common.bfd_user_base import BFDUserBase
+from common import data, db
+from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
@@ -30,29 +30,26 @@ def _(environment: Environment, **kwargs):
     global master_bene_ids
     master_bene_ids = data.load_from_parsed_opts(
         environment.parsed_options,
-        db.get_bene_ids,
-        use_table_sample=False,
+        db.get_regression_bene_ids,
         data_type_name="bene_ids",
     )
 
     global master_contract_data
     master_contract_data = data.load_from_parsed_opts(
         environment.parsed_options,
-        db.get_contract_ids,
-        use_table_sample=False,
+        db.get_regression_contract_ids,
         data_type_name="contract_data",
     )
 
     global master_hashed_mbis
     master_hashed_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
-        db.get_hashed_mbis,
-        use_table_sample=False,
+        db.get_regression_hashed_mbis,
         data_type_name="hashed_mbis",
     )
 
 
-validation.set_validation_goal(validation.ValidationGoal.SLA_V2_BASELINE)
+set_comparisons_metadata_path("./config/regression_suites_compare_meta.json")
 
 
 class TestLoadShape(UserInitAwareLoadShape):

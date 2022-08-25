@@ -4,6 +4,7 @@ import subprocess
 import urllib.parse
 from dataclasses import asdict, dataclass
 from enum import Enum
+from typing import List
 
 import boto3
 from botocore.config import Config
@@ -26,7 +27,7 @@ class InvokeEvent:
     users: int
     spawned_runtime: str
     compare_tag: str
-    store_tag: str
+    store_tags: List[str]
 
 
 @dataclass
@@ -178,17 +179,7 @@ def handler(event, context):
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
-    stats_config = {
-        "store": "s3",
-        "env": environment,
-        "compare": "previous",
-        "store_tag": invoke_event.store_tag,
-        "comp_tag": invoke_event.compare_tag,
-        "bucket": s3_bucket,
-        "database": f"bfd-insights-bfd-{environment}",
-        "table": f"bfd_insights_bfd_{environment.replace('-', '_')}_server_regression",
-    }
-    stats_config_str = ";".join([f"{k}={str(v)}" for k, v in stats_config.items()])
+    store_tag_args = [f"--stats-store-tag={tag}" for tag in invoke_event.store_tags]
     process = subprocess.run(
         [
             "locust",
@@ -199,10 +190,17 @@ def handler(event, context):
             f"--spawned-runtime={invoke_event.spawned_runtime}",
             f"--database-uri={db_dsn}",
             f"--client-cert-path={cert_path}",
-            f"--stats-config={stats_config_str}",
+            "--stats-store-s3",
+            f"--stats-env={environment}",
+            f"--stats-store-s3-bucket={s3_bucket}",
+            f"--stats-store-s3-database=bfd-insights-bfd-{environment}",
+            f"--stats-store-s3-table=bfd_insights_bfd_{environment.replace('-', '_')}_server_regression",
+            "--stats-compare-average",
+            f"--stats-compare-tag={invoke_event.compare_tag}",
             "--headless",
             "--only-summary",
-        ],
+        ]
+        + store_tag_args,
         text=True,
         check=False,
     )
@@ -211,7 +209,7 @@ def handler(event, context):
     send_pipeline_signal(
         signal_queue_url=signal_queue_url,
         result=TestResult.SUCCESS if process.returncode == 0 else TestResult.FAILURE,
-        message="Pipeline run succeeded, check the CloudWatch logs for more information",
+        message="Pipeline run finished, check the CloudWatch logs for more information",
         context=context,
     )
 
