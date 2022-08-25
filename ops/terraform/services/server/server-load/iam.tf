@@ -91,6 +91,39 @@ resource "aws_iam_policy" "logs" {
 EOF
 }
 
+resource "aws_iam_policy" "sqs" {
+  name        = "bfd-${local.env}-${local.service}-sqs"
+  description = "Permissions to use ${local.pipeline_signal_queue_name} SQS queue"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+                "sqs:DeleteMessage",
+                "sqs:ReceiveMessage"
+            ],
+            "Resource": [
+                "${aws_sqs_queue.broker.arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${local.kms_key_arn}"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role" "lambda" {
   # TODO: Hack this up to tighten for each lambda
   name        = "bfd-${local.env}-${local.service}"
@@ -118,6 +151,7 @@ resource "aws_iam_role" "lambda" {
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
-    aws_iam_policy.logs.arn
+    aws_iam_policy.logs.arn,
+    aws_iam_policy.sqs.arn
   ]
 }
