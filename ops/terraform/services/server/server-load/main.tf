@@ -49,7 +49,7 @@ resource "aws_lambda_function" "controller" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
-      SQS_QUEUE_NAME  = resource.aws_sqs_queue.broker.name
+      SQS_QUEUE_NAME  = aws_sqs_queue.broker.name
     }
   }
 
@@ -74,7 +74,7 @@ resource "aws_lambda_function" "node" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
-      SQS_QUEUE_NAME  = resource.aws_sqs_queue.broker.name
+      SQS_QUEUE_NAME  = aws_sqs_queue.broker.name
     }
   }
 
@@ -99,9 +99,9 @@ resource "aws_lambda_function" "broker" {
   environment {
     variables = {
       BFD_ENVIRONMENT        = local.env
-      SQS_QUEUE_NAME         = resource.aws_sqs_queue.broker.name
-      CONTROLLER_LAMBDA_NAME = resource.aws_lambda_function.controller.function_name
-      NODE_LAMBDA_NAME       = resource.aws_lambda_function.node.function_name
+      SQS_QUEUE_NAME         = aws_sqs_queue.broker.name
+      CONTROLLER_LAMBDA_NAME = aws_lambda_function.controller.function_name
+      NODE_LAMBDA_NAME       = aws_lambda_function.node.function_name
     }
   }
 
