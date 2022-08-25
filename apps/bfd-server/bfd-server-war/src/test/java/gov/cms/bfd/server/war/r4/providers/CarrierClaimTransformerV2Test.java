@@ -459,15 +459,15 @@ public class CarrierClaimTransformerV2Test {
   public void shouldHaveDiagnosesMembers() {
 
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A02", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H5555", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "H5555", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A02", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -476,15 +476,15 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H8888", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A06", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H8888", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "H8888", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -495,15 +495,15 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H66666", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B04", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H66666", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "H66666", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B04", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B04", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -514,15 +514,15 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H77777", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B05", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H77777", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "H77777", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B05", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -533,15 +533,15 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H12345", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A52", eob.getDiagnosis());
 
     DiagnosisComponent cmp5 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H12345", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "H12345", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

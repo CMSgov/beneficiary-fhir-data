@@ -470,13 +470,13 @@ public class HHAClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A40", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "H5555", null)),
+            Arrays.asList(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -485,15 +485,15 @@ public class HHAClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("H8888", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H8888", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "H8888", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B20", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B20", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -504,15 +504,15 @@ public class HHAClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B05", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R2222", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B05", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B05", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -523,15 +523,15 @@ public class HHAClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B30", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
             Arrays.asList(
-                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R3333", null),
-                new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null)),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B30", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B30", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
