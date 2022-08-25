@@ -34,8 +34,7 @@ AthenaQueryRowResult = Dict[str, List[Dict[str, str]]]
 
 TOTAL_RUNTIME_DELTA = 3.0
 """The delta under which two AggregatedStats instances are considered able to
-be compared"""
- 
+be compared""" 
 class StatsLoader(ABC):
     """Loads AggregatedStats depending on what type of comparison is requested"""
 
