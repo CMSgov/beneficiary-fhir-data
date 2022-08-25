@@ -37,6 +37,8 @@ locals {
   rds_cluster_identifier = local.nonsensitive_common_config["rds_cluster_identifier"]
   volume_size            = local.nonsensitive_config["volume_size"]
   vpc_name               = local.nonsensitive_common_config["vpc_name"]
+  service_name               = local.nonsensitive_common_config["service_name"]
+  system               = local.nonsensitive_common_config["system"]
 
   # Deploy Time Configuration
   ami_id                                      = var.ami_id # TODO: Consider storing AMI in SSM
