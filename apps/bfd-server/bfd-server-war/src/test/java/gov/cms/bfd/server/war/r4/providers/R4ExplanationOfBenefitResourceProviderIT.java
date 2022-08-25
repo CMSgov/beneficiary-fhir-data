@@ -1348,8 +1348,10 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .execute();
     assertNotNull(searchResults);
     for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      // SAMHSA fields are present on all claim types except for PDE and SNF
-      // so we expect one record per claim type in the results.
+      /*
+       * SAMHSA fields are present on all claim types except for PDE and SNF
+       * so we expect one record per claim type in the results.
+       */
       assertEquals(
           1,
           filterToClaimType(searchResults, claimType).size(),
