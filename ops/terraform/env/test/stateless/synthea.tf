@@ -31,7 +31,7 @@ resource "aws_s3_bucket" "synthea" {
 
   logging {
     target_bucket = "bfd-test-logs-${data.aws_caller_identity.current.account_id}"
-    target_prefix = "etl_s3_access_logs"
+    target_prefix = "etl_s3_access_logs/"
   }
 
   server_side_encryption_configuration {
