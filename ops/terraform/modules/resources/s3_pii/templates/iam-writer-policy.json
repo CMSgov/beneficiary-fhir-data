@@ -4,23 +4,43 @@ ${jsonencode(
   "Id": "bfd-${env}-${name}-iam-writer-policy",
   "Statement": [
     {
-      "Sid": "BFDPIIS3ReadAll",
+      "Sid": "BFDPIIS3ListBuckets",
       "Effect": "Allow",
       "Action": [
         "s3:ListAllMyBuckets",
         "s3:HeadBucket"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:s3:::*"
+    },
+    {
+      "Sid": "BFDPIIS3ListBucketObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+      ],
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}"
+      ]
+    },
+    {
+      "Sid": "BFDPIIS3ReadAll",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
     },
     {
       "Sid": "BFDPIIS3WriteAssume",
       "Effect": "Allow",
       "Action": [
-        "s3:ListBucket*",
+        "s3:ListBucketMultiPartUploads",
         "s3:ListMultipartUploadParts",
-        "s3:GetObject*",
-        "s3:PutObject*",
-        "s3:DeleteObject*"
+        "s3:*Object",
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",

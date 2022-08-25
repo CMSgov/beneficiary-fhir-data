@@ -4,6 +4,21 @@ ${jsonencode(
   "Id": "bfd-${env}-${bucket_name}-s3-policy",
   "Statement": [
     {
+      "Sid": "BFDPIIS3ListBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          for arn in concat(readers, writers) : "${arn}"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket",
+      ],
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}"
+      ]
+    },
+    {
       "Sid": "BFDPIIS3ReadBucket",
       "Effect": "Allow",
       "Principal": {
@@ -12,9 +27,8 @@ ${jsonencode(
         ]
       },
       "Action": [
-        "s3:ListBucket*",
-        "s3:GetBucket*",
-        "s3:GetObject*"
+        "s3:GetObject",
+        "s3:GetObjectVersion"
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",
@@ -30,8 +44,7 @@ ${jsonencode(
         ]
       },
       "Action": [
-        "s3:PutObject*",
-        "s3:DeleteObject*"
+        "s3:*Object"
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",
