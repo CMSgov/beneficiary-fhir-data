@@ -91,7 +91,6 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
-    
       - name: 'Run Maven Build'
         run: mvn --batch-mode --threads 1C verify
         working-directory: ./apps
@@ -117,27 +116,6 @@ jobs:
           mvn --quiet --batch-mode --threads 1C verify #TODO: should we keep the quiet mode to have tidier GHA logs?
         working-directory: ./apps
       
-      - name: 'Run Maven Build'
-        run: |
-          ACCOUNT_ID="$(python3 -c 'import json,sys;print(json.loads(sys.argv[1])["Account"])' "$(aws sts get-caller-identity)")"
-          CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain bfd-mgmt \
-          --domain-owner "$ACCOUNT_ID" \
-          --output text --query authorizationToken)"
-          cat <<EOF > ~/.m2/settings.xml
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-              <servers>
-                  <server>
-                  <username>aws</username>
-                  <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-                  <id>bfd-mgmt-bfd-mgmt</id>
-                  </server>
-              </servers>
-          </settings>
-          EOF
-          mvn --quiet --batch-mode --threads 1C verify #TODO: should we keep the quiet mode to have tidier GHA logs?
-        working-directory: ./apps
-
       - name: 'Run Maven Build on FDA Drug Utility'
         run: mvn --batch-mode --threads 1C verify
         working-directory: ./apps/bfd-data-fda
