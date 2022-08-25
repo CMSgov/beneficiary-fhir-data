@@ -10,14 +10,11 @@
   vars:
     ansible_ssh_pipelining: no
     bfd_migrator_dir: /opt/bfd-db-migrator
+    # TODO: Consider removing `env` when SSH/sudoer users have been resolved in SSM BFD-2068
     env: "test"
 
   tasks:
-    - name: Include global variables
-      include_vars:
-        file: vars/000_cross_env_vars.yml
-      tags: [pre-ami, post-ami]
-
+    # TODO: Remove include_vars when SSH/sudoer users have been resolved in SSM BFD-2068
     - name: Include env specific variables
       include_vars:
         dir: vars/{{ env }}
@@ -35,21 +32,11 @@
       import_role:
         name: bfd-db-migrator
       vars:
-        db_migrator_dir: "{{ bfd_migrator_dir  }}"
+        db_migrator_dir: "{{ bfd_migrator_dir }}"
         db_migrator_tmp_dir: "{{ bfd_migrator_dir }}/tmp"
-        # NOTE: The `db_migrator_zip` variable should have been provided by `--extra-vars` on the command line.
-        # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`
-        db_migrator_db_url: "{{ vault_data_db_primary_url }}"
-        db_migrator_db_username: "{{ vault_data_pipeline_db_username }}" # TODO: BFD-1552 get migrator-specific credentials
-        db_migrator_db_password: "{{ vault_data_pipeline_db_password }}" # TODO: BFD-1552 get migrator-specific credentials
-        db_migrator_aws_opentelemetry_app_name: "bfd-{{ env_name_std }}-db-migrator"
-        db_migrator_aws_opentelemetry_environment: "{{ env_name_std }}"
 
     - name: Add SSH users
       import_role:
         name: ssh_users
       tags:
         - pre-ami
-
-  handlers:
-    - import_tasks: handlers/main.yml

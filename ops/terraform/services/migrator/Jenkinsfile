@@ -16,7 +16,7 @@ boolean deployMigrator(Map args = [:], authFunction) {
     authFunction()
 
     // set sqsQueueName
-    sqsQueueName = "${bfdEnv}-db-migrator"
+    sqsQueueName = "bfd-${bfdEnv}-migrator"
 
     // precheck
     if (canMigratorDeploymentProceed(sqsQueueName, awsRegion)) {
@@ -160,7 +160,7 @@ terraform workspace select "$bfdEnv" -no-color
 terraform plan \
 -var='ami_id=${amiId}' \
 -var='create_migrator_instance=${createMigratorInstance}' \
--var='git_branch_name=${gitBranchName}' \
+-var='git_repo_version=${gitBranchName}' \
 -var='migrator_monitor_heartbeat_interval_seconds_override=${heartbeatInterval}' \
 -no-color -out=tfplan
 """

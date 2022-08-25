@@ -21,11 +21,18 @@ __s3_client = boto3.client("s3")
 
 
 def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    """Writes aggregated performance stats to user-specified storage
+
+    Args:
+        stats_config (StatsConfiguration): The user-specified configuration for stats-related
+        operations from the command-line or from configuration files
+        stats (AggregatedStats): The current run's aggregated stats
+    """
     logger = logging.getLogger()
-    if stats_config.store == StatsStorageType.FILE:
+    if stats_config.stats_store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
         _write_file(stats_config, stats)
-    elif stats_config.store == StatsStorageType.S3:
+    elif stats_config.stats_store == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
         _write_s3(stats_config, stats)
 
@@ -42,15 +49,17 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
     if not stats.metadata:
         raise ValueError("AggregatedStats instance must have metadata to write to file")
 
-    env_name = stats.metadata.environment.name.replace("-", "_")
-    store_tag = stats.metadata.tag
-    path = stats_config.path or ""
+    stats_hash = stats.metadata.hash
+    parent_path = stats_config.stats_store_file_path or "./"
+    full_path = os.path.join(parent_path, f"{int(time.time())}-{stats_hash}.stats.json")
     with open(
-        os.path.join(path, f"{env_name}-{store_tag}-{int(time.time())}.stats.json"),
+        full_path,
         mode="x",
         encoding="utf-8",
     ) as json_file:
         json_file.write(json.dumps(asdict(stats), indent=4))
+
+    logging.getLogger().info("Wrote aggregated performance statistics to file path: %s", full_path)
 
 
 def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
@@ -66,33 +75,40 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
     if not stats.metadata:
         raise ValueError("AggregatedStats instance must have metadata to write to S3")
 
-    if not stats_config.bucket:
-        raise ValueError("--stats-config must specify a S3 bucket to store to")
+    if not stats_config.stats_store_s3_bucket:
+        raise ValueError("--stats-store-s3-bucket must be specified")
 
-    if not stats_config.database:
-        raise ValueError(
-            "--stats-config must specify a database that stats will be stored under in S3"
-        )
+    if not stats_config.stats_store_s3_database:
+        raise ValueError("--stats-store-s3-database must be specified")
 
-    if not stats_config.table:
-        raise ValueError(
-            "--stats-config must specify a table that stats will be stored under in S3"
-        )
+    if not stats_config.stats_store_s3_table:
+        raise ValueError("--stats-store-s3-table must be specified")
 
-    env_name = stats.metadata.environment.name.replace("-", "_")
-    store_tag = stats.metadata.tag
-
-    s3_path = f"databases/{stats_config.database}/{stats_config.table}/env={env_name}/tag={store_tag}/{int(time.time())}.stats.json"
+    stats_hash = stats.metadata.hash
+    s3_path = "/".join(
+        [
+            "databases",
+            stats_config.stats_store_s3_database,
+            stats_config.stats_store_s3_table,
+            f"hash={stats_hash}",
+            f"{int(time.time())}.stats.json",
+        ]
+    )
     try:
         put_response = __s3_client.put_object(
-            Bucket=stats_config.bucket, Key=s3_path, Body=json.dumps(asdict(stats))
+            Bucket=stats_config.stats_store_s3_bucket, Key=s3_path, Body=json.dumps(asdict(stats))
         )
 
+        logging.getLogger().info(
+            'Wrote aggregated performance statistics to s3 bucket "%s" at path: %s',
+            stats_config.stats_store_s3_bucket,
+            s3_path,
+        )
         if not put_response:
             raise RuntimeError(
                 f"Storing stats to {s3_path} failed as an invalid response from AWS was returned"
             )
     except __s3_client.exceptions.NoSuchBucket as exc:
-        raise ValueError(f"S3 bucket {stats_config.bucket} does not exist") from exc
+        raise ValueError(f"S3 bucket {stats_config.stats_store_s3_bucket} does not exist") from exc
     except __s3_client.exceptions.ClientError as exc:
         raise RuntimeError(f"Unable to upload to {s3_path}") from exc
