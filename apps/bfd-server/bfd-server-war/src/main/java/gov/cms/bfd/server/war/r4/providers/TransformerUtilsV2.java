@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -190,10 +191,36 @@ public final class TransformerUtilsV2 {
   static CodeableConcept createCodeableConcept(
       String codingSystem, String codingVersion, String codingDisplay, String codingCode) {
     CodeableConcept codeableConcept = new CodeableConcept();
+    if (codingSystem == IcdCode.CODING_SYSTEM_ICD_10) {
+      AddCodingToCodeableConcept(
+          codeableConcept,
+          IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,
+          codingVersion,
+          codingDisplay,
+          codingCode);
+    }
+    AddCodingToCodeableConcept(
+        codeableConcept, codingSystem, codingVersion, codingDisplay, codingCode);
+    return codeableConcept;
+  }
+
+  /**
+   * @param codeableConcept the {@link CodeableConcept} to use
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingVersion the {@link Coding#getVersion()} to use
+   * @param codingDisplay the {@link Coding#getDisplay()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return
+   */
+  static void AddCodingToCodeableConcept(
+      CodeableConcept codeableConcept,
+      String codingSystem,
+      String codingVersion,
+      String codingDisplay,
+      String codingCode) {
     Coding coding = codeableConcept.addCoding().setSystem(codingSystem).setCode(codingCode);
     if (codingVersion != null) coding.setVersion(codingVersion);
     if (codingDisplay != null) coding.setDisplay(codingDisplay);
-    return codeableConcept;
   }
 
   /**
