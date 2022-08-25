@@ -131,13 +131,14 @@ public class DiagnosisUtilV2 {
    */
   static CodeableConcept toCodeableConcept(Diagnosis diag) {
     CodeableConcept codeableConcept = new CodeableConcept();
+    String system = diag.getFhirSystem();
+    String code = diag.getCode();
 
     // Add an additional coding for CARIN conformance for ICD-10-cm
-    String system = diag.getFhirSystem();
     if (system == IcdCode.CODING_SYSTEM_ICD_10) {
-      addCodingToCodeableConcept(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, diag.getCode());
+      addCodingToCodeableConcept(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, code);
     }
-    addCodingToCodeableConcept(codeableConcept, system, diag.getCode());
+    addCodingToCodeableConcept(codeableConcept, system, code);
 
     return codeableConcept;
   }
@@ -150,7 +151,7 @@ public class DiagnosisUtilV2 {
    * @param system The code
    * @return
    */
-  static CodeableConcept addCodingToCodeableConcept(
+  static void addCodingToCodeableConcept(
       CodeableConcept codeableConcept, String system, String code) {
     codeableConcept
         .addCoding()
@@ -158,8 +159,6 @@ public class DiagnosisUtilV2 {
         .setCode(code)
         // TODO: This code should be pulled out to a common library
         .setDisplay(retrieveIcdCodeDisplay(code));
-
-    return codeableConcept;
   }
 
   /**
