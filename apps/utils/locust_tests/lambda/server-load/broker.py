@@ -53,7 +53,7 @@ def start_controller(payload: InvokeEvent):
     response = lambda_client.invoke(
         FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload_json
     )
-    if response.StatusCode != 202:
+    if response["StatusCode"] != 202:
         print(
             f"An error occurred while trying to start the '{controller_lambda_name}' function:"
             f"{response.FunctionError}"
@@ -72,7 +72,7 @@ def start_worker(controller_ip: str):
         InvocationType="Event",
         Payload=f'{"controller_ip": controller_ip}',
     )
-    if response.StatusCode != 202:
+    if response["StatusCode"] != 202:
         print(
             f"An error occurred while trying to start the '{node_lambda_name}' function:"
             f"{response.FunctionError}"
