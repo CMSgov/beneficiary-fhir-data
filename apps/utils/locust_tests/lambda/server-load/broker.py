@@ -82,7 +82,7 @@ def start_worker(controller_ip: str):
     return response
 
 
-def check_queue(timeout: int = 1) -> Optional[List[Any]]:
+def check_queue(timeout: int = 1) -> List[Any]:
     """
     Checks SQS queue for messages.
     """
@@ -91,16 +91,17 @@ def check_queue(timeout: int = 1) -> Optional[List[Any]]:
         WaitTimeSeconds=timeout,
     )
 
-    if len(response["Messages"]) == 0:
-        return None
-
-    return response["Messages"]
+    return response
 
 
 def handler(event, context):
     """
     Lambda function handler.
     """
+
+    # Purge the message queue before we get started.
+    queue.purge()
+
     # We take only the first record, if it exists
     try:
         record = event["Records"][0]
@@ -125,7 +126,7 @@ def handler(event, context):
 
     start_controller(payload=invoke_event)
 
-    messages = None
+    messages = []
     while not messages:
         # Keep checking for messages with a five second wait time.
         messages = check_queue(timeout=5)
@@ -133,7 +134,7 @@ def handler(event, context):
     message = messages[0]
 
     try:
-        body = json.loads(message["body"])
+        body = json.loads(message.body)
     except json.JSONDecodeError:
         print("Message body was not valid JSON")
         return
