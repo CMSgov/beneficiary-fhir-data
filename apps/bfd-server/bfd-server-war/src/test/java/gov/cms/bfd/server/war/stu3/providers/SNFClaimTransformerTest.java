@@ -45,16 +45,16 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        SNFClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
-    assertMatches(claim, eob);
+    ExplanationOfBenefit eob = SNFClaimTransformer.transform(transformerContext, claim);
+
+    assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -64,9 +64,13 @@ public final class SNFClaimTransformerTest {
    * @param claim the {@link SNFClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     SNFClaim}
+   * @param transformerContext the {@link TransformerContext} that was generated from the specified
+   *     {@link SNFClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      SNFClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -146,6 +150,7 @@ public final class SNFClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

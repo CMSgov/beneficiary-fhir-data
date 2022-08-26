@@ -789,6 +789,23 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param identifierSystem the {@link Identifier#getSystem()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param identifierValue the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param npiOrgDisplay the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createIdentifierReference(
+      String identifierSystem, String identifierValue, String npiOrgDisplay) {
+
+    return new Reference()
+        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setDisplay(npiOrgDisplay);
+  }
+
+  /**
    * @param identifierType the {@link gov.cms.bfd.server.war.stu3.providers.IdentifierType}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link
    *     Reference#getIdentifier()}
@@ -2206,6 +2223,7 @@ public final class TransformerUtils {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> organizationNpiDisplay,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -2223,9 +2241,17 @@ public final class TransformerUtils {
       eob.setOrganization(
           TransformerUtils.createIdentifierReference(
               TransformerConstants.CODING_NPI_US, organizationNpi.get()));
-      eob.setFacility(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+      if (organizationNpiDisplay.isPresent()) {
+        eob.setFacility(
+            TransformerUtils.createIdentifierReference(
+                TransformerConstants.CODING_NPI_US,
+                organizationNpi.get(),
+                organizationNpiDisplay.get()));
+      } else {
+        eob.setFacility(
+            TransformerUtils.createIdentifierReference(
+                TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+      }
     }
 
     eob.getFacility()
