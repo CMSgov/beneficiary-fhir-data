@@ -987,9 +987,6 @@ final class TransformerTestUtils {
 
     if (expectedNpiOrgDisplay.isPresent()) {
       assertEquals(expectedNpiOrgDisplay.get(), reference.getDisplay());
-    } else {
-      assertEquals(
-          TransformerUtils.retrieveNpiCodeDisplay(expectedIdentifierValue), reference.getDisplay());
     }
   }
 
@@ -1792,7 +1789,10 @@ final class TransformerTestUtils {
         organizationNpiDisplay,
         eob.getOrganization());
     TransformerTestUtils.assertReferenceIdentifierEquals(
-        TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getFacility());
+        TransformerConstants.CODING_NPI_US,
+        organizationNpi.get(),
+        organizationNpiDisplay,
+        eob.getFacility());
 
     assertExtensionCodingEquals(
         CcwCodebookVariable.CLM_FAC_TYPE_CD, claimFacilityTypeCode, eob.getFacility());

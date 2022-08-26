@@ -2240,17 +2240,15 @@ public final class TransformerUtils {
     if (organizationNpi.isPresent()) {
       eob.setOrganization(
           TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+              TransformerConstants.CODING_NPI_US,
+              organizationNpi.get(),
+              organizationNpiDisplay.get()));
       if (organizationNpiDisplay.isPresent()) {
         eob.setFacility(
             TransformerUtils.createIdentifierReference(
                 TransformerConstants.CODING_NPI_US,
                 organizationNpi.get(),
                 organizationNpiDisplay.get()));
-      } else {
-        eob.setFacility(
-            TransformerUtils.createIdentifierReference(
-                TransformerConstants.CODING_NPI_US, organizationNpi.get()));
       }
     }
 

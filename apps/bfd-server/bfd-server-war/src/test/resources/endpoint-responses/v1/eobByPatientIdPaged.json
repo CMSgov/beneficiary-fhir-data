@@ -152,7 +152,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -166,7 +167,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -1239,7 +1241,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -1253,7 +1256,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -1818,7 +1822,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -1832,7 +1837,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -2559,7 +2565,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -2573,7 +2580,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -4107,7 +4115,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -4121,7 +4130,8 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "0000000000"
-        }
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
