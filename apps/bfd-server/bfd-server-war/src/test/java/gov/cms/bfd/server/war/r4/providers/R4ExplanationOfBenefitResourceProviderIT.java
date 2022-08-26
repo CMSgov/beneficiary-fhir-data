@@ -1310,15 +1310,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .execute();
     assertNotNull(searchResults);
     for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      /*
-       * SAMHSA fields are present on all claim types except for PDE and SNF so we should not
-       * get any claims back in the results except for PDE or SNF.
-       */
-      if (claimType == ClaimTypeV2.PDE || claimType == ClaimTypeV2.SNF) {
-        assertEquals(1, filterToClaimType(searchResults, claimType).size());
-      } else {
-        assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      }
+      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      assertEquals(
+          1,
+          filterToClaimType(searchResults, claimType).size(),
+          String.format("Verify claims of type '%s' are present", claimType));
     }
   }
 
@@ -1348,10 +1344,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .execute();
     assertNotNull(searchResults);
     for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      /*
-       * SAMHSA fields are present on all claim types except for PDE and SNF
-       * so we expect one record per claim type in the results.
-       */
+      // None of the claims are SAMHSA so we expect one record per claim type in the results.
       assertEquals(
           1,
           filterToClaimType(searchResults, claimType).size(),

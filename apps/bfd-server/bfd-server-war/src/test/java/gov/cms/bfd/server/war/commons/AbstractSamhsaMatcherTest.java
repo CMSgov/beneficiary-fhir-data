@@ -350,11 +350,17 @@ public class AbstractSamhsaMatcherTest {
       //noinspection unchecked
       doReturn(false)
           .when(matcherSpy)
-          .isSamhsaCoding(any(CodeableConcept.class), any(Predicate.class), any(Predicate.class));
+          .isSamhsaCoding(
+              any(CodeableConcept.class),
+              any(Predicate.class),
+              any(Predicate.class),
+              any(Predicate.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd9Diagnosis(any(Coding.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd10Diagnosis(any(Coding.class));
+
+      doReturn(false).when(matcherSpy).isSamhsaIcd10CmDiagnosis(any(Coding.class));
 
       ArgumentCaptor<CodeableConcept> conceptCaptor =
           ArgumentCaptor.forClass(CodeableConcept.class);
@@ -365,12 +371,20 @@ public class AbstractSamhsaMatcherTest {
       //noinspection unchecked
       ArgumentCaptor<Predicate<Coding>> icd10CallCaptor = ArgumentCaptor.forClass(Predicate.class);
 
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      ArgumentCaptor<Predicate<Coding>> icd10CmCallCaptor =
+          ArgumentCaptor.forClass(Predicate.class);
+
       matcherSpy.isSamhsaDiagnosis(mockConcept);
 
       // Capture the arguments used when it was invoked
       verify(matcherSpy)
           .isSamhsaCoding(
-              conceptCaptor.capture(), icd9CallCaptor.capture(), icd10CallCaptor.capture());
+              conceptCaptor.capture(),
+              icd9CallCaptor.capture(),
+              icd10CallCaptor.capture(),
+              icd10CmCallCaptor.capture());
 
       assertEquals(mockConcept, conceptCaptor.getValue());
 
@@ -379,9 +393,11 @@ public class AbstractSamhsaMatcherTest {
       // Invoke the captured lambdas to check they were the right ones
       icd9CallCaptor.getValue().test(mockCoding);
       icd10CallCaptor.getValue().test(mockCoding);
+      icd10CmCallCaptor.getValue().test(mockCoding);
 
       verify(matcherSpy, times(1)).isSamhsaIcd9Diagnosis(mockCoding);
       verify(matcherSpy, times(1)).isSamhsaIcd10Diagnosis(mockCoding);
+      verify(matcherSpy, times(1)).isSamhsaIcd10CmDiagnosis(mockCoding);
     }
 
     @Test
@@ -395,11 +411,17 @@ public class AbstractSamhsaMatcherTest {
       //noinspection unchecked
       doReturn(false)
           .when(matcherSpy)
-          .isSamhsaCoding(any(CodeableConcept.class), any(Predicate.class), any(Predicate.class));
+          .isSamhsaCoding(
+              any(CodeableConcept.class),
+              any(Predicate.class),
+              any(Predicate.class),
+              any(Predicate.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd9Procedure(any(Coding.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd10Procedure(any(Coding.class));
+
+      doReturn(false).when(matcherSpy).isSamhsaIcd10CmProcedure(any(Coding.class));
 
       ArgumentCaptor<CodeableConcept> conceptCaptor =
           ArgumentCaptor.forClass(CodeableConcept.class);
@@ -409,13 +431,20 @@ public class AbstractSamhsaMatcherTest {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       ArgumentCaptor<Predicate<Coding>> icd10CallCaptor = ArgumentCaptor.forClass(Predicate.class);
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      ArgumentCaptor<Predicate<Coding>> icd10CmCallCaptor =
+          ArgumentCaptor.forClass(Predicate.class);
 
       matcherSpy.isSamhsaIcdProcedure(mockConcept);
 
       // Capture the arguments used when it was invoked
       verify(matcherSpy)
           .isSamhsaCoding(
-              conceptCaptor.capture(), icd9CallCaptor.capture(), icd10CallCaptor.capture());
+              conceptCaptor.capture(),
+              icd9CallCaptor.capture(),
+              icd10CallCaptor.capture(),
+              icd10CmCallCaptor.capture());
 
       assertEquals(mockConcept, conceptCaptor.getValue());
 
@@ -424,9 +453,11 @@ public class AbstractSamhsaMatcherTest {
       // Invoke the captured lambdas to check they were the right ones
       icd9CallCaptor.getValue().test(mockCoding);
       icd10CallCaptor.getValue().test(mockCoding);
+      icd10CmCallCaptor.getValue().test(mockCoding);
 
       verify(matcherSpy, times(1)).isSamhsaIcd9Procedure(mockCoding);
       verify(matcherSpy, times(1)).isSamhsaIcd10Procedure(mockCoding);
+      verify(matcherSpy, times(1)).isSamhsaIcd10CmProcedure(mockCoding);
     }
   }
 
@@ -523,6 +554,20 @@ public class AbstractSamhsaMatcherTest {
             false,
             "ICD10 System Coding incorrectly marked samhsa."),
         arguments(
+            IcdCode.CODING_SYSTEM_ICD_10_CM,
+            mock(CodeableConcept.class),
+            false,
+            true,
+            true,
+            "ICD10-CM System Coding not correctly marked samhsa."),
+        arguments(
+            IcdCode.CODING_SYSTEM_ICD_10_CM,
+            mock(CodeableConcept.class),
+            false,
+            false,
+            false,
+            "ICD10-CM System Coding incorrectly marked samhsa."),
+        arguments(
             "other/unknown system",
             mock(CodeableConcept.class),
             false,
@@ -581,9 +626,15 @@ public class AbstractSamhsaMatcherTest {
     Predicate<Coding> mockPredicateIcd10 = mock(Predicate.class);
     doReturn(isIcd10Code).when(mockPredicateIcd10).test(mockCoding);
 
+    // unchecked - This is ok for making a mock.
+    //noinspection unchecked
+    Predicate<Coding> mockPredicateIcd10Cm = mock(Predicate.class);
+    doReturn(isIcd10Code).when(mockPredicateIcd10Cm).test(mockCoding);
+
     assertEquals(
         expectedResult,
-        matcherSpy.isSamhsaCoding(concept, mockPredicateIcd9, mockPredicateIcd10),
+        matcherSpy.isSamhsaCoding(
+            concept, mockPredicateIcd9, mockPredicateIcd10, mockPredicateIcd10Cm),
         errorMessage);
   }
 
@@ -984,6 +1035,16 @@ public class AbstractSamhsaMatcherTest {
             "icd10ProcedureCodes",
             IcdCode.CODING_SYSTEM_ICD_10,
             (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Procedure,
+            "Samhsa ICD 10 procedure code evaluated incorrectly"),
+        arguments(
+            "icd10DiagnosisCodes",
+            IcdCode.CODING_SYSTEM_ICD_10_CM,
+            (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10CmDiagnosis,
+            "Samhsa ICD 10 diagnosis code evaluated incorrectly"),
+        arguments(
+            "icd10ProcedureCodes",
+            IcdCode.CODING_SYSTEM_ICD_10_CM,
+            (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10CmProcedure,
             "Samhsa ICD 10 procedure code evaluated incorrectly"));
   }
 
@@ -1012,7 +1073,6 @@ public class AbstractSamhsaMatcherTest {
         "icd10DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd10DiagnosisCodes =
         "icd10ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
-
     MockSamhsaMatcher mockSamhsaMatcher =
         new MockSamhsaMatcher(
             cptCodes,
