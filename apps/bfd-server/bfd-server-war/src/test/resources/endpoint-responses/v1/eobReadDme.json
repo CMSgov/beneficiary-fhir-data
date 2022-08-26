@@ -198,8 +198,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B04",
-        "display" : "MONKEYPOX"
+        "code" : "R5555"
       } ]
     },
     "type" : [ {
@@ -214,8 +213,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A37",
-        "display" : "WHOOPING COUGH"
+        "code" : "R6666"
       } ]
     }
   }, {
@@ -223,8 +221,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A25",
-        "display" : "RAT-BITE FEVERS"
+        "code" : "G6666"
       } ]
     }
   } ],

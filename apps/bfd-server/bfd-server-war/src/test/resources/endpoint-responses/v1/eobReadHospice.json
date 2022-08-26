@@ -210,8 +210,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "B05",
-        "display" : "MEASLES"
+        "code" : "R5555"
       } ]
     },
     "type" : [ {
@@ -226,8 +225,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B30",
-        "display" : "VIRAL CONJUNCTIVITIS"
+        "code" : "R6666"
       } ]
     }
   }, {
@@ -235,8 +233,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B01",
-        "display" : "VARICELLA [CHICKENPOX]"
+        "code" : "R2222"
       } ]
     },
     "type" : [ {
@@ -251,8 +248,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A52",
-        "display" : "LATE SYPHILIS"
+        "code" : "R3333"
       } ]
     },
     "type" : [ {

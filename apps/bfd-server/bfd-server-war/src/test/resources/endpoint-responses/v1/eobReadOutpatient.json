@@ -291,8 +291,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A40",
-        "display" : "STREPTOCOCCAL SEPSIS"
+        "code" : "R5555"
       } ]
     },
     "type" : [ {
@@ -307,8 +306,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A52",
-        "display" : "LATE SYPHILIS"
+        "code" : "I9999"
       } ]
     }
   }, {
@@ -316,8 +314,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A06",
-        "display" : "AMEBIASIS"
+        "code" : "R2222"
       } ]
     },
     "type" : [ {
@@ -332,8 +329,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A15",
-        "display" : "RESPIRATORY TUBERCULOSIS"
+        "code" : "R3333"
       } ]
     },
     "type" : [ {
@@ -348,8 +344,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B20",
-        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+        "code" : "R1122"
       } ]
     },
     "type" : [ {

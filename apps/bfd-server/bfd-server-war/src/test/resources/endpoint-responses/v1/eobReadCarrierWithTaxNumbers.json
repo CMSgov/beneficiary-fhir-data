@@ -229,8 +229,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A02",
-        "display" : "OTHER SALMONELLA INFECTIONS"
+        "code" : "H5555"
       } ]
     },
     "type" : [ {
@@ -245,8 +244,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A06",
-        "display" : "AMEBIASIS"
+        "code" : "H8888"
       } ]
     }
   }, {
@@ -254,8 +252,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B04",
-        "display" : "MONKEYPOX"
+        "code" : "H66666"
       } ]
     }
   }, {
@@ -263,8 +260,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B05",
-        "display" : "MEASLES"
+        "code" : "H77777"
       } ]
     }
   }, {
@@ -272,8 +268,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A52",
-        "display" : "LATE SYPHILIS"
+        "code" : "H12345"
       } ]
     }
   } ],

@@ -445,12 +445,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A05",
-        "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
+        "code" : "R4444"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A05",
-        "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
+        "code" : "R4444"
       } ]
     },
     "type" : [ {
@@ -473,12 +471,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A40",
-        "display" : "STREPTOCOCCAL SEPSIS"
+        "code" : "R5555"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A40",
-        "display" : "STREPTOCOCCAL SEPSIS"
+        "code" : "R5555"
       } ]
     },
     "type" : [ {
@@ -501,12 +497,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A52",
-        "display" : "LATE SYPHILIS"
+        "code" : "A7777"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A52",
-        "display" : "LATE SYPHILIS"
+        "code" : "A7777"
       } ]
     },
     "type" : [ {
@@ -529,12 +523,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A06",
-        "display" : "AMEBIASIS"
+        "code" : "R8888"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A06",
-        "display" : "AMEBIASIS"
+        "code" : "R8888"
       } ]
     },
     "type" : [ {
@@ -557,12 +549,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A15",
-        "display" : "RESPIRATORY TUBERCULOSIS"
+        "code" : "K71234"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A15",
-        "display" : "RESPIRATORY TUBERCULOSIS"
+        "code" : "K71234"
       } ]
     },
     "type" : [ {
@@ -585,12 +575,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "B20",
-        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+        "code" : "7840",
+        "display" : "HEADACHE"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "B20",
-        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+        "code" : "7840",
+        "display" : "HEADACHE"
       } ]
     },
     "type" : [ {
@@ -613,12 +603,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A01",
-        "display" : "TYPHOID AND PARATYPHOID FEVERS"
+        "code" : "R2222"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A01",
-        "display" : "TYPHOID AND PARATYPHOID FEVERS"
+        "code" : "R2222"
       } ]
     },
     "type" : [ {
@@ -641,12 +629,10 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "A02",
-        "display" : "OTHER SALMONELLA INFECTIONS"
+        "code" : "R3333"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A02",
-        "display" : "OTHER SALMONELLA INFECTIONS"
+        "code" : "R3333"
       } ]
     },
     "type" : [ {
