@@ -126,7 +126,8 @@ resource "aws_iam_policy" "sqs" {
                 "sqs:GetQueueUrl",
                 "sqs:SendMessage",
                 "sqs:DeleteMessage",
-                "sqs:ReceiveMessage"
+                "sqs:ReceiveMessage",
+                "sqs:PurgeQueue"
             ],
             "Resource": [
                 "${aws_sqs_queue.broker.arn}"
