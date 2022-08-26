@@ -27,7 +27,7 @@ class InvokeEvent:
     """
 
     host: str
-    locust_ip: str
+    controller_ip: str
     locust_port: int = 5557
 
 
@@ -109,7 +109,7 @@ def handler(event, context):
             f"--database-uri={db_dsn}",
             f"--client-cert-path={cert_path}",
             "--worker",
-            f"--master-host={invoke_event.locust_ip}",
+            f"--master-host={invoke_event.controller_ip}",
             f"--master-port={invoke_event.locust_port}",
             "--headless",
             "--only-summary",

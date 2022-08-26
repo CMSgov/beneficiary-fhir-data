@@ -65,11 +65,11 @@ def start_controller(payload: InvokeEvent):
     return response
 
 
-def start_worker(controller_ip: str):
+def start_worker(controller_ip: str, host: str):
     """
     Invokes the lambda function that runs a Locust worker process.
     """
-    payload_json = json.dumps({"controller_ip": controller_ip})
+    payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
 
     response = lambda_client.invoke(
         FunctionName=node_lambda_name,
