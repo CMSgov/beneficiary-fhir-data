@@ -15,10 +15,12 @@ New diagnosis:
         "diagnosisCodeableConcept" : {
             "coding" : [
                 { "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-                "code" : "A00"
+                "code" : "A00",
+                "display": "CHOLERA"
                 }, {
                 "system" : "http://hl7.org/fhir/sid/icd-10",
-                "code" : "A00"
+                "code" : "A00",
+                "display": "CHOLERA"
                 }
         ]},
         ...
