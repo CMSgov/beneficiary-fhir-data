@@ -48,6 +48,7 @@ def start_controller(payload: InvokeEvent):
     Invokes the lambda function that runs the main Locust test instance.
 
     """
+    print(f"Starting controller with payload.host:{payload.host}, payload.users:{payload.users}")
     payload_json = json.dumps(asdict(payload))
 
     response = lambda_client.invoke(
@@ -65,10 +66,11 @@ def start_controller(payload: InvokeEvent):
     return response
 
 
-def start_worker(controller_ip: str, host: str):
+def start_node(controller_ip: str, host: str):
     """
-    Invokes the lambda function that runs a Locust worker process.
+    Invokes the lambda function that runs a Locust worker node process.
     """
+    print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
     payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
 
     response = lambda_client.invoke(
@@ -151,7 +153,7 @@ def handler(event, context):
 
     scaling_event = []
     while not scaling_event:
-        start_worker(controller_ip=controller_response.ip_address, host=invoke_event.host)
+        start_node(controller_ip=controller_response.ip_address, host=invoke_event.host)
         # Check for a scaling event
         # TODO: Make timeout an environment variable with sane default
         scaling_event = check_queue(timeout=10)

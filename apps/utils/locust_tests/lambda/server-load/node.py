@@ -101,6 +101,12 @@ def handler(event, context):
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
+    print(
+        f"Attempting to start locust with host: {invoke_event.host}, "
+        f"master-host: {invoke_event.controller_ip}, "
+        f"master-port: {invoke_event.locust_port}"
+    )
+
     process = subprocess.run(
         [
             "locust",
