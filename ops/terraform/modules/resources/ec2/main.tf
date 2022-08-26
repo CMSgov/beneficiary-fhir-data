@@ -54,7 +54,7 @@ resource "aws_instance" "main" {
   volume_tags                 = merge({ Name = "bfd-${var.env_config.env}-${var.role}", snapshot = "true" }, local.tags)
   monitoring                  = true
   associate_public_ip_address = false
-  tenancy                     = local.is_prod ? "dedicated" : "default"
+  tenancy                     = "default"
   ebs_optimized               = true
 
   vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], var.sg_ids)

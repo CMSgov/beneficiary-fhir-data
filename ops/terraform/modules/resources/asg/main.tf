@@ -86,7 +86,7 @@ resource "aws_launch_template" "main" {
   }
 
   placement {
-    tenancy = local.is_prod ? "dedicated" : "default"
+    tenancy = "default"
   }
 
   monitoring {
