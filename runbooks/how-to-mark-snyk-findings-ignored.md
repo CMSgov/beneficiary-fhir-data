@@ -16,4 +16,7 @@ acceptable risk as 'Ignored' in the [SNYK dashboard](https://app.snyk.io/org/blu
    1. 'Ignore Permanently' should be used for findings that are not planned to ever be addressed.
    2. 'Ignore Temporarily' should be used for findings that are planned to be addressed in the next PI at the latest.
       When selecting this option the JIRA ticket number for the remediation must be provided in the description.
+      The JIRA ticket should include a link to the finding in the SNYK dashboard and any additional information that is
+      available as an aid to the resolution. For Maven dependency findings, reference the 'Additional Information'
+      section of the [Resolving SNK-bot PR](how-to-mark-snyk-findings-ignored.md) for populating the JIRA ticket.
 
