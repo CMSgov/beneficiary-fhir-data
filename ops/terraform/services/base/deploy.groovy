@@ -3,10 +3,10 @@
 // TODO: Consider further generalizing this and hoisting into a new ops/jenkins/global-pipeline-libs/terraform.groovy
 
 /* Deploys base terraservice
- * @param args a {@link Map} must include `bfdEnv`, `serviceDirectory`
+ * @param args a {@link Map} must include `env`, `directory`
  * <ul>
- * <li>bfdEnv string represents the targeted BFD SDLC Environment
- * <li>serviceDirectory string relative path to terraservice module directory
+ * <li>env string represents the targeted BFD SDLC Environment
+ * <li>directory string relative path to terraservice module directory
  * </ul>
 */
 void deployTerraservice(Map args = [:]) {
