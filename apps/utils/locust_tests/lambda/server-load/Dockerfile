@@ -8,12 +8,12 @@ FROM prereqs as python
 # from your project folder.
 COPY requirements.txt .
 RUN  pip3 install -r requirements.txt
-ENV  PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
 
 FROM base as broker
 COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
 COPY . ${LAMBDA_TASK_ROOT}
 # Copy function code
+ENV  PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
 RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/broker.py" "${LAMBDA_TASK_ROOT}/app.py"
 CMD [ "app.handler" ]
 
@@ -22,6 +22,7 @@ FROM base as controller
 COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
 COPY --from=python /var/lang/bin /var/lang/bin
 COPY . ${LAMBDA_TASK_ROOT}
+ENV  PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
 # Copy function code
 RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/controller.py" "${LAMBDA_TASK_ROOT}/app.py"
 CMD [ "app.handler" ]
@@ -32,5 +33,6 @@ COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8
 COPY --from=python /var/lang/bin /var/lang/bin
 COPY . ${LAMBDA_TASK_ROOT}
 # Copy function code
+ENV  PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
 RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/node.py" "${LAMBDA_TASK_ROOT}/app.py"
 CMD [ "app.handler" ]
