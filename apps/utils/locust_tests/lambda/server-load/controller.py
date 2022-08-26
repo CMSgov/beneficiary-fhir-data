@@ -56,6 +56,8 @@ def handler(event, context):
             f"--users={invoke_event.users}",
             "--master",
             f"--master-bind-port={locust_port}",
+            "--client-cert-path=/dev/null",
+            "--database-uri=/dev/null",
             "--enable-rebalancing",
             # TODO: Make spawn rate configurable from invoke event with sane default
             "--spawn-rate=5",
