@@ -145,7 +145,7 @@ def handler(event, context):
         print(f"Message body missing required keys: {str(ex)}")
         return
 
-    scaling_event = None
+    scaling_event = []
     while not scaling_event:
         start_worker(controller_ip=controller_response.ip_address)
         # Check for a scaling event
