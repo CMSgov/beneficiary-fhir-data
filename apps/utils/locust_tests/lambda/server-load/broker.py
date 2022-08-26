@@ -51,7 +51,9 @@ def start_controller(payload: InvokeEvent):
     payload_json = json.dumps(asdict(payload))
 
     response = lambda_client.invoke(
-        FunctionName=controller_lambda_name, InvocationType="Event", Payload=payload_json
+        FunctionName=controller_lambda_name,
+        InvocationType="Event",
+        Payload=payload_json,
     )
     if response["StatusCode"] != 202:
         print(
@@ -67,10 +69,12 @@ def start_worker(controller_ip: str):
     """
     Invokes the lambda function that runs a Locust worker process.
     """
+    payload_json = json.dumps({"controller_ip": controller_ip})
+
     response = lambda_client.invoke(
         FunctionName=node_lambda_name,
         InvocationType="Event",
-        Payload=f'{"controller_ip": controller_ip}',
+        Payload=payload_json,
     )
     if response["StatusCode"] != 202:
         print(
