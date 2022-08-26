@@ -151,7 +151,7 @@ public class DiagnosisUtilV2 {
    * @param system The code
    * @return
    */
-  static void addCodingToCodeableConcept(
+  private static void addCodingToCodeableConcept(
       CodeableConcept codeableConcept, String system, String code) {
     codeableConcept
         .addCoding()

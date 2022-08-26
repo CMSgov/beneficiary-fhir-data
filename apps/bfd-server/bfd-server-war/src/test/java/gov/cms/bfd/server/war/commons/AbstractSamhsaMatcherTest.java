@@ -531,7 +531,7 @@ public class AbstractSamhsaMatcherTest {
             true,
             false,
             true,
-            "ICD9 System Coding not correctly marked samhsa."),
+            "ICD9 System Coding incorrectly marked samhsa."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_9,
             mock(CodeableConcept.class),
@@ -545,7 +545,7 @@ public class AbstractSamhsaMatcherTest {
             false,
             true,
             true,
-            "ICD10 System Coding not correctly marked samhsa."),
+            "ICD10 System Coding incorrectly marked samhsa."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_10,
             mock(CodeableConcept.class),
@@ -559,7 +559,7 @@ public class AbstractSamhsaMatcherTest {
             false,
             true,
             true,
-            "ICD10-CM System Coding not correctly marked samhsa."),
+            "ICD10-CM System Coding incorrectly marked samhsa."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_10_CM,
             mock(CodeableConcept.class),
@@ -573,7 +573,7 @@ public class AbstractSamhsaMatcherTest {
             false,
             false,
             true,
-            "Other/unknown system coding not correctly marked samhsa."),
+            "Other/unknown system coding incorrectly marked samhsa."),
         arguments(
             "doesn't matter",
             null,

@@ -315,7 +315,9 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Diagnosis Code.
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Diagnosis Code. This method is
+   * deprecated due to CARIN Compliance requirements with the ICD10-CM coding system URL. Use
+   * isSamhsaIcd10CmDiagnosis primarily, and this method for backwards compatibility.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
@@ -328,7 +330,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Diagnosis Code.
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10-CM Diagnosis Code. ICD-10-CM system
+   * coding URLs are required for CARIN compliance.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
@@ -341,7 +344,9 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code.
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code. This method is
+   * deprecated due to CARIN Compliance requirements with the ICD10-CM coding system URL. Use
+   * isSamhsaIcd10CmProcedure primarily, and this method for backwards compatibility.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
@@ -354,7 +359,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code.
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10-10 Procedure Code. ICD-10-CM system
+   * coding URLs are required for CARIN compliance.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
