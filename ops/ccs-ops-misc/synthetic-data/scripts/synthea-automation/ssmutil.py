@@ -37,12 +37,7 @@ def get_ssm_db_string(environment):
     try:
         db_uri = get_rds_db_uri(cluster_id)
     except ValueError as exc:
-        send_pipeline_signal(
-            signal_queue_url=signal_queue_url,
-            result=TestResult.FAILURE,
-            message=str(exc),
-            context=context,
-        )
+        print("Failed getting SSM DB uri: " + str(exc))
         return
     
     password = urllib.parse.quote(raw_password)

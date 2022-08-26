@@ -16,7 +16,7 @@
 # 1. Validate the paths and files for synthea needed are in place within the synthea directory (as passed in arg2)
 #    - Also checks files and folders that must be written to are writable, and that some externally added files are readable
 #    - Checks if the output folder exists, and creates one if not
-# 2. Checks the supplied database has room to load the number of benes (as passed in arg3) and related table data, so we dont waste time generating something that will have collisions in the target db
+# 2. Checks the supplied database has room to load the number of benes and related table data, so we dont waste time generating something that will have collisions in the target db
 #    - This validation's checks will begin at the expected generation starting point for each field, as read from the end state properties file in arg1
 #    - This is the validation that can be skipped by using optional arg5. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
 # 3. Validates the output directory is empty
