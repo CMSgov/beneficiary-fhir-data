@@ -9,6 +9,24 @@ FROM prereqs as python
 COPY requirements.txt .
 RUN  pip3 install -r requirements.txt
 
+FROM base as broker
+COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
+COPY . ${LAMBDA_TASK_ROOT}
+# Copy function code
+ENV  PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
+RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/broker.py" "${LAMBDA_TASK_ROOT}/app.py"
+CMD [ "app.handler" ]
+
+# Copy function code
+FROM base as controller
+COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
+COPY --from=python /var/lang/bin /var/lang/bin
+COPY . ${LAMBDA_TASK_ROOT}
+ENV  PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
+# Copy function code
+RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-load/controller.py" "${LAMBDA_TASK_ROOT}/app.py"
+CMD [ "app.handler" ]
+
 # Copy function code
 FROM base as node
 COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
