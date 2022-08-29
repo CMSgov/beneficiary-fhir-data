@@ -134,7 +134,11 @@ public class DiagnosisUtilV2 {
     String system = diag.getFhirSystem();
     String code = diag.getCode();
 
-    // Add an additional coding for CARIN conformance for ICD-10-cm
+    /*
+     * Due to meeting CARIN conformance, an additional coding with the ICD-10-CM system URL
+     * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
+     * See JIRA ticket: https://jira.cms.gov/browse/BFD-1894
+     */
     if (system == IcdCode.CODING_SYSTEM_ICD_10) {
       addCodingToCodeableConcept(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, code);
     }
