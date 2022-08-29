@@ -1,71 +1,75 @@
 """
-A lambda function that starts a controller node which coordinates tests between worker nodes.
-This is a modified version of the `server-regression` lambda.
+A lambda function that starts the load test controller and then periodically launches worker nodes
+until a scaling event occurs.
 """
-
 import json
 import os
 import socket
-import subprocess
-from dataclasses import dataclass
+from typing import Any, List
 
 import boto3
 from botocore.config import Config
 
-ip_address = socket.gethostbyname(socket.gethostname())
 
-environment = os.environ.get("BFD_ENVIRONMENT", "test")
-locust_port = os.environ.get("LOCUST_PORT", "5557")
-sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
-
-boto_config = Config(region_name="us-east-1")
-sqs = boto3.resource("sqs", config=boto_config)
-
-queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
-
-
-@dataclass
-class InvokeEvent:
+def start_node(controller_ip: str, host: str):
     """
-    Values contained in the event object passed to the handler function on invocation.
+    Invokes the lambda function that runs a Locust worker node process.
     """
+    # TODO get ip address of local node, use an environment variable for host, informed by ssm lookup in terraform or... similar.
 
-    host: str
-    users: int = 5000
+    print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
+    payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
 
-
-def handler(event, context):
-    """
-    Handles execution of a controller node.
-    """
-    try:
-        invoke_event = InvokeEvent(**event)
-    except TypeError as ex:
-        print(f"Message body missing required keys: {str(ex)}")
+    response = lambda_client.invoke(
+        FunctionName=node_lambda_name,
+        InvocationType="Event",
+        Payload=payload_json,
+    )
+    if response["StatusCode"] != 202:
+        print(
+            f"An error occurred while trying to start the '{node_lambda_name}' function:"
+            f"{response.FunctionError}"
+        )
         return None
+    # TODO: define useful return value
+    return response
 
-    message_body = json.dumps({"ip_address": ip_address})
 
-    queue.send_message(MessageBody=message_body, DelaySeconds=1)
-
-    process = subprocess.run(
-        [
-            "locust",
-            "--locustfile=/var/task/high_volume_suite.py",
-            f"--host={invoke_event.host}",
-            f"--users={invoke_event.users}",
-            "--master",
-            f"--master-bind-port={locust_port}",
-            "--client-cert-path=/dev/null",
-            "--database-uri=/dev/null",
-            "--enable-rebalancing",
-            # TODO: Make spawn rate configurable from invoke event with sane default
-            "--spawn-rate=5",
-            "--headless",
-            "--only-summary",
-        ],
-        text=True,
-        check=False,
+def check_queue(timeout: int = 1) -> List[Any]:
+    """
+    Checks SQS queue for messages.
+    """
+    response = queue.receive_messages(
+        AttributeNames=["SenderId", "SentTimestamp"],
+        WaitTimeSeconds=timeout,
     )
 
-    return process.stdout
+    return response
+
+
+# sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
+# environment = os.environ.get("BFD_ENVIRONMENT", "test")
+#
+locust_port = os.environ.get("LOCUST_PORT", "5557")
+
+if __name__ == "__main__":
+    # TODO ensure that we're setting up the envvars correctly
+    environment = os.environ.get("BFD_ENVIRONMENT", "test")
+    sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load-broker")
+    node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
+    test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
+
+    boto_config = Config(region_name="us-east-1")
+
+    sqs = boto3.resource("sqs", config=boto_config)
+    lambda_client = boto3.client("lambda", config=boto_config)
+
+    queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
+    queue.purge()
+
+    ip_address = socket.gethostbyname(socket.gethostname())
+
+    scaling_event = []
+    while not scaling_event:
+        start_node(controller_ip=ip_address, host=test_host)
+        scaling_event = check_queue(timeout=10)
