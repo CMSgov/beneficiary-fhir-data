@@ -531,56 +531,56 @@ public class AbstractSamhsaMatcherTest {
             true,
             false,
             true,
-            "ICD9 System Coding incorrectly marked samhsa."),
+            "ICD 9 System Coding expected to be marked samhsa but wasn't."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_9,
             mock(CodeableConcept.class),
             false,
             false,
             false,
-            "ICD9 System Coding incorrectly marked samhsa."),
+            "ICD 9 System Coding expected to be marked samhsa but wasn't."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_10,
             mock(CodeableConcept.class),
             false,
             true,
             true,
-            "ICD10 System Coding incorrectly marked samhsa."),
+            "ICD 10 System Coding expected to be marked samhsa but wasn't."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_10,
             mock(CodeableConcept.class),
             false,
             false,
             false,
-            "ICD10 System Coding incorrectly marked samhsa."),
+            "ICD 10 System Coding expected to be marked samhsa but wasn't."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_10_CM,
             mock(CodeableConcept.class),
             false,
             true,
             true,
-            "ICD10-CM System Coding incorrectly marked samhsa."),
+            "ICD 10 CM System Coding expected to be marked samhsa but wasn't."),
         arguments(
             IcdCode.CODING_SYSTEM_ICD_10_CM,
             mock(CodeableConcept.class),
             false,
             false,
             false,
-            "ICD10-CM System Coding incorrectly marked samhsa."),
+            "ICD 10 CM System Coding expected to be marked samhsa but wasn't."),
         arguments(
             "other/unknown system",
             mock(CodeableConcept.class),
             false,
             false,
             true,
-            "Other/unknown system coding incorrectly marked samhsa."),
+            "Other/unknown System Coding expected to be marked samhsa but wasn't."),
         arguments(
             "doesn't matter",
             null,
             false,
             false,
             false,
-            "Missing concept incorrectly marked samhsa"));
+            "Missing concept expected to be marked samhsa but wasn't."));
   }
 
   /**
