@@ -147,13 +147,14 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
-resource "aws_iam_role" "lambda" {
+
+resource "aws_iam_role" "this" {
   # TODO: Hack this up to tighten for each lambda
   name        = "bfd-${local.env}-${local.service}"
   path        = "/"
   description = "Role for lambda profile use for ${local.service} in ${local.env}"
 
-  # TODO: this is probably unacceptable. Separate concerns for the lambda principal and asg principal
+  # TODO: this is unacceptable. Separate concerns for the lambda principal, asg principal, ec2
   assume_role_policy = <<-EOF
   {
       "Version": "2012-10-17",
@@ -171,6 +172,13 @@ resource "aws_iam_role" "lambda" {
               "Principal": {
                 "Service": "autoscaling.amazonaws.com"
               }
+          },
+          {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                 "Service": "ec2.amazonaws.com"
+              }
           }
       ]
   }
@@ -186,4 +194,9 @@ resource "aws_iam_role" "lambda" {
     aws_iam_policy.sqs.arn,
     aws_iam_policy.lambda.arn
   ]
+}
+
+resource "aws_iam_instance_profile" "this" {
+  name = "bfd-${local.env}-${local.service}"
+  role = aws_iam_role.this.name
 }
