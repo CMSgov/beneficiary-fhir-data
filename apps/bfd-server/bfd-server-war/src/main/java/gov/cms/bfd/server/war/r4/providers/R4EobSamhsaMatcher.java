@@ -36,7 +36,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
           TransformerConstants.CODING_SYSTEM_HCPCS,
           CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD));
 
-  /** @see Predicate#test(Object) */
+  /** {@inheritDoc} */
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
   @Override

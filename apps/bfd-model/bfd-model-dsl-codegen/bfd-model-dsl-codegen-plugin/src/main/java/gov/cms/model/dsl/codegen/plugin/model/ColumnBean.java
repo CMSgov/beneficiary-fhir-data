@@ -261,6 +261,15 @@ public class ColumnBean {
   }
 
   /**
+   * Determines if the field is a primitive long type.
+   *
+   * @return true if the field is a primitive long type
+   */
+  public boolean isLong() {
+    return "long".equals(javaType) || isLongType(mapSqlTypeToTypeName());
+  }
+
+  /**
    * Determines if the column is a numeric type.
    *
    * @return true if the column is a numeric type
@@ -337,6 +346,16 @@ public class ColumnBean {
    */
   private static boolean isIntType(TypeName type) {
     return (type instanceof ClassName) && ((ClassName) type).simpleName().equals("Integer");
+  }
+
+  /**
+   * Determines if the specified {@link TypeName} is a boxed long.
+   *
+   * @param type type to check
+   * @return true if the specified {@link TypeName} is a boxed long
+   */
+  private static boolean isLongType(TypeName type) {
+    return (type instanceof ClassName) && ((ClassName) type).simpleName().equals("Long");
   }
 
   /**

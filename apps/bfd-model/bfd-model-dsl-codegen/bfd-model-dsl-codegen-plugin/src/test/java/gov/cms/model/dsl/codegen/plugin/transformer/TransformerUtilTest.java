@@ -170,6 +170,10 @@ public class TransformerUtilTest {
     assertTransformerInstanceOf(column, transformation, IntFieldTransformer.class);
 
     reset(column);
+    doReturn(true).when(column).isLong();
+    assertTransformerInstanceOf(column, transformation, LongFieldTransformer.class);
+
+    reset(column);
     doReturn(true).when(column).isNumeric();
     assertTransformerInstanceOf(column, transformation, AmountFieldTransformer.class);
 
@@ -186,13 +190,13 @@ public class TransformerUtilTest {
     transformation.setFrom("x");
 
     // verify a transformer would normally be selected
-    doReturn(true).when(column).isEnum();
-    assertEquals(Optional.empty(), selectTransformerForField(column, transformation));
+    doReturn(true).when(column).isChar();
+    assertTransformerInstanceOf(column, transformation, CharFieldTransformer.class);
 
     // now verify the special names prevent the transformer being returned
     for (String fromName : List.of(NoMappingFromName, ParentFromName, IndexFromName)) {
       transformation.setFrom(fromName);
-      assertEquals(Optional.empty(), selectTransformerForField(column, transformation));
+      assertTransformerInstanceOf(column, transformation, NoCodeFieldTransformer.class);
     }
   }
 

@@ -74,7 +74,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
 
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
@@ -114,7 +114,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return ExplanationOfBenefit.class;
@@ -405,13 +405,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     criteria.select(root).distinct(true);
 
     // Search for a beneficiary's records. Use lastUpdated if present
-    // TODO - BFD-1596
-    // while we gradually convert entity beans to use long data type for patientId,
-    // we may need to change the expected type for beneficiaryId in the entity Predicate.
-    // Once all claims have been migrated we can modify the ClaimTypeV2 to specifically
-    // return a long data type and this extra data type checking can be removed.
-    java.lang.Class javaClass = claimType.getEntityBeneficiaryIdAttribute().getJavaType();
-
     Predicate wherePredicate =
         builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId);
     if (lastUpdated != null && !lastUpdated.isEmpty()) {

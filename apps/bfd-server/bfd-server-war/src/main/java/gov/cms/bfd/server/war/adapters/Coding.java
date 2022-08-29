@@ -6,7 +6,17 @@ package gov.cms.bfd.server.war.adapters;
  */
 public interface Coding {
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   String getSystem();
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   String getCode();
 }

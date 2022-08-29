@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
 
-  /** @see Predicate#test(Object) */
+  /** {@inheritDoc} */
   @Override
   public boolean test(Claim claim) {
     ClaimAdapter adapter = new ClaimAdapter(claim);

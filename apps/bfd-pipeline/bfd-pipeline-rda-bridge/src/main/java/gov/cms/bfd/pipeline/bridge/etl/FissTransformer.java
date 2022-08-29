@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
@@ -18,6 +19,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -196,6 +198,15 @@ public class FissTransformer extends AbstractTransformer {
         .setClaim(claimBuilder.build())
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setDcn(dcn)
+        .setSource(
+            RecordSource.newBuilder()
+                // Hardcoding values for test data, this data is only used in production for
+                // analysis
+                .setPhase("P1")
+                .setPhaseSeqNum(0)
+                .setExtractDate(LocalDate.now().toString())
+                .setTransmissionTimestamp(Instant.now().toString())
+                .build())
         .build();
   }
 
