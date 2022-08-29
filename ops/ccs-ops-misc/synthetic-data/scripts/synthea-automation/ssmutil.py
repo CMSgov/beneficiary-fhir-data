@@ -45,7 +45,7 @@ def get_ssm_db_string(environment):
 
 def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
     """
-    Gets the ssm paramater with the given name from the ssm store.
+    Gets the ssm parameter with the given name from the ssm store.
     """
     response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
     
