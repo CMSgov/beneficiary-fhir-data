@@ -188,27 +188,6 @@
       "servicedPeriod": {
         "end": "1970-07-28"
       }
-    },
-    {
-      "sequence": 2,
-      "productOrService": {
-        "coding": [
-          {
-            "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }
-        ]
-      },
-      "modifier": [
-        {
-          "coding": [
-            {
-              "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-              "version": "2",
-              "code": "B"
-            }
-          ]
-        }
-      ]
     }
   ],
   "total": {

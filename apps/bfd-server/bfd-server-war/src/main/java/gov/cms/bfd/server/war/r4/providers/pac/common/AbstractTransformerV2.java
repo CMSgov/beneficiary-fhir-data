@@ -113,22 +113,23 @@ public class AbstractTransformerV2 {
     List<HumanName> names;
 
     // If no names, don't set anything
-    if (patientInfo.getFirstName() != null
-        || patientInfo.getLastName() != null
-        || patientInfo.getMiddleName() != null) {
+    if (Strings.isNotBlank(patientInfo.getFirstName())
+        || Strings.isNotBlank(patientInfo.getLastName())
+        || Strings.isNotBlank(patientInfo.getMiddleName())) {
       names = new ArrayList<>();
 
       List<StringType> givens;
 
       // If no givens, don't set any
-      if (patientInfo.getFirstName() != null || patientInfo.getLastName() != null) {
+      if (Strings.isNotBlank(patientInfo.getFirstName())
+          || Strings.isNotBlank(patientInfo.getLastName())) {
         givens = new ArrayList<>();
 
-        if (patientInfo.getFirstName() != null) {
+        if (Strings.isNotBlank(patientInfo.getFirstName())) {
           givens.add(new StringType(patientInfo.getFirstName()));
         }
 
-        if (patientInfo.getMiddleName() != null) {
+        if (Strings.isNotBlank(patientInfo.getMiddleName())) {
           givens.add(new StringType(patientInfo.getMiddleName()));
         }
       } else {
@@ -153,17 +154,17 @@ public class AbstractTransformerV2 {
     List<String> nodeNames = new ArrayList<>();
     List<String> nodeFormats = new ArrayList<>();
 
-    if (patientInfo.getFirstName() != null) {
+    if (Strings.isNotBlank(patientInfo.getFirstName())) {
       nodeNames.add(patientInfo.getFirstName());
       nodeFormats.add("[" + patientInfo.getFirstNameFormat() + "]");
     }
 
-    if (patientInfo.getMiddleName() != null) {
+    if (Strings.isNotBlank(patientInfo.getMiddleName())) {
       nodeNames.add(patientInfo.getMiddleName());
       nodeFormats.add("[" + patientInfo.getMiddleNameFormat() + "]");
     }
 
-    if (patientInfo.getLastName() != null) {
+    if (Strings.isNotBlank(patientInfo.getLastName())) {
       nodeNames.add(patientInfo.getLastName());
       nodeFormats.add("[" + patientInfo.getLastNameFormat() + "]");
     }
