@@ -5,19 +5,20 @@
 # Args:
 # 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
 # 2: bene id end (exclusive, taken from new output end state properties)
-# 3: db data string (db usernames and passwords for each environment DB, in this format (including quotes): "testUsername,testPassword,prodSbxUsername,prodSbxPassword,prodUsername,prodPassword")
-# 4: file system location of synthea folder
-# 5: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
+# 3: file system location of synthea folder
+# 4: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
 #
-# Example runstring: python3 ./validate-synthea-load.py -10000004009994 -10000004010094 $DB_STRING ~/Git/synthea-2 "test,sbx"
+# Example runstring: python3 ./validate-synthea-load.py -10000004009994 -10000004010094 ~/Git/synthea-2 "test,sbx"
 #
-# Requires psycopg2 installed
+# Requires psycopg2 and boto3 installed
 #
 
 import sys
 import psycopg2
 import fileinput
 import shlex
+
+import ssmutil
 
 def validate_synthea_load(args):
     """
@@ -26,17 +27,16 @@ def validate_synthea_load(args):
     
     bene_id_start = args[0]
     bene_id_end = args[1]
-    db_data = args[2].split(',')
-    synthea_folder_filepath = args[3]
-    envs = args[4].split(',')
+    synthea_folder_filepath = args[2]
+    envs = args[3].split(',')
     
     if not synthea_folder_filepath.endswith('/'):
         synthea_folder_filepath = synthea_folder_filepath + "/"
     synthea_output_folder = synthea_folder_filepath + "output/bfd/"
     
-    test_db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-test-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
-    prod_sbx_db_string = f"postgres://{db_data[2]}:{db_data[3]}@bfd-prod-sbx-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
-    prod_string = f"postgres://{db_data[4]}:{db_data[5]}@bfd-prod-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
+    test_db_string = ssmutil.get_ssm_db_string("test")
+    prod_sbx_db_string = ssmutil.get_ssm_db_string("prod-sbx")
+    prod_string = ssmutil.get_ssm_db_string("prod")
     
     ## Sanity check the tables and make sure the last line of each synthea file exists in the corresponding table
     print(f"Reading data from synthea output files for validation...")
@@ -56,15 +56,24 @@ def validate_synthea_load(args):
     test_validation_result = True
     prod_sbx_validation_result = True
     prod_validation_result = True
+    num_run = 0
     if "test" in envs:
         print("Running validations for test...")
         test_validation_result = check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, test_db_string)
-    if "sbx" in envs or "prd-sbx" in envs:
+        num_run = num_run + 1
+    if "prd-sbx" in envs:
         print("Running validations for prod-sbx...")
         prod_sbx_validation_result = check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, prod_sbx_db_string)
+        num_run = num_run + 1
     if "prod" in envs:
         print("Running validations for prod...")
         prod_validation_result = check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, prod_string)
+        num_run = num_run + 1
+        
+    if not num_run == len(envs):
+        print(f"(Validation Failure) Unknown environment found in {envs}")
+        print("Returning with exit code 1")
+        sys.exit(1)
     
     if not (test_validation_result and prod_sbx_validation_result and prod_validation_result):
         print("Failed validation, not all data loaded successfully")
