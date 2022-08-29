@@ -7,7 +7,7 @@
 # 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
 # 2: bene id end (exclusive, taken from new output end state properties)
 # 3: file system location to write the characteristics file
-# 4: which environment to check, should be a single value from the list of [test sbx prod]
+# 4: which environment to check, should be a single value from the list of [test prd-sbx prod]
 #
 # Example runstring: python3 ./generate-characteristics-file.py -10000008009988 -10000010009985 ~/Documents/Test/ test
 #
@@ -37,9 +37,9 @@ def generate_characteristics_file(args):
 
     if "test" == env:
         db_string = ssmutil.get_ssm_db_string("test")
-    elif "prd-sbx" == env or "sbx" == env:
-        db_string = ssmutil.get_ssm_db_string("prod-sbx")
-    elif "prd" == env or "prod" == env:
+    elif "prd-sbx" == env:
+        db_string = ssmutil.get_ssm_db_string("prd-sbx")
+    elif "prod" == env:
         db_string = ssmutil.get_ssm_db_string("prod")
     else:
         print(f"(Validation Failure) Unknown environment string {env}")

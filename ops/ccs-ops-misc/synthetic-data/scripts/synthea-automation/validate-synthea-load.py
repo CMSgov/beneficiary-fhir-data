@@ -56,15 +56,24 @@ def validate_synthea_load(args):
     test_validation_result = True
     prod_sbx_validation_result = True
     prod_validation_result = True
+    num_run = 0
     if "test" in envs:
         print("Running validations for test...")
         test_validation_result = check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, test_db_string)
-    if "sbx" in envs or "prd-sbx" in envs:
+        num_run = num_run + 1
+    if "prd-sbx" in envs:
         print("Running validations for prod-sbx...")
         prod_sbx_validation_result = check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, prod_sbx_db_string)
-    if "prod" in envs or "prd" in envs:
+        num_run = num_run + 1
+    if "prod" in envs:
         print("Running validations for prod...")
         prod_validation_result = check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, prod_string)
+        num_run = num_run + 1
+        
+    if not num_run == len(envs):
+        print(f"(Validation Failure) Unknown environment found in {envs}")
+        print("Returning with exit code 1")
+        sys.exit(1)
     
     if not (test_validation_result and prod_sbx_validation_result and prod_validation_result):
         print("Failed validation, not all data loaded successfully")

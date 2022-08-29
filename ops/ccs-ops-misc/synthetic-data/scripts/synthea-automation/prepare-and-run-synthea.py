@@ -89,17 +89,26 @@ def validate_and_run(args):
     test_validation_result = True
     prod_sbx_validation_result = True
     prod_validation_result = True
+    num_run = 0
     if not skip_validation:
         if "test" in envs:
             print("Running validations for test...")
             test_validation_result = check_ranges(end_state_properties_file, generated_benes, test_db_string)
-        if "sbx" in envs or "prd-sbx" in envs:
+            num_run = num_run + 1
+        if "prd-sbx" in envs:
             print("Running validations for prod-sbx...")
             prod_sbx_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_sbx_db_string)
-        if "prod" in envs or "prd" in envs:
+            num_run = num_run + 1
+        if "prod" in envs:
             ## Note this one step takes a while (near 30 mins), due to checking for non-indexed fields on very big tables
             print("Running validations for prod...")
             prod_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_string)
+            num_run = num_run + 1
+        
+        if not num_run == len(envs):
+            print(f"(Validation Failure) Unknown environment found in {envs}")
+            print("Returning with exit code 1")
+            sys.exit(1)
         
         if not (test_validation_result and prod_sbx_validation_result and prod_validation_result):
             print("Failed validation, not updating synthea properties")
