@@ -677,7 +677,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R4444", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R4444", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -694,7 +694,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R5555", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R5555", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -711,7 +711,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R6666", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R6666", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -728,7 +728,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R2222", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R2222", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -745,7 +745,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R3333", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R3333", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
