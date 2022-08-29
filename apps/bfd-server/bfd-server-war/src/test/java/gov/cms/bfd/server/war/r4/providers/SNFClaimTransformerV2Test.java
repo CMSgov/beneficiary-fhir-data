@@ -770,7 +770,7 @@ public class SNFClaimTransformerV2Test {
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "0TCCCCC", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "0TCCCCC", null)),
             "2016-01-16T00:00:00-08:00");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 0TCCCCC");
