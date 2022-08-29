@@ -430,7 +430,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R4444"
+        "code" : "B20",
+        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
       } ]
     },
     "type" : [ {
@@ -445,7 +446,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -460,7 +462,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R6666"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     }
   }, {
@@ -468,7 +471,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R2222"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     },
     "type" : [ {
@@ -483,7 +487,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R3333"
+        "code" : "B15",
+        "display" : "ACUTE HEPATITIS A"
       } ]
     },
     "type" : [ {

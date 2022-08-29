@@ -671,13 +671,16 @@ public class SNFClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R4444", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R4444", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-9-cm",
+                "B20",
+                "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -688,13 +691,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A40", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R5555", null),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", "STREPTOCOCCAL SEPSIS"),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -705,13 +708,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R6666", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A52", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R6666", null),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A52", "LATE SYPHILIS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -722,13 +725,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B05", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R2222", null),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B05", "MEASLES"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -739,13 +742,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B15", eob.getDiagnosis());
 
     DiagnosisComponent cmp5 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R3333", null),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B15", "ACUTE HEPATITIS A"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",

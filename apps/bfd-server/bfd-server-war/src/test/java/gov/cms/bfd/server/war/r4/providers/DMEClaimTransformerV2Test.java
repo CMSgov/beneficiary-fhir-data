@@ -245,13 +245,13 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B04", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "B04", "MONKEYPOX"),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -262,13 +262,13 @@ public final class DMEClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R6666", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A37", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R6666", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A37", "WHOOPING COUGH"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -279,13 +279,13 @@ public final class DMEClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("G6666", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A25", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "G6666", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A25", "RAT-BITE FEVERS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",

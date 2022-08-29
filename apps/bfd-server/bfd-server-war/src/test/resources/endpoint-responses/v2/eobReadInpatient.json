@@ -445,7 +445,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R4444"
+        "code" : "A05",
+        "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
       } ]
     },
     "type" : [ {
@@ -468,7 +469,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -491,7 +493,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A7777"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {
@@ -514,7 +517,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R8888"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     },
     "type" : [ {
@@ -537,7 +541,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "K71234"
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
       } ]
     },
     "type" : [ {
@@ -560,8 +565,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "7840",
-        "display" : "HEADACHE"
+        "code" : "B20",
+        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
       } ]
     },
     "type" : [ {
@@ -584,7 +589,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "A01",
+        "display" : "TYPHOID AND PARATYPHOID FEVERS"
       } ]
     },
     "type" : [ {
@@ -607,7 +613,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
       } ]
     },
     "type" : [ {

@@ -688,13 +688,16 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R4444", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A05", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R4444", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "A05",
+                "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "admitting",
@@ -705,13 +708,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A40", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS"),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -722,13 +725,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("A7777", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A52", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A7777", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -739,13 +742,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R8888", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A06", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R8888", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -756,13 +759,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
-        TransformerTestUtilsV2.findDiagnosisByCode("K71234", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A15", eob.getDiagnosis());
 
     DiagnosisComponent cmp5 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "K71234", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -773,13 +776,16 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
 
     DiagnosisComponent diag6 =
-        TransformerTestUtilsV2.findDiagnosisByCode("7840", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
 
     DiagnosisComponent cmp6 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "7840", "HEADACHE"),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "B20",
+                "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -790,13 +796,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp6.equalsDeep(diag6));
 
     DiagnosisComponent diag7 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A01", eob.getDiagnosis());
 
     DiagnosisComponent cmp7 =
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag7.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A01", "TYPHOID AND PARATYPHOID FEVERS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -807,13 +813,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp7.equalsDeep(diag7));
 
     DiagnosisComponent diag8 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A02", eob.getDiagnosis());
 
     DiagnosisComponent cmp8 =
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag8.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "A02", "OTHER SALMONELLA INFECTIONS"),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
