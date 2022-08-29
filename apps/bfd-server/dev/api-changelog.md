@@ -1,5 +1,34 @@
 # API Changelog
 
+## BFD-1894: Add CARIN conformant coding system in Diagnosis Coding list element in V2
+
+Add an additional coding for ICD diagnoses codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. http://hl7.org/fhir/sid/icd-10-cm).
+The existing coding has been left in place for backwards compatibility.
+
+New diagnosis:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "diagnosis" : [{
+        "sequence" : 1,
+        "diagnosisCodeableConcept" : {
+            "coding" : [
+                { "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "A00",
+                "display": "CHOLERA"
+                }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10",
+                "code" : "A00",
+                "display": "CHOLERA"
+                }
+        ]},
+        ...
+      ]},
+    ...
+  }
+```
+
 ## BFD-1916: Map FI Claim Action Code in V2
 
 FI Claim Action Code data has been mapped for V2. This data is now available in the extensions for SNF and Inpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
