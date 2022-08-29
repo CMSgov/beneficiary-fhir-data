@@ -274,6 +274,10 @@
     "sequence" : 1,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A02",
         "display" : "OTHER SALMONELLA INFECTIONS"
@@ -290,6 +294,10 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A06",
+        "display" : "AMEBIASIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A06",
         "display" : "AMEBIASIS"
@@ -306,6 +314,10 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B04",
+        "display" : "MONKEYPOX"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B04",
         "display" : "MONKEYPOX"
@@ -322,6 +334,10 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B05",
+        "display" : "MEASLES"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B05",
         "display" : "MEASLES"
@@ -338,6 +354,10 @@
     "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A52",
         "display" : "LATE SYPHILIS"

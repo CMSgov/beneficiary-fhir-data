@@ -382,7 +382,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A40", "STREPTOCOCCAL SEPSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -399,7 +401,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -416,7 +420,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", "AMEBIASIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -433,7 +439,9 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", "RESPIRATORY TUBERCULOSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -450,10 +458,15 @@ public final class OutpatientClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding(
-                "http://hl7.org/fhir/sid/icd-10",
-                "B20",
-                "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
+            List.of(
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "B20",
+                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "patientreasonforvisit",

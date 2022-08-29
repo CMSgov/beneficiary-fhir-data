@@ -469,7 +469,7 @@ public final class HospiceClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B05", "MEASLES"),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B05", "MEASLES")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -486,7 +486,9 @@ public final class HospiceClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "B30", "VIRAL CONJUNCTIVITIS"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B30", "VIRAL CONJUNCTIVITIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B30", "VIRAL CONJUNCTIVITIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -503,7 +505,9 @@ public final class HospiceClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B01", "VARICELLA [CHICKENPOX]"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -520,7 +524,9 @@ public final class HospiceClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",

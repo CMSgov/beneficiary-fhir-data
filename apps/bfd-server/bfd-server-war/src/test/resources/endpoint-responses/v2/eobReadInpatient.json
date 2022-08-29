@@ -444,6 +444,10 @@
     "sequence" : 1,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A05",
+        "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A05",
         "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
@@ -468,6 +472,10 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A40",
         "display" : "STREPTOCOCCAL SEPSIS"
@@ -492,6 +500,10 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A52",
         "display" : "LATE SYPHILIS"
@@ -516,6 +528,10 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A06",
+        "display" : "AMEBIASIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A06",
         "display" : "AMEBIASIS"
@@ -540,6 +556,10 @@
     "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A15",
         "display" : "RESPIRATORY TUBERCULOSIS"
@@ -564,6 +584,10 @@
     "sequence" : 6,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B20",
+        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B20",
         "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
@@ -588,6 +612,10 @@
     "sequence" : 7,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A01",
+        "display" : "TYPHOID AND PARATYPHOID FEVERS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A01",
         "display" : "TYPHOID AND PARATYPHOID FEVERS"
@@ -612,6 +640,10 @@
     "sequence" : 8,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A02",
         "display" : "OTHER SALMONELLA INFECTIONS"

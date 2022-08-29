@@ -349,6 +349,10 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B20",
+        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B20",
         "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
@@ -365,6 +369,10 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B05",
+        "display" : "MEASLES"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B05",
         "display" : "MEASLES"
@@ -381,6 +389,10 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B30",
         "display" : "VIRAL CONJUNCTIVITIS"

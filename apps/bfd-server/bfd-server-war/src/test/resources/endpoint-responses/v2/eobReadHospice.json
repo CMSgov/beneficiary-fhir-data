@@ -320,6 +320,10 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B30",
         "display" : "VIRAL CONJUNCTIVITIS"
@@ -336,6 +340,10 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "B01",
         "display" : "VARICELLA [CHICKENPOX]"
@@ -352,6 +360,10 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "A52",
         "display" : "LATE SYPHILIS"
