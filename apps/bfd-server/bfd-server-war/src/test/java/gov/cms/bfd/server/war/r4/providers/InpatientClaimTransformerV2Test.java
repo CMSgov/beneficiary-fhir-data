@@ -849,32 +849,29 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("02HK3JZ", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("8703", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding(
-                "http://hl7.org/fhir/sid/icd-10",
-                "02HK3JZ",
-                "\"INSERTION OF PACEMAKER LEAD INTO R VENTRICLE, PERC APPROACH\""),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "8703", "C.A.T. SCAN OF HEAD"),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 02HK3JZ");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 8703");
 
     ProcedureComponent proc2 =
-        TransformerTestUtilsV2.findProcedureByCode("0PQKXZZ", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("CD1YYZZ", eob.getProcedure());
 
     ProcedureComponent cmp2 =
         TransformerTestUtilsV2.createProcedure(
             proc2.getSequence(),
             new Coding(
                 "http://hl7.org/fhir/sid/icd-10",
-                "0PQKXZZ",
-                "\"REPAIR RIGHT ULNA, EXTERNAL APPROACH\""),
+                "CD1YYZZ",
+                "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code 0PQKXZZ");
+    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
 
     ProcedureComponent proc3 =
         TransformerTestUtilsV2.findProcedureByCode("0045", eob.getProcedure());
