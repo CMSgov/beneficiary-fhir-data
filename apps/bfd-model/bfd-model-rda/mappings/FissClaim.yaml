@@ -32,7 +32,7 @@ mappings:
         by the Centers for Medicare and Medicaid Services (CMS), and may be used to
         access data for the record depending on the copybook it is used in.'
     - name: currStatus
-      sqlType: char
+      sqlType: char(1)
       javaType: char
       nullable: false
       dbName: curr_status
@@ -40,7 +40,7 @@ mappings:
         claim (paid, reject, deny, etc.); for the record depending on the copybook
         it is used in.'
     - name: currLoc1
-      sqlType: char
+      sqlType: char(1)
       javaType: char
       nullable: false
       dbName: curr_loc1

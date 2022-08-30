@@ -22,12 +22,12 @@ alter index rda.claim_message_meta_data_received_date_idx rename to claim_messag
  */
 CREATE TABLE rda.fiss_audit_trails (
    dcn varchar(23) NOT NULL,
+   rda_position smallint NOT NULL,
    badt_status varchar(1),
    badt_loc varchar(5),
    badt_oper_id varchar(9),
    badt_reas varchar(5),
    badt_curr_date date,
-   rda_position smallint NOT NULL,
    CONSTRAINT fiss_audit_trails_key PRIMARY KEY (dcn, rda_position),
    CONSTRAINT fiss_audit_trails_parent FOREIGN KEY (dcn) REFERENCES rda.fiss_claims(dcn)
 );
