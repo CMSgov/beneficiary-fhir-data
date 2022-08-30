@@ -234,7 +234,10 @@ public final class DataServerLauncherAppIT {
       assertTrue(
           Files.readString(accessLogJson)
               .contains(DataServerLauncherApp.HTTP_ACCESS_RESPONSE_DURATION_PER_KB));
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0a05a9e94 (Added tests for IT)
       // Stop the application.
       serverProcess.close();
 
