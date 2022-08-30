@@ -3,7 +3,6 @@ A lambda function that starts a worker node which coordinates tests between a sw
 This is a modified version of the `server-regression` lambda.
 """
 
-import json
 import os
 import subprocess
 import urllib.parse

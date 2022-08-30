@@ -47,11 +47,6 @@ def check_queue(timeout: int = 1) -> List[Any]:
     return response
 
 
-# sqs_queue_name = os.environ.get("SQS_QUEUE_NAME")
-# environment = os.environ.get("BFD_ENVIRONMENT", "test")
-#
-locust_port = os.environ.get("LOCUST_PORT", "5557")
-
 if __name__ == "__main__":
     # TODO ensure that we're setting up the envvars correctly
     environment = os.environ.get("BFD_ENVIRONMENT", "test")
@@ -65,6 +60,7 @@ if __name__ == "__main__":
     sqs = boto3.resource("sqs", config=boto_config)
     lambda_client = boto3.client("lambda", config=boto_config)
 
+    # Get the SQS queue and purge it of any possible stale messages.
     queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
     queue.purge()
 
