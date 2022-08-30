@@ -29,7 +29,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   protected final String entityEndDateAttribute;
   /** The {@link ResourceTransformer} to convert an entity into a response object. */
   protected final ResourceTransformer<TResource> transformer;
-  /** When populated this attribute defines values needed to produce a service data sub-query. */
+  /** When populated this attribute defines values needed to produce a service date sub-query. */
   protected final Optional<ServiceDateSubquerySpec> serviceDateSubquerySpec;
 
   /**
