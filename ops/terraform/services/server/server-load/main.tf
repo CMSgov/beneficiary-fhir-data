@@ -35,30 +35,6 @@ locals {
   kms_key_id             = data.aws_kms_key.cmk.key_id
 }
 
-# resource "aws_lambda_function" "controller" {
-#   function_name = "bfd-${local.env}-${local.service}-controller"
-#   description   = "Lambda to run the Locust controller for load testing on the ${local.env} server"
-#   tags          = local.shared_tags
-#   kms_key_arn   = local.kms_key_arn
-
-#   image_uri    = local.docker_image_uri_controller
-#   package_type = "Image"
-
-#   memory_size = 2048 # TODO: Verify memory size
-#   timeout     = local.lambda_timeout_seconds
-#   environment {
-#     variables = {
-#       BFD_ENVIRONMENT = local.env
-#       SQS_QUEUE_NAME  = aws_sqs_queue.broker.name
-#     }
-#   }
-
-#   role = aws_iam_role.this.arn
-#   vpc_config {
-#     security_group_ids = [aws_security_group.lambda.id]
-#     subnet_ids         = data.aws_subnets.main.ids
-#   }
-# }
 
 resource "aws_lambda_function" "node" {
   function_name = "bfd-${local.env}-${local.service}-node"
@@ -85,34 +61,6 @@ resource "aws_lambda_function" "node" {
   }
 }
 
-
-# resource "aws_lambda_function" "broker" {
-#   function_name = "bfd-${local.env}-${local.service}-broker"
-#   description   = "Lambda to run the broker for load testing on the ${local.env} server"
-#   tags          = local.shared_tags
-#   kms_key_arn   = local.kms_key_arn
-
-#   image_uri    = local.docker_image_uri_broker
-#   package_type = "Image"
-
-#   memory_size = 2048
-#   timeout     = local.lambda_timeout_seconds
-#   environment {
-#     variables = {
-#       BFD_ENVIRONMENT        = local.env
-#       SQS_QUEUE_NAME         = aws_sqs_queue.broker.name
-#       CONTROLLER_LAMBDA_NAME = aws_lambda_function.controller.function_name
-#       NODE_LAMBDA_NAME       = aws_lambda_function.node.function_name
-#     }
-#   }
-
-#   role = aws_iam_role.this.arn
-#   vpc_config {
-#     security_group_ids = [aws_security_group.lambda.id]
-#     subnet_ids         = data.aws_subnets.main.ids
-#   }
-# }
-#
 
 variable "create_locust_instance" {
   default     = false

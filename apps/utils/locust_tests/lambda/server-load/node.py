@@ -5,20 +5,22 @@ This is a modified version of the `server-regression` lambda.
 
 import asyncio
 import os
-import subprocess
 import urllib.parse
-from dataclasses import Any, List, dataclass
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, List, Optional
 
 import boto3
 from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load-broker")
 
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
+sqs = boto3.resource("sqs", config=boto_config)
+queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
 
 @dataclass
