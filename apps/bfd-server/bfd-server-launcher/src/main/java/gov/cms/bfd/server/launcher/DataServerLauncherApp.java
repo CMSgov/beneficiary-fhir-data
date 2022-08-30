@@ -85,6 +85,14 @@ public final class DataServerLauncherApp {
   public static final String HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
       "http_access_response_duration_per_kb";
 
+  /** MDC key for the http response duration milliseconds. */
+  public static final String HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS =
+      "http_access_response_duration_milliseconds";
+
+  /** MDC key for the http response start in milliseconds. */
+  public static final String HTTP_ACCESS_RESPONSE_START_MILLISECONDS =
+      "http_access_response_start_milliseconds";
+
   /** The Jetty Server instance that will do most of our work. * */
   private static Server server;
 
@@ -360,12 +368,12 @@ public final class DataServerLauncherApp {
 
         // Record the response duration.
         Long requestStartMilliseconds =
-            (Long) request.getAttribute("http_access_response_start_milliseconds");
+            (Long) request.getAttribute(HTTP_ACCESS_RESPONSE_START_MILLISECONDS);
         if (requestStartMilliseconds != null) {
           Long responseDurationInMilliseconds =
               System.currentTimeMillis() - requestStartMilliseconds;
           BfdMDC.put(
-              BfdMDC.computeMDCKey("http_access_response_duration_milliseconds"),
+              BfdMDC.computeMDCKey(HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
               Long.toString(responseDurationInMilliseconds));
 
           if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
