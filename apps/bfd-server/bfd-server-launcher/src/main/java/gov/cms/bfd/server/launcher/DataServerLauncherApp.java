@@ -82,11 +82,7 @@ public final class DataServerLauncherApp {
   public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
       "http_access_response_output_size_in_bytes";
 
-<<<<<<< HEAD
-  /** MDC key for the response duration per kb. */
-=======
   /** MDC key for the http response duration per kb. */
->>>>>>> 0a05a9e94 (Added tests for IT)
   public static final String HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
       "http_access_response_duration_per_kb";
 
