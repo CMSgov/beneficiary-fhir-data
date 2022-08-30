@@ -77,22 +77,6 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
-  /** MDC key for the http output size in bytes. */
-  public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
-      "http_access_response_output_size_in_bytes";
-
-  /** MDC key for the http response duration per kb. */
-  public static final String HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
-      "http_access_response_duration_per_kb";
-
-  /** MDC key for the http response duration milliseconds. */
-  public static final String HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS =
-      "http_access_response_duration_milliseconds";
-
-  /** MDC key for the http response start in milliseconds. */
-  public static final String HTTP_ACCESS_RESPONSE_START_MILLISECONDS =
-      "http_access_response_start_milliseconds";
-
   /** The Jetty Server instance that will do most of our work. * */
   private static Server server;
 
@@ -364,28 +348,29 @@ public final class DataServerLauncherApp {
          * accessible to the filter.
          */
         Long outputSizeInBytes = response.getHttpOutput().getWritten();
-        BfdMDC.put(HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
+        BfdMDC.put(
+            BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
 
         // Record the response duration.
         Long requestStartMilliseconds =
-            (Long) request.getAttribute(HTTP_ACCESS_RESPONSE_START_MILLISECONDS);
+            (Long) request.getAttribute(BfdMDC.HTTP_ACCESS_RESPONSE_START_MILLISECONDS);
         if (requestStartMilliseconds != null) {
           Long responseDurationInMilliseconds =
               System.currentTimeMillis() - requestStartMilliseconds;
           BfdMDC.put(
-              BfdMDC.computeMDCKey(HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
+              BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
               Long.toString(responseDurationInMilliseconds));
 
           if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
-
             Long responseDurationPerKB =
                 ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
-            BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
+            BfdMDC.put(
+                BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
           } else {
-            BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+            BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
           }
         } else {
-          BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+          BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
         }
 
         /*

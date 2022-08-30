@@ -29,6 +29,32 @@ public class BfdMDC {
    */
   private static MDCAdapter mdcAdapter = null;
 
+  /** MDC key for the mdc prefix http access. */
+  private static final String MDC_PREFIX = "http_access";
+
+  /** MDC key for the http response prefix. */
+  private static final String RESPONSE_PREFIX = "response";
+
+  /** MDC key for the http request_Start_Key. */
+  public static final String REQUEST_START_KEY =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
+
+  /** MDC key for the http output size in bytes. */
+  public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "output_size_in_bytes");
+
+  /** MDC key for the http response duration per kb. */
+  public static final String HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_per_kb");
+
+  /** MDC key for the http response duration milliseconds. */
+  public static final String HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_milliseconds");
+
+  /** MDC key for the http response start in milliseconds. */
+  public static final String HTTP_ACCESS_RESPONSE_START_MILLISECONDS =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "tart_milliseconds");
+
   /**
    * Set the MDC Adapter. Normally this is not needed, but it can be useful in testing.
    *
