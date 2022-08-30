@@ -849,59 +849,65 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("0TCDDEE", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("02HK3JZ", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "0TCDDEE", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "02HK3JZ",
+                "\"INSERTION OF PACEMAKER LEAD INTO R VENTRICLE, PERC APPROACH\""),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 0TCDDEE");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 02HK3JZ");
 
     ProcedureComponent proc2 =
-        TransformerTestUtilsV2.findProcedureByCode("302DDAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("0PQKXZZ", eob.getProcedure());
 
     ProcedureComponent cmp2 =
         TransformerTestUtilsV2.createProcedure(
             proc2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302DDAA", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "0PQKXZZ",
+                "\"REPAIR RIGHT ULNA, EXTERNAL APPROACH\""),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code 302DDAA");
+    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code 0PQKXZZ");
 
     ProcedureComponent proc3 =
-        TransformerTestUtilsV2.findProcedureByCode("302ZZXX", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("0045", eob.getProcedure());
 
     ProcedureComponent cmp3 =
         TransformerTestUtilsV2.createProcedure(
             proc3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302ZZXX", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "0045", "INSERT 1 VASCULAR STENT"),
             "2016-01-15T00:00:00-06:00");
 
-    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 302ZZXX");
+    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 0045");
 
     ProcedureComponent proc4 =
-        TransformerTestUtilsV2.findProcedureByCode("5566AAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("4225", eob.getProcedure());
 
     ProcedureComponent cmp4 =
         TransformerTestUtilsV2.createProcedure(
             proc4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "5566AAA", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "4225", "OPEN BIOPSY OF ESOPHAGUS"),
             "2016-01-17T00:00:00-06:00");
 
-    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code 5566AAA");
+    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code 4225");
 
     ProcedureComponent proc5 =
-        TransformerTestUtilsV2.findProcedureByCode("6677BBB", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("470", eob.getProcedure());
 
     ProcedureComponent cmp5 =
         TransformerTestUtilsV2.createProcedure(
             proc5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "6677BBB", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "470", "APPENDECTOMY"),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code 6677BBB");
+    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code 470");
 
     ProcedureComponent proc6 =
         TransformerTestUtilsV2.findProcedureByCode("8109", eob.getProcedure());

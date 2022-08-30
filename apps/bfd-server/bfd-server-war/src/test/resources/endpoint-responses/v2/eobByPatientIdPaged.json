@@ -426,7 +426,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0AABBZZ"
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
           } ]
         }
       } ],
@@ -2800,7 +2801,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0TCDDEE"
+            "code" : "02HK3JZ",
+            "display" : "\"INSERTION OF PACEMAKER LEAD INTO R VENTRICLE, PERC APPROACH\""
           } ]
         }
       }, {
@@ -2809,7 +2811,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "302DDAA"
+            "code" : "0PQKXZZ",
+            "display" : "\"REPAIR RIGHT ULNA, EXTERNAL APPROACH\""
           } ]
         }
       }, {
@@ -2818,7 +2821,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "302ZZXX"
+            "code" : "0045",
+            "display" : "INSERT 1 VASCULAR STENT"
           } ]
         }
       }, {
@@ -2827,7 +2831,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "5566AAA"
+            "code" : "4225",
+            "display" : "OPEN BIOPSY OF ESOPHAGUS"
           } ]
         }
       }, {
@@ -2836,7 +2841,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "6677BBB"
+            "code" : "470",
+            "display" : "APPENDECTOMY"
           } ]
         }
       }, {
@@ -3793,7 +3799,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "0TCCCCC"
+            "code" : "0N5B4ZZ",
+            "display" : "\"DESTRUCTION OF NASAL BONE, PERCUTANEOUS ENDOSCOPIC APPROACH\""
           } ]
         }
       } ],

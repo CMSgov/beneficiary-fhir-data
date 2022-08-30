@@ -577,7 +577,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "0TCCCCC"
+        "code" : "0N5B4ZZ",
+        "display" : "\"DESTRUCTION OF NASAL BONE, PERCUTANEOUS ENDOSCOPIC APPROACH\""
       } ]
     }
   } ],
