@@ -37,7 +37,7 @@ resource "aws_iam_role" "iam-role-cloudwatch-logs" {
         {
           Action   = ["firehose:*"]
           Effect   = "Allow"
-          Resource = ["arn:aws:firehose:us-east-1:${data.aws_caller_identity.current.account_id}:deliverystream/${local.full_name}-firehose"]
+          Resource = ["arn:aws:firehose:us-east-1:${data.aws_caller_identity.current.account_id}:deliverystream/${local.full_name}-firehose-ingester"]
         }
       ]
     })
@@ -59,7 +59,7 @@ resource "aws_iam_policy" "iam-policy-firehose" {
           ]
           Effect   = "Allow"
           Resource = [
-            "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.glue-table-api-history.name}",
+            "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.glue-table-api-requests.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:database/${module.database.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:catalog"
           ]

@@ -41,9 +41,1240 @@ module "glue-table-api-requests" {
     }
   ]
 
-  # Don't specify here, because the schema is complex and it's sufficient to
-  # allow the crawler to define the columns
-  columns = [] 
+  # We have to explicitly specify the schema here, because Firehose cannot export to a parquet
+  # file without a static table schema.
+  columns = [
+    {
+      "name"    = "context",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "level",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "logger",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "message",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "thread",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "timestamp",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_bene_id",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_coverage_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_by_hash_collision_distinct_bene_ids",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_unknown_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_clientssl_dn",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_accept",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_accept-charset",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_accept-encoding",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bcda-cmsid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bcda-jobid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bfd-originalqueryid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-application",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-applicationid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-authappid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-authappname",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-authclientid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-authuuid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-backendcall",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-beneficiaryid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-developerid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-originalquery",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-originalquerycounter",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-originalqueryid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-originalquerytimestamp",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-originalurl",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-originatingipaddress",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-userid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bulk-clientid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bulk-jobid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_connection",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_content-length",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_content-type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_dpc_clientid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_host",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_includeaddressfields",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_includeidentifiers",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_includetaxnumbers",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_keep-alive",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_newrelic",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_traceparent",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_tracestate",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_user-agent",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_x-forwarded-for",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_x-forwarded-host",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_x-forwarded-proto",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_x-newrelic-id",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_x-newrelic-synthetics",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_x-newrelic-transaction",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_http_method",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_operation",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_query_string",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_uri",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_url",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_cache-control",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_content-encoding",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_content-location",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_content-type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_date",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_last-modified",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_x-newrelic-app-data",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_x-powered-by",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_x-request-id",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_status",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_include__duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_include__duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_include__record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_hicns_from_beneficiarieshistory_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_hicns_from_beneficiarieshistory_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_hicn_hicns_from_beneficiarieshistory_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_include__duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_include__duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_include__record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_include_mbi_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_include_mbi_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_include_mbi_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_omit_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_omit_hicns_and_mbis_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_id_omit_hicns_and_mbis_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_bene_by_mbi_or_id_include__duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_bene_by_mbi_or_id_include__duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_bene_by_mbi_or_id_include__record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_bene_by_mbi_or_id_include_mbi_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_bene_by_mbi_or_id_include_mbi_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_bene_by_mbi_or_id_include_mbi_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_mbis_from_beneficiarieshistory_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_mbis_from_beneficiarieshistory_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_by_mbi_mbis_from_beneficiarieshistory_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_ids_by_year_month_part_d_contract_id_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_ids_by_year_month_part_d_contract_id_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_ids_by_year_month_part_d_contract_id_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_benes_by_year_month_part_d_contract_id_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_benes_by_year_month_part_d_contract_id_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_benes_by_year_month_part_d_contract_id_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_carrier_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_carrier_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_carrier_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_dme_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_dme_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_dme_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_hha_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_hha_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_hha_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_hospice_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_hospice_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_hospice_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_inpatient_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_inpatient_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_inpatient_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_outpatient_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_outpatient_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_outpatient_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_pde_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_pde_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_pde_record_count",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_count",
+      "type"    = "string",
+      "comment" = ""
+    }
+  ] 
 }
 
 # Crawler for the API Requests table
@@ -232,19 +1463,18 @@ resource "aws_glue_job" "glue-job-history-ingest" {
 #
 # Organizes the Glue jobs / crawlers and runs them in sequence
 
-# Glue Workflow Object
-resource "aws_glue_workflow" "glue-workflow-api-requests" {
-  name = "${local.full_name}-api-requests-workflow"
+# Ingest History Workflow
+resource "aws_glue_workflow" "glue-workflow-ingest-history" {
+  name = "${local.full_name}-ingest-history-workflow"
   max_concurrent_runs = "1"
 }
 
-# Trigger for History Ingest Crawler. This will run every night at 4am UTC, but it can also be run
-# manually through the Console
+# Trigger for History Ingest Crawler. This will run only when explicitly activated.
 resource "aws_glue_trigger" "glue-trigger-api-history-crawler" {
   name          = "${local.full_name}-history-ingest-crawler-trigger"
-  workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
-  type          = "SCHEDULED"
-  schedule      = "cron(0 4 * * ? *)" # Every day at 4am UTC
+  description   = "Trigger to start the History Ingest Crawler on demand"
+  workflow_name = aws_glue_workflow.glue-workflow-ingest-history.name
+  type          = "ON_DEMAND"
 
   actions {
     crawler_name = aws_glue_crawler.glue-crawler-api-history.name
@@ -255,7 +1485,7 @@ resource "aws_glue_trigger" "glue-trigger-api-history-crawler" {
 resource "aws_glue_trigger" "glue-trigger-history-ingest-job" {
   name          = "${local.full_name}-history-ingest-trigger"
   description   = "Trigger to start the History Ingest Glue Job whenever the Crawler completes successfully"
-  workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
+  workflow_name = aws_glue_workflow.glue-workflow-ingest-history.name
   type          = "CONDITIONAL"
 
   actions {
@@ -270,21 +1500,21 @@ resource "aws_glue_trigger" "glue-trigger-history-ingest-job" {
   }
 }
 
+# Glue Workflow Object
+resource "aws_glue_workflow" "glue-workflow-api-requests" {
+  name = "${local.full_name}-api-requests-workflow"
+  max_concurrent_runs = "1"
+}
+
 # Trigger for API Requests Crawler
 resource "aws_glue_trigger" "glue-crawler-api-requests-crawler" {
   name          = "${local.full_name}-api-requests-crawler-trigger"
-  description   = "Trigger to start the API Requests Crawler whenever the History Ingest Job completes successfully"
+  description   = "Trigger to start the API Requests Crawler every day at 4 am UTC"
   workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
-  type          = "CONDITIONAL"
+  type          = "SCHEDULED"
+  schedule      = "cron(0 4 * * ? *)" # Every day at 4am UTC
 
   actions {
     crawler_name = aws_glue_crawler.glue-crawler-api-requests.name
-  }
-
-  predicate {
-    conditions {
-      job_name = aws_glue_job.glue-job-history-ingest.name
-      state  = "SUCCEEDED"
-    }
   }
 }

@@ -7,12 +7,12 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose-ingester" {
     bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
     buffer_interval     = 60
     buffer_size         = 128
-    error_output_prefix = "databases/${module.database.name}/${module.glue-table-api-history.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    error_output_prefix = "databases/${module.database.name}/${module.glue-table-api-requests.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     kms_key_arn         = data.aws_kms_key.kms_key.arn
-    prefix              = "databases/${module.database.name}/${module.glue-table-api-history.name}/firehose:year=!{timestamp:yyyy};month=!{timestamp:MM}/day:!{timestamp:dd}/"
+    prefix              = "databases/${module.database.name}/${module.glue-table-api-requests.name}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     role_arn            = aws_iam_role.iam-role-firehose.arn
     s3_backup_mode      = "Disabled"
-    compression_format  = "GZIP"
+    compression_format  = "UNCOMPRESSED" # Set to this when format_conversion is turned on
 
     cloudwatch_logging_options {
       enabled = false
@@ -28,6 +28,28 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose-ingester" {
           parameter_name  = "LambdaArn"
           parameter_value = "${resource.aws_lambda_function.lambda-function-format-firehose-logs.arn}:$LATEST"
         }
+      }
+    }
+
+    data_format_conversion_configuration {
+      input_format_configuration {
+        deserializer {
+          hive_json_ser_de {}
+        }
+      }
+
+      output_format_configuration {
+        serializer {
+          parquet_ser_de {
+            compression = "SNAPPY"
+          }
+        }
+      }
+
+      schema_configuration {
+        database_name = local.database
+        role_arn      = resource.aws_iam_role.iam-role-firehose.arn
+        table_name    = module.glue-table-api-requests.name
       }
     }
   }

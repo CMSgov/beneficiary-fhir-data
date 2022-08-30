@@ -80,6 +80,26 @@ from io import BytesIO
 import boto3
 from datetime import datetime # BFD modification
 
+def flatten_json(y):
+    """
+    BFD modification to add a function to flatten a JSON object (but not pivot out arrays).
+    Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
+    """
+
+    out = {}
+
+    def flatten(x, name=''):
+        if type(x) is dict:
+            if isinstance(x, dict):
+                for a in x:
+                    flatten(x[a], name + a + '.')
+                    flatten(x[a], name + a.replace('.', '_') + '_')
+        else:
+            out[name[:-1]] = x
+
+    flatten(y)
+    return out
+
 
 def transformLogEvent(log_event):
     """Transform each log event.
@@ -94,11 +114,12 @@ def transformLogEvent(log_event):
     """
 
     """
-    BFD modification to the blueprint to format similarly to CloudWatch exports
+    BFD modification to the blueprint to flatten the message json.
     """
-
-    date_text = datetime.fromtimestamp(log_event['timestamp'] / 1000).isoformat()
-    return '{date} {message}\n'.format(date=date_text, message=log_event['message'])
+    log_event_json = json.loads(log_event['message'])
+    flattened_log_event_json = flatten_json(log_event_json)
+    stringized_flattened_log_event_json = json.dumps(flattened_log_event_json)
+    return stringized_flattened_log_event_json + '\n'
 
 
 def processRecords(records):
