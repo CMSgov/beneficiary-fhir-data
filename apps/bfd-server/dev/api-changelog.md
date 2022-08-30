@@ -17,11 +17,11 @@ New diagnosis:
             "coding" : [
                 { "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
                 "code" : "4A0204Z",
-                "display": "Measurement of Cardiac Electrical Activity, Open Approach"
+                "display": "MEASUREMENT OF CARDIAC ELECTRICAL ACTIVITY, OPEN APPROACH"
                 }, {
                 "system" : "http://hl7.org/fhir/sid/icd-10",
                 "code" : "4A0204Z",
-                "display": "Measurement of Cardiac Electrical Activity, Open Approach"
+                "display": "MEASUREMENT OF CARDIAC ELECTRICAL ACTIVITY, OPEN APPROACH"
                 }
         ]},
         ...
