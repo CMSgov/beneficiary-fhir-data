@@ -849,15 +849,16 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("8703", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BQ0HZZZ", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "8703", "C.A.T. SCAN OF HEAD"),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10", "BQ0HZZZ", "PLAIN RADIOGRAPHY OF LEFT ANKLE"),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 8703");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code BQ0HZZZ");
 
     ProcedureComponent proc2 =
         TransformerTestUtilsV2.findProcedureByCode("CD1YYZZ", eob.getProcedure());
@@ -874,48 +875,54 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
 
     ProcedureComponent proc3 =
-        TransformerTestUtilsV2.findProcedureByCode("0045", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("2W52X6Z", eob.getProcedure());
 
     ProcedureComponent cmp3 =
         TransformerTestUtilsV2.createProcedure(
             proc3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "0045", "INSERT 1 VASCULAR STENT"),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "2W52X6Z",
+                "REMOVAL OF PRESSURE DRESSING ON NECK"),
             "2016-01-15T00:00:00-06:00");
 
-    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 0045");
+    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 2W52X6Z");
 
     ProcedureComponent proc4 =
-        TransformerTestUtilsV2.findProcedureByCode("4225", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BP17ZZZ", eob.getProcedure());
 
     ProcedureComponent cmp4 =
         TransformerTestUtilsV2.createProcedure(
             proc4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "4225", "OPEN BIOPSY OF ESOPHAGUS"),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA"),
             "2016-01-17T00:00:00-06:00");
 
-    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code 4225");
+    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code BP17ZZZ");
 
     ProcedureComponent proc5 =
-        TransformerTestUtilsV2.findProcedureByCode("470", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("D9YD8ZZ", eob.getProcedure());
 
     ProcedureComponent cmp5 =
         TransformerTestUtilsV2.createProcedure(
             proc5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "470", "APPENDECTOMY"),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX"),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code 470");
+    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code D9YD8ZZ");
 
     ProcedureComponent proc6 =
-        TransformerTestUtilsV2.findProcedureByCode("8109", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("F00ZCKZ", eob.getProcedure());
 
     ProcedureComponent cmp6 =
         TransformerTestUtilsV2.createProcedure(
             proc6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "8109", "REFUSION OF SPINE"),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "F00ZCKZ",
+                "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code 8109");
+    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
   }
 
   /** Insurance */

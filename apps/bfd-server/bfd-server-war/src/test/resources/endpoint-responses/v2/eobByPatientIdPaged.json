@@ -2801,8 +2801,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "8703",
-            "display" : "C.A.T. SCAN OF HEAD"
+            "code" : "BQ0HZZZ",
+            "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
           } ]
         }
       }, {
@@ -2821,8 +2821,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0045",
-            "display" : "INSERT 1 VASCULAR STENT"
+            "code" : "2W52X6Z",
+            "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
           } ]
         }
       }, {
@@ -2831,8 +2831,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "4225",
-            "display" : "OPEN BIOPSY OF ESOPHAGUS"
+            "code" : "BP17ZZZ",
+            "display" : "FLUOROSCOPY OF LEFT SCAPULA"
           } ]
         }
       }, {
@@ -2841,8 +2841,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "470",
-            "display" : "APPENDECTOMY"
+            "code" : "D9YD8ZZ",
+            "display" : "HYPERTHERMIA OF NASOPHARYNX"
           } ]
         }
       }, {
@@ -2851,8 +2851,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "8109",
-            "display" : "REFUSION OF SPINE"
+            "code" : "F00ZCKZ",
+            "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
           } ]
         }
       } ],
@@ -3799,8 +3799,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "0N5B4ZZ",
-            "display" : "\"DESTRUCTION OF NASAL BONE, PERCUTANEOUS ENDOSCOPIC APPROACH\""
+            "code" : "9214",
+            "display" : "BONE SCAN"
           } ]
         }
       } ],
