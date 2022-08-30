@@ -476,7 +476,7 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "H5555", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "H5555", null)),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
@@ -491,7 +491,9 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "H8888", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "H8888", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "H8888", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -508,7 +510,9 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R2222", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
@@ -525,7 +529,9 @@ public class HHAClaimTransformerV2Test {
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "R3333", null),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null)),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
