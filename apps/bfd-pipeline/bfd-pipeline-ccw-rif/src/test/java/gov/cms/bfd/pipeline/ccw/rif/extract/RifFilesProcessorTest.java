@@ -653,9 +653,9 @@ public final class RifFilesProcessorTest {
     assertEquals(LocalDate.of(2002, 1, 31), claimGroup.getMedicareBenefitsExhaustedDate().get());
     assertEquals(LocalDate.of(2013, 12, 18), claimGroup.getBeneficiaryDischargeDate().get());
 
-    assertEquals("B01", claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals("292", claimGroup.getDiagnosisAdmittingCode().get());
     assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
-    assertEquals("B05", claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals("790.3", claimGroup.getDiagnosisExternal1Code().get());
     assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get().charValue());
     assertEquals("23443453453", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals("34534535535", claimGroup.getFiOriginalClaimControlNumber().get());
@@ -715,7 +715,7 @@ public final class RifFilesProcessorTest {
     assertEquals(Character.valueOf('C'), claimGroup.getPatientStatusCd().get());
     assertEquals(BigDecimal.valueOf(30L), claimGroup.getUtilizationDayCount());
     assertEquals(LocalDate.of(2015, 6, 29), claimGroup.getBeneficiaryDischargeDate().get());
-    assertEquals("B05", claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals("292", claimGroup.getDiagnosisPrincipalCode().get());
     assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get().charValue());
     assertEquals(LocalDate.of(2014, 7, 06), claimGroup.getClaimHospiceStartDate().get());
     assertEquals("38875439343923937", claimGroup.getFiOriginalClaimControlNumber().get());
@@ -776,7 +776,7 @@ public final class RifFilesProcessorTest {
     assertEquals("2222222222", claimGroup.getAttendingPhysicianNpi().get());
     assertEquals("30", claimGroup.getPatientDischargeStatusCode());
     assertEquals(new BigDecimal("199.99"), claimGroup.getTotalChargeAmount());
-    assertEquals("A40", claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals("305", claimGroup.getDiagnosisPrincipalCode().get());
     assertEquals(Character.valueOf('9'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals('L', claimGroup.getClaimLUPACode().get().charValue());
     assertEquals('1', claimGroup.getClaimReferralCode().get().charValue());
