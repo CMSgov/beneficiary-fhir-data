@@ -130,7 +130,7 @@ locals {
   volume_size                = "40"                    # TODO: this even might be too big. Who knows!
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
-  key_pair               = local.nonsensitive_common_config["key_pair"]
+  key_pair                   = local.nonsensitive_common_config["key_pair"]
 }
 
 data "aws_security_group" "vpn" {
@@ -157,10 +157,10 @@ data "aws_subnet" "main" {
 }
 
 resource "aws_instance" "this" {
-  count                       = var.create_locust_instance ? 1 : 0
-  ami                         = local.ami_id
-  instance_type               = local.instance_type
-  key_name             = local.key_pair
+  count         = var.create_locust_instance ? 1 : 0
+  ami           = local.ami_id
+  instance_type = local.instance_type
+  key_name      = local.key_pair
 
   iam_instance_profile        = aws_iam_instance_profile.this.name
   availability_zone           = "us-east-1b" # TODO
@@ -189,7 +189,7 @@ resource "aws_instance" "this" {
 
 resource "aws_sqs_queue" "broker" {
   name                       = "${local.queue_name}-broker"
-  visibility_timeout_seconds = local.lambda_timeout_seconds
+  visibility_timeout_seconds = 0
   kms_master_key_id          = local.kms_key_id
 }
 

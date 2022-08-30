@@ -21,7 +21,7 @@ EOF
 locust \
 	--locustfile=high_volume_suite.py \
 	--host="${BFD_TEST_HOST}" \
-	--users=1 \
+	--users=5000 \
 	--master \
 	--master-bind-port=5557 \
 	--client-cert-path="/tmp/${BFD_ENV}-cert.pem" \

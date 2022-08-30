@@ -3,10 +3,11 @@ A lambda function that starts a worker node which coordinates tests between a sw
 This is a modified version of the `server-regression` lambda.
 """
 
+import asyncio
 import os
 import subprocess
 import urllib.parse
-from dataclasses import dataclass
+from dataclasses import Any, List, dataclass
 from typing import Optional
 
 import boto3
@@ -57,10 +58,28 @@ def get_rds_db_uri(cluster_id: str) -> Optional[str]:
         return None
 
 
+def check_queue(timeout: int = 1) -> List[Any]:
+    """
+    Checks SQS queue for messages.
+    """
+    # TODO: Make sure to not remove message from queue
+    response = queue.receive_messages(
+        AttributeNames=["SenderId", "SentTimestamp"],
+        WaitTimeSeconds=timeout,
+    )
+
+    return response
+
+
 def handler(event, context):
     """
     Handles execution of a worker node.
     """
+
+    asyncio.get_event_loop().run_until_complete(run_locust(event))
+
+
+async def run_locust(event):
 
     # We then attempt to extract an InvokeEvent instance from
     # the JSON body
@@ -107,7 +126,7 @@ def handler(event, context):
         f"master-port: {invoke_event.locust_port}"
     )
 
-    process = subprocess.run(
+    process = await asyncio.create_subprocess_exec(
         [
             "locust",
             "--locustfile=/var/task/high_volume_suite.py",
@@ -124,4 +143,8 @@ def handler(event, context):
         check=False,
     )
 
-    return process.stdout
+    scaling_event = []
+    while not scaling_event:
+        scaling_event = check_queue(timeout=1)
+
+    process.terminate()
