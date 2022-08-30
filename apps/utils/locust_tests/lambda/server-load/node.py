@@ -141,8 +141,6 @@ async def run_locust(event):
             "--headless",
             "--only-summary",
         ],
-        text=True,
-        check=False,
     )
 
     scaling_event = []
