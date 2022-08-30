@@ -375,18 +375,6 @@ public final class DataServerLauncherApp {
           BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
         }
 
-        Long startInMilliseconds =
-            (Long) request.getAttribute("http_access_response_start_milliseconds");
-
-        if (response.getHttpOutput().getWritten() != 0 && startInMilliseconds != 0) {
-          Long responseDurationInMilliseconds = System.currentTimeMillis() - startInMilliseconds;
-          Long responseDurationPerKB =
-              ((1024 * responseDurationInMilliseconds) / response.getHttpOutput().getWritten());
-          BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
-        } else {
-          BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-        }
-
         /*
          * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
          * automatically included with it is!
