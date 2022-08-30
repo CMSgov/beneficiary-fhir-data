@@ -119,7 +119,7 @@ def transformLogEvent(log_event):
     log_event_json = json.loads(log_event['message'])
     flattened_log_event_json = flatten_json(log_event_json)
     stringized_flattened_log_event_json = json.dumps(flattened_log_event_json)
-    return stringized_flattened_log_event_json + '\n'
+    return stringized_flattened_log_event_json.lower() + '\n'
 
 
 def processRecords(records):

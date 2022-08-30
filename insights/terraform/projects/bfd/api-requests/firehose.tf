@@ -12,7 +12,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose-ingester" {
     prefix              = "databases/${module.database.name}/${module.glue-table-api-requests.name}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     role_arn            = aws_iam_role.iam-role-firehose.arn
     s3_backup_mode      = "Disabled"
-    compression_format  = "UNCOMPRESSED" # Set to this when format_conversion is turned on
+    compression_format  = "UNCOMPRESSED" # Must be UNCOMPRESSED when format_conversion is turned on
 
     cloudwatch_logging_options {
       enabled = false

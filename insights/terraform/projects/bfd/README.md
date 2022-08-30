@@ -129,4 +129,5 @@ names).
         - Drag `timestamp` (beneficiaries table) or `last_seen` (beneficiaries_unique table) to
         the "X Axis" under the Field Wells.
         - In the upper-right, click Share > Publish Dashboard. Choose a name. Example:
-        `bfd-<environment>-beneficiaries`. The default options should be fine, so click Publish Dashboard.
+        `bfd-<environment>-beneficiaries`. The default options should be fine, so click Publish
+        Dashboard.

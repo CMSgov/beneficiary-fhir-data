@@ -1509,11 +1509,9 @@ resource "aws_glue_workflow" "glue-workflow-api-requests" {
 # Trigger for API Requests Crawler
 resource "aws_glue_trigger" "glue-crawler-api-requests-crawler" {
   name          = "${local.full_name}-api-requests-crawler-trigger"
-  description   = "Trigger to start the API Requests Crawler every day at 4 am UTC"
+  description   = "Trigger to start the API Requests Crawler"
   workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
   type          = "ON_DEMAND"
-  # type          = "SCHEDULED"
-  # schedule      = "cron(0 4 * * ? *)" # Every day at 4am UTC
 
   actions {
     crawler_name = aws_glue_crawler.glue-crawler-api-requests.name
