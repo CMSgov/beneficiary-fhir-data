@@ -50,6 +50,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public final class HospiceClaimTransformerV2Test {
@@ -97,7 +98,7 @@ public final class HospiceClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  // @Disabled
+  @Disabled
   @Test
   public void shouldOutputJSON() throws FHIRException {
     assertNotNull(eob);
