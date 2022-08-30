@@ -6,9 +6,8 @@
 # 1: previous end state properties file location
 # 2: file system location of synthea folder
 # 3: number of beneficiaries to be generated
-# 4: db usernames and passwords for each environment DB, in this format (including quotes): "testUsername,testPassword,prodSbxUsername,prodSbxPassword,prodUsername,prodPassword"
-# 5: which environments to load/validate, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
-# 6: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
+# 4: which environments to load/validate, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
+# 5: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
 #
 # Example runstring (with db usernames and passwords as an env variable DB_STRING): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $DB_STRING "test,sbx"
 #
@@ -17,9 +16,9 @@
 # 1. Validate the paths and files for synthea needed are in place within the synthea directory (as passed in arg2)
 #    - Also checks files and folders that must be written to are writable, and that some externally added files are readable
 #    - Checks if the output folder exists, and creates one if not
-# 2. Checks the supplied database (as passed in arg4) has room to load the number of benes (as passed in arg3) and related table data, so we dont waste time generating something that will have collisions in the target db
+# 2. Checks the supplied database has room to load the number of benes and related table data, so we dont waste time generating something that will have collisions in the target db
 #    - This validation's checks will begin at the expected generation starting point for each field, as read from the end state properties file in arg1
-#    - This is the validation that can be skipped by using optional arg6. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
+#    - This is the validation that can be skipped by using optional arg5. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
 # 3. Validates the output directory is empty
 #    - If the output folder has data from a previous run, the output directory is renamed with a timestamp and a new empty output directory is created
 #    - Since this check handles a non-empty output folder, this step wont fail unless there is an IO issue
@@ -28,14 +27,14 @@
 #    - Output of this run will be written to a timestamped log file in the synthea directory
 #    - If this run fails (denoted by checking the output for text synthea outputs on a build failure) the synthea generation step will be considered a failure
 #
-# Example runstring: python3 prepare-and-run-synthea.py ~/Documents/end-state.properties ~/Git/synthea 100 $DB_STRING "sbx" True
+# Example runstring: python3 prepare-and-run-synthea.py ~/Documents/end-state.properties ~/Git/synthea 100 "sbx" True
 #
 # If any step of the above fails, a message describing the failure will be printed to stdout along with a standard message on a new line "Returning with exit code 1"
 # If all steps succeed, the script will print to stdout "Returning with exit code 0 (No errors)"
 #
 # Note: If running locally, you will need to be connected to the VPN in order to successfully connect to the database
 #
-# Requires psycopg2 installed
+# Requires psycopg2 and boto3 installed
 #
 
 import sys
@@ -45,6 +44,8 @@ import time
 import fileinput
 import subprocess
 import shlex
+
+import ssmutil
 
 def validate_and_run(args):
     """
@@ -63,9 +64,8 @@ def validate_and_run(args):
     if not synthea_folder_filepath.endswith('/'):
         synthea_folder_filepath = synthea_folder_filepath + "/"
     generated_benes = args[2]
-    db_data = args[3].split(',')
-    envs = args[4].split(',')
-    skip_validation = True if len(args) > 5 and args[5] == "True" else False
+    envs = args[3].split(',')
+    skip_validation = True if len(args) > 4 and args[4] == "True" else False
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
     
@@ -79,26 +79,36 @@ def validate_and_run(args):
         sys.exit(1)
     
     end_state_properties_file = read_file_lines(end_state_file_path)
+        
+    ## Get DB Creds from param store
+    test_db_string = ssmutil.get_ssm_db_string("test")
+    prod_sbx_db_string = ssmutil.get_ssm_db_string("prod-sbx")
+    prod_string = ssmutil.get_ssm_db_string("prod")
     
     #Validate the ranges - number to be generated
-    test_db_string = f"postgres://{db_data[0]}:{db_data[1]}@bfd-test-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
-    prod_sbx_db_string = f"postgres://{db_data[2]}:{db_data[3]}@bfd-prod-sbx-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
-    prod_string = f"postgres://{db_data[4]}:{db_data[5]}@bfd-prod-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com/fhirdb"
-
     test_validation_result = True
     prod_sbx_validation_result = True
     prod_validation_result = True
+    num_run = 0
     if not skip_validation:
         if "test" in envs:
             print("Running validations for test...")
             test_validation_result = check_ranges(end_state_properties_file, generated_benes, test_db_string)
-        if "sbx" in envs or "prd-sbx" in envs:
+            num_run = num_run + 1
+        if "prd-sbx" in envs:
             print("Running validations for prod-sbx...")
             prod_sbx_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_sbx_db_string)
+            num_run = num_run + 1
         if "prod" in envs:
             ## Note this one step takes a while (near 30 mins), due to checking for non-indexed fields on very big tables
             print("Running validations for prod...")
             prod_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_string)
+            num_run = num_run + 1
+        
+        if not num_run == len(envs):
+            print(f"(Validation Failure) Unknown environment found in {envs}")
+            print("Returning with exit code 1")
+            sys.exit(1)
         
         if not (test_validation_result and prod_sbx_validation_result and prod_validation_result):
             print("Failed validation, not updating synthea properties")

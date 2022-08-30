@@ -4,7 +4,6 @@
 locals {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config      = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
-  is_prod         = substr(var.env_config.env, 0, 4) == "prod"
   port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
@@ -211,18 +210,16 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config = {
-    min             = local.is_prod ? 2 * length(local.azs) : length(local.azs)
+    min             = 2 * length(local.azs)
     max             = 8 * length(local.azs)
     max_warm        = 4 * length(local.azs)
-    desired         = local.is_prod ? 2 * length(local.azs) : length(local.azs)
+    desired         = 2 * length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    # test == c5.xlarge (4 vCPUs and 8GiB mem)
-    # prod and prod-sbx == c5.4xlarge (16 vCPUs and 32GiB mem )
     instance_type = "c5.4xlarge"
     volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
