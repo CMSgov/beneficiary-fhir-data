@@ -50,7 +50,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public final class HospiceClaimTransformerV2Test {
@@ -98,7 +97,7 @@ public final class HospiceClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  @Disabled
+  // @Disabled
   @Test
   public void shouldOutputJSON() throws FHIRException {
     assertNotNull(eob);
@@ -463,13 +462,13 @@ public final class HospiceClaimTransformerV2Test {
     List<DiagnosisComponent> expected = eob.getDiagnosis();
     assertEquals(4, expected.size());
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("B05", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("292", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B05", "MEASLES")),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "292", "Drug Withdrawal")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",

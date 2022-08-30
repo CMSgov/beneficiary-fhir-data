@@ -470,13 +470,13 @@ public class HHAClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("A40", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("305", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "A40", "STREPTOCOCCAL SEPSIS")),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "305", "Alcohol Abuse")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype", "principal", "principal"),
             null,
