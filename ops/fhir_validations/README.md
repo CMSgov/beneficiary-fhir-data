@@ -12,4 +12,4 @@ To run the validation script, enter the command `python3 validations.py -d path/
 By default, the script will validate every resource (takes about a minute or two) within the directories, or you can optionally use the `-r` flag to only validate resources in the current branch that differ from the main branch.
 
 The `-i` flag can be used to designate an "ignore list" to use when filtering the results of the validations, ex:
-`python3 validations.py -I myignorelist.yml`.  By default, it searches for a local file called `validations_ignorelist.yml`.
+`python3 validations.py -i myignorelist.yml`.  By default, it searches for a local file called `validations_ignorelist.yml`.
