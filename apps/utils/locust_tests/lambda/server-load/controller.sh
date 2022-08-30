@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -eou pipefail
 
+BFD_ENV=${BFD_ENV:="test"}
+BFD_TEST_HOST=${BFD_TEST_HOST:="https://test.bfd.cms.gov"}
+
 cluster_id="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/common/nonsensitive/rds_cluster_identifier --query Parameter.Value --region us-east-1 --output text)"
 username="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/server/sensitive/vault_data_server_db_username --with-decryption --query Parameter.Value --region us-east-1 --output text)"
 raw_password="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/server/sensitive/vault_data_server_db_password --with-decryption --query Parameter.Value --region us-east-1 --output text)"
