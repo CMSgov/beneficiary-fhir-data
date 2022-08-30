@@ -13,8 +13,9 @@ import boto3
 from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
+region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 
-boto_config = Config(region_name="us-east-1")
+boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
 
