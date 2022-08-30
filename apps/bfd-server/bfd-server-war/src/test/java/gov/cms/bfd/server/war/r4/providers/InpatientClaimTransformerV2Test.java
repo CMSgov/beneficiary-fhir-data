@@ -688,21 +688,15 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("A05", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A37", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
             List.of(
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10-cm",
-                    "A05",
-                    "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""),
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10",
-                    "A05",
-                    "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\"")),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A37", "WHOOPING COUGH"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A37", "WHOOPING COUGH")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "admitting",
@@ -789,21 +783,15 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
 
     DiagnosisComponent diag6 =
-        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B01", eob.getDiagnosis());
 
     DiagnosisComponent cmp6 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag6.getSequence(),
             List.of(
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10-cm",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B01", "VARICELLA [CHICKENPOX]"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",

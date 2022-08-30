@@ -1928,12 +1928,12 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-            "code" : "B20",
-            "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "B20",
-            "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           } ]
         },
         "type" : [ {
@@ -2619,12 +2619,12 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-            "code" : "A05",
-            "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
           }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "A05",
-            "display" : "\"OTH BACTERIAL FOODBORNE INTOXICATIONS, NEC\""
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
           } ]
         },
         "type" : [ {
@@ -2759,12 +2759,12 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-            "code" : "B20",
-            "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "B20",
-            "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           } ]
         },
         "type" : [ {
@@ -3753,8 +3753,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "B20",
-            "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           } ]
         },
         "type" : [ {

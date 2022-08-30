@@ -481,7 +481,7 @@ public final class RifFilesProcessorTest {
     assertEquals(LocalDate.of(2016, 1, 27), claimGroup.getBeneficiaryDischargeDate().get());
     assertEquals(new BigDecimal("23.99"), claimGroup.getDrgOutlierApprovedPaymentAmount().get());
 
-    assertEquals("A05", claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals("A37", claimGroup.getDiagnosisAdmittingCode().get());
     assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
 
     assertEquals("A40", claimGroup.getDiagnosisPrincipalCode().get());
@@ -653,7 +653,7 @@ public final class RifFilesProcessorTest {
     assertEquals(LocalDate.of(2002, 1, 31), claimGroup.getMedicareBenefitsExhaustedDate().get());
     assertEquals(LocalDate.of(2013, 12, 18), claimGroup.getBeneficiaryDischargeDate().get());
 
-    assertEquals("B20", claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals("B01", claimGroup.getDiagnosisAdmittingCode().get());
     assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
     assertEquals("B05", claimGroup.getDiagnosisExternal1Code().get());
     assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get().charValue());

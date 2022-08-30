@@ -500,8 +500,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "B20",
-        "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     },
     "type" : [ {

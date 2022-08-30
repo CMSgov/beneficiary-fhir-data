@@ -671,17 +671,14 @@ public class SNFClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B01", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
             List.of(
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-9-cm",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
+                new Coding("http://hl7.org/fhir/sid/icd-9-cm", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",

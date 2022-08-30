@@ -485,21 +485,15 @@ public class HHAClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B01", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
             List.of(
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10-cm",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B01", "VARICELLA [CHICKENPOX]"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
