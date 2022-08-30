@@ -452,21 +452,15 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
-        TransformerTestUtilsV2.findDiagnosisByCode("B20", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A37", eob.getDiagnosis());
 
     DiagnosisComponent cmp5 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
             List.of(
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10-cm",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"),
-                new Coding(
-                    "http://hl7.org/fhir/sid/icd-10",
-                    "B20",
-                    "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE")),
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A37", "WHOOPING COUGH"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A37", "WHOOPING COUGH")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "patientreasonforvisit",

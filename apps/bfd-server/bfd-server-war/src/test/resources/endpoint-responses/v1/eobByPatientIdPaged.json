@@ -367,8 +367,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "B20",
-            "display" : "HUMAN IMMUNODEFICIENCY VIRUS �HIV� DISEASE"
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
           } ]
         },
         "type" : [ {
