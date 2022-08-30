@@ -1,6 +1,5 @@
 locals {
   tags    = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
-  is_prod = substr(var.env_config.env, 0, 4) == "prod"
 }
 
 # subnets
