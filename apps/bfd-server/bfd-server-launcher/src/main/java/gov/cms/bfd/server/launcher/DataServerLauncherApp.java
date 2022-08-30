@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.newrelic.agent.deps.com.google.common.base.Strings;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
@@ -80,6 +81,10 @@ public final class DataServerLauncherApp {
   /** MDC key for the http output size in bytes. */
   public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
       "http_access_response_output_size_in_bytes";
+
+  /** MDC key for the response duration per kb. */
+  public static final String MDC_HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
+      "mdc_http_access_response_duration_per_kb";
 
   /** The Jetty Server instance that will do most of our work. * */
   private static Server server;
@@ -354,6 +359,20 @@ public final class DataServerLauncherApp {
         BfdMDC.put(
             HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
             String.valueOf(response.getHttpOutput().getWritten()));
+
+        String responseDurationInMilliseconds =
+            (String) request.getAttribute("response_duration_milliseconds");
+
+        if (response.getHttpOutput().getWritten() != 0
+            && !Strings.isNullOrEmpty(responseDurationInMilliseconds)) {
+          long responseDurationPerKB =
+              ((1024 * Long.parseLong(responseDurationInMilliseconds))
+                  / response.getHttpOutput().getWritten());
+          BfdMDC.put(
+              MDC_HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
+        } else {
+          BfdMDC.put(MDC_HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+        }
 
         /*
          * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
