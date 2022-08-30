@@ -274,6 +274,9 @@
     "sequence" : 1,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "H5555"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "H5555"
       } ]
@@ -289,6 +292,9 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "H8888"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "H8888"
       } ]
@@ -304,6 +310,9 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "H66666"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "H66666"
       } ]
@@ -319,6 +328,9 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "H77777"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "H77777"
       } ]
@@ -334,6 +346,9 @@
     "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "H12345"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
         "code" : "H12345"
       } ]
