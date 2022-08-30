@@ -425,6 +425,9 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "0AABBZZ"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "0AABBZZ"
           } ]
@@ -2799,6 +2802,9 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "0TCDDEE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "0TCDDEE"
           } ]
@@ -2808,6 +2814,9 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "302DDAA"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "302DDAA"
           } ]
@@ -2817,6 +2826,9 @@
         "date" : "2016-01-15T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "302ZZXX"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "302ZZXX"
           } ]
@@ -2826,6 +2838,9 @@
         "date" : "2016-01-17T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "5566AAA"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "5566AAA"
           } ]
@@ -2835,6 +2850,9 @@
         "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "6677BBB"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "6677BBB"
           } ]
@@ -2844,6 +2862,10 @@
         "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "8109",
+            "display" : "REFUSION OF SPINE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
             "code" : "8109",
             "display" : "REFUSION OF SPINE"
