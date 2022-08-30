@@ -5,7 +5,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.newrelic.agent.deps.com.google.common.base.Strings;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
@@ -83,8 +82,8 @@ public final class DataServerLauncherApp {
       "http_access_response_output_size_in_bytes";
 
   /** MDC key for the response duration per kb. */
-  public static final String MDC_HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
-      "mdc_http_access_response_duration_per_kb";
+  public static final String HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
+      "http_access_response_duration_per_kb";
 
   /** The Jetty Server instance that will do most of our work. * */
   private static Server server;
@@ -360,18 +359,16 @@ public final class DataServerLauncherApp {
             HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
             String.valueOf(response.getHttpOutput().getWritten()));
 
-        String responseDurationInMilliseconds =
-            (String) request.getAttribute("response_duration_milliseconds");
+        Long startInMilliseconds =
+            (Long) request.getAttribute("http_access_response_start_milliseconds");
 
-        if (response.getHttpOutput().getWritten() != 0
-            && !Strings.isNullOrEmpty(responseDurationInMilliseconds)) {
-          long responseDurationPerKB =
-              ((1024 * Long.parseLong(responseDurationInMilliseconds))
-                  / response.getHttpOutput().getWritten());
-          BfdMDC.put(
-              MDC_HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
+        if (response.getHttpOutput().getWritten() != 0 && startInMilliseconds != 0) {
+          Long responseDurationInMilliseconds = System.currentTimeMillis() - startInMilliseconds;
+          Long responseDurationPerKB =
+              ((1024 * responseDurationInMilliseconds) / response.getHttpOutput().getWritten());
+          BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
         } else {
-          BfdMDC.put(MDC_HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+          BfdMDC.put(HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
         }
 
         /*
