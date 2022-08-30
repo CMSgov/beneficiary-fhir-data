@@ -305,8 +305,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "B05",
-        "display" : "MEASLES"
+        "code" : "72761",
+        "display" : "ROTATOR CUFF RUPTURE"
       } ]
     },
     "type" : [ {

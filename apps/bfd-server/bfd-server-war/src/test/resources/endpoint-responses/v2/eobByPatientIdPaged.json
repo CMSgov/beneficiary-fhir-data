@@ -1912,8 +1912,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "A40",
-            "display" : "STREPTOCOCCAL SEPSIS"
+            "code" : "53081",
+            "display" : "ESOPHAGEAL REFLUX"
           } ]
         },
         "type" : [ {
@@ -3753,8 +3753,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "B01",
-            "display" : "VARICELLA [CHICKENPOX]"
+            "code" : "6202",
+            "display" : "OVARIAN CYST NEC/NOS"
           } ]
         },
         "type" : [ {
@@ -3769,8 +3769,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "A40",
-            "display" : "STREPTOCOCCAL SEPSIS"
+            "code" : "3736",
+            "display" : "PARASITIC INFEST EYELID"
           } ]
         },
         "type" : [ {
@@ -3785,8 +3785,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "A52",
-            "display" : "LATE SYPHILIS"
+            "code" : "V0182",
+            "display" : "EXPOSURE TO SARS"
           } ]
         },
         "type" : [ {
@@ -3801,8 +3801,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "B05",
-            "display" : "MEASLES"
+            "code" : "E9281",
+            "display" : "EXPOSURE TO NOISE"
           } ]
         },
         "type" : [ {
@@ -3817,8 +3817,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "B15",
-            "display" : "ACUTE HEPATITIS A"
+            "code" : "3310",
+            "display" : "ALZHEIMER'S DISEASE"
           } ]
         },
         "type" : [ {
@@ -5769,8 +5769,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "B05",
-            "display" : "MEASLES"
+            "code" : "72761",
+            "display" : "ROTATOR CUFF RUPTURE"
           } ]
         },
         "type" : [ {

@@ -222,8 +222,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "A40",
-        "display" : "STREPTOCOCCAL SEPSIS"
+        "code" : "53081",
+        "display" : "ESOPHAGEAL REFLUX"
       } ]
     },
     "type" : [ {
