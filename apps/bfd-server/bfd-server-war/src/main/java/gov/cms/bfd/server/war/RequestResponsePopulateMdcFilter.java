@@ -173,6 +173,13 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
               headerValues.toString());
       }
     }
+
+    // Record the response duration.
+    Long requestStartMilliseconds = (Long) request.getAttribute(REQUEST_START_KEY);
+    if (requestStartMilliseconds != null)
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_milliseconds"),
+          Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
   }
 
   /** {@inheritDoc} */
