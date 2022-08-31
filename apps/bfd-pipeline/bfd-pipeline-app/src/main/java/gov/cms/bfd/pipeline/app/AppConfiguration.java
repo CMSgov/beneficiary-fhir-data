@@ -225,7 +225,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       "RDA_JOB_STARTING_MCS_SEQ_NUM";
 
   /**
-   * The name of the environment variable that should be used to determine if the {@link
+   * The name of the boolean environment variable that should be used to determine if the {@link
    * gov.cms.bfd.pipeline.rda.grpc.source.DLQGrpcRdaSource} task should be run on subsequent job
    * runs.
    */

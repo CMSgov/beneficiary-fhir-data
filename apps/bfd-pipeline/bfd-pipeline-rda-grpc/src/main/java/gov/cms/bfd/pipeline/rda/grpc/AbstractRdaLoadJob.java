@@ -36,6 +36,14 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
+
+  /**
+   * Denotes the preferred execution of a sink
+   *
+   * <p>This enum is used with sink factories to help determine what type of sink should be created
+   * by the factory. When followup actions depend on the outcome of a sink write, synchronous
+   * execution may be desired.
+   */
   public enum SinkTypePreference {
     NONE,
     SYNCHRONOUS,
