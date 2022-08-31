@@ -204,7 +204,7 @@ resource "aws_iam_role" "iam-role-firehose-lambda" {
                   "firehose:PutRecordBatch"
               ],
               "Resource": [
-                  "arn:aws:firehose:us-east-1:577373831711:deliverystream/${local.full_name}-firehose"
+                  "arn:aws:firehose:us-east-1:577373831711:deliverystream/${local.full_name}-firehose-ingester"
               ]
           }
       ]

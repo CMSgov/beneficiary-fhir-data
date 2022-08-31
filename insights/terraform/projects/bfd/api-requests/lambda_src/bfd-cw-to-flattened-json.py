@@ -92,10 +92,9 @@ def flatten_json(y):
         if type(x) is dict:
             if isinstance(x, dict):
                 for a in x:
-                    flatten(x[a], name + a + '.')
                     flatten(x[a], name + a.replace('.', '_') + '_')
         else:
-            out[name[:-1]] = x
+            out[name.lower()[:-1]] = x
 
     flatten(y)
     return out
@@ -119,7 +118,7 @@ def transformLogEvent(log_event):
     log_event_json = json.loads(log_event['message'])
     flattened_log_event_json = flatten_json(log_event_json)
     stringized_flattened_log_event_json = json.dumps(flattened_log_event_json)
-    return stringized_flattened_log_event_json.lower() + '\n'
+    return stringized_flattened_log_event_json + '\n'
 
 
 def processRecords(records):

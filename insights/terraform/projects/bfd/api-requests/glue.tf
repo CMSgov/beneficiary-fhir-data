@@ -60,21 +60,6 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "message",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "thread",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "timestamp",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
       "name"    = "mdc_bene_id",
       "type"    = "string",
       "comment" = ""
@@ -795,6 +780,11 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
+      "name"    = "mdc_http_access_request_header_cache-control",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "mdc_http_access_request_header_connection",
       "type"    = "string",
       "comment" = ""
@@ -1273,6 +1263,21 @@ module "glue-table-api-requests" {
       "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_count",
       "type"    = "string",
       "comment" = ""
+    },
+    {
+      "name"    = "message",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "thread",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "timestamp",
+      "type"    = "string",
+      "comment" = ""
     }
   ] 
 }
@@ -1314,7 +1319,7 @@ resource "aws_glue_crawler" "glue-crawler-api-requests" {
 
   schema_change_policy {
     delete_behavior = "LOG"
-    update_behavior = "UPDATE_IN_DATABASE"
+    update_behavior = "LOG"
   }
 }
 
@@ -1380,8 +1385,8 @@ resource "aws_glue_crawler" "glue-crawler-api-history" {
   }
 
   schema_change_policy {
-    delete_behavior = "LOG" # "DEPRECATE_IN_DATABASE"
-    update_behavior = "UPDATE_IN_DATABASE"
+    delete_behavior = "LOG"
+    update_behavior = "LOG"
   }
 
   configuration = jsonencode(
