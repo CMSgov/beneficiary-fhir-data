@@ -7,3 +7,4 @@
   shell: yum update-minimal --security -y
   args:
     warn: no
+  tags: [pre-ami]
