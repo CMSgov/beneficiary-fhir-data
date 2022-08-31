@@ -352,8 +352,7 @@ public final class DataServerLauncherApp {
             BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
 
         // Record the response duration.
-        Long requestStartMilliseconds =
-            (Long) request.getAttribute(BfdMDC.HTTP_ACCESS_RESPONSE_START_MILLISECONDS);
+        Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
         if (requestStartMilliseconds != null) {
           Long responseDurationInMilliseconds =
               System.currentTimeMillis() - requestStartMilliseconds;
