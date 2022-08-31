@@ -22,6 +22,11 @@ data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
+# sns kms key
+data "aws_kms_key" "sns_key" {
+  key_id = "alias/aws/sns"
+}
+
 # subnets
 data "aws_subnet" "data_subnets" {
   count             = length(local.azs)
@@ -73,6 +78,8 @@ resource "aws_sns_topic" "cloudwatch_alarms" {
   name         = "bfd-${var.env_config.env}-cloudwatch-alarms"
   display_name = "BFD Cloudwatch Alarm. Created by Terraform."
   tags         = var.env_config.tags
+  
+  kms_master_key_id = data.aws_kms_key.sns_key.id
 }
 
 resource "aws_sns_topic_subscription" "alarm" {
@@ -87,6 +94,8 @@ resource "aws_sns_topic" "cloudwatch_ok" {
   name         = "bfd-${var.env_config.env}-cloudwatch-ok"
   display_name = "BFD Cloudwatch OK notifications. Created by Terraform."
   tags         = var.env_config.tags
+
+  kms_master_key_id = data.aws_kms_key.sns_key.id
 }
 
 resource "aws_sns_topic_subscription" "ok" {
