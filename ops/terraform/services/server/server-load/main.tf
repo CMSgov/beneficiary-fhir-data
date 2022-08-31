@@ -146,6 +146,7 @@ resource "aws_sqs_queue" "broker" {
 resource "aws_autoscaling_lifecycle_hook" "scaling_hook" {
   autoscaling_group_name  = data.aws_autoscaling_group.asg.name
   heartbeat_timeout       = 3600
+  default_result          = "CONTINUE"
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_LAUNCHING"
   name                    = "${local.queue_name}-scaling-hook"
   notification_target_arn = aws_sqs_queue.broker.arn

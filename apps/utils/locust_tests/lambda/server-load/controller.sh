@@ -10,6 +10,7 @@ raw_password="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/server/sensitive/va
 password="$( python3 -c 'import sys;import urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "$raw_password")"
 db_dsn="postgres://${username}:${password}@bfd-test-aurora-cluster.cluster-ro-clyryngdhnko.us-east-1.rds.amazonaws.com:5432/fhirdb"
 
+# TODO: Make spawn-rate configurable
 locust \
 	--locustfile=high_volume_suite.py \
 	--host="${BFD_TEST_HOST}" \
