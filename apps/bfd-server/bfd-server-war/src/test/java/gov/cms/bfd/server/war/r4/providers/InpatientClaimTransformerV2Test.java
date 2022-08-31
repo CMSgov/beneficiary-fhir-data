@@ -852,70 +852,80 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("0TCDDEE", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BQ0HZZZ", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "0TCDDEE", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10", "BQ0HZZZ", "PLAIN RADIOGRAPHY OF LEFT ANKLE"),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 0TCDDEE");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code BQ0HZZZ");
 
     ProcedureComponent proc2 =
-        TransformerTestUtilsV2.findProcedureByCode("302DDAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("CD1YYZZ", eob.getProcedure());
 
     ProcedureComponent cmp2 =
         TransformerTestUtilsV2.createProcedure(
             proc2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302DDAA", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "CD1YYZZ",
+                "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code 302DDAA");
+    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
 
     ProcedureComponent proc3 =
-        TransformerTestUtilsV2.findProcedureByCode("302ZZXX", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("2W52X6Z", eob.getProcedure());
 
     ProcedureComponent cmp3 =
         TransformerTestUtilsV2.createProcedure(
             proc3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302ZZXX", null),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "2W52X6Z",
+                "REMOVAL OF PRESSURE DRESSING ON NECK"),
             "2016-01-15T00:00:00-06:00");
 
-    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 302ZZXX");
+    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 2W52X6Z");
 
     ProcedureComponent proc4 =
-        TransformerTestUtilsV2.findProcedureByCode("5566AAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BP17ZZZ", eob.getProcedure());
 
     ProcedureComponent cmp4 =
         TransformerTestUtilsV2.createProcedure(
             proc4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "5566AAA", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA"),
             "2016-01-17T00:00:00-06:00");
 
-    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code 5566AAA");
+    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code BP17ZZZ");
 
     ProcedureComponent proc5 =
-        TransformerTestUtilsV2.findProcedureByCode("6677BBB", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("D9YD8ZZ", eob.getProcedure());
 
     ProcedureComponent cmp5 =
         TransformerTestUtilsV2.createProcedure(
             proc5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "6677BBB", null),
+            new Coding("http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX"),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code 6677BBB");
+    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code D9YD8ZZ");
 
     ProcedureComponent proc6 =
-        TransformerTestUtilsV2.findProcedureByCode("8109", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("F00ZCKZ", eob.getProcedure());
 
     ProcedureComponent cmp6 =
         TransformerTestUtilsV2.createProcedure(
             proc6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "8109", "REFUSION OF SPINE"),
+            new Coding(
+                "http://hl7.org/fhir/sid/icd-10",
+                "F00ZCKZ",
+                "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code 8109");
+    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
   }
 
   /** Insurance */
