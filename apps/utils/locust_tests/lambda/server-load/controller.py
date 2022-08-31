@@ -70,4 +70,5 @@ if __name__ == "__main__":
     scaling_event = []
     while not scaling_event:
         start_node(controller_ip=ip_address, host=test_host)
+        # TODO: Make this timeout configurable to allow faster spawning.
         scaling_event = check_queue(timeout=10)

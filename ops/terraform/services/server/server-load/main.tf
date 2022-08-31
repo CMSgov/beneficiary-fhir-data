@@ -141,7 +141,32 @@ resource "aws_sqs_queue" "broker" {
   kms_master_key_id          = local.kms_key_id
 }
 
-resource "aws_autoscaling_notification" "example_notifications" {
+resource "aws_sqs_queue_policy" "broker" {
+  queue_url = aws_sqs_queue.broker.id
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Id": "sqspolicy",
+  "Statement": [
+    {
+      "Sid": "First",
+      "Effect": "Allow",
+      "Principal": "${local.account_id}",
+      "Action": "sqs:SendMessage",
+      "Resource": "${aws_sqs_queue.broker.arn}",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "${aws_sns_topic.sns.arn}"
+        }
+      }
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_autoscaling_notification" "autoscaling_notification" {
   group_names = [
     data.aws_autoscaling_group.asg.name,
   ]
@@ -158,7 +183,7 @@ resource "aws_sns_topic" "sns" {
   kms_master_key_id = data.aws_kms_key.sns_key.id
 }
 
-resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
+resource "aws_sns_topic_subscription" "sqs_subscription" {
   topic_arn = aws_sns_topic.sns.arn
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.broker.arn
