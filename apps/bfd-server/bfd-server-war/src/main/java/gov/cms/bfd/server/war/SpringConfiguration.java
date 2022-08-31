@@ -382,7 +382,7 @@ public class SpringConfiguration {
     if (includeFakeOrgName) {
       return NPIOrgLookup.createNpiOrgLookupForTesting();
     } else {
-      return NPIOrgLookup.createNpiOrgLookupForTesting();
+      return NPIOrgLookup.createNpiOrgLookupForProduction();
     }
   }
 }
