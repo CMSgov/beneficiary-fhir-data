@@ -4,6 +4,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInpatientInstitutionalDiagnosisType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimOutpatientInstitutionalDiagnosisType;
@@ -130,15 +131,38 @@ public class DiagnosisUtilV2 {
    */
   static CodeableConcept toCodeableConcept(Diagnosis diag) {
     CodeableConcept codeableConcept = new CodeableConcept();
+    String system = diag.getFhirSystem();
+    String code = diag.getCode();
 
-    codeableConcept
-        .addCoding()
-        .setSystem(diag.getFhirSystem())
-        .setCode(diag.getCode())
-        // TODO: This code should be pulled out to a common library
-        .setDisplay(retrieveIcdCodeDisplay(diag.getCode()));
+    /*
+     * Due to meeting CARIN conformance, an additional coding with the ICD-10-CM system URL
+     * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
+     * See JIRA ticket: https://jira.cms.gov/browse/BFD-1894
+     */
+    if (system == IcdCode.CODING_SYSTEM_ICD_10) {
+      addCodingToCodeableConcept(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, code);
+    }
+    addCodingToCodeableConcept(codeableConcept, system, code);
 
     return codeableConcept;
+  }
+
+  /**
+   * Creates a {@link Coding} from an R4 {@link CodeableConcept}
+   *
+   * @param codeableConcept The codeableConcept to add Codings for
+   * @param system The system
+   * @param system The code
+   * @return
+   */
+  private static void addCodingToCodeableConcept(
+      CodeableConcept codeableConcept, String system, String code) {
+    codeableConcept
+        .addCoding()
+        .setSystem(system)
+        .setCode(code)
+        // TODO: This code should be pulled out to a common library
+        .setDisplay(retrieveIcdCodeDisplay(code));
   }
 
   /**
