@@ -265,7 +265,7 @@ public class LoadedFilterManager {
     this.transactionTime = lastBatchCreated;
   }
 
-  /** @return a info about the filter manager state */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     return "LoadedFilterManager [filters.size="

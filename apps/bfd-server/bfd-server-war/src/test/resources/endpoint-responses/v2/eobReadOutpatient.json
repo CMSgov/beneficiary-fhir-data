@@ -314,8 +314,13 @@
     "sequence" : 1,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -329,8 +334,13 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "I9999"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {
@@ -344,8 +354,13 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A06",
+        "display" : "AMEBIASIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     },
     "type" : [ {
@@ -359,8 +374,13 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
       } ]
     },
     "type" : [ {
@@ -374,8 +394,13 @@
     "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R1122"
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
       } ]
     },
     "type" : [ {

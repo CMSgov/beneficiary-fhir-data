@@ -17,6 +17,7 @@
 
 	<properties>
 		<poi.version>5.2.2</poi.version>
+		<javapoet.version>1.13.0</javapoet.version>
 	</properties>
 
 	<modules>

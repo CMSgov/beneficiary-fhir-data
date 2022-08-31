@@ -1,7 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.squareup.javapoet.CodeBlock;
 import gov.cms.model.dsl.codegen.plugin.accessor.GrpcGetter;
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 /** Unit test for {@link IntFieldTransformer}. */
 public class IntFieldTransformerTest {
-  /** Verifies that required fields throw an exception to indicate they are not supported. */
+  /** Verifies that required fields use {@code copyInt}. */
   @Test
   public void testRequiredField() {
     ColumnBean column =
@@ -30,11 +29,10 @@ public class IntFieldTransformerTest {
             .build();
 
     IntFieldTransformer generator = new IntFieldTransformer();
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            generator.generateCodeBlock(
-                mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance));
+    CodeBlock block =
+        generator.generateCodeBlock(
+            mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
+    assertEquals("transformer.copyInt(from.getIdrDtlCnt(), to::setIdrDtlCnt);\n", block.toString());
   }
 
   /** Verifies that optional fields use {@code copyOptionalInt}. */

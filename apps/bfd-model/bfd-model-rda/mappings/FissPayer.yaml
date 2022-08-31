@@ -1,0 +1,291 @@
+mappings:
+- id: FissPayer
+  messageClassName: gov.cms.mpsm.rda.v1.fiss.FissPayer
+  entityClassName: gov.cms.bfd.model.rda.RdaFissPayer
+  table:
+    name: fiss_payers
+    schema: rda
+    primaryKeyColumns:
+    - dcn
+    - priority
+    columns:
+    - name: dcn
+      sqlType: varchar(23)
+      nullable: false
+      comment: 'Document Control Number: This field is the identification number for
+        a claim. It provides a reference number for the control and monitoring of
+        specific claims, and to differentiate between claims for the beneficiary;
+        it may be used to access data for the record depending on the copybook it
+        used for. This is a unique field created by the system.'
+    - name: priority
+      sqlType: smallint
+      javaType: short
+      nullable: false
+    - name: payerType
+      enumType: PayerType
+      sqlType: varchar(20)
+      dbName: payer_type
+    - name: payersId
+      sqlType: varchar(1)
+      dbName: payers_id
+      comment: 'Payers Identification: This field identifies the primary insurer''s
+        payer code associated with the claim.'
+    - name: payersName
+      sqlType: varchar(32)
+      dbName: payers_name
+      comment: 'Payers Name: This field identifies the primary insurer''s payer
+        name associated with the claim.'
+    - name: relInd
+      sqlType: varchar(1)
+      dbName: rel_ind
+      comment: 'Release of Information: This field identifies whether or not the provider
+        has on file a signed statement permitting the provider to release data to
+        other organizations in order to adjudicate the claim.'
+    - name: assignInd
+      sqlType: varchar(1)
+      dbName: assign_ind
+      comment: 'Assignment of Benefits Indicator: This field identifies whether or
+        not the provider has on file a signed form authorizing the third-party payer
+        to pay the provider for claim benefits.'
+    - name: providerNumber
+      sqlType: varchar(13)
+      dbName: provider_number
+      comment: 'Provider Number: This field contains the Medicare number as assigned
+        by the Centers for Medicare and Medicaid Services (CMS) and is used to identify
+        the provider rendering Medicare services. This field may be used to access
+        data for the record.'
+    - name: adjDcnIcn
+      sqlType: varchar(23)
+      dbName: adj_dcn_icn
+      comment: 'Adjusting Document Control Number: This field identifies the document
+        control number of the claim being adjusted. This is the DCN to be adjusted
+        according to the provider. This field matches the XREF DCN on claim page 6,
+        if the provider gave the correct DCN to be adjusted.'
+    - name: priorPmt
+      sqlType: decimal(11,2)
+      dbName: prior_pmt
+      comment: 'Prior Payments: This field is not used by FISS.'
+    - name: estAmtDue
+      sqlType: decimal(11,2)
+      dbName: est_amt_due
+      comment: 'Estimated Amount Due: This field identifies the amount estimated by
+        the provider that is still due from the indicated payer (estimated responsibility
+        less prior payments.'
+    - name: beneRel
+      sqlType: varchar(2)
+      comment: 'Beneficiary Relationship: This field identifies the beneficiary/patient
+        relationship to the insured.'
+      dbName: bene_rel
+    - name: beneLastName
+      sqlType: varchar(15)
+      comment: 'Beneficiary Last Name: This field identifies the last name of the
+        beneficiary/patient.'
+      dbName: bene_last_name
+    - name: beneFirstName
+      sqlType: varchar(10)
+      comment: 'Beneficiary First Name: This field identifies the first name of the
+        beneficiary/patient.'
+      dbName: bene_first_name
+    - name: beneMidInit
+      sqlType: varchar(1)
+      comment: 'Beneficiary Middle Initial: This field identifies the middle initial
+        of the beneficiary/patient.'
+      dbName: bene_mid_init
+    - name: beneSsnHic
+      sqlType: varchar(19)
+      comment: 'Beneficiary SSN/HIC: This field identifies the Social Security Number
+        (SSN)/Health Insurance Claim (HIC) number of the beneficiary.'
+      dbName: bene_ssn_hic
+    - name: insuredRel
+      sqlType: varchar(2)
+      comment: 'Insured Relationship: This field identifies the insured''s relationship
+        to the beneficiary/patient'
+      dbName: insured_rel
+    - name: insuredName
+      sqlType: varchar(25)
+      comment: 'Insured Name: This field identifies the insured''s name (last,
+        and first) carrying health care coverage. This name can be the beneficiary/patient''s
+        and/or an individual with a relationship to the beneficiary/patient.'
+      dbName: insured_name
+    - name: insuredSsnHic
+      sqlType: varchar(19)
+      comment: 'Certification-Social Security Number-Health Insurance Claim: This
+        field identifies the insurer assigned beneficiary number or the Centers for
+        Medicare and Medicaid Services (CMS) assigned Health Insurance Claim (HIC)
+        number used in all correspondence and to facilitate the payment of claims.'
+      dbName: insured_ssn_hic
+    - name: insuredGroupName
+      sqlType: varchar(17)
+      dbName: insured_group_name
+      comment: 'Insured Group Name: This field identifies the name of the group or
+        plan through which the insurance is provided to the insured.'
+    - name: insuredGroupNbr
+      sqlType: varchar(20)
+      comment: 'Insurance Group Number: This field identifies the policy number (identification
+        number, control number, or code) assigned by the carrier or administrator
+        to identify the group number through which the insurance is provided to the
+        insured.'
+      dbName: insured_group_nbr
+    - name: beneDob
+      sqlType: date
+      comment: 'Beneficiary Date of Birth: The field identifies the century, year,
+        month, and day of the beneficiary/patient''s date of birth.'
+      dbName: bene_dob
+    - name: beneSex
+      sqlType: varchar(1)
+      comment: 'Beneficiary Sex: The field identifies the sex of the beneficiary/patient
+        for the record.'
+      dbName: bene_sex
+    - name: treatAuthCd
+      sqlType: varchar(18)
+      dbName: treat_auth_cd
+      comment: 'Home Health Prospective Payment System Treatment Authorization Code:
+        This field identifies a matching key to the Outcome Assessment Information
+        Set (OASIS) of the patient. This field is also used to report the Unique Tracking
+        Number (UTN) for Prior Authorization. For Home Health 32X claims, report the
+        UTN immediately after the HHPPS OASIS Treatment Authorization code. For all
+        other bill types, the UTN is keyed in positions 1-14. This field is also used
+        to identify a Center for Excellence or Provider Partnership Demonstration
+        for NOA Type of Bill ''11A'' and ''11D'' or CJR Demonstration 75 for SNF Type
+        of Bill 21X.'
+    - name: insuredSex
+      sqlType: varchar(1)
+      dbName: insured_sex
+      comment: 'Insured Sex: This field identifies the gender of the beneficiary.'
+    - name: insuredRelX12
+      sqlType: varchar(2)
+      dbName: insured_rel_x12
+      comment: 'Patient Relationship to the Insured: This field identifies the relationship
+        of the patient to the identified insured.'
+    - name: insuredDob
+      sqlType: date
+      dbName: insured_dob
+      comment: 'Insured Date of Birth: This field identifies the insured''s date
+        of birth, in MMDDCCYY format.'
+    - name: insuredDobText
+      sqlType: varchar(9)
+      dbName: insured_dob_text
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: lastUpdated
+      sqlType: timestamp with time zone
+      dbName: last_updated
+    comment: FISS Payer
+  enumTypes:
+  - name: PayerType
+    values:
+    - BeneZ
+    - Insured
+  transformations:
+  - from: PARENT
+    to: dcn
+  - from: INDEX
+    to: priority
+  - from: beneZPayer
+    to: payerType
+    transformer: EnumValueIfPresent
+    transformerOptions:
+      enumName: PayerType
+      enumValue: BeneZ
+  - from: insuredPayer
+    to: payerType
+    transformer: EnumValueIfPresent
+    transformerOptions:
+      enumName: PayerType
+      enumValue: Insured
+  - from: NONE
+    to: payerType
+  - from: insuredPayer.payersId
+    to: payersId
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+  - from: insuredPayer.payersName
+  - from: insuredPayer.relInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation
+  - from: insuredPayer.assignInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator
+  - from: insuredPayer.providerNumber
+  - from: insuredPayer.adjDcnIcn
+  - from: insuredPayer.priorPmt
+  - from: insuredPayer.estAmtDue
+  - from: insuredPayer.insuredRel
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+  - from: insuredPayer.insuredName
+  - from: insuredPayer.insuredSsnHic
+  - from: insuredPayer.insuredGroupName
+  - from: insuredPayer.insuredGroupNbr
+  - from: insuredPayer.treatAuthCd
+  - from: insuredPayer.insuredSex
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+  - from: insuredPayer.insuredRelX12
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+  - from: insuredPayer.insuredDob
+  - from: insuredPayer.insuredDobText
+  - from: beneZPayer.payersId
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPayersCode
+  - from: beneZPayer.payersName
+  - from: beneZPayer.relInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator
+  - from: beneZPayer.assignInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator
+  - from: beneZPayer.providerNumber
+  - from: beneZPayer.adjDcnIcn
+  - from: beneZPayer.priorPmt
+  - from: beneZPayer.estAmtDue
+  - from: beneZPayer.beneRel
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+  - from: beneZPayer.beneLastName
+    transformerOptions:
+      ignoreEmptyString: true
+  - from: beneZPayer.beneFirstName
+    transformerOptions:
+      ignoreEmptyString: true
+  - from: beneZPayer.beneMidInit
+    transformerOptions:
+      ignoreEmptyString: true
+  - from: beneZPayer.beneSsnHic
+  - from: beneZPayer.insuredGroupName
+  - from: beneZPayer.beneDob
+  - from: beneZPayer.beneSex
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+  - from: beneZPayer.treatAuthCd
+  - from: beneZPayer.insuredSex
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex
+  - from: beneZPayer.insuredRelX12
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode
+  - from: insuredPayer.rdaPosition
+    transformer: UintToShort
+    optionalComponents: FieldOnly
+  - from: beneZPayer.rdaPosition
+    transformer: UintToShort
+    optionalComponents: FieldOnly
+  - from: NOW
+    to: lastUpdated

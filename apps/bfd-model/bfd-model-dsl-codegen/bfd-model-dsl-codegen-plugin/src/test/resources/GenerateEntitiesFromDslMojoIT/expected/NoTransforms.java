@@ -18,7 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
 /**
- * JPA class for the {@code MbiCache} table. */
+ * JPA class for the {@code MbiCache} table.
+ */
 @Entity
 @Builder
 @AllArgsConstructor

@@ -1,8 +1,26 @@
+#
+# Script for creating a file that describes which bene ids were generated 
+# and what claim types were associated with each bene id. 
+# Will overwrite any characteristics.csv at output location, assuming queries succeed
+#
+# Args:
+# 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
+# 2: bene id end (exclusive, taken from new output end state properties)
+# 3: file system location to write the characteristics file
+# 4: which environment to check, should be a single value from the list of [test prd-sbx prod]
+#
+# Example runstring: python3 ./generate-characteristics-file.py -10000008009988 -10000010009985 ~/Documents/Test/ test
+#
+# Requires psycopg2 and boto3 installed
+#
+
 import sys
 import psycopg2
 import re
 import csv
 from pathlib import Path
+
+import ssmutil
 
 def generate_characteristics_file(args):
     """
@@ -12,8 +30,21 @@ def generate_characteristics_file(args):
     
     bene_id_start = args[0]
     bene_id_end = args[1]
-    db_string = args[2]
-    output_path = args[3]
+    output_path = args[2]
+    env = args[3]
+    
+    db_string = ""
+
+    if "test" == env:
+        db_string = ssmutil.get_ssm_db_string("test")
+    elif "prd-sbx" == env:
+        db_string = ssmutil.get_ssm_db_string("prd-sbx")
+    elif "prod" == env:
+        db_string = ssmutil.get_ssm_db_string("prod")
+    else:
+        print(f"(Validation Failure) Unknown environment string {env}")
+        print("Returning with exit code 1")
+        sys.exit(1)
     
     header = ['Beneficiary Id','MBI Unhashed','Part D Contract Number','Carrier Claims Total','DME Claims Total','HHA Claims Total','Hospice Claims Total','Inpatient Claims Total','Outpatient Claims Total','SNF Claims Total','Part D Events Total']
     
@@ -152,13 +183,4 @@ def _execute_query(uri: str, query: str):
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
-    # 3 args:
-    # arg1: bene id starting point for the load to check. The characteristics file generation will assume everything from this point on (counting down, as the synthea bene ids are negative) is new in the db. This can be mined from the synthea properties file used for the generation
-    # arg2: bene id ending point; this should be the number from end-state.properties for bene_id
-    # arg2: db string for target environment DB, in this format: postgres://<dbName>:<db-pass>@<aws db url>:5432/fhirdb
-    # arg3: file system location to output the characteristics file
-    """
-    Notes:
-    - Will overwrite any characteristics.csv at output location, assuming queries succeed
-    """
     generate_characteristics_file(sys.argv[1:])

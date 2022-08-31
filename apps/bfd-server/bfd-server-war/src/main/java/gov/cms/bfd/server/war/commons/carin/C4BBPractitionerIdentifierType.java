@@ -3,14 +3,26 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Practitioner Identifiers <a
  * href="http://hl7.org/fhir/us/carin-bb/STU1/ValueSet-C4BBPractitionerIdentifierType.html">ValueSet:
- * C4BB Practitioner Identifier Type</a>
+ * C4BB Practitioner Identifier Type</a>.
  */
 public enum C4BBPractitionerIdentifierType {
+  /** National Provider Identifier. */
   NPI,
+  /**
+   * An identifier for a provider within the CMS/Medicare program. A globally unique identifier for
+   * the provider in the Medicare program.
+   */
   UPIN,
+  /** Identifier that uniquely identifies a geographic location in the US. */
   PIN,
+  /** Tax ID number. */
   TAX;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
       case NPI:
@@ -20,6 +32,11 @@ public enum C4BBPractitionerIdentifierType {
     }
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case NPI:
@@ -35,6 +52,11 @@ public enum C4BBPractitionerIdentifierType {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case NPI:
@@ -50,6 +72,11 @@ public enum C4BBPractitionerIdentifierType {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case NPI:

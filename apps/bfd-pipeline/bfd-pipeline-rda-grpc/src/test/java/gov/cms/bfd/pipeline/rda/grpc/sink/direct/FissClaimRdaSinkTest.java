@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -23,10 +24,10 @@ import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.time.Clock;
 import java.time.Instant;
@@ -41,9 +42,14 @@ import javax.persistence.EntityTransaction;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FissClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -61,7 +67,6 @@ public class FissClaimRdaSinkTest {
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
@@ -82,6 +87,7 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.calls",
             "FissClaimRdaSink.change.latency.millis",
             "FissClaimRdaSink.failures",
+            "FissClaimRdaSink.insertCount",
             "FissClaimRdaSink.lastSeq",
             "FissClaimRdaSink.successes",
             "FissClaimRdaSink.transform.failures",
@@ -120,6 +126,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
     assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertHistogramReading(3, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
@@ -127,6 +134,10 @@ public class FissClaimRdaSinkTest {
   public void mergeFatalError() {
     final List<RdaChange<RdaFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
+    doReturn(mock(RdaClaimMessageMetaData.class))
+        .when(entityManager)
+        .merge(any(RdaClaimMessageMetaData.class));
+    doReturn(mock(RdaFissClaim.class)).when(entityManager).merge(any(RdaFissClaim.class));
     doThrow(new RuntimeException("oops")).when(entityManager).merge(batch.get(1).getClaim());
 
     try {
@@ -153,6 +164,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(1, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
     assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertHistogramReading(1, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
@@ -195,6 +207,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
+    assertHistogramReading(0, "database insert count", metrics.getInsertCount());
   }
 
   /**
@@ -218,7 +231,13 @@ public class FissClaimRdaSinkTest {
             .currTranDate(transactionDate)
             .build();
     RdaChange<RdaFissClaim> change =
-        new RdaChange<>(100L, RdaChange.Type.UPDATE, claim, changeDate);
+        new RdaChange<>(
+            100L,
+            RdaChange.Type.UPDATE,
+            claim,
+            changeDate,
+            new RdaChange.Source(
+                (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
     RdaClaimMessageMetaData metaData = sink.createMetaData(change);
     assertEquals(100L, metaData.getSequenceNumber());
     assertEquals('F', metaData.getClaimType());
@@ -249,6 +268,11 @@ public class FissClaimRdaSinkTest {
     claim.setDcn(dcn);
     claim.setApiSource(VERSION);
     return new RdaChange<>(
-        nextSeq++, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
+        nextSeq++,
+        RdaChange.Type.INSERT,
+        claim,
+        clock.instant().minusMillis(12),
+        new RdaChange.Source(
+            (short) 1, (short) 0, LocalDate.of(1970, 1, 1), Instant.ofEpochSecond(0)));
   }
 }
