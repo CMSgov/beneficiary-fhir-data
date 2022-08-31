@@ -505,7 +505,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "0TCCCCC"
+        "code" : "9214",
+        "display" : "BONE SCAN"
       } ]
     }
   } ],
