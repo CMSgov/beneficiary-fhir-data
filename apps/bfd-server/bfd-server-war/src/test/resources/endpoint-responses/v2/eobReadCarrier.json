@@ -275,10 +275,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "H5555"
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H5555"
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
       } ]
     },
     "type" : [ {
@@ -293,10 +295,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "H8888"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H8888"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     },
     "type" : [ {
@@ -311,10 +315,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "H66666"
+        "code" : "B04",
+        "display" : "MONKEYPOX"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H66666"
+        "code" : "B04",
+        "display" : "MONKEYPOX"
       } ]
     },
     "type" : [ {
@@ -329,10 +335,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "H77777"
+        "code" : "B05",
+        "display" : "MEASLES"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H77777"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     },
     "type" : [ {
@@ -347,10 +355,12 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "H12345"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H12345"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {
