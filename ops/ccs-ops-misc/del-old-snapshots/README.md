@@ -28,7 +28,7 @@ It does this in batches and may take a very long time (at least initially) to co
 
 ```sh
 python3 -m venv .venv
-. .venv/bin/activate
+. .venv/bin/activate # 'deactivate' to exit venv
 pip3 install -r requirements.txt
 ```
 
