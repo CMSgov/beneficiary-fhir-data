@@ -191,20 +191,28 @@ public final class TransformerUtilsV2 {
   static CodeableConcept createCodeableConcept(
       String codingSystem, String codingVersion, String codingDisplay, String codingCode) {
     CodeableConcept codeableConcept = new CodeableConcept();
+
+    /*
+     * Due to meeting CARIN conformance, an additional coding with the ICD-10-Medicare system URL
+     * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
+     * See JIRA ticket: https://jira.cms.gov/browse/BFD-1895
+     */
     if (codingSystem == IcdCode.CODING_SYSTEM_ICD_10) {
-      AddCodingToCodeableConcept(
+      addCodingToCodeableConcept(
           codeableConcept,
           IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,
           codingVersion,
           codingDisplay,
           codingCode);
     }
-    AddCodingToCodeableConcept(
+    addCodingToCodeableConcept(
         codeableConcept, codingSystem, codingVersion, codingDisplay, codingCode);
     return codeableConcept;
   }
 
   /**
+   * Creates a {@link Coding} from an R4 {@link CodeableConcept}
+   *
    * @param codeableConcept the {@link CodeableConcept} to use
    * @param codingSystem the {@link Coding#getSystem()} to use
    * @param codingVersion the {@link Coding#getVersion()} to use
@@ -212,7 +220,7 @@ public final class TransformerUtilsV2 {
    * @param codingCode the {@link Coding#getCode()} to use
    * @return
    */
-  static void AddCodingToCodeableConcept(
+  static void addCodingToCodeableConcept(
       CodeableConcept codeableConcept,
       String codingSystem,
       String codingVersion,
