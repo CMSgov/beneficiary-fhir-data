@@ -452,7 +452,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @param icd9Check The ICD-9 based SAMHSA check logic to use.
    * @param icd10Check The ICD-10 based SAMHSA check logic to use.
    * @param icd10CmCheck The ICD-10-CM based SAMHSA check logic to use.
-   * @param icd10CmCheck The ICD-10 Medicare based SAMHSA check logic to use.
+   * @param icd10MedicareCheck The ICD-10 Medicare based SAMHSA check logic to use.
    * @return <code>true</code> if the given {@link CodeableConcept} contains any {@link Coding}s
    *     with SAMHSA data for it's respective system, or if the system is not ICD9/10. <code>false
    *     </code> otherwise.
