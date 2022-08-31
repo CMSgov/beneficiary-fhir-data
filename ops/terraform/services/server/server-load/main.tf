@@ -181,7 +181,7 @@ resource "aws_autoscaling_notification" "autoscaling_notification" {
 
 resource "aws_sns_topic" "sns" {
   name              = "${local.queue_name}-sns"
-  kms_master_key_id = data.aws_kms_key.sns_key.id
+  kms_master_key_id = local.kms_key_id
 }
 
 resource "aws_sns_topic_subscription" "sqs_subscription" {

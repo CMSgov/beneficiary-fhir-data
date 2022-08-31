@@ -84,7 +84,3 @@ data "aws_security_group" "rds" {
     values = ["bfd-${local.env}-aurora-cluster"] # TODO think harder about this... RE: ssm, ephemeral environments, etc.
   }
 }
-
-data "aws_kms_key" "sns_key" {
-  key_id = "alias/aws/sns"
-}
