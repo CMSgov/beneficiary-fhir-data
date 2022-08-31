@@ -152,9 +152,7 @@ resource "aws_sqs_queue_policy" "broker" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": [
-          "${local.account_id}"
-        ]
+        "Service": "sns.amazonaws.com"
       },
       "Action": "SQS:SendMessage",
       "Resource": "${aws_sqs_queue.broker.arn}",
