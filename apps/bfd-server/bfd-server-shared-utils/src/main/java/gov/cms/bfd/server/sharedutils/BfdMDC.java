@@ -51,10 +51,6 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_milliseconds");
 
-  /** MDC key for the http response start in milliseconds. */
-  public static final String HTTP_ACCESS_RESPONSE_START_MILLISECONDS =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
-
   /**
    * Set the MDC Adapter. Normally this is not needed, but it can be useful in testing.
    *
