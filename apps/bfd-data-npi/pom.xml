@@ -17,10 +17,7 @@
 	<description>
 		NPI Org code lookup jar
 	</description>
-
-	<properties>
-		<junit>3.8.1</junit>
-	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
