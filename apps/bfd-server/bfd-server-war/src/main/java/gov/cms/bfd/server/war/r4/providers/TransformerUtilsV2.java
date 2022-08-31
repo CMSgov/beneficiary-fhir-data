@@ -3433,6 +3433,9 @@ public final class TransformerUtilsV2 {
           provider.setName(npiOrgName.get());
         } else {
           provider.setName("UNKNOWN");
+          if (value.isPresent())
+            LOGGER.info("Organization not found for npi number:" + value.get());
+          else LOGGER.info("Organization not found for empty npi nummber");
         }
       }
 
