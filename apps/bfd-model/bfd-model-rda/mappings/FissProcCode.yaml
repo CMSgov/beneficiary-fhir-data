@@ -17,6 +17,11 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
     - name: procCode
       sqlType: varchar(10)
       nullable: false
@@ -29,11 +34,6 @@ mappings:
     - name: procDate
       sqlType: date
       dbName: proc_date
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
     comment: FISS Procedure Code
   transformations:
   - from: PARENT

@@ -17,6 +17,11 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
     - name: payerType
       enumType: PayerType
       sqlType: varchar(20)
@@ -161,11 +166,6 @@ mappings:
     - name: insuredDobText
       sqlType: varchar(9)
       dbName: insured_dob_text
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
     comment: FISS Payer
   enumTypes:
   - name: PayerType

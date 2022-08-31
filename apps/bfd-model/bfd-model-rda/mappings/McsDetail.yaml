@@ -16,6 +16,12 @@ mappings:
       comment: 'Internal Claim Control Number: This field contains a numeric value
         that identifies a claim throughout the processing cycle and allows for a linkage
         between the claim and the beneficiary for whom it was submitted.'
+    - name: idrDtlNumber
+      sqlType: smallint
+      javaType: short
+      dbName: idr_dtl_number
+      nullable: false
+      comment: 'This field contains the sequence number of the detail record. Up to 50 detail records can be included.'
     - name: idrDtlStatus
       sqlType: varchar(1)
       dbName: idr_dtl_status
@@ -268,12 +274,6 @@ mappings:
       dbName: idr_dtl_amb_dropoff_zipcode
       comment: 'Ambulance Drop-off Location ZIP Code: This field contains the ambulance
         drop-off location''s zip code.'
-    - name: idrDtlNumber
-      sqlType: smallint
-      javaType: short
-      dbName: idr_dtl_number
-      nullable: false
-      comment: 'This field contains the sequence number of the detail record. Up to 50 detail records can be included.'
   transformations:
   - from: PARENT
     to: idrClmHdIcn

@@ -37,10 +37,10 @@ CREATE TABLE rda.fiss_audit_trails (
  */
 CREATE TABLE rda.fiss_diagnosis_codes (
   dcn varchar(23) NOT NULL,
+  rda_position smallint NOT NULL,
   diag_cd2 varchar(7) NOT NULL,
   diag_poa_ind varchar(1),
   bit_flags varchar(4),
-  rda_position smallint NOT NULL,
   CONSTRAINT fiss_diagnosis_codes_key PRIMARY KEY (dcn, rda_position),
   CONSTRAINT fiss_diagnosis_codes_parent FOREIGN KEY (dcn) REFERENCES rda.fiss_claims(dcn)
 );
@@ -50,6 +50,7 @@ CREATE TABLE rda.fiss_diagnosis_codes (
  */
 CREATE TABLE rda.fiss_payers (
      dcn varchar(23) NOT NULL,
+     rda_position smallint NOT NULL,
      payer_type varchar(20),
      payers_id varchar(1),
      payers_name varchar(32),
@@ -76,7 +77,6 @@ CREATE TABLE rda.fiss_payers (
      insured_rel_x12 varchar(2),
      insured_dob date,
      insured_dob_text varchar(9),
-     rda_position smallint NOT NULL,
      CONSTRAINT fiss_payers_key PRIMARY KEY (dcn, rda_position),
      CONSTRAINT fiss_payers_parent FOREIGN KEY (dcn) REFERENCES rda.fiss_claims(dcn)
 );
@@ -86,10 +86,10 @@ CREATE TABLE rda.fiss_payers (
  */
 CREATE TABLE rda.fiss_proc_codes (
      dcn varchar(23) NOT NULL,
+     rda_position smallint NOT NULL,
      proc_code varchar(10) NOT NULL,
      proc_flag varchar(4),
      proc_date date,
-     rda_position smallint NOT NULL,
      CONSTRAINT fiss_proc_codes_key PRIMARY KEY (dcn, rda_position),
      CONSTRAINT fiss_proc_codes_parent FOREIGN KEY (dcn) REFERENCES rda.fiss_claims(dcn)
 );
@@ -129,6 +129,7 @@ CREATE TABLE rda.mcs_audits (
  */
 CREATE TABLE rda.mcs_details (
      idr_clm_hd_icn varchar(15) NOT NULL,
+     idr_dtl_number smallint NOT NULL,
      idr_dtl_status varchar(1),
      idr_dtl_from_date date,
      idr_dtl_to_date date,
@@ -166,7 +167,6 @@ CREATE TABLE rda.mcs_details (
      idr_dtl_amb_dropoff_city varchar(20),
      idr_dtl_amb_dropoff_state varchar(2),
      idr_dtl_amb_dropoff_zipcode varchar(9),
-     idr_dtl_number smallint NOT NULL,
      CONSTRAINT mcs_details_key PRIMARY KEY (idr_clm_hd_icn, idr_dtl_number),
      CONSTRAINT mcs_details_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );

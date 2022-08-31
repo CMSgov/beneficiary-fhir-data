@@ -17,6 +17,11 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
     - name: diagCd2
       sqlType: varchar(7)
       minLength: 0
@@ -41,11 +46,6 @@ mappings:
       dbName: bit_flags
       comment: 'Bit Flags: This field identifies the reason for a cancel without a
         corresponding repayment.'
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
   transformations:
   - from: PARENT
     to: dcn

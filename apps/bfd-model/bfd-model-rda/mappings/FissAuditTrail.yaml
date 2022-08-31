@@ -17,6 +17,11 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
     - name: badtStatus
       sqlType: varchar(1)
       dbName: badt_status
@@ -52,11 +57,6 @@ mappings:
     - name: badtCurrDate
       sqlType: date
       dbName: badt_curr_date
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
   transformations:
   - from: PARENT
     to: dcn
