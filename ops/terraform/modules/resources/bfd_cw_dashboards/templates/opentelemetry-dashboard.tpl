@@ -7,6 +7,22 @@
             "x": 0,
             "type": "text",
             "properties": {
+                "markdown": "# Dashboard Directory \n\n
+                [button:SLI Dashboard]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-${env})\n
+                [button:BFD Application Log Metrics]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-${env})\n
+                [button:Host Metrics]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-${env})\n
+                [button:AWS Service Dashboards]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-${env})\n
+                [button:OpenTelemetry Metrics]([https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=bfd-server-${env})\n\n:"
+                }
+        },
+        
+        {
+            "height": 1,
+            "width": 24,
+            "y": 5,
+            "x": 0,
+            "type": "text",
+            "properties": {
                 "markdown": "#BFD-Server OpenTelemtry Metrics\n---\n"
             }
         },
