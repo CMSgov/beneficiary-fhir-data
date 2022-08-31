@@ -1,0 +1,162 @@
+{
+  "totals": [
+    {
+      "name": "num_requests",
+      "better_if": "LARGER",
+      "warn_percent": 150,
+      "fail_percent": 200
+    },
+    {
+      "name": "median_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 150,
+      "fail_percent": 200
+    },
+    {
+      "name": "average_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 150,
+      "fail_percent": 200
+    },
+    {
+      "name": "min_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 2500,
+      "fail_percent": 5000
+    },
+    {
+      "name": "max_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 150,
+      "fail_percent": 500
+    },
+    {
+      "name": "total_reqs_per_second",
+      "better_if": "LARGER",
+      "warn_percent": 150,
+      "fail_percent": 200
+    },
+    {
+      "name": "0.9",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.95",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.98",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.99",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.999",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.9999",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "1.0",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    }
+  ],
+  "tasks": [
+    {
+      "name": "num_requests",
+      "better_if": "LARGER",
+      "warn_percent": 200,
+      "fail_percent": 300
+    },
+    {
+      "name": "median_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "average_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 200,
+      "fail_percent": 300
+    },
+    {
+      "name": "min_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 500,
+      "fail_percent": 1000
+    },
+    {
+      "name": "max_response_time",
+      "better_if": "SMALLER",
+      "warn_percent": 500,
+      "fail_percent": 1000
+    },
+    {
+      "name": "total_reqs_per_second",
+      "better_if": "LARGER",
+      "warn_percent": 150,
+      "fail_percent": 200
+    },
+    {
+      "name": "0.9",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.95",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.98",
+      "better_if": "SMALLER",
+      "warn_percent": 300,
+      "fail_percent": 500
+    },
+    {
+      "name": "0.99",
+      "better_if": "SMALLER",
+      "warn_percent": 500,
+      "fail_percent": 1000
+    },
+    {
+      "name": "0.999",
+      "better_if": "SMALLER",
+      "warn_percent": 500,
+      "fail_percent": 1000
+    },
+    {
+      "name": "0.9999",
+      "better_if": "SMALLER",
+      "warn_percent": 500,
+      "fail_percent": 1000
+    },
+    {
+      "name": "1.0",
+      "better_if": "SMALLER",
+      "warn_percent": 500,
+      "fail_percent": 1000
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 """Utility module for executing database queries.
 """
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import psycogreen.gevent
 
@@ -11,7 +11,14 @@ psycogreen.gevent.patch_psycopg()
 
 import psycopg2
 
-LIMIT = 100000  # global limit on the number of records to return
+LIMIT = 100000
+"""Global limit on the number of records to return"""
+REGRESSION_BENE_RANGE_START = -10000000019999
+"""Beginning of the beneficiary range used by the Regression Suite in each environment for
+consistent data"""
+REGRESSION_BENE_RANGE_END = -10000000000001
+"""End of the beneficiary range used by the Regression Suite in each environment for
+consistent data"""
 
 
 def _execute(uri: str, query: str) -> List:
@@ -30,6 +37,73 @@ def _execute(uri: str, query: str) -> List:
             conn.close()
 
     return results
+
+
+def _get_regression_query(select_query: str) -> str:
+    return " ".join(
+        [
+            select_query,
+            f'WHERE "bene_id" BETWEEN {REGRESSION_BENE_RANGE_START} AND {REGRESSION_BENE_RANGE_END}',
+            'ORDER BY "bene_id" ASC',
+            f"LIMIT {LIMIT}",
+        ]
+    )
+
+
+def get_regression_bene_ids(uri: str) -> List[str]:
+    """Retrieves a list of beneficiary IDs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+    """
+    bene_query = _get_regression_query('SELECT "bene_id" FROM "beneficiaries"')
+    return [str(r[0]) for r in _execute(uri, bene_query)]
+
+
+def get_regression_hashed_mbis(uri: str) -> List[str]:
+    """Retrieves a list of hashed MBIs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic hashed MBIs used for the regression suites
+    """
+    mbi_query = _get_regression_query('SELECT "mbi_hash" FROM "beneficiaries"')
+    return [str(r[0]) for r in _execute(uri, mbi_query)]
+
+
+def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
+    """Retrieves a list of contract IDs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order, and
+    any empty values are excluded
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[Dict[str, str]]: A list of dicts with 3 keys, "id", "month", and "year", corresponding
+        to the contract ID, the contract month, and contract year, respectively
+    """
+    contract_id_query = _get_regression_query(
+        'SELECT "partd_contract_number_id", "year_month" FROM "beneficiary_monthly"'
+    )
+
+    unfiltered_contracts = [
+        {
+            "id": str(result[0]) if result[0] else None,
+            "month": f"{result[1].month:02}",
+            "year": str(result[1].year),
+        }
+        for result in _execute(uri, contract_id_query)
+    ]
+
+    return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
 def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
