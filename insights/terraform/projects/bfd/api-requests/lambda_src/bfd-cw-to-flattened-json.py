@@ -80,9 +80,10 @@ from io import BytesIO
 import boto3
 from datetime import datetime # BFD modification
 
-def flatten_json(y):
+def format_json(y):
     """
-    BFD modification to add a function to flatten a JSON object (but not pivot out arrays).
+    BFD modification to add a function to flatten a JSON object (but not pivot out arrays),
+    convert field names to lower case, and replace "." with "_" in field names.
     Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
     """
 
@@ -113,10 +114,10 @@ def transformLogEvent(log_event):
     """
 
     """
-    BFD modification to the blueprint to flatten the message json.
+    BFD modification to the blueprint to format the message json uniformly.
     """
     log_event_json = json.loads(log_event['message'])
-    flattened_log_event_json = flatten_json(log_event_json)
+    flattened_log_event_json = format_json(log_event_json)
     stringized_flattened_log_event_json = json.dumps(flattened_log_event_json)
     return stringized_flattened_log_event_json + '\n'
 

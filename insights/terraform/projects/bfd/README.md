@@ -39,13 +39,16 @@ be clear. For example, we have `module.glue-table-api-requests` and
 ### Structure
 
 ```mermaid
-flowchart TD
-    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| S3
-    S3["S3 Bucket"] --> History["Glue Table: API History"]
-    History -->|Glue: Ingest History| APIRequests["Glue Table: API Requests"]
-
-    EC2["CloudWatch Log Subscription (Real-Time)"] --> Firehose["Kinesis Firehose"]
-    Firehose -->|Lambda| APIRequests
+flowchart TB
+    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| AppLogs["S3: App Logs Bucket"]
+    AppLogs -->|Manual Move| S3["S3: BFD Insights Bucket"]
+    S3 -->|Manually Start| workflow
+    subgraph workflow [Glue Workflow]
+    HistoryCrawler["Glue Crawler: API History"] --> HistoryJob["Glue Job: Ingest History"]
+    HistoryJob --> RequestsCrawler["Glue Crawler: API Requests"]
+    end
+    workflow --> APIRequests["Glue Table: API Requests"]
+    LogSubscription["CloudWatch Log Subscription (Real-Time)"] -->|"Kinesis Firehose / Lambda"| APIRequests
 ```
 
 ### Manual Ingestion of Log Files
