@@ -88,7 +88,7 @@ resource "aws_instance" "this" {
 # BFD Migrator CloudWatch Dashboard
 resource "aws_cloudwatch_dashboard" "bfd_migrator_dashboard" {
   dashboard_name = "bfd-${local.env}-${local.service}-opentelemetry"
-  dashboard_body = templatefile("${path.module}/templates/dashboard.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}" })
+  dashboard_body = templatefile("${path.module}/templates/dashboard.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}", env = var.env })
 }
 resource "aws_cloudwatch_dashboard" "bfd_migrator_opentelemetry_dashboard" {
   dashboard_name = "bfd-${local.env}-${local.service}-opentelemetry"
@@ -96,5 +96,5 @@ resource "aws_cloudwatch_dashboard" "bfd_migrator_opentelemetry_dashboard" {
 }
 resource "aws_cloudwatch_dashboard" "bfd_migrator_aws_services_dashboard" {
   dashboard_name = "bfd-${local.env}-${local.service}-aws-services"
-  dashboard_body = templatefile("${path.module}/templates/bfd-dashboards.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}" })
+  dashboard_body = templatefile("${path.module}/templates/bfd-dashboards.tpl", { dashboard_namespace = "bfd-${local.env}/${local.service}", env = var.env })
 }
