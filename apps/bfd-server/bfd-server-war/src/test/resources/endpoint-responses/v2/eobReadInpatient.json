@@ -663,7 +663,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "0TCDDEE"
+        "code" : "BQ0HZZZ",
+        "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
       } ]
     }
   }, {
@@ -672,7 +673,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "302DDAA"
+        "code" : "CD1YYZZ",
+        "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
       } ]
     }
   }, {
@@ -681,7 +683,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "302ZZXX"
+        "code" : "2W52X6Z",
+        "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
       } ]
     }
   }, {
@@ -690,7 +693,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "5566AAA"
+        "code" : "BP17ZZZ",
+        "display" : "FLUOROSCOPY OF LEFT SCAPULA"
       } ]
     }
   }, {
@@ -699,7 +703,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "6677BBB"
+        "code" : "D9YD8ZZ",
+        "display" : "HYPERTHERMIA OF NASOPHARYNX"
       } ]
     }
   }, {
@@ -708,8 +713,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "8109",
-        "display" : "REFUSION OF SPINE"
+        "code" : "F00ZCKZ",
+        "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
       } ]
     }
   } ],

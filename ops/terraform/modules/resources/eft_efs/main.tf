@@ -16,6 +16,11 @@ data "aws_vpc" "main" {
 # used to get our current account number
 data "aws_caller_identity" "current" {}
 
+# sns kms key
+data "aws_kms_key" "sns_key" {
+  key_id = "alias/aws/sns"
+}
+
 # returns all "data" subnet id's available to the seleted vpc
 data "aws_subnet_ids" "etl" {
   vpc_id = var.env_config.vpc_id
@@ -310,6 +315,8 @@ resource "aws_efs_mount_target" "eft" {
 # sns topic for cloudwatch
 resource "aws_sns_topic" "eft_efs" {
   name = "${var.partner}-eft-efs-${var.env_config.env}-cloudwatch-alarms"
+
+  kms_master_key_id = data.aws_kms_key.sns_key.id
 }
 
 # hook up efs alerts
