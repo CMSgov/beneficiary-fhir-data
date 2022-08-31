@@ -144,16 +144,19 @@ resource "aws_sqs_queue" "broker" {
 resource "aws_sqs_queue_policy" "broker" {
   queue_url = aws_sqs_queue.broker.id
 
-  policy = <<POLICY
+  policy = <<-EOF
 {
   "Version": "2012-10-17",
-  "Id": "sqspolicy",
+  "Id": "${local.queue_name}-broker-sns-to-sqs",
   "Statement": [
     {
-      "Sid": "First",
       "Effect": "Allow",
-      "Principal": "${local.account_id}",
-      "Action": "sqs:SendMessage",
+      "Principal": {
+        "AWS": [
+          "${local.account_id}"
+        ]
+      },
+      "Action": "SQS:SendMessage",
       "Resource": "${aws_sqs_queue.broker.arn}",
       "Condition": {
         "ArnEquals": {
@@ -163,7 +166,7 @@ resource "aws_sqs_queue_policy" "broker" {
     }
   ]
 }
-POLICY
+EOF
 }
 
 resource "aws_autoscaling_notification" "autoscaling_notification" {
