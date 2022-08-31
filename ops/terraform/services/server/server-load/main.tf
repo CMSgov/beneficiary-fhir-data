@@ -141,14 +141,25 @@ resource "aws_sqs_queue" "broker" {
   kms_master_key_id          = local.kms_key_id
 }
 
-# Send scaling event notifications to the broker's SQS queue
-# TODO this should probably live elsewhere... pending the bfd-server terraservice thing
-resource "aws_autoscaling_lifecycle_hook" "scaling_hook" {
-  autoscaling_group_name  = data.aws_autoscaling_group.asg.name
-  heartbeat_timeout       = 3600
-  default_result          = "CONTINUE"
-  lifecycle_transition    = "autoscaling:EC2_INSTANCE_LAUNCHING"
-  name                    = "${local.queue_name}-scaling-hook"
-  notification_target_arn = aws_sqs_queue.broker.arn
-  role_arn                = aws_iam_role.this.arn
+resource "aws_autoscaling_notification" "example_notifications" {
+  group_names = [
+    data.aws_autoscaling_group.asg.name,
+  ]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+  ]
+
+  topic_arn = aws_sns_topic.sns.arn
+}
+
+resource "aws_sns_topic" "sns" {
+  name              = "${local.queue_name}-sns"
+  kms_master_key_id = data.aws_kms_key.sns_key.id
+}
+
+resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
+  topic_arn = aws_sns_topic.sns.arn
+  protocol  = "sqs"
+  endpoint  = aws_sqs_queue.broker.arn
 }
