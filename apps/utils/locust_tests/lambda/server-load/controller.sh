@@ -19,7 +19,7 @@ locust \
 	--client-cert-path="/tmp/bfd_test_cert.pem" \
 	--database-uri="$db_dsn"\
 	--enable-rebalancing \
-	--spawn-rate=5 \
+	--spawn-rate=1 \
 	--headless \
 	--loglevel=DEBUG \
 	--csv=load
