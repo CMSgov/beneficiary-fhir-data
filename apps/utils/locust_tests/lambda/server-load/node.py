@@ -78,7 +78,9 @@ def handler(event, context):
     Handles execution of a worker node.
     """
 
-    asyncio.get_event_loop().run_until_complete(run_locust(event))
+    print("Preparing to run async worker...")
+    asyncio.run(run_locust(event))
+    print("Async worker terminated.")
 
 
 async def run_locust(event):
@@ -141,8 +143,13 @@ async def run_locust(event):
         "--only-summary",
     )
 
+    print(f"Started locust worker with pid {process.pid}")
+
     scaling_event = []
     while not scaling_event:
         scaling_event = check_queue(timeout=1)
+
+    print("Scaling event detected, terminating.")
+    print(f"Scaling event detected was: {scaling_event[0]}")
 
     process.terminate()
