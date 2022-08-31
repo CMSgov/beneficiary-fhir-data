@@ -8,6 +8,7 @@ COPY toolchains.xml /root/.m2/toolchains.xml
 
 ARG ANSIBLE_VERSION
 
+# TODO: install pip3 from a known requirements.txt file instead
 RUN apt-get -y update && \
     apt-get -y install python3-pip jq && \
     pip3 install ansible==${ANSIBLE_VERSION} awscli boto
