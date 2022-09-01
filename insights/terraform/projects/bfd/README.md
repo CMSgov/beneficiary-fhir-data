@@ -40,14 +40,10 @@ be clear. For example, we have `module.glue-table-api-requests` and
 
 ```mermaid
 flowchart TB
-    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| AppLogs["S3: App Logs Bucket"]
-    AppLogs -->|Manual Move| S3["S3: BFD Insights Bucket"]
-    S3 -->|Manually Start| workflow
-    subgraph workflow [Glue Workflow]
-    HistoryCrawler["Glue Crawler: API History"] --> HistoryJob["Glue Job: Ingest History"]
-    HistoryJob --> RequestsCrawler["Glue Crawler: API Requests"]
-    end
-    workflow --> APIRequests["Glue Table: API Requests"]
+    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| S3["S3 Bucket"]
+    S3 -->|Crawler: History| History["Glue Table: API History"]
+    History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
+
     LogSubscription["CloudWatch Log Subscription (Real-Time)"] -->|"Kinesis Firehose / Lambda"| APIRequests
 ```
 
