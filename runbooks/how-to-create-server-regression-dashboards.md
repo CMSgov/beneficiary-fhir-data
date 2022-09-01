@@ -176,168 +176,168 @@ As of writing, the following dashboards are available to view for members of the
       19. Ensure that a toast appears indicating the dataset was saved successfully
       20. Click "CANCEL" in the navigation bar on the top right of the screen
 
-   4. Navigate to "Analyses" in QuickSight (click on "Analyses" in the navigation tree on the left side of the page from the QuickSight "home")
-   5. Click "New analysis" on the top right of the page
-   6. Choose `bfd-test-server-regression`
-   7. A new page should appear with details about the dataset. Click on "USE IN ANALYSIS"
-   8. A new page should appear with an empty "AutoGraph" and a variety of controls on the left-side:
-      1. ![New Analysis Startpage](resources/new-analsyis-startpage.png)
-   9. Start by re-creating all of the line graphs for the `server-regression` dashboard:
+3. Navigate to "Analyses" in QuickSight (click on "Analyses" in the navigation tree on the left side of the page from the QuickSight "home")
+4. Click "New analysis" on the top right of the page
+5. Choose `bfd-test-server-regression`
+6. A new page should appear with details about the dataset. Click on "USE IN ANALYSIS"
+7. A new page should appear with an empty "AutoGraph" and a variety of controls on the left-side:
+   1. ![New Analysis Startpage](resources/new-analsyis-startpage.png)
+8. Start by re-creating all of the line graphs for the `server-regression` dashboard:
 
-      1. Click anywhere within the empty "AutoGraph". An outline should appear indicating it has been selected, along with controls in the top-right corner
-      2. In "Visual types", choose a line graph (red outlined button in figure):
-         1. ![Line Graph in Visual Types](resources/visual-types-line-graph.png)
-      3. The graph's title/description should change to "You need to add or remove fields" and the collapsed "Field wells" section should expand showing "X axis", "Value", and "Color" as shown in the following figure:
-         1. ![Line Graph Selected](resources/line-graph-chosen.png)
-      4. In the "Fields list", click and drag "date_time" to the "X axis" control in "Field wells". You should see the graph update after doing so
-      5. In the "Fields list", click and drag "total_reqs_per_second" to the "Value" control in "Field wells". You should see the graph update, and the page should look like the following:
-         1. ![Fields Added to Line Graph Without Change](resources/fields-added-to-line-graph-start.png)
-      6. The graph's "Value" is currently representing the unique count of the "total_reqs_per_second" which is not correct. Click on "total_reqs_per_second (Count)" in the "Value" control in the "Field wells" section. A dropdown menu should appear
-      7. Click on "Aggregate: Count". An additional dropdown menu should appear to the right of the menu
-      8. Click on "Sum" in the list of aggregations
-      9. The graph should update and the values being graphed should be correct, as shown below (note the values will be different, but the graph should now be graphing the actual _value_ of `total_reqs_per_second`):
-         1. !["total_reqs_per_second" Changed to Sum Aggregation](resources/total-reqs-per-second-graph-using-sum.png)
-      10. The graph's x-axis (`date_time`) is currently sorted alphabetically and not by time. Similar to above, click on "date_time" in the "X axis" control in "Field wells". A dropdown menu should appear. The first item in the menu should be "Sort by" and should be "total_reqs_per_second" as shown in the figure:
-          1. !["date_time" Dropdown "Sort by"](resources/date-time-sort-by-dropdown.png)
-      11. Click on the "Sort by" option (highlighted by the red outline in the figure above). A second dropdown should appear to the right of the original menu
-      12. Click on "Sort options" in the second, right-most dropdown
-      13. The left pane (where "Fields list" was) should be replaced by "Sort options". In the select/dropdown menu labeled "Sort by", select "raw_timestamp" as shown in the figure below:
-          1. !["Sort by" Set to "raw_timestamp"](resources/sort-options-raw-timestamp.png)
-      14. Click "Apply" at the bottom of the "Sort options" pane. The graph should update and now be ordered correctly by time
-      15. Click "Close". The left-most pane should switch back to "Fields list"
-      16. Change the title of the graph to "Total RPS Over Time" by double-clicking on the current title ("Sum of Total_reqs_per_second by Date_time") and entering the new title in the text area
-      17. Double-click the y-axis label ("total_reqs_per_second (Sum)", shown vertically). A dropdown menu should appear
-      18. Select "Rename" from the dropdown menu
-      19. Rename to "Total Requests-Per-Second"
-      20. Follow the same steps as above to rename the x-axis, but this time the name should be "Date and Time (EST)"
-      21. Hover over the graph and click the small pencil icon in the top right corner. Hovering over the icon should show a tooltip with the text "Format visual". The "Fields list" pane should be replaced by a pane named "Format visual" on the leftside of the page, as shown below:
-          1. !["Format visual" Pane](resources/format-visual-pane.png)
-      22. There should be multiple collapsible sections, click on "Data labels"
-      23. Click on the "Show data labels" checkbox. Each point on the line graph should now be labeled with its value
-      24. Hover over the graph again and this time click the three-dots in the top right corner. A dropdown menu should appear
-      25. Click "Duplicate visual"
-      26. A duplicate of the original "Total RPS Over Time" line graph should appear to the right
-      27. Click on this new, duplicate graph. It should become outlined
-      28. Uncollapse the "Field wells" section above the graphs by clicking anywhere within it
-      29. Click on the green "total_reqs_per_second (Sum)" button in the "Value" section. A dropdown menu should appear
-      30. In the very bottom of the dropdown menu, beneath the "Search fields" input, find "total_requests". Click on it
-      31. The graph's y-axis should change to "total_requests (Sum)" and the "Value" of the graph should now be "total_requests (Sum)"
-      32. Change the title of the graph to "Total Requests over Time" following instructions above
-      33. Change the title of the y-axis to "Total Requests"
-      34. Ensure the title of the x-axis remains "Date and Time (EST)". If not, change it following instructions above
-      35. Ensure that data labels appear above each point in the graph. If not, change it following instructions above
-      36. Duplicate any of the two graphs following the instructions above. A third graph should appear on bottom-left of the screen
-      37. Following instructions outlined above, change the "Value"/y-axis of the graph to "total_failures"
-      38. Change the title to "Number of Total Request Failures over Time"
-      39. Change the y-axis title to "Total Failures"
-      40. Ensure the x-axis title is "Date and Time (EST)"
-      41. Ensure data labels appear above each point in the line graph
-      42. Navigate to "Format visual" (ensure that the new failures graph is selected)
-      43. In the "Title" collapsible section, click the "Edit subtitle" button
-      44. Change the subtitle to "Successful runs should always have 0 failures"
+   1. Click anywhere within the empty "AutoGraph". An outline should appear indicating it has been selected, along with controls in the top-right corner
+   2. In "Visual types", choose a line graph (red outlined button in figure):
+      1. ![Line Graph in Visual Types](resources/visual-types-line-graph.png)
+   3. The graph's title/description should change to "You need to add or remove fields" and the collapsed "Field wells" section should expand showing "X axis", "Value", and "Color" as shown in the following figure:
+      1. ![Line Graph Selected](resources/line-graph-chosen.png)
+   4. In the "Fields list", click and drag "date_time" to the "X axis" control in "Field wells". You should see the graph update after doing so
+   5. In the "Fields list", click and drag "total_reqs_per_second" to the "Value" control in "Field wells". You should see the graph update, and the page should look like the following:
+      1. ![Fields Added to Line Graph Without Change](resources/fields-added-to-line-graph-start.png)
+   6. The graph's "Value" is currently representing the unique count of the "total_reqs_per_second" which is not correct. Click on "total_reqs_per_second (Count)" in the "Value" control in the "Field wells" section. A dropdown menu should appear
+   7. Click on "Aggregate: Count". An additional dropdown menu should appear to the right of the menu
+   8. Click on "Sum" in the list of aggregations
+   9. The graph should update and the values being graphed should be correct, as shown below (note the values will be different, but the graph should now be graphing the actual _value_ of `total_reqs_per_second`):
+      1. !["total_reqs_per_second" Changed to Sum Aggregation](resources/total-reqs-per-second-graph-using-sum.png)
+   10. The graph's x-axis (`date_time`) is currently sorted alphabetically and not by time. Similar to above, click on "date_time" in the "X axis" control in "Field wells". A dropdown menu should appear. The first item in the menu should be "Sort by" and should be "total_reqs_per_second" as shown in the figure:
+       1. !["date_time" Dropdown "Sort by"](resources/date-time-sort-by-dropdown.png)
+   11. Click on the "Sort by" option (highlighted by the red outline in the figure above). A second dropdown should appear to the right of the original menu
+   12. Click on "Sort options" in the second, right-most dropdown
+   13. The left pane (where "Fields list" was) should be replaced by "Sort options". In the select/dropdown menu labeled "Sort by", select "raw_timestamp" as shown in the figure below:
+       1. !["Sort by" Set to "raw_timestamp"](resources/sort-options-raw-timestamp.png)
+   14. Click "Apply" at the bottom of the "Sort options" pane. The graph should update and now be ordered correctly by time
+   15. Click "Close". The left-most pane should switch back to "Fields list"
+   16. Change the title of the graph to "Total RPS Over Time" by double-clicking on the current title ("Sum of Total_reqs_per_second by Date_time") and entering the new title in the text area
+   17. Double-click the y-axis label ("total_reqs_per_second (Sum)", shown vertically). A dropdown menu should appear
+   18. Select "Rename" from the dropdown menu
+   19. Rename to "Total Requests-Per-Second"
+   20. Follow the same steps as above to rename the x-axis, but this time the name should be "Date and Time (EST)"
+   21. Hover over the graph and click the small pencil icon in the top right corner. Hovering over the icon should show a tooltip with the text "Format visual". The "Fields list" pane should be replaced by a pane named "Format visual" on the leftside of the page, as shown below:
+       1. !["Format visual" Pane](resources/format-visual-pane.png)
+   22. There should be multiple collapsible sections, click on "Data labels"
+   23. Click on the "Show data labels" checkbox. Each point on the line graph should now be labeled with its value
+   24. Hover over the graph again and this time click the three-dots in the top right corner. A dropdown menu should appear
+   25. Click "Duplicate visual"
+   26. A duplicate of the original "Total RPS Over Time" line graph should appear to the right
+   27. Click on this new, duplicate graph. It should become outlined
+   28. Uncollapse the "Field wells" section above the graphs by clicking anywhere within it
+   29. Click on the green "total_reqs_per_second (Sum)" button in the "Value" section. A dropdown menu should appear
+   30. In the very bottom of the dropdown menu, beneath the "Search fields" input, find "total_requests". Click on it
+   31. The graph's y-axis should change to "total_requests (Sum)" and the "Value" of the graph should now be "total_requests (Sum)"
+   32. Change the title of the graph to "Total Requests over Time" following instructions above
+   33. Change the title of the y-axis to "Total Requests"
+   34. Ensure the title of the x-axis remains "Date and Time (EST)". If not, change it following instructions above
+   35. Ensure that data labels appear above each point in the graph. If not, change it following instructions above
+   36. Duplicate any of the two graphs following the instructions above. A third graph should appear on bottom-left of the screen
+   37. Following instructions outlined above, change the "Value"/y-axis of the graph to "total_failures"
+   38. Change the title to "Number of Total Request Failures over Time"
+   39. Change the y-axis title to "Total Failures"
+   40. Ensure the x-axis title is "Date and Time (EST)"
+   41. Ensure data labels appear above each point in the line graph
+   42. Navigate to "Format visual" (ensure that the new failures graph is selected)
+   43. In the "Title" collapsible section, click the "Edit subtitle" button
+   44. Change the subtitle to "Successful runs should always have 0 failures"
 
-   10. Next, recreate the totals bar charts
+9. Next, recreate the totals bar charts
 
-       1. On the top-left of the page, click the "ADD" button. A dropdown menu should appear
-       2. Select "Add visual". A new "AutoGraph" should appear on the page
-       3. From "Visual types" (bottom collapsible section of the left-pane) select "Vertical bar chart" (top-most row, right-most icon)
-       4. Click the "ADD" button again. Choose "Add calculated field". A new page should open with three main sections: a name field with the value "Add name", a section on the right with inner collapsible sections showing "Fields", "Parameters" and "Functions", and a large text area that takes up most of the screen
-       5. In the large text area, type "1"
-       6. For the name of the field, enter "fake_x". See the figure below:
-          1. !["fake_x" Calculated Field](resources/calculated-field-fakex.png)
-       7. Click "Save". You should now return to the main Analysis screen with the graphs
-       8. Select the empty vertical bar chart graph
-       9. In "Field wells", set the x-axis to "fake_x"
-       10. Set the "Value" to "total_avg_response_time". When set, the aggregate function should default to "Count"
-       11. Following instructions outlined above to change the aggregate for a value, change the aggregate function from "Count" to "Min"
-       12. Add another copy/duplicate of "total*avg_response_time" to the graph's "Value" (by dragging "total_avg_response_time" to "Value" in "Field wells" again) \_beneath* the previous "total_avg_response_time (Min)" value, as shown in the figure below:
-           1. ![Multiple "total_avg_response_time" Values for Bar Chart](resources/multiple-values-vertical-bar-chart.png)
-       13. This time, change the aggregate function from "Count" to "Median"
-       14. Repeat the above steps two more times: add two more "total_avg_reponse_time" values, set the first's aggregate to "Average", and set the second's to "Max". When finished, "Values" should have 4 "total_avg_response_time" values each with a different aggregate function. See figure below:
-           1. ![All "total_avg_respone_time" Values for Bar Chart](resources/all-values-with-aggregates-in-values-field-wells.png)
-       15. Go to "Format visual" for the bar chart
-       16. Un-collapse "X-axis" in "Format visual" by clicking on it
-       17. Un-select every checkbox in the section: "Show title", "Show sort", "Show data zoom", "Show axis line", and "Show labels". The bar chart should now only display the y-axis
-       18. Un-collapse "Legend"
-       19. Un-select every checkbox in the section: "Show legend" and "Show legend title". The legend to the right of the bars in the vertical bar chart should no longer be visible
-       20. Un-collapse "Data labels"
-       21. Select "Show data labels". Each bar's value should now appear above their respective bar
-       22. Un-collapse "Tooltip"
-       23. Under "Display options", un-select "Use primary value as title" and _select_ "Show aggregations"
-       24. Under "Fields", find "fake_x" and click on the three-dots to the right of its label. A dropdown menu should appear
-       25. Click/select "Hide". The "fake_x" field should darken/grey-out. Now when hovering over each distinct bar in the bar chart you will see a tooltip showing the value and the corresponding aggregation function, as shown in the figure below:
-           1. ![Bar Chart Tooltip Example](resources/bar-chart-tooltip.png)
-       26. Close the "Format visual" section by clicking the "x" button next to the name at the top of the section. The "Fields list" should re-appear
-       27. In "Fields list", hover over "total_avg_response_time" until a vertical three-dots button appears to the right of the label. Click on it. A dropdown menu should appear
-       28. Hover over "Format: 1,234.57". A dropdown menu should appear to the right
-       29. Click on "More formatting options...". The "Fields list" section should be replaced with "Format data"
-       30. Un-collapse the "Units" section
-       31. In the input field labeled "Suffix", enter " ms". _Do not forget the leading space_. You should see the values in the vertical bar chart for "total_avg_response_time" update to include the new "ms" suffix
-       32. Change the bar chart's title to "Total Average Response Time"
-       33. Change the bar chart's subtitle to "Minimum, Median, Average, Maximum"
-       34. Duplicate the bar chart following the instructions for duplicating charts above
-       35. For this new chart, change all of its aggregated values from "total_avg_response_time" to "total_reqs_per_second". You may need to change the aggregation function from "Count" to "Min"/"Median"/etc. after changing the value's field
-       36. Change this new chart's title to "Total Requests Per Second"
-       37. Ensure this new chart's subtitle is "Minimum, Median, Average, Maximum"
-       38. Duplicate this new chart
-       39. Change all aggregated values to "total_requests"
-       40. Change the "total_requests" chart's title to "Total Requests"
-       41. Ensure this new "total_requests" chart's subtitle is "Minimum, Median, Average, Maximum"
-       42. Resize and move the 3 bar charts such that they are arranged at the top of the dashboard in a similar way to the following figure:
-           1. ![Vertical Bar Chart Arrangement](resources/bar-chart-arrangement.png)
+   1. On the top-left of the page, click the "ADD" button. A dropdown menu should appear
+   2. Select "Add visual". A new "AutoGraph" should appear on the page
+   3. From "Visual types" (bottom collapsible section of the left-pane) select "Vertical bar chart" (top-most row, right-most icon)
+   4. Click the "ADD" button again. Choose "Add calculated field". A new page should open with three main sections: a name field with the value "Add name", a section on the right with inner collapsible sections showing "Fields", "Parameters" and "Functions", and a large text area that takes up most of the screen
+   5. In the large text area, type "1"
+   6. For the name of the field, enter "fake_x". See the figure below:
+      1. !["fake_x" Calculated Field](resources/calculated-field-fakex.png)
+   7. Click "Save". You should now return to the main Analysis screen with the graphs
+   8. Select the empty vertical bar chart graph
+   9. In "Field wells", set the x-axis to "fake_x"
+   10. Set the "Value" to "total_avg_response_time". When set, the aggregate function should default to "Count"
+   11. Following instructions outlined above to change the aggregate for a value, change the aggregate function from "Count" to "Min"
+   12. Add another copy/duplicate of "total*avg_response_time" to the graph's "Value" (by dragging "total_avg_response_time" to "Value" in "Field wells" again) \_beneath* the previous "total_avg_response_time (Min)" value, as shown in the figure below:
+   13. ![Multiple "total_avg_response_time" Values for Bar Chart](resources/multiple-values-vertical-bar-chart.png)
+   14. This time, change the aggregate function from "Count" to "Median"
+   15. Repeat the above steps two more times: add two more "total_avg_reponse_time" values, set the first's aggregate to "Average", and set the second's to "Max". When finished, "Values" should have 4 "total_avg_response_time" values each with a different aggregate function. See figure below:
+   16. ![All "total_avg_respone_time" Values for Bar Chart](resources/all-values-with-aggregates-in-values-field-wells.png)
+   17. Go to "Format visual" for the bar chart
+   18. Un-collapse "X-axis" in "Format visual" by clicking on it
+   19. Un-select every checkbox in the section: "Show title", "Show sort", "Show data zoom", "Show axis line", and "Show labels". The bar chart should now only display the y-axis
+   20. Un-collapse "Legend"
+   21. Un-select every checkbox in the section: "Show legend" and "Show legend title". The legend to the right of the bars in the vertical bar chart should no longer be visible
+   22. Un-collapse "Data labels"
+   23. Select "Show data labels". Each bar's value should now appear above their respective bar
+   24. Un-collapse "Tooltip"
+   25. Under "Display options", un-select "Use primary value as title" and _select_ "Show aggregations"
+   26. Under "Fields", find "fake_x" and click on the three-dots to the right of its label. A dropdown menu should appear
+   27. Click/select "Hide". The "fake_x" field should darken/grey-out. Now when hovering over each distinct bar in the bar chart you will see a tooltip showing the value and the corresponding aggregation function, as shown in the figure below:
+   28. ![Bar Chart Tooltip Example](resources/bar-chart-tooltip.png)
+   29. Close the "Format visual" section by clicking the "x" button next to the name at the top of the section. The "Fields list" should re-appear
+   30. In "Fields list", hover over "total_avg_response_time" until a vertical three-dots button appears to the right of the label. Click on it. A dropdown menu should appear
+   31. Hover over "Format: 1,234.57". A dropdown menu should appear to the right
+   32. Click on "More formatting options...". The "Fields list" section should be replaced with "Format data"
+   33. Un-collapse the "Units" section
+   34. In the input field labeled "Suffix", enter " ms". _Do not forget the leading space_. You should see the values in the vertical bar chart for "total_avg_response_time" update to include the new "ms" suffix
+   35. Change the bar chart's title to "Total Average Response Time"
+   36. Change the bar chart's subtitle to "Minimum, Median, Average, Maximum"
+   37. Duplicate the bar chart following the instructions for duplicating charts above
+   38. For this new chart, change all of its aggregated values from "total_avg_response_time" to "total_reqs_per_second". You may need to change the aggregation function from "Count" to "Min"/"Median"/etc. after changing the value's field
+   39. Change this new chart's title to "Total Requests Per Second"
+   40. Ensure this new chart's subtitle is "Minimum, Median, Average, Maximum"
+   41. Duplicate this new chart
+   42. Change all aggregated values to "total_requests"
+   43. Change the "total_requests" chart's title to "Total Requests"
+   44. Ensure this new "total_requests" chart's subtitle is "Minimum, Median, Average, Maximum"
+   45. Resize and move the 3 bar charts such that they are arranged at the top of the dashboard in a similar way to the following figure:
+   46. ![Vertical Bar Chart Arrangement](resources/bar-chart-arrangement.png)
 
-   11. Next, recreate the comparison results pie chart
+10. Next, recreate the comparison results pie chart
 
-       1. Create a new visual following the steps outlined above
-       2. In "Visual types" choose "Pie chart"
-       3. Set the "Group/Color" in "Field wells" to "compare_result". The pie chart should update and show the ratios of each type of comparison result
-       4. Rename the bottom-most label from "Group By: compare_result" to "Comparison Result"
-       5. Change the title to "Comparison Results"
+    1. Create a new visual following the steps outlined above
+    2. In "Visual types" choose "Pie chart"
+    3. Set the "Group/Color" in "Field wells" to "compare_result". The pie chart should update and show the ratios of each type of comparison result
+    4. Rename the bottom-most label from "Group By: compare_result" to "Comparison Result"
+    5. Change the title to "Comparison Results"
 
-   12. Finally, recreate the percentiles and average response time bar charts
+11. Finally, recreate the percentiles and average response time bar charts
 
-       1. Add a new visual and set its type to "Vertical bar chart"
-       2. Set the x-axis to "date_time"
-       3. Set the values to "total_95_percentile", "total_99_percentile", "total_100_percentile". Ensure each value's aggregation function is "Sum". The bar chart should update and show each response time percentile for each date
-       4. Following the instructions outlined above, set "date_time"'s sort to "raw_timestamp" so that the graph is sorted by time
-       5. Following the instructions outlined above, enable data labels such that the value of each bar in the bar chart is displayed above the bar
-       6. Following the instructions outlined above, _for each field in "Values"_ add a " ms" suffix to the field. The values displayed in the bar chart should now include a "ms" suffix to indicate that the value is a measure of time
-       7. Change the chart's title to "95%, 99%, and 100% Total Response Time Percentiles over Time"
-       8. Change the x-axis's title to "Date and Time (EST)"
-       9. Duplicate the chart
-       10. Change the chart's values to be "total_min_response_time", "total_median_response_time", and "total_max_response_time". Ensure each value's aggregation function is "Sum", not "Count". The bar chart should update and show each response time for each date
-       11. Following instructions outlined above, change the suffix for "total_min_response_time" and "total_median_response_time" to " ms"
-       12. Change the chart title to "Minimum, Median, and Average Response Times (ms) over Time"
-       13. Ensure the x-axis title is "Date and Time (EST)"
+    1. Add a new visual and set its type to "Vertical bar chart"
+    2. Set the x-axis to "date_time"
+    3. Set the values to "total_95_percentile", "total_99_percentile", "total_100_percentile". Ensure each value's aggregation function is "Sum". The bar chart should update and show each response time percentile for each date
+    4. Following the instructions outlined above, set "date_time"'s sort to "raw_timestamp" so that the graph is sorted by time
+    5. Following the instructions outlined above, enable data labels such that the value of each bar in the bar chart is displayed above the bar
+    6. Following the instructions outlined above, _for each field in "Values"_ add a " ms" suffix to the field. The values displayed in the bar chart should now include a "ms" suffix to indicate that the value is a measure of time
+    7. Change the chart's title to "95%, 99%, and 100% Total Response Time Percentiles over Time"
+    8. Change the x-axis's title to "Date and Time (EST)"
+    9. Duplicate the chart
+    10. Change the chart's values to be "total_min_response_time", "total_median_response_time", and "total_max_response_time". Ensure each value's aggregation function is "Sum", not "Count". The bar chart should update and show each response time for each date
+    11. Following instructions outlined above, change the suffix for "total_min_response_time" and "total_median_response_time" to " ms"
+    12. Change the chart title to "Minimum, Median, and Average Response Times (ms) over Time"
+    13. Ensure the x-axis title is "Date and Time (EST)"
 
-   13. Click on "ADD" in the top-left
-   14. Select "Add title"
-   15. Set the sheet's title to "server-regression Statistics from TEST Environment 'master' Deployment Runs"
-   16. On the top-right of the screen, click the share icon (next to the save and download icons). A dropdown menu should appear
-   17. Click "Publish dashboard"
-   18. Name the dashboard "bfd-test-server-regression"
-   19. Click "Publish dashboard". A new page should load showing the completed Dashboard
-   20. Click the share icon on the top-right of the screen. A dropdown menu should appear
-   21. Click "Share dashboard". A new page should load with sharing options
-   22. In the bottom right, under "Enable access for", select "Everyone in this account"
-   23. Select "Discoverable in QuickSight" as well
-   24. Close the Dashboard and return to the QuickSight "home" by clicking on "QuickSight" on the top-left of the screen
-   25. Return to the "Analyses" view
-   26. Open the "bfd-test-server-regression" analysis
-   27. When loaded, click on the save icon on the top-right of the screen. A dialog pop-up should appear titled "Save a copy"
-   28. In the input field, enter "bfd-prod-sbx-server-regression"
-   29. Click "SAVE". The copied Analysis should load
-   30. In the left pane, click the pencil icon next to the "Dataset" label. A dialog pop-up should appear with the title "Datasets in this analysis"
-   31. Click on the vertical three-dots. A dropdown menu should appear
-   32. Click on "Replace". A new dialog should appear named "Select replacement dataset"
-   33. Select the "bfd-prod-sbx-server-regression" Dataset
-   34. Click "Select"
-   35. Click "Replace". All graphs in the Analysis should update appropriately with the new Dataset's field values
-   36. Change the sheet's title to "server-regression Statistics from PROD-SBX Environment 'master' Deployment Runs"
-   37. Repeat the steps outlined above to publish and share the Analsyis as a Dashboard named "bfd-prod-sbx-server-regression"
-   38. Repeat the previous steps to duplicate the "bfd-prod-sbx-server-regression" Analysis. Name the duplicated analysis "bfd-prod-server-regression"
-   39. Repeat the previous steps to replace the "bfd-prod-sbx-server-regression" Dataset with "bfd-prod-server-regression"
-   40. Change the sheet's title to "server-regression Statistics from PROD Environment 'master' Deployment Runs"
-   41. Repeat the steps outlined above to push and share the Analysis as a Dashboard named "bfd-prod-server-regression"
+12. Click on "ADD" in the top-left
+13. Select "Add title"
+14. Set the sheet's title to "server-regression Statistics from TEST Environment 'master' Deployment Runs"
+15. On the top-right of the screen, click the share icon (next to the save and download icons). A dropdown menu should appear
+16. Click "Publish dashboard"
+17. Name the dashboard "bfd-test-server-regression"
+18. Click "Publish dashboard". A new page should load showing the completed Dashboard
+19. Click the share icon on the top-right of the screen. A dropdown menu should appear
+20. Click "Share dashboard". A new page should load with sharing options
+21. In the bottom right, under "Enable access for", select "Everyone in this account"
+22. Select "Discoverable in QuickSight" as well
+23. Close the Dashboard and return to the QuickSight "home" by clicking on "QuickSight" on the top-left of the screen
+24. Return to the "Analyses" view
+25. Open the "bfd-test-server-regression" analysis
+26. When loaded, click on the save icon on the top-right of the screen. A dialog pop-up should appear titled "Save a copy"
+27. In the input field, enter "bfd-prod-sbx-server-regression"
+28. Click "SAVE". The copied Analysis should load
+29. In the left pane, click the pencil icon next to the "Dataset" label. A dialog pop-up should appear with the title "Datasets in this analysis"
+30. Click on the vertical three-dots. A dropdown menu should appear
+31. Click on "Replace". A new dialog should appear named "Select replacement dataset"
+32. Select the "bfd-prod-sbx-server-regression" Dataset
+33. Click "Select"
+34. Click "Replace". All graphs in the Analysis should update appropriately with the new Dataset's field values
+35. Change the sheet's title to "server-regression Statistics from PROD-SBX Environment 'master' Deployment Runs"
+36. Repeat the steps outlined above to publish and share the Analsyis as a Dashboard named "bfd-prod-sbx-server-regression"
+37. Repeat the previous steps to duplicate the "bfd-prod-sbx-server-regression" Analysis. Name the duplicated analysis "bfd-prod-server-regression"
+38. Repeat the previous steps to replace the "bfd-prod-sbx-server-regression" Dataset with "bfd-prod-server-regression"
+39. Change the sheet's title to "server-regression Statistics from PROD Environment 'master' Deployment Runs"
+40. Repeat the steps outlined above to push and share the Analysis as a Dashboard named "bfd-prod-server-regression"
 
 Once the steps above are complete, there should be three new Dashboards available to view in QuickSight displaying performance metrics for each of the three environments (`TEST`, `PROD-SBX`, and `PROD`).
