@@ -38,9 +38,6 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
 
   private static final String RESPONSE_PREFIX = "response";
 
-  private static final String REQUEST_START_KEY =
-      BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
-
   /** {@inheritDoc} */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -61,7 +58,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
 
   /** @param request the {@link ServletRequest} to record the standard {@link BfdMDC} entries for */
   private static void handleRequest(ServletRequest request) {
-    request.setAttribute(REQUEST_START_KEY, System.currentTimeMillis());
+    request.setAttribute(BfdMDC.REQUEST_START_KEY, System.currentTimeMillis());
 
     // Record the request type.
     BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, "request_type"), request.getClass().getName());
@@ -173,13 +170,6 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
               headerValues.toString());
       }
     }
-
-    // Record the response duration.
-    Long requestStartMilliseconds = (Long) request.getAttribute(REQUEST_START_KEY);
-    if (requestStartMilliseconds != null)
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_milliseconds"),
-          Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
   }
 
   /** {@inheritDoc} */
