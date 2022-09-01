@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +26,18 @@ import org.slf4j.LoggerFactory;
 public final class ServerProcess implements AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerProcess.class);
 
+  /** The log message for when the war was started. */
   private static final String LOG_MESSAGE_WAR_STARTED = "Johnny 5 is alive on SLF4J!";
 
+  /** The App process under test. */
   private Process appProcess;
+  /** Consumes the app stdout for validation. */
   private ProcessOutputConsumer appRunConsumer;
+  /** The thread for running the {@link #appRunConsumer}. */
   private Thread appRunConsumerThread;
+  /** The server uri to use. */
   private URI serverUri;
+  /** The process output value. */
   private Optional<Integer> exitValue;
 
   /**
@@ -57,8 +63,8 @@ public final class ServerProcess implements AutoCloseable {
 
     // Wait for it to start both Jetty and the app.
     try {
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
     } catch (ConditionTimeoutException e) {
       // Add some additional logging detail.
       throw new ConditionTimeoutException(
@@ -86,7 +92,11 @@ public final class ServerProcess implements AutoCloseable {
     }
   }
 
-  /** @return the local {@link URI} that the server is accessible at */
+  /**
+   * Gets the {@link #serverUri}.
+   *
+   * @return the local {@link URI} that the server is accessible at
+   */
   public URI getServerUri() {
     return serverUri;
   }
@@ -102,7 +112,7 @@ public final class ServerProcess implements AutoCloseable {
     return appRunConsumer.getStdoutContents().toString();
   }
 
-  /** @see java.lang.AutoCloseable#close() */
+  /** {@inheritDoc} */
   @Override
   public void close() {
     if (appProcess != null) {
@@ -134,6 +144,8 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Gets the {@link #exitValue}.
+   *
    * @return the server process' result code if it's stopped, or {@link Optional#empty()} if it has
    *     not
    */
@@ -142,6 +154,8 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Sets up a {@link ProcessBuilder} that can run the app for testing.
+   *
    * @param warPath the {@link Path} to the WAR file to run with the server
    * @param jvmDebugOptions the {@link JvmDebugOptions} to use
    * @return a {@link ProcessBuilder} that can be used to launch the application
@@ -174,6 +188,8 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Creates the command to launch the server.
+   *
    * @param jvmDebugOptions the {@link JvmDebugOptions} to use
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
    *     the application via its <code>.x</code> executable wrapper script
@@ -236,9 +252,11 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Checks if jetty has started by scanning the app server output for a specific message.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that Jetty has started, <code>
-   *     false</code> if not
+   *          false</code> if not
    */
   static boolean hasJettyStarted(ProcessOutputConsumer appRunConsumer) {
     return appRunConsumer
@@ -248,6 +266,8 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Checks if the war app has started by scanning the app server output for a specific message.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that the sample WAR application
    *     has started, <code>false</code> if not
@@ -256,7 +276,7 @@ public final class ServerProcess implements AutoCloseable {
     return appRunConsumer.getStdoutContents().toString().contains(LOG_MESSAGE_WAR_STARTED);
   }
 
-  /** Models the <code>suspend=<y/n></code> option is JVM debug settings. */
+  /** Models the <code>suspend=y/n</code> option is JVM debug settings. */
   public static enum JvmDebugAttachMode {
     /** The JVM will wait at launch for a debugger to be attached, before proceeding. */
     WAIT_FOR_ATTACH,
@@ -279,15 +299,18 @@ public final class ServerProcess implements AutoCloseable {
 
   /** Models the various JVM debug settings and options. */
   public static final class JvmDebugOptions {
+    /** If debug mode is on. */
     private final JvmDebugEnableMode debugEnableMode;
+    /** If debug mode is attached. */
     private final JvmDebugAttachMode debugAttachMode;
+    /** The port to attach on. */
     private final Integer port;
 
     /**
      * Constructs a new {@link JvmDebugOptions} instance.
      *
-     * @param debugEnableMode whether or not to enable debugging (must be
-     *        {@link JvmDebugEnableMode#DISABLED for this particular constructor)
+     * @param debugEnableMode whether or not to enable debugging (must be {@link
+     *     JvmDebugEnableMode#DISABLED} for this particular constructor)
      */
     public JvmDebugOptions(JvmDebugEnableMode debugEnableMode) {
       // Use the other constructor if you want debugging enabled.
@@ -315,7 +338,11 @@ public final class ServerProcess implements AutoCloseable {
         throw new IllegalArgumentException();
     }
 
-    /** @return the JVM launch options represented by this {@link JvmDebugOptions}' settings */
+    /**
+     * Builds the jvm options.
+     *
+     * @return the JVM launch options represented by this {@link JvmDebugOptions}' settings
+     */
     public String[] buildJvmOptions() {
       if (debugEnableMode == JvmDebugEnableMode.DISABLED) return new String[] {};
 

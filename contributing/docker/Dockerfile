@@ -1,18 +1,49 @@
-FROM centos:centos7
-COPY . /config
-RUN yum -y update
-RUN yum -y install java-1.8.0-openjdk-devel make sudo
-# Install Latest Maven Stable
-ARG MVN_VER="3.6.3"
-RUN curl -O http://mirrors.advancedhosters.com/apache/maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz
-RUN tar xvf apache-maven-${MVN_VER}-bin.tar.gz
-RUN mv apache-maven-${MVN_VER} /opt/maven
+FROM amazonlinux:2
+# You may install a specific maven version using `docker build --build-arg MVN_VER="3.8.6" ...`
+# See https://maven.apache.org/download.cgi to find the latest version and available mirrors.
+ARG MVN_VER="3.8.6"
+ARG MVN_MIRROR="https://dlcdn.apache.org/"
 ENV LANG en_US.UTF-8
-RUN useradd -ms /bin/bash dev
+
+COPY . /config
+
+# Install some common dev utils
+# - net-tools includes ifconfig, netstat, route, etc
+# - iputils includes ping and friends
+# - systat includes top, uptime, ps, etc
+# - procps-ng includes iostat
+RUN yum update -y --security && \
+    yum groupinstall -y "Development Tools" && \
+    yum install -y \
+      sudo \
+      net-tools \
+      iputils \
+      sysstat \
+      procps-ng \
+      wget \
+      which \
+      python3 \
+      python3-pip \
+      traceroute \
+      mtr
+
+# Install Java 11 and Maven
+RUN amazon-linux-extras install java-openjdk11 && \
+    curl -O ${MVN_MIRROR}/maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz && \
+    tar xvzf apache-maven-${MVN_VER}-bin.tar.gz && \
+    mv apache-maven-${MVN_VER} /opt/maven && \
+    rm -f apache-maven-*-bin.tar.gz
+
+# Add dev user
+RUN useradd dev && \
+    usermod -a -G wheel dev && \
+    echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/dev
+
+# Prepare dev's environment
+USER dev
 ENV BFD_V2_ENABLED true
 ENV BFD_PAC_ENABLED true
-USER dev
 ENV MAVEN_HOME /opt/maven
 ENV PATH="${PATH}:${MAVEN_HOME}/bin"
-RUN mkdir -p $HOME/.m2
-RUN cp /config/toolchains.xml $HOME/.m2/toolchains.xml
+RUN mkdir -p $HOME/.m2 && \
+    cp /config/toolchains.xml $HOME/.m2/toolchains.xml

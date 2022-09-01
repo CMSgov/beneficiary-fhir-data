@@ -25,6 +25,8 @@ import org.opentest4j.TestAbortedException;
 /** Contains test utilities. */
 public final class ServerTestUtils {
   /**
+   * Creates a new http client.
+   *
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the server
    * @return a new {@link HttpClient} for use
    */
@@ -37,8 +39,10 @@ public final class ServerTestUtils {
   }
 
   /**
+   * Create a new {@link SSLContext} for HTTP clients connecting to the server to use.
+   *
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the server
-   * @return a new {@link SSLContext} for HTTP clients connecting to the server to use
+   * @return a new {@link SSLContext}
    */
   private static SSLContext createSslContext(Optional<ClientSslIdentity> clientSslIdentity) {
     SSLContext sslContext;
@@ -69,7 +73,11 @@ public final class ServerTestUtils {
     return sslContext;
   }
 
-  /** @return the local {@link Path} that the project can be found in */
+  /**
+   * Gets the local {@link Path} that the project can be found in.
+   *
+   * @return the local {@link Path}
+   */
   public static Path getLauncherProjectDirectory() {
     try {
       /*
@@ -85,7 +93,11 @@ public final class ServerTestUtils {
     }
   }
 
-  /** @return the local {@link Path} that development/test key and trust stores can be found in */
+  /**
+   * Gets the local {@link Path} that development/test key and trust stores can be found in.
+   *
+   * @return the {@link Path}
+   */
   static Path getSslStoresDirectory() {
     /*
      * The working directory for tests will either be the module directory
@@ -98,7 +110,11 @@ public final class ServerTestUtils {
     return sslStoresDir;
   }
 
-  /** @return the local {@link Path} to the trust store that FHIR clients should use */
+  /**
+   * Gets the local {@link Path} to the trust store that FHIR clients should use.
+   *
+   * @return the {@link Path}
+   */
   private static Path getClientTrustStorePath() {
     Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
     return trustStorePath;
@@ -123,7 +139,11 @@ public final class ServerTestUtils {
         "Unsupported OS for this test case.");
   }
 
-  /** @return the {@link Path} to the <code>bfd-server-launcher-sample</code> WAR */
+  /**
+   * Gets the {@link Path} to the <code>bfd-server-launcher-sample</code> WAR.
+   *
+   * @return the {@link Path}
+   */
   static Path getSampleWar() {
     return AppConfigurationIT.getProjectDirectory()
         .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"));

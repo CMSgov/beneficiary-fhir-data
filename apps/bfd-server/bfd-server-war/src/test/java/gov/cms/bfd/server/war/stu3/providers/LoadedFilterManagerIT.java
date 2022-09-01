@@ -238,6 +238,7 @@ public final class LoadedFilterManagerIT {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
+            false,
             sampleResources.stream()
                 .map(StaticRifResource::toRifFile)
                 .collect(Collectors.toList()));

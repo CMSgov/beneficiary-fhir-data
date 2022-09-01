@@ -8,9 +8,9 @@ import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsLocation;
 import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.IOException;
 import java.util.Comparator;
@@ -49,6 +49,16 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
   }
 
   @Override
+  int getInsertCount(RdaMcsClaim claim) {
+    return 1 // Add one for the base claim
+        + claim.getDetails().size()
+        + claim.getDiagCodes().size()
+        + claim.getAdjustments().size()
+        + claim.getAudits().size()
+        + claim.getLocations().size();
+  }
+
+  @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
     final RdaMcsClaim claim = change.getClaim();
     final var locations = new StringList();
@@ -64,6 +74,10 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .receivedDate(claim.getLastUpdated())
         .locations(locations)
         .transactionDate(claim.getIdrStatusDate())
+        .phase(change.getSource().getPhase())
+        .phaseSeqNum(change.getSource().getPhaseSeqNum())
+        .extractDate(change.getSource().getExtractDate())
+        .transmissionTimestamp(change.getSource().getTransmissionTimestamp())
         .build();
   }
 

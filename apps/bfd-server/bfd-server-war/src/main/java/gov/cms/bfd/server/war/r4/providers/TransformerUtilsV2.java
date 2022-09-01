@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -190,10 +191,44 @@ public final class TransformerUtilsV2 {
   static CodeableConcept createCodeableConcept(
       String codingSystem, String codingVersion, String codingDisplay, String codingCode) {
     CodeableConcept codeableConcept = new CodeableConcept();
+
+    /*
+     * Due to meeting CARIN conformance, an additional coding with the ICD-10-Medicare system URL
+     * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
+     * See JIRA ticket: https://jira.cms.gov/browse/BFD-1895
+     */
+    if (codingSystem == IcdCode.CODING_SYSTEM_ICD_10) {
+      addCodingToCodeableConcept(
+          codeableConcept,
+          IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,
+          codingVersion,
+          codingDisplay,
+          codingCode);
+    }
+    addCodingToCodeableConcept(
+        codeableConcept, codingSystem, codingVersion, codingDisplay, codingCode);
+    return codeableConcept;
+  }
+
+  /**
+   * Creates a {@link Coding} from an R4 {@link CodeableConcept}
+   *
+   * @param codeableConcept the {@link CodeableConcept} to use
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingVersion the {@link Coding#getVersion()} to use
+   * @param codingDisplay the {@link Coding#getDisplay()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return
+   */
+  static void addCodingToCodeableConcept(
+      CodeableConcept codeableConcept,
+      String codingSystem,
+      String codingVersion,
+      String codingDisplay,
+      String codingCode) {
     Coding coding = codeableConcept.addCoding().setSystem(codingSystem).setCode(codingCode);
     if (codingVersion != null) coding.setVersion(codingVersion);
     if (codingDisplay != null) coding.setDisplay(codingDisplay);
-    return codeableConcept;
   }
 
   /**
@@ -1677,9 +1712,11 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO: Remove this method when the calling method has been removed as per BFD-1582 and the
-   * conversion to bigint for beneficiaryId is complete which will allow removal of the other caller
-   * which is a unit test that passes an ID that contains alpha characters (BFD-1583).
+   * Internally BFD treats beneficiaryId as a Long (db bigint); however, within FHIR, an {@link
+   * ca.uhn.fhir.model.primitive.IdDt} does not constrain itself to numeric. So this convenience
+   * method will continue to exist as a means to create a non-numeric IdDt. This non-numeric
+   * handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
    *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
@@ -2093,8 +2130,12 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO: BFD-1583 Remove this method and the calling unit test when fully converted to BigInt
-   * claim IDs.
+   * Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier {@link
+   * org.hl7.fhir.r4.model.Identifier} has a value {@link org.hl7.fhir.r4.model.StringType} that
+   * does not constrain itself to numeric. So this convenience method will continue to exist as a
+   * means to create a {@link ExplanationOfBenefit#getId()} whose claim ID is not numeric. This
+   * non-numeric handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
    *
    * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
@@ -2223,6 +2264,8 @@ public final class TransformerUtilsV2 {
    *     exhausted date for the claim
    * @param diagnosisRelatedGroupCd CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared
    *     field representing the non-covered stay from date for the claim
+   * @param fiClaimActionCd FI_CLM_ACTN_CD: a {@link Character} shared field representing the fiscal
+   *     intermediary action cd for the claim
    */
   static void addCommonEobInformationInpatientSNF(
       ExplanationOfBenefit eob,
@@ -2232,7 +2275,8 @@ public final class TransformerUtilsV2 {
       Optional<LocalDate> noncoveredStayThroughDate,
       Optional<LocalDate> coveredCareThroughDate,
       Optional<LocalDate> medicareBenefitsExhaustedDate,
-      Optional<String> diagnosisRelatedGroupCd) {
+      Optional<String> diagnosisRelatedGroupCd,
+      Optional<Character> fiClaimActionCd) {
 
     // CLM_IP_ADMSN_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
     addInformationWithCode(
@@ -2299,6 +2343,12 @@ public final class TransformerUtilsV2 {
         cd ->
             addInformationWithCode(
                 eob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, cd));
+
+    // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
+    fiClaimActionCd.ifPresent(
+        value ->
+            eob.addExtension(
+                createExtensionCoding(eob, CcwCodebookVariable.FI_CLM_ACTN_CD, value)));
   }
 
   /**

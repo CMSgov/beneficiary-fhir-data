@@ -12,12 +12,14 @@ import org.apache.commons.io.IOUtils;
 public class JsonInterceptor implements IClientInterceptor {
   private String response;
 
+  /** {@inheritDoc} */
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
     // TODO Auto-generated method stub
 
   }
 
+  /** {@inheritDoc} */
   @Override
   public void interceptResponse(IHttpResponse theResponse) throws IOException {
     /*

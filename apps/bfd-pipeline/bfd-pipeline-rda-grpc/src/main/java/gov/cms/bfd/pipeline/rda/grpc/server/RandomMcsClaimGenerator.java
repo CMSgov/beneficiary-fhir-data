@@ -231,6 +231,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private void addDetails(McsClaim.Builder claim, int detailCount) {
     for (int i = 1; i <= detailCount; ++i) {
       final McsDetail.Builder detail = McsDetail.newBuilder();
+      detail.setIdrDtlNumber(i);
       oneOf(
           () -> detail.setIdrDtlStatusEnum(randomEnum(McsDetailStatusEnums)),
           () -> detail.setIdrDtlStatusUnrecognized(randomLetter(1, 1)));

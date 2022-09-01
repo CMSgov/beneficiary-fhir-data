@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.function.BiConsumer;
@@ -41,9 +42,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @param minLength minimum valid length for the string field
    * @param maxLength maximum valid length for the string field
    * @return this object so that calls can be chained
@@ -68,9 +68,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @param minLength minimum valid length for the string field
    * @param maxLength maximum valid length for the string field
    * @return this object so that calls can be chained
@@ -94,9 +93,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @param maxLength maximum valid length for the string field
    * @return this object so that calls can be chained
    */
@@ -119,9 +117,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @param minLength minimum valid length for the string field
    * @param maxLength maximum valid length for the string field
    * @param ignoreEmpty when true indicates that empty strings do not generate errors for minLength
@@ -152,6 +149,10 @@ public abstract class ClaimTransformerFieldTester<
     if (maxLength < Integer.MAX_VALUE) {
       verifyStringFieldLengthLimitsEnforced(
           wrappedSetter, wrappedFieldLabel, minLength, maxLength, maxLength + 1);
+    }
+    if (ignoreEmpty) {
+      verifyFieldTransformationSucceeds(
+          claimBuilder -> wrappedSetter.accept(claimBuilder, ""), wrappedGetter, null);
     }
     return this;
   }
@@ -196,9 +197,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @return this object so that calls can be chained
    */
   @CanIgnoreReturnValue
@@ -231,9 +231,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @return this object so that calls can be chained
    */
   @CanIgnoreReturnValue
@@ -375,9 +374,8 @@ public abstract class ClaimTransformerFieldTester<
    *
    * @param setter method reference or lambda to set a value of the field being tested on a message
    *     object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @param badValues a variadic list of values that should throw an error indicating the value is
    *     unsupported by the field
    * @return this object so that calls can be chained
