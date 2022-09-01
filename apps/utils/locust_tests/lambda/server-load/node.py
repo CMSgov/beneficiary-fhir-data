@@ -152,4 +152,15 @@ async def run_locust(event):
     print("Scaling event detected, terminating.")
     print(f"Scaling event detected was: {scaling_event[0]}")
 
-    process.terminate()
+    try:
+        process.terminate()
+    except ProcessLookupError as e:
+        print("Could not terminate subprocess")
+        print(f"Received exception {e}")
+
+    await process.wait()
+
+    # Accessing a protected member on purpose to work around known problem with
+    # orphaned processes in asyncio.
+    # If the process is already closed, this is a noop.
+    process._transport.close()
