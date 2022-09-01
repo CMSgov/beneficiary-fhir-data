@@ -500,7 +500,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R4444"
+        "code" : "6202",
+        "display" : "OVARIAN CYST NEC/NOS"
       } ]
     },
     "type" : [ {
@@ -515,7 +516,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R5555"
+        "code" : "3736",
+        "display" : "PARASITIC INFEST EYELID"
       } ]
     },
     "type" : [ {
@@ -530,7 +532,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R6666"
+        "code" : "V0182",
+        "display" : "EXPOSURE TO SARS"
       } ]
     },
     "type" : [ {
@@ -545,7 +548,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R2222"
+        "code" : "E9281",
+        "display" : "EXPOSURE TO NOISE"
       } ]
     },
     "type" : [ {
@@ -560,7 +564,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R3333"
+        "code" : "3310",
+        "display" : "ALZHEIMER'S DISEASE"
       } ]
     },
     "type" : [ {
@@ -577,7 +582,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "0TCCCCC"
+        "code" : "9214",
+        "display" : "BONE SCAN"
       } ]
     }
   } ],
