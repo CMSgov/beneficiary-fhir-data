@@ -34,7 +34,7 @@ resource "aws_s3_bucket" "main" {
     for_each = var.log_bucket == "" ? [] : [var.log_bucket]
     content {
       target_bucket = logging.value
-      target_prefix = "${var.role}_s3_access_logs"
+      target_prefix = "${var.role}_s3_access_logs/"
     }
   }
 
