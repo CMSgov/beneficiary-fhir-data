@@ -28,7 +28,6 @@ ${jsonencode(
       },
       "Action": [
         "s3:GetObject",
-        "s3:GetObjectVersion"
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",
@@ -44,7 +43,8 @@ ${jsonencode(
         ]
       },
       "Action": [
-        "s3:*Object"
+        "s3:PutObject",
+        "s3:DeleteObject",
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",

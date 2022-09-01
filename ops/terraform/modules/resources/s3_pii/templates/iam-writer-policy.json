@@ -8,7 +8,6 @@ ${jsonencode(
       "Effect": "Allow",
       "Action": [
         "s3:ListAllMyBuckets",
-        "s3:HeadBucket"
       ],
       "Resource": "arn:aws:s3:::*"
     },
@@ -40,7 +39,9 @@ ${jsonencode(
       "Action": [
         "s3:ListBucketMultiPartUploads",
         "s3:ListMultipartUploadParts",
-        "s3:*Object",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",
