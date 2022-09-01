@@ -48,7 +48,7 @@ resource "aws_s3_bucket" "pii_bucket" {
 
   logging {
     target_bucket = var.pii_bucket_config.log_bucket
-    target_prefix = "${var.pii_bucket_config.name}_s3_access_logs"
+    target_prefix = "${var.pii_bucket_config.name}_s3_access_logs/"
   }
 
   versioning {
