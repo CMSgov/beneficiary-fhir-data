@@ -857,8 +857,15 @@ public final class InpatientClaimTransformerV2Test {
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding(
-                "http://hl7.org/fhir/sid/icd-10", "BQ0HZZZ", "PLAIN RADIOGRAPHY OF LEFT ANKLE"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "BQ0HZZZ",
+                    "PLAIN RADIOGRAPHY OF LEFT ANKLE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "BQ0HZZZ",
+                    "PLAIN RADIOGRAPHY OF LEFT ANKLE")),
             "2016-01-16T00:00:00-06:00");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code BQ0HZZZ");
@@ -869,10 +876,15 @@ public final class InpatientClaimTransformerV2Test {
     ProcedureComponent cmp2 =
         TransformerTestUtilsV2.createProcedure(
             proc2.getSequence(),
-            new Coding(
-                "http://hl7.org/fhir/sid/icd-10",
-                "CD1YYZZ",
-                "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
             "2016-01-16T00:00:00-06:00");
 
     assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
@@ -883,10 +895,15 @@ public final class InpatientClaimTransformerV2Test {
     ProcedureComponent cmp3 =
         TransformerTestUtilsV2.createProcedure(
             proc3.getSequence(),
-            new Coding(
-                "http://hl7.org/fhir/sid/icd-10",
-                "2W52X6Z",
-                "REMOVAL OF PRESSURE DRESSING ON NECK"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "2W52X6Z",
+                    "REMOVAL OF PRESSURE DRESSING ON NECK"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "2W52X6Z",
+                    "REMOVAL OF PRESSURE DRESSING ON NECK")),
             "2016-01-15T00:00:00-06:00");
 
     assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 2W52X6Z");
@@ -897,7 +914,13 @@ public final class InpatientClaimTransformerV2Test {
     ProcedureComponent cmp4 =
         TransformerTestUtilsV2.createProcedure(
             proc4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "BP17ZZZ",
+                    "FLUOROSCOPY OF LEFT SCAPULA"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA")),
             "2016-01-17T00:00:00-06:00");
 
     assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code BP17ZZZ");
@@ -908,7 +931,13 @@ public final class InpatientClaimTransformerV2Test {
     ProcedureComponent cmp5 =
         TransformerTestUtilsV2.createProcedure(
             proc5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "D9YD8ZZ",
+                    "HYPERTHERMIA OF NASOPHARYNX"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX")),
             "2016-01-24T00:00:00-06:00");
 
     assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code D9YD8ZZ");
@@ -919,10 +948,15 @@ public final class InpatientClaimTransformerV2Test {
     ProcedureComponent cmp6 =
         TransformerTestUtilsV2.createProcedure(
             proc6.getSequence(),
-            new Coding(
-                "http://hl7.org/fhir/sid/icd-10",
-                "F00ZCKZ",
-                "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "F00ZCKZ",
+                    "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "F00ZCKZ",
+                    "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT")),
             "2016-01-24T00:00:00-06:00");
 
     assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
