@@ -210,6 +210,7 @@ public class ClaimDao {
    *       join rda.mbi_cache mbi on mbi.mbi_id = mc.mbi_id
    *       left join rda.mcs_details md on md.idr_clm_hd_icn = mc.idr_clm_hd_icn
    *       where mbi.hash = :'mbi_hash'
+   *         and mc.last_updated > :'min_date'
    *       group by mc.idr_clm_hd_icn, mc.idr_hdr_to_date_of_svc
    *       having ((max(md.idr_dtl_to_date) is not null) and (max(md.idr_dtl_to_date) >= :'min_date'))
    *              or ((mc.idr_hdr_to_date_of_svc is not null) and (mc.idr_hdr_to_date_of_svc >= :'min_date')));

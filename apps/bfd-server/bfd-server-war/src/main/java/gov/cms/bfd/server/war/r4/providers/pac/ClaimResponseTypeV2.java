@@ -61,6 +61,7 @@ public final class ClaimResponseTypeV2<TEntity>
    * @param entityEndDateAttribute the attribute name for the service end date on the entity class
    * @param transformer the transformer used to convert from the given entity to the associated
    *     resource type
+   * @param serviceDateSubquerySpec value for {@link ResourceTypeV2#getServiceDateSubquerySpec()}
    */
   private ClaimResponseTypeV2(
       String nameForParsing,
@@ -70,7 +71,7 @@ public final class ClaimResponseTypeV2<TEntity>
       String entityIdAttribute,
       String entityEndDateAttribute,
       ResourceTransformer<ClaimResponse> transformer,
-      Optional<ServiceDateSubquerySpec> serviceDateJoinSpec) {
+      Optional<ServiceDateSubquerySpec> serviceDateSubquerySpec) {
     super(
         nameForParsing,
         nameForMetrics,
@@ -79,7 +80,7 @@ public final class ClaimResponseTypeV2<TEntity>
         entityIdAttribute,
         entityEndDateAttribute,
         transformer,
-        serviceDateJoinSpec);
+        serviceDateSubquerySpec);
   }
 
   /**
