@@ -45,7 +45,7 @@ spec:
                                 // inject code artifact credentials into maven ~/.m2/settings.xml
                                 // Setup AWS Credentials
                              awsAuth.assumeRole()
-                        }
+                             
                         withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                             codeArtifactAuthToken = sh(
                                 returnStdout: true,
