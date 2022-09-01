@@ -44,13 +44,8 @@ spec:
                             dir('apps/bfd-data-fda/') {
                                 // inject code artifact credentials into maven ~/.m2/settings.xml
                                 // Setup AWS Credentials
-<<<<<<< HEAD
                              awsAuth.assumeRole()
                         }
-=======
-                        awsAuth.assumeRole()
-                        
->>>>>>> f0ce326eb (Assume role added to jenkins file)
                         withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                             codeArtifactAuthToken = sh(
                                 returnStdout: true,
