@@ -360,4 +360,8 @@ data.
 39. Change the sheet's title to "server-regression Statistics from PROD Environment 'master' Deployment Runs" [following instructions outlined above](#set-sheet-title)
 40. [Repeat the steps outlined above to publish](#publish-dashboard) and [share the Analsyis](#share-dashboard) as a Dashboard named "bfd-prod-server-regression"
 
-Once the steps above are complete, there should be three new Dashboards available to view in QuickSight displaying performance metrics for each of the three environments (`TEST`, `PROD-SBX`, and `PROD`).
+Once the steps above are complete, there should be three new Dashboards available to view in QuickSight
+displaying performance metrics for each of the three environments (`TEST`, `PROD-SBX`, and `PROD`). These
+Dashboards should appear similar to the following:
+
+![Final Dashboard Preview](resources/final-dashboard-preview.png)
