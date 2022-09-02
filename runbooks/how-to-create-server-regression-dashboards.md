@@ -260,7 +260,7 @@ data.
 
    1. <a id="create-new-visual"></a>On the top-left of the page, click the "ADD" button. A dropdown menu should appear
    2. Select "Add visual". A new "AutoGraph" should appear on the page
-   3. From "Visual types" (bottom collapsible section of the left-pane) select "Vertical bar chart" (top-most row, right-most icon)
+   3. From "Visual types" (bottom collapsible section of the left-pane) select "Vertical bar chart" (top-most row, right-most icon). Vertical bar charts require _both_ an x-axis and values, but since these charts will be used to display values without any meaningful x-axis to plot them against we will need to create a _fake_ x-axis value to plot against
    4. Click the "ADD" button again. Choose "Add calculated field". A new page should open with three main sections: a name field with the value "Add name", a section on the right with inner collapsible sections showing "Fields", "Parameters" and "Functions", and a large text area that takes up most of the screen
    5. In the large text area, type "1"
    6. For the name of the field, enter "fake_x". See the figure below:
