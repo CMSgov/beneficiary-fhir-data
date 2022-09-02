@@ -101,7 +101,6 @@ resource "aws_instance" "this" {
 resource "aws_sqs_queue" "broker" {
   name                       = "${local.queue_name}-broker"
   visibility_timeout_seconds = 0
-  kms_master_key_id          = local.kms_key_id
 }
 
 resource "aws_sqs_queue_policy" "broker" {
@@ -143,8 +142,7 @@ resource "aws_autoscaling_notification" "autoscaling_notification" {
 }
 
 resource "aws_sns_topic" "sns" {
-  name              = "${local.queue_name}-sns"
-  # kms_master_key_id = local.kms_key_id
+  name = "${local.queue_name}-sns"
 }
 
 resource "aws_sns_topic_subscription" "sqs_subscription" {
