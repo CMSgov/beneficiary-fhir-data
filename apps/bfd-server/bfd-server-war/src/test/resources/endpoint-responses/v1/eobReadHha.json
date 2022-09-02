@@ -224,7 +224,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "H5555"
+        "code" : "53081",
+        "display" : "ESOPHAGEAL REFLUX"
       } ]
     },
     "type" : [ {
@@ -239,7 +240,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H8888"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     }
   }, {
@@ -247,7 +249,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     },
     "type" : [ {
@@ -262,7 +265,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       } ]
     },
     "type" : [ {

@@ -43,21 +43,7 @@ spec:
                             dir('apps/bfd-data-npi/') {
                                 // inject code artifact credentials into maven ~/.m2/settings.xml
                                 // Setup AWS Credentials
-                        withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
-                            withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'ROLE')]) {
-                                env.SESSION_NAME = env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
-                                awsCredentials = sh(
-                                    returnStdout: true,
-                                    script: 'aws sts assume-role --role-arn "$ROLE" \
-                                             --role-session-name "$SESSION_NAME" \
-                                             --output text --query Credentials'
-                                    ).trim().split(/\s+/)
-                                env.AWS_DEFAULT_REGION = 'us-east-1'
-                                env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-                                env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-                                env.AWS_SESSION_TOKEN = awsCredentials[3]
-                            }
-                        }
+                       awsAuth.assumeRole()
                         withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                             codeArtifactAuthToken = sh(
                                 returnStdout: true,

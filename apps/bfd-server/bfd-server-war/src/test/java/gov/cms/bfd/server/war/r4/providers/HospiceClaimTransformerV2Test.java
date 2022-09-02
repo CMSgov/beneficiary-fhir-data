@@ -466,13 +466,14 @@ public final class HospiceClaimTransformerV2Test {
     List<DiagnosisComponent> expected = eob.getDiagnosis();
     assertEquals(4, expected.size());
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("72761", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R5555", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-9-cm", "72761", "ROTATOR CUFF RUPTURE")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -483,13 +484,15 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R6666", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B30", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R6666", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B30", "VIRAL CONJUNCTIVITIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B30", "VIRAL CONJUNCTIVITIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -500,13 +503,15 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B01", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B01", "VARICELLA [CHICKENPOX]"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -517,13 +522,15 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A52", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",

@@ -453,7 +453,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R4444"
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
       } ]
     },
     "type" : [ {
@@ -476,7 +477,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -499,7 +501,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "A7777"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     }
   }, {
@@ -515,7 +518,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R8888"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     }
   }, {
@@ -531,7 +535,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "K71234"
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
       } ]
     }
   }, {
@@ -547,8 +552,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "7840",
-        "display" : "HEADACHE"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     }
   }, {
@@ -564,7 +569,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "A01",
+        "display" : "TYPHOID AND PARATYPHOID FEVERS"
       } ]
     },
     "type" : [ {
@@ -593,7 +599,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
       } ]
     },
     "type" : [ {
@@ -610,7 +617,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "0TCDDEE"
+        "code" : "BQ0HZZZ",
+        "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
       } ]
     }
   }, {
@@ -619,7 +627,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "302DDAA"
+        "code" : "CD1YYZZ",
+        "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
       } ]
     }
   }, {
@@ -628,7 +637,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "302ZZXX"
+        "code" : "2W52X6Z",
+        "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
       } ]
     }
   }, {
@@ -637,7 +647,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "5566AAA"
+        "code" : "BP17ZZZ",
+        "display" : "FLUOROSCOPY OF LEFT SCAPULA"
       } ]
     }
   }, {
@@ -646,7 +657,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "6677BBB"
+        "code" : "D9YD8ZZ",
+        "display" : "HYPERTHERMIA OF NASOPHARYNX"
       } ]
     }
   }, {
@@ -655,8 +667,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "8109",
-        "display" : "REFUSION OF SPINE"
+        "code" : "F00ZCKZ",
+        "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
       } ]
     }
   } ],

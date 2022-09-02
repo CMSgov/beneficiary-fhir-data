@@ -21,6 +21,7 @@
 	<properties>
 		<junit>3.8.1</junit>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -108,7 +109,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>bfd-data-fda</finalName>
+		<finalName>bfd-data-npi</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
