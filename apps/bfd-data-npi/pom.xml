@@ -17,9 +17,25 @@
 	<description>
 		NPI Org code lookup jar
 	</description>
+<<<<<<< HEAD
 
 	<dependencies>
 		<dependency>
+=======
+	
+	<properties>
+		<junit>3.8.1</junit>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+>>>>>>> ed485416a (Added bacl pom.xml version)
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
