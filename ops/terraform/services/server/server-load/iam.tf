@@ -11,7 +11,6 @@ resource "aws_iam_policy" "lambda" {
                 "lambda:InvokeFunction"
             ],
             "Resource": [
-              "arn:aws:lambda:us-east-1:${local.account_id}:function:bfd-${local.env}-server-load-controller",
               "arn:aws:lambda:us-east-1:${local.account_id}:function:bfd-${local.env}-server-load-node"
             ]
         }
@@ -200,12 +199,9 @@ resource "aws_iam_role" "ec2" {
   EOF
 
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
-    aws_iam_policy.logs.arn,
     aws_iam_policy.sqs.arn,
     aws_iam_policy.lambda.arn
   ]
@@ -216,30 +212,8 @@ resource "aws_iam_instance_profile" "this" {
   role = aws_iam_role.ec2.name
 }
 
-resource "aws_iam_role" "asg" {
-  name        = "bfd-${local.env}-${local.service}-asg"
-  path        = "/"
-  description = "Role for asg profile use for ${local.service} in ${local.env}"
-
-  assume_role_policy = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": "sts:AssumeRole",
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "autoscaling.amazonaws.com"
-        }
-      }
-    ]
-  }
-  EOF
-
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
-    aws_iam_policy.kms.arn,
-    aws_iam_policy.sqs.arn,
-  ]
+resource "aws_iam_policy_attachment" "asg" {
+  name       = "asg-kms"
+  roles      = ["arn:aws:iam::${local.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
+  policy_arn = aws_iam_policy.kms.arn
 }
