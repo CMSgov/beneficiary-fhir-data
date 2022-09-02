@@ -21,10 +21,6 @@
 	<properties>
 		<junit>3.8.1</junit>
 	</properties>
-	
-	<properties>
-		<junit>3.8.1</junit>
-	</properties>
 
 	<dependencies>
 		<dependency>
