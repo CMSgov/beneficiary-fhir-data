@@ -435,8 +435,13 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0AABBZZ"
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
           } ]
         }
       } ],
@@ -2836,8 +2841,13 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "BQ0HZZZ",
+            "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0TCDDEE"
+            "code" : "BQ0HZZZ",
+            "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
           } ]
         }
       }, {
@@ -2845,8 +2855,13 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "302DDAA"
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
           } ]
         }
       }, {
@@ -2854,8 +2869,13 @@
         "date" : "2016-01-15T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "2W52X6Z",
+            "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "302ZZXX"
+            "code" : "2W52X6Z",
+            "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
           } ]
         }
       }, {
@@ -2863,8 +2883,13 @@
         "date" : "2016-01-17T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "BP17ZZZ",
+            "display" : "FLUOROSCOPY OF LEFT SCAPULA"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "5566AAA"
+            "code" : "BP17ZZZ",
+            "display" : "FLUOROSCOPY OF LEFT SCAPULA"
           } ]
         }
       }, {
@@ -2872,8 +2897,13 @@
         "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "D9YD8ZZ",
+            "display" : "HYPERTHERMIA OF NASOPHARYNX"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "6677BBB"
+            "code" : "D9YD8ZZ",
+            "display" : "HYPERTHERMIA OF NASOPHARYNX"
           } ]
         }
       }, {
@@ -2881,9 +2911,13 @@
         "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "F00ZCKZ",
+            "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "8109",
-            "display" : "REFUSION OF SPINE"
+            "code" : "F00ZCKZ",
+            "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
           } ]
         }
       } ],
@@ -3835,7 +3869,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "0TCCCCC"
+            "code" : "9214",
+            "display" : "BONE SCAN"
           } ]
         }
       } ],
