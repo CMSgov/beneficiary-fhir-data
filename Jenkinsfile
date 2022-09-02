@@ -52,6 +52,7 @@ def scriptForApps
 def scriptForDeploys
 def migratorScripts
 def serverScripts
+def baseScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -135,7 +136,7 @@ try {
 		containers: [
 			containerTemplate(
 				name: 'bfd-cbc-build',
-				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv',
+				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6', //TODO: consider a smarter solution for resolving this image
 				command: 'cat',
 				ttyEnabled: true,
 				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
@@ -154,6 +155,9 @@ try {
 					// Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
+
+					// terraservice deployments...
+					baseScripts = load('ops/terraform/services/base/deploy.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
@@ -228,8 +232,22 @@ try {
 				}
 			}
 
+			bfdEnv = 'test'
+			stage('Deploy base to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_base_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						baseScripts.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/base"
+						)
+					}
+				}
+			}
+
 			stage('Deploy Migrator to TEST') {
-				bfdEnv = 'test'
 				currentStage = env.STAGE_NAME
 
 				lock(resource: 'env_test') {
@@ -278,11 +296,12 @@ try {
 						if (hasRegressionRunSucceeded) {
 							println 'Regression suite passed, proceeding to next stage...'
 						} else {
-							// TODO: Regression suite is currently inconsistent, so failing builds automatically
-							// would cause false negatives. Uncomment the line below when the regression suite is
-							// more consistent
-
-							// error('Regression suite failed, check the CloudWatch logs above for more details')
+							try {
+								input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+								echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+							} catch(err) {
+								error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+							}
 						}
 					}
 				}
@@ -314,8 +333,26 @@ try {
 				}
 			}
 
+			bfdEnv = 'prod-sbx'
+			stage('Deploy base to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_base_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							baseScripts.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
 			stage('Deploy Migrator to PROD-SBX') {
-				bfdEnv = 'prod-sbx'
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
@@ -367,11 +404,12 @@ try {
 							if (hasRegressionRunSucceeded) {
 								println 'Regression suite passed, proceeding to next stage...'
 							} else {
-								// TODO: Regression suite is currently inconsistent, so failing builds automatically
-								// would cause false negatives. Uncomment the line below when the regression suite is
-								// more consistent
-
-								// error('Regression suite failed, check the CloudWatch logs above for more details')
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
 							}
 						}
 					}
@@ -380,8 +418,27 @@ try {
 				}
 			}
 
+
+			bfdEnv = 'prod'
+			stage('Deploy base to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_base_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							baseScripts.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
 			stage('Deploy Migrator to PROD') {
-				bfdEnv = 'prod'
 				currentStage = env.STAGE_NAME
 
 				if (willDeployToProdEnvs) {
@@ -426,18 +483,22 @@ try {
 								dockerImageTagOverride: params.server_regression_image_override
 							)
 
-							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
-							// awsAssumeRole()
-							// hasRegressionRunSucceeded = serverScripts.runServerRegression(
-							// 	bfdEnv: bfdEnv,
-							// 	gitBranchName: gitBranchName
-							// )
+							awsAssumeRole()
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
+							)
 
-							// if (hasRegressionRunSucceeded) {
-							// 	println 'Regression suite passed, proceeding to next stage...'
-							// } else {
-							// 	error('Regression suite failed, check the CloudWatch logs above for more details')
-							// }
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
+							}
 						}
 					}
 				} else {
