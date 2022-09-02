@@ -250,7 +250,7 @@ As of writing, the following dashboards are available to view for members of the
    9. In "Field wells", set the x-axis to "fake_x"
    10. Set the "Value" to "total_avg_response_time". When set, the aggregate function should default to "Count"
    11. Following instructions outlined above to change the aggregate for a value, change the aggregate function from "Count" to "Min"
-   12. Add another copy/duplicate of "total*avg_response_time" to the graph's "Value" (by dragging "total_avg_response_time" to "Value" in "Field wells" again) \_beneath* the previous "total_avg_response_time (Min)" value, as shown in the figure below:
+   12. Add another copy/duplicate of "total_avg_response_time" to the graph's "Value" (by dragging "total_avg_response_time" to "Value" in "Field wells" again) _beneath_ the previous "total_avg_response_time (Min)" value, as shown in the figure below:
    13. ![Multiple "total_avg_response_time" Values for Bar Chart](resources/multiple-values-vertical-bar-chart.png)
    14. This time, change the aggregate function from "Count" to "Median"
    15. Repeat the above steps two more times: add two more "total_avg_reponse_time" values, set the first's aggregate to "Average", and set the second's to "Max". When finished, "Values" should have 4 "total_avg_response_time" values each with a different aggregate function. See figure below:
