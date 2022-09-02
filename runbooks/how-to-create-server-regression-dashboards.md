@@ -48,7 +48,7 @@ As of writing, the following dashboards are available to view for members of the
       6. Click "Create data source"
       7. Choose `AwsDataCatalog` as the "Catalog"
       8. Choose `bfd-insights-bfd-test` as the "Database"
-      9. Choose `bfd_insights_bfd_test_server_regression" as the "Table"
+      9. Choose `bfd_insights_bfd_test_server_regression` as the "Table"
       10. Click "Use custom SQL"
       11. In the first input box, enter "bfd-test-server-regression" (replacing "New custom SQL")
       12. In the large text area, enter the following SQL query:
@@ -94,7 +94,7 @@ As of writing, the following dashboards are available to view for members of the
       6. Click "Create data source"
       7. Choose `AwsDataCatalog` as the "Catalog"
       8. Choose `bfd-insights-bfd-prod-sbx` as the "Database"
-      9. Choose `bfd_insights_bfd_prod_sbx_server_regression" as the "Table"
+      9. Choose `bfd_insights_bfd_prod_sbx_server_regression` as the "Table"
       10. Click "Use custom SQL"
       11. In the first input box, enter "bfd-prod-sbx-server-regression" (replacing "New custom SQL")
       12. In the large text area, enter the following SQL query:
@@ -140,7 +140,7 @@ As of writing, the following dashboards are available to view for members of the
       6. Click "Create data source"
       7. Choose `AwsDataCatalog` as the "Catalog"
       8. Choose `bfd-insights-bfd-prod` as the "Database"
-      9. Choose `bfd_insights_bfd_prod_server_regression" as the "Table"
+      9. Choose `bfd_insights_bfd_prod_server_regression` as the "Table"
       10. Click "Use custom SQL"
       11. In the first input box, enter "bfd-prod-server-regression" (replacing "New custom SQL")
       12. In the large text area, enter the following SQL query:
