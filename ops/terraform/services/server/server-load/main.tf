@@ -33,8 +33,14 @@ locals {
   lambda_timeout_seconds = 600
   kms_key_arn            = data.aws_kms_key.cmk.arn
   kms_key_id             = data.aws_kms_key.cmk.key_id
-}
 
+  ami_id                     = "ami-032b55183ff04af12" #TODO: whatever
+  instance_type              = "m5.large"              #TODO: is this cool? We think so.
+  volume_size                = "40"                    # TODO: this even might be too big. Who knows!
+  nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
+  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
+  key_pair                   = local.nonsensitive_common_config["key_pair"]
+}
 
 resource "aws_lambda_function" "node" {
   function_name = "bfd-${local.env}-${local.service}-node"
@@ -68,26 +74,6 @@ variable "create_locust_instance" {
   type        = bool
 }
 
-data "aws_ssm_parameters_by_path" "nonsensitive_common" {
-  path = "/bfd/${local.env}/common/nonsensitive"
-}
-
-locals {
-  ami_id                     = "ami-032b55183ff04af12" #TODO: whatever
-  instance_type              = "m5.large"              #TODO: is this cool? We think so.
-  volume_size                = "40"                    # TODO: this even might be too big. Who knows!
-  nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
-  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
-  key_pair                   = local.nonsensitive_common_config["key_pair"]
-}
-
-data "aws_security_group" "vpn" {
-  vpc_id = data.aws_vpc.main.id
-  filter {
-    name   = "tag:Name"
-    values = [local.nonsensitive_common_config["vpn_security_group"]]
-  }
-}
 
 variable "git_repo_version" {
   description = "Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version)"
@@ -95,14 +81,7 @@ variable "git_repo_version" {
   default     = "morgan/make-load-tests-scale-bfd-1783"
 }
 
-data "aws_subnet" "main" {
-  vpc_id            = data.aws_vpc.main.id
-  availability_zone = "us-east-1b" #TODO
-  filter {
-    name   = "tag:Layer"
-    values = [local.layer]
-  }
-}
+
 
 resource "aws_instance" "this" {
   count         = var.create_locust_instance ? 1 : 0
