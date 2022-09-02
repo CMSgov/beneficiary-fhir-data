@@ -67,22 +67,6 @@ resource "aws_lambda_function" "node" {
   }
 }
 
-
-variable "create_locust_instance" {
-  default     = false
-  description = "When true, create the locust instance"
-  type        = bool
-}
-
-
-variable "git_repo_version" {
-  description = "Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version)"
-  type        = string
-  default     = "morgan/make-load-tests-scale-bfd-1783"
-}
-
-
-
 resource "aws_instance" "this" {
   count         = var.create_locust_instance ? 1 : 0
   ami           = local.ami_id
@@ -160,7 +144,7 @@ resource "aws_autoscaling_notification" "autoscaling_notification" {
 
 resource "aws_sns_topic" "sns" {
   name              = "${local.queue_name}-sns"
-  kms_master_key_id = local.kms_key_id
+  # kms_master_key_id = local.kms_key_id
 }
 
 resource "aws_sns_topic_subscription" "sqs_subscription" {
