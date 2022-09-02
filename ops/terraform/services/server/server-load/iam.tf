@@ -211,9 +211,3 @@ resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-${local.service}"
   role = aws_iam_role.ec2.name
 }
-
-resource "aws_iam_policy_attachment" "asg" {
-  name       = "asg-kms"
-  roles      = ["arn:aws:iam::${local.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
-  policy_arn = aws_iam_policy.kms.arn
-}
