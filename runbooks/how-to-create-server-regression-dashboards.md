@@ -19,6 +19,7 @@ As of writing, the following dashboards are available to view for members of the
 |       Dataset       |                  QuickSight's term for a data store (such as S3, Athena, etc) along with the fields to display from the store                  |
 |      Analysis       |                                       A work-in-progress Dashboard that uses a Dataset to display fields                                       |
 |      Dashboard      |                                          A collection of graphs and visuals that represents a Dataset                                          |
+|       Athena        |                                An AWS Service that is used to analyze data stored in AWS S3 using standard SQL                                 |
 
 ## FAQ
 
