@@ -163,4 +163,5 @@ async def run_locust(event):
     # Accessing a protected member on purpose to work around known problem with
     # orphaned processes in asyncio.
     # If the process is already closed, this is a noop.
+    # pylint: disable=protected-access
     process._transport.close()
