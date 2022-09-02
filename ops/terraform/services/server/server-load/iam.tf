@@ -147,14 +147,11 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
-
-resource "aws_iam_role" "this" {
-  # TODO: Hack this up to tighten for each lambda
-  name        = "bfd-${local.env}-${local.service}"
+resource "aws_iam_role" "lambda" {
+  name        = "bfd-${local.env}-${local.service}-lambda"
   path        = "/"
-  description = "Role for lambda profile use for ${local.service} in ${local.env}"
+  description = "Role for node lambda profile use for ${local.service} in ${local.env}"
 
-  # TODO: this is unacceptable. Separate concerns for the lambda principal, asg principal, ec2
   assume_role_policy = <<-EOF
   {
       "Version": "2012-10-17",
@@ -164,20 +161,6 @@ resource "aws_iam_role" "this" {
               "Effect": "Allow",
               "Principal": {
                   "Service": "lambda.amazonaws.com"
-              }
-          },
-          {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "autoscaling.amazonaws.com"
-              }
-          },
-          {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                 "Service": "ec2.amazonaws.com"
               }
           }
       ]
@@ -196,7 +179,39 @@ resource "aws_iam_role" "this" {
   ]
 }
 
+resource "aws_iam_role" "ec2" {
+  name        = "bfd-${local.env}-${local.service}-ec2"
+  path        = "/"
+  description = "Role for ec2 profile use for ${local.service} in ${local.env}"
+
+  assume_role_policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        }
+      }
+    ]
+  }
+  EOF
+
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
+    aws_iam_policy.ssm.arn,
+    aws_iam_policy.kms.arn,
+    aws_iam_policy.rds.arn,
+    aws_iam_policy.logs.arn,
+    aws_iam_policy.sqs.arn,
+    aws_iam_policy.lambda.arn
+  ]
+}
+
 resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-${local.service}"
-  role = aws_iam_role.this.name
+  role = aws_iam_role.ec2.name
 }

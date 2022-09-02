@@ -54,7 +54,7 @@ resource "aws_lambda_function" "node" {
     }
   }
 
-  role = aws_iam_role.this.arn
+  role = aws_iam_role.lambda.arn
   vpc_config {
     security_group_ids = [aws_security_group.lambda.id]
     subnet_ids         = data.aws_subnets.main.ids
