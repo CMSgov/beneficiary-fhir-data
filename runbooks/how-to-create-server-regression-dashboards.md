@@ -81,7 +81,7 @@ As of writing, the following dashboards are available to view for members of the
       16. An editor should appear with the SQL you entered above, click "Apply"
       17. Ensure that data is returned in the data preview
       18. Click "SAVE & PUBLISH" in the navigation bar on the top right of the screen
-      19. Ensure that a toast appears indicating the dataset was saved successfully
+      19. Ensure that an in-page notification appears indicating the dataset was saved successfully
       20. Click "CANCEL" in the navigation bar on the top right of the screen
 
    2. Creating the `bfd-prod-sbx-server-regression` dataset:
@@ -127,7 +127,7 @@ As of writing, the following dashboards are available to view for members of the
       16. An editor should appear with the SQL you entered above, click "Apply"
       17. Ensure that data is returned in the data preview
       18. Click "SAVE & PUBLISH" in the navigation bar on the top right of the screen
-      19. Ensure that a toast appears indicating the dataset was saved successfully
+      19. Ensure that an in-page notification appears indicating the dataset was saved successfully
       20. Click "CANCEL" in the navigation bar on the top right of the screen
 
    3. Creating the `bfd-prod-server-regression` dataset:
@@ -173,7 +173,7 @@ As of writing, the following dashboards are available to view for members of the
       16. An editor should appear with the SQL you entered above, click "Apply"
       17. Ensure that data is returned in the data preview
       18. Click "SAVE & PUBLISH" in the navigation bar on the top right of the screen
-      19. Ensure that a toast appears indicating the dataset was saved successfully
+      19. Ensure that an in-page notification appears indicating the dataset was saved successfully
       20. Click "CANCEL" in the navigation bar on the top right of the screen
 
 3. Navigate to "Analyses" in QuickSight (click on "Analyses" in the navigation tree on the left side of the page from the QuickSight "home")
