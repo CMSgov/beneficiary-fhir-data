@@ -215,3 +215,31 @@ resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-${local.service}"
   role = aws_iam_role.ec2.name
 }
+
+resource "aws_iam_role" "asg" {
+  name        = "bfd-${local.env}-${local.service}-asg"
+  path        = "/"
+  description = "Role for asg profile use for ${local.service} in ${local.env}"
+
+  assume_role_policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "autoscaling.amazonaws.com"
+        }
+      }
+    ]
+  }
+  EOF
+
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
+    aws_iam_policy.kms.arn,
+    aws_iam_policy.sqs.arn,
+  ]
+}
