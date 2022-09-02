@@ -25,7 +25,26 @@ As of writing, the following dashboards are available to view for members of the
 
 <!-- This section should contain frequently-asked-questions as sub-headers with answers as sub-paragraphs. Since this is a living document, this section should be added to as needed. -->
 
-<!-- REPLACE ME when FAQs are added -->
+### Will the `hash` in each of the Dataset SQL queries below ever change? What is it used for?
+
+Firstly, the `hash` (or, more specifically, `metadata.hash`) is a SHA256 hash of various test parameters and metadata values
+from a given test suite run. Performance metrics with the same `metadata.hash` value can be confidently compared as they
+were collected from test suite runs that were started with the same parameters (i.e. number of simulated users, desired
+test runtime, types of tests run, etc.).
+
+There are really only two scenarios where the hash could change:
+
+1. The parameters (runtime, user count, spawn rate) that control how the `server-regression` test suite runs during BFD Server deployments change from their current defaults
+2. The code to generate the hash changes because we add an additional field or want to change the hashing algorithm
+
+These scenarios are unlikely for the following reasons:
+
+1. With the current parameters, consistent and _useful_ results are being captured with minimal increase in deployment time. That is to say, at time of writing there is no benefit in changing these parameters
+2. There is no additional metadata that Locust exposes that we would want to include in the hash to further delineate performance metrics that _can_ or _can't_ be compared
+
+If, however, the hash _does_ change in the future, the queries listed below will need to be updated **in both** this runbook and in each of
+the Datasets in QuickSight. Note that this scenario will be easy to identify, as the visuals in each Dashboard will stop displaying
+data.
 
 ## Instructions
 
