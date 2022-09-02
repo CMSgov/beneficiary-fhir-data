@@ -30,7 +30,7 @@ locals {
   docker_image_tag_node = split(":", coalesce(var.docker_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_node.value)))[1]
   docker_image_uri_node = "${data.aws_ecr_repository.ecr_node.repository_url}:${local.docker_image_tag_node}"
 
-  lambda_timeout_seconds = 600
+  lambda_timeout_seconds = 360
   kms_key_arn            = data.aws_kms_key.cmk.arn
   kms_key_id             = data.aws_kms_key.cmk.key_id
 
