@@ -92,9 +92,9 @@ resource "aws_instance" "this" {
     kms_key_id            = local.kms_key_arn
   }
 
-  user_data = templatefile("${path.module}/locust-user-data.tftpl", {
+  user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     env              = local.env
-    git_repo_version = var.git_repo_version # TODO: This works for now, but it's probably more appropriate for image to contain ansible configuration
+    git_repo_version = var.git_repo_version
   })
 }
 

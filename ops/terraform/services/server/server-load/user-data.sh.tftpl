@@ -15,7 +15,9 @@ python3 -m pip install --upgrade pip --quiet
 python3 -m pip install -r requirements.txt --quiet
 PATH="/usr/local/bin:$${PATH}"
 chmod +x lambda/server-load/controller.sh
-# NOTE: Run locust when the locust process AND spawn nodes if locust isn't running, otherwise do nothing
+
+# TODO: This IS NOT prodction ready until a non-privileged user runs load test logic; BFD-1883 et al
+# NOTE: Run locust controller AND spawn nodes if locust process isn't running, otherwise do nothing
 if ! pgrep locust >/dev/null; then
   lambda/server-load/controller.sh &>>locust.log &
   python3 lambda/server-load/controller.py &
