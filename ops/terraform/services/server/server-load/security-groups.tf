@@ -5,11 +5,19 @@ resource "aws_security_group" "lambda" {
   vpc_id      = data.aws_vpc.main.id
 
   egress {
+    description = "Permissive egress"
     from_port   = 0
     protocol    = "-1"
-    self        = true # The security group itself will be added as a source to this egress rule.
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Locust Controller Service Port 5557"
+    from_port   = 5557
+    protocol    = "tcp"
+    self        = true
+    to_port     = 5557
   }
 }
 
