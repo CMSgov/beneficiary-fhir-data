@@ -173,8 +173,7 @@ resource "aws_iam_role" "lambda" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.logs.arn,
-    aws_iam_policy.sqs.arn,
-    aws_iam_policy.lambda.arn
+    aws_iam_policy.sqs.arn
   ]
 }
 
