@@ -1,5 +1,5 @@
-variable "docker_image_tag_node_override" {
-  description = "Overrides the Docker image URI used by the built load suite worker node lambda"
+variable "container_image_tag_node_override" {
+  description = "Overrides the Container image URI used by the built load suite worker node lambda"
   type        = string
   default     = null
 }

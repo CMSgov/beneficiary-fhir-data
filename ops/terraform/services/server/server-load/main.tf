@@ -20,8 +20,8 @@ locals {
 
   queue_name = "bfd-${local.env}-${local.service}"
 
-  docker_image_tag_node = split(":", coalesce(var.docker_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_node.value)))[1]
-  docker_image_uri_node = "${data.aws_ecr_repository.ecr_node.repository_url}:${local.docker_image_tag_node}"
+  container_image_tag_node = split(":", coalesce(var.container_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.container_image_tag_node.value)))[1]
+  container_image_uri_node = "${data.aws_ecr_repository.ecr_node.repository_url}:${local.container_image_tag_node}"
 
   lambda_timeout_seconds = 360
   kms_key_arn            = data.aws_kms_key.cmk.arn
@@ -40,8 +40,8 @@ resource "aws_lambda_function" "node" {
   description   = "Lambda to run the Locust worker node for load testing on the ${local.env} server"
   tags          = local.shared_tags
   kms_key_arn   = local.kms_key_arn
+  image_uri     = local.container_image_uri_node
 
-  image_uri    = local.docker_image_uri_node
   package_type = "Image"
 
   memory_size = 2048

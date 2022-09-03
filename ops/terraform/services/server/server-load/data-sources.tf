@@ -41,11 +41,11 @@ data "aws_ecr_repository" "ecr_node" {
 
 data "aws_ecr_image" "image_node" {
   repository_name = data.aws_ecr_repository.ecr_node.name
-  image_tag       = local.docker_image_tag_node
+  image_tag       = local.container_image_tag_node
 }
 
-data "aws_ssm_parameter" "docker_image_tag_node" {
-  # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
+# TODO: Consider making this more environment-specific, versioning RFC in BFD-1743 may provide us a path forward
+data "aws_ssm_parameter" "container_image_tag_node" {
   name = "/bfd/mgmt/server/nonsensitive/server_load_node_latest_image_tag"
 }
 
