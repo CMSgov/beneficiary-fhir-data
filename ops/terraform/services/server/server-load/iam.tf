@@ -1,6 +1,6 @@
 resource "aws_iam_policy" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda-invocation"
-  description = "Permissions to invoke controller and node lambdas in ${local.env}"
+  description = "Allow invocation of locust worker ${local.service} 'node' lambda in ${local.env}"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -114,7 +114,7 @@ EOF
 
 resource "aws_iam_policy" "sqs" {
   name        = "bfd-${local.env}-${local.service}-sqs"
-  description = "Permissions to use ${local.queue_name}-broker SQS queue"
+  description = "Permissions to use ${local.queue_name} SQS queue"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",

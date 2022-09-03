@@ -37,7 +37,7 @@ data "aws_subnets" "main" {
   }
 }
 
-# TODO: Consider hoisting these pieces into the server definition
+# TODO: Consider hoisting ASG signaling logic into forthcoming server definition
 data "aws_launch_template" "template" {
   name = "bfd-${local.env}-fhir"
 }
@@ -75,7 +75,7 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 
 data "aws_subnet" "main" {
   vpc_id            = data.aws_vpc.main.id
-  availability_zone = "us-east-1b" #TODO
+  availability_zone = "us-east-1b" # TODO: Fix with BFD-1883
   filter {
     name   = "tag:Layer"
     values = [local.layer]

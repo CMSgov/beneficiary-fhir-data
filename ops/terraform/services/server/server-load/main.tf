@@ -66,7 +66,7 @@ resource "aws_instance" "this" {
   key_name      = local.key_pair
 
   iam_instance_profile        = aws_iam_instance_profile.this.name
-  availability_zone           = "us-east-1b" # TODO
+  availability_zone           = "us-east-1b" # TODO: Fix in BFD-1883
   tags                        = local.shared_tags
   monitoring                  = false
   associate_public_ip_address = false
