@@ -6,6 +6,17 @@ data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
 }
 
+# NOTE: locust load test controller needs a well-vetted bfd image
+#       the db-migrator image was chosen somewhat arbitrarily
+data "aws_ami" "main" {
+  most_recent = true
+  owners      = ["self"]
+  name_regex  = ".+db-migrator.+"
+
+  filter {
+    name   = "tag:Branch"
+    values = ["master"]
+  }
 }
 
 data "aws_vpc" "main" {
