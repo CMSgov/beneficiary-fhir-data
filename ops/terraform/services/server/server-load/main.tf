@@ -50,7 +50,7 @@ resource "aws_lambda_function" "node" {
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
-      SQS_QUEUE_NAME  = aws_sqs_queue.broker.name
+      SQS_QUEUE_NAME  = aws_sqs_queue.this.name
     }
   }
 
@@ -90,57 +90,4 @@ resource "aws_instance" "this" {
     env              = local.env
     git_repo_version = var.git_repo_version
   })
-}
-
-resource "aws_sqs_queue" "broker" {
-  name                       = "${local.queue_name}-broker"
-  visibility_timeout_seconds = 0
-}
-
-resource "aws_sqs_queue_policy" "broker" {
-  queue_url = aws_sqs_queue.broker.id
-
-  policy = <<-EOF
-{
-  "Version": "2012-10-17",
-  "Id": "${local.queue_name}-broker-sns-to-sqs",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "sns.amazonaws.com"
-      },
-      "Action": "SQS:SendMessage",
-      "Resource": "${aws_sqs_queue.broker.arn}",
-      "Condition": {
-        "ArnEquals": {
-          "aws:SourceArn": "${aws_sns_topic.sns.arn}"
-        }
-      }
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_autoscaling_notification" "autoscaling_notification" {
-  group_names = [
-    data.aws_autoscaling_group.asg.name,
-  ]
-
-  notifications = [
-    "autoscaling:EC2_INSTANCE_LAUNCH",
-  ]
-
-  topic_arn = aws_sns_topic.sns.arn
-}
-
-resource "aws_sns_topic" "sns" {
-  name = "${local.queue_name}-sns"
-}
-
-resource "aws_sns_topic_subscription" "sqs_subscription" {
-  topic_arn = aws_sns_topic.sns.arn
-  protocol  = "sqs"
-  endpoint  = aws_sqs_queue.broker.arn
 }

@@ -51,7 +51,7 @@ def check_queue(timeout: int = 1) -> List[Any]:
 if __name__ == "__main__":
     # TODO ensure that we're setting up the envvars correctly
     environment = os.environ.get("BFD_ENVIRONMENT", "test")
-    sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load-broker")
+    sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
     region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")

@@ -129,7 +129,7 @@ resource "aws_iam_policy" "sqs" {
                 "sqs:PurgeQueue"
             ],
             "Resource": [
-                "${aws_sqs_queue.broker.arn}"
+                "${aws_sqs_queue.this.arn}"
             ]
         },
         {

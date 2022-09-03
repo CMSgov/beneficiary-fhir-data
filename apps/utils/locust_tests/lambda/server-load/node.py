@@ -14,7 +14,7 @@ from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
-sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load-broker")
+sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
 
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
