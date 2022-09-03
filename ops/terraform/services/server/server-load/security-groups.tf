@@ -1,7 +1,7 @@
-resource "aws_security_group" "lambda" {
-  description = "${local.service} lambda security group in ${local.env}"
-  name        = "bfd-${local.env}-${local.service}-lambda"
-  tags        = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}-lambda" })
+resource "aws_security_group" "this" {
+  description = "Allow ${local.service} intra-group communications in ${local.env}"
+  name        = "bfd-${local.env}-${local.service}"
+  tags        = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}" })
   vpc_id      = data.aws_vpc.main.id
 
   egress {
@@ -28,5 +28,5 @@ resource "aws_security_group_rule" "rds" {
   protocol                 = "tcp"
   description              = "Allow ${local.service} access in ${local.env}"
   security_group_id        = data.aws_security_group.rds.id
-  source_security_group_id = aws_security_group.lambda.id
+  source_security_group_id = aws_security_group.this.id
 }

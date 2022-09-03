@@ -56,7 +56,7 @@ resource "aws_lambda_function" "node" {
 
   role = aws_iam_role.lambda.arn
   vpc_config {
-    security_group_ids = [aws_security_group.lambda.id]
+    security_group_ids = [aws_security_group.this.id]
     subnet_ids         = data.aws_subnets.main.ids
   }
 }
@@ -75,7 +75,7 @@ resource "aws_instance" "this" {
   ebs_optimized               = true
 
   subnet_id              = data.aws_subnet.main.id
-  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.lambda.id]
+  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
 
   root_block_device {
     tags                  = merge(local.shared_tags, { snapshot = "false" })
