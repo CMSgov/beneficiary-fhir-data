@@ -64,18 +64,6 @@ ${jsonencode(
             "s3:x-amz-server-side-encryption": "aws:kms"
         }
       }
-    },
-    {
-      "Sid": "BFDPIIS3EnforceSecureTransport",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::${bucket_id}/*",
-      "Condition": {
-        "Bool": {
-          "aws:SecureTransport": "false"
-        }
-      }
     }
   ]
 }
