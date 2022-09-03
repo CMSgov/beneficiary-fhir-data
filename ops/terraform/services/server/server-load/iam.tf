@@ -11,7 +11,7 @@ resource "aws_iam_policy" "lambda" {
                 "lambda:InvokeFunction"
             ],
             "Resource": [
-              "arn:aws:lambda:us-east-1:${local.account_id}:function:bfd-${local.env}-server-load-node"
+              "${aws_lambda_function.node.arn}"
             ]
         }
     ]
