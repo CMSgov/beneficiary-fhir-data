@@ -4,28 +4,15 @@ import time
 import sys
 import re
 
-
-# The following throttling limits apply to using Security Hub API operations.
-
-# BatchEnableStandards - RateLimit of 1 request per second, BurstLimit of 1 request per second.
-# GetFindings - RateLimit of 3 requests per second. BurstLimit of 6 requests per second.
-# BatchImportFindings - RateLimit of 10 requests per second. BurstLimit of 30 requests per second.
-# BatchUpdateFindings - RateLimit of 10 requests per second. BurstLimit of 30 requests per second.
-# UpdateStandardsControl - RateLimit of 1 request per second, BurstLimit of 5 requests per second.
-# All other operations - RateLimit of 10 requests per second. BurstLimit of 30 requests per second.
-
-RATE_LIMITER = {
+# half the max rate limit for security hub requests
+THROTTLE_RATES = {
     'security_hub': {
-        'BatchEnableStandards': 1,
-        'GetFindings': 3,
-        'BatchImportFindings': 10,
-        'BatchUpdateFindings': 1,
-        'UpdateStandardsControl': 1,
-        'Default': 10,
+        'get': 3,
+        'update': 5,
+        'batch_update': 5,
     },
     'ec2': {
-        'DescribeInstances': 5,
-        'Default': 5,
+        'describe': 5,
     }
 }
 
@@ -120,7 +107,7 @@ def resolve_findings(client, ec2_client):
     # page through active security hub findings and resolve any that are solely referencing inactive instances
     paginator = client.get_paginator('get_findings')
     page_iterator = paginator.paginate(Filters=FINDING_FILTERS, MaxResults=100)
-    rate_bucket = RATE_LIMITER['security_hub']['BatchUpdateFindings'] + 1
+    request_bucket = THROTTLE_RATES['security_hub']['batch_update']
     t = time.time()
     print('Resolving...')
     for page in page_iterator:
@@ -151,26 +138,20 @@ def resolve_findings(client, ec2_client):
             if num_resources == 0:
                 batch.append({'Id': finding['Id'], 'ProductArn': finding['ProductArn']})
     
-        # get the current time in seconds since epoch
-        if t == time.time():
-            rate_bucket -= 1
-        else:
-            rate_bucket = RATE_LIMITER['security_hub']['BatchUpdateFindings']
-
-        # backoff if our bucket is empty
-        if rate_bucket == 0:
-            print('Backoff...')
-            t = time.time()
-            time.sleep(1)
-            rate_bucket = RATE_LIMITER['security_hub']['BatchUpdateFindings']
+        # throttle requests (leaky bucket)
+        if (time.time() - t) > 1:
+            request_bucket = THROTTLE_RATES['security_hub']['batch_update']
+        if request_bucket == 0:
+            print('Rate limit reached, backing off...')
+            time.sleep(1.5)
 
         # update findings
         num_findings_in_batch = len(batch)
         if num_findings_in_batch > 0:
             print(f"Resolving {num_findings_in_batch} invalid findings...")
-            rate_bucket -= 1
             # client.batch_update_findings(Findings=batch, Note=RESOLVED_NOTE, WorkflowStatus='RESOLVED', Workflow=RESOLVED_BY)
-            
+            request_bucket -= 1
+            t = time.time()
 
 def main():
     print("This script will query all findings matching the following search criteria:")
