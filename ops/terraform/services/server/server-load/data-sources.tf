@@ -2,8 +2,6 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-data "aws_ecr_authorization_token" "token" {}
-
 data "aws_kms_key" "cmk" {
   key_id = "alias/bfd-${local.env}-cmk" # TODO: replace ssm lookup
 }
@@ -35,14 +33,6 @@ data "aws_autoscaling_group" "asg" {
   name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
 }
 
-data "aws_ecr_repository" "ecr_broker" {
-  name = "bfd-mgmt-${local.service}-broker"
-}
-
-data "aws_ecr_repository" "ecr_controller" {
-  name = "bfd-mgmt-${local.service}-controller"
-}
-
 data "aws_ecr_repository" "ecr_node" {
   name = "bfd-mgmt-${local.service}-node"
 }
@@ -52,29 +42,9 @@ data "aws_ecr_image" "image_node" {
   image_tag       = local.docker_image_tag_node
 }
 
-data "aws_ecr_image" "image_controller" {
-  repository_name = data.aws_ecr_repository.ecr_controller.name
-  image_tag       = local.docker_image_tag_controller
-}
-
-data "aws_ecr_image" "image_broker" {
-  repository_name = data.aws_ecr_repository.ecr_broker.name
-  image_tag       = local.docker_image_tag_broker
-}
-
 data "aws_ssm_parameter" "docker_image_tag_node" {
   # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
   name = "/bfd/mgmt/server/nonsensitive/server_load_node_latest_image_tag"
-}
-
-data "aws_ssm_parameter" "docker_image_tag_controller" {
-  # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
-  name = "/bfd/mgmt/server/nonsensitive/server_load_controller_latest_image_tag"
-}
-
-data "aws_ssm_parameter" "docker_image_tag_broker" {
-  # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
-  name = "/bfd/mgmt/server/nonsensitive/server_load_broker_latest_image_tag"
 }
 
 data "aws_security_group" "rds" {

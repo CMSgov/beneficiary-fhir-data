@@ -21,12 +21,6 @@ locals {
   vpc_name   = "bfd-${local.env}-vpc"
   queue_name = "bfd-${local.env}-${local.service}"
 
-  docker_image_tag_broker = split(":", coalesce(var.docker_image_tag_broker_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_broker.value)))[1]
-  docker_image_uri_broker = "${data.aws_ecr_repository.ecr_broker.repository_url}:${local.docker_image_tag_broker}"
-
-  docker_image_tag_controller = split(":", coalesce(var.docker_image_tag_controller_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_controller.value)))[1]
-  docker_image_uri_controller = "${data.aws_ecr_repository.ecr_controller.repository_url}:${local.docker_image_tag_controller}"
-
   docker_image_tag_node = split(":", coalesce(var.docker_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_node.value)))[1]
   docker_image_uri_node = "${data.aws_ecr_repository.ecr_node.repository_url}:${local.docker_image_tag_node}"
 
