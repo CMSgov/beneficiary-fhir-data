@@ -18,7 +18,6 @@ locals {
   layer      = "app"
   service    = "server-load"
 
-  vpc_name   = "bfd-${local.env}-vpc"
   queue_name = "bfd-${local.env}-${local.service}"
 
   docker_image_tag_node = split(":", coalesce(var.docker_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag_node.value)))[1]

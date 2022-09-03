@@ -3,13 +3,15 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 data "aws_kms_key" "cmk" {
-  key_id = "alias/bfd-${local.env}-cmk" # TODO: replace ssm lookup
+  key_id = local.nonsensitive_common_config["kms_key_alias"]
+}
+
 }
 
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
-    values = [local.vpc_name]
+    values = [local.nonsensitive_common_config["vpc_name"]]
   }
 }
 
@@ -50,8 +52,9 @@ data "aws_ssm_parameter" "docker_image_tag_node" {
 data "aws_security_group" "rds" {
   vpc_id = data.aws_vpc.main.id
   filter {
+    # NOTE: The rds security group shares a name with the rds cluster identifer
     name   = "tag:Name"
-    values = ["bfd-${local.env}-aurora-cluster"] # TODO think harder about this... RE: ssm, ephemeral environments, etc.
+    values = [local.nonsensitive_common_config["rds_cluster_identifier"]]
   }
 }
 
