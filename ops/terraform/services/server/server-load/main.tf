@@ -41,11 +41,11 @@ resource "aws_lambda_function" "node" {
   tags          = local.shared_tags
   kms_key_arn   = local.kms_key_arn
   image_uri     = local.container_image_uri_node
+  package_type  = "Image"
+  memory_size   = 2048
+  timeout       = local.lambda_timeout_seconds
+  role          = aws_iam_role.lambda.arn
 
-  package_type = "Image"
-
-  memory_size = 2048
-  timeout     = local.lambda_timeout_seconds
   environment {
     variables = {
       BFD_ENVIRONMENT = local.env
@@ -53,7 +53,6 @@ resource "aws_lambda_function" "node" {
     }
   }
 
-  role = aws_iam_role.lambda.arn
   vpc_config {
     security_group_ids = [aws_security_group.this.id]
     subnet_ids         = data.aws_subnets.main.ids
