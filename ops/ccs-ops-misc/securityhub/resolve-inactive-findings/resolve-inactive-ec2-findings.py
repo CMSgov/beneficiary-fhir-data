@@ -1,4 +1,5 @@
 from pydoc import pager
+from unittest import result
 import boto3
 import time
 import sys
@@ -149,9 +150,21 @@ def resolve_findings(client, ec2_client):
         num_findings_in_batch = len(batch)
         if num_findings_in_batch > 0:
             print(f"Resolving {num_findings_in_batch} invalid findings...")
-            # client.batch_update_findings(Findings=batch, Note=RESOLVED_NOTE, WorkflowStatus='RESOLVED', Workflow=RESOLVED_BY)
+            result = client.batch_update_findings(
+                FindingIdentifiers=batch,
+                Note={
+                    'Text': RESOLVED_NOTE,
+                    'UpdatedBy': RESOLVED_BY
+                },
+                Workflow={
+                    'Status': 'RESOLVED'
+                },
+            )
             request_bucket -= 1
             t = time.time()
+            if len(result['ProcessedFindings']) != num_findings_in_batch:
+                print(f"Failed to resolve {num_findings_in_batch - len(result['ProcessedFindings'])} findings.")
+                # print(f"Failed to resolve: {result['UnprocessedFindings']}")
 
 def main():
     print("This script will query all findings matching the following search criteria:")
