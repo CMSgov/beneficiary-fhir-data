@@ -4,27 +4,19 @@ ${jsonencode(
   "Id": "bfd-${env}-${name}-iam-writer-policy",
   "Statement": [
     {
-      "Sid": "BFDPIIS3ListBuckets",
+      "Sid": "BFDPIIS3ListAllBuckets",
       "Effect": "Allow",
       "Action": [
-        "s3:ListAllMyBuckets",
+        "s3:ListAllMyBuckets"
       ],
       "Resource": "arn:aws:s3:::*"
-    },
-    {
-      "Sid": "BFDPIIS3ListBucketObjects",
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListBucket",
-      ],
-      "Resource": [
-        "arn:aws:s3:::${bucket_id}"
-      ]
     },
     {
       "Sid": "BFDPIIS3ReadAll",
       "Effect": "Allow",
       "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
         "s3:GetObject",
         "s3:GetObjectVersion"
       ],
