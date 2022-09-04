@@ -42,6 +42,7 @@ UPDATE_INTERVALS = {
     'AwsS3Bucket': 5,
     'AwsRdsDbClusterSnapshot': 60,
     'AwsIamPolicy': 60,
+    'AwsAutoScalingAutoScalingGroup': 5,
 }
 
 EC2_INSTANCE_STATES = ['pending', 'running', 'stopping', 'stopped', 'shutting-down', 'terminated']
@@ -82,6 +83,7 @@ RESOURCE_ID_RE = {
     'AwsEc2Volume': r'^vol-[a-zA-Z0-9]+$',
     'AwsRdsDbClusterSnapshot': r'^[a-zA-Z0-9-]+$',
     'AwsIamPolicy': r'^[a-zA-Z0-9-]+$',
+    'AwsAutoScalingAutoScalingGroup': r'^[a-zA-Z0-9-]+$',
 }
 
 # SecurityHub Insights are used to get a count of findings that match our filters. This is much faster than
@@ -101,6 +103,8 @@ def get_client(region, resource_type):
         return boto3.client('rds', region_name=region)
     elif resource_type.startswith('AwsIam'):
         return boto3.client('iam', region_name=region)
+    elif resource_type.startswith('AwsAutoScaling'):
+        return boto3.client('autoscaling', region_name=region)
     elif resource_type == 'hub':
         return boto3.client('securityhub', region_name=region)
 
@@ -134,6 +138,8 @@ def get_or_create_insight(region):
     if not insight_arn:
         name = f"{INSIGHT_NAME_PREFIX}{FINDING_FILTERS['ResourceType'][0]['Value']}"
         insight_arn = client.create_insight(Name=f"{name}", Filters=FINDING_FILTERS, GroupByAttribute=GROUP_BY).get('InsightArn')
+        # give it a few seconds to be created
+        time.sleep(10)
     return insight
 
 
@@ -158,8 +164,18 @@ def get_active_resources(client, resource_type):
         return get_active_rds_snapshots(client)
     elif resource_type == 'AwsIamPolicy':
         return get_active_iam_policies(client)
+    elif resource_type == 'AwsAutoScalingAutoScalingGroup':
+        return get_active_asg_groups(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+# Get active ASG groups
+def get_active_asg_groups(client):
+    groups = []
+    response = client.describe_auto_scaling_groups()
+    for asg in response['AutoScalingGroups']:
+        groups.append(asg['AutoScalingGroupName'])
+    return groups
 
 
 # Get active IAM policies
@@ -325,10 +341,17 @@ def main():
     resource_group.add_argument('--s3-buckets', action='store_const', const='AwsS3Bucket', help='Resolve findings referencing non-existent S3 buckets')
     resource_group.add_argument('--rds-cluster-snapshots', action='store_const', const='AwsRdsDbClusterSnapshot', help='Resolve findings referencing non-existent RDS cluster snapshots')
     resource_group.add_argument('--iam-policies', action='store_const', const='AwsIamPolicy', help='Resolve findings referencing non-existent IAM policies')
+    resource_group.add_argument('--autoscaling-groups', action='store_const', const='AwsAutoScalingAutoScalingGroup', help='Resolve findings referencing non-existent ASG groups')
     args = parser.parse_args()
     
     # set the resource type filter
-    resource_type = args.ec2_instances or args.s3_buckets or args.ec2_volumes or args.rds_cluster_snapshots or args.iam_policies
+    resource_type = \
+        args.ec2_instances or \
+        args.s3_buckets or \
+        args.ec2_volumes or \
+        args.rds_cluster_snapshots or \
+        args.iam_policies or \
+        args.autoscaling_groups
     FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
     
     # heads up
@@ -348,14 +371,14 @@ def main():
     insight = get_or_create_insight(args.region)
     # print(insight)
     count = get_count_from_insight(args.region, insight)
-    
     print(f'There are {count} findings matching the search criteria.')
     if count == 0:
         print('Nothing to do.')
         sys.exit(0)
-
+    
     # resolve findings
     num_resolved = resolve_findings(args.region, args.dry_run)
+
     print(f"Done.\n")
     print(f"We resolved {num_resolved} out of {count} findings matching the search criteria.")
     print("It may take a few minutes for SecuriyHub to catch up. You may also need to refresh console to see the updates.")
