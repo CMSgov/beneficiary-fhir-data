@@ -27,13 +27,17 @@ THROTTLE_RATES = {
     's3': {
         'get': 5,
     },
+    'rds': {
+        'describe': 25,
+    }
 }
 
 # How frequently to update the active resource lists (in minutes)
 UPDATE_INTERVALS = {
     'AwsEc2Instance': 5,
-    'AwsS3Bucket': 5,
     'AwsEc2Volume': 5,
+    'AwsS3Bucket': 5,
+    'AwsRdsDbClusterSnapshot': 60,
 }
 
 EC2_INSTANCE_STATES = ['pending', 'running', 'stopping', 'stopped', 'shutting-down', 'terminated']
@@ -72,6 +76,7 @@ RESOURCE_ID_RE = {
     'AwsEc2Instance': r'^i-[a-zA-Z0-9]+$',
     'AwsS3Bucket': r'^[a-z0-9][a-zA-Z0-9-]{1,61}[a-z0-9]$',
     'AwsEc2Volume': r'^vol-[a-zA-Z0-9]+$',
+    'AwsRdsDbClusterSnapshot': r'^[a-zA-Z0-9-]+$',
 }
 
 # SecurityHub Insights are used to get a count of findings that match our filters. This is much faster than
@@ -87,6 +92,8 @@ def get_client(region, resource_type):
         return boto3.client('ec2', region_name=region)
     elif resource_type.startswith('AwsS3Bucket'):
         return boto3.client('s3', region_name=region)
+    elif resource_type.startswith('AwsRds'):
+        return boto3.client('rds', region_name=region)
     elif resource_type == 'hub':
         return boto3.client('securityhub', region_name=region)
 
@@ -140,8 +147,20 @@ def get_active_resources(client, resource_type):
         return get_active_s3_buckets(client)
     elif resource_type == 'AwsEc2Volume':
         return get_active_volumes(client)
+    elif resource_type == 'AwsRdsDbClusterSnapshot':
+        return get_active_rds_snapshots(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active RDS cluster snapshots
+def get_active_rds_snapshots(client):
+    snapshots = []
+    paginator = client.get_paginator('describe_db_cluster_snapshots')
+    for response in paginator.paginate():
+        for snapshot in response['DBClusterSnapshots']:
+            snapshots.append(snapshot['DBClusterSnapshotIdentifier'])
+    return snapshots
 
 
 # Returns a list of active ec2 volumes
@@ -230,8 +249,8 @@ def resolve_findings(region, dry_run):
                     continue
 
                 if id not in active_resources:
-                    # if dry_run:
-                    #     print(f"{id} not active (first 3 for comparison: {active_resources[0:3]}")
+                    if dry_run:
+                        print(f"{id} not active (first 3 for comparison: {active_resources[0:3]}")
                     # decrement num_resources if it's not
                     num_resources -= 1
 
@@ -285,10 +304,11 @@ def main():
     resource_group.add_argument('--ec2-instances', action='store_const', const='AwsEc2Instance', help='Resolve findings referencing non-existent EC2 instances')
     resource_group.add_argument('--ec2-volumes', action='store_const', const='AwsEc2Volume', help='Resolve findings referencing non-existent EC2 volumes')
     resource_group.add_argument('--s3-buckets', action='store_const', const='AwsS3Bucket', help='Resolve findings referencing non-existent S3 buckets')
+    resource_group.add_argument('--rds-cluster-snapshots', action='store_const', const='AwsRdsDbClusterSnapshot', help='Resolve findings referencing non-existent RDS cluster snapshots')
     args = parser.parse_args()
     
     # set the resource type filter
-    resource_type = args.ec2_instances or args.s3_buckets or args.ec2_volumes
+    resource_type = args.ec2_instances or args.s3_buckets or args.ec2_volumes or args.rds_cluster_snapshots
     FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
     
     # heads up
@@ -319,6 +339,9 @@ def main():
     print(f"Done.\n")
     print(f"We resolved {num_resolved} out of {count} findings matching the search criteria.")
     print("You may need to refresh the Security Hub console to see the updates.")
+    if args.dry_run:
+        print("*** This was a dry run, no findings were actually resolved. ***")
+    
 
 
 if __name__ == '__main__':
