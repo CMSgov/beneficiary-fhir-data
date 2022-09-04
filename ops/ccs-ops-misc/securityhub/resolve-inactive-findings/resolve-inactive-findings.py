@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+import argparse
+import boto3
+import time
+import sys
+import re
+
+# We need to throttle requests to AWS to ensure we do not hit rate limits. Each service can have different limits
+# depending on the call. And throttle using "leaky bucket", "token bucket", or simple fixed Requests Per Second.
+# 
+# It's important we do not exceed the limits as they impact account wide limits for the region. For example, if
+# we were to hit the limit for Ec2 Describe*, nobody would be able to describe instances in the region. Even the
+# console would be impacted.
+#
+# The following is a dict of services and their limits. The values are the maximum number of requests per second,
+# which is roughly half the maximum listed by AWS or 1/4 for Ec2 Describe* calls (just in case).
+# EC2: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/throttling.html
+THROTTLE_RATES = {
+    'security_hub': {
+        'get': 5,
+        'update': 5,
+        'batch_update': 5,
+    },
+    'ec2': {
+        'describe': 25,
+    },
+    's3': {
+        'get': 5,
+    },
+}
+
+# How frequently to update the active resource lists (in minutes)
+UPDATE_INTERVALS = {
+    'AwsEc2Instance': 5,
+    'AwsS3Bucket': 5,
+    'AwsEc2Volume': 5,
+}
+
+EC2_INSTANCE_STATES = ['pending', 'running', 'stopping', 'stopped', 'shutting-down', 'terminated']
+ACTIVE_INSTANCE_STATES = set(EC2_INSTANCE_STATES) - set(['terminated'])
+EC2_VOLUME_STATES = ['creating', 'available' , 'in-use' , 'deleting' , 'deleted' , 'error']
+ACTIVE_VOLUME_STATES = set(EC2_VOLUME_STATES) - set(['deleting', 'deleted', 'error'])
+
+# When we resolve a finding, we add a note to explain why.
+RESOLVED_NOTE = "Finding no longer references active resources."
+RESOLVED_BY = "Script"
+
+# This is the filter we use to find findings that need to be resolved. 
+# The 'ResourceType' gets set via command line args.
+FINDING_FILTERS = {
+    'ResourceType': [],
+    'WorkflowStatus': [
+        {
+            'Value': 'NEW',
+            'Comparison': 'EQUALS'
+        },
+        {
+            'Value': 'NOTIFIED',
+            'Comparison': 'EQUALS'
+        },
+    ],
+    'RecordState': [
+        {
+            'Value': 'ACTIVE',
+            'Comparison': 'EQUALS'
+        },
+    ]
+}
+
+# Resource ID regex patterns
+RESOURCE_ID_RE = {
+    'AwsEc2Instance': r'^i-[a-zA-Z0-9]+$',
+    'AwsS3Bucket': r'^[a-z0-9][a-zA-Z0-9-]{1,61}[a-z0-9]$',
+    'AwsEc2Volume': r'^vol-[a-zA-Z0-9]+$',
+}
+
+# SecurityHub Insights are used to get a count of findings that match our filters. This is much faster than
+# paginating through all the findings as there is no .count() method. Insights are dynamically created if
+# needed.
+INSIGHT_NAME_PREFIX = 'NewFailedFindingsBy'
+GROUP_BY = 'AwsAccountId'
+
+
+# Return a boto3 client based on the resource type or 'hub' for a security hub client
+def get_client(region, resource_type):
+    if resource_type.startswith('AwsEc2'):
+        return boto3.client('ec2', region_name=region)
+    elif resource_type.startswith('AwsS3Bucket'):
+        return boto3.client('s3', region_name=region)
+    elif resource_type == 'hub':
+        return boto3.client('securityhub', region_name=region)
+
+
+# Returns True if the given "id" string looks like an AWS ARN
+def is_arn(id):
+    return id.startswith('arn:')
+
+
+# Gets the id from an ARN
+def get_id_from_arn(arn):
+    # If the arn has a / in it, the id is the last part of the arn
+    if '/' in arn:
+        return arn.split('/')[-1]
+    # Otherwise, the id is the last part of the resource
+    return arn.split(':')[-1]
+
+
+# Gets or creates an insight matching our FINDING_FILTERS and returns the insight object
+def get_or_create_insight(region):
+    # see if any existing insight matches our filters and group by attribute
+    client = get_client(region, 'hub')
+    insights = client.get_insights()
+    insight_arn = None
+    for insight in insights['Insights']:
+        if insight['Filters'] == FINDING_FILTERS and insight['GroupByAttribute'] == 'AwsAccountId':
+            insight_arn = insight['InsightArn']
+            break
+    
+    # if no matches, create one
+    if not insight_arn:
+        name = f"{INSIGHT_NAME_PREFIX}{FINDING_FILTERS['ResourceType'][0]['Value']}"
+        insight_arn = client.create_insight(Name=f"{name}", Filters=FINDING_FILTERS, GroupByAttribute=GROUP_BY).get('InsightArn')
+    return insight
+
+
+# Get the count of findings that match our filters
+def get_count_from_insight(region, insight):
+    client = get_client(region, 'hub')
+    results = client.get_insight_results(InsightArn=insight['InsightArn'])
+    if len(results['InsightResults']['ResultValues']) > 0:
+        return results['InsightResults']['ResultValues'][0]['Count']
+    return 0
+
+
+# Returns a list of active resources by type
+def get_active_resources(client, resource_type):
+    if resource_type == 'AwsEc2Instance':
+        return get_active_instances(client)
+    elif resource_type == 'AwsS3Bucket':
+        return get_active_s3_buckets(client)
+    elif resource_type == 'AwsEc2Volume':
+        return get_active_volumes(client)
+    else:
+        raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Returns a list of active ec2 volumes
+def get_active_volumes(client):
+    # TODO: add pagination
+    active_volumes = []
+    response = client.describe_volumes(
+        Filters=[{'Name': 'status', 'Values': list(ACTIVE_VOLUME_STATES)}]
+    )
+    for volume in response['Volumes']:
+        active_volumes.append(volume.get('VolumeId'))
+    
+    return active_volumes
+
+
+# Returns a list of active s3 bucket names.
+def get_active_s3_buckets(client):
+    buckets = []
+    response = client.list_buckets()
+    for bucket in response['Buckets']:
+        buckets.append(bucket['Name'])
+    return buckets
+
+
+# Returns a list of currently active ec2 instances (any instance not in a 'terminated' state)
+def get_active_instances(client):
+    active_instances = []
+    response = client.describe_instances(
+        Filters=[{'Name': 'instance-state-name', 'Values': list(ACTIVE_INSTANCE_STATES)}])
+    for reservation in response['Reservations']:
+        for instance in reservation['Instances']:
+            active_instances.append(instance.get('InstanceId'))
+    return active_instances
+
+
+# Validate a resource id against the current filter types regex pattern
+def validate_resource_id(resource_id, resource_type):
+    resource_re = re.compile(RESOURCE_ID_RE[resource_type])
+    return resource_re.match(resource_id)
+
+
+# Resolve findings that no longer reference active resources
+def resolve_findings(region, dry_run):
+    resource_type = FINDING_FILTERS['ResourceType'][0]['Value']
+    resource_client = get_client(region, resource_type)
+    throttle_rate = THROTTLE_RATES['security_hub']['batch_update']
+    update_interval = UPDATE_INTERVALS[str(resource_type)] * 60
+    last_update = 0
+    resolved_finding_count = 0
+    
+    # page through and batch findings to resolve
+    print('Processing findings...')
+    hub = get_client(region, 'hub')
+    paginator = hub.get_paginator('get_findings')
+    page_iterator = paginator.paginate(Filters=FINDING_FILTERS, MaxResults=100)
+    
+    # throttle requests (leaky bucket)
+    request_bucket = THROTTLE_RATES['security_hub']['batch_update']
+    t = time.time()
+    
+    # page through findings 100 at a time
+    for page in page_iterator:
+        batch = []
+        # for each finding
+        for finding in page['Findings']:
+            num_resources = len(finding['Resources'])
+            
+            # update the list of active resources if needed
+            if (time.time() - last_update) > update_interval:
+                active_resources = get_active_resources(resource_client, resource_type)
+                last_update = time.time()
+
+            # for each resource in the finding
+            for resource in finding['Resources']:
+                if is_arn(resource['Id']):
+                    id = get_id_from_arn(resource['Id'])
+                else:
+                    id = resource['Id']
+                
+                # validate the resource id and check if it's in the active resource list
+                if resource['Type'] != resource_type:
+                    continue
+                
+                if not validate_resource_id(id, resource_type):
+                    print(f"Invalid resource id: {id}")
+                    continue
+
+                if id not in active_resources:
+                    # if dry_run:
+                    #     print(f"{id} not active (first 3 for comparison: {active_resources[0:3]}")
+                    # decrement num_resources if it's not
+                    num_resources -= 1
+
+            # if there are no remaining active resources, add the resource to the batch to get resolved
+            if num_resources == 0:
+                batch.append({'Id': finding['Id'], 'ProductArn': finding['ProductArn']})
+
+        # be sure we throttle requests (leaky bucket)
+        if (time.time() - t) > 1:
+            request_bucket = throttle_rate
+        if request_bucket == 0:
+            print('Rate limit reached, backing off...')
+            time.sleep(1.5)
+
+        # resolve findings in the batch
+        num_findings_in_batch = len(batch)
+        if num_findings_in_batch > 0:
+            print(f"Resolving {num_findings_in_batch} inactive findings...")
+            
+            if dry_run:
+                resolved_finding_count += num_findings_in_batch
+                continue
+
+            result = hub.batch_update_findings(
+                FindingIdentifiers=batch,
+                Note={
+                    'Text': RESOLVED_NOTE,
+                    'UpdatedBy': RESOLVED_BY
+                },
+                Workflow={
+                    'Status': 'RESOLVED'
+                },
+            )
+            request_bucket -= 1
+            t = time.time()
+            
+            resolved_finding_count += num_findings_in_batch # - len(result['ProcessedFindings'])
+            if len(result['ProcessedFindings']) != num_findings_in_batch:
+                print(f"Failed to resolve {num_findings_in_batch - len(result['ProcessedFindings'])} findings.")
+                
+            
+    return resolved_finding_count
+
+
+def main():
+    # parse args
+    parser = argparse.ArgumentParser(description='Resolve inactive Security Hub findings.')
+    parser.add_argument('--dry-run', action='store_true', help='Do not update findings, just print what would be done.')
+    parser.add_argument('--region', default='us-east-1', help='AWS region to use.')
+    resource_group = parser.add_mutually_exclusive_group(required=True)
+    resource_group.add_argument('--ec2-instances', action='store_const', const='AwsEc2Instance', help='Resolve findings referencing non-existent EC2 instances')
+    resource_group.add_argument('--ec2-volumes', action='store_const', const='AwsEc2Volume', help='Resolve findings referencing non-existent EC2 volumes')
+    resource_group.add_argument('--s3-buckets', action='store_const', const='AwsS3Bucket', help='Resolve findings referencing non-existent S3 buckets')
+    args = parser.parse_args()
+    
+    # set the resource type filter
+    resource_type = args.ec2_instances or args.s3_buckets or args.ec2_volumes
+    FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
+    
+    # heads up
+    print("This script will query all findings matching the following search criteria:")
+    print(f" * ResourceType: {resource_type}")
+    print(" * WorkflowStatus: NEW or NOTIFIED")
+    print(" * RecordState: ACTIVE")
+    print(f"And will resolve any finding found no longer referencing active resources.\n")
+    print(f"Findings will be marked resolved by '{RESOLVED_BY}' with the following note: '{RESOLVED_NOTE}'\n")
+
+    # continue?
+    if input("This may take some time.. continue? (y/n): ").lower() != 'y':
+        return
+
+    # Get a count of new findings matching the filter using seucrity hub insights
+    print('Getting findings...')
+    insight = get_or_create_insight(args.region)
+    # print(insight)
+    count = get_count_from_insight(args.region, insight)
+    
+    print(f'There are {count} findings matching the search criteria.')
+    if count == 0:
+        print('Nothing to do.')
+        sys.exit(0)
+
+    # resolve findings
+    num_resolved = resolve_findings(args.region, args.dry_run)
+    print(f"Done.\n")
+    print(f"We resolved {num_resolved} out of {count} findings matching the search criteria.")
+    print("You may need to refresh the Security Hub console to see the updates.")
+
+
+if __name__ == '__main__':
+    main()
