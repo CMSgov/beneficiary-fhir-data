@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from urllib import response
 import boto3
 import time
 import sys
@@ -42,6 +43,7 @@ UPDATE_INTERVALS = {
     'AwsS3Bucket': 5,
     'AwsRdsDbClusterSnapshot': 60,
     'AwsIamPolicy': 60,
+    'AwsIamAccessKey': 5,
     'AwsAutoScalingAutoScalingGroup': 5,
 }
 
@@ -83,6 +85,7 @@ RESOURCE_ID_RE = {
     'AwsEc2Volume': r'^vol-[a-zA-Z0-9]+$',
     'AwsRdsDbClusterSnapshot': r'^[a-zA-Z0-9-]+$',
     'AwsIamPolicy': r'^[a-zA-Z0-9-]+$',
+    'AwsIamAccessKey': r'^AWS::IAM::AccessKey:[A-Z0-9]+$',
     'AwsAutoScalingAutoScalingGroup': r'^[a-zA-Z0-9-]+$',
 }
 
@@ -162,12 +165,28 @@ def get_active_resources(client, resource_type):
         return get_active_volumes(client)
     elif resource_type == 'AwsRdsDbClusterSnapshot':
         return get_active_rds_snapshots(client)
+    elif resource_type == 'AwsIamAccessKey':
+        return get_active_iam_access_keys(client)
     elif resource_type == 'AwsIamPolicy':
         return get_active_iam_policies(client)
     elif resource_type == 'AwsAutoScalingAutoScalingGroup':
         return get_active_asg_groups(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active IAM access keys
+def get_active_iam_access_keys(client):
+    keys = []
+    user_paginator = client.get_paginator('list_users')
+    for user_page in user_paginator.paginate():
+        for user in user_page['Users']:
+            key_paginator = client.get_paginator('list_access_keys')
+            for key_page in key_paginator.paginate(UserName=user['UserName']):
+                for key in key_page['AccessKeyMetadata']:
+                    keys.append(f"AWS::IAM::AccessKey:{key['AccessKeyId']}")        
+    return keys
+
 
 # Get active ASG groups
 def get_active_asg_groups(client):
@@ -280,7 +299,7 @@ def resolve_findings(region, dry_run):
                     continue
                 
                 if not validate_resource_id(id, resource_type):
-                    print(f"Invalid resource id: {id}")
+                    print(f"Skipping invalid resource id: {id}")
                     continue
 
                 if id not in active_resources:
@@ -340,6 +359,7 @@ def main():
     resource_group.add_argument('--ec2-volumes', action='store_const', const='AwsEc2Volume', help='Resolve findings referencing non-existent EC2 volumes')
     resource_group.add_argument('--s3-buckets', action='store_const', const='AwsS3Bucket', help='Resolve findings referencing non-existent S3 buckets')
     resource_group.add_argument('--rds-cluster-snapshots', action='store_const', const='AwsRdsDbClusterSnapshot', help='Resolve findings referencing non-existent RDS cluster snapshots')
+    resource_group.add_argument('--iam-access-keys', action='store_const', const='AwsIamAccessKey', help='Resolve findings referencing non-existent IAM access keys')
     resource_group.add_argument('--iam-policies', action='store_const', const='AwsIamPolicy', help='Resolve findings referencing non-existent IAM policies')
     resource_group.add_argument('--autoscaling-groups', action='store_const', const='AwsAutoScalingAutoScalingGroup', help='Resolve findings referencing non-existent ASG groups')
     args = parser.parse_args()
@@ -350,6 +370,7 @@ def main():
         args.s3_buckets or \
         args.ec2_volumes or \
         args.rds_cluster_snapshots or \
+        args.iam_access_keys or \
         args.iam_policies or \
         args.autoscaling_groups
     FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
