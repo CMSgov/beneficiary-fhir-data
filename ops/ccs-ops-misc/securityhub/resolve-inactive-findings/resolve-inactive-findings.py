@@ -43,6 +43,7 @@ THROTTLE_RATES = {
 UPDATE_INTERVALS = {
     'AwsEc2Instance': 5,
     'AwsEc2Volume': 5,
+    'AwsEc2SecurityGroup': 5,
     'AwsS3Bucket': 5,
     'AwsRdsDbClusterSnapshot': 60,
     'AwsRdsDbInstance': 60,
@@ -88,6 +89,7 @@ RESOURCE_ID_RE = {
     'AwsEc2Instance': r'^i-[a-zA-Z0-9]+$',
     'AwsS3Bucket': r'^[a-z0-9][a-zA-Z0-9-]{1,61}[a-z0-9]$',
     'AwsEc2Volume': r'^vol-[a-zA-Z0-9]+$',
+    'AwsEc2SecurityGroup': r'^sg-[a-zA-Z0-9]+$',
     'AwsRdsDbClusterSnapshot': r'^[a-zA-Z0-9-]+$',
     'AwsRdsDbInstance': r'^[a-zA-Z0-9-]+$',
     'AwsIamPolicy': r'^[a-zA-Z0-9-]+$',
@@ -145,7 +147,6 @@ def get_or_create_insight(region):
         if insight['Filters'] == FINDING_FILTERS and insight['GroupByAttribute'] == 'AwsAccountId':
             insight_arn = insight['InsightArn']
             break
-    
     # if no matches, create one
     if not insight_arn:
         name = f"{INSIGHT_NAME_PREFIX}{FINDING_FILTERS['ResourceType'][0]['Value']}"
@@ -172,6 +173,8 @@ def get_active_resources(client, resource_type):
         return get_active_s3_buckets(client)
     elif resource_type == 'AwsEc2Volume':
         return get_active_volumes(client)
+    elif resource_type == 'AwsEc2SecurityGroup':
+        return get_active_security_groups(client)
     elif resource_type == 'AwsRdsDbClusterSnapshot':
         return get_active_rds_snapshots(client)
     elif resource_type == 'AwsRdsDbInstance':
@@ -186,6 +189,16 @@ def get_active_resources(client, resource_type):
         return get_active_lambdas(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active ec2 security groups
+def get_active_security_groups(client):
+    groups = []
+    paginator = client.get_paginator('describe_security_groups')
+    for page in paginator.paginate():
+        for group in page['SecurityGroups']:
+            groups.append(group['GroupId'])
+    return groups
 
 
 # Get active lambda functions
@@ -390,6 +403,7 @@ def main():
     resource_group = parser.add_mutually_exclusive_group(required=True)
     resource_group.add_argument('--ec2-instances', action='store_const', const='AwsEc2Instance', help='Resolve findings referencing non-existent EC2 instances')
     resource_group.add_argument('--ec2-volumes', action='store_const', const='AwsEc2Volume', help='Resolve findings referencing non-existent EC2 volumes')
+    resource_group.add_argument('--ec2-security-groups', action='store_const', const='AwsEc2SecurityGroup',help='Resolve findings referencing non-existent EC2 security groups')
     resource_group.add_argument('--s3-buckets', action='store_const', const='AwsS3Bucket', help='Resolve findings referencing non-existent S3 buckets')
     resource_group.add_argument('--rds-cluster-snapshots', action='store_const', const='AwsRdsDbClusterSnapshot', help='Resolve findings referencing non-existent RDS cluster snapshots')
     resource_group.add_argument('--rds-db-instances', action='store_const', const='AwsRdsDbInstance', help='Resolve findings referencing non-existent RDS DB instances')
@@ -404,6 +418,7 @@ def main():
         args.ec2_instances or \
         args.s3_buckets or \
         args.ec2_volumes or \
+        args.ec2_security_groups or \
         args.rds_cluster_snapshots or \
         args.iam_access_keys or \
         args.iam_policies or \
