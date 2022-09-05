@@ -47,6 +47,7 @@ UPDATE_INTERVALS = {
     'AwsS3Bucket': 5,
     'AwsRdsDbClusterSnapshot': 60,
     'AwsRdsDbInstance': 60,
+    'AwsIamUser': 60,
     'AwsIamPolicy': 60,
     'AwsIamAccessKey': 5,
     'AwsAutoScalingAutoScalingGroup': 5,
@@ -92,6 +93,7 @@ RESOURCE_ID_RE = {
     'AwsEc2SecurityGroup': r'^sg-[a-zA-Z0-9]+$',
     'AwsRdsDbClusterSnapshot': r'^[a-zA-Z0-9-]+$',
     'AwsRdsDbInstance': r'^[a-zA-Z0-9-]+$',
+    'AwsIamUser': r'^[a-zA-Z0-9-]+$',
     'AwsIamPolicy': r'^[a-zA-Z0-9-]+$',
     'AwsIamAccessKey': r'^AWS::IAM::AccessKey:[A-Z0-9]+$',
     'AwsAutoScalingAutoScalingGroup': r'^[a-zA-Z0-9-]+$',
@@ -179,6 +181,8 @@ def get_active_resources(client, resource_type):
         return get_active_rds_snapshots(client)
     elif resource_type == 'AwsRdsDbInstance':
         return get_active_rds_instances(client)
+    elif resource_type == 'AwsIamUser':
+        return get_active_iam_users(client)
     elif resource_type == 'AwsIamAccessKey':
         return get_active_iam_access_keys(client)
     elif resource_type == 'AwsIamPolicy':
@@ -189,6 +193,12 @@ def get_active_resources(client, resource_type):
         return get_active_lambdas(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active IAM users
+def get_active_iam_users(client):
+    users = client.list_users()
+    return [user['UserName'] for user in users['Users']]
 
 
 # Get active ec2 security groups
@@ -407,6 +417,7 @@ def main():
     resource_group.add_argument('--s3-buckets', action='store_const', const='AwsS3Bucket', help='Resolve findings referencing non-existent S3 buckets')
     resource_group.add_argument('--rds-cluster-snapshots', action='store_const', const='AwsRdsDbClusterSnapshot', help='Resolve findings referencing non-existent RDS cluster snapshots')
     resource_group.add_argument('--rds-db-instances', action='store_const', const='AwsRdsDbInstance', help='Resolve findings referencing non-existent RDS DB instances')
+    resource_group.add_argument('--iam-users', action='store_const', const='AwsIamUser', help='Resolve findings referencing non-existent IAM users')
     resource_group.add_argument('--iam-access-keys', action='store_const', const='AwsIamAccessKey', help='Resolve findings referencing non-existent IAM access keys')
     resource_group.add_argument('--iam-policies', action='store_const', const='AwsIamPolicy', help='Resolve findings referencing non-existent IAM policies')
     resource_group.add_argument('--autoscaling-groups', action='store_const', const='AwsAutoScalingAutoScalingGroup', help='Resolve findings referencing non-existent ASG groups')
@@ -420,6 +431,7 @@ def main():
         args.ec2_volumes or \
         args.ec2_security_groups or \
         args.rds_cluster_snapshots or \
+        args.iam_users or \
         args.iam_access_keys or \
         args.iam_policies or \
         args.autoscaling_groups or \
