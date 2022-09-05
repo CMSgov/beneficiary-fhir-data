@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import resource
 from urllib import response
 import boto3
 import time
@@ -36,7 +37,10 @@ THROTTLE_RATES = {
     },
     'lambda': {
         'describe': 25,
-    }
+    },
+    'kms': {
+        'describe': 25,
+    },
 }
 
 # How frequently to update the active resource lists (in minutes)
@@ -53,6 +57,7 @@ UPDATE_INTERVALS = {
     'AwsAutoScalingAutoScalingGroup': 5,
     'AwsLambdaFunction': 5,
     'AwsSnsTopic': 5,
+    'AwsKmsKey': 5,
 }
 
 EC2_INSTANCE_STATES = ['pending', 'running', 'stopping', 'stopped', 'shutting-down', 'terminated']
@@ -100,6 +105,7 @@ RESOURCE_ID_RE = {
     'AwsAutoScalingAutoScalingGroup': r'^[a-zA-Z0-9-]+$',
     'AwsLambdaFunction': r'^[a-zA-Z0-9-]+$',
     'AwsSnsTopic': r'^[a-zA-Z0-9-]+$',
+    'AwsKmsKey': r'^[a-zA-Z0-9-]+$',
 }
 
 # SecurityHub Insights are used to get a count of findings that match our filters. This is much faster than
@@ -125,6 +131,8 @@ def get_client(region, resource_type):
         return boto3.client('lambda', region_name=region)
     elif resource_type.startswith('AwsSns'):
         return boto3.client('sns', region_name=region)
+    elif resource_type.startswith('AwsKms'):
+        return boto3.client('kms', region_name=region)
     elif resource_type == 'hub':
         return boto3.client('securityhub', region_name=region)
 
@@ -197,8 +205,20 @@ def get_active_resources(client, resource_type):
         return get_active_lambdas(client)
     elif resource_type == 'AwsSnsTopic':
         return get_active_sns_topics(client)
+    elif resource_type == 'AwsKmsKey':
+        return get_active_kms_keys(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active kms keys
+def get_active_kms_keys(client):
+    keys = []
+    paginator = client.get_paginator('list_keys')
+    for page in paginator.paginate():
+        for key in page['Keys']:
+            keys.append(key['KeyId'])
+    return keys
 
 
 # Get active sns topics
@@ -439,6 +459,7 @@ def main():
     resource_group.add_argument('--autoscaling-groups', action='store_const', const='AwsAutoScalingAutoScalingGroup', help='Resolve findings referencing non-existent ASG groups')
     resource_group.add_argument('--lambda-functions', action='store_const', const='AwsLambdaFunction', help='Resolve findings referencing non-existent Lambda functions')
     resource_group.add_argument('--sns-topics', action='store_const', const='AwsSnsTopic', help='Resolve findings referencing non-existent SNS topics')
+    resource_group.add_argument('--kms-keys', action='store_const', const='AwsKmsKey', help='Resolve findings referencing non-existent KMS keys')
     args = parser.parse_args()
     
     # set the resource type filter
@@ -454,7 +475,8 @@ def main():
         args.autoscaling_groups or \
         args.rds_db_instances or \
         args.lambda_functions or \
-        args.sns_topics
+        args.sns_topics or \
+        args.kms_keys
     FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
     
     # heads up
