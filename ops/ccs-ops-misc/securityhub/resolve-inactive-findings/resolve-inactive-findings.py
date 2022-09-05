@@ -52,6 +52,7 @@ UPDATE_INTERVALS = {
     'AwsIamAccessKey': 5,
     'AwsAutoScalingAutoScalingGroup': 5,
     'AwsLambdaFunction': 5,
+    'AwsSnsTopic': 5,
 }
 
 EC2_INSTANCE_STATES = ['pending', 'running', 'stopping', 'stopped', 'shutting-down', 'terminated']
@@ -98,6 +99,7 @@ RESOURCE_ID_RE = {
     'AwsIamAccessKey': r'^AWS::IAM::AccessKey:[A-Z0-9]+$',
     'AwsAutoScalingAutoScalingGroup': r'^[a-zA-Z0-9-]+$',
     'AwsLambdaFunction': r'^[a-zA-Z0-9-]+$',
+    'AwsSnsTopic': r'^[a-zA-Z0-9-]+$',
 }
 
 # SecurityHub Insights are used to get a count of findings that match our filters. This is much faster than
@@ -121,6 +123,8 @@ def get_client(region, resource_type):
         return boto3.client('autoscaling', region_name=region)
     elif resource_type.startswith('AwsLambda'):
         return boto3.client('lambda', region_name=region)
+    elif resource_type.startswith('AwsSns'):
+        return boto3.client('sns', region_name=region)
     elif resource_type == 'hub':
         return boto3.client('securityhub', region_name=region)
 
@@ -191,8 +195,20 @@ def get_active_resources(client, resource_type):
         return get_active_asg_groups(client)
     elif resource_type == 'AwsLambdaFunction':
         return get_active_lambdas(client)
+    elif resource_type == 'AwsSnsTopic':
+        return get_active_sns_topics(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active sns topics
+def get_active_sns_topics(client):
+    topics = []
+    paginator = client.get_paginator('list_topics')
+    for page in paginator.paginate():
+        for topic in page['Topics']:
+            topics.append(get_id_from_arn(topic['TopicArn']))
+    return topics
 
 
 # Get active IAM users
@@ -422,6 +438,7 @@ def main():
     resource_group.add_argument('--iam-policies', action='store_const', const='AwsIamPolicy', help='Resolve findings referencing non-existent IAM policies')
     resource_group.add_argument('--autoscaling-groups', action='store_const', const='AwsAutoScalingAutoScalingGroup', help='Resolve findings referencing non-existent ASG groups')
     resource_group.add_argument('--lambda-functions', action='store_const', const='AwsLambdaFunction', help='Resolve findings referencing non-existent Lambda functions')
+    resource_group.add_argument('--sns-topics', action='store_const', const='AwsSnsTopic', help='Resolve findings referencing non-existent SNS topics')
     args = parser.parse_args()
     
     # set the resource type filter
@@ -436,7 +453,8 @@ def main():
         args.iam_policies or \
         args.autoscaling_groups or \
         args.rds_db_instances or \
-        args.lambda_functions
+        args.lambda_functions or \
+        args.sns_topics
     FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
     
     # heads up
