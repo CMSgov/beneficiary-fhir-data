@@ -32,7 +32,10 @@ THROTTLE_RATES = {
         'describe': 25,
     },
     'iam': {
-        'get': 5,
+        'list': 5,
+    },
+    'lambda': {
+        'describe': 25,
     }
 }
 
@@ -46,6 +49,7 @@ UPDATE_INTERVALS = {
     'AwsIamPolicy': 60,
     'AwsIamAccessKey': 5,
     'AwsAutoScalingAutoScalingGroup': 5,
+    'AwsLambdaFunction': 5,
 }
 
 EC2_INSTANCE_STATES = ['pending', 'running', 'stopping', 'stopped', 'shutting-down', 'terminated']
@@ -89,6 +93,7 @@ RESOURCE_ID_RE = {
     'AwsIamPolicy': r'^[a-zA-Z0-9-]+$',
     'AwsIamAccessKey': r'^AWS::IAM::AccessKey:[A-Z0-9]+$',
     'AwsAutoScalingAutoScalingGroup': r'^[a-zA-Z0-9-]+$',
+    'AwsLambdaFunction': r'^[a-zA-Z0-9-]+$',
 }
 
 # SecurityHub Insights are used to get a count of findings that match our filters. This is much faster than
@@ -110,6 +115,8 @@ def get_client(region, resource_type):
         return boto3.client('iam', region_name=region)
     elif resource_type.startswith('AwsAutoScaling'):
         return boto3.client('autoscaling', region_name=region)
+    elif resource_type.startswith('AwsLambda'):
+        return boto3.client('lambda', region_name=region)
     elif resource_type == 'hub':
         return boto3.client('securityhub', region_name=region)
 
@@ -175,8 +182,20 @@ def get_active_resources(client, resource_type):
         return get_active_iam_policies(client)
     elif resource_type == 'AwsAutoScalingAutoScalingGroup':
         return get_active_asg_groups(client)
+    elif resource_type == 'AwsLambdaFunction':
+        return get_active_lambdas(client)
     else:
         raise Exception(f"Unknown resource type: {resource_type}")
+
+
+# Get active lambda functions
+def get_active_lambdas(client):
+    lambdas = []
+    paginator = client.get_paginator('list_functions')
+    for page in paginator.paginate(FunctionVersion='ALL',):
+        for lambda_function in page['Functions']:
+            lambdas.append(lambda_function['FunctionName'])
+    return lambdas
 
 
 # Get active IAM access keys
@@ -377,6 +396,7 @@ def main():
     resource_group.add_argument('--iam-access-keys', action='store_const', const='AwsIamAccessKey', help='Resolve findings referencing non-existent IAM access keys')
     resource_group.add_argument('--iam-policies', action='store_const', const='AwsIamPolicy', help='Resolve findings referencing non-existent IAM policies')
     resource_group.add_argument('--autoscaling-groups', action='store_const', const='AwsAutoScalingAutoScalingGroup', help='Resolve findings referencing non-existent ASG groups')
+    resource_group.add_argument('--lambda-functions', action='store_const', const='AwsLambdaFunction', help='Resolve findings referencing non-existent Lambda functions')
     args = parser.parse_args()
     
     # set the resource type filter
@@ -388,7 +408,8 @@ def main():
         args.iam_access_keys or \
         args.iam_policies or \
         args.autoscaling_groups or \
-        args.rds_db_instances
+        args.rds_db_instances or \
+        args.lambda_functions
     FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
     
     # heads up
