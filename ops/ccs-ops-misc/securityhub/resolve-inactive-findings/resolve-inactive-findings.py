@@ -43,6 +43,7 @@ THROTTLE_RATES = {
     },
 }
 
+
 # How frequently to update the active resource lists (in minutes)
 UPDATE_INTERVALS = {
     'AwsEc2Instance': 5,
@@ -441,11 +442,43 @@ def resolve_findings(region, dry_run):
     return resolved_finding_count
 
 
+# process
+def process(region, resource_type, dry_run, yes):
+    print(f"Processing {resource_type} findings in {region} with:")
+    print(" -> WorkflowStatus: NEW or NOTIFIED")
+    print(" -> RecordState: ACTIVE")
+
+    # continue?
+    if not yes:
+        if input("This may take some time.. continue? (y/n): ").lower() != 'y':
+            return
+
+    # Get a count of new findings matching the filter using seucrity hub insights
+    print(f'Getting {resource_type} related findings...')
+    insight = get_or_create_insight(region)
+    count = get_count_from_insight(region, insight)
+    print(f'There are {count} findings matching the search criteria.')
+    if count == 0:
+        print('Nothing to do.')
+        return
+
+    # resolve findings
+    num_resolved = resolve_findings(region, dry_run)
+
+    print(f"Done.\n")
+    print(
+        f"We resolved {num_resolved} out of {count} {resource_type} findings matching the search criteria.")
+    print("It may take a few minutes for SecuriyHub to catch up. You may also need to refresh console to see the updates.")
+    if dry_run:
+        print("*** This was a dry run, no findings were actually resolved. ***")
+
+
 def main():
     # parse args
     parser = argparse.ArgumentParser(description='Resolve inactive Security Hub findings.')
     parser.add_argument('--dry-run', action='store_true', help='Do not update findings, just print what would be done.')
     parser.add_argument('--region', default='us-east-1', help='AWS region to use.')
+    parser.add_argument('--yes', action='store_true', help='Skip confirmation prompts.', default=False)
     resource_group = parser.add_mutually_exclusive_group(required=True)
     resource_group.add_argument('--ec2-instances', action='store_const', const='AwsEc2Instance', help='Resolve findings referencing non-existent EC2 instances')
     resource_group.add_argument('--ec2-volumes', action='store_const', const='AwsEc2Volume', help='Resolve findings referencing non-existent EC2 volumes')
@@ -460,7 +493,14 @@ def main():
     resource_group.add_argument('--lambda-functions', action='store_const', const='AwsLambdaFunction', help='Resolve findings referencing non-existent Lambda functions')
     resource_group.add_argument('--sns-topics', action='store_const', const='AwsSnsTopic', help='Resolve findings referencing non-existent SNS topics')
     resource_group.add_argument('--kms-keys', action='store_const', const='AwsKmsKey', help='Resolve findings referencing non-existent KMS keys')
+    resource_group.add_argument('--all', action='store_const', const='all', help='Resolve findings referencing non-existent resources for all supported resource types')
     args = parser.parse_args()
+    
+    print("This script resolves Security Hub findings that no longer reference active resources.")
+    print(f"Findings will be marked resolved by '{RESOLVED_BY}' with the following note: '{RESOLVED_NOTE}'\n")
+    if not args.yes:
+        if input("This may take some time.. continue? (y/n): ").lower() != 'y':
+            return
     
     # set the resource type filter
     resource_type = \
@@ -476,40 +516,19 @@ def main():
         args.rds_db_instances or \
         args.lambda_functions or \
         args.sns_topics or \
-        args.kms_keys
-    FINDING_FILTERS['ResourceType'].append({'Comparison': 'EQUALS', 'Value': resource_type})
+        args.kms_keys or \
+        args.all
     
-    # heads up
-    print("This script will query all findings matching the following search criteria:")
-    print(f" * ResourceType: {resource_type}")
-    print(" * WorkflowStatus: NEW or NOTIFIED")
-    print(" * RecordState: ACTIVE")
-    print(f"And will resolve any finding found no longer referencing active resources.\n")
-    print(f"Findings will be marked resolved by '{RESOLVED_BY}' with the following note: '{RESOLVED_NOTE}'\n")
-
-    # continue?
-    if input("This may take some time.. continue? (y/n): ").lower() != 'y':
-        return
-
-    # Get a count of new findings matching the filter using seucrity hub insights
-    print('Getting findings...')
-    insight = get_or_create_insight(args.region)
-    # print(insight)
-    count = get_count_from_insight(args.region, insight)
-    print(f'There are {count} findings matching the search criteria.')
-    if count == 0:
-        print('Nothing to do.')
-        sys.exit(0)
-    
-    # resolve findings
-    num_resolved = resolve_findings(args.region, args.dry_run)
-
+    if resource_type != 'all':
+        process(args.region, resource_type, args.dry_run, args.yes)
+    else:
+        # iterate over the keys defined in RESOURCE_ID_RE
+        for resource_type in RESOURCE_ID_RE.keys():
+            print(f"============================================================")
+            FINDING_FILTERS['ResourceType'] = [{'Comparison': 'EQUALS', 'Value': resource_type}]
+            process(args.region, resource_type, args.dry_run, args.yes)
+            print("")
     print(f"Done.\n")
-    print(f"We resolved {num_resolved} out of {count} findings matching the search criteria.")
-    print("It may take a few minutes for SecuriyHub to catch up. You may also need to refresh console to see the updates.")
-    if args.dry_run:
-        print("*** This was a dry run, no findings were actually resolved. ***")
-    
 
 
 if __name__ == '__main__':
