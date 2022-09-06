@@ -6,6 +6,10 @@ locals {
   env     = terraform.workspace
   service = "common"
 
+  # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
+  seed_env         = lookup(local.nonsensitive_config, "ephemeral_environment_seed", null)
+  is_ephemeral_env = local.seed_env == null ? false : true
+
   shared_tags = {
     Environment = local.env
     application = "bfd"
