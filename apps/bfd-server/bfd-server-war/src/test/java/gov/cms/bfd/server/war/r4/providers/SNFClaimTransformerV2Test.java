@@ -766,15 +766,15 @@ public class SNFClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("0TCCCCC", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("9214", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "0TCCCCC", null),
+            List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "9214", "BONE SCAN")),
             "2016-01-16T00:00:00-08:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 0TCCCCC");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 9214");
   }
 
   /** Insurance */
