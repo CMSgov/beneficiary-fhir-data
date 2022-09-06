@@ -101,32 +101,32 @@ jobs:
             --output text --query authorizationToken)"
             cat <<EOF > ~/.m2/settings.xml
             <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-                <profiles>
-                    <profile>
+              xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+                  <profiles>
+                      <profile>
+                          <id>bfd-mgmt-bfd-mgmt</id>
+                          <activation>
+                            <activeByDefault>true</activeByDefault>
+                          </activation>
+                          <repositories>
+                              <repository>
+                                  <id>central</id>
+                                  <url>https://repo1.maven.org/maven2</url>
+                              </repository>
+                              <repository>
+                                  <id>bfd-mgmt-bfd-mgmt</id>
+                                  <url>${CODEARTIFACT_ENDPOINT}</url>
+                              </repository>
+                          </repositories>
+                      </profile>
+                  </profiles>
+                  <servers>
+                      <server>
+                        <username>aws</username>
+                        <password>${CODEARTIFACT_AUTH_TOKEN}</password>
                         <id>bfd-mgmt-bfd-mgmt</id>
-                        <activation>
-                        <activeByDefault>true</activeByDefault>
-                        </activation>
-                        <repositories>
-                            <repository>
-                                <id>central</id>
-                                <url>https://repo1.maven.org/maven2</url>
-                            </repository>
-                            <repository>
-                                <id>bfd-mgmt-bfd-mgmt</id>
-                                <url>${CODEARTIFACT_ENDPOINT}</url>
-                            </repository>
-                        </repositories>
-                    </profile>
-                </profiles>
-                <servers>
-                    <server>
-                    <username>aws</username>
-                    <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-                    <id>bfd-mgmt-bfd-mgmt</id>
-                    </server>
-                </servers>
+                      </server>
+                  </servers>
             </settings>
             EOF
           mvn --quiet --batch-mode --threads 1C verify #TODO: should we keep the quiet mode to have tidier GHA logs?
