@@ -110,6 +110,7 @@ async def run_locust(event):
     )
 
     if not cluster_id or not username or not raw_password or not cert_key or not cert:
+        print("Could not retrieve one or more needed values from SSM.")
         return
 
     cert_path = "/tmp/bfd_test_cert.pem"
@@ -120,6 +121,7 @@ async def run_locust(event):
     db_uri = get_rds_db_uri(cluster_id)
 
     if not db_uri:
+        print("Could not generate a URI for the database connection.")
         return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"

@@ -29,7 +29,7 @@ def start_node(controller_ip: str, host: str):
             f"{response.FunctionError}"
         )
         return None
-    # TODO: define useful return value
+
     return response
 
 
@@ -37,7 +37,6 @@ def check_queue(timeout: int = 1) -> List[Any]:
     """
     Checks SQS queue for messages.
     """
-    # TODO: Make sure to not remove message from queue
     response = queue.receive_messages(
         AttributeNames=["SenderId", "SentTimestamp"],
         WaitTimeSeconds=timeout,
@@ -47,7 +46,6 @@ def check_queue(timeout: int = 1) -> List[Any]:
 
 
 if __name__ == "__main__":
-    # TODO ensure that we're setting up the envvars correctly
     environment = os.environ.get("BFD_ENVIRONMENT", "test")
     sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
