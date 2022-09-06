@@ -91,9 +91,6 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
-      - name: 'Run Maven Build'
-        run: mvn --batch-mode --threads 1C verify
-        working-directory: ./apps
       
       - name: 'Run Maven Build'
         run: |
