@@ -78,7 +78,7 @@ public class NPIOrgLookup {
     /*
      * Handle bad data (e.g. our random test data) if npiNumber is empty
      */
-    if (!npiNumber.isPresent()) {
+    if (!npiNumber.isPresent() && npiOrgHashMap.isEmpty()) {
       return null;
     }
 
@@ -99,17 +99,19 @@ public class NPIOrgLookup {
    * @param includeFakeNPIOrgCode whether to include the fake testing NPI Org
    */
   private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
-    InputStream stream = App.class.getClassLoader().getResourceAsStream(App.NPI_RESOURCE);
+    final InputStream npiOrgStream =
+        App.class.getClassLoader().getResourceAsStream(App.NPI_RESOURCE);
 
-    if (stream != null) {
-      try (final InputStream npiOrgStream =
-              Thread.currentThread().getContextClassLoader().getResourceAsStream(App.NPI_RESOURCE);
-          final BufferedReader npiOrgIn = new BufferedReader(new InputStreamReader(npiOrgStream))) {
+    if (npiOrgStream != null) {
+      try (final BufferedReader npiOrgIn =
+          new BufferedReader(new InputStreamReader(npiOrgStream))) {
         String line = "";
         while ((line = npiOrgIn.readLine()) != null) {
           String npiProductColumns[] = line.split("\t");
-          npiOrgHashMap.put(
-              npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
+          if (npiProductColumns.length == 2) {
+            npiOrgHashMap.put(
+                npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
+          }
         }
 
       } catch (IOException e) {

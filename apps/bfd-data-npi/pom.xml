@@ -18,17 +18,7 @@
 		NPI Org code lookup jar
 	</description>
 
-	<properties>
-		<junit>3.8.1</junit>
-	</properties>
-
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>
