@@ -153,7 +153,7 @@ def get_id_from_arn(arn):
 
 
 # Gets or creates an insight matching our FINDING_FILTERS and returns the insight object
-def get_or_create_insight(region):
+def get_or_create_insight(region, resource_type):
     # see if any existing insight matches our filters and group by attribute
     client = get_client(region, 'hub')
     insights = client.get_insights()
@@ -163,8 +163,8 @@ def get_or_create_insight(region):
             insight_arn = insight['InsightArn']
             break
     # if no matches, create one
-    if not insight_arn:
-        name = f"{INSIGHT_NAME_PREFIX}{FINDING_FILTERS['ResourceType'][0]['Value']}"
+    if insight_arn is None:
+        name = f"{INSIGHT_NAME_PREFIX}{resource_type}"
         insight_arn = client.create_insight(Name=f"{name}", Filters=FINDING_FILTERS, GroupByAttribute=GROUP_BY).get('InsightArn')
         # give it a few seconds to be created
         time.sleep(10)
@@ -350,8 +350,7 @@ def validate_resource_id(resource_id, resource_type):
 
 
 # Resolve findings that no longer reference active resources
-def resolve_findings(region, dry_run):
-    resource_type = FINDING_FILTERS['ResourceType'][0]['Value']
+def resolve_findings(region, resource_type, dry_run):
     resource_client = get_client(region, resource_type)
     throttle_rate = THROTTLE_RATES['security_hub']['batch_update']
     update_interval = UPDATE_INTERVALS[str(resource_type)] * 60
@@ -455,7 +454,7 @@ def process(region, resource_type, dry_run, yes):
 
     # Get a count of new findings matching the filter using seucrity hub insights
     print(f'Getting {resource_type} related findings...')
-    insight = get_or_create_insight(region)
+    insight = get_or_create_insight(region, resource_type)
     count = get_count_from_insight(region, insight)
     print(f'There are {count} findings matching the search criteria.')
     if count == 0:
@@ -463,7 +462,7 @@ def process(region, resource_type, dry_run, yes):
         return
 
     # resolve findings
-    num_resolved = resolve_findings(region, dry_run)
+    num_resolved = resolve_findings(region, resource_type, dry_run)
 
     print(f"Done.\n")
     print(
@@ -498,9 +497,6 @@ def main():
     
     print("This script resolves Security Hub findings that no longer reference active resources.")
     print(f"Findings will be marked resolved by '{RESOLVED_BY}' with the following note: '{RESOLVED_NOTE}'\n")
-    if not args.yes:
-        if input("This may take some time.. continue? (y/n): ").lower() != 'y':
-            return
     
     # set the resource type filter
     resource_type = \
@@ -518,7 +514,6 @@ def main():
         args.sns_topics or \
         args.kms_keys or \
         args.all
-    
     if resource_type != 'all':
         process(args.region, resource_type, args.dry_run, args.yes)
     else:
