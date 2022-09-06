@@ -28,7 +28,7 @@ resource "aws_s3_bucket_public_access_block" "admin" {
 resource "aws_s3_bucket_logging" "admin" {
   bucket        = aws_s3_bucket.admin.id
   target_bucket = aws_s3_bucket.logging.id
-  target_prefix = "admin_s3_access_logs"
+  target_prefix = "admin_s3_access_logs/"
 }
 
 resource "aws_s3_bucket_acl" "admin" {
