@@ -47,6 +47,28 @@ flowchart TB
     LogSubscription["CloudWatch Log Subscription (Real-Time)"] -->|"Kinesis Firehose / Lambda"| APIRequests
 ```
 
+### Adding new columns
+
+The api_requests table has hard-coded column fields.
+
+Based on historical log files, this list is meant to contain every field ever used *so far*. However, when new fields are added to the FHIR server's log files, they will also need to be added to api-requests/glue.tf and then the tables will need to be updated in AWS. The procedure is:
+
+1. Add the new column to terraform.
+2. Run terraform apply.
+3. To verify that the new column has been added, wait about fifteen minutes to be sure that some log files have been processed via Kinesis Firehose, and then run a quick Athena query such as:
+
+```sql
+SELECT
+  "cw_id",
+  "cw_timestamp",
+  "<new_field>"
+FROM
+  "bfd_insights_bfd_<underscore_environment>_api_requests"
+WHERE
+  "<new_field>" IS NOT NULL
+LIMIT 50;
+```
+
 ### Manual Ingestion of Log Files
 
 Note: Replace `<environment>` and `<account-number>` with the name of your environment, such as
@@ -90,43 +112,3 @@ flowchart TD
     DataSet --> Analysis["QuickSight: Analysis"]
     Analysis --> Dashboard["QuickSight: Dashboard"]
 ```
-
-## Manual Creation of QuickSight Dashboards
-
-Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
-Replace any `-` with `_` in `<underscore_environment>` (Athena doesn't like hyphens in table
-names).
-
-1. Go to [QuickSight](https://us-east-1.quicksight.aws.amazon.com/).
-2. Datasets. New Dataset.
-    - Athena.
-        - Name your data source. Example: `bfd-<environment>-beneficiaries`
-        - Athena Workgroup: `bfd`
-        - Create Data Source.
-    - Choose Your Table.
-        - Catalog: `AwsDataCatalog`
-        - Database: `bfd-<environment>`
-        - Table: Choose the one you want to query. Ex: `bfd_<underscore_environment>_beneficiaries`
-        - Select.
-    - Finish dataset creation.
-        - Directly query your data.
-        - Visualize.
-3. Create an analysis.
-    - Add a Count sheet (Unique Beneficiaries only)
-        - Under Visual Types (on the left), select `Insight` (it looks like an old-school
-        lightbulb with a lightning bolt)
-        - Drag `bene_id` from the left to the chart.
-        - Click on Customize Insight on the chart.
-        - Computations > Add one.
-        - Total aggregation. Next.
-        - Select `bene_id` from the dropdown (it should already be selected by default). Add.
-        - Save.
-    - Add a Line Chart sheet.
-        - Under Visual Types (on the left), select `Line Chart`.
-        - Expand Field Wells at the top.
-        - Drag `# bene_id` from the left to "Value" under the Field Wells.
-        - Drag `timestamp` (beneficiaries table) or `last_seen` (beneficiaries_unique table) to
-        the "X Axis" under the Field Wells.
-        - In the upper-right, click Share > Publish Dashboard. Choose a name. Example:
-        `bfd-<environment>-beneficiaries`. The default options should be fine, so click Publish
-        Dashboard.
