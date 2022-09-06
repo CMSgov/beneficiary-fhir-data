@@ -43,7 +43,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   copy_tags_to_snapshot               = true
   db_cluster_parameter_group_name     = "default.${local.rds_aurora_family}"
   db_subnet_group_name                = aws_db_subnet_group.aurora_cluster.name
-  deletion_protection                 = true
+  deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
   engine                              = "aurora-postgresql"
   engine_mode                         = "provisioned"
   engine_version                      = "14.3"
@@ -54,7 +54,8 @@ resource "aws_rds_cluster" "aurora_cluster" {
   preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
-  tags                                = merge(local.shared_tags, { "cpm backup" = "Weekly Monthly", "Layer" = "data" })
+  # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
+  tags = merge(local.shared_tags, { "cpm backup" = "Weekly Monthly", "Layer" = "data" })
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password
