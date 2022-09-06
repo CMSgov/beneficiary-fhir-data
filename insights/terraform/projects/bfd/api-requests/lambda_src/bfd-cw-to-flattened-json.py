@@ -118,6 +118,9 @@ def transformLogEvent(log_event):
     """
     log_event_json = json.loads(log_event['message'])
     flattened_log_event_json = format_json(log_event_json)
+    flattened_log_event_json['cw_id'] = log_event['id']
+    flattened_log_event_json['cw_timestamp'] = datetime.utcfromtimestamp(
+        log_event['timestamp'] / 1000).isoformat()
     stringized_flattened_log_event_json = json.dumps(flattened_log_event_json)
     return stringized_flattened_log_event_json + '\n'
 

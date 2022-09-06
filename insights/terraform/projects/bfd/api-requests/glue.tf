@@ -33,11 +33,6 @@ module "glue-table-api-requests" {
       name    = "month"
       type    = "string"
       comment = "Month of request"
-    },
-    {
-      name    = "day"
-      type    = "string"
-      comment = "Day of request"
     }
   ]
 
@@ -45,7 +40,17 @@ module "glue-table-api-requests" {
   # file without a static table schema.
   columns = [
     {
-      "name"    = "context",
+      "name"    = "cw_timestamp",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "cw_id",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "timestamp",
       "type"    = "string",
       "comment" = ""
     },
@@ -55,7 +60,22 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
+      "name"    = "thread",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "logger",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "message",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "context",
       "type"    = "string",
       "comment" = ""
     },
@@ -65,12 +85,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_coverage_batch",
+      "name"    = "mdc_database_query_bene_by_coverage_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_coverage_batch_size",
+      "name"    = "mdc_database_query_bene_by_coverage_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -105,12 +125,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_batch",
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_batch_size",
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -140,12 +160,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_batch",
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_batch_size",
+      "name"    = "mdc_database_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -175,12 +195,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_batch",
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_batch_size",
+      "name"    = "mdc_database_query_bene_by_hicn_hicns_from_beneficiarieshistory_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -215,12 +235,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_batch",
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_batch_size",
+      "name"    = "mdc_database_query_bene_by_id_include_hicns_and_mbis_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -255,12 +275,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_batch",
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_batch_size",
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -271,6 +291,11 @@ module "glue-table-api-requests" {
     },
     {
       "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_id_omit_hicns_and_mbis_query",
       "type"    = "string",
       "comment" = ""
     },
@@ -290,17 +315,57 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_batch_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_batch",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_datasource_name",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_query",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_size",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_success",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_database_query_bene_by_mbi_mbis_from_beneficiarieshistory_type",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "mdc_database_query_by_hash_collision_distinct_bene_ids",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_carrier_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -335,12 +400,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_dme_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_dme_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_dme_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -375,12 +440,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_hha_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_hha_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_hha_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -415,12 +480,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_hospice_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -455,12 +520,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_inpatient_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -495,12 +560,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_outpatient_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -535,12 +600,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_pde_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_pde_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_pde_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -575,12 +640,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_snf_batch",
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_eobs_by_bene_id_snf_batch_size",
+      "name"    = "mdc_database_query_eobs_by_bene_id_snf_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -615,12 +680,12 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_unknown_batch",
+      "name"    = "mdc_database_query_unknown_batch_size",
       "type"    = "string",
       "comment" = ""
     },
     {
-      "name"    = "mdc_database_query_unknown_batch_size",
+      "name"    = "mdc_database_query_unknown_batch",
       "type"    = "string",
       "comment" = ""
     },
@@ -660,17 +725,17 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_http_access_request_header_accept",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
       "name"    = "mdc_http_access_request_header_accept-charset",
       "type"    = "string",
       "comment" = ""
     },
     {
       "name"    = "mdc_http_access_request_header_accept-encoding",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_accept",
       "type"    = "string",
       "comment" = ""
     },
@@ -726,6 +791,11 @@ module "glue-table-api-requests" {
     },
     {
       "name"    = "mdc_http_access_request_header_bluebutton-beneficiaryid",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_request_header_bluebutton-developer",
       "type"    = "string",
       "comment" = ""
     },
@@ -915,12 +985,27 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
+      "name"    = "mdc_http_access_response_duration_per_kb",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "mdc_http_access_response_header_cache-control",
       "type"    = "string",
       "comment" = ""
     },
     {
+      "name"    = "mdc_http_access_response_header_connection",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "mdc_http_access_response_header_content-encoding",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_http_access_response_header_content-length",
       "type"    = "string",
       "comment" = ""
     },
@@ -960,6 +1045,11 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
+      "name"    = "mdc_http_access_response_output_size_in_bytes",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "mdc_http_access_response_status",
       "type"    = "string",
       "comment" = ""
@@ -976,21 +1066,6 @@ module "glue-table-api-requests" {
     },
     {
       "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_include__record_count",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_duration_milliseconds",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_duration_nanoseconds",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_jpa_query_bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis_record_count",
       "type"    = "string",
       "comment" = ""
     },
@@ -1036,21 +1111,6 @@ module "glue-table-api-requests" {
     },
     {
       "name"    = "mdc_jpa_query_bene_by_id_include_mbi_record_count",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_jpa_query_bene_by_id_omit_hicns_and_mbis_duration_milliseconds",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_jpa_query_bene_by_id_omit_hicns_and_mbis_duration_nanoseconds",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_jpa_query_bene_by_id_omit_hicns_and_mbis_record_count",
       "type"    = "string",
       "comment" = ""
     },
@@ -1260,22 +1320,7 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_count",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "message",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "thread",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "timestamp",
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_countstring",
       "type"    = "string",
       "comment" = ""
     }
