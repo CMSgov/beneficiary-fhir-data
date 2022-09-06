@@ -4978,9 +4978,9 @@
                 "display" : "National Provider Identifier"
               } ]
             },
-            "value" : "1497758544"
+            "value" : "0000000000"
           },
-          "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+          "display" : "Fake ORG Name"
         },
         "role" : {
           "coding" : [ {

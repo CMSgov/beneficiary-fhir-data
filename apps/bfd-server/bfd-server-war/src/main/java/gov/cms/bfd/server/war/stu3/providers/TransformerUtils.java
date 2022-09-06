@@ -789,6 +789,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Setting identifier reference when npiorgdisplay is passed in.
+   *
    * @param identifierSystem the {@link Identifier#getSystem()} to use in {@link
    *     Reference#getIdentifier()}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link

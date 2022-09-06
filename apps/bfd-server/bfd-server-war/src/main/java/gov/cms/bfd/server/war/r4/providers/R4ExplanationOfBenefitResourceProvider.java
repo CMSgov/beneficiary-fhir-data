@@ -123,7 +123,11 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
-  /** @param npiOrgLookup the {@link NPIOrgLookup} to use */
+  /**
+   * Sets the npiorglookup for the npiorgdisplay.
+   *
+   * @param npiOrgLookup the {@link NPIOrgLookup} to use
+   */
   @Inject
   public void setnpiOrgLookup(NPIOrgLookup npiOrgLookup) {
     this.npiOrgLookup = npiOrgLookup;
