@@ -11,15 +11,15 @@ provider "aws" {
 }
 
 locals {
-  env = terraform.workspace
+  env              = terraform.workspace
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
+
   established_envs = [
     "test",
     "mgmt",
     "prod-sbx",
     "prod"
   ]
-
-  kms_key_alias = "alias/bfd-${local.env}-cmk"
 }
 
 data "aws_kms_key" "cmk" {
