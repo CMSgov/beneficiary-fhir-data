@@ -4,7 +4,7 @@
  * Enables Conditional daily build of a latest bfd-data-fda SNAPSHOT artifact from master 
  * using the bfd-cbc-build container image.  Downloads the external file for FDA, calculates the SHA for the file
  * Check in SSM to see if the SHA is empty or if the new SHA is not equal to the previously stored file SHA. If
- * this is the case, than it delivers to bfd-mgmt AWS CodeArtifact Maven Repository as appropriate.
+ * this is the case, then it delivers to bfd-mgmt AWS CodeArtifact Maven Repository as appropriate.
  */
 
 pipeline {
