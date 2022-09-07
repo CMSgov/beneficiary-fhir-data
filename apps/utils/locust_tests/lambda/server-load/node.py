@@ -5,6 +5,7 @@ This is a modified version of the `server-regression` lambda.
 
 import asyncio
 import os
+import time
 import urllib.parse
 from dataclasses import dataclass
 from typing import Any, List, Optional
@@ -15,6 +16,7 @@ from botocore.config import Config
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
+coasting_time = os.environ.get("COASTING_TIME", "10")
 
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
@@ -151,8 +153,11 @@ async def run_locust(event):
     while not scaling_event:
         scaling_event = check_queue(timeout=1)
 
-    print("Scaling event detected, terminating.")
+    print("Scaling event detected.")
     print(f"Scaling event detected was: {scaling_event[0]}")
+    print(f"Coasting for {coasting_time} seconds before termination.")
+
+    time.sleep(coasting_time)
 
     try:
         process.terminate()
