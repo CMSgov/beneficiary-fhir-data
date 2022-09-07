@@ -159,6 +159,8 @@ async def run_locust(event):
 
     time.sleep(coasting_time)
 
+    print("Coasting time complete, terminating worker node.")
+
     try:
         process.terminate()
     except ProcessLookupError as e:
