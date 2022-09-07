@@ -26,8 +26,11 @@ sequenceDiagram
     alt When scaling event occurs
         asg -->> sns: Scaling event notification
         sns -->> sqs: Forward scaling event notification
-        cpy -->> cpy: Stop spawning nodes
-        n -->> n: Stop running locust worker
+        par
+            cpy -->> cpy: Stop spawning nodes
+            n -->> n: Stop running locust worker
+        end
+        Note over csh: Locust worker death causes<br>termination of controller
     end
     deactivate csh
     deactivate cpy
