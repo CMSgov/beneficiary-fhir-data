@@ -10,7 +10,7 @@ spec:
   serviceAccount: bfd
   containers:
   - name: bfd-cbc-build
-    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv # TODO: make sure this is coming from somewhere sane
+    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv
     command:
     - sleep
     args:
@@ -25,8 +25,9 @@ spec:
 """
         }
     }
+    // Run Everyday at 2pm
      triggers {
-        cron('0 0 28 * *')
+        cron('0 14 * * *')
     }
     parameters {
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
