@@ -51,7 +51,8 @@ if __name__ == "__main__":
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
     region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
-    # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling, but this may need some adjustment.
+    # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling.
+    # This may need some adjustment, but should be a fine default.
     max_spawned_nodes = os.environ.get("MAX_SPAWNED_NODES", 80)
     spawning_timeout = os.environ.get("NODE_SPAWN_TIMEOUT", 10)
 

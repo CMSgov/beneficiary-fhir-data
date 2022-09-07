@@ -66,7 +66,6 @@ def check_queue(timeout: int = 1) -> List[Any]:
     """
     Checks SQS queue for messages.
     """
-    # TODO: Make sure to not remove message from queue
     response = queue.receive_messages(
         AttributeNames=["SenderId", "SentTimestamp"],
         WaitTimeSeconds=timeout,
