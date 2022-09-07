@@ -89,3 +89,11 @@ resource "aws_instance" "this" {
     git_repo_version = var.git_repo_version
   })
 }
+
+resource "random_integer" "this" {
+  min = 0
+  max = 2
+  keepers = {
+    az = var.create_locust_instance
+  }
+}

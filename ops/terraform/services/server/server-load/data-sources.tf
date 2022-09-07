@@ -89,3 +89,7 @@ data "aws_security_group" "vpn" {
     values = [local.nonsensitive_common_config["vpn_security_group"]]
   }
 }
+
+data "aws_availability_zones" "this" {
+  state = "available"
+}
