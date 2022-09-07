@@ -3,7 +3,7 @@
 BFD Insights captures data in near-real-time from the EC2 instances and provides the data for
 analysis in QuickSight.
 
-![Resource Diagram](docs/unique-bene-workflow-poc.svg)
+![Resource Diagram](docs/unique-bene-workflow.svg)
 
 ## API-Requests
 
@@ -40,11 +40,11 @@ be clear. For example, we have `module.glue-table-api-requests` and
 
 ```mermaid
 flowchart TB
-    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| S3["S3 Bucket"]
-    S3 -->|Crawler: History| History["Glue Table: API History"]
-    History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
+    CloudWatch["CloudWatch Log Group"] -->|"Manual Export (Historical)"| S3["S3 Bucket"]
+    S3 -->|Manual Athena Queries| APIRequests["Glue Table: API Requests"]
 
-    LogSubscription["CloudWatch Log Subscription (Real-Time)"] -->|"Kinesis Firehose / Lambda"| APIRequests
+    CloudWatch -->|"Subscription"| Kinesis["Kinesis Firehose"]
+    Kinesis -->|Lambda| APIRequests
 ```
 
 ## Adding new columns
@@ -94,4 +94,4 @@ flowchart TD
 
 ## Adding QuickSight Dashboards
 
-See the runbook in `runbooks/how-to-create-bfd-insights-quicksight.md`.
+See the runbook in [/runbooks/how-to-create-bfd-insights-quicksight.md](../../../../runbooks/how-to-create-bfd-insights-quicksight.md)
