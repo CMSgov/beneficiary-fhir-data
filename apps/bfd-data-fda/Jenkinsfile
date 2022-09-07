@@ -10,7 +10,7 @@ spec:
   serviceAccount: bfd
   containers:
   - name: bfd-cbc-build
-    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv # TODO: make sure this is coming from somewhere sane
+    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv
     command:
     - sleep
     args:
@@ -25,64 +25,114 @@ spec:
 """
         }
     }
-    // trigger builds on the 28th of every month
+    // Run Everyday at 2pm
      triggers {
-        cron('0 0 28 * *')
+        cron('0 14 * * *')
     }
     parameters {
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
     }
     stages {
-        stage('Maven') {
+        stage('Setup') {
             steps {
                 script {
                     container('bfd-cbc-build') {
                         // Address limitations resulting from CVE-2022-24767
                         sh 'git config --global --add safe.directory "$WORKSPACE"'
 
+                        // inject code artifact credentials into maven ~/.m2/settings.xml
+                        // Setup AWS Credentials
+                        awsAuth.assumeRole()
 
-                            dir('apps/bfd-data-fda/') {
-                                // inject code artifact credentials into maven ~/.m2/settings.xml
-                                // Setup AWS Credentials
-                             awsAuth.assumeRole()
-                             
                         withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                             codeArtifactAuthToken = sh(
+                            returnStdout: true,
+                            script: '''
+aws codeartifact get-authorization-token --domain bfd-mgmt \
+ --domain-owner "$ACCOUNT_ID" \
+ --output text --query authorizationToken
+'''
+                            ).trim()
+                            codeArtifactEndpoint = sh(
                                 returnStdout: true,
-                                script: 'aws codeartifact get-authorization-token --domain bfd-mgmt \
-                                        --domain-owner "$ACCOUNT_ID" \
-                                        --output text --query authorizationToken'
-                                ).trim()
-
+                                script: '''
+aws codeartifact get-repository-endpoint \
+--domain bfd-mgmt --repository bfd-mgmt \
+--format maven --output text
+'''
+                            )
                             env.CODEARTIFACT_AUTH_TOKEN = codeArtifactAuthToken
-                               
-                                sh '''
+                            env.CODEARTIFACT_ENDPOINT = codeArtifactEndpoint
+                        }
+                        sh '''
 cat <<EOF > ~/.m2/settings.xml
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-    <servers>
-        <server>
-        <username>aws</username>
-        <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-        <id>bfd-mgmt-bfd-mgmt</id>
-        </server>
-    </servers>
+<settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
+xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+<servers>
+    <server>
+    <username>aws</username>
+    <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+    <id>bfd-mgmt-bfd-mgmt</id>
+    </server>
+</servers>
 </settings>
 EOF
 '''
+                    }
+                }
+            }
+        }
+        stage('Maven Build') {
+            steps {
+                script {
+                    container('bfd-cbc-build') {
+                    // Calculate FDA DrugCode Sha256
+                        fdaDrugCodeSha256 = sh(
+                            returnStdout: true,
+                            script: '''
+curl -fsSL https://www.accessdata.fda.gov/cder/ndctext.zip | sha256sum | awk '{ print $1 }'
+'''
+                        )
+                        awsAuth.assumeRole()
+                        ssmLookupSha256 = sh(
+                            returnStdout: true,
+                            script: '''
+if parameter_lookup="$(aws ssm get-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda \
+--region us-east-1 --output text --query Parameter.Value 2>/dev/null)"; then
+   echo "$parameter_lookup"
+fi
+'''
+                        )
+
+                        if (ssmLookupSha256.isEmpty() || fdaDrugCodeSha256.trim() != ssmLookupSha256.trim()) {
+                            dir('apps/bfd-data-fda') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
                                 sh "mvn ${quietFlags} clean install"
-                                sh """mvn ${quietFlags} exec:java \
-    -Dexec.mainClass="gov.cms.bfd.data.fda.utility.App" \
-    -Dexec.args="./src/main/resources/"
-    """
+                                sh """
+mvn ${quietFlags} exec:java \
+-Dexec.mainClass="gov.cms.bfd.data.fda.utility.App" \
+-Dexec.args="./src/main/resources/"
+"""
+                                sh 'echo "$CODEARTIFACT_ENDPOINT"'
                                 sh "mvn ${quietFlags} package"
-                                sh 'mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"'
+
+                                withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
+                                    sh '''
+mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"
+'''
+                                }
+                                awsAuth.assumeRole()
+                                sh """
+aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda \
+--type String --region us-east-1 --value "${fdaDrugCodeSha256}"
+"""
                             }
-                            }
+                        } else {
+                            echo "Drug code already up-to-date. Nothing to do!"
                         }
                     }
                 }
             }
+        }
     }
 }
