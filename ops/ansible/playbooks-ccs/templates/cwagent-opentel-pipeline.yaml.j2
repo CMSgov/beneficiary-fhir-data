@@ -5,11 +5,11 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317
+        endpoint: localhost:4317
       http:
-        endpoint: 0.0.0.0:55681
+        endpoint: localhost:55681
   awsxray:
-    endpoint: 0.0.0.0:2000
+    endpoint: localhost:2000
     transport: udp
 
 processors:
