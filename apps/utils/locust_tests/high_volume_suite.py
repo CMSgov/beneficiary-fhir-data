@@ -52,8 +52,9 @@ def _(environment: Environment, **kwargs):
         data_type_name="hashed_mbis",
     )
 
-
-validation.set_validation_goal(validation.ValidationGoal.SLA_V2_BASELINE)
+## Load tests won't have validation EXCEPT our safeguard to ensure the database isn't falling over and bringing down the environment
+## If we want to test destroying the environment with massive calls, remove this.
+validation.set_validation_goal(validation.ValidationGoal.SLA_SAFEGUARD)
 
 
 class TestLoadShape(UserInitAwareLoadShape):
