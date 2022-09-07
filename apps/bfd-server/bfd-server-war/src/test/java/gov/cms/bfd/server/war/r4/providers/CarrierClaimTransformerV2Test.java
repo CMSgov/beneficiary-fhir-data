@@ -419,7 +419,7 @@ public class CarrierClaimTransformerV2Test {
         Arrays.asList(
             new Extension(
                 "http://hl7.org/fhir/sid/ndc",
-                new Coding("http://hl7.org/fhir/sid/ndc", "49035044700", null))));
+                new Coding("http://hl7.org/fhir/sid/ndc", "4000000000", null))));
 
     assertTrue(compare.equalsDeep(pos));
   }
