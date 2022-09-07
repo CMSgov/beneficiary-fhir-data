@@ -1344,18 +1344,18 @@ public final class TransformerTestUtilsV2 {
    * Creates a {@link ProcedureComponent} for use in testing
    *
    * @param seq The sequence number to set
-   * @param code A {@link Coding} to set to the procedureCodeableConcept
+   * @param codes A List of {@link Coding}s to set to the procedureCodeableConcept
    * @param date A String date when the procedure was performed
    * @return
    */
-  static ProcedureComponent createProcedure(int seq, Coding code, String date) {
+  static ProcedureComponent createProcedure(int seq, List<Coding> codes, String date) {
     // The CCW Procedure extraction uses a LocalDate and converts it to Date
     LocalDate ldate =
         LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
 
     return new ProcedureComponent()
         .setSequence(seq)
-        .setProcedure(new CodeableConcept().setCoding(Arrays.asList(code)))
+        .setProcedure(new CodeableConcept().setCoding(codes))
         .setDate(TransformerUtilsV2.convertToDate(ldate));
   }
 

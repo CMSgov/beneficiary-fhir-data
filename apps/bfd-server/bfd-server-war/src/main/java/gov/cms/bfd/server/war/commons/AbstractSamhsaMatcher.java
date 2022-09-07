@@ -359,17 +359,18 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given {@link Coding} contains a SAMHSA ICD10-10 Procedure Code. ICD-10-CM system
-   * coding URLs are required for CARIN compliance.
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code. ICD10 Medicare
+   * system coding URLs are required for CARIN compliance.
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
    *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
-   * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10-CM
+   * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10 Medicare
    */
   @VisibleForTesting
-  boolean isSamhsaIcd10CmProcedure(Coding coding) {
-    return isSamhsaCodingForSystem(coding, icd10ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10_CM);
+  boolean isSamhsaIcd10MedicareProcedure(Coding coding) {
+    return isSamhsaCodingForSystem(
+        coding, icd10ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10_MEDICARE);
   }
   /**
    * Checks if the given {@link Coding} is in the given {@link Set} of SAMHSA codes.
@@ -420,7 +421,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
         concept,
         this::isSamhsaIcd9Diagnosis,
         this::isSamhsaIcd10Diagnosis,
-        this::isSamhsaIcd10CmDiagnosis);
+        this::isSamhsaIcd10CmDiagnosis,
+        null);
   }
 
   /**
@@ -438,7 +440,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
         concept,
         this::isSamhsaIcd9Procedure,
         this::isSamhsaIcd10Procedure,
-        this::isSamhsaIcd10CmProcedure);
+        null,
+        this::isSamhsaIcd10MedicareProcedure);
   }
 
   /**
@@ -448,6 +451,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @param concept The {@link CodeableConcept} to check.
    * @param icd9Check The ICD-9 based SAMHSA check logic to use.
    * @param icd10Check The ICD-10 based SAMHSA check logic to use.
+   * @param icd10CmCheck The ICD-10-CM based SAMHSA check logic to use.
+   * @param icd10MedicareCheck The ICD-10 Medicare based SAMHSA check logic to use.
    * @return <code>true</code> if the given {@link CodeableConcept} contains any {@link Coding}s
    *     with SAMHSA data for it's respective system, or if the system is not ICD9/10. <code>false
    *     </code> otherwise.
@@ -457,7 +462,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
       CodeableConcept concept,
       final Predicate<Coding> icd9Check,
       final Predicate<Coding> icd10Check,
-      final Predicate<Coding> icd10CmCheck) {
+      final Predicate<Coding> icd10CmCheck,
+      final Predicate<Coding> icd10MedicareCheck) {
     boolean containsSamhsa = false;
 
     if (concept != null && concept.getCoding() != null) {
@@ -471,6 +477,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
                       return icd10Check.test(coding);
                     } else if (IcdCode.CODING_SYSTEM_ICD_10_CM.equals(coding.getSystem())) {
                       return icd10CmCheck.test(coding);
+                    } else if (IcdCode.CODING_SYSTEM_ICD_10_MEDICARE.equals(coding.getSystem())) {
+                      return icd10MedicareCheck.test(coding);
                     } else {
                       // Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
                       return true;
