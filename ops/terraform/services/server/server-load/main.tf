@@ -13,10 +13,11 @@ locals {
     stack       = local.env
   }
 
-  account_id = data.aws_caller_identity.current.account_id
-  env        = terraform.workspace
-  layer      = "app"
-  service    = "server-load"
+  account_id             = data.aws_caller_identity.current.account_id
+  availability_zone_name = data.aws_availability_zones.this.names[random_integer.this.result]
+  env                    = terraform.workspace
+  layer                  = "app"
+  service                = "server-load"
 
   queue_name = "bfd-${local.env}-${local.service}"
 
@@ -60,17 +61,17 @@ resource "aws_lambda_function" "node" {
 }
 
 resource "aws_instance" "this" {
-  count         = var.create_locust_instance ? 1 : 0
-  ami           = local.ami_id
-  instance_type = local.instance_type
-  key_name      = local.key_pair
+  count = var.create_locust_instance ? 1 : 0
 
-  iam_instance_profile        = aws_iam_instance_profile.this.name
-  availability_zone           = "us-east-1b" # TODO: Fix in BFD-1883
-  tags                        = local.shared_tags
-  monitoring                  = false
+  ami                         = local.ami_id
   associate_public_ip_address = false
+  availability_zone           = local.availability_zone_name
   ebs_optimized               = true
+  iam_instance_profile        = aws_iam_instance_profile.this.name
+  instance_type               = local.instance_type
+  key_name                    = local.key_pair
+  monitoring                  = false
+  tags                        = local.shared_tags
 
   subnet_id              = data.aws_subnet.main.id
   vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]

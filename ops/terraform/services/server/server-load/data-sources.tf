@@ -75,7 +75,7 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 
 data "aws_subnet" "main" {
   vpc_id            = data.aws_vpc.main.id
-  availability_zone = "us-east-1b" # TODO: Fix with BFD-1883
+  availability_zone = local.availability_zone_name
   filter {
     name   = "tag:Layer"
     values = [local.layer]
