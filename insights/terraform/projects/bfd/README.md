@@ -40,11 +40,14 @@ be clear. For example, we have `module.glue-table-api-requests` and
 
 The api_requests table has hard-coded column fields.
 
-Based on historical log files, this list is meant to contain every field ever used *so far*. However, when new fields are added to the FHIR server's log files, they will also need to be added to api-requests/glue.tf and then the tables will need to be updated in AWS. The procedure is:
+Based on historical log files, this list is meant to contain every field ever used *so far*.
+However, when new fields are added to the FHIR server's log files, they will also need to be added
+to api-requests/glue.tf and then the tables will need to be updated in AWS. The procedure is:
 
 1. Add the new column to terraform.
 2. Run terraform apply.
-3. To verify that the new column has been added, wait about fifteen minutes to be sure that some log files have been processed via Kinesis Firehose, and then run a quick Athena query such as:
+3. To verify that the new column has been added, wait about fifteen minutes to be sure that some
+log files have been processed via Kinesis Firehose, and then run a quick Athena query such as:
 
 ```sql
 SELECT
@@ -60,7 +63,8 @@ LIMIT 50;
 
 ## Manual Ingestion of Log Files
 
-This process will be done via a series of complex Athena queries, in order to reduce the amount of AWS Glue we have to perform. This approach is far more cost-effective and faster.
+This process will be done via a series of complex Athena queries, in order to reduce the amount of
+AWS Glue we have to perform. This approach is far more cost-effective and faster.
 
 **TODO: Add a reference to the runbook once completed.**
 
@@ -83,4 +87,5 @@ flowchart TD
 
 ## Adding QuickSight Dashboards
 
-See the runbook in [/runbooks/how-to-create-bfd-insights-quicksight.md](../../../../runbooks/how-to-create-bfd-insights-quicksight.md)
+See the runbook in
+[/runbooks/how-to-create-bfd-insights-quicksight.md](../../../../runbooks/how-to-create-bfd-insights-quicksight.md)
