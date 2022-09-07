@@ -125,7 +125,7 @@ jobs:
                 </servers>
             </settings>
           EOF
-          mvn --quiet --batch-mode --threads 1C verify #TODO: should we keep the quiet mode to have tidier GHA logs?
+          mvn --quiet --batch-mode --threads 1C verify
         working-directory: ./apps
       
       - name: 'Run Maven Build on FDA Drug Utility'
