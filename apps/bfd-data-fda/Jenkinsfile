@@ -114,7 +114,7 @@ if parameter_lookup="$(aws ssm get-parameter --name /bfd/mgmt/versioning/nonsens
 fi
 '''
                         )
-                        // Check whether the parameter is empoty or the sha value is not equal to the new sha value, if either 
+                        // Check whether the parameter is empty or the sha value is not equal to the new sha value, if either 
                         // it is empty or doesnt exist we build the project and deploy the new jar to aws code artifact
                         if (ssmLookupSha256.isEmpty() || fdaDrugCodeSha256.trim() != ssmLookupSha256.trim()) {
                             dir('apps/bfd-data-fda') {
