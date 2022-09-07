@@ -51,6 +51,9 @@ if __name__ == "__main__":
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
     region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+    # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling, but this may need some adjustment.
+    max_spawned_nodes = os.environ.get("MAX_SPAWNED_NODES", 80)
+    spawning_timeout = os.environ.get("NODE_SPAWN_TIMEOUT", 10)
 
     boto_config = Config(region_name=region)
 
@@ -64,7 +67,8 @@ if __name__ == "__main__":
     ip_address = socket.gethostbyname(socket.gethostname())
 
     scaling_event = []
-    while not scaling_event:
+    spawn_count = 0
+    while not scaling_event and spawn_count < max_spawned_nodes:
         start_node(controller_ip=ip_address, host=test_host)
-        # TODO: Make this timeout configurable to allow faster spawning.
-        scaling_event = check_queue(timeout=10)
+        scaling_event = check_queue(timeout=spawning_timeout)
+        spawn_count += 1
