@@ -214,7 +214,7 @@ public class RDABridge {
         }
 
         for (int i = 0; i < mcsSources.size(); ++i) {
-          samplerBuilder.registerSampleSet(currentSampleId++, mcsProportion / fissSources.size());
+          samplerBuilder.registerSampleSet(currentSampleId++, mcsProportion / mcsSources.size());
         }
 
         mbiSampler = samplerBuilder.build();
