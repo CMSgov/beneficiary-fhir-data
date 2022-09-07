@@ -36,7 +36,7 @@ that even the modules, which do not clearly indicate the type of AWS resource th
 be clear. For example, we have `module.glue-table-api-requests` and
 `aws_glue_crawler.glue-crawler-api-requests`.
 
-### Structure
+## Structure
 
 ```mermaid
 flowchart TB
@@ -47,7 +47,7 @@ flowchart TB
     LogSubscription["CloudWatch Log Subscription (Real-Time)"] -->|"Kinesis Firehose / Lambda"| APIRequests
 ```
 
-### Adding new columns
+## Adding new columns
 
 The api_requests table has hard-coded column fields.
 
@@ -69,32 +69,11 @@ WHERE
 LIMIT 50;
 ```
 
-### Manual Ingestion of Log Files
+## Manual Ingestion of Log Files
 
-Note: Replace `<environment>` and `<account-number>` with the name of your environment, such as
-`prod` or `prod-sbx`, and the AWS account number, respectively. Replace any `-` with `_` in
-`<underscore_environment>` (Athena doesn't like hyphens in table names).
+This process will be done via a series of complex Athena queries, in order to reduce the amount of AWS Glue we have to perform. This approach is far more cost-effective and faster.
 
-1. CloudWatch > Log Groups > `/bfd/<environment>/bfd-server/access.json`
-    - Actions > Export Data to Amazon S3
-        - Choose time period
-        - Select Account: *This Account*
-        - S3 Bucket Name: `bfd-insights-bfd-app-logs`
-        - S3 Bucket Prefix: `history/temp-<environment>`.
-    - Export. This took about 80 minutes for 3 weeks of prod-sbx logs.
-
-2. S3
-    - Select bucket `bfd-insights-bfd-app-logs`
-    - Go to path `history/temp-<environment>`
-    - Select all objects *except* `aws-logs-write-test`
-    - Actions > Move
-        - Bucket
-        - Destination: `bfd-insights-bfd-<account-number>/databases/bfd-insights-bfd-<environment>/bfd_insights_bfd_<underscore_environment>_api_history/`
-        - Move
-
-3. AWS Glue > Workflows > `bfd-insights-bfd-<environment>-history-workflow`
-    - Actions > Run. The entire workflow may take a bit to run through, but you can track progress
-    in the graph: History > (choose the top item) > Run Details.
+**TODO: Add a reference to the runbook once completed.**
 
 ## Beneficiaries
 
@@ -112,3 +91,7 @@ flowchart TD
     DataSet --> Analysis["QuickSight: Analysis"]
     Analysis --> Dashboard["QuickSight: Dashboard"]
 ```
+
+## Adding QuickSight Dashboards
+
+See the runbook in `runbooks/how-to-create-bfd-insights-quicksight.md`.
