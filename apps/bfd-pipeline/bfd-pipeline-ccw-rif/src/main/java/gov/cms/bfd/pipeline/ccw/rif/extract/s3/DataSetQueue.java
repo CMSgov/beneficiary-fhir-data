@@ -181,7 +181,10 @@ public final class DataSetQueue {
            * that it starts with a valid timestamp.
            */
           DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(key);
-          if (manifestId != null) manifestIds.add(manifestId);
+          // Skip future dates, so we can hold (synthetic) data to load in the future
+          if (manifestId != null && !manifestId.isFutureManifest()) {
+            manifestIds.add(manifestId);
+          }
         } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
           completedManifestsCount++;
         }
