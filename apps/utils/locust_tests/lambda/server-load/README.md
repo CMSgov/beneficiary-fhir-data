@@ -2,35 +2,32 @@
 sequenceDiagram
     autonumber
     actor u as User
+    participant csh as controller.sh
+    Note over csh: controller.sh runs main<br>locust process
+    participant cpy as controller.py
+    participant n as node.py &lambda;
     participant sqs as SQS
-    participant b as Broker
-    participant c as Controller
-    participant n AS Worker<br />Nodes
+    participant sns as SNS
     participant asg as ASG
-    u -->> sqs: Start load test
-    activate sqs
-    sqs ->> b: Start Broker #lambda;
-    deactivate sqs
-    activate b
-    b ->> c: Launch Controller #lambda;
-    activate c
-    c -->> sqs: Report ready state and controller IP
-    activate sqs
-    sqs -->> b: Broker receives controller IP
-    deactivate sqs
-    loop Until scaling event
-        b ->> n: Launch Worker Node #lambda;
-        activate n
-        b ->> b: sleep 1s
-        Note right of b: Sleep interval should be a variable
-        b ->> sqs: Fetch messages in queue
+    u -->> csh: Starts controller.sh
+    activate csh
+    u -->> cpy: Starts controller.py
+    activate cpy
+    loop Until autoscaling notification received via SNS subscription<br>or maximum number of nodes reached
+        par
+            cpy -->> n: Invoke worker node &lambda;
+            cpy -->> sqs: Check for scaling event
+        and
+            n --> asg: Run load tests against ASG via port 443
+            n --> csh: Report load test statistics via port 5557
+            n -->> sqs: Check for scaling event
+        end
     end
-    break On ASG lifecycle hook "EC2_INSTANCE_LAUNCHING"
-        asg -->> sqs: Scaling event has ocurred
-        sqs -->> b: Broker receives scaling event
-        b ->> b: stop starting worker nodes
-        deactivate n
+    alt When scaling event occurs
+        asg -->> sns: Scaling event notification
+        sns -->> sqs: Forward scaling event notification
+        cpy -->> cpy: Stop spawning nodes
+        n -->> n: Stop running locust worker
     end
-    deactivate c
-    deactivate b
-```
+    deactivate csh
+    deactivate cpy
