@@ -96,7 +96,7 @@ EOF
             steps {
                 script {
                     container('bfd-cbc-build') {
-                    // Download and Calculate FDA DrugCode Sha256 from the external source
+                      // Download and Calculate FDA DrugCode Sha256 from the external source
                         fdaDrugCodeSha256 = sh(
                             returnStdout: true,
                             script: '''
