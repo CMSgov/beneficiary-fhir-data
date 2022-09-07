@@ -36,17 +36,6 @@ that even the modules, which do not clearly indicate the type of AWS resource th
 be clear. For example, we have `module.glue-table-api-requests` and
 `aws_glue_crawler.glue-crawler-api-requests`.
 
-## Structure
-
-```mermaid
-flowchart TB
-    CloudWatch["CloudWatch Log Group"] -->|"Manual Export (Historical)"| S3["S3 Bucket"]
-    S3 -->|Manual Athena Queries| APIRequests["Glue Table: API Requests"]
-
-    CloudWatch -->|"Subscription"| Kinesis["Kinesis Firehose"]
-    Kinesis -->|Lambda| APIRequests
-```
-
 ## Adding new columns
 
 The api_requests table has hard-coded column fields.
