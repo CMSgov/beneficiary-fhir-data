@@ -23,7 +23,6 @@ class ValidationGoal(Enum):
     SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000)
     SLA_V1_BASELINE = (700, 1000, 3000)
     SLA_V2_BASELINE = (700, 1000, 3000)
-    SLA_SAFEGUARD = (3000, 3000, 3000)
 
     def __init__(self, sla_50: int, sla_95: int, sla_99: int) -> None:
         self.sla_50 = sla_50
