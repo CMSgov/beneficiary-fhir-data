@@ -3,6 +3,7 @@ package gov.cms.bfd.data.npi.utility;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.base.Strings;
 
 /**
  * A simple application that downloads NPI Data file; unzips it and then converts it to UTF-8
@@ -31,9 +32,17 @@ public final class App {
     if (args.length < 1) {
       throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
     }
-    if (args.length > 1) {
+
+    if(args.length==1){
+      if(Strings.isNullOrEmpty(args[0])){
+        throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
+      }
+    }
+
+    if (args.length > 2) {
       throw new IllegalArgumentException("Invalid arguments supplied for NPI download.");
     }
+
     DataUtilityCommons.getNPIOrgNames(args[0], NPI_RESOURCE);
   }
 }
