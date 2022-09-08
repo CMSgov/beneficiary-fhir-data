@@ -9,31 +9,67 @@
     "metrics_collected": {
       "cpu": {
         "measurement": [
+          "usage_active" ,
           "usage_idle",
           "usage_iowait",
-          "usage_user",
-          "usage_system"
+          "usage_system",
+          "usage_user"
         ]
       },
       "disk": {
         "measurement": [
+          "free",
+          "inodes_free",
+          "inodes_total",
+          "total",
           "used_percent",
-          "inodes_free"
+          "used"
         ]
       },
       "diskio": {
         "measurement": [
-          "io_time"
+          "io_time",
+          "reads_bytes",
+          "reads_time",
+          "reads",
+          "writes_bytes",
+          "writes_time",
+          "writes"
         ]
       },
       "mem": {
         "measurement": [
-          "used_percent"
+          "active",
+          "available_percent",
+          "buffered",
+          "cached",
+          "free",
+          "inactive",
+          "total",
+          "used_percent",
+          "used"
+        ]
+      },
+      "processes": {
+        "measurement": [
+          "blocked",
+          "dead",
+          "idle",
+          "paging",
+          "running",
+          "sleeping",
+          "stopped",
+          "total_threads",
+          "total",
+          "wait",
+          "zombies"
         ]
       },
       "swap": {
         "measurement": [
-          "used_percent"
+          "free",
+          "used_percent",
+          "used"
         ]
       }
     }
