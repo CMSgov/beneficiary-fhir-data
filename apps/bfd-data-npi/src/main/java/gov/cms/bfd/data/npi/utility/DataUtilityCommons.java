@@ -40,12 +40,11 @@ public class DataUtilityCommons {
   /**
    * Gets the org names from the npi file.
    *
-   * @param outputDir the output directory
-   * @param npiFile the npi file
+   * @param npiAppObject.
    */
-  public static void getNPIOrgNames(String outputDir, String npiFile)
+  public static void getNPIOrgNames(NpiAppObject npiAppObject)
       throws IOException, IllegalStateException {
-    Path outputPath = Paths.get(outputDir);
+    Path outputPath = Paths.get(npiAppObject.OutputDir);
     if (!Files.isDirectory(outputPath)) {
       throw new IllegalStateException("OUTPUT_DIR does not exist for NPI download.");
     }
@@ -59,7 +58,7 @@ public class DataUtilityCommons {
     }
 
     // If the output file isn't already there, go build it.
-    Path convertedNpiDataFile = outputPath.resolve(npiFile);
+    Path convertedNpiDataFile = outputPath.resolve(npiAppObject.NPI_RESOURCE);
     if (!Files.exists(convertedNpiDataFile)) {
       try {
         buildNPIResource(convertedNpiDataFile, tempDir);
@@ -69,6 +68,8 @@ public class DataUtilityCommons {
         recursivelyDelete(tempDir);
       }
     }
+
+  
   }
 
   /**
@@ -304,57 +305,57 @@ public class DataUtilityCommons {
         "NPI Org File Processing Error: Cannot field fieldname " + fieldName);
   }
 
-  /**
-   * Extracts a file name.
-   *
-   * @param getMonthBefore gets the month before
-   * @return a file name string
-   */
-  private static String getFileName(boolean getMonthBefore) {
-    Map<Integer, String> months =
-        new HashMap<Integer, String>() {
-          {
-            put(0, "January");
-            put(1, "February");
-            put(2, "March");
-            put(3, "April");
-            put(4, "May");
-            put(5, "June");
-            put(6, "July");
-            put(7, "August");
-            put(8, "September");
-            put(9, "October");
-            put(10, "November");
-            put(11, "December");
-          }
-        };
+  // /**
+  //  * Extracts a file name.
+  //  *
+  //  * @param getMonthBefore gets the month before
+  //  * @return a file name string
+  //  */
+  // private static String getFileName(boolean getMonthBefore) {
+  //   Map<Integer, String> months =
+  //       new HashMap<Integer, String>() {
+  //         {
+  //           put(0, "January");
+  //           put(1, "February");
+  //           put(2, "March");
+  //           put(3, "April");
+  //           put(4, "May");
+  //           put(5, "June");
+  //           put(6, "July");
+  //           put(7, "August");
+  //           put(8, "September");
+  //           put(9, "October");
+  //           put(10, "November");
+  //           put(11, "December");
+  //         }
+  //       };
 
-    Calendar cal = Calendar.getInstance();
-    int month = cal.get(Calendar.MONTH);
-    int currentYear = cal.get(Calendar.YEAR);
-    String currentMonth = null;
+  //   Calendar cal = Calendar.getInstance();
+  //   int month = cal.get(Calendar.MONTH);
+  //   int currentYear = cal.get(Calendar.YEAR);
+  //   String currentMonth = null;
 
-    String fileName = null;
+  //   String fileName = null;
 
-    if (getMonthBefore) {
-      if (month == 0) {
-        currentMonth = months.get(11);
-        currentYear = currentYear - 1;
-      } else {
-        currentMonth = months.get(month - 1);
-      }
+  //   if (getMonthBefore) {
+  //     if (month == 0) {
+  //       currentMonth = months.get(11);
+  //       currentYear = currentYear - 1;
+  //     } else {
+  //       currentMonth = months.get(month - 1);
+  //     }
 
-    } else {
-      currentMonth = months.get(month);
-    }
+  //   } else {
+  //     currentMonth = months.get(month);
+  //   }
 
-    fileName =
-        "https://download.cms.gov/nppes/NPPES_Data_Dissemination_"
-            + currentMonth
-            + "_"
-            + currentYear
-            + ".zip";
+  //   fileName =
+  //       "https://download.cms.gov/nppes/NPPES_Data_Dissemination_"
+  //           + currentMonth
+  //           + "_"
+  //           + currentYear
+  //           + ".zip";
 
-    return fileName;
-  }
+  //   return fileName;
+  // }
 }

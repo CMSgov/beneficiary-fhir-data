@@ -3,6 +3,7 @@ package gov.cms.bfd.data.npi.lookup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import gov.cms.bfd.data.npi.commons.NPIFakeOrg;
 import java.io.IOException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ public class NPIOrgLookupTest {
   public void shouldReturnFakeOrgDataWhenConstructorSetToTrue() throws IOException {
     NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIFakeOrg.FAKE_NPI_NUMBER));
     assertNotEquals(null, npiOrgDisplay.get());
   }
 
@@ -26,7 +27,7 @@ public class NPIOrgLookupTest {
   public void shouldNotReturnFakeOrgWhenConstructorSetToFalse() throws IOException {
     NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIFakeOrg.FAKE_NPI_NUMBER));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
@@ -35,8 +36,8 @@ public class NPIOrgLookupTest {
   public void shouldReturnFakeNPIOrgNameWhenConstructorSetToTrue() throws IOException {
     NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIFakeOrg.FAKE_NPI_NUMBER));
+    assertEquals(NPIFakeOrg.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
   /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true. */
@@ -44,7 +45,7 @@ public class NPIOrgLookupTest {
   public void shouldNotReturnFakeNPIOrgNameWhenConstructorSetToFalse() throws IOException {
     NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
     Optional<String> npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
+        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIFakeOrg.FAKE_NPI_NUMBER));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 }

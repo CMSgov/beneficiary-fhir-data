@@ -10,11 +10,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class App {
   private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-  /**
-   * The name of the classpath resource (for the project's main web application) for the NPI "Orgs"
-   * TSV file.
-   */
-  public static final String NPI_RESOURCE = "npi_org_data_utf8.tsv";
 
   /**
    * The application entry point, which will receive all non-JVM command line options in the <code>
@@ -34,6 +29,8 @@ public final class App {
     if (args.length > 1) {
       throw new IllegalArgumentException("Invalid arguments supplied for NPI download.");
     }
-    DataUtilityCommons.getNPIOrgNames(args[0], NPI_RESOURCE);
+
+    NpiAppOject npiAppObject = new NpiAppOject(args[0], false);
+    DataUtilityCommons.getNPIOrgNames(npiAppObject);
   }
 }
