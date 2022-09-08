@@ -1,9 +1,11 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
@@ -182,6 +184,36 @@ public final class DataSetManifestTest {
     assertNotNull(manifest);
     assertNotNull(manifest.getTimestamp());
     assertEquals(121212, manifest.getSequenceId());
+  }
+
+  /**
+   * Verifies that {@link DataSetManifest} with a future date correctly returns {@link
+   * DataSetManifestId#isFutureManifest} as {@code true}.
+   *
+   * @throws JAXBException failure reading in test code
+   */
+  @Test
+  public void whenFutureTimestampExpectFutureManifestTrue() throws JAXBException, SAXException {
+    InputStream manifestStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-e.xml");
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+
+    assertTrue(manifest.getId().isFutureManifest());
+  }
+
+  /**
+   * Verifies that {@link DataSetManifest} with a past date correctly returns {@link
+   * DataSetManifestId#isFutureManifest} as {@code false}.
+   *
+   * @throws JAXBException failure reading in test code
+   */
+  @Test
+  public void whenPastTimestampExpectFutureManifestFalse() throws JAXBException, SAXException {
+    InputStream manifestStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-a.xml");
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+
+    assertFalse(manifest.getId().isFutureManifest());
   }
 
   /**
