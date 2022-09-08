@@ -28,8 +28,46 @@ class AppBuildResults implements Serializable {
 def build(boolean verboseMaven) {
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
+  
+  	sh "ACCOUNT_ID=\"$(python3 -c 'import json,sys;print(json.loads(sys.argv[1])[\"Account\"])' \"$(aws sts get-caller-identity)\")\"
+            CODEARTIFACT_ENDPOINT=\"$(aws codeartifact get-repository-endpoint --domain bfd-mgmt --repository bfd-mgmt --format maven --output text)\"
+            CODEARTIFACT_AUTH_TOKEN=\"$(aws codeartifact get-authorization-token --domain bfd-mgmt \
+            --domain-owner \"$ACCOUNT_ID\" \
+            --output text --query authorizationToken)\"
+            cat <<EOF > ~/.m2/settings.xml
+            <settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+            xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd\">
+                <profiles>
+                    <profile>
+                        <id>bfd-mgmt-bfd-mgmt</id>
+                        <activation>
+                        <activeByDefault>true</activeByDefault>
+                        </activation>
+                        <repositories>
+                            <repository>
+                                <id>bfd-mgmt-bfd-mgmt</id>
+                                <url>${CODEARTIFACT_ENDPOINT}</url>
+                            </repository>
+                        </repositories>
+                    </profile>
+                </profiles>
+                <servers>
+                    <server>
+                    <username>aws</username>
+                    <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+                    <id>bfd-mgmt-bfd-mgmt</id>
+                    </server>
+                </servers>
+            </settings>
+          EOF"
+	
 
 		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
+	}
+
+	dir ('apps/bfd-data-fda') {
+		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
+		sh "mvn ${quietFlags} --threads 1C verify"
 	}
 
 	return new AppBuildResults(
