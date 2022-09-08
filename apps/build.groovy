@@ -67,7 +67,6 @@ def build(boolean verboseMaven) {
 
 	dir ('apps/bfd-data-fda') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-
 		sh "mvn ${quietFlags} --threads 1C verify"
 	}
 
