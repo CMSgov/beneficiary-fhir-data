@@ -1,3 +1,4 @@
+import sys
 import boto3
 from pathlib import Path
 
@@ -51,17 +52,15 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
         )
 
 
-def main():
+def main(args):
     client = boto3.client("s3")
+    s3_bucket = args[0]
+    target_dir = args[1]
 
-    file_names, folders = get_file_folders(client, "bfd-synthea")
+    file_names, folders = get_file_folders(client, s3_bucket)
     download_files(
-        client,
-        "bfd-synthea",
-        "/tmp/my-s3-folder",
-        file_names,
-        folders
+        client, s3_bucket, target_dir, file_names, folders
     )
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
