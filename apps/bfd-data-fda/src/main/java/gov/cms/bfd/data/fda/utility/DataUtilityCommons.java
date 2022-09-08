@@ -49,16 +49,19 @@ public class DataUtilityCommons {
     try {
       Path workingDir = Files.createTempDirectory("fda-data");
 
-      // If the output file isn't already there, go build it.
+      // If the output file is there, delete it.
       Path convertedNdcDataFile = outputPath.resolve(fdaFile);
-      if (!Files.exists(convertedNdcDataFile)) {
-        try {
-          DataUtilityCommons.buildProductsResource(convertedNdcDataFile, workingDir);
-        } finally {
-          // Recursively delete the working dir.
-          recursivelyDelete(workingDir);
-        }
+      if (Files.exists(convertedNdcDataFile)) {
+        Files.delete(convertedNdcDataFile);
       }
+
+      try {
+        DataUtilityCommons.buildProductsResource(convertedNdcDataFile, workingDir);
+      } finally {
+        // Recursively delete the working dir.
+        recursivelyDelete(workingDir);
+      }
+
     } catch (Exception ex) {
       throw new IllegalStateException(ex);
     }
