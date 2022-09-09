@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
@@ -37,13 +38,20 @@ public class DataUtilityCommons {
   /** Size of the buffer to read/write data. */
   private static final int BUFFER_SIZE = 4096;
 
+  /** Base url for the nppes download. */
+  private static final String BASE_URL = "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
+
+  /** The day of the month we should check to see if the file has posted. */
+  private static final int DAYS_IN_EXPIRATION = 10;
+
   /**
    * Gets the org names from the npi file.
    *
    * @param outputDir the output directory
+   * @param downloadUrl the downloadUrl passed in
    * @param npiFile the npi file
    */
-  public static void getNPIOrgNames(String outputDir, String npiFile)
+  public static void getNPIOrgNames(String outputDir, Optional<String> downloadUrl, String npiFile)
       throws IOException, IllegalStateException {
     Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {
@@ -62,7 +70,7 @@ public class DataUtilityCommons {
     Path convertedNpiDataFile = outputPath.resolve(npiFile);
     if (!Files.exists(convertedNpiDataFile)) {
       try {
-        buildNPIResource(convertedNpiDataFile, tempDir);
+        buildNPIResource(convertedNpiDataFile, downloadUrl, tempDir);
       } catch (IOException exception) {
         LOGGER.error("NPI data file could not be read.  Error:", exception);
       } finally {
@@ -201,22 +209,40 @@ public class DataUtilityCommons {
    * Creates the {@link #NPI_RESOURCE} file in the specified location.
    *
    * @param convertedNpiDataFile the output file/resource to produce
+   * @param downloadUrl is the download url
    * @param workingDir a directory that temporary/working files can be written to
    * @throws IOException (any errors encountered will be bubbled up)
    */
-  private static void buildNPIResource(Path convertedNpiDataFile, Path workingDir)
-      throws IOException {
+  private static void buildNPIResource(
+      Path convertedNpiDataFile, Optional<String> downloadUrl, Path workingDir) throws IOException {
     Path originalNpiDataFile;
-    String fileName;
+    String fileUrl;
 
-    try {
-      fileName = getFileName(false);
-      originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileName);
-    } catch (IOException e) {
-      fileName = getFileName(true);
-      originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileName);
+    if (downloadUrl.isPresent()) {
+      try {
+        originalNpiDataFile = getOriginalNpiDataFile(workingDir, downloadUrl.get());
+        convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
+      } catch (IOException e) {
+        Calendar cal = Calendar.getInstance();
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        if (day >= DAYS_IN_EXPIRATION) {
+          throw new IOException(
+              "NPI file is not available for the month and should of been made available by the NPI Files team.");
+        } else {
+          throw new IOException("NPI file is not for the month.");
+        }
+      }
+
+    } else {
+      try {
+        fileUrl = getFileName(false);
+        originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileUrl);
+      } catch (IOException e) {
+        fileUrl = getFileName(true);
+        originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileUrl);
+      }
+      convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
     }
-    convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
   }
 
   /**
@@ -348,12 +374,7 @@ public class DataUtilityCommons {
       currentMonth = months.get(month);
     }
 
-    fileName =
-        "https://download.cms.gov/nppes/NPPES_Data_Dissemination_"
-            + currentMonth
-            + "_"
-            + currentYear
-            + ".zip";
+    fileName = BASE_URL + currentMonth + "_" + currentYear + ".zip";
 
     return fileName;
   }

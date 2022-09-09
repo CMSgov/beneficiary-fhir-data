@@ -1,9 +1,10 @@
 package gov.cms.bfd.data.npi.utility;
 
+import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.base.Strings;
 
 /**
  * A simple application that downloads NPI Data file; unzips it and then converts it to UTF-8
@@ -33,16 +34,33 @@ public final class App {
       throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
     }
 
-    if(args.length==1){
-      if(Strings.isNullOrEmpty(args[0])){
-        throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
-      }
-    }
-
     if (args.length > 2) {
       throw new IllegalArgumentException("Invalid arguments supplied for NPI download.");
     }
 
-    DataUtilityCommons.getNPIOrgNames(args[0], NPI_RESOURCE);
+    String outputDir = null;
+    Optional<String> downloadUrl = Optional.empty();
+
+    if (args.length == 1) {
+      if (Strings.isNullOrEmpty(args[0])) {
+        throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
+      }
+      outputDir = args[0];
+    }
+
+    if (args.length == 2) {
+      if (Strings.isNullOrEmpty(args[0])) {
+        throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
+      }
+
+      if (Strings.isNullOrEmpty(args[1])) {
+        throw new IllegalArgumentException("Download Url argument not specified for NPI download.");
+      }
+
+      outputDir = args[0];
+      downloadUrl = Optional.of(args[1]);
+    }
+
+    DataUtilityCommons.getNPIOrgNames(outputDir, downloadUrl, NPI_RESOURCE);
   }
 }
