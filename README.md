@@ -88,7 +88,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
 1. Install pre-commit hooks `mvn -f apps initialize`
 
-### Adding Referene to AWS Code Artifactory
+### Adding Reference to AWS Code Artifactory
 1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours).  Replace {aws account id goes here} with the aws account id
 
 '''sh

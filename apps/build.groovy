@@ -74,9 +74,9 @@ xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache
     </profiles>
     <servers>
         <server>
-        <username>aws</username>
-        <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-        <id>bfd-mgmt-bfd-mgmt</id>
+          <username>aws</username>
+          <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+          <id>bfd-mgmt-bfd-mgmt</id>
         </server>
     </servers>
 </settings>
