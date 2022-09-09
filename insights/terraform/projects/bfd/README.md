@@ -126,97 +126,32 @@ collection to some degree.
 Annotate the `api_requests` data with the partner that made the query, based on the SSL client
 certificate.
 
-```sql
-CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_partners" AS
-SELECT
-    mdc_bene_id AS benes,
-    CASE "mdc_http_access_request_clientssl_dn"
-        WHEN 'C=US, CN=dpc.prod.client' then 'dpc'
-        WHEN 'C=US,CN=dpc.prod.client' then 'dpc'
-        WHEN 'CN=bluebutton-backend-prod-data-server-client-test' then 'bfd_test'
-        WHEN 'CN=bcda-prod-client' then 'bcda'
-        WHEN 'CN=ab2d-prod-client' then 'ab2d'
-        WHEN 'CN=ab2d-prod-validation-client' then 'ab2d_test'
-        WHEN 'EMAILADDRESS=ryan@adhocteam.us, CN=BlueButton Root CA, OU=BlueButton on FHIR API Root CA, O=Centers for Medicare and Medicaid Services, L=Baltimore, ST=Maryland, C=US' then 'bb2'
-        WHEN '1.2.840.113549.1.9.1=#16117279616e406164686f637465616d2e7573,CN=BlueButton Root CA,OU=BlueButton on FHIR API Root CA,O=Centers for Medicare and Medicaid Services,L=Baltimore,ST=Maryland,C=US' then 'bb2'
-        WHEN 'CN=bfd.cms.gov' then 'bfd'
-        ELSE 'unknown'
-    END AS partner,
-    *
-FROM "bfd_insights_bfd_prod_api_requests" AS api_requests;
-```
+[SQL](./athena-queries/partners.sql)
 
 ### Beneficiaries
 
 Split the beneficiaries by the comma separators, one row per beneficiary.
 
-```sql
-CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_beneficiaries" AS
-    SELECT
-        TRY(CAST(TRIM(bene) as bigint)) as bene,
-        "bfd_insights_bfd_prod_partners".*
-    FROM "bfd_insights_bfd_prod_partners"
-    CROSS JOIN UNNEST(split(benes, ',')) as x(bene);
-```
+[SQL](./athena-queries/beneficiaries.sql)
 
 #### Daily Unique
 
 Count the number of beneficiaries _first seen_ on each calendar date.
 
-```sql
-CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_unique_benes" AS
-    SELECT
-        COUNT(*) AS "num_benes",
-        "day"
-    FROM (
-        SELECT 
-            "bene",
-            DATE_FORMAT(from_iso8601_timestamp(MIN("timestamp")), '%Y-%m-%d') AS "day"
-        FROM
-            "bfd_insights_bfd_prod_beneficiaries"
-        WHERE
-            "bene" > 0
-            AND "mdc_http_access_response_status" = '200'
-        GROUP BY "bene"
-    )
-    GROUP BY "day"
-    ORDER BY "day";
-```
+[SQL](./athena-queries/daily_unqiue_benes.sql)
 
 ### Daily Benes
 
 Count all queries made on each calendar date.
 
-```sql
-CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_benes" AS
-    SELECT
-        COUNT(*) AS "num_benes",
-        DATE_FORMAT(from_iso8601_timestamp("timestamp"), '%Y-%m-%d') AS "day"
-    FROM
-        "bfd_insights_bfd_prod_beneficiaries"
-    WHERE
-        "bene" > 0
-        AND "mdc_http_access_response_status" = '200'
-    GROUP BY DATE_FORMAT(from_iso8601_timestamp("timestamp"), '%Y-%m-%d')
-    ORDER BY DATE_FORMAT(from_iso8601_timestamp("timestamp"), '%Y-%m-%d');
-```
+[SQL](./athena-queries/daily_benes.sql)
 
 ### Daily Combined
 
 For each date, combined `benes_queried` (total number of beneficiaries queried) and
 `benes_first_seen` (beneficiaries first seen on this date).
 
-```sql
-CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_combined" AS
-SELECT
-    COALESCE(a."num_benes", 0) AS benes_queried,
-    COALESCE(b."num_benes", 0) AS benes_first_seen,
-    date_parse(COALESCE(a."day", b."day"), '%Y-%m-%d') AS day
-FROM
-    "bfd_insights_bfd_prod_daily_benes" AS a
-    FULL JOIN "bfd_insights_bfd_prod_daily_unique_benes" AS b
-        ON (a."day" = b."day" OR a."day" IS NULL OR b."day" IS NULL);
-```
+[SQL](./athena-queries/daily_combined.sql)
 
 ## QuickSight Dashboards
 
