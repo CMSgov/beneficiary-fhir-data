@@ -63,6 +63,7 @@ def validate_and_run(args):
     ## Script assumes trailing slash on this, so add it if not added
     if not synthea_folder_filepath.endswith('/'):
         synthea_folder_filepath = synthea_folder_filepath + "/"
+    print ("Using Synthea folder: {}", synthea_folder_filepath)
     generated_benes = args[2]
     envs = args[3].split(',')
     skip_validation = True if len(args) > 4 and args[4] == "True" else False
@@ -432,4 +433,4 @@ def _execute_single_count_query(uri: str, query: str):
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
-    validate_and_run(sys.argv[1:])
+    validate_and_run(sys.argv[1:]) #get everything (slice) after the script name
