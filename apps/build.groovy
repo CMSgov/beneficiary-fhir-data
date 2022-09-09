@@ -83,11 +83,6 @@ EOF
 		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
 	}
 
-	dir ('apps/bfd-data-fda') {
-		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-		sh "mvn ${quietFlags} --threads 1C verify"
-	}
-
 	return new AppBuildResults(
 		dbMigratorZip: 'apps/bfd-db-migrator/target/bfd-db-migrator-1.0.0-SNAPSHOT.zip',
 		dataPipelineZip: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip',
