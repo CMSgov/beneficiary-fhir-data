@@ -2,26 +2,10 @@
 database "Glue Catalog" {
   frame "api_requests" as api_requests {
   }
-  frame "benes" as benes {
-  }
-  frame "benes_unique" as benes_unique {
-  }
 }
 
 note right of api_requests
-  unified historical and incoming raw api data
-end note
-
-note right of benes
-  * filter out non-200s
-  * reduce field selections
-  * pivot out bene_id arrays (one bene per record)
-  * stored in Parquet format (columnar store)
-end note
-
-note right of benes_unique
-  * reduce field selections
-  * only stores the "first seen" record for a bene
+  Unified historical and incoming raw api data
 end note
 
 package "Cloud Watch" {
@@ -60,19 +44,17 @@ note right of Lambda
   structure field.
 end note
 
-api_requests --> benes : Glue:Populate
-benes <--> benes_unique : Glue: Combine
-
 package "Analysis" {
-  [ Athena ] as A
+  [ Athena Views ] as A
+  api_requests --> A
   A --> [ QuickSight ]
-  benes --> A
-  benes_unique --> A
 }
 
 note right of A
-  dahboards can be built on either table
-  for the use case but queries against the
-  benes table may become unwieldy
+  * Filter out non-200s
+  * Reduce field selections
+  * Pivot out bene_id arrays (one bene per record)
+  * Aggregate benes_queried and first_seen date
 end note
+
 @enduml
