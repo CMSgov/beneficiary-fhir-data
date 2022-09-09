@@ -1316,11 +1316,11 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_countstring",
+      "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_count",
       "type"    = "string",
       "comment" = ""
     }
-  ] 
+  ]
 }
 
 # Crawler for the API Requests table
