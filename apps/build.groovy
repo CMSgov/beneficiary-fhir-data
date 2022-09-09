@@ -60,11 +60,14 @@ xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache
             <activeByDefault>true</activeByDefault>
             </activation>
             <repositories>
-                <repository>
-                    <id>bfd-mgmt-bfd-mgmt</id>
-                    <url>${CODEARTIFACT_ENDPOINT}</url>
-                </repository>
-            </repositories>
+				<repository>
+					<id>bfd-mgmt-bfd-mgmt</id>
+					<url>${CODEARTIFACT_ENDPOINT}</url>
+					<releases>
+					<enabled>false</enabled>
+					</releases>
+				</repository>
+			</repositories>
         </profile>
     </profiles>
     <servers>
