@@ -84,15 +84,6 @@ xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.
     <id>bfd-mgmt-bfd-mgmt</id>
     </server>
 </servers>
-<repositories>
-   <repository>
-    <id>bfd-mgmt-bfd-mgmt</id>
-    <url>${CODEARTIFACT_ENDPOINT}</url>
-    <releases>
-     <enabled>false</enabled>
-    </releases>
-   </repository>
-  </repositories>
 </settings>
 EOF
 '''
