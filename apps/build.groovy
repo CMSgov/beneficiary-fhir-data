@@ -49,6 +49,8 @@ aws codeartifact get-repository-endpoint \
 	}
 
 	// Add the authorization token and username for our aws code artifact repository
+	// Added the repositories section in order to not pull from the aws code artifact first instead
+	// of the regular maven repository.  Decreases build times assoiated with this change.
 	sh '''
 cat <<EOF > ~/.m2/settings.xml
 <settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
@@ -60,14 +62,14 @@ xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache
             <activeByDefault>true</activeByDefault>
             </activation>
             <repositories>
-				<repository>
-					<id>bfd-mgmt-bfd-mgmt</id>
-					<url>${CODEARTIFACT_ENDPOINT}</url>
-					<releases>
-					<enabled>false</enabled>
-					</releases>
-				</repository>
-			</repositories>
+               <repository>
+                   <id>bfd-mgmt-bfd-mgmt</id>
+                   <url>${CODEARTIFACT_ENDPOINT}</url>
+                   <releases>
+                   <enabled>false</enabled>
+                   </releases>
+               </repository>
+            </repositories>
         </profile>
     </profiles>
     <servers>

@@ -95,33 +95,44 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`
 '''
 
-2.  In your settings settings.xml file add the following (Replace {aws account id goes here} with the aws account id):
+2.  For your settings settings.xml file add the following (Replace {aws account id goes here} with the aws account id):
 ```xml
-<profiles>
-  <profile>
-    <id>bfd-mgmt-bfd-mgmt</id>
-    <activation>
-      <activeByDefault>true</activeByDefault>
-    </activation>
-    <repositories>
-      <repository>
-        <id>bfd-mgmt-bfd-mgmt</id>
-        <url>https://bfd-mgmt-{aws account id}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/</url>
-      </repository>
-    </repositories>
-  </profile>
-</profiles>
-```
+<?xml version="1.0" encoding="UTF-8"?>
 
-Under servers in your settings.xml file add the following:
-```xml
-<servers>
-  <server>
-    <id>bfd-mgmt-bfd-mgmt</id>
-    <username>aws</username>
-    <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
-  </server>
-</servers>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <!-- servers
+   | This is a list of authentication profiles, keyed by the server-id used within the system.
+   | Authentication profiles can be used whenever maven must make a connection to a remote server.
+   |-->
+  <servers>
+    <server>
+      <id>bfd-mgmt-bfd-mgmt</id>
+      <username>aws</username>
+      <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+    </server>
+  </servers>
+
+  <profiles>
+   <profile>
+      <id>bfd-mgmt-bfd-mgmt</id>
+      <activation>
+      <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+          <repository>
+            <id>bfd-mgmt-bfd-mgmt</id>
+            <url>https://bfd-mgmt-{aws account id goes here}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/</url>
+            <releases>
+              <enabled>false</enabled>
+            </releases>
+          </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>
 ```
 
 ### Native Setup
