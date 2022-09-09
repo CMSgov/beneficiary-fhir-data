@@ -161,7 +161,7 @@ CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_beneficiaries" AS
 
 #### Daily Unique
 
-Count of the number of beneficiaries _first seen_ on each calendar date.
+Count the number of beneficiaries _first seen_ on each calendar date.
 
 ```sql
 CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_unique_benes" AS
@@ -185,7 +185,7 @@ CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_unique_benes" AS
 
 ### Daily Benes
 
-Count of all queries made on each calendar date.
+Count all queries made on each calendar date.
 
 ```sql
 CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_benes" AS
@@ -203,11 +203,8 @@ CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_benes" AS
 
 ### Daily Combined
 
-For each date, combined `benes_queries` (total number of beneficiaries queried) and
+For each date, combined `benes_queried` (total number of beneficiaries queried) and
 `benes_first_seen` (beneficiaries first seen on this date).
-
-We break down the dates into `year`, `month`, and `day` (each as a string representation of the
-full date to that point) because it's helpful for sorting in QuickSight.
 
 ```sql
 CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_daily_combined" AS
