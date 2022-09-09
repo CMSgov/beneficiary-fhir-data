@@ -44,7 +44,7 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
     for file_name in file_names:
         file_path = Path.joinpath(local_path, file_name)
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        print('file_path: {0}'.format(file_path))
+        print(f"file_path: {file_path}")
         s3_client.download_file(
             bucket_name,
             file_name,
