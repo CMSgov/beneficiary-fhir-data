@@ -14,7 +14,7 @@ locals {
   }
 
   account_id             = data.aws_caller_identity.current.account_id
-  availability_zone_name = data.aws_availability_zones.this.names[random_integer.this.result]
+  availability_zone_name = var.create_locust_instance ? data.aws_availability_zones.this.names[random_integer.this[0].result] : ""
   env                    = terraform.workspace
   layer                  = "app"
   service                = "server-load"
@@ -73,7 +73,7 @@ resource "aws_instance" "this" {
   monitoring                  = false
   tags                        = local.shared_tags
 
-  subnet_id              = data.aws_subnet.main.id
+  subnet_id              = data.aws_subnet.main[0].id
   vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
 
   root_block_device {
@@ -92,8 +92,9 @@ resource "aws_instance" "this" {
 }
 
 resource "random_integer" "this" {
-  min = 0
-  max = 2
+  count = var.create_locust_instance ? 1 : 0
+  min   = 0
+  max   = 2
   keepers = {
     az = var.create_locust_instance
   }
