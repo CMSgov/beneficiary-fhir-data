@@ -86,38 +86,54 @@ flowchart TD
     Analysis --> Dashboard["QuickSight: Dashboard"]
 ```
 
-## Manual Creation of QuickSight Dashboards
+### Athena Views
 
-Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
-Replace any `-` with `_` in `<underscore_environment>` (Athena doesn't like hyphens in table
-names).
+Instead of using AWS Glue to build intermediate tables, we use Athena views to standardize data collection to some degree. Below are the `CREATE` statements used to build the views:
 
-1. Go to [QuickSight](https://us-east-1.quicksight.aws.amazon.com/).
-2. Datasets. New Dataset.
-    - Athena.
-        - Name your data source. Example: `bfd-<environment>-beneficiaries`
-        - Athena Workgroup: `bfd`
-        - Create Data Source.
-    - Choose Your Table.
-        - Catalog: `AwsDataCatalog`
-        - Database: `bfd-<environment>`
-        - Table: Choose the one you want to query. Ex: `bfd_<underscore_environment>_beneficiaries`
-        - Select.
-    - Finish dataset creation.
-        - Directly query your data.
-        - Visualize.
-3. Create an analysis.
-    - Add a Count sheet (Unique Beneficiaries only)
-        - Under Visual Types (on the left), select `Insight` (it looks like an old-school lightbulb with a lightning bolt)
-        - Drag `bene_id` from the left to the chart.
-        - Click on Customize Insight on the chart.
-        - Computations > Add one.
-        - Total aggregation. Next.
-        - Select `bene_id` from the dropdown (it should already be selected by default). Add.
-        - Save.
-    - Add a Line Chart sheet.
-        - Under Visual Types (on the left), select `Line Chart`.
-        - Expand Field Wells at the top.
-        - Drag `# bene_id` from the left to "Value" under the Field Wells.
-        - Drag `timestamp` (beneficiaries table) or `last_seen` (beneficiaries_unique table) to the "X Axis" under the Field Wells.
-        - In the upper-right, click Share > Publish Dashboard. Choose a name. Example: `bfd-<environment>-beneficiaries`. The default options should be fine, so click Publish Dashboard.
+```sql
+CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_partners" AS
+    SELECT
+        mdc_bene_id AS benes,
+        CASE "mdc_http_access_request_clientssl_dn"
+            WHEN 'C=US, CN=dpc.prod.client' then 'dpc'
+            WHEN 'C=US,CN=dpc.prod.client' then 'dpc'
+            WHEN 'CN=bluebutton-backend-prod-data-server-client-test' then 'bfd_test'
+            WHEN 'CN=bcda-prod-client' then 'bcda'
+            WHEN 'CN=ab2d-prod-client' then 'ab2d'
+            WHEN 'CN=ab2d-prod-validation-client' then 'ab2d_test'
+            WHEN 'EMAILADDRESS=ryan@adhocteam.us, CN=BlueButton Root CA, OU=BlueButton on FHIR API Root CA, O=Centers for Medicare and Medicaid Services, L=Baltimore, ST=Maryland, C=US' then 'bb2'
+            WHEN '1.2.840.113549.1.9.1=#16117279616e406164686f637465616d2e7573,CN=BlueButton Root CA,OU=BlueButton on FHIR API Root CA,O=Centers for Medicare and Medicaid Services,L=Baltimore,ST=Maryland,C=US' then 'bb2'
+            WHEN 'CN=bfd.cms.gov' then 'bfd'
+            ELSE 'unknown'
+        END AS partner,
+  *
+  FROM "bfd_insights_bfd_prod_api_requests" AS api_requests;
+```
+
+```sql
+CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_beneficiaries" AS
+    SELECT
+        TRY(CAST(TRIM(bene) as bigint)) as bene,
+        "bfd_insights_bfd_prod_partners".*
+    FROM "bfd_insights_bfd_prod_partners"
+    CROSS JOIN UNNEST(split(benes, ',')) as x(bene);
+```
+
+```sql
+CREATE OR REPLACE VIEW "bfd_insights_bfd_prod_monthly_unique_benes" AS
+    SELECT
+        first_date,
+        COUNT(*) AS num_benes
+    FROM (
+        SELECT 
+            bene,
+            DATE_FORMAT(from_iso8601_timestamp(MIN("timestamp")), '%Y-%m') AS first_date
+        FROM
+            "bfd_insights_bfd_prod_beneficiaries"
+        WHERE
+            bene > 0
+        GROUP BY bene
+    )
+    GROUP BY first_date
+    ORDER BY first_date;
+```
