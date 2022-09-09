@@ -74,6 +74,7 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 }
 
 data "aws_subnet" "main" {
+  count             = var.create_locust_instance ? 1 : 0
   vpc_id            = data.aws_vpc.main.id
   availability_zone = local.availability_zone_name
   filter {
