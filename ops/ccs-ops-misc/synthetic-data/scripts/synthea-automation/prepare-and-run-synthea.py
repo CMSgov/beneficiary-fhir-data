@@ -63,12 +63,16 @@ def validate_and_run(args):
     ## Script assumes trailing slash on this, so add it if not added
     if not synthea_folder_filepath.endswith('/'):
         synthea_folder_filepath = synthea_folder_filepath + "/"
-    print ("Using Synthea folder: {0}'.format(synthea_folder_filepath))
+    print (f"Using Synthea folder: {synthea_folder_filepath}")
     generated_benes = args[2]
     envs = args[3].split(',')
     skip_validation = True if len(args) > 4 and args[4] == "True" else False
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
+    
+    print (f"Synthea folder file path: {synthea_folder_filepath}")
+    print (f"Synthea folder prop path: {synthea_prop_filepath}")
+    print (f"Synthea folder output   : {synthea_output_filepath}")
     
     found_all_paths = validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_output_filepath, end_state_file_path)
     
