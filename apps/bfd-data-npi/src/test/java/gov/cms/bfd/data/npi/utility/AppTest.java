@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 
 import java.io.IOException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -24,14 +25,14 @@ public final class AppTest {
     assertEquals("OUTPUT_DIR argument not specified for NPI download.", exception.getMessage());
   }
 
-  /** Throws Illegal Argument Exception When more than one argument is Passed. */
+  /** Throws Illegal Argument Exception When more than two arguments is Passed. */
   @Test
   public void npiAppThrowsIllegalArgumentExceptionWhenMoreThanOneArgumentsPassed() {
     Throwable exception =
         assertThrows(
             IllegalArgumentException.class,
             () -> {
-              App.main(new String[] {"Argument 1", "Argument 2"});
+              App.main(new String[] {"Argument 1", "Argument 2", "Argument 3"});
             });
     assertEquals("Invalid arguments supplied for NPI download.", exception.getMessage());
   }
@@ -46,19 +47,5 @@ public final class AppTest {
               App.main(new String[] {"Argument 1"});
             });
     assertEquals("OUTPUT_DIR does not exist for NPI download.", exception.getMessage());
-  }
-
-  /** NPI passes with valid parameters. */
-  @Test
-  public void npiAppPassesWithValidParameters() throws IOException {
-    try (MockedStatic<DataUtilityCommons> dataUtilityCommons =
-        Mockito.mockStatic(DataUtilityCommons.class)) {
-      String outputDir = "outputDir";
-
-      dataUtilityCommons
-          .when(() -> DataUtilityCommons.getNPIOrgNames(any(), any()))
-          .thenAnswer((Answer<Void>) invocation -> null);
-      App.main(new String[] {outputDir});
-    }
   }
 }

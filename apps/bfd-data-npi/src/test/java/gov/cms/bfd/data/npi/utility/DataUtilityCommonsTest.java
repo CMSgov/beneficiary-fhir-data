@@ -2,10 +2,12 @@ package gov.cms.bfd.data.npi.utility;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -32,7 +34,7 @@ public final class DataUtilityCommonsTest {
               assertThrows(
                   IllegalStateException.class,
                   () -> {
-                    DataUtilityCommons.getNPIOrgNames(outputDir, any());
+                    DataUtilityCommons.getNPIOrgNames(outputDir, Optional.empty(), anyString());
                   });
           assertEquals("OUTPUT_DIR does not exist for NPI download.", exception.getMessage());
         }
