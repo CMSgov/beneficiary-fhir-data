@@ -33,7 +33,7 @@ def get_file_folders(s3_client, bucket_name, prefix=""):
     return file_names, folders
 
 
-def download_files(s3_client, bucket_name, local_path, file_names, folders):
+def download_files(s3_client, bucket_name, local_path, target_file, file_names, folders):
 
     local_path = Path(local_path)
 
@@ -42,24 +42,26 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
         folder_path.mkdir(parents=True, exist_ok=True)
 
     for file_name in file_names:
-        file_path = Path.joinpath(local_path, file_name)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        print(f"file_path: {file_path}")
-        s3_client.download_file(
-            bucket_name,
-            file_name,
-            str(file_path)
-        )
+        if target_file == "" or target_file == file_name:
+            file_path = Path.joinpath(local_path, file_name)
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            print(f"file_path: {file_path}")
+            s3_client.download_file(
+                bucket_name,
+                file_name,
+                str(file_path)
+            )
 
 
 def main(args):
     client = boto3.client("s3")
-    s3_bucket = args[0]
-    target_dir = args[1]
+    s3_bucket   = args[0]
+    target_dir  = args[1]
+    target_file = args[2] if len(args) > 2 else ""
 
     file_names, folders = get_file_folders(client, s3_bucket)
     download_files(
-        client, s3_bucket, target_dir, file_names, folders
+        client, s3_bucket, target_dir, target_file, file_names, folders
     )
 
 if __name__ == "__main__":
