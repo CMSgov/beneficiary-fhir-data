@@ -1,11 +1,12 @@
 import sys
 import boto3
+import botocore
 from botocore.config import Config
 from pathlib import Path
 
 
 boto_config = Config(region_name="us-east-1")
-s3 = boto3.client('s3', config=boto_config)
+s3_client = boto3.client('s3', config=boto_config)
 
 mitre_synthea_bucket = "bfd-synthea"
 bfd_synthea_bucket = "bfd-test-synthea-etl-577373831711"
@@ -25,10 +26,10 @@ code_map_files = [
 
 def download_map_files(target_dir):
     for file_name in code_map_files:
-        file_path = Path.joinpath(target_dir, file_name)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+        output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
+        print("file_path: {0}".format(str(output_fn)))
         try:
-            s3.Bucket(mitre_synthea_bucket).download_file(file_name, str(file_path))
+            s3_client.download_file(mitre_synthea_bucket, file_name, output_fn)
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "404":
                 print("The object does not exist.")
@@ -36,10 +37,11 @@ def download_map_files(target_dir):
                 raise
 
 def download_characteristic_file(target_dir) -> str:
-    file_path = Path.joinpath(target_dir, os.path.basename(bfd_synthea_characteristic_file))
+    output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
+    output_fn = output_fn + bfd_synthea_characteristic_file
     try:
-        s3.Bucket(bfd_synthea_bucket).download_file(bfd_synthea_characteristic_file, str(file_path))
-        return str(file_path)
+        s3_client.download_file(bfd_synthea_bucket, bfd_synthea_characteristic_file, output_fn)
+        return output_fn
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")
@@ -48,8 +50,7 @@ def download_characteristic_file(target_dir) -> str:
 
 def upload_characteristic_file(file_name):
     try:
-        s3.Bucket(bfd_synthea_bucket).upload_file(
-            file_name, bfd_synthea_bucket, bfd_synthea_characteristic_file)
+        s3_client.upload_file(file_name, bfd_synthea_bucket, bfd_synthea_characteristic_file)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")
@@ -57,8 +58,8 @@ def upload_characteristic_file(file_name):
             raise
 
 def main(args):
-    target = args[1] if len(args) > 1 else "./"
-    op = args[2] if len(args) > 2 else "download_csv"
+    target = args[0] if len(args) > 0 else "./"
+    op = args[1] if len(args) > 1 else "download_csv"
     if op == "download_csv":
         download_map_files(target)
     else:
