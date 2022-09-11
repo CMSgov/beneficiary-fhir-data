@@ -30,7 +30,7 @@ def generate_characteristics_file(args):
     
     bene_id_start = args[0]
     bene_id_end = args[1]
-    output_path = args[2]
+    output_path = args[2] if args[2].endswith('/') else args[2] + "/"
     env = args[3]
     
     db_string = ""
