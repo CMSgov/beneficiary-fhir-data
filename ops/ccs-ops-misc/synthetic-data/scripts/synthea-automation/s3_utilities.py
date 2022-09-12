@@ -11,7 +11,7 @@ s3_client = boto3.client('s3', config=boto_config)
 
 mitre_synthea_bucket = "bfd-synthea"
 bfd_synthea_bucket = "bfd-test-synthea-etl-577373831711"
-bfd_synthea_characteristic_file = "end_state/characteristics.csv"
+end_state_props_file = "end_state/end_state.properties
 
 code_map_files = [
     'betos_code_map.json',
@@ -58,13 +58,13 @@ def download_synthea_scripts(target_dir):
             else:
                 raise
 
-def download_characteristic_file(target_dir) -> str:
-    base_name = os.path.basename(bfd_synthea_characteristic_file)
+def download_end_state_props_file(target_dir) -> str:
+    base_name = os.path.basename(end_state_props_file)
     output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
     output_fn = output_fn + base_name
-    print(f"download_characteristic_file, output_fn: {output_fn}")
+    print(f"download_end_state_props_file, output_fn: {output_fn}")
     try:
-        s3_client.download_file(bfd_synthea_bucket, bfd_synthea_characteristic_file, output_fn)
+        s3_client.download_file(bfd_synthea_bucket, end_state_props_file, output_fn)
         return output_fn
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
@@ -72,10 +72,10 @@ def download_characteristic_file(target_dir) -> str:
         else:
             raise
 
-def upload_characteristic_file(file_name):
-    print(f"upload_characteristic_file, file_name: {file_name}")
+def upload_end_state_props_file(file_name):
+    print(f"upload_end_state_props_file, file_name: {file_name}")
     try:
-        s3_client.upload_file(file_name, bfd_synthea_bucket, bfd_synthea_characteristic_file)
+        s3_client.upload_file(file_name, bfd_synthea_bucket, end_state_props_file)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")
@@ -93,11 +93,11 @@ def main(args):
             download_synthea_scripts(target)
         else:
             if op == "download_prop":
-                rslt = download_characteristic_file(target)
+                rslt = download_end_state_props_file(target)
                 return rslt
             else:
                 if op == "upload_prop":
-                    upload_characteristic_file(target)
+                    upload_end_state_props_file(target)
                 else:
                     return 1
 
