@@ -288,7 +288,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
-      // Add bene_id to MDC logs
+      // Add bene_id to MDC logs when _lastUpdated filter is in effect
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
       return TransformerUtilsV2.createBundle(
