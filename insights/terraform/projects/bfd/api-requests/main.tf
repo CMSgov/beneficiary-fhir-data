@@ -15,5 +15,6 @@ locals {
     business    = "OEDA",
     application = "bfd-insights",
     project     = "bfd"
+    environment = local.environment
   }
 }

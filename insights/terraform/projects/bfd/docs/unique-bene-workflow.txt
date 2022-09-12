@@ -1,7 +1,5 @@
 @startuml
 database "Glue Catalog" {
-  frame "api_history" as api_history {
-  }
   frame "api_requests" as api_requests {
   }
   frame "benes" as benes {
@@ -29,7 +27,6 @@ end note
 package "Cloud Watch" {
   [ Log Group\n(access.json) ] as L
   L --> () Export
-  Export --> api_history
   L --> () Subscription
 }
 
@@ -43,20 +40,25 @@ note left of Export
    historical data.
 end note
 
-package "Kinesis FIrehose" {
+package "Athena" {
+  (Queries)
+}
+
+package "Kinesis Firehose" {
 (Lambda)
 }
 
+Export --> Queries
+Queries --> api_requests
+
 Subscription --> (Lambda)
-Lambda --> api_history
+Lambda --> api_requests
 
 note right of Lambda
   Flatten the JSON schema so that
   we have one column for each MDC
   structure field.
 end note
-
-api_history -> api_requests : Glue:Flatten
 
 api_requests --> benes : Glue:Populate
 benes <--> benes_unique : Glue: Combine
@@ -73,5 +75,4 @@ note right of A
   for the use case but queries against the
   benes table may become unwieldy
 end note
-
 @enduml
