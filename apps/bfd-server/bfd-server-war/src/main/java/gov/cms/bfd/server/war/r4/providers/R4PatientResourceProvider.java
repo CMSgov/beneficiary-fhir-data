@@ -222,6 +222,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<IBaseResource> patients;
     if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(logicalId.getValue());
+
       patients = Collections.emptyList();
     } else {
       try {
