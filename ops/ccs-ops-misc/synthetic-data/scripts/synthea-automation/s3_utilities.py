@@ -11,7 +11,7 @@ s3_client = boto3.client('s3', config=boto_config)
 
 mitre_synthea_bucket = "bfd-synthea"
 bfd_synthea_bucket = "bfd-test-synthea-etl-577373831711"
-end_state_props_file = "end_state/end_state.properties
+end_state_props_file = "end_state/end_state.properties"
 
 code_map_files = [
     'betos_code_map.json',

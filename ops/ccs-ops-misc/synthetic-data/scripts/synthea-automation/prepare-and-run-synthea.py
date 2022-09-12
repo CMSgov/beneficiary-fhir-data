@@ -374,9 +374,11 @@ def update_property_file(end_state_file_lines, synthea_props_file_location):
     
     replacement_lines = []
     for line in end_state_file_lines:
-        ## Avoid any accidental blank lines in the end state file
+        ## Avoid any accidental blank lines in the end state file;
+        ## also, ignore any comment lines
         if len(line.strip()) > 0:
-            replacement_lines.append(line.split("="))
+            if line[0] != '#':
+                replacement_lines.append(line.split("="))
         
     for tuple in replacement_lines:
         replace_text = tuple[0] + "=" + tuple[1]
