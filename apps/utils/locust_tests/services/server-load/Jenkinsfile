@@ -1,0 +1,39 @@
+#!/usr/bin/env groovy
+
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer 'bfd-cbc-build'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: false
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
+    }
+  }
+
+  stages {
+    stage('Run Load Tests') {
+      steps {
+        // TODO: Run terraform apply, create infrastructure (which starts load test service)
+
+        // TODO: Await some signal from controller (SQS or other) with log location and other detail
+      }
+    }
+  }
+}
