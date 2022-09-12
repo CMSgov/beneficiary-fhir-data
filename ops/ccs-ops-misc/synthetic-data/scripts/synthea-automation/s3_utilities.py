@@ -2,6 +2,7 @@ import sys
 import os
 import boto3
 import botocore
+import fnmatch
 from botocore.config import Config
 from pathlib import Path
 
@@ -64,7 +65,7 @@ def download_end_state_props_file(target_dir) -> str:
     output_fn = output_fn + base_name
     print(f"download_end_state_props_file, output_fn: {output_fn}")
     try:
-        s3_client.download_file(bfd_synthea_bucket, end_state_props_file, output_fn)
+        s3_client.download_file(mitre_synthea_bucket, end_state_props_file, output_fn)
         return output_fn
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
@@ -75,18 +76,40 @@ def download_end_state_props_file(target_dir) -> str:
 def upload_end_state_props_file(file_name):
     print(f"upload_end_state_props_file, file_name: {file_name}")
     try:
-        s3_client.upload_file(file_name, bfd_synthea_bucket, end_state_props_file)
+        s3_client.upload_file(file_name, mitre_synthea_bucket, end_state_props_file)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")
         else:
             raise
 
-def upload_csv_files(file_name):
-    print(f"upload_csv_files, file_name: {file_name}")
+def get_props_value(list, starts_with):
+    """
+    Small helper function for getting a value from the property file
+    for the line that starts with the given value.
+    """
+    return [x for x in list if x.startswith(starts_with)][0].split("=")[1]
 
-def upload_manifest_file(file_name):
-    print(f"upload_manifest_file, file_name: {file_name}")
+def create_s3_bucket_for_rif(folder_name) -> str:
+    print(f"create_s3_bucket_for_rif, file_name: {folder_name}")
+
+def upload_rif_files(synthea_output_dir):
+    print(f"upload_csv_files, file_name: {synthea_output_dir}")
+    for fn in os.listdir(synthea_output_dir):
+        if fnmatch.fnmatch(fn, '*.csv'):
+            print(file)
+
+def upload_manifest_file(synthea_output_dir):
+    print(f"upload_manifest_file, file_name: {synthea_output_dir}")
+    for fn in os.listdir(synthea_output_dir):
+        if fnmatch.fnmatch(fn, 'manifest.xml'):
+            print(file)
+
+
+def upload_synthea_results(synthea_output_dir):
+    print(f"upload_synthea_outputs_to_s3, file_name: {synthea_output_dir}")
+    upload_rif_files(synthea_output_dir)
+    upload_manifest_file(synthea_output_dir)
 
 def main(args):
     target = args[0] if len(args) > 0 else "./"
@@ -101,10 +124,8 @@ def main(args):
             download_end_state_props_file(target)
         case "upload_prop":
             upload_end_state_props_file(target)
-        case "upload_csv":
-            upload_csv_files(target)
-        case "upload_manifest":
-            upload_manifest_file(target)
+        case "upload_synthea_results":
+            upload_synthea_results(target)
         case _:
             return 1
 
