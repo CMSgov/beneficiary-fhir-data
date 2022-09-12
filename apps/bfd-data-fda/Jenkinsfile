@@ -135,7 +135,7 @@ mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mg
                                 awsAuth.assumeRole()
                                 sh """
 aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda \
---type String --region us-east-1 --value "${fdaDrugCodeSha256}"
+--type String --region us-east-1  --overwrite --value "${fdaDrugCodeSha256}"
 """
                             }
                         } else {
