@@ -82,24 +82,32 @@ def upload_end_state_props_file(file_name):
         else:
             raise
 
+def upload_csv_files(file_name):
+    print(f"upload_csv_files, file_name: {file_name}")
+
+def upload_manifest_file(file_name):
+    print(f"upload_manifest_file, file_name: {file_name}")
+
 def main(args):
     target = args[0] if len(args) > 0 else "./"
     op = args[1] if len(args) > 1 else "download_file"
     print(f"op: {op}, target_dir: {target}")
-    if op == "download_file":
-        download_synthea_files(target)
-    else:
-        if op == "download_script":
+    match op:
+        case "download_file":
+            download_synthea_files(target)
+        case "download_script":
             download_synthea_scripts(target)
-        else:
-            if op == "download_prop":
-                rslt = download_end_state_props_file(target)
-                return rslt
-            else:
-                if op == "upload_prop":
-                    upload_end_state_props_file(target)
-                else:
-                    return 1
+        case "download_prop":
+            download_end_state_props_file(target)
+        case "upload_prop":
+            upload_end_state_props_file(target)
+        case "upload_csv":
+            upload_csv_files(target)
+        case "upload_manifest":
+            upload_manifest_file(target)
+        case _:
+            return 1
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
