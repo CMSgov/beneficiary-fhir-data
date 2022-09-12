@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+# add a timestamp to this scripts log output and redirect to both console and logfile
+exec > >(
+    while read line; do
+        echo "$(date +"%Y-%m-%d %H:%M:%S") - $${line}" | tee -a /var/log/user_data.log 2>&1
+    done
+)
+
+ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
+
+cd /beneficiary-fhir-data/apps/utils/locust_tests
+python3 -m pip install --upgrade pip --quiet
+python3 -m pip install -r requirements.txt --quiet
+PATH="/usr/local/bin:$${PATH}"
+chmod +x lambda/server-load/controller.sh
+
+# TODO: This IS NOT prodction ready until a non-privileged user runs load test logic; BFD-1883 et al
+# NOTE: Run locust controller AND spawn nodes if locust process isn't running, otherwise do nothing
+if ! pgrep locust >/dev/null; then
+  lambda/server-load/controller.sh &>>locust.log &
+  python3 lambda/server-load/controller.py &
+fi
