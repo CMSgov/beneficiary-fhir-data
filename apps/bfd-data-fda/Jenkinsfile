@@ -17,7 +17,7 @@ spec:
   serviceAccount: bfd
   containers:
   - name: bfd-cbc-build
-    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv // TODO: resolve the container image rather than hard-coding it
+    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv # TODO: resolve the container image rather than hard-coding it
     command:
     - sleep
     args:
