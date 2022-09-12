@@ -144,6 +144,7 @@ async def run_locust(event):
         f"--master-port={invoke_event.locust_port}",
         "--headless",
         "--only-summary",
+        cwd="/var/task",
     )
 
     print(f"Started locust worker with pid {process.pid}")

@@ -14,7 +14,7 @@ DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
 # Build tagged node image
 docker build . \
-  --file ./lambda/server-load/Dockerfile \
+  --file ./services/server-load/node/Dockerfile \
   --target node \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG_LATEST}" \
