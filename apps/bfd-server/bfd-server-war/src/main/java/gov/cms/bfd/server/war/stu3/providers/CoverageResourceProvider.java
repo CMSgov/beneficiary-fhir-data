@@ -211,6 +211,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdatedRange)) {
+      // Add bene_id to MDC logs
+      LoggingUtils.logBeneIdToMdc(beneId);
+
       throw new NoResultException();
     }
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
