@@ -1342,6 +1342,8 @@ resource "aws_glue_crawler" "glue-crawler-api-requests" {
   )
   name     = "${local.full_name}-api-requests-crawler"
   role     = data.aws_iam_role.iam-role-glue.arn
+  # Run this crawler to create the new partition at 00:30 on the first of every month
+  schedule = "cron(30 00 01 * *)"
 
   catalog_target {
     database_name = module.database.name
@@ -1361,28 +1363,5 @@ resource "aws_glue_crawler" "glue-crawler-api-requests" {
   schema_change_policy {
     delete_behavior = "LOG"
     update_behavior = "LOG"
-  }
-}
-
-
-# Glue Workflow
-#
-# Organizes the Glue jobs / crawlers and runs them in sequence
-
-# Glue Workflow Object
-resource "aws_glue_workflow" "glue-workflow-api-requests" {
-  name = "${local.full_name}-api-requests-workflow"
-  max_concurrent_runs = "1"
-}
-
-# Trigger for API Requests Crawler
-resource "aws_glue_trigger" "glue-crawler-api-requests-crawler" {
-  name          = "${local.full_name}-api-requests-crawler-trigger"
-  description   = "Trigger to start the API Requests Crawler"
-  workflow_name = aws_glue_workflow.glue-workflow-api-requests.name
-  type          = "ON_DEMAND"
-
-  actions {
-    crawler_name = aws_glue_crawler.glue-crawler-api-requests.name
   }
 }
