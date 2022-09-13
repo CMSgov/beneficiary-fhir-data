@@ -11,7 +11,10 @@ boto_config = Config(region_name="us-east-1")
 s3_client = boto3.client('s3', config=boto_config)
 
 mitre_synthea_bucket = "bfd-synthea"
+mitre_synthea_end_state = "/end_state/end_state.properties"
 bfd_synthea_bucket = "bfd-test-synthea-etl-577373831711"
+bfd_synthea_incoming = "Incoming/"
+bfd_synthea_done = "Done/"
 end_state_props_file = "end_state/end_state.properties"
 
 code_map_files = [
@@ -76,7 +79,7 @@ def download_end_state_props_file(target_dir) -> str:
 def upload_end_state_props_file(file_name):
     print(f"upload_end_state_props_file, file_name: {file_name}")
     try:
-        s3_client.upload_file(file_name, mitre_synthea_bucket, end_state_props_file)
+        s3_client.upload_file(file_name, mitre_synthea_bucket, mitre_synthea_end_state)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")
@@ -93,23 +96,61 @@ def get_props_value(list, starts_with):
 def create_s3_bucket_for_rif(folder_name) -> str:
     print(f"create_s3_bucket_for_rif, file_name: {folder_name}")
 
-def upload_rif_files(synthea_output_dir):
-    print(f"upload_csv_files, file_name: {synthea_output_dir}")
-    for fn in os.listdir(synthea_output_dir):
-        if fnmatch.fnmatch(fn, '*.csv'):
-            print(file)
+def extract_timestamp_from_manifest(synthea_output_dir) -> str:
+    if not os.path.exists(synthea_output_dir + '/manifest.xml'):
+        return ""
+    lines = []
+    with open(synthea_output_dir + '/manifest.xml') as file:
+        lines = file.readlines()
+    for line in lines:
+        if line.startswith("<dataSetManifest"):
+            beg_ix = line.find('timestamp=')
+            if beg_ix > 0:
+                ## timestamp="yyyy-mm-ddThh:mi:ssZ"
+                ts = line[beg_ix:beg_ix+31]
+                lines = ts.split("\"")
+                return lines[1] if len(lines) > 1 else ""
 
-def upload_manifest_file(synthea_output_dir):
-    print(f"upload_manifest_file, file_name: {synthea_output_dir}")
+def upload_rif_files(synthea_output_dir, s3_folder):
+    print(f"upload_rif_files, file: {synthea_output_dir}, remote_fn: {s3_folder}")
     for fn in os.listdir(synthea_output_dir):
-        if fnmatch.fnmatch(fn, 'manifest.xml'):
-            print(file)
+        ## ignore the export_summary.csv
+        if fn.startswith("export_summary"):
+            continue
+        tmp_ext = fn.split('.')[1:]
+        if len(tmp_ext) > 0 and tmp_ext[0] == 'csv':
+            try:
+                local_fn = synthea_output_dir + "/" + fn
+                remote_fn = s3_folder + fn
+                s3_client.upload_file(local_fn, bfd_synthea_bucket, remote_fn)
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == "404":
+                    print("The object does not exist.")
+                else:
+                    raise
 
+def upload_manifest_file(synthea_output_dir, s3_folder):
+    local_fn = synthea_output_dir + "/manifest.xml"
+    remote_fn = s3_folder + "0_manifest.xml"
+    print(f"upload_manifest_file, local_fn: {local_fn}, remote_fn: {remote_fn}")
+    if os.path.exists(local_fn):
+        try:
+            s3_client.upload_file(local_fn, bfd_synthea_bucket, remote_fn)
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "404":
+                print("The object does not exist.")
+            else:
+                raise
 
 def upload_synthea_results(synthea_output_dir):
     print(f"upload_synthea_outputs_to_s3, file_name: {synthea_output_dir}")
-    upload_rif_files(synthea_output_dir)
-    upload_manifest_file(synthea_output_dir)
+    manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
+    print(f"ts: {manifest_ts}")
+    if len(manifest_ts) < 1:
+        raise
+    s3_folder = bfd_synthea_incoming + manifest_ts + "/"
+    upload_rif_files(synthea_output_dir, s3_folder)
+    upload_manifest_file(synthea_output_dir, s3_folder)
 
 def main(args):
     target = args[0] if len(args) > 0 else "./"
