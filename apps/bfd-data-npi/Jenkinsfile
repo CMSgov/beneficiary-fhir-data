@@ -118,7 +118,7 @@ fi
                         if (ssmLookupSha256.isEmpty() || npiOrgNameSha256.trim() != ssmLookupSha256.trim()) {
                             dir('apps/bfd-data-npi') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
-                                sh "mvn ${quietFlags} clean install"
+                                sh "mvn ${quietFlags} -Dnpi.downloadUrl=\"${downloadUrl}\" clean install"
                                 sh 'echo "$CODEARTIFACT_ENDPOINT"'
 
                                 withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
