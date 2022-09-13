@@ -34,7 +34,7 @@ public final class App {
       throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
     }
 
-    if (args.length > 2) {
+    if (args.length > 1) {
       throw new IllegalArgumentException("Invalid arguments supplied for NPI download.");
     }
 
@@ -48,17 +48,10 @@ public final class App {
       outputDir = args[0];
     }
 
-    if (args.length == 2) {
-      if (Strings.isNullOrEmpty(args[0])) {
-        throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
-      }
+    String downloadUrlProperty = System.getProperty("npi.downloadUrl");
 
-      if (Strings.isNullOrEmpty(args[1])) {
-        throw new IllegalArgumentException("Download Url argument not specified for NPI download.");
-      }
-
-      outputDir = args[0];
-      downloadUrl = Optional.of(args[1]);
+    if (!Strings.isNullOrEmpty(downloadUrlProperty)) {
+      downloadUrl = Optional.of(downloadUrlProperty);
     }
 
     DataUtilityCommons.getNPIOrgNames(outputDir, downloadUrl, NPI_RESOURCE);
