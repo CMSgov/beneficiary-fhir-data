@@ -114,9 +114,14 @@ async def async_main():
         )
         spawn_count += 1
 
-    # Sleep for the coasting time plus an additional 30 seconds before forcing the master process
+    # Sleep for the coasting time plus an additional 10 seconds before forcing the master process
     # to end
-    time.sleep(int(coasting_time) + 30)
+    time.sleep(int(coasting_time) + 10)
+
+    if locust_process.returncode:
+        # If returncode is not None, then the locust process has finished on its own and we do not
+        # need to end it manually
+        return
 
     try:
         locust_process.terminate()
