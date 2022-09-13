@@ -91,7 +91,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 ### Native Setup
 1. Change to the `apps/bfd-data-fda` directory and `mvn clean install`. 
 2. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-3. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+3. Set up a Postgres 14 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
     ```sh
     docker run \
       -d \
@@ -101,7 +101,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
       -p '5432:5432' \
       -v 'bfd_pgdata:/var/lib/postgresql/data' \
-      postgres:12 -c max_connections=200
+      postgres:14 -c max_connections=200
     ```
 4. Set up a local S3 using Minio Docker Container
     ```sh
@@ -143,8 +143,8 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
     ```
 
-### Adding Reference to AWS Code Artifactory
-1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS Code Artifactory).  Replace {aws account id goes here} with the aws account id
+### Adding Reference to AWS Code Artifact
+1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS Code Artifact).  Replace {aws account id goes here} with the aws account id
 
 '''sh
 export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`

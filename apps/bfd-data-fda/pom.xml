@@ -142,7 +142,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.5.0</version>
@@ -155,9 +155,9 @@
                         </goals>
                         <configuration>
                             <mainClass>gov.cms.bfd.data.fda.utility.App</mainClass>
-							<arguments>
-                            	<argument>${basedir}/src/main/resources</argument>
-							</arguments>
+                            <arguments>
+                                <argument>${basedir}/src/main/resources</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
