@@ -88,6 +88,61 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
 1. Install pre-commit hooks `mvn -f apps initialize`
 
+### Native Setup
+1. Change to the `apps/bfd-data-fda` directory and `mvn clean install`. 
+2. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
+3. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+    ```sh
+    docker run \
+      -d \
+      --name 'bfd-db' \
+      -e 'POSTGRES_DB=fhirdb' \
+      -e 'POSTGRES_USER=bfd' \
+      -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
+      -p '5432:5432' \
+      -v 'bfd_pgdata:/var/lib/postgresql/data' \
+      postgres:12 -c max_connections=200
+    ```
+4. Set up a local S3 using Minio Docker Container
+    ```sh
+    docker run \
+      -p 9000:9000 \
+      -p 9001:9001 -d  --name 'minio' \
+      -e "MINIO_ROOT_USER=bfdLocalS3Dev" \
+      -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
+      minio/minio server /data --console-address ":9001"
+    ```
+5. Run mvn install with the following 
+    ```
+     mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+    ```
+   You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
+
+### Loading Beneficiary
+1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
+    ```
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify
+    ```
+    This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with:
+    ```
+    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/fhirdb' -c 'SELECT "bene_id" FROM "beneficiaries" LIMIT 1;'
+    ```
+1. Run `export BFD_PORT=6500`. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later. This can be set in your shell profile but note that when running the integration tests through maven, the BFD_PORT needs to be unset from the environment.
+1. Now it's time to start the server up. Change to `apps/bfd-server` and run:
+    ```
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
+    ```
+    After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`
+1. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command:
+    ```
+    curl --silent --insecure --cert $BFD_PATH/apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://localhost:$BFD_PORT/v2/fhir/ExplanationOfBenefit/?patient=567834&_format=json"
+    ```
+    where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
+1. Total success (probably)!. You have a working call. To stop the server run this from the `apps/bfd-server` directory:
+    ```
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
+    ```
+
 ### Adding Reference to AWS Code Artifactory
 1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours).  Replace {aws account id goes here} with the aws account id
 
@@ -134,60 +189,6 @@ export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domai
   </profiles>
 </settings>
 ```
-
-### Native Setup
-1. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-2. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
-    ```sh
-    docker run \
-      -d \
-      --name 'bfd-db' \
-      -e 'POSTGRES_DB=fhirdb' \
-      -e 'POSTGRES_USER=bfd' \
-      -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
-      -p '5432:5432' \
-      -v 'bfd_pgdata:/var/lib/postgresql/data' \
-      postgres:12 -c max_connections=200
-    ```
-3. Set up a local S3 using Minio Docker Container
-    ```sh
-    docker run \
-      -p 9000:9000 \
-      -p 9001:9001 -d  --name 'minio' \
-      -e "MINIO_ROOT_USER=bfdLocalS3Dev" \
-      -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
-      minio/minio server /data --console-address ":9001"
-    ```
-4. Run mvn install with the following 
-    ```
-     mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
-    ```
-   You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
-
-### Loading Beneficiary
-1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
-    ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify
-    ```
-    This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with:
-    ```
-    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/fhirdb' -c 'SELECT "bene_id" FROM "beneficiaries" LIMIT 1;'
-    ```
-1. Run `export BFD_PORT=6500`. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later. This can be set in your shell profile but note that when running the integration tests through maven, the BFD_PORT needs to be unset from the environment.
-1. Now it's time to start the server up. Change to `apps/bfd-server` and run:
-    ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
-    ```
-    After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`
-1. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command:
-    ```
-    curl --silent --insecure --cert $BFD_PATH/apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://localhost:$BFD_PORT/v2/fhir/ExplanationOfBenefit/?patient=567834&_format=json"
-    ```
-    where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
-1. Total success (probably)!. You have a working call. To stop the server run this from the `apps/bfd-server` directory:
-    ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
-    ```
 
 ### Certificates
 
