@@ -8,10 +8,11 @@ import os
 import time
 import urllib.parse
 from dataclasses import dataclass
-from typing import Any, List, Optional
 
 import boto3
 from botocore.config import Config
+
+from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
@@ -36,44 +37,6 @@ class InvokeEvent:
     locust_port: int = 5557
 
 
-def get_ssm_parameter(name: str, with_decrypt: bool = False) -> Optional[str]:
-    """
-    Gets a named SSM parameter.
-    """
-    response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
-
-    try:
-        return response["Parameter"]["Value"]
-    except KeyError:
-        print(f'SSM parameter "{name}" not found or empty')
-        return None
-
-
-def get_rds_db_uri(cluster_id: str) -> Optional[str]:
-    """
-    Gets the URI for the reader instance.
-    """
-    response = rds_client.describe_db_clusters(DBClusterIdentifier=cluster_id)
-
-    try:
-        return response["DBClusters"][0]["ReaderEndpoint"]
-    except KeyError:
-        print(f'DB URI not found for cluster ID "{cluster_id}"')
-        return None
-
-
-def check_queue(timeout: int = 1) -> List[Any]:
-    """
-    Checks SQS queue for messages.
-    """
-    response = queue.receive_messages(
-        AttributeNames=["SenderId", "SentTimestamp"],
-        WaitTimeSeconds=timeout,
-    )
-
-    return response
-
-
 def handler(event, context):
     """
     Handles execution of a worker node.
@@ -85,7 +48,6 @@ def handler(event, context):
 
 
 async def run_locust(event):
-
     # We then attempt to extract an InvokeEvent instance from
     # the JSON body
     try:
@@ -94,24 +56,26 @@ async def run_locust(event):
         print(f"Message body missing required keys: {str(ex)}")
         return
 
-    # Assuming we get this far, invoke_event should have the information
-    # required to run the lambda:
-    cluster_id = get_ssm_parameter(f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier")
-    username = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
-    )
-    raw_password = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
-    )
-    cert_key = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
-    )
-    cert = get_ssm_parameter(
-        f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
-    )
-
-    if not cluster_id or not username or not raw_password or not cert_key or not cert:
-        print("Could not retrieve one or more needed values from SSM.")
+    try:
+        # Assuming we get this far, invoke_event should have the information
+        # required to run the lambda:
+        cluster_id = get_ssm_parameter(
+            f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
+        )
+        username = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+        )
+        raw_password = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+        )
+        cert_key = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
+        )
+        cert = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
+        )
+    except ValueError as exc:
+        print(exc)
         return
 
     cert_path = "/tmp/bfd_test_cert.pem"
@@ -119,10 +83,10 @@ async def run_locust(event):
         file.write(cert_key + cert)
 
     password = urllib.parse.quote(raw_password)
-    db_uri = get_rds_db_uri(cluster_id)
-
-    if not db_uri:
-        print("Could not generate a URI for the database connection.")
+    try:
+        db_uri = get_rds_db_uri(cluster_id)
+    except ValueError as exc:
+        print(exc)
         return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"

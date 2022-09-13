@@ -5,10 +5,11 @@ until a scaling event occurs.
 import json
 import os
 import socket
-from typing import Any, List
 
 import boto3
 from botocore.config import Config
+
+from common.boto_utils import check_queue
 
 
 def start_node(controller_ip: str, host: str):
@@ -29,18 +30,6 @@ def start_node(controller_ip: str, host: str):
             f"{response.FunctionError}"
         )
         return None
-
-    return response
-
-
-def check_queue(timeout: int = 1) -> List[Any]:
-    """
-    Checks SQS queue for messages.
-    """
-    response = queue.receive_messages(
-        AttributeNames=["SenderId", "SentTimestamp"],
-        WaitTimeSeconds=timeout,
-    )
 
     return response
 
