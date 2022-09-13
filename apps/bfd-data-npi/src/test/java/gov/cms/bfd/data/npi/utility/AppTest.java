@@ -2,14 +2,8 @@ package gov.cms.bfd.data.npi.utility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
 
-import java.io.IOException;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 
 /** App Testing class for NPI. */
 public final class AppTest {

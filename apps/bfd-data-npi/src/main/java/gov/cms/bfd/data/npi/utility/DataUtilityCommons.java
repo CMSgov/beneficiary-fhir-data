@@ -38,9 +38,6 @@ public class DataUtilityCommons {
   /** Size of the buffer to read/write data. */
   private static final int BUFFER_SIZE = 4096;
 
-  /** Base url for the nppes download. */
-  private static final String BASE_URL = "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
-
   /** The day of the month we should check to see if the file has posted. */
   private static final int DAYS_IN_EXPIRATION = 10;
 
@@ -68,14 +65,12 @@ public class DataUtilityCommons {
 
     // If the output file isn't already there, go build it.
     Path convertedNpiDataFile = outputPath.resolve(npiFile);
-    if (!Files.exists(convertedNpiDataFile)) {
-      try {
-        buildNPIResource(convertedNpiDataFile, downloadUrl, tempDir);
-      } catch (IOException exception) {
-        LOGGER.error("NPI data file could not be read.  Error:", exception);
-      } finally {
-        recursivelyDelete(tempDir);
-      }
+    try {
+      buildNPIResource(convertedNpiDataFile, downloadUrl, tempDir);
+    } catch (IOException exception) {
+      LOGGER.error("NPI data file could not be read.  Error:", exception);
+    } finally {
+      recursivelyDelete(tempDir);
     }
   }
 
@@ -235,10 +230,10 @@ public class DataUtilityCommons {
 
     } else {
       try {
-        fileUrl = getFileName(false);
+        fileUrl = FileNameCalculation.getFileName(false);
         originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileUrl);
       } catch (IOException e) {
-        fileUrl = getFileName(true);
+        fileUrl = FileNameCalculation.getFileName(true);
         originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileUrl);
       }
       convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
@@ -328,54 +323,5 @@ public class DataUtilityCommons {
 
     throw new IllegalStateException(
         "NPI Org File Processing Error: Cannot field fieldname " + fieldName);
-  }
-
-  /**
-   * Extracts a file name.
-   *
-   * @param getMonthBefore gets the month before
-   * @return a file name string
-   */
-  private static String getFileName(boolean getMonthBefore) {
-    Map<Integer, String> months =
-        new HashMap<Integer, String>() {
-          {
-            put(0, "January");
-            put(1, "February");
-            put(2, "March");
-            put(3, "April");
-            put(4, "May");
-            put(5, "June");
-            put(6, "July");
-            put(7, "August");
-            put(8, "September");
-            put(9, "October");
-            put(10, "November");
-            put(11, "December");
-          }
-        };
-
-    Calendar cal = Calendar.getInstance();
-    int month = cal.get(Calendar.MONTH);
-    int currentYear = cal.get(Calendar.YEAR);
-    String currentMonth = null;
-
-    String fileName = null;
-
-    if (getMonthBefore) {
-      if (month == 0) {
-        currentMonth = months.get(11);
-        currentYear = currentYear - 1;
-      } else {
-        currentMonth = months.get(month - 1);
-      }
-
-    } else {
-      currentMonth = months.get(month);
-    }
-
-    fileName = BASE_URL + currentMonth + "_" + currentYear + ".zip";
-
-    return fileName;
   }
 }
