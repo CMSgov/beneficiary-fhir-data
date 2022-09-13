@@ -137,6 +137,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.ephemeral_common](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.ephemeral_migrator](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.ephemeral_pipeline](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.migrator_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.migrator_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.pipeline_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |

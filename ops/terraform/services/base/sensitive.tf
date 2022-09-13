@@ -1,7 +1,6 @@
 locals {
-  # NOTE: initial support for ephemeral environments does not include sensitive values; ephemeral.eyaml is a non-existent file
-  eyaml_file = contains(local.established_envs, local.env) ? "${local.env}.eyaml" : "ephemeral.eyaml"
-  eyaml      = local.is_ephemeral_env ? {} : data.external.eyaml[0].result
+  eyaml_file = local.is_ephemeral_env ? "ephemeral.eyaml" : "${local.env}.eyaml"
+  eyaml      = data.external.eyaml.result
 
   common_sensitive   = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "common") }
   migrator_sensitive = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "migrator") }
@@ -9,9 +8,7 @@ locals {
   server_sensitive   = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "server") }
 }
 
-# NOTE: initial support for ephemeral environments does not include sensitive values
 data "external" "eyaml" {
-  count   = local.is_ephemeral_env ? 0 : 1
   program = ["${path.module}/scripts/read-and-decrypt-eyaml.sh", local.eyaml_file]
 }
 
