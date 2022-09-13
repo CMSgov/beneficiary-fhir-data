@@ -107,7 +107,7 @@ curl -fsSL https://www.accessdata.fda.gov/cder/ndctext.zip | sha256sum | awk '{ 
                         ssmLookupSha256 = sh(
                             returnStdout: true,
                             script: '''
-if parameter_lookup="$(aws ssm get-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda \
+if parameter_lookup="$(aws ssm get-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda-sha256 \
 --region us-east-1 --output text --query Parameter.Value 2>/dev/null)"; then
    echo "$parameter_lookup"
 fi
@@ -119,11 +119,6 @@ fi
                             dir('apps/bfd-data-fda') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
                                 sh "mvn ${quietFlags} clean install"
-                                sh """
-mvn ${quietFlags} exec:java \
--Dexec.mainClass="gov.cms.bfd.data.fda.utility.App" \
--Dexec.args="./src/main/resources/"
-"""
                                 sh 'echo "$CODEARTIFACT_ENDPOINT"'
                                 sh "mvn ${quietFlags} package"
 
@@ -134,7 +129,7 @@ mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mg
                                 }
                                 awsAuth.assumeRole()
                                 sh """
-aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda \
+aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda-sha256\
 --type String --region us-east-1  --overwrite --value "${fdaDrugCodeSha256}"
 """
                             }
