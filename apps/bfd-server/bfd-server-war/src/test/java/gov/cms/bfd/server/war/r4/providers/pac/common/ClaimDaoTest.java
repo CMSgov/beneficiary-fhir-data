@@ -550,7 +550,7 @@ class ClaimDaoTest {
     doReturn(innerClaimMbiRecord).when(innerClaim).get(resourceType.getEntityMbiRecordAttribute());
 
     final Path<String> innerClaimId = mock(Path.class);
-    doReturn(innerClaimId).when(innerClaim).get(resourceType.getEntityIdAttribute());
+    doReturn(innerClaimId).when(innerClaim).get(subquerySpec.getClaimIdAttribute());
 
     final Path<LocalDate> innerDetailsDate = mock(Path.class);
     doReturn(innerDetailsDate).when(innerDetails).<LocalDate>get(subquerySpec.getDateAttribute());

@@ -247,7 +247,7 @@ public class ClaimDao {
     final Join<?, ?> innerDetails =
         innerClaim.join(subquerySpec.getDetailJoinAttribute(), JoinType.LEFT);
     final Path<?> innerClaimMbiRecord = innerClaim.get(resourceType.getEntityMbiRecordAttribute());
-    final Path<String> innerClaimId = innerClaim.get(resourceType.getEntityIdAttribute());
+    final Path<String> innerClaimId = innerClaim.get(subquerySpec.getClaimIdAttribute());
     final Path<LocalDate> innerClaimDate = innerClaim.get(resourceType.getEntityEndDateAttribute());
     final Path<LocalDate> innerDetailsDate =
         innerDetails.<LocalDate>get(subquerySpec.getDateAttribute());

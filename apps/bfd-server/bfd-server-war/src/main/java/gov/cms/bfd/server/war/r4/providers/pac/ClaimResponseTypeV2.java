@@ -43,7 +43,7 @@ public final class ClaimResponseTypeV2<TEntity>
               new ServiceDateSubquerySpec(
                   RdaMcsClaim.Fields.details,
                   RdaMcsDetail.class,
-                  RdaMcsDetail.Fields.idrDtlToDate,
+                  RdaMcsDetail.Fields.idrClmHdIcn,
                   RdaMcsDetail.Fields.idrDtlToDate)));
 
   /** Immutable list of all possible instances of this class. */

@@ -42,7 +42,7 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
               new ServiceDateSubquerySpec(
                   RdaMcsClaim.Fields.details,
                   RdaMcsDetail.class,
-                  RdaMcsDetail.Fields.idrDtlToDate,
+                  RdaMcsDetail.Fields.idrClmHdIcn,
                   RdaMcsDetail.Fields.idrDtlToDate)));
 
   /** Immutable list of all possible instances of this class. */
