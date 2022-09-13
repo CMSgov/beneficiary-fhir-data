@@ -144,7 +144,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
 
 ### Adding Reference to AWS Code Artifactory
-1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours).  Replace {aws account id goes here} with the aws account id
+1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS Code Artifactory).  Replace {aws account id goes here} with the aws account id
 
 '''sh
 export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`
