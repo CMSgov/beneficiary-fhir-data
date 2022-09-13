@@ -35,7 +35,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   /**
    * Constructor intended for use by derived classes to set values in common fields.
    *
-   * @param nameForParsing value for {@link ResourceTypeV2#getNameForMetrics()}
+   * @param nameForParsing value for {@link ResourceTypeV2#getNameForParsing()}
    * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class

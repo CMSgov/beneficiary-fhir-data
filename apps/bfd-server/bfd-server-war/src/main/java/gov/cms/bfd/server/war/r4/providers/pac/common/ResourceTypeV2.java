@@ -34,6 +34,10 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
   /** @return The attribute name for the entity's service end date attribute. */
   String getEntityEndDateAttribute();
 
+  /**
+   * @return the {@link ServiceDateSubquerySpec} if one is defined for this resource or an empty
+   *     {@link Optional} if none is needed.
+   */
   Optional<ServiceDateSubquerySpec> getServiceDateSubquerySpec();
 
   /**
