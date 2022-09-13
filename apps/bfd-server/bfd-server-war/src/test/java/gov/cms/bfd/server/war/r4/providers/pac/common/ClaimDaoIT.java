@@ -280,7 +280,9 @@ public class ClaimDaoIT {
    * range parameters.
    *
    * @param claimDao The {@link ClaimDao} to execute the query on.
-   * @param serviceDate The service date {@link DateRangeParam}
+   * @param mbiHash the hashed MBI value to use
+   * @param lastUpdated the (possibly null) lastUpdated {@link DateRangeParam}
+   * @param serviceDate The (possibly null) service date {@link DateRangeParam}
    * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI
    *     hash and satisfying the date requirement.
    */
