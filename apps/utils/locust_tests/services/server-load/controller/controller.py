@@ -89,6 +89,7 @@ async def async_main():
         "--enable-rebalancing",
         "--spawn-rate=1",
         "--headless",
+        "--logfile=locust.log",
         "--loglevel=DEBUG",
         "--csv=load",
     )
