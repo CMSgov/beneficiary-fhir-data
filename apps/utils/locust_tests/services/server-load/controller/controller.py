@@ -47,6 +47,8 @@ async def async_main():
     # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling.
     # This may need some adjustment, but should be a fine default.
     max_spawned_nodes = os.environ.get("MAX_SPAWNED_NODES", 80)
+    max_users = os.environ.get("MAX_SPAWNED_USERS", 5000)
+    user_spawn_rate = os.environ.get("USER_SPAWN_RATE", 1)
     spawning_timeout = os.environ.get("NODE_SPAWN_TIMEOUT", 10)
     coasting_time = os.environ.get("COASTING_TIME", 10)
 
@@ -81,17 +83,17 @@ async def async_main():
         "locust",
         "--locustfile=high_volume_suite.py",
         f"--host={test_host}",
-        "--users=5000",
+        f"--users={max_users}",
+        f"--spawn-rate={user_spawn_rate}",
+        f"--database-uri={db_dsn}",
         "--master",
         "--master-bind-port=5557",
         "--client-cert-path='tmp/bfd_test_cert.pem'",
-        f"--database-uri={db_dsn}",
         "--enable-rebalancing",
-        "--spawn-rate=1",
-        "--headless",
         "--logfile=locust.log",
         "--loglevel=DEBUG",
         "--csv=load",
+        "--headless",
     )
 
     # Get the SQS queue and purge it of any possible stale messages.
