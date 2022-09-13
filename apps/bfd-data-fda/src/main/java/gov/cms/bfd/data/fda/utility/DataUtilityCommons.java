@@ -51,9 +51,6 @@ public class DataUtilityCommons {
 
       // If the output file isn't already there, go build it.
       Path convertedNdcDataFile = outputPath.resolve(fdaFile);
-      if (Files.exists(convertedNdcDataFile)) {
-        Files.delete(convertedNdcDataFile);
-      }
 
       try {
         DataUtilityCommons.buildProductsResource(convertedNdcDataFile, workingDir);

@@ -120,7 +120,6 @@ fi
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
                                 sh "mvn ${quietFlags} clean install"
                                 sh 'echo "$CODEARTIFACT_ENDPOINT"'
-                                sh "mvn ${quietFlags} package"
 
                                 withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                                     sh '''
