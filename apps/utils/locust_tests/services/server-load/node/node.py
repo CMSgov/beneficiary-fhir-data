@@ -115,7 +115,9 @@ async def run_locust(event):
 
     scaling_event = []
     while not scaling_event:
-        scaling_event = check_queue(timeout=1)
+        scaling_event = check_queue(
+            timeout=1, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
+        )
 
     print("Scaling event detected.")
     print(f"Scaling event detected was: {scaling_event[0]}")

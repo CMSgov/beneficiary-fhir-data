@@ -106,7 +106,9 @@ async def async_main():
             controller_ip=ip_address,
             host=test_host,
         )
-        scaling_event = check_queue(timeout=spawning_timeout)
+        scaling_event = check_queue(
+            timeout=spawning_timeout, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
+        )
         spawn_count += 1
 
     try:
