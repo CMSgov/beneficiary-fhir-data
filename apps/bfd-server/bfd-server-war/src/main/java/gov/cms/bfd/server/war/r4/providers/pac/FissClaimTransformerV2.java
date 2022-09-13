@@ -187,7 +187,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
               if (Strings.isNotBlank(diagnosisCode.getDiagCd2())) {
                 component =
                     new Claim.DiagnosisComponent()
-                        .setSequence(diagnosisCode.getPriority() + 1)
+                        .setSequence(diagnosisCode.getRdaPosition())
                         .setDiagnosis(createCodeableConcept(icdSystem, diagnosisCode.getDiagCd2()));
 
                 if (Strings.isNotBlank(diagnosisCode.getDiagPoaInd())) { // Present on Admission
@@ -225,7 +225,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
         .map(
             procCode ->
                 new Claim.ProcedureComponent()
-                    .setSequence(procCode.getPriority() + 1)
+                    .setSequence(procCode.getRdaPosition())
                     .setDate(localDateToDate(procCode.getProcDate()))
                     .setProcedure(createCodeableConcept(icdSystem, procCode.getProcCode())))
         .sorted(Comparator.comparing(Claim.ProcedureComponent::getSequence))
@@ -247,7 +247,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
               if (Strings.isNotBlank(payer.getPayersName())) {
                 component =
                     new Claim.InsuranceComponent()
-                        .setSequence(payer.getPriority() + 1)
+                        .setSequence(payer.getRdaPosition())
                         .setFocal(Objects.equals(payer.getPayersName(), MEDICARE));
 
                 component.setCoverage(

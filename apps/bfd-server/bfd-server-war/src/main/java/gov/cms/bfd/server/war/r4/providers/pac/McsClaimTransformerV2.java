@@ -166,7 +166,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
                 component =
                     new Claim.DiagnosisComponent()
-                        .setSequence(diagCode.getPriority() + 1)
+                        .setSequence(diagCode.getRdaPosition())
                         .setDiagnosis(createCodeableConcept(system, diagCode.getIdrDiagCode()));
               } else {
                 component = null;
@@ -195,7 +195,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
               if (Strings.isNotBlank(detail.getIdrProcCode())) {
                 item =
                     new Claim.ItemComponent()
-                        .setSequence(detail.getPriority() + 1)
+                        .setSequence(detail.getIdrDtlNumber())
                         // The FHIR spec requires productOrService to exist even if there is
                         // no product code, so printing out the system regardless because
                         // HAPI won't serialize it unless there is some sort of value inside.
@@ -220,7 +220,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                   matchingCode.ifPresent(
                       dxCode ->
                           item.setDiagnosisSequence(
-                              List.of(new PositiveIntType(dxCode.getPriority() + 1))));
+                              List.of(new PositiveIntType(dxCode.getRdaPosition()))));
                 }
               } else {
                 item = null;
