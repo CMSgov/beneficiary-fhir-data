@@ -24,11 +24,6 @@ module "glue-table-beneficiaries" {
       name    = "month"
       type    = "string"
       comment = "Month of request"
-    },
-    {
-      name    = "day"
-      type    = "string"
-      comment = "Day of request"
     }
   ]
 
@@ -301,22 +296,20 @@ resource "aws_glue_crawler" "glue-crawler-beneficiaries-unique" {
 #
 # Organizes the Glue jobs / crawlers and runs them in sequence
 
+resource "aws_glue_workflow" "glue-workflow-update-insights" {
+  name = "${local.full_name}-update-insights-workflow"
+  max_concurrent_runs = "1"
+}
+
 # Trigger for Populate Beneficiaries Job
 resource "aws_glue_trigger" "glue-trigger-populate-beneficiaries-job" {
   name          = "${local.full_name}-populate-beneficiaries-job-trigger"
   description   = "Trigger to start the Populate Beneficiaries Glue Job whenever the Crawler completes successfully"
-  workflow_name = local.glue_workflow_name
-  type          = "CONDITIONAL"
+  workflow_name = aws_glue_workflow.glue-workflow-update-insights.name
+  type          = "ON_DEMAND"
 
   actions {
     job_name = aws_glue_job.glue-job-populate-beneficiaries.name
-  }
-
-  predicate {
-    conditions {
-      crawler_name = "${local.full_name}-api-requests-crawler" # From api-requests
-      crawl_state  = "SUCCEEDED"
-    }
   }
 }
 
@@ -324,7 +317,7 @@ resource "aws_glue_trigger" "glue-trigger-populate-beneficiaries-job" {
 resource "aws_glue_trigger" "glue-trigger-beneficiaries-crawler" {
   name          = "${local.full_name}-beneficiaries-crawler-trigger"
   description   = "Trigger to start the Beneficiaries Crawler whenever the Populate Beneficiaries Job completes successfully"
-  workflow_name = local.glue_workflow_name
+  workflow_name = aws_glue_workflow.glue-workflow-update-insights.name
   type          = "CONDITIONAL"
 
   actions {
@@ -343,7 +336,7 @@ resource "aws_glue_trigger" "glue-trigger-beneficiaries-crawler" {
 resource "aws_glue_trigger" "glue-trigger-populate-beneficiaries-unique-job" {
   name          = "${local.full_name}-populate-beneficiaries-unique-job-trigger"
   description   = "Trigger to start the Populate Beneficiaries Unique Job whenever the Beneficiaries Crawler completes successfully"
-  workflow_name = local.glue_workflow_name
+  workflow_name = aws_glue_workflow.glue-workflow-update-insights.name
   type          = "CONDITIONAL"
 
   actions {
@@ -362,7 +355,7 @@ resource "aws_glue_trigger" "glue-trigger-populate-beneficiaries-unique-job" {
 resource "aws_glue_trigger" "glue-trigger-beneficiaries-unique-crawler" {
   name          = "${local.full_name}-beneficiaries-unique-crawler-trigger"
   description   = "Trigger to start the Beneficiaries Unique Crawler whenever the Populate Beneficiaries Unique Job completes successfully"
-  workflow_name = local.glue_workflow_name
+  workflow_name = aws_glue_workflow.glue-workflow-update-insights.name
   type          = "CONDITIONAL"
 
   actions {
