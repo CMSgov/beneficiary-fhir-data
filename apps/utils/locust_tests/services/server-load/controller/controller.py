@@ -2,20 +2,23 @@
 A lambda function that starts the load test controller and then periodically launches worker nodes
 until a scaling event occurs.
 """
+import asyncio
 import json
 import os
 import socket
+import urllib.parse
 
 import boto3
 from botocore.config import Config
 
-from common.boto_utils import check_queue
+from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
 
 
-def start_node(controller_ip: str, host: str):
+def start_node(lambda_client, node_lambda_name: str, controller_ip: str, host: str):
     """
     Invokes the lambda function that runs a Locust worker node process.
     """
+    # TODO: Properly type hint 'lambda_client'
     print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
     payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
 
@@ -34,7 +37,7 @@ def start_node(controller_ip: str, host: str):
     return response
 
 
-if __name__ == "__main__":
+async def async_main():
     environment = os.environ.get("BFD_ENVIRONMENT", "test")
     sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
@@ -50,6 +53,44 @@ if __name__ == "__main__":
     sqs = boto3.resource("sqs", config=boto_config)
     lambda_client = boto3.client("lambda", config=boto_config)
 
+    try:
+        cluster_id = get_ssm_parameter(
+            f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
+        )
+        username = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+        )
+        raw_password = get_ssm_parameter(
+            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+        )
+    except ValueError as exc:
+        print(exc)
+        return
+
+    password = urllib.parse.quote(raw_password)
+    try:
+        db_uri = get_rds_db_uri(cluster_id)
+    except ValueError as exc:
+        print(exc)
+        return
+
+    db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
+    locust_process = await asyncio.create_subprocess_exec(
+        "locust",
+        "--locustfile=high_volume_suite.py",
+        f"--host={test_host}",
+        "--users=5000",
+        "--master",
+        "--master-bind-port=5557",
+        "--client-cert-path='tmp/bfd_test_cert.pem'",
+        f"--database-uri={db_dsn}",
+        "--enable-rebalancing",
+        "--spawn-rate=1",
+        "--headless",
+        "--loglevel=DEBUG",
+        "--csv=load",
+    )
+
     # Get the SQS queue and purge it of any possible stale messages.
     queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
     queue.purge()
@@ -59,6 +100,29 @@ if __name__ == "__main__":
     scaling_event = []
     spawn_count = 0
     while not scaling_event and spawn_count < max_spawned_nodes:
-        start_node(controller_ip=ip_address, host=test_host)
+        start_node(
+            lambda_client=lambda_client,
+            node_lambda_name=node_lambda_name,
+            controller_ip=ip_address,
+            host=test_host,
+        )
         scaling_event = check_queue(timeout=spawning_timeout)
         spawn_count += 1
+
+    try:
+        locust_process.terminate()
+    except ProcessLookupError as e:
+        print("Could not terminate Locust master subprocess")
+        print(f"Received exception {e}")
+
+    await locust_process.wait()
+
+    # Accessing a protected member on purpose to work around known problem with
+    # orphaned processes in asyncio.
+    # If the process is already closed, this is a noop.
+    # pylint: disable=protected-access
+    locust_process._transport.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(async_main())
