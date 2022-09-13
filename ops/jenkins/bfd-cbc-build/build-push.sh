@@ -9,7 +9,7 @@ DOCKER_TAG_LATEST="${CBC_DOCKER_TAG_LATEST:-"jdk11-mvn3-an29-tfenv-latest"}"
 docker build . \
   --build-arg JAVA_VERSION="${CBC_JAVA_VERSION:-11}" \
   --build-arg MAVEN_VERSION="${CBC_MAVEN_VERSION:-3}" \
-  --build-arg ANSIBLE_VERSION="${CBC_ANSIBLE_VERSION:-2.9.25}" \
+  --build-arg ANSIBLE_VERSION="${CBC_ANSIBLE_VERSION:-2.9.27}" \
   --build-arg PACKER_VERSION="${CBC_PACKER_VERSION:-1.6.6}" \
   --build-arg TFENV_REPO_HASH="${CBC_TFENV_REPO_HASH:-7e89520}" \
   --build-arg TFENV_VERSIONS="${CBC_TFENV_VERSIONS:-0.12.31 1.1.9}" \

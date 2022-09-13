@@ -12,6 +12,11 @@ data "aws_iam_policy" "cloudwatch_agent_policy" {
   arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+# AWS CloudWatch agent needs extra IAM permissions for x-ray
+data "aws_iam_policy" "cloudwatch_xray_policy" {
+  arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
 resource "aws_iam_instance_profile" "instance" {
   name = "bfd-${var.env_config.env}-${var.name}-profile"
   role = aws_iam_role.instance.name
@@ -67,6 +72,11 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
   policy_arn = data.aws_iam_policy.cloudwatch_agent_policy.arn
 }
 
+# attach AWS managed AWSXRayDaemonWriteAccess to all EC2 instances
+resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
+  role       = aws_iam_role.instance.id
+  policy_arn = data.aws_iam_policy.cloudwatch_xray_policy.arn
+}
 
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${var.env_config.env}-${local.service}-ssm-parameters"
@@ -102,7 +112,7 @@ resource "aws_iam_policy" "ssm" {
 EOF
 }
 
-# attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
+# attach AWS managed SSM parameters to all EC2 instances
 resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.ssm.arn

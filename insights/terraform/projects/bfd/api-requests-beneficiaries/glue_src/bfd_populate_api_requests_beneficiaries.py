@@ -46,8 +46,7 @@ if SourceDyf.count() > 0:
             SqlFuncs.col("`mdc_http_access_request_uri`").alias("uri"),
             SqlFuncs.col("`mdc_http_access_request_query_string`").alias("query_string"),
             SqlFuncs.col("year"),
-            SqlFuncs.col("month"),
-            SqlFuncs.col("day")
+            SqlFuncs.col("month")
         )
     )
 
@@ -59,7 +58,7 @@ if SourceDyf.count() > 0:
         table_name=args['targetTable'],
         additional_options={
             "updateBehavior": "UPDATE_IN_DATABASE",
-            "partitionKeys": ["year", "month", "day"],
+            "partitionKeys": ["year", "month"],
             "enableUpdateCatalog": True,
         },
         transformation_ctx="WriteNode",
