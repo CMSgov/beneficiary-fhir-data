@@ -37,8 +37,8 @@ code_script_files = [
 
 def download_synthea_files(target_dir):
     for fn in code_map_files:
-        output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
-        output_fn = output_fn + fn
+        ## output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
+        output_fn = target_dir + fn
         print(f"file_path: {output_fn}")
         try:
             s3_client.download_file(mitre_synthea_bucket, fn, output_fn)
@@ -50,8 +50,8 @@ def download_synthea_files(target_dir):
 
 def download_synthea_scripts(target_dir):
     for fn in code_script_files:
-        output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
-        output_fn = output_fn + fn
+        ## output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
+        output_fn = target_dir + fn
         print(f"download_synthea_scripts, file_path: {output_fn}")
         try:
             s3_client.download_file(mitre_synthea_bucket, fn, output_fn)
@@ -64,8 +64,8 @@ def download_synthea_scripts(target_dir):
 
 def download_end_state_props_file(target_dir) -> str:
     base_name = os.path.basename(end_state_props_file)
-    output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
-    output_fn = output_fn + base_name
+    ## output_fn = target_dir if target_dir.endswith('/') else target_dir + "/"
+    output_fn = target_dir + base_name
     print(f"download_end_state_props_file, output_fn: {output_fn}")
     try:
         s3_client.download_file(mitre_synthea_bucket, end_state_props_file, output_fn)
@@ -97,10 +97,10 @@ def create_s3_bucket_for_rif(folder_name) -> str:
     print(f"create_s3_bucket_for_rif, file_name: {folder_name}")
 
 def extract_timestamp_from_manifest(synthea_output_dir) -> str:
-    if not os.path.exists(synthea_output_dir + '/manifest.xml'):
+    if not os.path.exists(synthea_output_dir + 'manifest.xml'):
         return ""
     lines = []
-    with open(synthea_output_dir + '/manifest.xml') as file:
+    with open(synthea_output_dir + 'manifest.xml') as file:
         lines = file.readlines()
     for line in lines:
         if line.startswith("<dataSetManifest"):
@@ -120,7 +120,7 @@ def upload_rif_files(synthea_output_dir, s3_folder):
         tmp_ext = fn.split('.')[1:]
         if len(tmp_ext) > 0 and tmp_ext[0] == 'csv':
             try:
-                local_fn = synthea_output_dir + "/" + fn
+                local_fn = synthea_output_dir + fn
                 remote_fn = s3_folder + fn
                 s3_client.upload_file(local_fn, bfd_synthea_bucket, remote_fn)
             except botocore.exceptions.ClientError as e:
@@ -130,7 +130,7 @@ def upload_rif_files(synthea_output_dir, s3_folder):
                     raise
 
 def upload_manifest_file(synthea_output_dir, s3_folder):
-    local_fn = synthea_output_dir + "/manifest.xml"
+    local_fn = synthea_output_dir + "manifest.xml"
     remote_fn = s3_folder + "0_manifest.xml"
     print(f"upload_manifest_file, local_fn: {local_fn}, remote_fn: {remote_fn}")
     if os.path.exists(local_fn):
@@ -154,6 +154,8 @@ def upload_synthea_results(synthea_output_dir):
 
 def main(args):
     target = args[0] if len(args) > 0 else "./"
+    if not target.endswith('/'):
+        target = target + "/"
     op = args[1] if len(args) > 1 else "download_file"
     print(f"op: {op}, target_dir: {target}")
     match op:
