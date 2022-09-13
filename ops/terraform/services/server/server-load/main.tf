@@ -49,8 +49,10 @@ resource "aws_lambda_function" "node" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      SQS_QUEUE_NAME  = aws_sqs_queue.this.name
+      BFD_ENVIRONMENT    = local.env
+      SQS_QUEUE_NAME     = aws_sqs_queue.this.name
+      AWS_DEFAULT_REGION = data.aws_region.current.name
+      COASTING_TIME      = 10
     }
   }
 

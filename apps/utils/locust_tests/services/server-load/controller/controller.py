@@ -6,6 +6,7 @@ import asyncio
 import json
 import os
 import socket
+import time
 import urllib.parse
 
 import boto3
@@ -47,6 +48,7 @@ async def async_main():
     # This may need some adjustment, but should be a fine default.
     max_spawned_nodes = os.environ.get("MAX_SPAWNED_NODES", 80)
     spawning_timeout = os.environ.get("NODE_SPAWN_TIMEOUT", 10)
+    coasting_time = os.environ.get("COASTING_TIME", 10)
 
     boto_config = Config(region_name=region)
 
@@ -110,6 +112,10 @@ async def async_main():
             timeout=spawning_timeout, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
         )
         spawn_count += 1
+
+    # Sleep for the coasting time plus an additional 30 seconds before forcing the master process
+    # to end
+    time.sleep(int(coasting_time) + 30)
 
     try:
         locust_process.terminate()
