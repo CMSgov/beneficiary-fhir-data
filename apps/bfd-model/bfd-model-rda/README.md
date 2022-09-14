@@ -137,6 +137,26 @@ This diagram shows all of the MCS related tables along with their primary keys.
                                └─────────────────────┘
 ```
 
+## RDA API Progress
+
+The RDA ETL pipeline jobs consume data by calling a gRPC service in the RDA API.  This service
+returns a stream of claim messages.  Each message represents either a new claim or an update
+to an existing claim.  Every message includes a sequence number.  These sequence numbers
+can be used to track progress within the stream and to resume from a specific location
+in the stream in a later RPC call.
+
+The `rda_api_progress` table is used to store the last processed sequence number for each claim type.
+The pipeline jobs update the table as they process incoming claims.  The jobs can be forced to
+replay data by stopping the job, changing the `last_sequence_number` value for the appropriate
+claim type, and restarting the pipeline job.
+
+## Message Errors
+
+The RDA ETL pipeline jobs transform incoming messages into claim entities.  This transformation
+includes validation of the message contents.  If any of these validations fail the jobs insert a record
+into the `message_errors` table including the nature of the error and details of the message that
+triggered the error.
+
 ## Claim Meta Data
 
 Each claim will be received multiple times from the RDA API and we only store the latest
