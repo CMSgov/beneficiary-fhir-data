@@ -1,0 +1,33 @@
+db:
+  url: jdbc:postgresql://localhost:5435/fhirdb
+  username: bfd
+  password: InsecureLocalDev
+  schema: rda
+pipelines:
+  - type: SQL
+    target: list_tables.sql
+    pipeTo:
+      type: XLSX
+      target: insights.xlsx
+      label: Tables
+  - type: SQL
+    target: list_tables.sql
+    pipeTo:
+      type: SQL
+      target: list_fields.sql
+      pipeTo:
+        type: XLSX
+        target: insights.xlsx
+        label: Columns
+  - type: SQL
+    target: list_tables.sql
+    pipeTo:
+      type: SQL
+      target: list_fields.sql
+      pipeTo:
+        type: SQL
+        target: variable_count.sql
+        pipeTo:
+          type: XLSX
+          target: insights.xlsx
+          label: Overall Variable Counts
