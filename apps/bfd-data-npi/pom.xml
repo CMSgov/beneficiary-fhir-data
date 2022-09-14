@@ -113,8 +113,28 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<mkdir dir="${basedir}/src/main/resources"/>
+								<mkdir dir="${basedir}/target/npi-org-csv-output"/>
 							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<executions>
+					<execution>
+						<id>download-fda-drug-data</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>gov.cms.bfd.data.npi.utility.App</mainClass>
+							<arguments>
+								<argument>${basedir}/target/npi-org-csv-output</argument>
+							</arguments>
 						</configuration>
 					</execution>
 				</executions>
@@ -125,15 +145,15 @@
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-							<phase>package</phase>
+							<phase>process-classes</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target</outputDirectory>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/src/main/resources</directory>
+									<directory>${basedir}/target/npi-org-csv-output</directory>
 								<filtering>false</filtering>
 								</resource>
 							</resources>
@@ -141,32 +161,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.5.0</version>
-                <executions>
-                    <execution>
-                        <id>download-fda-drug-data</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>gov.cms.bfd.data.npi.utility.App</mainClass>
-							<systemProperties>
-								<systemProperty>
-									<key>npi.downloadUrl</key>
-									<value></value>
-								</systemProperty>
-							</systemProperties>
-							<arguments>
-                            	<argument>${basedir}/src/main/resources</argument>
-							</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 		</plugins>
 	</build>
 </project>
