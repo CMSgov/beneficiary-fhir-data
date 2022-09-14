@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e
+
+# add a timestamp to this scripts log output and redirect to both console and logfile
+exec > >(
+    while read line; do
+        echo "$(date +"%Y-%m-%d %H:%M:%S") - $${line}" | tee -a /var/log/user_data.log 2>&1
+    done
+)
+
+ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
+
+cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
+
+aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" . # TODO: pipeline will no longer rely on this with the changes described here, however the bfd ansible configuration encodes an ansible-vault password, and expects it.
+
+aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/pipeline/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > pipeline_vars.json
+
+aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
+
+cat <<EOF > extra_vars.json
+{
+  "data_pipeline_db_url": "${writer_endpoint}",
+  "data_pipeline_jvm_args": "-Xmx{{ ansible_memtotal_mb * 0.80 | int }}m -XX:+PreserveFramePointer",
+  "data_pipeline_loader_threads": "{{ ansible_processor_vcpus * 25 }}",
+  "data_pipeline_new_relic_app_name": "BFD Pipeline ({{ env_name_std }})",
+  "data_pipeline_s3_bucket": "${pipeline_bucket}",
+  "data_pipeline_tmp_dir": "{{ data_pipeline_dir }}/tmp",
+  "env": "${env}"
+}
+EOF
+
+ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
+
+rm vault.password # TODO: pipeline will no longer rely on this with the changes described here, however the bfd ansible configuration encodes an ansible-vault password, and expects it.
+
+# Set login environment for all users:
+# 1. make BFD_ENV_NAME available to all logins
+# 2. change prompt color based on environment (red for prod and yellow for prod-sbx)
+cat <<EOF > /etc/profile.d/set-bfd-login-env.sh
+# make BFD_ENV_NAME available to all logins
+export BFD_ENV_NAME="${env}"
+
+# set prompt color based on environment (only if we are in an interactive shell)
+if [[ \$- == *i* ]]; then
+    case "\$BFD_ENV_NAME" in
+        "prod") export PS1="[\[\033[1;31m\]\u@\h\[\033[00m\]:\[\033[1;31m\]\w\[\033[00m\]] " ;;
+        "prod-sbx") export PS1="[\[\033[0;33m\]\u@\h\[\033[00m\]:\[\033[0;33m\]\w\[\033[00m\]] " ;;
+    esac
+fi
+EOF
+chmod 0644 /etc/profile.d/set-bfd-login-env.sh
