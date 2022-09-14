@@ -311,6 +311,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      */
     public static DataSetManifestId parseManifestIdFromS3Key(String s3ManifestKey) {
       Matcher manifestKeyMatcher = CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3ManifestKey);
+      // If we don't match the normal Incoming, try the synthetic location
+      if (!manifestKeyMatcher.matches()) {
+        manifestKeyMatcher = CcwRifLoadJob.REGEX_PENDING_MANIFEST_SYNTHETIC.matcher(s3ManifestKey);
+      }
       boolean keyMatchesRegex = manifestKeyMatcher.matches();
 
       if (!keyMatchesRegex) return null;

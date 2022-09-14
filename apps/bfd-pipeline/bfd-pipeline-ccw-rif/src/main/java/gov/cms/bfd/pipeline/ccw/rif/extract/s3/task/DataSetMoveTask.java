@@ -21,8 +21,11 @@ import org.slf4j.LoggerFactory;
 public final class DataSetMoveTask implements Callable<Void> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMoveTask.class);
 
+  /** Handle by which to invoke s3 tasks. */
   private final S3TaskManager s3TaskManager;
+  /** The extraction options which contain metadata such as the bucket the files are in. */
   private final ExtractionOptions options;
+  /** The Manifest for the files being moved. */
   private final DataSetManifest manifest;
 
   /**
@@ -40,7 +43,7 @@ public final class DataSetMoveTask implements Callable<Void> {
     this.manifest = manifest;
   }
 
-  /** @see java.util.concurrent.Callable#call() */
+  /** {@inheritDoc} */
   @Override
   public Void call() throws Exception {
     LOGGER.debug("Renaming data set '{}' in S3, now that processing is complete...", manifest);
@@ -67,10 +70,25 @@ public final class DataSetMoveTask implements Callable<Void> {
      * bulk copy operation).
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
-      String sourceKey =
+      String sourceKey;
+      String targetKey;
+
+      // Move the item from where it started into the corresponding output, assume Incoming first
+      sourceKey =
           String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
-      String targetKey =
+      targetKey =
           String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
+      boolean manifestInIncoming =
+          s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), sourceKey);
+
+      if (!manifestInIncoming) {
+        sourceKey =
+            String.format(
+                "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, s3KeySuffixToMove);
+        targetKey =
+            String.format(
+                "%s/%s", CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS, s3KeySuffixToMove);
+      }
 
       /*
        * Before copying, grab the metadata of the source object to ensure
@@ -112,6 +130,13 @@ public final class DataSetMoveTask implements Callable<Void> {
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
       String sourceKey =
           String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
+      boolean manifestInIncoming =
+          s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), sourceKey);
+      if (!manifestInIncoming) {
+        sourceKey =
+            String.format(
+                "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, s3KeySuffixToMove);
+      }
       DeleteObjectRequest deleteObjectRequest =
           new DeleteObjectRequest(options.getS3BucketName(), sourceKey);
       s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);

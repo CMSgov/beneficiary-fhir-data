@@ -74,8 +74,14 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   /** The directory name that pending/incoming RIF data sets will be pulled from in S3. */
   public static final String S3_PREFIX_PENDING_DATA_SETS = "Incoming";
 
+  /** The directory name that pending/incoming synthetic RIF data sets will be pulled from in S3. */
+  public static final String S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS = "Synthetic/Incoming";
+
   /** The directory name that completed/done RIF data sets will be moved to in S3. */
   public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
+
+  /** The directory name that completed/done RIF data sets will be moved to in S3. */
+  public static final String S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS = "Synthetic/Done";
 
   /**
    * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} goes and
@@ -102,8 +108,20 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   public static final Pattern REGEX_PENDING_MANIFEST =
       Pattern.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
+  /**
+   * A regex for {@link DataSetManifest} keys in S3 for synthetic files. Provides capturing groups
+   * for the {@link DataSetManifestId} fields.
+   */
+  public static final Pattern REGEX_PENDING_MANIFEST_SYNTHETIC =
+      Pattern.compile(
+          "^" + S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
+
   public static final Pattern REGEX_COMPLETED_MANIFEST =
       Pattern.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
+
+  public static final Pattern REGEX_COMPLETED_MANIFEST_SYNTHETIC =
+      Pattern.compile(
+          "^" + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
   private final MetricRegistry appMetrics;
   private final ExtractionOptions options;

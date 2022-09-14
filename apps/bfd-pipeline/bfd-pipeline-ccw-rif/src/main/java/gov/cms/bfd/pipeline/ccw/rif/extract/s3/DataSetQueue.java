@@ -94,37 +94,18 @@ public final class DataSetQueue {
     newManifests.removeAll(knownInvalidManifests);
     newManifests.removeAll(recentlyProcessedManifests);
     newManifests.removeAll(
-        manifestsToProcess.stream().map(m -> m.getId()).collect(Collectors.toSet()));
-    newManifests.stream()
-        .forEach(
-            manifestId -> {
-              String manifestS3Key =
-                  manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
-              DataSetManifest manifest = null;
-              try {
-                manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
-              } catch (JAXBException | SAXException e) {
-                /*
-                 * We want to terminate the ETL load process if an invalid manifest was found
-                 * such as a incorrect version number
-                 */
-                LOGGER.error(
-                    "Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
-                    manifestS3Key,
-                    e.toString());
-                knownInvalidManifests.add(manifestId);
-                throw new RuntimeException(e);
-              }
-
-              // Finally, ensure that the manifest passes the options filter.
-              if (!options.getDataSetFilter().test(manifest)) {
-                LOGGER.debug("Skipping data set that doesn't pass filter: {}", manifest.toString());
-                return;
-              }
-
-              // Everything checks out. Add it to the list!
-              manifestsToProcess.add(manifest);
-            });
+        manifestsToProcess.stream().map(DataSetManifest::getId).collect(Collectors.toSet()));
+    // Add manifests from Incoming
+    newManifests.forEach(
+        manifestId ->
+            addManifestToList(
+                manifestId, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)));
+    // Add manifests from Synthetic/Incoming
+    newManifests.forEach(
+        manifestId ->
+            addManifestToList(
+                manifestId,
+                manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)));
 
     /*
      * Any manifests that weren't found have presumably been processed and
@@ -144,8 +125,49 @@ public final class DataSetQueue {
   }
 
   /**
+   * Adds a manifest to the list of manifests to load if it meets filtering criteria and is not a
+   * future manifest.
+   *
+   * @param manifestId the manifest id
+   * @param manifestS3Key the manifest s3 key
+   */
+  private void addManifestToList(
+      DataSetManifest.DataSetManifestId manifestId, String manifestS3Key) {
+    DataSetManifest manifest;
+    try {
+      manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
+    } catch (JAXBException | SAXException e) {
+      /*
+       * We want to terminate the ETL load process if an invalid manifest was found
+       * such as a incorrect version number
+       */
+      LOGGER.error(
+          "Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
+          manifestS3Key,
+          e.toString());
+      knownInvalidManifests.add(manifestId);
+      throw new RuntimeException(e);
+    }
+
+    // Skip future dates, so we can hold (synthetic) data to load in the future
+    if (manifestId.isFutureManifest()) {
+      // Don't log to avoid noise from hundreds of skipped pending future files
+      return;
+    }
+
+    // Finally, ensure that the manifest passes the options filter.
+    if (!options.getDataSetFilter().test(manifest)) {
+      LOGGER.debug("Skipping data set that doesn't pass filter: {}", manifest.toString());
+      return;
+    }
+
+    // Everything checks out. Add it to the list!
+    manifestsToProcess.add(manifest);
+  }
+
+  /**
    * @return the {@link DataSetManifestId}s for the manifests that are found in S3 under the {@value
-   *     #S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
    */
   private Set<DataSetManifestId> listPendingManifests() {
     Timer.Context timerS3Scanning =
@@ -174,18 +196,19 @@ public final class DataSetQueue {
 
       for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
         String key = objectSummary.getKey();
-        if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(key).matches()) {
+        if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(key).matches()
+            || CcwRifLoadJob.REGEX_PENDING_MANIFEST_SYNTHETIC.matcher(key).matches()) {
           /*
            * We've got an object that *looks like* it might be a
            * manifest file. But we need to parse the key to ensure
            * that it starts with a valid timestamp.
            */
           DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(key);
-          // Skip future dates, so we can hold (synthetic) data to load in the future
-          if (manifestId != null && !manifestId.isFutureManifest()) {
+          if (manifestId != null) {
             manifestIds.add(manifestId);
           }
-        } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
+        } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()
+            || CcwRifLoadJob.REGEX_COMPLETED_MANIFEST_SYNTHETIC.matcher(key).matches()) {
           completedManifestsCount++;
         }
       }
