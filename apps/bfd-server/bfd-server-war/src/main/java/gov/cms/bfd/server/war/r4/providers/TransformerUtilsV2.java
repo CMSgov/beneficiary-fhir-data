@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -190,10 +191,44 @@ public final class TransformerUtilsV2 {
   static CodeableConcept createCodeableConcept(
       String codingSystem, String codingVersion, String codingDisplay, String codingCode) {
     CodeableConcept codeableConcept = new CodeableConcept();
+
+    /*
+     * Due to meeting CARIN conformance, an additional coding with the ICD-10-Medicare system URL
+     * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
+     * See JIRA ticket: https://jira.cms.gov/browse/BFD-1895
+     */
+    if (codingSystem == IcdCode.CODING_SYSTEM_ICD_10) {
+      addCodingToCodeableConcept(
+          codeableConcept,
+          IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,
+          codingVersion,
+          codingDisplay,
+          codingCode);
+    }
+    addCodingToCodeableConcept(
+        codeableConcept, codingSystem, codingVersion, codingDisplay, codingCode);
+    return codeableConcept;
+  }
+
+  /**
+   * Creates a {@link Coding} from an R4 {@link CodeableConcept}
+   *
+   * @param codeableConcept the {@link CodeableConcept} to use
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingVersion the {@link Coding#getVersion()} to use
+   * @param codingDisplay the {@link Coding#getDisplay()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return
+   */
+  static void addCodingToCodeableConcept(
+      CodeableConcept codeableConcept,
+      String codingSystem,
+      String codingVersion,
+      String codingDisplay,
+      String codingCode) {
     Coding coding = codeableConcept.addCoding().setSystem(codingSystem).setCode(codingCode);
     if (codingVersion != null) coding.setVersion(codingVersion);
     if (codingDisplay != null) coding.setDisplay(codingDisplay);
-    return codeableConcept;
   }
 
   /**

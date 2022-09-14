@@ -1320,7 +1320,7 @@ module "glue-table-api-requests" {
       "type"    = "string",
       "comment" = ""
     }
-  ] 
+  ]
 }
 
 # Crawler for the API Requests table

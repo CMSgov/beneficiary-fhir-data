@@ -1,18 +1,19 @@
 ---
+# env:test
 # COMMON CONFIGURATION
 /bfd/test/common/nonsensitive/enterprise_tools_security_group: bfd-test-enterprise-tools
 /bfd/test/common/nonsensitive/env_name_std: test
 /bfd/test/common/nonsensitive/key_pair: bfd-test
 /bfd/test/common/nonsensitive/kms_key_alias: alias/bfd-test-cmk
 /bfd/test/common/nonsensitive/management_security_group: bfd-test-remote-management
-/bfd/test/common/nonsensitive/new_relic_metric_host:  https://gov-metric-api.newrelic.com
-/bfd/test/common/nonsensitive/new_relic_metric_path: /metric/v1
+/bfd/test/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
+/bfd/test/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 /bfd/test/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/test/common/nonsensitive/rds_backup_retention_period: 21 # in days TODO: is a 21 day retention period sensible default?
 /bfd/test/common/nonsensitive/rds_iam_database_authentication_enabled: false
 /bfd/test/common/nonsensitive/rds_cluster_identifier: bfd-test-aurora-cluster
 /bfd/test/common/nonsensitive/rds_instance_class: db.r5.12xlarge
-/bfd/test/common/nonsensitive/rds_instance_count: 2
+/bfd/test/common/nonsensitive/rds_instance_count: 3
 /bfd/test/common/nonsensitive/rds_master_username: bfduser
 /bfd/test/common/nonsensitive/rds_security_group: bfd-test-aurora-cluster
 /bfd/test/common/nonsensitive/vpc_name: bfd-test-vpc
@@ -24,3 +25,25 @@
 /bfd/test/migrator/nonsensitive/sqs_queue_name: bfd-test-migrator
 /bfd/test/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
 /bfd/test/migrator/nonsensitive/db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
+
+# PIPELINE CONFIGURATION
+/bfd/${env}/pipeline/nonsensitive/bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_dir: *bfdPipelineDir
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_user: bb-etl
+/bfd/${env}/pipeline/nonsensitive/instance_type: m5.xlarge
+## PIPELINE CCW
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
+## PIPELINE+RDA
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: ''
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 3600 # 60 minutes
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 5

@@ -3,14 +3,28 @@
 BFD Insights captures data in near-real-time from the EC2 instances and provides the data for
 analysis in QuickSight.
 
-API-Requests is the portion of the project that ingests the logs and stores them in Glue tables.
-Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually
-by exporting logs from CloudWatch and running a Glue Job to ingest them into the `api_requests`
-table. Most other parts of this project will depend upon `api_requests`.
-
-
 ![Resource Diagram](docs/unique-bene-workflow.svg)
 
+## Known Data Discrepencies
+
+While the goal is to completely capture all historical and real-time data, sometimes errors occur.
+The following is a list of known discrepencies in the data, with dates and reasons.
+
+* 09/02/22 - 09/09/22: Due to a typo in the column name, the
+`mdc_jpa_query_eobs_by_bene_id_snf_record_count` field was not being captured.
+
+## API-Requests
+
+API-Requests is the portion of the project that ingests the logs and stores them in Glue tables.
+Normally, this happens in real time through AWS Kinesis Firehose, but it can also be done manually
+by exporting logs from CloudWatch and running a Glue Job to ingest them into the API-Requests
+table. Most other parts of this project will depend upon API-Requests.
+
+## Naming Conventions
+
+### AWS Resources
+
+Somewhere in the BFD documentation (which I cannot presently find; please update if found), there was a convention to name AWS resources to clearly identify that the resource belongs to BFD Insights and to which project (BFD, BB2, AB2D, etc.), plus an identifier for the environment (prod, prod-sbx, test). The convention is: `bfd-insights-<project>-<environment>-<identifier>` in kebab case (lower-case words separated by hyphens). The exception is for AWS Glue / Athena table names, which must be in snake case (lower-case separated by underscores), because the hyphen is not a valid character in Athena table names. For example, we have `bfd-insights-bfd-prod-sbx-firehose-ingester` and `bfd-insights-bfd-test-api-requests-crawler`. However, for Glue Tables, we have `bfd_insights_bfd_prod_sbx_api_requests`.
 
 # Naming Conventions
 
@@ -78,31 +92,13 @@ The Analysis section is handled through Athena views and QuickSight dashboards, 
 be efficient and cost-effective.
 
 ```mermaid
-flowchart LR
+flowchart TD
+    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| S3
+    S3["S3 Bucket"] -->|Crawler: History| History["Glue Table: API History"]
+    History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
 
-    subgraph Glue
-        APIRequests["API Requests"]
-    end
-
-    subgraph Athena
-        Partners
-        Beneficiaries
-        DailyUnique["Daily Unique"]
-        DailyBenes["Daily Benes"]
-        DailyCombined["Daily Combined"]
-    end
-
-    subgraph QuickSight
-        Dashboard
-    end
-
-    APIRequests --> Partners
-    Partners --> Beneficiaries
-    Beneficiaries --> DailyUnique
-    Beneficiaries --> DailyBenes
-    DailyUnique --> DailyCombined
-    DailyBenes --> DailyCombined
-    DailyCombined --> Dashboard
+    EC2["CloudWatch Log Subscription (Real-Time)"] --> Firehose["Kinesis Firehose"]
+    Firehose -->|Lambda| History
 ```
 
 ## Athena Views
