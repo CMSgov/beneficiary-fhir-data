@@ -24,12 +24,6 @@ table. Most other parts of this project will depend upon API-Requests.
 
 ### AWS Resources
 
-Somewhere in the BFD documentation (which I cannot presently find; please update if found), there was a convention to name AWS resources to clearly identify that the resource belongs to BFD Insights and to which project (BFD, BB2, AB2D, etc.), plus an identifier for the environment (prod, prod-sbx, test). The convention is: `bfd-insights-<project>-<environment>-<identifier>` in kebab case (lower-case words separated by hyphens). The exception is for AWS Glue / Athena table names, which must be in snake case (lower-case separated by underscores), because the hyphen is not a valid character in Athena table names. For example, we have `bfd-insights-bfd-prod-sbx-firehose-ingester` and `bfd-insights-bfd-test-api-requests-crawler`. However, for Glue Tables, we have `bfd_insights_bfd_prod_sbx_api_requests`.
-
-# Naming Conventions
-
-## AWS Resources
-
 Somewhere in the BFD documentation (which I cannot presently find; please update if found), there
 was a convention to name AWS resources to clearly identify that the resource belongs to BFD
 Insights and to which project (BFD, BB2, AB2D, etc.), plus an identifier for the environment (prod,
@@ -40,7 +34,7 @@ valid character in Athena table names. For example, we have
 `bfd-insights-bfd-prod-sbx-firehose-ingester` and `bfd-insights-bfd-test-api-requests-crawler`.
 However, for Glue Tables, we have `bfd_insights_bfd_prod_sbx_api_requests`.
 
-## Terraform Resources
+### Terraform Resources
 
 The terraform resource names do not need to be labeled with the
 `bfd-insights-<project>-<environment>-` prefix, because it should be clear from context what project
@@ -50,7 +44,7 @@ that even the modules, which do not clearly indicate the type of AWS resource th
 be clear. For example, we have `module.glue-table-api-requests` and
 `aws_glue_crawler.glue-crawler-api-requests`.
 
-# Adding new columns
+## Adding new columns
 
 The `api_requests` table has hard-coded column fields, which is unavoidable due to limitations in
 Kinesis Firehose's format_conversion feature.
@@ -79,14 +73,14 @@ OR
 `SELECT "<column>" FROM "bfd_insights_bfd_prod_partners" WHERE "<column>" IS NOT NULL;
 ```
 
-# Manual Ingestion of Log Files
+## Manual Ingestion of Log Files
 
 This process will be done via a series of complex Athena queries, in order to reduce the amount of
 AWS Glue we have to perform. This approach is far more cost-effective and faster.
 
 **TODO: Add a reference to the runbook once completed.**
 
-# Analysis
+## Analysis
 
 The Analysis section is handled through Athena views and QuickSight dashboards, and is designed to
 be efficient and cost-effective.
