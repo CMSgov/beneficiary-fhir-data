@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+{#
+# The expression {{ '#' if foo|default('', true)|length < 1 }} prepends exports with '#' to prevent
+# undefined or empty 'foo' variable from entering the environment. Maintains the existing templating
+# strategy and remains flexible for manual manipulation of resultant script in development and
+# troubleshooting scenarios.
+#}
+
+python3 "{{ server_load_dir }}/services/server-load/controller/controller.py" \
+  &>> "{{ server_load_dir }}/bfd-server-load.log"

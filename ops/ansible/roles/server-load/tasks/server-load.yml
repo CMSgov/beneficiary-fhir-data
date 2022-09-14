@@ -1,0 +1,88 @@
+---
+- name: Install Pre-requisites
+  yum:
+    pkg:
+      - java-11-openjdk
+      - jq
+  become: true
+  tags:
+    - pre-ami
+
+- name: Create server-load Service User
+  user:
+    name: "{{ server_load_user }}"
+    shell: /bin/false
+  become: true
+  tags: 
+    - pre-ami
+
+- name: Create server-load Service Directory
+  file:
+    path: "{{ server_load_dir }}"
+    state: directory
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  tags: 
+    - pre-ami
+
+# Create the temp directory if and only if it's missing. (Don't want to
+# accidentally change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ server_load_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: server_load_tmp_dir is defined
+  tags: 
+    - pre-ami
+
+- name: Create Custom Temp Directory
+  file:
+    path: "{{ server_load_tmp_dir }}"
+    state: directory
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  when: server_load_tmp_dir is defined and stat_tmp.stat.exists == false
+  tags: 
+    - pre-ami
+
+- name: Copy server-load Application
+  copy:
+    src: "{{ git_repo_root }}/apps/utils/locust_tests/"
+    dest: "{{ server_load_dir }}"
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+  become: true
+  tags:
+    - pre-ami
+
+- name: Create server-load Service Wrapper Script
+  template:
+    src: bfd-server-load-service.sh.j2
+    dest: "{{ server_load_dir }}/bfd-server-load-service.sh"
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  notify:
+    - Restart server-load Service
+  tags:
+    - post-ami
+
+- name: Create server-load Service Definition
+  template:
+    src: bfd-server-load.service.j2
+    dest: /etc/systemd/system/bfd-server-load.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - Enable server-load Service
+    - Restart server-load Service
+  tags:
+    - post-ami

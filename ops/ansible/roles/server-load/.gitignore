@@ -1,0 +1,4 @@
+# Ignore test junk.
+test/venv/
+test/roles/
+test/*.retry

@@ -1,0 +1,41 @@
+---
+##
+# Applies and verifies the role on the container being used for the test case.
+##
+
+# Apply the role.
+- hosts: bfd-server-load
+  tasks:
+    - name: Install Prerequisites
+      package:
+        name:
+          - procps
+          - awscli
+          - jq
+        state: present
+      become: true
+    - name: Apply Role
+      import_role:
+        name: bfd-server-load
+      vars:
+        env: dev
+        git_repo_root: /beneficiary-fhir-data
+        server_load_dir: /opt/bfd-server-load
+
+    - name: Ensure Service Is Running
+      service:
+        name: bfd-server-load
+        state: started
+        enabled: yes
+      changed_when: false
+      become: true
+
+    - name: Evaluate migrator exit code
+      shell: >-
+        systemctl show bfd-server-load.service --property=ExecStart \
+        | xargs -n1
+        | grep status=
+      retries: 10
+      delay: 6
+      register: exit_status
+      until: exit_status.stdout == 'status=0'
