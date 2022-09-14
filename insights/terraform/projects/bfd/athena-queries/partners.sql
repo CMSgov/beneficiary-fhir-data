@@ -10,7 +10,8 @@ SELECT
         WHEN 'CN=ab2d-prod-validation-client' then 'ab2d_test'
         WHEN 'EMAILADDRESS=ryan@adhocteam.us, CN=BlueButton Root CA, OU=BlueButton on FHIR API Root CA, O=Centers for Medicare and Medicaid Services, L=Baltimore, ST=Maryland, C=US' then 'bb2'
         WHEN '1.2.840.113549.1.9.1=#16117279616e406164686f637465616d2e7573,CN=BlueButton Root CA,OU=BlueButton on FHIR API Root CA,O=Centers for Medicare and Medicaid Services,L=Baltimore,ST=Maryland,C=US' then 'bb2'
-        WHEN 'CN=bfd.cms.gov' then 'bfd'
+        -- bfd_migration_test below was used during early 2022 for validation of database migrations
+        WHEN 'CN=bfd.cms.gov' then 'bfd_migration_test'
         ELSE 'unknown'
     END AS partner,
     *
