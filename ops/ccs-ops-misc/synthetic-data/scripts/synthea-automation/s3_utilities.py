@@ -8,7 +8,6 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from pathlib import Path
 
-
 boto_config = Config(region_name="us-east-1")
 s3_client = boto3.client('s3', config=boto_config)
 
@@ -83,16 +82,6 @@ def upload_end_state_props_file(file_name):
         else:
             raise
 
-def get_props_value(list, starts_with):
-    """
-    Small helper function for getting a value from the property file
-    for the line that starts with the given value.
-    """
-    return [x for x in list if x.startswith(starts_with)][0].split("=")[1]
-
-def create_s3_bucket_for_rif(folder_name) -> str:
-    print(f"create_s3_bucket_for_rif, file_name: {folder_name}")
-
 def extract_timestamp_from_manifest(synthea_output_dir) -> str:
     if not os.path.exists(synthea_output_dir + 'manifest.xml'):
         return ""
@@ -129,9 +118,10 @@ def upload_rif_files(synthea_output_dir, s3_folder):
 
 def upload_manifest_file(synthea_output_dir, s3_folder):
     local_fn = synthea_output_dir + "manifest.xml"
-    remote_fn = s3_folder + "/0_manifest.xml"    ## FIX THIS
-    print(f"upload_manifest_file, remote_fn: {remote_fn}")
+    remote_fn = s3_folder + "/" + "0_manifest.xml"    ## FIX THIS
+    
     if os.path.exists(local_fn):
+        print(f"upload_manifest_file, local_fn: {local_fn}, remote_fn: {remote_fn}")
         try:
             s3_client.upload_file(local_fn, bfd_synthea_bucket, remote_fn)
         except botocore.exceptions.ClientError as e:
@@ -139,38 +129,37 @@ def upload_manifest_file(synthea_output_dir, s3_folder):
                 print("The object does not exist.")
             else:
                 raise
- 
+
+def path_exists(s3_resource, key_name, loop_cnt, max_tries):
+    """Check to see if an object exists on S3"""
+    cnt = loop_cnt
+    print(f"S3 waiting for: Bucket: {bfd_synthea_bucket}, Key: {key_name}")
+    while loop_cnt < max_tries:
+        try:
+            s3_resource.ObjectSummary(bucket_name=bfd_synthea_bucket, key=key_name).load()
+            return cnt
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                cnt += 1
+                continue
+            else:
+                raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
+    
 def wait_for_manifest_done(s3_folder):
     print(f"wait_for_manifest_done, S3 folder: {s3_folder}")
+    s3_resource = boto3.resource('s3', config=boto_config)
     num_mins_3_days = 4320
-    key_name = s3_folder
-    ok_to_cont = 0
-    
-    try:
-      print(f"S3 waiting for: Bucket: {bfd_synthea_bucket}, Key: {key_name}")
-      waiter = s3_client.get_waiter('object_exists')
-      waiter.wait(Bucket=bfd_synthea_bucket, Key=key_name,
-                  WaiterConfig={'Delay': 60, 'MaxAttempts': num_mins_3_days})
-      print(f"Object exists: {bfd_synthea_bucket}/{key_name}")
-      ok_to_cont = 1
-    except ClientError as e:
-      raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
-    except Exception as e:
-      raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
+    loop_cnt = 0
+    key_name = s3_folder + "/"
 
-    if ok_to_cont > 0:
+    loop_cnt = path_exists(s3_resource, key_name, loop_cnt, num_mins_3_days)
+    if loop_cnt >= num_mins_3_days:
+        raise Exception(f"failed to detect S3 folder using key: {key_name}")
+    else:
         key_name = s3_folder + "/manifest.xml"
-        try:
-            print(f"S3 waiting for: Bucket: {bfd_synthea_bucket}, Key: {key_name}")
-            waiter = s3_client.get_waiter('object_exists')
-            waiter.wait(Bucket=bfd_synthea_bucket, Key=key_name,
-                        WaiterConfig={'Delay': 60, 'MaxAttempts': num_mins_3_days})
-            print(f"Object exists: {bfd_synthea_bucket}/{key_name}")
-        except ClientError as e:
-            raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
-        except Exception as e:
-            raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
-
+        loop_cnt = path_exists(s3_resource, key_name, loop_cnt, num_mins_3_days)
+        if loop_cnt >= num_mins_3_days:
+            raise Exception(f"failed to detect manifest.xml using key: {key_name}")
 
 def upload_synthea_results(synthea_output_dir):
     manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
