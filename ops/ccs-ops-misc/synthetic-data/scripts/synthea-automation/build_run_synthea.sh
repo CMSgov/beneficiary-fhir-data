@@ -178,21 +178,21 @@ gen_characteristics_file(){
 
 
 #----------------- GO! ------------------#
-#clean_up
+clean_up
 
-#install_synthea_from_git
+install_synthea_from_git
 
-#install_bfd_from_git
+install_bfd_from_git
 
-#activate_py_env
+activate_py_env
 
-#download_s3_mapping_files
+download_s3_mapping_files
 
-#download_s3_script_files
+download_s3_script_files
 
-#download_s3_props_file
+download_s3_props_file
 
-#prepare_and_run_synthea
+prepare_and_run_synthea
 
 upload_synthea_results
 
