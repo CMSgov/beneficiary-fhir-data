@@ -118,7 +118,7 @@ def upload_rif_files(synthea_output_dir, s3_folder):
 
 def upload_manifest_file(synthea_output_dir, s3_folder):
     local_fn = synthea_output_dir + "manifest.xml"
-    remote_fn = s3_folder + "/" + "0_manifest.xml"    ## FIX THIS
+    remote_fn = s3_folder + "/" + "manifest.xml"
     
     if os.path.exists(local_fn):
         print(f"upload_manifest_file, local_fn: {local_fn}, remote_fn: {remote_fn}")
