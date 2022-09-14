@@ -5,6 +5,7 @@ import botocore
 import fnmatch
 import time
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from pathlib import Path
 
 
@@ -118,6 +119,7 @@ def upload_rif_files(synthea_output_dir, s3_folder):
             try:
                 local_fn = synthea_output_dir + fn
                 remote_fn = s3_folder + fn
+                print(f"upload_rif_files, local_fn: {local_fn}, remote_fn: {remote_fn}")
                 s3_client.upload_file(local_fn, bfd_synthea_bucket, remote_fn)
             except botocore.exceptions.ClientError as e:
                 if e.response['Error']['Code'] == "404":
@@ -137,29 +139,46 @@ def upload_manifest_file(synthea_output_dir, s3_folder):
                 print("The object does not exist.")
             else:
                 raise
-
+ 
 def wait_for_manifest_done(s3_folder):
     print(f"wait_for_manifest_done, S3 folder: {s3_folder}")
     num_mins_3_days = 4320
-    cnt = 0
-    key = s3_folder + "manifest.xml"
-    while cnt < num_mins_3_days:
+    key_name = s3_folder
+    ok_to_cont = 0
+    print(f"Bucket: {bfd_synthea_bucket}, Key: {key_name}")
+
+    try:
+      waiter = s3_client.get_waiter('object_exists')
+      waiter.wait(Bucket=bfd_synthea_bucket, Key=key_name,
+                  WaiterConfig={
+                     'Delay': 60, 'MaxAttempts': num_mins_3_days})
+      print('Object exists: ' + bucket_name +'/'+key_name)
+      ok_to_cont = 1
+    except ClientError as e:
+      raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
+    except Exception as e:
+      raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
+
+    if ok_to_cont > 0:
+        key_name = s3_folder + "/manifest.xml"
         try:
-            obj = s3_client.head_object(Bucket=bfd_synthea_bucket, Key=key)
-            if obj['ContentLength'] > 0 or cnt > 1:
-                break;
-        except ClientError as exc:
-            if exc.response['Error']['Code'] != '404':
-                raise
-        """ sleep for a minute """
-        time.sleep(60)
+            waiter = s3_client.get_waiter('object_exists')
+            waiter.wait(Bucket=bfd_synthea_bucket, Key=key_name,
+                        WaiterConfig={
+                            'Delay': 60, 'MaxAttempts': num_mins_3_days})
+            print('Object exists: ' + bucket_name +'/'+key_name)
+            ok_to_cont = 1
+        except ClientError as e:
+            raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
+        except Exception as e:
+            raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
 
 
 def upload_synthea_results(synthea_output_dir):
     manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
     if len(manifest_ts) < 1:
         raise
-    s3_folder = bfd_synthea_incoming + manifest_ts + "/"
+    s3_folder = bfd_synthea_incoming + manifest_ts
     upload_rif_files(synthea_output_dir, s3_folder)
     upload_manifest_file(synthea_output_dir, s3_folder)
 
