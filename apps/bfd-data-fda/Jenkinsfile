@@ -118,12 +118,11 @@ fi
                         if (ssmLookupSha256.isEmpty() || fdaDrugCodeSha256.trim() != ssmLookupSha256.trim()) {
                             dir('apps/bfd-data-fda') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
-                                sh "mvn ${quietFlags} clean install"
                                 sh 'echo "$CODEARTIFACT_ENDPOINT"'
 
                                 withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                                     sh '''
-mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"
+mvn ${quietFlags} clean install deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"
 '''
                                 }
                                 awsAuth.assumeRole()
