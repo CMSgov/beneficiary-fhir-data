@@ -143,8 +143,9 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
     ```
 
-### Adding Reference to AWS Code Artifact
-1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS Code Artifact).  Replace {aws account id goes here} with the aws account id
+### Adding Reference to AWS CodeArtifact 
+(This step is optional, if you want to not use AWS Code artifact, you need to run the bfd-data-fda project first by changing to the `apps/bfd-data-fda` directory and running `mvn clean install`.)
+1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS CodeArtifact).  Replace {aws account id goes here} with the aws account id
 
 '''sh
 export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`
