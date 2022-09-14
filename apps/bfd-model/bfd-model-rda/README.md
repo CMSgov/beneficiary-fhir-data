@@ -33,7 +33,7 @@ key column `mbi_id` to reference the appropriate MBI record.
 
 ```
                         ┌─────────────┐
-                        │ mcs_claims  │
+                        │ mbi_cache   │
                    ┌────► - mbi_id    ◄───┐
                    │    │ - hash      │   │
                    │    │ - old_hash  │   │
