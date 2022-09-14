@@ -114,7 +114,7 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<mkdir dir="${basedir}/src/main/resources"/>
+								<mkdir dir="${basedir}/target/fda-drug-csv-output"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -134,7 +134,7 @@
 						<configuration>
 							<mainClass>gov.cms.bfd.data.fda.utility.App</mainClass>
 							<arguments>
-								<argument>${basedir}/src/main/resources</argument>
+								<argument>${basedir}/target/fda-drug-csv-output</argument>
 							</arguments>
 						</configuration>
 					</execution>
@@ -151,10 +151,10 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target</outputDirectory>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/src/main/resources</directory>
+									<directory>${basedir}/target/fda-drug-csv-output</directory>
 								<filtering>false</filtering>
 								</resource>
 							</resources>
