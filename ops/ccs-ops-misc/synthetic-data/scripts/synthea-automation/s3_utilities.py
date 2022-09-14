@@ -145,7 +145,7 @@ def wait_for_manifest_done(s3_folder):
     key = s3_folder + "manifest.xml"
     while cnt < num_mins_3_days:
         try:
-            obj = client.head_object(Bucket=bfd_synthea_bucket, Key=key)
+            obj = s3_client.head_object(Bucket=bfd_synthea_bucket, Key=key)
             if obj['ContentLength'] > 0 or cnt > 1:
                 break;
         except ClientError as exc:
