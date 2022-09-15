@@ -7,7 +7,6 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
@@ -81,7 +80,7 @@ public class SQLFilter extends PipelineFilter {
 
     private void addRowToPipelineValues(PipelineValues.ValueSet valueSet, Object[] rowValues, List<String> columnNames) {
         for (int i = 0; i < rowValues.length; ++i) {
-            valueSet.addResult(columnNames.get(i), rowValues[i]);
+            valueSet.put(columnNames.get(i), rowValues[i]);
         }
     }
 

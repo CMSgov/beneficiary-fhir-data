@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.insights;
 
+import gov.cms.bfd.pipeline.rda.insights.filters.JavaScriptFilter;
 import gov.cms.bfd.pipeline.rda.insights.filters.PipelineFilter;
 import gov.cms.bfd.pipeline.rda.insights.filters.ReadCSVFilter;
 import gov.cms.bfd.pipeline.rda.insights.filters.SQLFilter;
@@ -33,6 +34,7 @@ public class RdaInsights {
         pipelineFilters.put(Pipeline.Type.SQL, new SQLFilter(appConfigs));
         pipelineFilters.put(Pipeline.Type.READ_CSV, new ReadCSVFilter(appConfigs));
         pipelineFilters.put(Pipeline.Type.WRITE_XLSX, new WriteXLSXFilter(appConfigs));
+        pipelineFilters.put(Pipeline.Type.JS_SCRIPT, new JavaScriptFilter(appConfigs));
     }
 
     public void run() {

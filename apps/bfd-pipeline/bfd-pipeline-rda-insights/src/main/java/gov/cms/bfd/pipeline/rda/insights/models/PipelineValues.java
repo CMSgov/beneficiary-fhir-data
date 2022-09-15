@@ -47,8 +47,14 @@ public class PipelineValues {
 
         private final Map<String, FieldResult<?>> set = new LinkedHashMap<>();
 
-        public void addResult(String key, Object value) {
+        public void put(String key, Object value) {
             set.put(key, new FieldResult(key, value == null ? null : value.getClass(), value));
+        }
+
+        public void putAll(Map<String, Object> map) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                put(entry.getKey(), entry.getValue());
+            }
         }
 
         public FieldResult get(String key) {

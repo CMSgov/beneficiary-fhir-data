@@ -30,6 +30,9 @@ pipelines:
         type: SQL
         target: variable_count.sql
         pipeTo:
-          type: WRITE_XLSX
-          target: insights.xlsx
-          label: Overall Variable Counts
+          type: JS_SCRIPT
+          target: calculate_null_percent.js
+          pipeTo:
+            type: WRITE_XLSX
+            target: insights.xlsx
+            label: Overall Variable Counts

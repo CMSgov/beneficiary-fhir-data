@@ -36,7 +36,7 @@ public class ReadCSVFilter extends PipelineFilter {
 
                     for (int col = 0; col < columnNames.size(); ++col) {
                         final String columnName = columnNames.get(col);
-                        pipelineValues.currentSet().addResult(columnName, rowData[col]);
+                        pipelineValues.currentSet().put(columnName, rowData[col]);
                     }
                 }
             }
