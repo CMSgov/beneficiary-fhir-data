@@ -5,12 +5,16 @@ There are three Glue tables that are referenced in this runbook:
 - `staging` table - a non-partitioned table that has the desired column structure and can be loaded from the `export` table efficiently
 - `target` table - the partitioned table that is the final destination for the data (should already exist via terraform)
 
+This runbook should be executed after the Kinesis Firehose has started to populate data into the `target` table.
+
 1. Export the data from Cloudwatch.
    1. Review the exports that are available already in the export location: s3://bfd-insights-bfd-app-logs/export/prod/
       to see if the needed data has been exported previously. New exports should be contiguous and non-overlapping with
-      existing exports. Start and end timestamps should be selected to run from the first day of a month to the last day
-      of a month when possible. Start and end times should be set to 00:00:00 UTC. Removing an existing export in favor
-      of exporting that data again with a later end date is an acceptable way to keep the number of exports manageable. 
+      existing exports. Start and end timestamps should be selected to run from the first day of a month at 00:00:00 UTC
+      until the first day of a subsequent month at 00:00:00 UTC. Removing an existing export in favor of exporting that
+      data again with a later end date is an acceptable way to keep the number of exports manageable. The last export
+      chronologically should have a small overlap of 12 hours with the data that is populated with Firehose. This
+      overlap will be accounted for when populating the `staging` table.
    3. Navigate to Cloudwatch in the AWS console.
    4. Select `Log Groups`
    5. Select `/bfd/prod/bfd-server/access.json`
@@ -39,7 +43,9 @@ There are three Glue tables that are referenced in this runbook:
 3. Determine the column list for `staging` and `target` tables.
    1. This step may be skipped if the `target` table already exists. In that case the column list for the `staging` table
       should be identical in names, data types, and ordering to the `target` table after removing the `year` and `month`
-      partition columns.
+      partition columns. The column definition for the `target` table can be retrieved by navigating to the table in
+      the AWS Glue console, selecting `Actions` and then `View properties` which makes a JSON schema for the table
+      available which includes the ordered list of columns. 
    3. This Athena query produces the canonical ordered list of JSON MDC keys from a Cloudwatch export.
    ```sql
    with dataset AS (
@@ -95,8 +101,8 @@ There are three Glue tables that are referenced in this runbook:
    Athena timeout. This is accomplished by running the following statement with different where clauses in the with
    clause that load a portion of the data each time. Note that in order to avoid duplication with the running
    firehose, the most recent export should have a small overlap with the firehose data and include a where clause
-   that performs de-duplication. The where clauses for the initial load are included below, commented out, with the
-   elapsed time to load as a comment.
+   that performs de-duplication against the `target` table. The where clauses for the initial load are included below,
+   commented out, with the elapsed time to load as a comment.
    ```sql
    insert into prod_staging
    with dataset as (
@@ -141,7 +147,7 @@ There are three Glue tables that are referenced in this runbook:
       from dataset
    ```
 
-6. Load the `target` table from the `staging` table.
+7. Load the `target` table from the `staging` table.
    1. The `target` table definition resides in terraform and should match the `staging` table columns and ordering with the one
       difference being that the `staging` table does not include the `year` and `month` partition columns. Verify that
       the table structure is the same if not done already. 
@@ -174,7 +180,7 @@ There are three Glue tables that are referenced in this runbook:
          and month(from_iso8601_timestamp("timestamp")) = 8
       ```
    
-7. Verify the load.
+8. Verify the load.
    1. Select a sample of the data and inspect the most important columns: timestamp, mdc_bene_id, mdc_http* to ensure
       that the columns are populated sensibly. Note that many of the other columns are only sparsely populated.
       ```sql
