@@ -24,10 +24,10 @@ locals {
     env      = local.env
     seed_env = local.seed_env
   }))
-  common_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "common") }
-  migrator_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") }
-  pipeline_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "pipeline") }
-  server_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "server") }
+  common_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "common") && value != "UNDEFINED" }
+  migrator_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") && value != "UNDEFINED" }
+  pipeline_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "pipeline") && value != "UNDEFINED" }
+  server_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "server") && value != "UNDEFINED" }
 
   # Low precedence. These values are already present in SSM but aren't (yet) part of the encoded YAML configuration.
   common_nonsensitive_ssm = zipmap(
