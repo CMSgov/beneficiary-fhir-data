@@ -43,6 +43,7 @@ As of early September 2022, technical controls for standards enforcement are sti
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)
 - only string-formatted values are accepted
 - empty strings, i.e '' are not supported
+- we've adopted a _local_ convention where the literal `UNDEFINED` makes an SSM-derived value absent
 - sensitive values must be encrypted with appropriate [AWS Key Management Service-stored CMK](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/keys)
 
 ### Usage and User Additions

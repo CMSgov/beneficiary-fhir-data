@@ -51,23 +51,26 @@ Kinesis Firehose's format_conversion feature.
 
 Based on historical log files, this list is meant to contain every field ever used *so far*.
 However, when new fields are added to the FHIR server's log files, they will also need to be added
-to api-requests/glue.tf and then the tables will need to be updated in AWS. The procedure is:
+to api-requests/glue.tf and then the tables will need to be updated in AWS. It is perfectly fine
+(preferable, maybe) to update the table schema _before_ the changes go live on the FHIR server.
+
+The procedure for adding a new column is:
 
 1. Add the new column to terraform.
 2. Run terraform apply.
-3. To verify that the new column has been added, wait about fifteen minutes to be sure that some
-log files have been processed via Kinesis Firehose, and then run a quick Athena query such as:
+3. *IMPORTANT*: If you update the schema (such as adding a new column), you also need to be sure to
+update the Views in Athena. See below, under Athena Views.
+4. To verify that the new column has been added, wait about fifteen minutes to be sure that some
+log files have been processed via Kinesis Firehose, and then run a quick Athena query such as these:
 
 ```sql
-SELECT
-  "cw_id",
-  "cw_timestamp",
-  "<new_field>"
-FROM
-  "bfd_insights_bfd_<underscore_environment>_api_requests"
-WHERE
-  "<new_field>" IS NOT NULL
-LIMIT 50;
+SELECT * FROM "bfd_insights_bfd_prod_daily_combined";
+```
+
+OR
+
+```sql
+`SELECT "<column>" FROM "bfd_insights_bfd_prod_partners" WHERE "<column>" IS NOT NULL;
 ```
 
 ## Manual Ingestion of Log Files
@@ -77,55 +80,74 @@ AWS Glue we have to perform. This approach is far more cost-effective and faster
 
 **TODO: Add a reference to the runbook once completed.**
 
-## Beneficiaries
+## Analysis
 
-Beneficiaries is the portion that selects the beneficiary and timestamp from the API-Requests
-table. Beneficiaries-Unique (which is included within this portion of BFD Insights) includes the
-calculations of when each beneficiary was first queried.
-
-### Structure
+The Analysis section is handled through Athena views and QuickSight dashboards, and is designed to
+be efficient and cost-effective.
 
 ```mermaid
 flowchart TD
-    APIRequests["Glue Table: API Requests"] -->|Glue Job: Populate Beneficiaries| Beneficiaries["Glue Table: Beneficiaries"]
-    Beneficiaries -->|Glue Job: Populate Beneficiary Unique| BeneUnique["Glue Table: Beneficiary Unique"]
-    BeneUnique --> DataSet["QuickSight: DataSet"]
-    DataSet --> Analysis["QuickSight: Analysis"]
-    Analysis --> Dashboard["QuickSight: Dashboard"]
+    CloudWatch["CloudWatch: Historical Logs"] -->|Manual Export| S3
+    S3["S3 Bucket"] -->|Crawler: History| History["Glue Table: API History"]
+    History -->|Glue Job: History Ingest| APIRequests["Glue Table: API Requests"]
+
+    EC2["CloudWatch Log Subscription (Real-Time)"] --> Firehose["Kinesis Firehose"]
+    Firehose -->|Lambda| History
 ```
 
-## Manual Creation of QuickSight Dashboards
+## Athena Views
 
-Note: Replace `<environment>` with the name of your environment, such as `prod` or `prod-sbx`.
-Replace any `-` with `_` in `<underscore_environment>` (Athena doesn't like hyphens in table
-names).
+Instead of using AWS Glue to build intermediate tables, we use Athena views to standardize data
+collection to some degree.
 
-1. Go to [QuickSight](https://us-east-1.quicksight.aws.amazon.com/).
-2. Datasets. New Dataset.
-    - Athena.
-        - Name your data source. Example: `bfd-<environment>-beneficiaries`
-        - Athena Workgroup: `bfd`
-        - Create Data Source.
-    - Choose Your Table.
-        - Catalog: `AwsDataCatalog`
-        - Database: `bfd-<environment>`
-        - Table: Choose the one you want to query. Ex: `bfd_<underscore_environment>_beneficiaries`
-        - Select.
-    - Finish dataset creation.
-        - Directly query your data.
-        - Visualize.
-3. Create an analysis.
-    - Add a Count sheet (Unique Beneficiaries only)
-        - Under Visual Types (on the left), select `Insight` (it looks like an old-school lightbulb with a lightning bolt)
-        - Drag `bene_id` from the left to the chart.
-        - Click on Customize Insight on the chart.
-        - Computations > Add one.
-        - Total aggregation. Next.
-        - Select `bene_id` from the dropdown (it should already be selected by default). Add.
-        - Save.
-    - Add a Line Chart sheet.
-        - Under Visual Types (on the left), select `Line Chart`.
-        - Expand Field Wells at the top.
-        - Drag `# bene_id` from the left to "Value" under the Field Wells.
-        - Drag `timestamp` (beneficiaries table) or `last_seen` (beneficiaries_unique table) to the "X Axis" under the Field Wells.
-        - In the upper-right, click Share > Publish Dashboard. Choose a name. Example: `bfd-<environment>-beneficiaries`. The default options should be fine, so click Publish Dashboard.
+*IMPORTANT NOTES*:
+  * You will have to re-create (or otherwise "refresh") each of these views whenever you update the
+  underlying table schema for `api-requests` or you will get an error saying that the view is
+  stale. You can copy/paste the queries below, or from the editor click "Insert into Editor" on the
+  view.
+  * The prod version of these Athena views is listed, as that is the only environment on which we
+  are presently doing analysis. They will definitely need to be adapted if we choose to use these
+  views / QuickSight in other environments.
+
+**TODO**: When terraform supports Athena Views, put these into terraform.
+
+### Partners
+
+Annotate the `api_requests` data with the partner that made the query, based on the SSL client
+certificate.
+
+[SQL](./athena-queries/partners.sql)
+
+### Beneficiaries
+
+Split the beneficiaries by the comma separators, one row per beneficiary.
+
+[SQL](./athena-queries/beneficiaries.sql)
+
+#### Daily Unique
+
+Count the number of beneficiaries _first seen_ on each calendar date.
+
+[SQL](./athena-queries/daily_unqiue_benes.sql)
+
+### Daily Benes
+
+Count all queries made on each calendar date.
+
+[SQL](./athena-queries/daily_benes.sql)
+
+### Daily Combined
+
+For each date, combined `benes_queried` (total number of beneficiaries queried) and
+`benes_first_seen` (beneficiaries first seen on this date).
+
+[SQL](./athena-queries/daily_combined.sql)
+
+## QuickSight Dashboards
+
+The QuickSight dashboards are the portion that displays the data to users. They rely heavily on
+the Athena views and are set up to run once per day, just before midnight UTC.
+
+Please see the
+["How to Create BFD Insights QuickSight"](../../../../runbooks/how-to-create-bfd-insights-quicksight.md)
+runbook for how to create these if they ever need to be recreated.
