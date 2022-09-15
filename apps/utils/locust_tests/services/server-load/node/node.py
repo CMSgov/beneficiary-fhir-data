@@ -135,16 +135,16 @@ async def run_locust(event):
     if stop_on_scaling:
         message_filters.append(WARM_POOL_INSTANCE_LAUNCH_FILTER)
 
-    scaling_event = []
-    while not scaling_event:
-        scaling_event = check_queue(
+    scale_or_stop_events = []
+    while not scale_or_stop_events:
+        scale_or_stop_events = check_queue(
             queue=queue,
             timeout=1,
             message_filters=message_filters,
         )
 
     print("Scaling event detected.")
-    print(f"Scaling event detected was: {scaling_event[0]}")
+    print(f"Scaling event detected was: {scale_or_stop_events[0]}")
     print(f"Coasting for {coasting_time} seconds before termination.")
 
     time.sleep(int(coasting_time))
