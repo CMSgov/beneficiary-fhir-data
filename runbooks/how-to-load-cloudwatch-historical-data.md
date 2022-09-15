@@ -43,12 +43,12 @@ This runbook should be executed after the Kinesis Firehose has started to popula
    ```
 
 3. Determine the column list for the `staging` table.
-   1. The column list for the `staging` table
-      should be identical in names, data types, and ordering to the `target` table after removing the `year` and `month`
-      partition columns. The column definition for the `target` table can be retrieved by navigating to the table in
-      the AWS Glue console, selecting `Actions` and then `View properties` which makes a JSON schema for the table
-      available which includes the ordered list of columns. The column names can be extracted from this file and should
-      resemble the list below. Only include the column names from the `Columns` array -- do not include `PartitionKeys`.
+   1. The column list for the `staging` table should be identical in names, data types, and ordering to the `target`
+      table after removing the `year` and `month` partition columns. The column definition for the `target` table can be
+      retrieved by navigating to the table in the AWS Glue console, selecting `Actions` and then `View properties` which
+      makes a JSON schema for the table available which includes the ordered list of columns. The column names can be
+      extracted from this file and should resemble the list below. Only include the column names from the `Columns`
+      array -- do not include `PartitionKeys`.
 
       Sample output:
       ```text
