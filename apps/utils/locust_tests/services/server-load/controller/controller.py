@@ -6,12 +6,14 @@ import asyncio
 import json
 import os
 import socket
+import sys
 import time
 import urllib.parse
 
 import boto3
 from botocore.config import Config
 
+sys.path.append("..")  # Allows for module imports from sibling directories
 from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
 from common.convert_utils import to_bool
 
@@ -60,18 +62,25 @@ async def async_main():
 
     boto_config = Config(region_name=region)
 
+    ssm_client = boto3.client("ssm", config=boto_config)
+    rds_client = boto3.client("rds", config=boto_config)
     sqs = boto3.resource("sqs", config=boto_config)
     lambda_client = boto3.client("lambda", config=boto_config)
 
     try:
         cluster_id = get_ssm_parameter(
-            f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier",
         )
         username = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/server/sensitive/vault_data_server_db_username",
+            with_decrypt=True,
         )
         raw_password = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/server/sensitive/vault_data_server_db_password",
+            with_decrypt=True,
         )
     except ValueError as exc:
         print(exc)
@@ -79,7 +88,7 @@ async def async_main():
 
     password = urllib.parse.quote(raw_password)
     try:
-        db_uri = get_rds_db_uri(cluster_id)
+        db_uri = get_rds_db_uri(rds_client=rds_client, cluster_id=cluster_id)
     except ValueError as exc:
         print(exc)
         return
@@ -90,6 +99,7 @@ async def async_main():
         "--locustfile=high_volume_suite.py",
         f"--host={test_host}",
         f"--users={max_users}",
+        f"--run-time={runtime_limit}",
         f"--spawn-rate={user_spawn_rate}",
         f"--database-uri={db_dsn}",
         "--master",
@@ -100,6 +110,7 @@ async def async_main():
         "--loglevel=DEBUG",
         "--csv=load",
         "--headless",
+        cwd="../../../",
     )
 
     # Get the SQS queue and purge it of any possible stale messages.
@@ -118,7 +129,9 @@ async def async_main():
             host=test_host,
         )
         scaling_event = check_queue(
-            timeout=node_spawn_time, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
+            queue=queue,
+            timeout=node_spawn_time,
+            message_filter={"Origin": "EC2", "Destination": "WarmPool"},
         )
         spawn_count += 1
 

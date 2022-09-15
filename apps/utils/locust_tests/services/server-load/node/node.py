@@ -5,6 +5,7 @@ This is a modified version of the `server-regression` lambda.
 
 import asyncio
 import os
+import sys
 import time
 import urllib.parse
 from dataclasses import dataclass
@@ -12,6 +13,7 @@ from dataclasses import dataclass
 import boto3
 from botocore.config import Config
 
+sys.path.append("..")  # Allows for module imports from sibling directories
 from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
 from common.convert_utils import to_bool
 
