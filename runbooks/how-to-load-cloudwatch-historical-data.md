@@ -25,8 +25,8 @@ This runbook should be executed after the Kinesis Firehose has started to popula
    8. S3 Bucket Name: `bfd-insights-bfd-app-logs`
    9. S3 Bucket Prefix: `export/prod/YYYY_(MM-MM)` (For example, export/prod/2022_(01-06) for the data that spans from 
       2022-01-01 00:00:00 through 2022-07-01 00:00:00)
-   11. Run the job. Production exports can take up to an hour per month depending on the activity level that month.
-   12. When the job completes, remove the `aws-logs-write-test` subfolder that AWS creates for internal testing.
+   10. Run the job. Production exports can take up to an hour per month depending on the activity level that month.
+   11. When the job completes, remove the `aws-logs-write-test` subfolder that AWS creates for internal testing.
 
 2. Create/Update the Glue `export` table.
    1. From the AWS Glue console, select Crawlers
