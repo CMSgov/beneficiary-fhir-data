@@ -2,3 +2,4 @@
 test/venv/
 test/roles/
 test/*.retry
+test/files/
