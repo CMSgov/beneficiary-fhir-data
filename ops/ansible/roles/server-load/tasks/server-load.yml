@@ -2,8 +2,9 @@
 - name: Install Pre-requisites
   yum:
     pkg:
-      - java-11-openjdk
-      - jq
+      - gcc
+      - python3-devel
+      - setuptools
   become: true
   tags:
     - pre-ami
@@ -56,6 +57,14 @@
     dest: "{{ server_load_dir }}"
     owner: "{{ server_load_user }}"
     group: "{{ server_load_user }}"
+  become: true
+  tags:
+    - pre-ami
+
+- name: Install server-load Application Requirements
+  pip:
+    requirements: "{{ server_load_dir }}/requirements.txt"
+    umask: "0022"
   become: true
   tags:
     - pre-ami
