@@ -55,10 +55,6 @@ public class BBCodingSystems {
 
     public static final String ICN = MCS_BASE + "/icn";
 
-    public static final String PROC_CODE = MCS_BASE + "/proc-code";
-
-    public static final String MOD_PREFIX = MCS_BASE + "/mod-";
-
     private MCS() {}
   }
 }
