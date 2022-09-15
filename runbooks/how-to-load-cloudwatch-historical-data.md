@@ -24,7 +24,7 @@ There are three Glue tables that are referenced in this runbook:
 
 2. Create/Update the Glue `export` table.
    1. From the AWS Glue console, select Crawlers
-   2. Select the `bfd_cw_export` crawler (this crawler is terraformed)
+   2. Select the `bfd_cw_export` crawler (this crawler is in terraform and should already exist)
    3. Select `Run`
    4. Verify that the `bfd_cw_export.prod` table has the expected data by inspecting the results of this query that
       retrieves the number of records per month and ensuring that the newly exported data is represented:
