@@ -286,6 +286,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
+      // Add bene_id to MDC logs when _lastUpdated filter is in effect
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
+
       return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
