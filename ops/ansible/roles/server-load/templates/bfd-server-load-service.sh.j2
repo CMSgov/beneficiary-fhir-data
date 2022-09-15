@@ -7,5 +7,50 @@
 # troubleshooting scenarios.
 #}
 
+# BFD_ENVIRONMENT defaults to 'test' in the server-load application
+{{ '#' if env|default('', true)|length < 1 }}export BFD_ENVIRONMENT='{{ env|default('', true) }}'
+
+# SQS_QUEUE_NAME defaults to 'bfd-test-server-load' in the server-load application
+{{ '#' if server_load_sqs_queue_name|default('', true)|length < 1 }}export SQS_QUEUE_NAME='{{ server_load_sqs_queue_name|default('', true) }}'
+
+# NODE_LAMBDA_NAME defaults to 'bfd-test-server-load-node' in the server-load application
+{{ '#' if server_load_node_lambda_name|default('', true)|length < 1 }}export NODE_LAMBDA_NAME='{{ server_load_node_lambda_name|default('', true) }}'
+
+# TEST_HOST defaults to 'https://test.bfd.cms.gov' in the server-load application
+{{ '#' if server_load_test_host|default('', true)|length < 1 }}export TEST_HOST='{{ server_load_test_host|default('', true) }}'
+
+# AWS_DEFAULT_REGION defaults to 'us-east-1' in the server-load application
+{{ '#' if server_load_aws_default_region|default('', true)|length < 1 }}export AWS_DEFAULT_REGION='{{ server_load_aws_default_region|default('', true) }}'
+
+# INITIAL_WORKER_NODES defaults to 0 in the server-load application
+{{ '#' if server_load_initial_worker_nodes|default('', true)|length < 1 }}export INITIAL_WORKER_NODES='{{ server_load_initial_worker_nodes|default('', true) }}'
+
+# NODE_SPAWN_RATE defaults to 10 in the server-load application
+{{ '#' if server_load_node_spawn_rate|default('', true)|length < 1 }}export NODE_SPAWN_RATE='{{ server_load_node_spawn_rate|default('', true) }}'
+
+# MAX_SPAWNED_NODES defaults to 80 in the server-load application
+{{ '#' if server_load_max_spawned_nodes|default('', true)|length < 1 }}export MAX_SPAWNED_NODES='{{ server_load_max_spawned_nodes|default('', true) }}'
+
+# MAX_SPAWNED_USERS defaults to 5000 in the server-load application
+{{ '#' if server_load_max_spawned_users|default('', true)|length < 1 }}export MAX_SPAWNED_USERS='{{ server_load_max_spawned_users|default('', true) }}'
+
+# USER_SPAWN_RATE defaults to 1 in the server-load application
+{{ '#' if server_load_user_spawn_rate|default('', true)|length < 1 }}export USER_SPAWN_RATE='{{ server_load_user_spawn_rate|default('', true) }}'
+
+# TEST_RUNTIME_LIMIT defaults to '10m30s' in the server-load application
+{{ '#' if server_load_test_runtime_limit|default('', true)|length < 1 }}export TEST_RUNTIME_LIMIT='{{ server_load_test_runtime_limit|default('', true) }}'
+
+# COASTING_TIME defaults to 10 in the server-load application
+{{ '#' if server_load_coasting_time|default('', true)|length < 1 }}export COASTING_TIME='{{ server_load_coasting_time|default('', true) }}'
+
+# WARM_INSTANCE_TARGET defaults to 7 in the server-load application
+{{ '#' if server_load_warm_instance_target|default('', true)|length < 1 }}export WARM_INSTANCE_TARGET='{{ server_load_warm_instance_target|default('', true) }}'
+
+# STOP_ON_SCALING defaults to true in the server-load application
+{{ '#' if server_load_stop_on_scaling|default('', true)|length < 1 }}export STOP_ON_SCALING='{{ server_load_stop_on_scaling|default('', true) }}'
+
+# STOP_ON_NODE_LIMIT defaults to true in the server-load application
+{{ '#' if server_load_STOP_ON_NODE_LIMIT|default('', true)|length < 1 }}export STOP_ON_NODE_LIMIT='{{ server_load_stop_on_node_limit|default('', true) }}'
+
 python3 "{{ server_load_dir }}/services/server-load/controller/controller.py" \
   &>> "{{ server_load_dir }}/bfd-server-load.log"
