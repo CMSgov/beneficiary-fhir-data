@@ -118,8 +118,17 @@ async def async_main():
 
     ip_address = socket.gethostbyname(socket.gethostname())
 
-    scaling_event = []
     spawn_count = 0
+    for _ in range(0, initial_worker_nodes):
+        start_node(
+            lambda_client=lambda_client,
+            node_lambda_name=node_lambda_name,
+            controller_ip=ip_address,
+            host=test_host,
+        )
+        spawn_count += 1
+
+    scaling_event = []
     while not scaling_event and spawn_count < max_spawned_nodes:
         start_node(
             lambda_client=lambda_client,
