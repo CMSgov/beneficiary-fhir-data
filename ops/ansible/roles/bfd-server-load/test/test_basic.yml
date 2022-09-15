@@ -15,6 +15,30 @@
         state: present
       become: true
 
+    - name: Archive server-load Application
+      archive:
+        path: ../../../../../apps/utils/locust_tests
+        dest: files/locust_tests.zip
+        format: zip
+      become: false
+      delegate_to: localhost
+
+    - name: Create Git Repo Directory
+      file:
+        path: /beneficiary-fhir-data/apps/utils
+        state: directory
+        owner: root
+        group: root
+      become: true
+
+    - name: Copy and Unarchive Local Repository
+      unarchive:
+        src: files/locust_tests.zip
+        dest: /beneficiary-fhir-data/apps/utils
+        owner: root
+        group: root
+      become: true
+
     - name: Apply Role
       import_role:
         name: bfd-server-load

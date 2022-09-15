@@ -9,6 +9,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Run everything from that directory.
 cd "$SCRIPT_DIR"
 
+# Create the "files" directory to store archived server-load application
+mkdir -p "files"
+
 # Create and activate the Python virtualenv needed by Ansible.
 if [ ! -d venv/ ]; then
   python3 -m venv venv
@@ -37,11 +40,13 @@ if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E 
   docker run \
     "--net=${CONTAINER_NAME}" \
     --cap-add=SYS_ADMIN \
+    --privileged \
     --detach \
     --rm \
     --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
     --tmpfs /run \
     --tmpfs /run/lock \
     --name "$CONTAINER_NAME" \
-    "ghcr.io/cmsgov/bfd-apps:${BFD_APPS_IMAGE_ID}"
+    "ghcr.io/cmsgov/bfd-apps:${BFD_APPS_IMAGE_ID}" \
+    /usr/sbin/init
 fi
