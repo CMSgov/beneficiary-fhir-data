@@ -13,13 +13,14 @@ import boto3
 from botocore.config import Config
 
 from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
+from common.convert_utils import to_bool
 
-environment = str(os.environ.get("BFD_ENVIRONMENT", "test"))
-region = str(os.environ.get("AWS_DEFAULT_REGION", "us-east-1"))
-sqs_queue_name = str(os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load"))
+environment = os.environ.get("BFD_ENVIRONMENT", "test")
+region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
 coasting_time = int(os.environ.get("COASTING_TIME", 10))
 warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 7))
-stop_on_scaling = bool(os.environ.get("STOP_ON_SCALING", True))
+stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
