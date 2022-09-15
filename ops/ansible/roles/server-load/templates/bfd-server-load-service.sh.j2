@@ -50,7 +50,7 @@
 {{ '#' if server_load_stop_on_scaling|default('', true)|length < 1 }}export STOP_ON_SCALING='{{ server_load_stop_on_scaling|default('', true) }}'
 
 # STOP_ON_NODE_LIMIT defaults to true in the server-load application
-{{ '#' if server_load_STOP_ON_NODE_LIMIT|default('', true)|length < 1 }}export STOP_ON_NODE_LIMIT='{{ server_load_stop_on_node_limit|default('', true) }}'
+{{ '#' if server_load_stop_on_node_limit|default('', true)|length < 1 }}export STOP_ON_NODE_LIMIT='{{ server_load_stop_on_node_limit|default('', true) }}'
 
 python3 "{{ server_load_dir }}/services/server-load/controller/controller.py" \
   &>> "{{ server_load_dir }}/bfd-server-load.log"
