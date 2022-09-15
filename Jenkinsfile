@@ -51,6 +51,7 @@ def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
+def pipelineScripts
 def serverScripts
 def baseScripts
 def canDeployToProdEnvs
@@ -136,7 +137,7 @@ try {
 		containers: [
 			containerTemplate(
 				name: 'bfd-cbc-build',
-				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6', //TODO: consider a smarter solution for resolving this image
+				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6', // TODO: consider a smarter solution for resolving this image
 				command: 'cat',
 				ttyEnabled: true,
 				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
@@ -159,6 +160,7 @@ try {
 					// terraservice deployments...
 					baseScripts = load('ops/terraform/services/base/deploy.groovy')
 					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
+					pipelineScripts = load('ops/terraform/services/pipeline/deploy.groovy')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
 					awsAssumeRole()
@@ -233,7 +235,7 @@ try {
 			}
 
 			bfdEnv = 'test'
-			stage('Deploy base to TEST') {
+			stage('Deploy Base to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_base_start')
@@ -249,7 +251,6 @@ try {
 
 			stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
-
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_migration_start')
 					container('bfd-cbc-build') {
@@ -264,7 +265,7 @@ try {
 						)
 
 						if (migratorDeploymentSuccessful) {
-							println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 						} else {
 							error('Migrator deployment failed')
 						}
@@ -272,7 +273,25 @@ try {
 				}
 			}
 
-			stage('Deploy to TEST') {
+			stage('Deploy Pipeline to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_pipeline_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						pipelineScripts.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/pipeline",
+							tfVars: [
+								git_repo_version: gitCommitId,
+								ami_id_override: amiIds.bfdPipelineAmiId
+							]
+						)
+					}
+				}
+			}
+
+			stage('Deploy Server to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_start')
@@ -334,7 +353,7 @@ try {
 			}
 
 			bfdEnv = 'prod-sbx'
-			stage('Deploy base to PROD-SBX') {
+			stage('Deploy Base to PROD-SBX') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
@@ -369,7 +388,7 @@ try {
 							)
 
 							if (migratorDeploymentSuccessful) {
-								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
 								error('Migrator deployment failed')
 							}
@@ -380,7 +399,29 @@ try {
 				}
 			}
 
-			stage('Deploy to PROD-SBX') {
+			stage('Deploy Pipeline to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_pipeline_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							pipelineScripts.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+									git_repo_version: gitCommitId,
+									ami_id_override: amiIds.bfdPipelineAmiId
+								]
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
+			stage('Deploy Server to PROD-SBX') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
@@ -420,7 +461,7 @@ try {
 
 
 			bfdEnv = 'prod'
-			stage('Deploy base to PROD') {
+			stage('Deploy Base to PROD') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
@@ -456,7 +497,7 @@ try {
 							)
 
 							if (migratorDeploymentSuccessful) {
-								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
 								error('Migrator deployment failed')
 							}
@@ -467,7 +508,30 @@ try {
 				}
 			}
 
-			stage('Deploy to PROD') {
+			stage('Deploy Pipeline to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_pipeline_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							pipelineScripts.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+									git_repo_version: gitCommitId,
+									ami_id_override: amiIds.bfdPipelineAmiId
+								]
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
+
+			stage('Deploy Server to PROD') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {

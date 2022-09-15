@@ -1,8 +1,4 @@
 ---
-  
-# Version of the ETL Jar to deploy 
-data_pipeline_version: '0.1.0-SNAPSHOT'
-
 # The abbreviated name for this environment, per https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions.
 env_name_std: 'prod-sbx'
 
@@ -15,14 +11,6 @@ pac_resources_enabled: true
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_server_new_relic_metric_path: '/metric/v1'
-
-# This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
-data_pipeline_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
-data_pipeline_ec2_instance_type_vcpu: 4
-
-# There is no ongoing data refresh here: if we're loading data in the developer preview environment, it should be an initial
-# load.
-data_pipeline_idempotency_required: false
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
@@ -68,16 +56,3 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_sbx_certificate.pem') }}"
   - alias: client_ab2d_imp
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_imp_certificate.pem') }}"
-  
-# Populate RDA API data in our database using the in-process mock server and S3 mode.
-# Mock server configuration is defined in the vault.
-data_pipeline_rda_grpc_server_type: 'InProcess'
-data_pipeline_rda_grpc_inproc_server_mode: 'S3'
-
-# Enables the CCW RIF job when true; disables when false
-data_pipeline_ccw_rif_job_enabled: true
-
-# Enable RDA API data ETL pipeline jobs.
-data_pipeline_rda_job_enabled: true
-data_pipeline_rda_job_interval_seconds: 3600
-

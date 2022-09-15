@@ -1,12 +1,13 @@
 ---
+# env:prod
 # COMMON CONFIGURATION
 /bfd/prod/common/nonsensitive/enterprise_tools_security_group: bfd-prod-enterprise-tools
 /bfd/prod/common/nonsensitive/env_name_std: prod
 /bfd/prod/common/nonsensitive/key_pair: bfd-prod
 /bfd/prod/common/nonsensitive/kms_key_alias: alias/bfd-prod-cmk
 /bfd/prod/common/nonsensitive/management_security_group: bfd-prod-remote-management
-/bfd/prod/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
-/bfd/prod/common/nonsensitive/new_relic_metric_path: /metric/v1
+/bfd/prod/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
+/bfd/prod/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 /bfd/prod/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/prod/common/nonsensitive/rds_backup_retention_period: 21 # in days TODO: is a 21 day retention period sensible default?
 /bfd/prod/common/nonsensitive/rds_iam_database_authentication_enabled: false
@@ -24,3 +25,25 @@
 /bfd/prod/migrator/nonsensitive/sqs_queue_name: bfd-prod-migrator
 /bfd/prod/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
 /bfd/prod/migrator/nonsensitive/db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
+
+# PIPELINE CONFIGURATION
+/bfd/${env}/pipeline/nonsensitive/bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_dir: *bfdPipelineDir
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_user: bb-etl
+/bfd/${env}/pipeline/nonsensitive/instance_type: m5.4xlarge
+## PIPELINE CCW
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
+## PIPELINE+RDA
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 600 # 10 minutes
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 20

@@ -196,7 +196,6 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
-		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
 		-var='ssh_key_name=bfd-${environmentId}' \
 		-var='git_branch_name=${gitBranchName}' \
 		-var='git_commit_id=${gitCommitId}' \
