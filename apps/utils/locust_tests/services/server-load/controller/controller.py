@@ -39,18 +39,23 @@ def start_node(lambda_client, node_lambda_name: str, controller_ip: str, host: s
 
 
 async def async_main():
-    environment = os.environ.get("BFD_ENVIRONMENT", "test")
-    sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
-    node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
-    test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
-    region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+    environment = str(os.environ.get("BFD_ENVIRONMENT", "test"))
+    sqs_queue_name = str(os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load"))
+    node_lambda_name = str(os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node"))
+    test_host = str(os.environ.get("TEST_HOST", "https://test.bfd.cms.gov"))
+    region = str(os.environ.get("AWS_DEFAULT_REGION", "us-east-1"))
+    initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
+    node_spawn_rate = int(os.environ.get("NODE_SPAWN_RATE", 10))
     # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling.
     # This may need some adjustment, but should be a fine default.
-    max_spawned_nodes = os.environ.get("MAX_SPAWNED_NODES", 80)
-    max_users = os.environ.get("MAX_SPAWNED_USERS", 5000)
-    user_spawn_rate = os.environ.get("USER_SPAWN_RATE", 1)
-    spawning_timeout = os.environ.get("NODE_SPAWN_TIMEOUT", 10)
-    coasting_time = os.environ.get("COASTING_TIME", 10)
+    max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", 80))
+    max_users = int(os.environ.get("MAX_SPAWNED_USERS", 5000))
+    user_spawn_rate = int(os.environ.get("USER_SPAWN_RATE", 1))
+    runtime_limit = str(os.environ.get("TEST_RUNTIME_LIMIT", "10m30s"))
+    coasting_time = int(os.environ.get("COASTING_TIME", 10))
+    warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 7))
+    stop_on_scaling = bool(os.environ.get("STOP_ON_SCALING", True))
+    stop_on_node_limit = bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
 
     boto_config = Config(region_name=region)
 
@@ -112,7 +117,7 @@ async def async_main():
             host=test_host,
         )
         scaling_event = check_queue(
-            timeout=spawning_timeout, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
+            timeout=node_spawn_rate, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
         )
         spawn_count += 1
 
