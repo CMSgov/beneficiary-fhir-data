@@ -1,16 +1,6 @@
 ---
-  
-# Version of the ETL Jar to deploy 
-data_pipeline_version: '0.1.0-SNAPSHOT'
-
 # The abbreviated name for this environment, per https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions.
 env_name_std: 'prod'
-
-# This system is an m5.4xlarge (16 vCPUs, 64 GB RAM).
-data_pipeline_ec2_instance_type_mem_mib: "{{ 64 * 1024 }}"
-data_pipeline_ec2_instance_type_vcpu: 16
-
-data_pipeline_idempotency_required: false
 
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
@@ -46,17 +36,3 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_certificate.pem') }}"
   - alias: client_ab2d_prod_validation
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_validation_certificate.pem') }}"
-
-# Enables the CCW RIF job when true; disables when false
-data_pipeline_ccw_rif_job_enabled: true
-
-# Enables the RDA API data pipeline
-data_pipeline_rda_job_enabled: true
-# Sets the pipeline manager to ensure the rda job is running every 10 mins
-data_pipeline_rda_job_interval_seconds: 600
-# Sets the job to use 20 threads to load data
-data_pipeline_rda_job_write_threads: 20
-
-# Set to true to enable DLQ processing, which reads messages off the MessageErrors table and
-# attempts to reprocess them from the RDA API.
-data_pipeline_rda_process_dlq: false

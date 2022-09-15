@@ -52,10 +52,6 @@ def _(environment: Environment, **kwargs):
         data_type_name="hashed_mbis",
     )
 
-
-validation.set_validation_goal(validation.ValidationGoal.SLA_V2_BASELINE)
-
-
 class TestLoadShape(UserInitAwareLoadShape):
     pass
 

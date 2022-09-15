@@ -366,7 +366,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "0AABBZZ"
+        "code" : "CD1YYZZ",
+        "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
       } ]
     }
   } ],
@@ -405,7 +406,7 @@
         "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
-          "code" : "987654321"
+          "code" : "000000000"
         }
       } ],
       "coding" : [ {

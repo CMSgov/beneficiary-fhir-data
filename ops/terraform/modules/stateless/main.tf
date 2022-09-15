@@ -361,37 +361,6 @@ module "bfd_server_alarm_all_eob_6s-p95" {
   }
 }
 
-## ETL server
-#
-module "bfd_pipeline" {
-  source = "../resources/bfd_pipeline"
-
-  env_config = local.env_config
-  az         = "us-east-1b" # same as the master db
-
-  launch_config = {
-    ami_id       = var.etl_ami
-    account_id   = data.aws_caller_identity.current.account_id
-    ssh_key_name = var.ssh_key_name
-    git_branch   = var.git_branch_name
-    git_commit   = var.git_commit_id
-  }
-
-  db_config = {
-    db_sg = data.aws_security_group.aurora_cluster.id
-  }
-
-  mgmt_config = {
-    vpn_sg    = data.aws_security_group.vpn.id
-    tool_sg   = data.aws_security_group.tools.id
-    remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
-  }
-
-  alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-}
-
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {

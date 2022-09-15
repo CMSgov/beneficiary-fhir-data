@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -480,15 +480,23 @@ public final class OutpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("0AABBZZ", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("CD1YYZZ", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "0AABBZZ", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
             "2016-01-16T00:00:00-08:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 0AABBZZ");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code CD1YYZZ");
   }
 
   /** Insurance */
@@ -561,7 +569,7 @@ public final class OutpatientClaimTransformerV2Test {
         Arrays.asList(
             new Extension(
                 "http://hl7.org/fhir/sid/ndc",
-                new Coding("http://hl7.org/fhir/sid/ndc", "987654321", null))));
+                new Coding("http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER"))));
 
     assertTrue(compare.equalsDeep(pos));
   }
@@ -579,7 +587,7 @@ public final class OutpatientClaimTransformerV2Test {
     Extension compare =
         new Extension(
             "http://hl7.org/fhir/sid/ndc",
-            new Coding("http://hl7.org/fhir/sid/ndc", "987654321", null));
+            new Coding("http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER"));
 
     assertTrue(compare.equalsDeep(ex));
   }

@@ -44,19 +44,6 @@
 		<tag>HEAD</tag>
 	</scm>
 
-	<repositories>
-		<repository>
-			<id>ossrh-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<modules>
 		<module>bfd-shared-utils</module>
 		<module>bfd-shared-test-utils</module>
@@ -98,7 +85,7 @@
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.0</junit.version>
-		<jackson.version>2.13.3</jackson.version>
+		<jackson.version>2.13.4</jackson.version>
 		<mockito.version>4.6.1</mockito.version>
 		<postgresql.version>42.4.1</postgresql.version>
 		<hsqldb.version>2.7.0</hsqldb.version>

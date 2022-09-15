@@ -13,11 +13,7 @@
     env: "test"
 
   tasks:
-    - name: Include global variables
-      include_vars:
-        file: vars/000_cross_env_vars.yml
-      tags: [pre-ami, post-ami]
-    
+    # TODO: Remove include_vars when SSH/sudoer users have been resolved in SSM BFD-2068
     - name: Include env specific variables
       include_vars:
         dir: vars/{{ env }}
@@ -36,20 +32,8 @@
         name: bfd-pipeline
       vars:
         data_pipeline_dir: "{{ bfd_pipeline_dir }}"
-        # Note: The `data_pipeline_zip` variable should have been provided by `--extra-vars` on the command line.
-        data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m -XX:+PreserveFramePointer"
         data_pipeline_tmp_dir: "{{ bfd_pipeline_dir }}/tmp"
-        data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 25 }}"
-        data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
-        data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
-        data_pipeline_s3_bucket: "{{ vault_data_pipeline_s3_bucket }}"
-        # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`:
-        data_pipeline_db_url: "{{ vault_data_db_primary_url }}"
-        data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
-        data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
-        #data_pipeline_loader_threads: (see group_vars/all/main.yml
-        data_pipeline_new_relic_app_name: "BFD Pipeline ({{ env_name_std }})"
-        data_pipeline_new_relic_metric_key: "{{ vault_data_pipeline_new_relic_metric_key }}"
+        # Note: The `data_pipeline_zip` variable should have been provided by `--extra-vars` on the command line.
 
     - name: Add SSH users
       import_role:
@@ -57,5 +41,6 @@
       tags:
         - pre-ami
 
+  # TODO: Consider removing this task all together... it doesn't seem to be firing, but the solution continues to work
   handlers:
     - import_tasks: handlers/main.yml

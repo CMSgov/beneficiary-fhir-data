@@ -406,7 +406,7 @@ public final class RifFilesProcessorTest {
     assertFalse(claimLine.getRxNumber().isPresent());
     assertEquals(new BigDecimal("42.0"), claimLine.getHctHgbTestResult());
     assertEquals("R1", claimLine.getHctHgbTestTypeCode().get());
-    assertEquals("49035044700", claimLine.getNationalDrugCode().get());
+    assertEquals("000000000", claimLine.getNationalDrugCode().get());
     assertEquals("BB889999AA", claimLine.getCliaLabNumber().get());
     assertEquals(BigDecimal.ZERO, claimLine.getAnesthesiaUnitCount());
   }
@@ -491,7 +491,7 @@ public final class RifFilesProcessorTest {
     assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get().charValue());
     assertEquals(Character.valueOf('Y'), claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
 
-    assertEquals("0TCDDEE", claimGroup.getProcedure1Code().get());
+    assertEquals("BQ0HZZZ", claimGroup.getProcedure1Code().get());
     assertEquals(Character.valueOf('0'), claimGroup.getProcedure1CodeVersion().get());
     assertEquals(LocalDate.of(2016, 1, 16), claimGroup.getProcedure1Date().get());
     assertEquals(new BigDecimal("120.56"), claimGroup.getClaimUncompensatedCareAmount().get());
