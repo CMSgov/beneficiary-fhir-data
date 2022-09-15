@@ -18,10 +18,8 @@
   become: true
 
 - name: Copy Local Test SSL Keypair
-  copy:
-    # Note: This PEM file is encrypted within the project via Ansible Vault, which will
-    # automagically decrypt it as part of the copy operation.
-    src: "{{ data_server_ssl_client_certificate_test }}"
+  template:
+    src: test-keypair.pem.j2
     dest: "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
@@ -31,7 +29,7 @@
 - name: Copy the appserver keystore
   copy:
     # Note: this JKS file is encrypted via the Ansible Vault
-    src: "{{ data_server_appserver_keystore }}"
+    src: "{{ playbook_dir + '/' + data_server_appserver_keystore }}"
     dest: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
     force: yes # overwrite the existing keystore
   become: true
@@ -63,7 +61,7 @@
 
 - name: Save App Server SSL Truststore Certificates
   copy:
-    content: "{{ item.certificate }}"
+    content: "{{ lookup('file', playbook_dir + '/' + item.certificate) }}"
     dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
   with_items: "{{ data_server_ssl_client_certificates }}"
   changed_when: false

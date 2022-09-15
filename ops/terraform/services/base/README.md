@@ -11,28 +11,32 @@ This is supported by a [terraform workspaces-enabled](https://www.terraform.io/l
 Configuration management can get away from us, becoming wildly complex if there isn't a conscious effort to _keep things simple_.
 While simplicity is in the eye of the beholder, this module seeks to be as simple as possible and no simpler.
 To that end, this module will _primarily_ be composed of three files, `sensitive.tf`, `nonsensitive.tf`, and `ephemeral.tf`.
-The former two terraform files, as their names suggest, deal with sensitive and nonsensitive values, respectively.
-As of this writing, the sensitive values only apply to the so-called _established environments_, while nonsensitive values apply to both ephemeral and established environments alike.
-As you might expect, `ephemeral.tf` only applies to ephemeral environments.
+The former two terraform files deal with sensitive and nonsensitive values, respectively, while `ephemeral.tf` applies exclusively to ephemeral environments.
 
 Additional terraform instructions are housed in somewhat canonical, expected files, e.g. `main.tf`, `variables.tf`, etc.
-In general, this modules takes values from specific, yaml-formatted files stored in the [values directory](.values), and stores them in the appropriate AWS SSM Parameter hierarchies.
+In general, this modules takes configuration settings from specific, yaml-formatted files stored in the [values directory](.values), and stores them under the appropriate AWS SSM Parameter Store hierarchy.
 
 Each environment is configured in a terraform workspace, named for the environment it defines.
-There are four, known _established environments_ (`local.established_envs`) that enjoy _special_ treatment.
-Their respective configurations come from appropriately named, environment-specific yaml files found in the aforementioned values directory.
+There are four, known _established environments_ (`local.established_envs`) with their respective configurations coming from appropriately named, environment-specific yaml and eyaml files found in the aforementioned values directory.
 Ephemeral environments use a combination of the values stored in the `ephemeral.yaml` and effectively copy necessary values from their _seed_ environments. 
 
 **As of early September 2022, ephemeral environment support is limited. Please work with BFD engineers working in the infrastructure space if you need ephemeral environment support.**
 
-To summarize, terraform reads encrypted **and** plaintext yaml-encoded _key:value_ pairs and stores environment-specific AWS SSM Parameter Store _parameter-path:parameter-value_ pairs.
+To summarize, terraform reads encrypted **and** plaintext yaml-encoded _<key>:<value>_ pairs and stores environment-specific AWS SSM Parameter Store _<parameter-path>:<parameter-value>_ pairs.
 
 For more general documentation on formatting and usage, expand the `More...` below.
 
 <details><summary>More...</summary>
 
-### Formatting and Validation
+### Known Limitations
+AWS SSM Parameter Store has very limited support for storing non-string values in plain-text (`nonsensitive`) data and virtually no options for storing encrypted (`sensitive`)data.
+This forces us to handle some data that would more naturally be represented as collections like maps and arrays as formatted string types.
+To work with this, you might consider using spaces to delimit your collection and parse accordingly, which can easily be achieved using yaml's `>` _folding block_ for multi-line strings.
+Other techniques might involve storing more complex data in formats that are more machine-readable, like JSON.
+However between writing a JSON string to yaml here and being fetched from AWS SSM Parameter Store, it will be in an _escaped_ format and the data will need to be pre-processed.
+`jq`'s `fromjson` function is especially handy for this kind of conversion.
 
+### Formatting and Validation
 
 As of early September 2022, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
 - hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/${sensitivity}/${leaf}` format
