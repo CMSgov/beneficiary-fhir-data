@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -419,7 +419,7 @@ public class CarrierClaimTransformerV2Test {
         Arrays.asList(
             new Extension(
                 "http://hl7.org/fhir/sid/ndc",
-                new Coding("http://hl7.org/fhir/sid/ndc", "49035044700", null))));
+                new Coding("http://hl7.org/fhir/sid/ndc", "000000000", "Fake Diluent - WATER"))));
 
     assertTrue(compare.equalsDeep(pos));
   }

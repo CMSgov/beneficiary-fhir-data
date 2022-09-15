@@ -336,6 +336,15 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return String.format("%s/%s/%d_manifest.xml", s3Prefix, timestampText, sequenceId);
     }
 
+    /**
+     * Checks if the parsed manifest has a date in the future, compared to the current instant.
+     *
+     * @return {@code true} if the manifest has a future date
+     */
+    public boolean isFutureManifest() {
+      return Instant.now().compareTo(timestamp) <= 0;
+    }
+
     /** @see java.lang.Comparable#compareTo(java.lang.Object) */
     @Override
     public int compareTo(DataSetManifestId o) {
