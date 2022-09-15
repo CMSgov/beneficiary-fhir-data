@@ -4,7 +4,7 @@
     pkg:
       - gcc
       - python3-devel
-      - setuptools
+      - python3-setuptools
   become: true
   tags:
     - pre-ami
@@ -54,6 +54,7 @@
 - name: Copy server-load Application
   copy:
     src: "{{ git_repo_root }}/apps/utils/locust_tests/"
+    remote_src: yes
     dest: "{{ server_load_dir }}"
     owner: "{{ server_load_user }}"
     group: "{{ server_load_user }}"
@@ -64,6 +65,7 @@
 - name: Install server-load Application Requirements
   pip:
     requirements: "{{ server_load_dir }}/requirements.txt"
+    executable: pip3
     umask: "0022"
   become: true
   tags:
