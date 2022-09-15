@@ -177,7 +177,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
       --where year(from_iso8601_timestamp("timestamp")) = 2020
       --where year(from_iso8601_timestamp("timestamp")) = 2021
       --where year(from_iso8601_timestamp("timestamp")) = 2022
-        --and month(from_iso8601_timestamp("timestamp")) <= 8
+        --and month(from_iso8601_timestamp("timestamp")) < 8
       where year(from_iso8601_timestamp("timestamp")) = 2022
          and month(from_iso8601_timestamp("timestamp")) = 8
       ```
