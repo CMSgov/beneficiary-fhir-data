@@ -51,7 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Unit tests for the {@link StandardGrpcRdaSource} class. */
 @ExtendWith(MockitoExtension.class)
-public class GrpcRdaSourceTest {
+public class StandardGrpcRdaSourceTest {
   /** Value used as result from {@link RdaSink#readMaxExistingSequenceNumber()}. */
   public static final long DATABASE_SEQUENCE_NUMBER = 42;
   /** Value used when passing a non-empty configured sequence number to the constructor. */
