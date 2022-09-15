@@ -4,7 +4,7 @@
 set -eou pipefail
 
 # Determine the directory that this script is in.
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Run everything from that directory.
 cd "$SCRIPT_DIR"
@@ -30,6 +30,8 @@ if [ ! -L "roles/${ROLE}" ]; then ln -s "$(cd .. && pwd)" "roles/${ROLE}"; fi
 
 docker network create "$CONTAINER_NAME" || true
 
+docker pull "ghcr.io/cmsgov/bfd-apps:${BFD_APPS_IMAGE_ID}"
+
 # Prep the Docker container that will be used (if it's not already running).
 if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E "^${CONTAINER_NAME}$")" ]; then
   docker run \
@@ -43,8 +45,3 @@ if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E 
     --name "$CONTAINER_NAME" \
     "ghcr.io/cmsgov/bfd-apps:${BFD_APPS_IMAGE_ID}"
 fi
-
-# Ensure the ansible host's artifact directory exists
-mkdir -p "${HOME}/${ARTIFACT_DIRECTORY}"
-# Copy the artifact from the container onto the ansible host
-docker cp "${CONTAINER_NAME}:/${ARTIFACT_DIRECTORY}/${ARTIFACT}" "${HOME}/${ARTIFACT_DIRECTORY}/${ARTIFACT}"
