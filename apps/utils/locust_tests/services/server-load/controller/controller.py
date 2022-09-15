@@ -106,7 +106,6 @@ async def async_main():
         "--master-bind-port=5557",
         "--client-cert-path='tmp/bfd_test_cert.pem'",
         "--enable-rebalancing",
-        "--logfile=locust.log",
         "--loglevel=DEBUG",
         "--csv=load",
         "--headless",
