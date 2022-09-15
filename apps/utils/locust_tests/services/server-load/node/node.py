@@ -65,19 +65,28 @@ async def run_locust(event):
         # Assuming we get this far, invoke_event should have the information
         # required to run the lambda:
         cluster_id = get_ssm_parameter(
-            f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier",
         )
         username = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/server/sensitive/vault_data_server_db_username",
+            with_decrypt=True,
         )
         raw_password = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/server/sensitive/vault_data_server_db_password",
+            with_decrypt=True,
         )
         cert_key = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/server/sensitive/test_client_key",
+            with_decrypt=True,
         )
         cert = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
+            ssm_client=ssm_client,
+            name=f"/bfd/{environment}/server/sensitive/test_client_cert",
+            with_decrypt=True,
         )
     except ValueError as exc:
         print(exc)
@@ -89,7 +98,7 @@ async def run_locust(event):
 
     password = urllib.parse.quote(raw_password)
     try:
-        db_uri = get_rds_db_uri(cluster_id)
+        db_uri = get_rds_db_uri(rds_client=rds_client, clusterd_id=cluster_id)
     except ValueError as exc:
         print(exc)
         return
@@ -121,7 +130,9 @@ async def run_locust(event):
     scaling_event = []
     while not scaling_event:
         scaling_event = check_queue(
-            timeout=1, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
+            queue=queue,
+            timeout=1,
+            message_filter={"Origin": "EC2", "Destination": "WarmPool"},
         )
 
     print("Scaling event detected.")
