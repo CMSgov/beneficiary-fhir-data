@@ -14,7 +14,8 @@ public class Pipeline {
 
     public enum Type {
         SQL,
-        XLSX
+        READ_CSV,
+        WRITE_XLSX
     }
 
 }

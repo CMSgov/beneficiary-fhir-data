@@ -13,5 +13,6 @@ public class DbConfig {
     private String schema;
     private String driver;
     private String dialect;
+    private String showSql;
 
 }

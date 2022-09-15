@@ -10,6 +10,8 @@ import java.util.Set;
 public class AppConfig {
 
     private DbConfig db;
+    private String resourceDir;
+    private String outputDir;
     private Set<Pipeline> pipelines;
 
 }

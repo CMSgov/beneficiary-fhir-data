@@ -3,24 +3,26 @@ db:
   username: bfd
   password: InsecureLocalDev
   schema: rda
+resourceDir: filters/
+outputDir: .
 pipelines:
   - type: SQL
     target: list_tables.sql
     pipeTo:
-      type: XLSX
+      type: WRITE_XLSX
       target: insights.xlsx
       label: Tables
-  - type: SQL
-    target: list_tables.sql
+  - type: READ_CSV
+    target: list_tables.csv
     pipeTo:
       type: SQL
       target: list_fields.sql
       pipeTo:
-        type: XLSX
+        type: WRITE_XLSX
         target: insights.xlsx
         label: Columns
-  - type: SQL
-    target: list_tables.sql
+  - type: READ_CSV
+    target: list_tables.csv
     pipeTo:
       type: SQL
       target: list_fields.sql
@@ -28,6 +30,6 @@ pipelines:
         type: SQL
         target: variable_count.sql
         pipeTo:
-          type: XLSX
+          type: WRITE_XLSX
           target: insights.xlsx
           label: Overall Variable Counts
