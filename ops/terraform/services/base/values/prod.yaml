@@ -38,13 +38,13 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
 ## PIPELINE+RDA
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: ''
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: true
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 600 # 10 minutes
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: 0
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 20
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_process_dlq: false
