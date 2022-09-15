@@ -16,6 +16,10 @@ from botocore.config import Config
 sys.path.append("..")  # Allows for module imports from sibling directories
 from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
 from common.convert_utils import to_bool
+from common.message_filters import (
+    QUEUE_STOP_SIGNAL_FILTER,
+    WARM_POOL_INSTANCE_LAUNCH_FILTER,
+)
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
@@ -127,12 +131,16 @@ async def run_locust(event):
 
     print(f"Started locust worker with pid {process.pid}")
 
+    message_filters = [QUEUE_STOP_SIGNAL_FILTER]
+    if stop_on_scaling:
+        message_filters.append(WARM_POOL_INSTANCE_LAUNCH_FILTER)
+
     scaling_event = []
     while not scaling_event:
         scaling_event = check_queue(
             queue=queue,
             timeout=1,
-            message_filter={"Origin": "EC2", "Destination": "WarmPool"},
+            message_filters=message_filters,
         )
 
     print("Scaling event detected.")

@@ -23,17 +23,17 @@ def get_rds_db_uri(rds_client, cluster_id: str) -> str:
 
 
 def check_queue(
-    queue, timeout: int = 1, message_filter: Optional[Dict[str, str]] = None
+    queue, timeout: int = 1, message_filters: Optional[List[Dict[str, str]]] = None
 ) -> List[Dict[str, str]]:
-    """Checks a given SQS queue for messages. Optionally, a message filter can be provided that will
-    be used to filter out queue messages with inner JSON messages that do not have keys with values
-    matching the given filter
+    """Checks a given SQS queue for messages. Optionally, a list of message filters can be provided
+    that will be used to filter out queue messages with inner JSON messages that do not have keys
+    with values matching the given filter
 
     Args:
         queue: A boto3 SQS queue
         timeout (int, optional): Amount of time to poll for messages in queue. Defaults to 1
-        message_filter (Optional[Dict[str, str]], optional): Inner JSON message filter. Messages
-        must having matching keys and values to be retrieved from queue. Defaults to None
+        message_filters (Optional[List[Dict[str, str]]], optional): Inner JSON message filter.
+        Messages must having matching keys and values to be retrieved from queue. Defaults to None
 
     Returns:
         List[Dict[str, str]]: _description_
@@ -44,13 +44,17 @@ def check_queue(
         WaitTimeSeconds=timeout,
     )
 
-    if not message_filter:
+    if not message_filters:
         return response
 
     def filter_by_message(queue_msg_dict: Dict[str, str]) -> bool:
-        inner_message = json.loads(queue_msg_dict["Message"])
-        return all(
-            k in inner_message and inner_message[k] == message_filter[k] for k in message_filter
+        raw_inner_message = queue_msg_dict.get("Message") or queue_msg_dict.get("Body")
+        inner_message = json.loads(raw_inner_message)
+        return any(
+            all(
+                k in inner_message and inner_message[k] == message_filter[k] for k in message_filter
+            )
+            for message_filter in message_filters
         )
 
     return list(filter(filter_by_message, response))

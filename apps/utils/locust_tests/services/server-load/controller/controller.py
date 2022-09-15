@@ -16,6 +16,10 @@ from botocore.config import Config
 sys.path.append("..")  # Allows for module imports from sibling directories
 from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
 from common.convert_utils import to_bool
+from common.message_filters import (
+    QUEUE_STOP_SIGNAL_FILTER,
+    WARM_POOL_INSTANCE_LAUNCH_FILTER,
+)
 
 
 def start_node(lambda_client, node_lambda_name: str, controller_ip: str, host: str):
@@ -128,18 +132,22 @@ async def async_main():
         )
         spawn_count += 1
 
-    scaling_event = []
-    while not scaling_event and spawn_count < max_spawned_nodes:
+    message_filters = [QUEUE_STOP_SIGNAL_FILTER]
+    if stop_on_scaling:
+        message_filters.append(WARM_POOL_INSTANCE_LAUNCH_FILTER)
+
+    scale_or_stop_events = []
+    while not scale_or_stop_events or (spawn_count >= max_spawned_nodes and stop_on_node_limit):
         start_node(
             lambda_client=lambda_client,
             node_lambda_name=node_lambda_name,
             controller_ip=ip_address,
             host=test_host,
         )
-        scaling_event = check_queue(
+        scale_or_stop_events = check_queue(
             queue=queue,
             timeout=node_spawn_time,
-            message_filter={"Origin": "EC2", "Destination": "WarmPool"},
+            message_filter=message_filters,
         )
         spawn_count += 1
 
