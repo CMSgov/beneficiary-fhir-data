@@ -46,7 +46,7 @@ async def async_main():
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
     region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
     initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
-    node_spawn_rate = int(os.environ.get("NODE_SPAWN_RATE", 10))
+    node_spawn_time = int(os.environ.get("NODE_SPAWN_TIME", 10))
     # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling.
     # This may need some adjustment, but should be a fine default.
     max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", 80))
@@ -118,7 +118,7 @@ async def async_main():
             host=test_host,
         )
         scaling_event = check_queue(
-            timeout=node_spawn_rate, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
+            timeout=node_spawn_time, message_filter={"Origin": "EC2", "Destination": "WarmPool"}
         )
         spawn_count += 1
 

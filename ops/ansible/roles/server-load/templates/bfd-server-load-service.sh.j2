@@ -25,8 +25,8 @@
 # INITIAL_WORKER_NODES defaults to 0 in the server-load application
 {{ '#' if server_load_initial_worker_nodes|default('', true)|length < 1 }}export INITIAL_WORKER_NODES='{{ server_load_initial_worker_nodes|default('', true) }}'
 
-# NODE_SPAWN_RATE defaults to 10 in the server-load application
-{{ '#' if server_load_node_spawn_rate|default('', true)|length < 1 }}export NODE_SPAWN_RATE='{{ server_load_node_spawn_rate|default('', true) }}'
+# NODE_SPAWN_TIME defaults to 10 in the server-load application
+{{ '#' if server_load_node_spawn_time|default('', true)|length < 1 }}export NODE_SPAWN_TIME='{{ server_load_node_spawn_time|default('', true) }}'
 
 # MAX_SPAWNED_NODES defaults to 80 in the server-load application
 {{ '#' if server_load_max_spawned_nodes|default('', true)|length < 1 }}export MAX_SPAWNED_NODES='{{ server_load_max_spawned_nodes|default('', true) }}'
