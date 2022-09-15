@@ -11,18 +11,20 @@ This runbook should be executed after the Kinesis Firehose has started to popula
    1. Review the exports that are available already in the export location: s3://bfd-insights-bfd-app-logs/export/prod/
       to see if the needed data has been exported previously. New exports should be contiguous and non-overlapping with
       existing exports. Start and end timestamps should be selected to run from the first day of a month at 00:00:00 UTC
-      until the first day of a subsequent month at 00:00:00 UTC. Removing an existing export in favor of exporting that
+      until the first day of a subsequent month at 00:00:00 UTC (exporting more than one month at a time is advisable).
+      Removing an existing export in favor of exporting that
       data again with a later end date is an acceptable way to keep the number of exports manageable. The last export
       chronologically should have a small overlap of 12 hours with the data that is populated with Firehose. This
       overlap will be accounted for when populating the `staging` table.
-   3. Navigate to Cloudwatch in the AWS console.
-   4. Select `Log Groups`
-   5. Select `/bfd/prod/bfd-server/access.json`
-   6. Select `Actions -> Export Data to Amazon S3`
-   7. Choose the time period 
-   8. Select Account: *This Account*
-   9. S3 Bucket Name: `bfd-insights-bfd-app-logs`
-   10. S3 Bucket Prefix: `export/prod/YYYY_(MM-MM)`
+   2. Navigate to Cloudwatch in the AWS console.
+   3. Select `Log Groups`
+   4. Select `/bfd/prod/bfd-server/access.json`
+   5. Select `Actions -> Export Data to Amazon S3`
+   6. Choose the time period 
+   7. Select Account: *This Account*
+   8. S3 Bucket Name: `bfd-insights-bfd-app-logs`
+   9. S3 Bucket Prefix: `export/prod/YYYY_(MM-MM)` (For example, export/prod/2022_(01-06) for the data that spans from 
+      2022-01-01 00:00:00 through 2022-07-01 00:00:00)
    11. Run the job. Production exports can take up to an hour per month depending on the activity level that month.
    12. When the job completes, remove the `aws-logs-write-test` subfolder that AWS creates for internal testing.
 
@@ -40,30 +42,30 @@ This runbook should be executed after the Kinesis Firehose has started to popula
    order by 1
    ```
 
-3. Determine the column list for `staging` and `target` tables.
-   1. This step may be skipped if the `target` table already exists. In that case the column list for the `staging` table
+3. Determine the column list for the `staging` table.
+   1. The column list for the `staging` table
       should be identical in names, data types, and ordering to the `target` table after removing the `year` and `month`
       partition columns. The column definition for the `target` table can be retrieved by navigating to the table in
       the AWS Glue console, selecting `Actions` and then `View properties` which makes a JSON schema for the table
-      available which includes the ordered list of columns. 
-   3. This Athena query produces the canonical ordered list of JSON MDC keys from a Cloudwatch export.
-   ```sql
-   with dataset AS (
-      select map_keys(cast(json_extract(message, '$.mdc') as MAP(VARCHAR, VARCHAR))) as things
-      from bfd_cw_export.prod
-   )
-   select distinct concat('mdc_', replace(lower(name), '.', '_')) as column_name from dataset
-   cross join unnest(things) as t(name)
-   order by column_name;
-   ```
-   Sample output:
-   ```text
-   mdc_bene_id
-   mdc_database_query_bene_by_coverage_batch
-   ... <over 200 additional mdc columns>
-   ```
-   3. The column list for the `staging` table is constructed from the output from step 2 with some other columns prepended.
-      All columns should be of type string. 
+      available which includes the ordered list of columns. The column names can be extracted from this file and should
+      resemble the list below. Only include the column names from the `Columns` array -- do not include `PartitionKeys`.
+
+      Sample output:
+      ```text
+      cw_timestamp
+      cw_id
+      timestamp
+      level
+      thread
+      logger
+      message
+      context
+      mdc_bene_id
+      mdc_database_query_bene_by_coverage_batch
+      ... <over 200 additional mdc columns>
+      ```
+   2. The column list for the `staging` table is constructed from the output from step 2 adding the column type (all
+      columns are of string type).
    ```text
       cw_timestamp string,
       cw_id string,
@@ -78,7 +80,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
       ... <all other mdc columns in order>
    ```
 
-4. Create a non-partitioned Parquet Glue table to serve as the `staging` table.
+5. Create a non-partitioned Parquet Glue table to serve as the `staging` table.
    ```sql
    CREATE EXTERNAL TABLE prod_staging (
       cw_timestamp string, -- Cloudwatch timestamp
@@ -96,7 +98,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
    LOCATION 's3://bfd-insights-bfd-<account-id>/databases/bfd_cw_export/prod_staging/'
    ```
 
-5. Load the `staging` table from the `export` table.
+6. Load the `staging` table from the `export` table.
    The `staging` table must be loaded in batches of no more than ~300 million records to avoid hitting the 30 minute
    Athena timeout. This is accomplished by running the following statement with different where clauses in the with
    clause that load a portion of the data each time. Note that in order to avoid duplication with the running
@@ -189,8 +191,8 @@ This runbook should be executed after the Kinesis Firehose has started to popula
       limit 100;
       ```
       
-   2. Compare the count of records by month between the `export` table and the `target` table (accounting for any data in
-      the `target` table that was loaded independently by firehose).
+   2. Compare the count of records by month between the `export` table and the `target` table. The counts for each month
+      should match (accounting for any data in the `target` table that was loaded independently by firehose).
       ```sql
       -- Retrieve count of records by month for the target table
       select date_format(from_iso8601_timestamp(timestamp), '%Y-%m'), count(*)
@@ -204,3 +206,18 @@ This runbook should be executed after the Kinesis Firehose has started to popula
       group by 1
       order by 1
       ```
+   
+Reference:
+
+The following query was used to extract the canonical ordered list of JSON MDC keys from the Cloudwatch exports to
+define the initial table schema for the `export` table.
+
+   ```sql
+   with dataset AS (
+      select map_keys(cast(json_extract(message, '$.mdc') as MAP(VARCHAR, VARCHAR))) as things
+      from bfd_cw_export.prod
+   )
+   select distinct concat('mdc_', replace(lower(name), '.', '_')) as column_name from dataset
+   cross join unnest(things) as t(name)
+   order by column_name;
+   ```
