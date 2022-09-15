@@ -53,4 +53,4 @@
 {{ '#' if server_load_stop_on_node_limit|default('', true)|length < 1 }}export STOP_ON_NODE_LIMIT='{{ server_load_stop_on_node_limit|default('', true) }}'
 
 (cd "{{ server_load_dir }}/services/server-load/controller" && \
- python3 controller.py &>> "{{ server_load_dir }}/bfd-server-load.log")
+ python3 controller.py &>> "{{ server_load_dir }}/server-load-controller.log")
