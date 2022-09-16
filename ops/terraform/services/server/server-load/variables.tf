@@ -49,13 +49,13 @@ variable "node_spawn_time" {
 variable "max_spawned_nodes" {
   description = "The maximum number of Lambda worker nodes to spawn over the lifetime of a given test run. Does not account for failed nodes or nodes that reach their Lambda timeout"
   type        = number
-  default     = 80
+  default     = 0
 }
 
 variable "max_spawned_users" {
   description = "The maximum number of simulated Locust users (not worker nodes) to spawn. Use this and spawn rate to constrain the load during a test run"
   type        = number
-  default     = 5000
+  default     = 0
 }
 
 variable "user_spawn_rate" {
@@ -67,19 +67,19 @@ variable "user_spawn_rate" {
 variable "test_runtime_limit" {
   description = "The maximum runtime for the current load test. Acts as a failsafe against runaway load testing"
   type        = string
-  default     = "10m30s"
+  default     = "0s"
 }
 
 variable "coasting_time" {
   description = "The amount of time the load test should continue for after receiving a scaling notification. Does not effect operator stop signals"
   type        = number
-  default     = 10
+  default     = 0
 }
 
 variable "warm_instance_target" {
   description = "The number of BFD Server instances to target before scaling causes the load test to stop"
   type        = number
-  default     = 7
+  default     = 0
 }
 
 variable "stop_on_scaling" {

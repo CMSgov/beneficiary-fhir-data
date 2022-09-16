@@ -58,16 +58,15 @@ async def async_main():
     asg_name = os.environ.get("ASG_NAME", "")
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
     region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+    # Default dangerous variables to values that will not cause any issues
     initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
     node_spawn_time = int(os.environ.get("NODE_SPAWN_TIME", 10))
-    # Default maximum of 80 spawned nodes _should_ be sufficient to cause scaling.
-    # This may need some adjustment, but should be a fine default.
-    max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", 80))
-    max_users = int(os.environ.get("MAX_SPAWNED_USERS", 5000))
+    max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", 0))
+    max_users = int(os.environ.get("MAX_SPAWNED_USERS", 0))
     user_spawn_rate = int(os.environ.get("USER_SPAWN_RATE", 1))
-    runtime_limit = os.environ.get("TEST_RUNTIME_LIMIT", "10m30s")
-    coasting_time = int(os.environ.get("COASTING_TIME", 10))
-    warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 7))
+    runtime_limit = os.environ.get("TEST_RUNTIME_LIMIT", "0s")
+    coasting_time = int(os.environ.get("COASTING_TIME", 0))
+    warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
     stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
     stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
 

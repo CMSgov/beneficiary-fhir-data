@@ -31,8 +31,9 @@ environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
 asg_name = os.environ.get("ASG_NAME", "")
-coasting_time = int(os.environ.get("COASTING_TIME", 10))
-warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 7))
+# Default dangerous variables to values that will not cause any issues
+coasting_time = int(os.environ.get("COASTING_TIME", 0))
+warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 
 boto_config = Config(region_name=region)
