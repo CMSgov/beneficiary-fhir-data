@@ -140,7 +140,7 @@ async def run_locust(event):
     print(f"Started locust worker with pid {process.pid}")
 
     has_received_stop = False
-    while True:
+    while process.returncode is None:
         scale_or_stop_events = check_queue(
             queue=queue,
             timeout=1,
@@ -168,8 +168,14 @@ async def run_locust(event):
             )
             break
 
+    if process.returncode:
+        # If returncode is not None, then the locust process has finished on its own and we do not
+        # need to end it manually
+        print("Locust worker process ended without intervention, stopping...")
+        return
+
     if not has_received_stop:
-        print(f"Coasting for {coasting_time} seconds before termination.")
+        print(f"Coasting for {coasting_time} seconds before stopping...")
         time.sleep(int(coasting_time))
         print("Coasting time complete")
 

@@ -141,7 +141,7 @@ async def async_main():
         spawn_count += 1
 
     has_received_stop = False
-    while not (spawn_count >= max_spawned_nodes and stop_on_node_limit):
+    while locust_process.returncode is None:
         scale_or_stop_events = check_queue(
             queue=queue,
             timeout=node_spawn_time,
@@ -177,18 +177,25 @@ async def async_main():
                 host=test_host,
             )
             spawn_count += 1
-
-    # Sleep for the coasting time plus an additional 10 seconds before forcing the master process
-    # to end if no stop signal was encountered. If a stop signal _is_ encountered, we want to end
-    # immediately
-    if not has_received_stop:
-        time.sleep(int(coasting_time) + 10)
+        elif stop_on_node_limit:
+            print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
+            break
 
     if locust_process.returncode:
         # If returncode is not None, then the locust process has finished on its own and we do not
         # need to end it manually
+        print("Locust master process ended without intervention, stopping...")
         return
 
+    if not has_received_stop:
+        # Sleep for the coasting time plus an additional 10 seconds before forcing the master
+        # process to end if no stop signal was encountered. If a stop signal _is_ encountered, we
+        # want to end immediately
+        print(f"Coasting for {coasting_time + 10} seconds before stopping...")
+        time.sleep(int(coasting_time) + 10)
+        print("Coasting time complete")
+
+    print("Stopping Locust master process...")
     try:
         locust_process.terminate()
     except ProcessLookupError as e:
