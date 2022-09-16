@@ -146,6 +146,27 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
+resource "aws_iam_policy" "asg" {
+  name        = "bfd-${local.env}-${local.service}-asg"
+  description = "Permissions to describe the warm pool of the ${data.aws_autoscaling_group.asg.name} auto-scaling group"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "autoscaling:DescribeWarmPool"
+            ],
+            "Resource": [
+                "${data.aws_autoscaling_group.asg.arn}"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda"
   path        = "/"
@@ -173,7 +194,8 @@ resource "aws_iam_role" "lambda" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.logs.arn,
-    aws_iam_policy.sqs.arn
+    aws_iam_policy.sqs.arn,
+    aws_iam_policy.asg.arn
   ]
 }
 
@@ -202,7 +224,8 @@ resource "aws_iam_role" "ec2" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.sqs.arn,
-    aws_iam_policy.lambda.arn
+    aws_iam_policy.lambda.arn,
+    aws_iam_policy.asg.arn
   ]
 }
 
