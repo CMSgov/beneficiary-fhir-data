@@ -24,21 +24,15 @@ def get_rds_db_uri(rds_client, cluster_id: str) -> str:
         raise ValueError(f'DB URI not found for cluster ID "{cluster_id}"') from exc
 
 
-def check_queue(
-    queue, timeout: int = 1, message_filters: Optional[List[Dict[str, str]]] = None
-) -> List[Dict[str, str]]:
-    """Checks a given SQS queue for messages. Optionally, a list of message filters can be provided
-    that will be used to filter out queue messages with inner JSON messages that do not have keys
-    with values matching the given filter
+def check_queue(queue, timeout: int = 1) -> List[Dict[str, str]]:
+    """Checks a given SQS queue for messages and returns the inner JSON message from each
 
     Args:
         queue: A boto3 SQS queue
         timeout (int, optional): Amount of time to poll for messages in queue. Defaults to 1
-        message_filters (Optional[List[Dict[str, str]]], optional): Inner JSON message filter.
-        Messages must having matching keys and values to be retrieved from queue. Defaults to None
 
     Returns:
-        List[Dict[str, str]]: The list of inner queue messages that passed the filter, if applicable
+        List[Dict[str, str]]: The list of inner queue messages
     """
     # TODO: Properly type hint 'queue'
     responses: List[Dict[str, str]] = queue.receive_messages(
@@ -49,7 +43,19 @@ def check_queue(
     raw_messages = [response.get("Message") or response.get("Body") for response in responses]
     messages = [json.loads(raw_message) for raw_message in raw_messages]
 
-    if not message_filters:
-        return messages
+    return messages
 
-    return list(filter(filter_message_by_keys, messages))
+
+def get_warm_pool_count(autoscaling_client, asg_name: str) -> int:
+    """Returns the count of instances that are currently in the given ASG's warm pool
+
+    Args:
+        autoscaling_client: Boto3 "autoscaling" client
+        asg_name (str): Name of the autoscaling group to check
+
+    Returns:
+        int: The count of instances available in the warm pool
+    """
+    response = autoscaling_client.describe_warm_pool(AutoScalingGroupName=asg_name)
+
+    return len(response["Instances"])

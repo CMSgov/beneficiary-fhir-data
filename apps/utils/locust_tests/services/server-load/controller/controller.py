@@ -14,7 +14,12 @@ import boto3
 from botocore.config import Config
 
 sys.path.append("..")  # Allows for module imports from sibling directories
-from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
+from common.boto_utils import (
+    check_queue,
+    get_rds_db_uri,
+    get_ssm_parameter,
+    get_warm_pool_count,
+)
 from common.convert_utils import to_bool
 from common.message_filters import (
     QUEUE_STOP_SIGNAL_FILTER,
@@ -50,6 +55,7 @@ async def async_main():
     environment = os.environ.get("BFD_ENVIRONMENT", "test")
     sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
+    asg_name = os.environ.get("ASG_NAME", "")
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
     region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
     initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
@@ -69,6 +75,7 @@ async def async_main():
 
     ssm_client = boto3.client("ssm", config=boto_config)
     rds_client = boto3.client("rds", config=boto_config)
+    autoscaling_client = boto3.client("autoscaling", config=boto_config)
     sqs = boto3.resource("sqs", config=boto_config)
     lambda_client = boto3.client("lambda", config=boto_config)
 
@@ -133,31 +140,47 @@ async def async_main():
         )
         spawn_count += 1
 
-    message_filters = [QUEUE_STOP_SIGNAL_FILTER]
-    if stop_on_scaling:
-        message_filters.append(WARM_POOL_INSTANCE_LAUNCH_FILTER)
+    has_received_stop = False
+    while not (spawn_count >= max_spawned_nodes and stop_on_node_limit):
+        scale_or_stop_events = check_queue(
+            queue=queue,
+            timeout=node_spawn_time,
+        )
 
-    scale_or_stop_events = []
-    while not scale_or_stop_events or (spawn_count >= max_spawned_nodes and stop_on_node_limit):
+        if any(
+            filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
+        ):
+            has_received_stop = True
+            print("Stop signal encountered, stopping")
+            break
+
+        if (
+            stop_on_scaling
+            and any(
+                filter_message_by_keys(msg, [WARM_POOL_INSTANCE_LAUNCH_FILTER])
+                for msg in scale_or_stop_events
+            )
+            and get_warm_pool_count(autoscaling_client=autoscaling_client, asg_name=asg_name)
+            >= warm_instance_target
+        ):
+            print(
+                f"Scaling target of {warm_instance_target} instances in {asg_name} has"
+                " been hit, stopping"
+            )
+            break
+
         start_node(
             lambda_client=lambda_client,
             node_lambda_name=node_lambda_name,
             controller_ip=ip_address,
             host=test_host,
         )
-        scale_or_stop_events = check_queue(
-            queue=queue,
-            timeout=node_spawn_time,
-            message_filter=message_filters,
-        )
         spawn_count += 1
 
     # Sleep for the coasting time plus an additional 10 seconds before forcing the master process
     # to end if no stop signal was encountered. If a stop signal _is_ encountered, we want to end
     # immediately
-    if not any(
-        filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
-    ):
+    if not has_received_stop:
         time.sleep(int(coasting_time) + 10)
 
     if locust_process.returncode:

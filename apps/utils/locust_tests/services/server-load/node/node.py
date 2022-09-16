@@ -14,7 +14,12 @@ import boto3
 from botocore.config import Config
 
 sys.path.append("..")  # Allows for module imports from sibling directories
-from common.boto_utils import check_queue, get_rds_db_uri, get_ssm_parameter
+from common.boto_utils import (
+    check_queue,
+    get_rds_db_uri,
+    get_ssm_parameter,
+    get_warm_pool_count,
+)
 from common.convert_utils import to_bool
 from common.message_filters import (
     QUEUE_STOP_SIGNAL_FILTER,
@@ -25,6 +30,7 @@ from common.message_filters import (
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
+asg_name = os.environ.get("ASG_NAME", "")
 coasting_time = int(os.environ.get("COASTING_TIME", 10))
 warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 7))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
@@ -32,6 +38,7 @@ stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
+autoscaling_client = boto3.client("autoscaling", config=boto_config)
 sqs = boto3.resource("sqs", config=boto_config)
 queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
@@ -132,24 +139,36 @@ async def run_locust(event):
 
     print(f"Started locust worker with pid {process.pid}")
 
-    message_filters = [QUEUE_STOP_SIGNAL_FILTER]
-    if stop_on_scaling:
-        message_filters.append(WARM_POOL_INSTANCE_LAUNCH_FILTER)
-
-    scale_or_stop_events = []
-    while not scale_or_stop_events:
+    has_received_stop = False
+    while True:
         scale_or_stop_events = check_queue(
             queue=queue,
             timeout=1,
-            message_filters=message_filters,
         )
 
-    print("Scaling or stop event detected")
-    print(f"Messages received: {scale_or_stop_events}")
+        if any(
+            filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
+        ):
+            has_received_stop = True
+            print("Stop signal encountered, stopping")
+            break
 
-    if not any(
-        filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
-    ):
+        if (
+            stop_on_scaling
+            and any(
+                filter_message_by_keys(msg, [WARM_POOL_INSTANCE_LAUNCH_FILTER])
+                for msg in scale_or_stop_events
+            )
+            and get_warm_pool_count(autoscaling_client=autoscaling_client, asg_name=asg_name)
+            >= warm_instance_target
+        ):
+            print(
+                f"Scaling target of {warm_instance_target} instances in {asg_name} has"
+                " been hit, stopping"
+            )
+            break
+
+    if not has_received_stop:
         print(f"Coasting for {coasting_time} seconds before termination.")
         time.sleep(int(coasting_time))
         print("Coasting time complete")
