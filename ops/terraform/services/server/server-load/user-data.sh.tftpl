@@ -24,21 +24,21 @@ aws ssm get-parameters-by-path \
 cat <<EOF > extra_vars.json
 {
     "env": "${env}",
-    "server_load_sqs_queue_name": "${server_load_sqs_queue_name}",
-    "server_load_node_lambda_name": "${server_load_node_lambda_name}",
-    "server_load_asg_name": "${server_load_asg_name}",
-    "server_load_test_host": "${server_load_test_host}",
-    "server_load_aws_default_region": "${server_load_aws_default_region}",
-    "server_load_initial_worker_nodes": "${server_load_initial_worker_nodes}",
-    "server_load_node_spawn_time": "${server_load_node_spawn_time}",
-    "server_load_max_spawned_nodes": "${server_load_max_spawned_nodes}",
-    "server_load_max_spawned_users": "${server_load_max_spawned_users}",
-    "server_load_user_spawn_rate": "${server_load_user_spawn_rate}",
-    "server_load_test_runtime_limit": "${server_load_test_runtime_limit}",
-    "server_load_coasting_time": "${server_load_coasting_time}",
-    "server_load_warm_instance_target": "${server_load_warm_instance_target}",
-    "server_load_stop_on_scaling": "${server_load_stop_on_scaling}",
-    "server_load_stop_on_node_limit": "${server_load_stop_on_node_limit}"
+    "server_load_sqs_queue_name": "${sqs_queue_name}",
+    "server_load_node_lambda_name": "${node_lambda_name}",
+    "server_load_asg_name": "${asg_name}",
+    "server_load_test_host": "${test_host}",
+    "server_load_aws_default_region": "${aws_default_region}",
+    "server_load_initial_worker_nodes": "${initial_worker_nodes}",
+    "server_load_node_spawn_time": "${node_spawn_time}",
+    "server_load_max_spawned_nodes": "${max_spawned_nodes}",
+    "server_load_max_spawned_users": "${max_spawned_users}",
+    "server_load_user_spawn_rate": "${user_spawn_rate}",
+    "server_load_test_runtime_limit": "${test_runtime_limit}",
+    "server_load_coasting_time": "${coasting_time}",
+    "server_load_warm_instance_target": "${warm_instance_target}",
+    "server_load_stop_on_scaling": "${stop_on_scaling}",
+    "server_load_stop_on_node_limit": "${stop_on_node_limit}"
 }
 EOF
 

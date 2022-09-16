@@ -91,25 +91,25 @@ resource "aws_instance" "this" {
   }
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    account_id                     = local.account_id
-    env                            = local.env
-    server_load_aws_default_region = data.aws_region.current.name
-    server_load_asg_name           = data.aws_autoscaling_group.asg.name
+    account_id         = local.account_id
+    env                = local.env
+    aws_default_region = data.aws_region.current.name
+    asg_name           = data.aws_autoscaling_group.asg.name
 
-    git_repo_version                 = var.git_repo_version
-    server_load_sqs_queue_name       = var.sqs_queue_name
-    server_load_node_lambda_name     = var.node_lambda_name
-    server_load_test_host            = var.test_host
-    server_load_initial_worker_nodes = var.initial_worker_nodes
-    server_load_node_spawn_time      = var.node_spawn_time
-    server_load_max_spawned_nodes    = var.max_spawned_nodes
-    server_load_max_spawned_users    = var.max_spawned_users
-    server_load_user_spawn_rate      = var.user_spawn_rate
-    server_load_test_runtime_limit   = var.test_runtime_limit
-    server_load_coasting_time        = var.coasting_time
-    server_load_warm_instance_target = var.warm_instance_target
-    server_load_stop_on_scaling      = var.stop_on_scaling
-    server_load_stop_on_node_limit   = var.stop_on_node_limit
+    git_repo_version     = var.git_repo_version
+    sqs_queue_name       = var.sqs_queue_name
+    node_lambda_name     = var.node_lambda_name
+    test_host            = var.test_host
+    initial_worker_nodes = var.initial_worker_nodes
+    node_spawn_time      = var.node_spawn_time
+    max_spawned_nodes    = var.max_spawned_nodes
+    max_spawned_users    = var.max_spawned_users
+    user_spawn_rate      = var.user_spawn_rate
+    test_runtime_limit   = var.test_runtime_limit
+    coasting_time        = var.coasting_time
+    warm_instance_target = var.warm_instance_target
+    stop_on_scaling      = var.stop_on_scaling
+    stop_on_node_limit   = var.stop_on_node_limit
   })
 }
 
