@@ -169,13 +169,14 @@ async def async_main():
             )
             break
 
-        start_node(
-            lambda_client=lambda_client,
-            node_lambda_name=node_lambda_name,
-            controller_ip=ip_address,
-            host=test_host,
-        )
-        spawn_count += 1
+        if spawn_count < max_spawned_nodes:
+            start_node(
+                lambda_client=lambda_client,
+                node_lambda_name=node_lambda_name,
+                controller_ip=ip_address,
+                host=test_host,
+            )
+            spawn_count += 1
 
     # Sleep for the coasting time plus an additional 10 seconds before forcing the master process
     # to end if no stop signal was encountered. If a stop signal _is_ encountered, we want to end
