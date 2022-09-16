@@ -15,7 +15,7 @@ spec:
     command:
     - cat
     tty: true
-    imagePullPolicy: false
+    imagePullPolicy: Always
     resources:
       requests:
         memory: '16384Mi'
