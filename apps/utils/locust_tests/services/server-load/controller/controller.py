@@ -19,6 +19,7 @@ from common.convert_utils import to_bool
 from common.message_filters import (
     QUEUE_STOP_SIGNAL_FILTER,
     WARM_POOL_INSTANCE_LAUNCH_FILTER,
+    filter_message_by_keys,
 )
 
 
@@ -152,8 +153,12 @@ async def async_main():
         spawn_count += 1
 
     # Sleep for the coasting time plus an additional 10 seconds before forcing the master process
-    # to end
-    time.sleep(int(coasting_time) + 10)
+    # to end if no stop signal was encountered. If a stop signal _is_ encountered, we want to end
+    # immediately
+    if not any(
+        filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
+    ):
+        time.sleep(int(coasting_time) + 10)
 
     if locust_process.returncode:
         # If returncode is not None, then the locust process has finished on its own and we do not

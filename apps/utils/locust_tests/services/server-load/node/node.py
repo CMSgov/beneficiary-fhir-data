@@ -19,6 +19,7 @@ from common.convert_utils import to_bool
 from common.message_filters import (
     QUEUE_STOP_SIGNAL_FILTER,
     WARM_POOL_INSTANCE_LAUNCH_FILTER,
+    filter_message_by_keys,
 )
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
@@ -143,14 +144,17 @@ async def run_locust(event):
             message_filters=message_filters,
         )
 
-    print("Scaling event detected.")
-    print(f"Scaling event detected was: {scale_or_stop_events[0]}")
-    print(f"Coasting for {coasting_time} seconds before termination.")
+    print("Scaling or stop event detected")
+    print(f"Messages received: {scale_or_stop_events}")
 
-    time.sleep(int(coasting_time))
+    if not any(
+        filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
+    ):
+        print(f"Coasting for {coasting_time} seconds before termination.")
+        time.sleep(int(coasting_time))
+        print("Coasting time complete")
 
-    print("Coasting time complete, terminating worker node.")
-
+    print("Terminating worker node")
     try:
         process.terminate()
     except ProcessLookupError as e:

@@ -1,6 +1,8 @@
 import json
 from typing import Dict, List, Optional
 
+from common.message_filters import filter_message_by_keys
+
 
 def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
     # TODO: Properly type hint 'ssm_client'
@@ -36,25 +38,18 @@ def check_queue(
         Messages must having matching keys and values to be retrieved from queue. Defaults to None
 
     Returns:
-        List[Dict[str, str]]: _description_
+        List[Dict[str, str]]: The list of inner queue messages that passed the filter, if applicable
     """
     # TODO: Properly type hint 'queue'
-    response: List[Dict[str, str]] = queue.receive_messages(
+    responses: List[Dict[str, str]] = queue.receive_messages(
         AttributeNames=["SenderId", "SentTimestamp"],
         WaitTimeSeconds=timeout,
     )
 
+    raw_messages = [response.get("Message") or response.get("Body") for response in responses]
+    messages = [json.loads(raw_message) for raw_message in raw_messages]
+
     if not message_filters:
-        return response
+        return messages
 
-    def filter_by_message(queue_msg_dict: Dict[str, str]) -> bool:
-        raw_inner_message = queue_msg_dict.get("Message") or queue_msg_dict.get("Body")
-        inner_message = json.loads(raw_inner_message)
-        return any(
-            all(
-                k in inner_message and inner_message[k] == message_filter[k] for k in message_filter
-            )
-            for message_filter in message_filters
-        )
-
-    return list(filter(filter_by_message, response))
+    return list(filter(filter_message_by_keys, messages))
