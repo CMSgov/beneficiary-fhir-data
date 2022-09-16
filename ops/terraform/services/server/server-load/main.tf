@@ -52,9 +52,9 @@ resource "aws_lambda_function" "node" {
       BFD_ENVIRONMENT      = local.env
       SQS_QUEUE_NAME       = aws_sqs_queue.this.name
       AWS_DEFAULT_REGION   = data.aws_region.current.name
-      COASTING_TIME        = var.server_load_coasting_time
-      WARM_INSTANCE_TARGET = var.server_load_warm_instance_target
-      STOP_ON_SCALING      = var.server_load_stop_on_scaling
+      COASTING_TIME        = var.coasting_time
+      WARM_INSTANCE_TARGET = var.warm_instance_target
+      STOP_ON_SCALING      = var.stop_on_scaling
     }
   }
 
@@ -93,20 +93,20 @@ resource "aws_instance" "this" {
     account_id                       = local.account_id
     env                              = local.env
     git_repo_version                 = var.git_repo_version
-    server_load_sqs_queue_name       = var.server_load_sqs_queue_name
-    server_load_node_lambda_name     = var.server_load_node_lambda_name
-    server_load_test_host            = var.server_load_test_host
+    server_load_sqs_queue_name       = var.sqs_queue_name
+    server_load_node_lambda_name     = var.node_lambda_name
+    server_load_test_host            = var.test_host
     server_load_aws_default_region   = data.aws_region.current.name
-    server_load_initial_worker_nodes = var.server_load_initial_worker_nodes
-    server_load_node_spawn_time      = var.server_load_node_spawn_time
-    server_load_max_spawned_nodes    = var.server_load_max_spawned_nodes
-    server_load_max_spawned_users    = var.server_load_max_spawned_users
-    server_load_user_spawn_rate      = var.server_load_user_spawn_rate
-    server_load_test_runtime_limit   = var.server_load_test_runtime_limit
-    server_load_coasting_time        = var.server_load_coasting_time
-    server_load_warm_instance_target = var.server_load_warm_instance_target
-    server_load_stop_on_scaling      = var.server_load_stop_on_scaling
-    server_load_stop_on_node_limit   = var.server_load_stop_on_node_limit
+    server_load_initial_worker_nodes = var.initial_worker_nodes
+    server_load_node_spawn_time      = var.node_spawn_time
+    server_load_max_spawned_nodes    = var.max_spawned_nodes
+    server_load_max_spawned_users    = var.max_spawned_users
+    server_load_user_spawn_rate      = var.user_spawn_rate
+    server_load_test_runtime_limit   = var.test_runtime_limit
+    server_load_coasting_time        = var.coasting_time
+    server_load_warm_instance_target = var.warm_instance_target
+    server_load_stop_on_scaling      = var.stop_on_scaling
+    server_load_stop_on_node_limit   = var.stop_on_node_limit
   })
 }
 
