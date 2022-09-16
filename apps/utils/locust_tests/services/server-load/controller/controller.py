@@ -170,6 +170,7 @@ async def async_main():
             break
 
         if spawn_count < max_spawned_nodes:
+            print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
             start_node(
                 lambda_client=lambda_client,
                 node_lambda_name=node_lambda_name,
@@ -177,6 +178,7 @@ async def async_main():
                 host=test_host,
             )
             spawn_count += 1
+            print(f"Worker node #{spawn_count} spawned successfully")
         elif stop_on_node_limit:
             print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
