@@ -16,6 +16,9 @@
 # NODE_LAMBDA_NAME defaults to 'bfd-test-server-load-node' in the server-load application
 {{ '#' if server_load_node_lambda_name|default('', true)|length < 1 }}export NODE_LAMBDA_NAME='{{ server_load_node_lambda_name|default('', true) }}'
 
+# ASG_NAME defaults to '' in the server-load application
+{{ '#' if server_load_asg_name|default('', true)|length < 1 }}export ASG_NAME='{{ server_load_asg_name|default('', true) }}'
+
 # TEST_HOST defaults to 'https://test.bfd.cms.gov' in the server-load application
 {{ '#' if server_load_test_host|default('', true)|length < 1 }}export TEST_HOST='{{ server_load_test_host|default('', true) }}'
 
