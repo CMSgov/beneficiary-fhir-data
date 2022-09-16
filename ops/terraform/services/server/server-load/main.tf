@@ -90,13 +90,14 @@ resource "aws_instance" "this" {
   }
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    account_id                       = local.account_id
-    env                              = local.env
+    account_id                     = local.account_id
+    env                            = local.env
+    server_load_aws_default_region = data.aws_region.current.name
+
     git_repo_version                 = var.git_repo_version
     server_load_sqs_queue_name       = var.sqs_queue_name
     server_load_node_lambda_name     = var.node_lambda_name
     server_load_test_host            = var.test_host
-    server_load_aws_default_region   = data.aws_region.current.name
     server_load_initial_worker_nodes = var.initial_worker_nodes
     server_load_node_spawn_time      = var.node_spawn_time
     server_load_max_spawned_nodes    = var.max_spawned_nodes
