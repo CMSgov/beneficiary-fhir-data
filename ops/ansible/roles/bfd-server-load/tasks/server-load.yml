@@ -28,29 +28,6 @@
   tags: 
     - pre-ami
 
-# Create the temp directory if and only if it's missing. (Don't want to
-# accidentally change the permissions on /tmp.)
-- name: Check for Custom Temp Directory
-  stat:
-    path: "{{ server_load_tmp_dir }}"
-  become: true
-  register: stat_tmp
-  when: server_load_tmp_dir is defined
-  tags: 
-    - pre-ami
-
-- name: Create Custom Temp Directory
-  file:
-    path: "{{ server_load_tmp_dir }}"
-    state: directory
-    owner: "{{ server_load_user }}"
-    group: "{{ server_load_user }}"
-    mode: u=rwx,g=rx,o=rx
-  become: true
-  when: server_load_tmp_dir is defined and stat_tmp.stat.exists == false
-  tags: 
-    - pre-ami
-
 - name: Copy server-load Application
   copy:
     src: "{{ git_repo_root }}/apps/utils/locust_tests/"

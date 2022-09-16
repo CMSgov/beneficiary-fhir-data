@@ -8,8 +8,6 @@ exec > >(
     done
 )
 
-ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
-
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
 aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" . # TODO: remove vault.password in BFD-1786
