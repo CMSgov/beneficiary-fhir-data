@@ -80,7 +80,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
       ... <all other mdc columns in order>
    ```
 
-5. Create a non-partitioned Parquet Glue table to serve as the `staging` table.
+4. Create a non-partitioned Parquet Glue table to serve as the `staging` table.
    ```sql
    CREATE EXTERNAL TABLE prod_staging (
       cw_timestamp string, -- Cloudwatch timestamp
@@ -98,7 +98,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
    LOCATION 's3://bfd-insights-bfd-<account-id>/databases/bfd_cw_export/prod_staging/'
    ```
 
-6. Load the `staging` table from the `export` table.
+5. Load the `staging` table from the `export` table.
    The `staging` table must be loaded in batches of no more than ~300 million records to avoid hitting the 30 minute
    Athena timeout. This is accomplished by running the following statement with different where clauses in the with
    clause that load a portion of the data each time. Note that in order to avoid duplication with the running
@@ -149,7 +149,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
       from dataset
    ```
 
-7. Load the `target` table from the `staging` table.
+6. Load the `target` table from the `staging` table.
    1. The `target` table definition resides in terraform and should match the `staging` table columns and ordering with the one
       difference being that the `staging` table does not include the `year` and `month` partition columns. Verify that
       the table structure is the same if not done already. 
@@ -182,7 +182,7 @@ This runbook should be executed after the Kinesis Firehose has started to popula
          and month(from_iso8601_timestamp("timestamp")) = 8
       ```
    
-8. Verify the load.
+7. Verify the load.
    1. Select a sample of the data and inspect the most important columns: timestamp, mdc_bene_id, mdc_http* to ensure
       that the columns are populated sensibly. Note that many of the other columns are only sparsely populated.
       ```sql
