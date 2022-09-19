@@ -60,9 +60,7 @@ spec:
           hostUnderTest = String.format(params.TEST_HOST, params.ENVIRONMENT)
           terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' }
                                 .collectEntries { key, value -> [(key.toLowerCase()): value] }
-                                .putAll([
-                                  "test_host": hostUnderTest
-                                ])
+          terraformVars.putAll(['test_host': hostUnderTest])
         }
         // TODO: Run terraform apply, create infrastructure (which starts load test service)
         echo "${terraformVars}"
