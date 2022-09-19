@@ -1,5 +1,4 @@
 #!/usr/bin/env groovy
-import groovy.text.SimpleTemplateEngine
 
 pipeline {
   agent {
@@ -31,7 +30,7 @@ spec:
   parameters {
     choice(name: 'ENVIRONMENT', choices: ['test', 'prod-sbx', 'prod'] , description: 'The BFD SDLC environment to run against')
 
-    string(name: 'TEST_HOST', defaultValue: 'https://${env}.bfd.cms.gov' , description: 'The URL under test -- should match the given environment. ${env} will be replaced with the chosen environment')
+    string(name: 'TEST_HOST', defaultValue: 'https://%s.bfd.cms.gov' , description: 'The URL under test -- should match the given environment. "%s" will be replaced with the chosen environment')
 
     string(name: 'INITIAL_WORKER_NODES', defaultValue: '0' , description: 'The number of initial Locust worker nodes to spawn before checking for stop signals. Useful for static load tests')
 
@@ -58,13 +57,7 @@ spec:
     stage('Run Load Tests') {
       steps {
         script {
-          def templateEngine = new SimpleTemplateEngine()
-          def templateBinding = [
-            'env': params.ENVIRONMENT
-          ]
-          def hostUnderTest = templateEngine.createTemplate(params.TEST_HOST)
-                                            .make(templateBinding)
-                                            .toString()
+          def hostUnderTest = String.format(params.TEST_HOST, params.ENVIRONMENT)
           def terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' }
                                     .collectEntries { key, value -> [key.toLower(), value] }
                                     + [
