@@ -60,7 +60,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Create put request put object request.
+   * Create put request within a given bucket for a manifest at a keyed location.
    *
    * @param bucket the {@link Bucket} to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
@@ -132,7 +132,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Create put request put object request.
+   * Creates a put request, placing the items within the location key inside the given bucket.
    *
    * @param bucket the {@link Bucket} to place the new object in
    * @param manifest the {@link DataSetManifest} to create an object for

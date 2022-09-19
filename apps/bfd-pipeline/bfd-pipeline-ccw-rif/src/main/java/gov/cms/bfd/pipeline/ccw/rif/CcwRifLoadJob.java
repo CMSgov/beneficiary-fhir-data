@@ -308,18 +308,22 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     String syntheticPrefix =
         String.format("%s/%s/", S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, manifest.getTimestampText());
 
-    String sampleManifestName = manifest.getEntries().get(0).getName();
+    String sampleItemLocation = manifest.getEntries().get(0).getName();
 
+    // Do a check and see if the manifest's first file is in the synthetic incoming folder or the
+    // Incoming folder
     if (!s3TaskManager
             .getS3Client()
-            .doesObjectExist(options.getS3BucketName(), prefix + sampleManifestName)
+            .doesObjectExist(options.getS3BucketName(), prefix + sampleItemLocation)
         && !s3TaskManager
             .getS3Client()
-            .doesObjectExist(options.getS3BucketName(), syntheticPrefix + sampleManifestName)) {
+            .doesObjectExist(options.getS3BucketName(), syntheticPrefix + sampleItemLocation)) {
+      // If the file isn't anywhere, let's save some time and bail early; we're still downloading
+      // files
       return false;
     } else if (!s3TaskManager
         .getS3Client()
-        .doesObjectExist(options.getS3BucketName(), prefix + sampleManifestName)) {
+        .doesObjectExist(options.getS3BucketName(), prefix + sampleItemLocation)) {
       prefix = syntheticPrefix;
     }
 
