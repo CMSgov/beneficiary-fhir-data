@@ -51,7 +51,7 @@ resource "aws_lambda_function" "node" {
     variables = {
       BFD_ENVIRONMENT      = local.env
       SQS_QUEUE_NAME       = aws_sqs_queue.this.name
-      AWS_DEFAULT_REGION   = data.aws_region.current.name
+      AWS_CURRENT_REGION   = data.aws_region.current.name
       ASG_NAME             = data.aws_autoscaling_group.asg.name
       COASTING_TIME        = var.coasting_time
       WARM_INSTANCE_TARGET = var.warm_instance_target
@@ -93,7 +93,7 @@ resource "aws_instance" "this" {
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     account_id         = local.account_id
     env                = local.env
-    aws_default_region = data.aws_region.current.name
+    aws_current_region = data.aws_region.current.name
     asg_name           = data.aws_autoscaling_group.asg.name
 
     git_repo_version     = var.git_repo_version

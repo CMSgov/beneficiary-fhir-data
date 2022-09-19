@@ -28,7 +28,7 @@ from common.message_filters import (
 )
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
-region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+region = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
 asg_name = os.environ.get("ASG_NAME", "")
 # Default dangerous variables to values that will not cause any issues

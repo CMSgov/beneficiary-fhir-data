@@ -57,7 +57,7 @@ async def async_main():
     node_lambda_name = os.environ.get("NODE_LAMBDA_NAME", "bfd-test-server-load-node")
     asg_name = os.environ.get("ASG_NAME", "")
     test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
-    region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+    region = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
     # Default dangerous variables to values that will not cause any issues
     initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
     node_spawn_time = int(os.environ.get("NODE_SPAWN_TIME", 10))

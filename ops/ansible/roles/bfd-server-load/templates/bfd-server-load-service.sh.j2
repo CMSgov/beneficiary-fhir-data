@@ -22,8 +22,8 @@
 # TEST_HOST defaults to 'https://test.bfd.cms.gov' in the server-load application
 {{ '#' if server_load_test_host|default('', true)|length < 1 }}export TEST_HOST='{{ server_load_test_host|default('', true) }}'
 
-# AWS_DEFAULT_REGION defaults to 'us-east-1' in the server-load application
-{{ '#' if server_load_aws_default_region|default('', true)|length < 1 }}export AWS_DEFAULT_REGION='{{ server_load_aws_default_region|default('', true) }}'
+# AWS_CURRENT_REGION defaults to 'us-east-1' in the server-load application
+{{ '#' if server_load_aws_current_region|default('', true)|length < 1 }}export AWS_CURRENT_REGION='{{ server_load_aws_current_region|default('', true) }}'
 
 # INITIAL_WORKER_NODES defaults to 0 in the server-load application
 {{ '#' if server_load_initial_worker_nodes|default('', true)|length < 1 }}export INITIAL_WORKER_NODES='{{ server_load_initial_worker_nodes|default('', true) }}'
