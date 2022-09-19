@@ -43,8 +43,6 @@
     - name: Apply server-load Role
       import_role:
         name: bfd-server-load
-      vars:
-        server_load_dir: "{{ bfd_migrator_dir }}"
       tags:
         - pre-ami
 
