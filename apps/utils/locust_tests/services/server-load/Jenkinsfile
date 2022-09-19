@@ -108,6 +108,7 @@ spec:
                                 .collectEntries { key, value -> [(key.toLowerCase()): value] }
           terraformVars.putAll(['test_host': hostUnderTest])
 
+          awsAuth.assumeRole()
           baseScripts.deployTerraservice(
             env: params.ENVIRONMENT,
             directory: 'ops/terraform/services/server/server-load',
