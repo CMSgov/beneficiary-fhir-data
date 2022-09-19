@@ -148,7 +148,7 @@ EOF
 
 resource "aws_iam_policy" "asg" {
   name        = "bfd-${local.env}-${local.service}-asg"
-  description = "Permissions to describe the warm pool of the ${data.aws_autoscaling_group.asg.name} auto-scaling group"
+  description = "Permissions to describe the warm pool of the ${local.env} environment auto-scaling group"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -159,7 +159,7 @@ resource "aws_iam_policy" "asg" {
                 "autoscaling:DescribeWarmPool"
             ],
             "Resource": [
-                "${data.aws_autoscaling_group.asg.arn}"
+                "arn:aws:autoscaling:us-east-1:${local.account_id}:autoScalingGroup::autoScalingGroupName/bfd-${local.env}-fhir*"
             ]
         }
     ]
