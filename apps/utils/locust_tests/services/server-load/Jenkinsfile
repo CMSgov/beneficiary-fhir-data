@@ -124,7 +124,15 @@ spec:
     cleanup {
       script {
         if (env.NODE_NAME != null) {
-          sh 'terraform version'
+          // TODO: Send stop signal via SQS
+
+          echo 'Tearing down controller EC2 instance...'
+          baseScripts.deployTerraservice(
+            env: params.ENVIRONMENT,
+            directory: 'ops/terraform/services/server/server-load',
+            tfVars: terraformVars
+          )
+          echo 'Controller teardown successful'
         } else {
           echo 'Build ended prior to node being created'
         }
