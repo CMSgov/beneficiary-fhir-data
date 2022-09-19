@@ -58,7 +58,7 @@ spec:
                         + 'given test run. Does not account for failed nodes or nodes that reach '
                         + 'their Lambda timeout')
 
-    string(name: 'MAX_USERS',
+    string(name: 'MAX_SPAWNED_USERS',
            defaultValue: '5000',
            description: 'The maximum number of simulated Locust users (not worker nodes) to spawn. '
                         + 'Use this and spawn rate to constrain the load during a test run')
