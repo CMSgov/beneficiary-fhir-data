@@ -59,7 +59,7 @@ spec:
         script {
           def hostUnderTest = String.format(params.TEST_HOST, params.ENVIRONMENT)
           def terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' }
-                                    .collectEntries { key, value -> [key.toLower(), value] }
+                                    .collectEntries { key, value -> [key.toLowerCase(), value] }
                                     + [
                                       "test_host": hostUnderTest
                                     ]
