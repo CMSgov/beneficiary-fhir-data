@@ -103,8 +103,20 @@ spec:
         }
         // TODO: Run terraform apply, create infrastructure (which starts load test service)
         echo "${terraformVars}"
-
+        sleep 60
         // TODO: Await some signal from controller (SQS or other) with log location and other detail
+      }
+    }
+  }
+
+  post {
+    cleanup {
+      script {
+        if (env.NODE_NAME != null) {
+          sh 'terraform version'
+        } else {
+          echo 'Build ended prior to node being created'
+        }
       }
     }
   }
