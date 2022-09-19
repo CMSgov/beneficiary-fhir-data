@@ -40,8 +40,6 @@
         "-e ansible_python_interpreter=/usr/bin/python",
         "-e git_commit={{ user `git_commit` }}",
         "-e git_branch={{ user `git_branch` }}",
-        "--extra-vars",
-        "@extra_vars.json",
         "--tags",
         "pre-ami"
       ],
@@ -49,11 +47,6 @@
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
         "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
       ]
-    },
-    {
-      "type": "file",
-      "source": "extra_vars.json",
-      "destination": "/tmp/extra_vars.json"
     }
   ],
   "post-processors": [
