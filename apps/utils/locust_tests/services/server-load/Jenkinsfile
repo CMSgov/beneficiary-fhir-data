@@ -69,7 +69,7 @@ spec:
                         + 'Set this equal to max_spawned_users if all users should be spawned '
                         + 'immediately')
 
-    string(name: 'RUNTIME_LIMIT',
+    string(name: 'TEST_RUNTIME_LIMIT',
            defaultValue: '10m30s',
            description: 'The maximum runtime for the current load test. Acts as a failsafe against '
                         + 'runaway load testing')
