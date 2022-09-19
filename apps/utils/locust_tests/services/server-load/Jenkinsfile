@@ -111,7 +111,7 @@ spec:
         // TODO: Run terraform apply, create infrastructure (which starts load test service)
         baseScripts.deployTerraservice(
           env: params.ENVIRONMENT,
-          directory: 'ops/terraform/services/server/server-load'
+          directory: 'ops/terraform/services/server/server-load',
           tfVars: terraformVars + ['create_locust_instance': true]
         )
         // TODO: Await some signal from controller (SQS or other) with log location and other detail
