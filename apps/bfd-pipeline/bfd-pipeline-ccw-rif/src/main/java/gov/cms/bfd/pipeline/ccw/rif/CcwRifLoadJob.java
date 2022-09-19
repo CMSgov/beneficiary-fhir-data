@@ -303,8 +303,28 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
      * option #1.
      */
 
-    String dataSetKeyPrefix =
+    String prefix =
         String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
+    String syntheticPrefix =
+        String.format("%s/%s/", S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, manifest.getTimestampText());
+
+    String sampleManifestName = manifest.getEntries().get(0).getName();
+
+    if (!s3TaskManager
+            .getS3Client()
+            .doesObjectExist(options.getS3BucketName(), prefix + sampleManifestName)
+        && !s3TaskManager
+            .getS3Client()
+            .doesObjectExist(options.getS3BucketName(), syntheticPrefix + sampleManifestName)) {
+      return false;
+    } else if (!s3TaskManager
+        .getS3Client()
+        .doesObjectExist(options.getS3BucketName(), prefix + sampleManifestName)) {
+      prefix = syntheticPrefix;
+    }
+
+    // Value must be final for lambda expression using them to be happy
+    final String dataSetKeyPrefix = prefix;
 
     ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
     s3BucketListRequest.setBucketName(options.getS3BucketName());

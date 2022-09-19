@@ -231,6 +231,21 @@ public final class DataSetManifestTest {
   }
 
   /**
+   * Verifies that {@link DataSetManifestId}s can be round-tripped as expected when using the
+   * synthetic load key.
+   */
+  @Test
+  public void manifestSyntheticIdRoundtrip() {
+    String s3Key =
+        CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+            + "/2017-07-11T00:00:00.000Z/1_manifest.xml";
+    DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Key);
+
+    assertEquals(
+        s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS));
+  }
+
+  /**
    * Just a simple little app that will use JAXB to marshall a sample {@link DataSetManifest} to
    * XML. This was used as the basis for the test resources used in these tests.
    *

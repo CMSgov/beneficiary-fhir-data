@@ -60,14 +60,25 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
   @Override
   public ManifestEntryDownloadResult call() throws Exception {
     try {
-      GetObjectRequest objectRequest =
-          new GetObjectRequest(
-              options.getS3BucketName(),
-              String.format(
-                  "%s/%s/%s",
-                  CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-                  manifestEntry.getParentManifest().getTimestampText(),
-                  manifestEntry.getName()));
+
+      String location =
+          String.format(
+              "%s/%s/%s",
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              manifestEntry.getParentManifest().getTimestampText(),
+              manifestEntry.getName());
+
+      // Check that our manifest is in Incoming, else check synthetic/incoming
+      if (!s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), location)) {
+        location =
+            String.format(
+                "%s/%s/%s",
+                CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+                manifestEntry.getParentManifest().getTimestampText(),
+                manifestEntry.getName());
+      }
+
+      GetObjectRequest objectRequest = new GetObjectRequest(options.getS3BucketName(), location);
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
       Timer.Context downloadTimer =

@@ -134,6 +134,16 @@ public final class DataSetQueue {
   private void addManifestToList(
       DataSetManifest.DataSetManifestId manifestId, String manifestS3Key) {
     DataSetManifest manifest;
+
+    // If the keyspace we're scanning doesnt exist, bail early
+    if (!s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), manifestS3Key)) {
+      LOGGER.warn(
+          "Unable to find keyspace {} in bucket {} while scanning for manifests.",
+          manifestS3Key,
+          options.getS3BucketName());
+      return;
+    }
+
     try {
       manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
     } catch (JAXBException | SAXException e) {
