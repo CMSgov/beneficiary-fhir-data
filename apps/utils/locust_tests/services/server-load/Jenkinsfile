@@ -1,5 +1,10 @@
 #!/usr/bin/env groovy
 
+// Global variable where the base deploy.groovy script will be loaded
+def baseScripts
+// Global variable where the terraform variable map will be stored
+def terraformVars
+
 pipeline {
   agent {
     kubernetes {
@@ -96,6 +101,8 @@ spec:
     stage('Run Load Tests') {
       steps {
         script {
+          baseScripts = load 'ops/terraform/services/base/deploy.groovy'
+
           hostUnderTest = String.format(params.TEST_HOST, params.ENVIRONMENT)
           terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' }
                                 .collectEntries { key, value -> [(key.toLowerCase()): value] }
