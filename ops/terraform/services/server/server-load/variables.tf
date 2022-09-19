@@ -10,12 +10,6 @@ variable "create_locust_instance" {
   default     = false
 }
 
-variable "git_repo_version" {
-  description = "Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version)"
-  type        = string
-  default     = "master"
-}
-
 variable "sqs_queue_name" {
   description = "The name of the SQS queue that will be polled for scaling notifications or stop signals"
   type        = string

@@ -96,7 +96,6 @@ resource "aws_instance" "this" {
     aws_current_region = data.aws_region.current.name
     asg_name           = data.aws_autoscaling_group.asg.name
 
-    git_repo_version     = var.git_repo_version
     sqs_queue_name       = var.sqs_queue_name
     node_lambda_name     = var.node_lambda_name
     test_host            = var.test_host
