@@ -1,7 +1,5 @@
 import json
-from typing import Dict, List, Optional
-
-from common.message_filters import filter_message_by_keys
+from typing import Any, Dict, List
 
 
 def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
@@ -40,10 +38,28 @@ def check_queue(queue, timeout: int = 1) -> List[Dict[str, str]]:
         WaitTimeSeconds=timeout,
     )
 
-    raw_messages = [response.get("Message") or response.get("Body") for response in responses]
-    messages = [json.loads(raw_message) for raw_message in raw_messages]
+    def load_json_safe(json_str: str) -> Dict[str, Any]:
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            return None
+        except TypeError:
+            return None
 
-    return messages
+    raw_messages = [load_json_safe(response.body) for response in responses]
+    # SQS messages can come in a lot of forms, for this service's use-case we are expecting either
+    # messages from an SNS subscription or directly via the cli or the SQS web UI. In the SNS case,
+    # the actual, full SQS message will include additional metadata alongside the actual message.
+    # The actual message will be string-escaped JSON under the "Message" key, hence why that key's
+    # value is deserialized from JSON if it exists. If it doesn't exist, we assume the message is
+    # the _entire_ SQS message
+    filtered_messages = [
+        load_json_safe(message.get("Message")) or message
+        for message in raw_messages
+        if message is not None
+    ]
+
+    return filtered_messages
 
 
 def get_warm_pool_count(autoscaling_client, asg_name: str) -> int:
