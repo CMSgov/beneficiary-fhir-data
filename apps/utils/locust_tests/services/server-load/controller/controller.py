@@ -65,7 +65,7 @@ async def async_main():
     max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", 0))
     max_users = int(os.environ.get("MAX_SPAWNED_USERS", 0))
     user_spawn_rate = int(os.environ.get("USER_SPAWN_RATE", 1))
-    runtime_limit = os.environ.get("TEST_RUNTIME_LIMIT", "0s")
+    runtime_limit = int(os.environ.get("TEST_RUNTIME_LIMIT", 0))
     coasting_time = int(os.environ.get("COASTING_TIME", 0))
     warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
     stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
@@ -139,23 +139,21 @@ async def async_main():
         )
         spawn_count += 1
 
-    runtime_limit_end = datetime.now() + timedelta(seconds=10)
-    has_received_stop = False
+    runtime_limit_end = datetime.now() + timedelta(seconds=runtime_limit)
     while locust_process.returncode is None:
         current_time = datetime.now()
         if current_time >= runtime_limit_end:
-            print("Runtime limit exceeded")
+            print(f"User provided runtime of {runtime_limit} seconds has been exceeded, stopping")
             break
 
         scale_or_stop_events = check_queue(
             queue=queue,
-            timeout=node_spawn_time,
+            timeout=node_spawn_time if spawn_count > 0 else 1,
         )
 
         if any(
             filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
         ):
-            has_received_stop = True
             print("Stop signal encountered, stopping")
             break
 
@@ -188,19 +186,22 @@ async def async_main():
             print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
 
+    # Unconditionally send a stop signal to the queue to force all nodes to stop
+    print("Sending stop signal to remaining nodes...")
+    queue.send_message(MessageBody=json.dumps(QUEUE_STOP_SIGNAL_FILTER))
+    print("Stop signal sent successfully")
+
     if locust_process.returncode:
         # If returncode is not None, then the locust process has finished on its own and we do not
         # need to end it manually
         print("Locust master process ended without intervention, stopping...")
         return
 
-    if not has_received_stop and coasting_time > 0:
-        # Sleep for the coasting time plus an additional 10 seconds before forcing the master
-        # process to end if no stop signal was encountered. If a stop signal _is_ encountered, we
-        # want to end immediately
-        print(f"Coasting for {coasting_time + 10} seconds before stopping...")
-        time.sleep(int(coasting_time) + 10)
-        print("Coasting time complete")
+    # Sleep for the coasting time plus an additional 10 seconds before forcing the master
+    # process to end.
+    print(f"Coasting for {coasting_time + 10} seconds before stopping...")
+    time.sleep(int(coasting_time) + 10)
+    print("Coasting time complete")
 
     print("Stopping Locust master process...")
     try:
