@@ -87,8 +87,8 @@ class ClaimDaoTest {
   }
 
   /**
-   * Verifies that {@link ClaimDao#getEntityById(Class, String, String)} builds the correct query to
-   * return the expected entity using a given ID.
+   * Verifies that {@link ClaimDao#getEntityById(ResourceTypeV2, String)} builds the correct query
+   * to return the expected entity using a given ID.
    */
   @Test
   void shouldGetEntityById() {
@@ -149,8 +149,8 @@ class ClaimDaoTest {
   }
 
   /**
-   * Verifies that {@link ClaimDao#getEntityById(Class, String, String)} builds the correct query to
-   * return the expected null value when no entity found using a given ID.
+   * Verifies that {@link ClaimDao#getEntityById(ResourceTypeV2, String)} builds the correct query
+   * to return the expected null value when no entity found using a given ID.
    */
   @Test
   void shouldGetEntityByIdWhenNull() {
@@ -210,8 +210,8 @@ class ClaimDaoTest {
   }
 
   /**
-   * Verifies that {@link ClaimDao#logQueryMetric(long, int)} was invoked with the correct return
-   * size of the query.
+   * Verifies that {@link ClaimDao#logQueryMetric(ResourceTypeV2, String, long, int)} was invoked
+   * with the correct return size of the query.
    */
   @Test
   void shouldSetClaimByMbiMetricForClaimsSearch() {
@@ -266,8 +266,8 @@ class ClaimDaoTest {
   }
 
   /**
-   * Verifies that {@link ClaimDao#logQueryMetric(long, int)} was invoked with size set to 0 if the
-   * query result was null.
+   * Verifies that {@link ClaimDao#logQueryMetric(ResourceTypeV2, String, long, int)} was invoked
+   * with size set to 0 if the query result was null.
    */
   @Test
   void shouldSetClaimByMbiMetricForNullClaimsSearch() {
@@ -626,8 +626,7 @@ class ClaimDaoTest {
 
   /**
    * Parameter object defining a test case for {@link
-   * ClaimDaoTest#testCreateStandardDateRangePredicateList} and {@link
-   * ClaimDaoTest#testCreateSubqueryForServiceDate}.
+   * ClaimDaoTest#testCreateStandardDateRangePredicateList}.
    */
   @AllArgsConstructor
   private static class DateRangeTestParameter {

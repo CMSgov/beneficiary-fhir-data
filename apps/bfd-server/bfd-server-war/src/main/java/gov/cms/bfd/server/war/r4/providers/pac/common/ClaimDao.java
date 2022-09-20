@@ -226,7 +226,6 @@ public class ClaimDao {
    * @param root The root path of the entity to get attributes from.
    * @param mbiSearchValue The MBI value being searched for.
    * @param isMbiSearchValueHashed Indicates if the search value is a hash or raw MBI.
-   * @param isOldMbiHashEnabled Indicates if the old MBI should be checked for the query.
    * @param builder The builder to use for creating predicates.
    * @return A {@link Predicate} that checks for the given mbi value.
    */

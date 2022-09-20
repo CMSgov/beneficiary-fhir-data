@@ -47,8 +47,7 @@ public final class ClaimResponseTypeV2<TEntity>
    * @param nameForParsing name used when parsing parameter string to find appropriate instance
    * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
    * @param entityClass the entity class for the associated resource
-   * @param entityMbiAttribute the attribute name for the mbi value on the entity class
-   * @param entityMbiHashAttribute the attribute name for the mbiHash value on the entity class
+   * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
    * @param entityServiceDateAttributes the attribute name for the service end date on the entity
    *     class
