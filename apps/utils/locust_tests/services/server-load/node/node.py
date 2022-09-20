@@ -113,7 +113,7 @@ async def run_locust(event):
 
     password = urllib.parse.quote(raw_password)
     try:
-        db_uri = get_rds_db_uri(rds_client=rds_client, clusterd_id=cluster_id)
+        db_uri = get_rds_db_uri(rds_client=rds_client, cluster_id=cluster_id)
     except ValueError as exc:
         print(exc)
         return
