@@ -31,22 +31,22 @@
 # NODE_SPAWN_TIME defaults to 10 in the server-load application
 {{ (server_load_node_spawn_time is defined) | ternary('', '#') }}export NODE_SPAWN_TIME='{{ server_load_node_spawn_time | default('', true) }}'
 
-# MAX_SPAWNED_NODES defaults to 80 in the server-load application
+# MAX_SPAWNED_NODES defaults to 0 in the server-load application
 {{ (server_load_max_spawned_nodes is defined) | ternary('', '#') }}export MAX_SPAWNED_NODES='{{ server_load_max_spawned_nodes | default('', true) }}'
 
-# MAX_SPAWNED_USERS defaults to 5000 in the server-load application
+# MAX_SPAWNED_USERS defaults to 0 in the server-load application
 {{ (server_load_max_spawned_users is defined) | ternary('', '#') }}export MAX_SPAWNED_USERS='{{ server_load_max_spawned_users | default('', true) }}'
 
 # USER_SPAWN_RATE defaults to 1 in the server-load application
 {{ (server_load_user_spawn_rate is defined) | ternary('', '#') }}export USER_SPAWN_RATE='{{ server_load_user_spawn_rate | default('', true) }}'
 
-# TEST_RUNTIME_LIMIT defaults to '10m30s' in the server-load application
+# TEST_RUNTIME_LIMIT defaults to '0s' in the server-load application
 {{ (server_load_test_runtime_limit is defined) | ternary('', '#') }}export TEST_RUNTIME_LIMIT='{{ server_load_test_runtime_limit | default('', true) }}'
 
-# COASTING_TIME defaults to 10 in the server-load application
+# COASTING_TIME defaults to 0 in the server-load application
 {{ (server_load_coasting_time is defined) | ternary('', '#') }}export COASTING_TIME='{{ server_load_coasting_time | default('', true) }}'
 
-# WARM_INSTANCE_TARGET defaults to 7 in the server-load application
+# WARM_INSTANCE_TARGET defaults to 0 in the server-load application
 {{ (server_load_warm_instance_target is defined) | ternary('', '#') }}export WARM_INSTANCE_TARGET='{{ server_load_warm_instance_target | default('', true) }}'
 
 # STOP_ON_SCALING defaults to true in the server-load application
