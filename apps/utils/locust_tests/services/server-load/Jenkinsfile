@@ -130,7 +130,7 @@ spec:
           baseScripts.deployTerraservice(
             env: params.ENVIRONMENT,
             directory: 'ops/terraform/services/server/server-load',
-            tfVars: terraformVars = ['create_locust_instance': false]
+            tfVars: terraformVars + ['create_locust_instance': false]
           )
           echo 'Controller teardown successful'
         } else {
