@@ -12,8 +12,9 @@ RUN pip3 install -r requirements.txt
 FROM base as node
 COPY --from=python /var/lang/lib/python3.8/site-packages /var/lang/lib/python3.8/site-packages
 COPY --from=python /var/lang/bin /var/lang/bin
-COPY . ${LAMBDA_TASK_ROOT}
+COPY . "${LAMBDA_TASK_ROOT}/locust_tests"
+RUN mv "${LAMBDA_TASK_ROOT}/locust_tests/services/server-load" "${LAMBDA_TASK_ROOT}/"
 ENV PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
-WORKDIR "${LAMBDA_TASK_ROOT}/services/server-load/node"
-# TODO: Use LAMBDA_TASK_ROOT instead of directly specifying /var/task
-CMD [ "/var/task/services/server-load/node/node.handler" ]
+ENV NODE_LOCUST_TESTS_DIR="${LAMBDA_TASK_ROOT}/locust_tests"
+CMD [ "node.handler" ]
+

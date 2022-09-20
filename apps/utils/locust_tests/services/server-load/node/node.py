@@ -27,6 +27,8 @@ from common.message_filters import (
     filter_message_by_keys,
 )
 
+# We assume that if this environment variable is not set we are running from this file's directory
+locust_tests_dir = os.environ.get("NODE_LOCUST_TESTS_DIR", "../../../")
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 region = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
@@ -126,7 +128,7 @@ async def run_locust(event):
 
     process = await asyncio.create_subprocess_exec(
         "locust",
-        "--locustfile=/var/task/high_volume_suite.py",
+        f"--locustfile={os.path.join(locust_tests_dir, 'high_volume_suite.py')}",
         f"--host={invoke_event.host}",
         f"--database-uri={db_dsn}",
         f"--client-cert-path={cert_path}",
@@ -135,7 +137,7 @@ async def run_locust(event):
         f"--master-port={invoke_event.locust_port}",
         "--headless",
         "--only-summary",
-        cwd="/var/task",
+        cwd=locust_tests_dir,
     )
 
     print(f"Started locust worker with pid {process.pid}")
