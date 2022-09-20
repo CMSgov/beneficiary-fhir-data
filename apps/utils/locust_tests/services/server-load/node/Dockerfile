@@ -15,4 +15,5 @@ COPY --from=python /var/lang/bin /var/lang/bin
 COPY . ${LAMBDA_TASK_ROOT}
 ENV PATH="/var/lang/lib/python3.8/site-packages:${PATH}"
 WORKDIR "${LAMBDA_TASK_ROOT}/services/server-load/node"
-CMD $LAMBDA_TASK_ROOT/services/server-load/node/node.handler
+# TODO: Use LAMBDA_TASK_ROOT instead of directly specifying /var/task
+CMD [ "/var/task/services/server-load/node/node.handler" ]
