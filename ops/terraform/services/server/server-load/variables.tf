@@ -59,9 +59,9 @@ variable "user_spawn_rate" {
 }
 
 variable "test_runtime_limit" {
-  description = "The maximum runtime for the current load test. Acts as a failsafe against runaway load testing"
-  type        = string
-  default     = "0s"
+  description = "The maximum runtime, in seconds, for the current load test. Acts as a failsafe against runaway load testing"
+  type        = number
+  default     = 0
 }
 
 variable "coasting_time" {

@@ -40,7 +40,7 @@
 # USER_SPAWN_RATE defaults to 1 in the server-load application
 {{ (server_load_user_spawn_rate is defined) | ternary('', '#') }}export USER_SPAWN_RATE='{{ server_load_user_spawn_rate | default('', true) }}'
 
-# TEST_RUNTIME_LIMIT defaults to '0s' in the server-load application
+# TEST_RUNTIME_LIMIT defaults to 0 in the server-load application
 {{ (server_load_test_runtime_limit is defined) | ternary('', '#') }}export TEST_RUNTIME_LIMIT='{{ server_load_test_runtime_limit | default('', true) }}'
 
 # COASTING_TIME defaults to 0 in the server-load application

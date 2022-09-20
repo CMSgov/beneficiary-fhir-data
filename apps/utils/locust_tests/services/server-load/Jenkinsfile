@@ -70,9 +70,9 @@ spec:
                         + 'immediately')
 
     string(name: 'TEST_RUNTIME_LIMIT',
-           defaultValue: '10m30s',
-           description: 'The maximum runtime for the current load test. Acts as a failsafe against '
-                        + 'runaway load testing')
+           defaultValue: '630',
+           description: 'The maximum runtime, in seconds, for the current load test. Acts as a '
+                        + 'failsafe against runaway load testing')
 
     string(name: 'COASTING_TIME',
            defaultValue: '10',
@@ -115,7 +115,8 @@ spec:
             tfVars: terraformVars + ['create_locust_instance': true]
           )
         }
-        // TODO: Await some signal from controller (SQS or other) with log location and other detail
+
+        // TODO: Ask the user to indicate when the load test is finished
       }
     }
   }
