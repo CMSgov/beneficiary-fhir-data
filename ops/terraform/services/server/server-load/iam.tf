@@ -161,6 +161,8 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
+# NOTE: autoscaling:DescribeWarmPool does not support resource-specific permissions, nor does it
+# support any useful conditions. This is why all resources are permitted to be described 
 resource "aws_iam_policy" "asg" {
   name        = "bfd-${local.env}-${local.service}-asg"
   description = "Permissions to describe the warm pool of the ${local.env} environment auto-scaling group"
@@ -174,7 +176,7 @@ resource "aws_iam_policy" "asg" {
                 "autoscaling:DescribeWarmPool"
             ],
             "Resource": [
-                "arn:aws:autoscaling:us-east-1:${local.account_id}:autoScalingGroup::autoScalingGroupName/bfd-${local.env}-fhir*"
+                "*"
             ]
         }
     ]
