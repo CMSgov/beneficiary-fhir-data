@@ -9,19 +9,7 @@
     - name: Apply BFD DB Migrator Role
       import_role:
         name: bfd-db-migrator
-      vars:
-        # NOTE: variables listed here are provided in the user-data script encoded
-        #       inside the specific migrator terraform module from SSM lookups
-        # TODO: consider moving variable resolution here with aws_ssm lookups post BFD-1890
-        # db_migrator_db_password:
-        # db_migrator_db_username:
-        # db_migrator_dir:
-        # db_migrator_tmp_dir:
-        # sqs_queue_name:
-        # db_migrator_db_username:
-        # db_migrator_db_password:
 
-    # TODO: Consider moving the CloudWatch agent configuration elsewhere, potentially in the application role or a cloudwatch-specific role. This is a little awkward.
     - name: Build CloudWatch unified agent configuration
       template:
         src: cwagent-db-migrator.json.j2
@@ -38,7 +26,3 @@
       become: true
       tags:
         - post-ami
-
-  # TODO: Consider removing this task all together... it doesn't seem to be firing, but the solution continues to work
-  handlers:
-    - import_tasks: handlers/main.yml

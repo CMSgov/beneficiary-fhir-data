@@ -8,8 +8,8 @@
   remote_user: ec2-user
   gather_facts: no
   vars:
-    ansible_ssh_pipelining: no
     data_server_dir: '/usr/local/bfd-server'
+    # TODO: Consider removing `env` when SSH/sudoer users have been resolved in SSM BFD-2068
     env: "test"
 
   tasks:
@@ -34,6 +34,8 @@
     - name: Apply Blue Button Data Server Role
       import_role:
         name: bfd-server
+      vars:
+        data_server_tmp_dir: "{{ data_server_dir }}/tmp"
 
     - name: Apply base Cloudwatch Agent Role
       import_role:

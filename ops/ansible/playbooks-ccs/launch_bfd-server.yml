@@ -4,8 +4,6 @@
 ##
 - name: Launch BFD Data Server
   hosts: localhost
-  vars:
-    data_server_dir: '/usr/local/bfd-server'
 
   tasks:
     - name: Apply BFD Server Role
