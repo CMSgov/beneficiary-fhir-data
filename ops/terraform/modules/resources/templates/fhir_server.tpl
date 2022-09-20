@@ -8,22 +8,43 @@ exec > >(
 	done
 )
 
-git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
+cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
+aws s3 --quiet cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 
-aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
+aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/server/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > server_vars.json
+
+# build `data_server_ssl_client_certificates` from json values stored in SSM
+jq '{data_server_ssl_client_certificates: .data_server_ssl_client_certificates_json|fromjson}' server_vars.json > client_certificates.json
+
+aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
 
 # The extra_vars.json file from the previous build step contains a few incorrect values
 # and needs to get trimmed down to the following
-cat <<EOF >> extra_vars.json
+cat <<EOF > extra_vars.json
 {
-    "env":"${env}",
-    "data_server_version":"1.0.0-SNAPSHOT"
+  "data_server_appserver_jvmargs": "-Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer",
+  "data_server_db_connections_max": "{{ ansible_processor_vcpus * 10 }}",
+  "data_server_new_relic_app_name": "BFD Server ({{ env_name_std }})",
+  "data_server_new_relic_environment": "{{ env_name_std }}",
+  "data_server_tmp_dir": "{{ data_server_dir }}/tmp",
+  "data_server_war": "bfd-server-war-1.0.0-SNAPSHOT.war",
+  "env": "${env}"
 }
 EOF
 
-ansible-playbook --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-server.yml
+mkdir -p logs
+
+ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-server.yml
 
 rm vault.password
 
