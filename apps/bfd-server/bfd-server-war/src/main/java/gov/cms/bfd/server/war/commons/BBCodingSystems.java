@@ -47,7 +47,7 @@ public class BBCodingSystems {
 
     public static final String CLAIM_RECEIPT_DATE = MCS_BASE + "/claim-receipt-date";
 
-    public static final String CLM_TYPE = MCS_BASE + "/clm-type";
+    public static final String CLAIM_TYPE = MCS_BASE + "/claim-type";
 
     public static final String STATUS_CODE = MCS_BASE + "/status-code";
 

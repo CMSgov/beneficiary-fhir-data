@@ -176,7 +176,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static List<Claim.DiagnosisComponent> getDiagnosis(
       RdaFissClaim claimGroup, boolean isIcd9) {
-    final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10;
+    final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10_CM;
 
     return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaFissDiagnosisCode>of())
         .stream()
@@ -219,7 +219,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static List<Claim.ProcedureComponent> getProcedure(
       RdaFissClaim claimGroup, boolean isIcd9) {
-    final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10;
+    final String icdSystem =
+        isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9_MEDICARE : IcdCode.CODING_SYSTEM_ICD_10_MEDICARE;
 
     return ObjectUtils.defaultIfNull(claimGroup.getProcCodes(), List.<RdaFissProcCode>of()).stream()
         .map(

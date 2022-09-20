@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -336,8 +337,8 @@ public class AbstractSamhsaMatcherTest {
     /**
      * Test to see if {@link AbstractSamhsaMatcher#isSamhsaDiagnosis(CodeableConcept)} correctly
      * invokes the expected sibling method ({@link
-     * AbstractSamhsaMatcher#isSamhsaCoding(CodeableConcept, Predicate, Predicate)}) with the
-     * expected parameters.
+     * AbstractSamhsaMatcher#isSamhsaCoding(CodeableConcept, Predicate, Predicate, Predicate,
+     * Predicate, Predicate)}) with the expected parameters.
      */
     @Test
     public void shouldCorrectlyInvokeIsSamhsaCodingForDiagnosis() {
@@ -355,6 +356,7 @@ public class AbstractSamhsaMatcherTest {
               any(Predicate.class),
               any(Predicate.class),
               any(Predicate.class),
+              any(Predicate.class),
               any(Predicate.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd9Diagnosis(any(Coding.class));
@@ -368,6 +370,10 @@ public class AbstractSamhsaMatcherTest {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       ArgumentCaptor<Predicate<Coding>> icd9CallCaptor = ArgumentCaptor.forClass(Predicate.class);
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      ArgumentCaptor<Predicate<Coding>> icd9MedicareCallCaptor =
+          ArgumentCaptor.forClass(Predicate.class);
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       ArgumentCaptor<Predicate<Coding>> icd10CallCaptor = ArgumentCaptor.forClass(Predicate.class);
@@ -387,6 +393,7 @@ public class AbstractSamhsaMatcherTest {
           .isSamhsaCoding(
               conceptCaptor.capture(),
               icd9CallCaptor.capture(),
+              icd9MedicareCallCaptor.capture(),
               icd10CallCaptor.capture(),
               icd10CmCallCaptor.capture(),
               icd10MedicareCallCaptor.capture());
@@ -394,6 +401,9 @@ public class AbstractSamhsaMatcherTest {
       assertEquals(mockConcept, conceptCaptor.getValue());
 
       Coding mockCoding = mock(Coding.class);
+
+      assertNull(icd9MedicareCallCaptor.getValue());
+      assertNull(icd10MedicareCallCaptor.getValue());
 
       // Invoke the captured lambdas to check they were the right ones
       icd9CallCaptor.getValue().test(mockCoding);
@@ -421,9 +431,12 @@ public class AbstractSamhsaMatcherTest {
               any(Predicate.class),
               any(Predicate.class),
               any(Predicate.class),
+              any(Predicate.class),
               any(Predicate.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd9Procedure(any(Coding.class));
+
+      doReturn(false).when(matcherSpy).isSamhsaIcd9MedicareProcedure(any(Coding.class));
 
       doReturn(false).when(matcherSpy).isSamhsaIcd10Procedure(any(Coding.class));
 
@@ -434,6 +447,10 @@ public class AbstractSamhsaMatcherTest {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       ArgumentCaptor<Predicate<Coding>> icd9CallCaptor = ArgumentCaptor.forClass(Predicate.class);
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      ArgumentCaptor<Predicate<Coding>> icd9MedicareCallCaptor =
+          ArgumentCaptor.forClass(Predicate.class);
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       ArgumentCaptor<Predicate<Coding>> icd10CallCaptor = ArgumentCaptor.forClass(Predicate.class);
@@ -453,6 +470,7 @@ public class AbstractSamhsaMatcherTest {
           .isSamhsaCoding(
               conceptCaptor.capture(),
               icd9CallCaptor.capture(),
+              icd9MedicareCallCaptor.capture(),
               icd10CallCaptor.capture(),
               icd10CmCallCaptor.capture(),
               icd10MedicareCallCaptor.capture());
@@ -461,12 +479,16 @@ public class AbstractSamhsaMatcherTest {
 
       Coding mockCoding = mock(Coding.class);
 
+      assertNull(icd10CmCallCaptor.getValue());
+
       // Invoke the captured lambdas to check they were the right ones
       icd9CallCaptor.getValue().test(mockCoding);
+      icd9MedicareCallCaptor.getValue().test(mockCoding);
       icd10CallCaptor.getValue().test(mockCoding);
       icd10MedicareCallCaptor.getValue().test(mockCoding);
 
       verify(matcherSpy, times(1)).isSamhsaIcd9Procedure(mockCoding);
+      verify(matcherSpy, times(1)).isSamhsaIcd9MedicareProcedure(mockCoding);
       verify(matcherSpy, times(1)).isSamhsaIcd10Procedure(mockCoding);
       verify(matcherSpy, times(1)).isSamhsaIcd10MedicareProcedure(mockCoding);
     }
@@ -610,7 +632,7 @@ public class AbstractSamhsaMatcherTest {
 
   /**
    * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCoding(CodeableConcept, Predicate,
-   * Predicate)}
+   * Predicate, Predicate, Predicate, Predicate)}
    *
    * <p>The target method takes a {@link CodeableConcept} and two {@link Predicate}s (one for ICD9
    * checks and one for ICD10 checks). The test checks each combination of coding system/predicate
@@ -648,6 +670,11 @@ public class AbstractSamhsaMatcherTest {
 
     // unchecked - This is ok for making a mock.
     //noinspection unchecked
+    Predicate<Coding> mockPredicateIcd9Medicare = mock(Predicate.class);
+    doReturn(isIcd9Code).when(mockPredicateIcd9Medicare).test(mockCoding);
+
+    // unchecked - This is ok for making a mock.
+    //noinspection unchecked
     Predicate<Coding> mockPredicateIcd10 = mock(Predicate.class);
     doReturn(isIcd10Code).when(mockPredicateIcd10).test(mockCoding);
 
@@ -666,6 +693,7 @@ public class AbstractSamhsaMatcherTest {
         matcherSpy.isSamhsaCoding(
             concept,
             mockPredicateIcd9,
+            mockPredicateIcd9Medicare,
             mockPredicateIcd10,
             mockPredicateIcd10Cm,
             mockPredicateIcd10Medicare),

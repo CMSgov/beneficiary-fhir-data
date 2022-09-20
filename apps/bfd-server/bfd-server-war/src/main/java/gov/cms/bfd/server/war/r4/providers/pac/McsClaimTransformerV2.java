@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
@@ -85,7 +86,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     claim
         .getIdentifier()
         .add(createClaimIdentifier(BBCodingSystems.MCS.ICN, claimGroup.getIdrClmHdIcn()));
-    addExtension(claim.getExtension(), BBCodingSystems.MCS.CLM_TYPE, claimGroup.getIdrClaimType());
+    addExtension(
+        claim.getExtension(), BBCodingSystems.MCS.CLAIM_TYPE, claimGroup.getIdrClaimType());
     claim.setStatus(getStatus(claimGroup));
     claim.setType(createCodeableConcept(ClaimType.PROFESSIONAL));
     claim.setBillablePeriod(
@@ -158,8 +160,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                 String system;
 
                 if (VALID_ICD_TYPES.contains(diagCode.getIdrDiagIcdType())) {
-                  String icdVersion = diagCode.getIdrDiagIcdType().equals("0") ? "10" : "9-cm";
-                  system = "http://hl7.org/fhir/sid/icd-" + icdVersion;
+                  system =
+                      diagCode.getIdrDiagIcdType().equals("0")
+                          ? IcdCode.CODING_SYSTEM_ICD_10_CM
+                          : IcdCode.CODING_SYSTEM_ICD_9;
                 } else {
                   system = null;
                 }
