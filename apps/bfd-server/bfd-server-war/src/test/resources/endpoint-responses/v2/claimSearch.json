@@ -250,7 +250,7 @@
             "procedureCodeableConcept": {
               "coding": [
                 {
-                  "system": "http://hl7.org/fhir/sid/icd-9-cm",
+                  "system": "http://www.cms.gov/Medicare/Coding/ICD9",
                   "code": "CODEABC"
                 }
               ]
@@ -261,7 +261,7 @@
             "procedureCodeableConcept": {
               "coding": [
                 {
-                  "system": "http://hl7.org/fhir/sid/icd-9-cm",
+                  "system": "http://www.cms.gov/Medicare/Coding/ICD9",
                   "code": "CODECBA"
                 }
               ]
@@ -385,9 +385,9 @@
         ],
         "extension": [
           {
-            "url": "https://bluebutton.cms.gov/resources/variables/mcs/clm-type",
+            "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-type",
             "valueCoding": {
-              "system": "https://bluebutton.cms.gov/resources/variables/mcs/clm-type",
+              "system": "https://bluebutton.cms.gov/resources/variables/mcs/claim-type",
               "code": "R"
             }
           }
@@ -444,7 +444,7 @@
             "diagnosisCodeableConcept": {
               "coding": [
                 {
-                  "system": "http://hl7.org/fhir/sid/icd-10",
+                  "system": "http://hl7.org/fhir/sid/icd-10-cm",
                   "code": "HF3IJIF"
                 }
               ]

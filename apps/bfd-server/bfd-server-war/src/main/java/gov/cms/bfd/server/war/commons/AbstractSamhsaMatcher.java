@@ -500,21 +500,25 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
           concept.getCoding().stream()
               .anyMatch(
                   coding -> {
-                    switch (coding.getSystem()) {
-                      case IcdCode.CODING_SYSTEM_ICD_9:
-                        return icd9Check.test(coding);
-                      case IcdCode.CODING_SYSTEM_ICD_9_MEDICARE:
-                        return icd9MedicareCheck.test(coding);
-                      case IcdCode.CODING_SYSTEM_ICD_10:
-                        return icd10Check.test(coding);
-                      case IcdCode.CODING_SYSTEM_ICD_10_CM:
-                        return icd10CmCheck.test(coding);
-                      case IcdCode.CODING_SYSTEM_ICD_10_MEDICARE:
-                        return icd10MedicareCheck.test(coding);
-                      default:
-                        // Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
-                        return true;
+                    if (coding.getSystem() != null) {
+                      switch (coding.getSystem()) {
+                        case IcdCode.CODING_SYSTEM_ICD_9:
+                          return icd9Check.test(coding);
+                        case IcdCode.CODING_SYSTEM_ICD_9_MEDICARE:
+                          return icd9MedicareCheck.test(coding);
+                        case IcdCode.CODING_SYSTEM_ICD_10:
+                          return icd10Check.test(coding);
+                        case IcdCode.CODING_SYSTEM_ICD_10_CM:
+                          return icd10CmCheck.test(coding);
+                        case IcdCode.CODING_SYSTEM_ICD_10_MEDICARE:
+                          return icd10MedicareCheck.test(coding);
+                        default:
+                          // Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
+                          return true;
+                      }
                     }
+
+                    return true;
                   });
     }
 

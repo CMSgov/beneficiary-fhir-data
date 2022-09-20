@@ -234,7 +234,7 @@
       "procedureCodeableConcept": {
         "coding": [
           {
-            "system": "http://hl7.org/fhir/sid/icd-9-cm",
+            "system": "http://www.cms.gov/Medicare/Coding/ICD9",
             "code": "CODEABC"
           }
         ]
@@ -245,7 +245,7 @@
       "procedureCodeableConcept": {
         "coding": [
           {
-            "system": "http://hl7.org/fhir/sid/icd-9-cm",
+            "system": "http://www.cms.gov/Medicare/Coding/ICD9",
             "code": "CODECBA"
           }
         ]
