@@ -9,6 +9,7 @@ import socket
 import sys
 import time
 import urllib.parse
+from datetime import datetime, timedelta
 
 import boto3
 from botocore.config import Config
@@ -110,7 +111,6 @@ async def async_main():
         "--locustfile=high_volume_suite.py",
         f"--host={test_host}",
         f"--users={max_users}",
-        f"--run-time={runtime_limit}",
         f"--spawn-rate={user_spawn_rate}",
         f"--database-uri={db_dsn}",
         "--master",
@@ -139,8 +139,14 @@ async def async_main():
         )
         spawn_count += 1
 
+    runtime_limit_end = datetime.now() + timedelta(seconds=10)
     has_received_stop = False
     while locust_process.returncode is None:
+        current_time = datetime.now()
+        if current_time >= runtime_limit_end:
+            print("Runtime limit exceeded")
+            break
+
         scale_or_stop_events = check_queue(
             queue=queue,
             timeout=node_spawn_time,
