@@ -175,16 +175,16 @@ async def run_locust(event):
         print("Locust worker process ended without intervention, stopping...")
         return
 
-    if not has_received_stop:
+    if not has_received_stop and coasting_time > 0:
         print(f"Coasting for {coasting_time} seconds before stopping...")
         time.sleep(int(coasting_time))
         print("Coasting time complete")
 
-    print("Terminating worker node")
+    print("Terminating worker node...")
     try:
         process.terminate()
     except ProcessLookupError as e:
-        print("Could not terminate subprocess")
+        print("Could not terminate Locust worker subprocess")
         print(f"Received exception {e}")
 
     await process.wait()
@@ -194,3 +194,5 @@ async def run_locust(event):
     # If the process is already closed, this is a noop.
     # pylint: disable=protected-access
     process._transport.close()
+
+    print("Locust worker node process has been stopped")

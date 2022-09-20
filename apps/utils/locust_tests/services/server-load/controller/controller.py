@@ -188,7 +188,7 @@ async def async_main():
         print("Locust master process ended without intervention, stopping...")
         return
 
-    if not has_received_stop:
+    if not has_received_stop and coasting_time > 0:
         # Sleep for the coasting time plus an additional 10 seconds before forcing the master
         # process to end if no stop signal was encountered. If a stop signal _is_ encountered, we
         # want to end immediately
@@ -210,6 +210,8 @@ async def async_main():
     # If the process is already closed, this is a noop.
     # pylint: disable=protected-access
     locust_process._transport.close()
+
+    print("Locust master process has been stopped")
 
 
 if __name__ == "__main__":
