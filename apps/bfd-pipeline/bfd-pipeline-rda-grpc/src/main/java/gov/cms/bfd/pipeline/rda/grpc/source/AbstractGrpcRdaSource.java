@@ -21,6 +21,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Defines common gRPC RDA Source logic, taking care of basic resource and error handling.
+ *
+ * @param <TMessage> The type of message object received from the source
+ * @param <TClaim> The type of claim object generated from the source message object data
+ */
 @Slf4j
 public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     implements RdaSource<TMessage, TClaim> {
@@ -28,10 +34,15 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
+  /** The {@link ManagedChannel} the source messages will be streamed on */
   protected ManagedChannel channel;
+  /** Client for calling the remote RDA gRPC service */
   protected final GrpcStreamCaller<TMessage> caller;
+  /** The type of claim being read from the source (i.e. FISS/MCS) */
   protected final String claimType;
+  /** Factory for creating {@link CallOptions} */
   protected final Supplier<CallOptions> callOptionsFactory;
+  /** Metrics for doing later application and processing analysis */
   @Getter protected final DLQGrpcRdaSource.Metrics metrics;
 
   protected AbstractGrpcRdaSource(
@@ -169,6 +180,16 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     metrics.uptimeValue.set(0);
   }
 
+  /**
+   * Submit a batch of message objects to be written to the given {@link RdaSink}.
+   *
+   * @param apiVersion The version of the RDA API source the message was received from.
+   * @param sink The {@link RdaSink} to write the batch of messages to.
+   * @param batch The batch of messages from the RDA source to write to the {@link RdaSink}.
+   * @return The number of messages that were successfully written to the given {@link RdaSink}.
+   * @throws ProcessingException If there was an issue processing a message in the batch or writing
+   *     to the given sink.
+   */
   protected int submitBatchToSink(
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
@@ -186,7 +207,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   }
 
   /**
-   * Metrics are tested in unit tests so they need to be easily accessible from tests. Also this
+   * Metrics are tested in unit tests, so they need to be easily accessible from tests. Also, this
    * class is used to write both MCS and FISS claims so the metric names need to include a claim
    * type to distinguish them.
    */
@@ -218,6 +239,13 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     /** Holds the value that is reported in the update gauge. */
     private final AtomicLong uptimeValue;
 
+    /**
+     * Constructor to create a Metrics object
+     *
+     * @param baseClass The class the {@link Metrics} object is being created for.
+     * @param appMetrics The {@link MetricRegistry} used to create the needed metrics tools.
+     * @param claimType The type of claim this {@link Metrics} object will gather metrics for.
+     */
     private Metrics(Class<?> baseClass, MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(baseClass.getSimpleName(), claimType);
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));

@@ -33,23 +33,43 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
+/** Tests the {@link AbstractRdaLoadJob} class. */
 public class AbstractRdaLoadJobTest {
+
+  /** Mock {@link Callable} task used in testing for the preJob logic. */
   @Mock private Callable<RdaSource<Integer, Integer>> preJobTask;
+
+  /** Mock {@link Callable} task used in testing for the RDA source logic. */
   @Mock private Callable<RdaSource<Integer, Integer>> sourceFactory;
 
+  /** Mock factory function used in testing for creating {@link RdaSink} objects. */
   @Mock
   private ThrowingFunction<
           RdaSink<Integer, Integer>, AbstractRdaLoadJob.SinkTypePreference, Exception>
       sinkFactory;
 
+  /** Mock {@link RdaSource} to use in testing. */
   @Mock private RdaSource<Integer, Integer> source;
+
+  /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Integer, Integer> sink;
+
+  /** The {@link TestingLoadJob} used in the testing. */
   private TestingLoadJob job;
+
+  /** The {@link MetricRegistry} used in the testing. */
   private MetricRegistry appMetrics;
+
+  /** The {@link Config} used in the testing. */
   private Config config;
 
+  /**
+   * The {@link AutoCloseable} to store the object returned by {@link
+   * MockitoAnnotations#openMocks(Object)} so it can be closed at the end of testing.
+   */
   private AutoCloseable mocksClosable;
 
+  /** Set up the mocks before each test. */
   @BeforeEach
   public void setUp() {
     mocksClosable = MockitoAnnotations.openMocks(this);
@@ -62,11 +82,17 @@ public class AbstractRdaLoadJobTest {
     job = new TestingLoadJob(config, preJobTask, sourceFactory, sinkFactory, appMetrics);
   }
 
+  /**
+   * Close the mocks that were created after each test.
+   *
+   * @throws Exception If there was an issue closing a mock
+   */
   @AfterEach
   public void tearDown() throws Exception {
     mocksClosable.close();
   }
 
+  /** Tests that the {@link #appMetrics} meter names are the expected values. */
   @Test
   public void meterNames() {
     assertEquals(
@@ -78,6 +104,12 @@ public class AbstractRdaLoadJobTest {
         new ArrayList<>(appMetrics.getNames()));
   }
 
+  /**
+   * Tests that the meters are appropriately updated when the {@link #sourceFactory} fails to create
+   * a {@link RdaSource} object.
+   *
+   * @throws Exception If an error occurred during logic execution
+   */
   @Test
   public void openSourceFails() throws Exception {
     // resource - This is a mock, not an invocation
@@ -97,6 +129,12 @@ public class AbstractRdaLoadJobTest {
     assertMeterReading(0, "processed", job.getMetrics().getProcessed());
   }
 
+  /**
+   * Tests that the meters are appropriately updated when the {@link #sinkFactory} fails to create
+   * an {@link RdaSink} object.
+   *
+   * @throws Exception If a resource fails to close or some other issue occurred.
+   */
   @Test
   public void openSinkFails() throws Exception {
     // resource - This is a mock, not an invocation
@@ -121,6 +159,12 @@ public class AbstractRdaLoadJobTest {
     assertMeterReading(0, "processed", job.getMetrics().getProcessed());
   }
 
+  /**
+   * Tests that the process count and meters are correctly set when {@link
+   * RdaSource#retrieveAndProcessObjects(int, RdaSink)} fails to invoke on the {@link #source}.
+   *
+   * @throws Exception If the resource fails to close or some other issue occurred.
+   */
   @Test
   public void sourceFails() throws Exception {
     // resource - This is a mock, not an invocation
@@ -151,6 +195,13 @@ public class AbstractRdaLoadJobTest {
     assertMeterReading(7, "processed", job.getMetrics().getProcessed());
   }
 
+  /**
+   * Checks that a job properly updates the metrics, as well as returning {@link
+   * PipelineJobOutcome#NOTHING_TO_DO} when it has executed successfully to completion and no work
+   * was available to be done.
+   *
+   * @throws Exception If a resource fails to close or some other issue has occurred.
+   */
   @Test
   public void nothingToDo() throws Exception {
     // resource - This is a mock, not an invocation
@@ -177,6 +228,13 @@ public class AbstractRdaLoadJobTest {
     assertMeterReading(0, "processed", job.getMetrics().getProcessed());
   }
 
+  /**
+   * Checks that a job properly updates the metrics, as well as returning {@link
+   * PipelineJobOutcome#NOTHING_TO_DO} when it has executed successfully to completion and work was
+   * available to process.
+   *
+   * @throws Exception If a resource fails to close or some other issue has occurred.
+   */
   @Test
   public void workDone() throws Exception {
     // resource - This is a mock, not an invocation
@@ -203,6 +261,11 @@ public class AbstractRdaLoadJobTest {
     assertMeterReading(25_000, "processed", job.getMetrics().getProcessed());
   }
 
+  /**
+   * Tests that if multiple jobs try to execute at the same time, only one will proceed.
+   *
+   * @throws Exception If there was an issue processing the work.
+   */
   @Test
   public void enforcesOneCallAtATime() throws Exception {
     // let the source indicate that it did some work to set the first call apart from the second one
@@ -250,12 +313,18 @@ public class AbstractRdaLoadJobTest {
       //noinspection ResultOfMethodCallIgnored
       pool.awaitTermination(5, TimeUnit.SECONDS);
     }
+
     assertMeterReading(1, "calls", job.getMetrics().getCalls());
     assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
     assertMeterReading(0, "failures", job.getMetrics().getFailures());
     assertMeterReading(100, "processed", job.getMetrics().getProcessed());
   }
 
+  /**
+   * Tests that the {@link AbstractRdaLoadJob.Config} is serializable.
+   *
+   * @throws Exception If there was an issue executing the logic.
+   */
   @Test
   public void configIsSerializable() throws Exception {
     final AbstractRdaLoadJob.Config original =
@@ -275,6 +344,7 @@ public class AbstractRdaLoadJobTest {
     assertEquals(original, loaded);
   }
 
+  /** Test class used to perform the associated {@link AbstractRdaLoadJob} testing. */
   private static class TestingLoadJob extends AbstractRdaLoadJob<Integer, Integer> {
     public TestingLoadJob(
         Config config,

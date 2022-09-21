@@ -231,14 +231,31 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
     }
 
+    /**
+     * Returns the configured starting FISS sequence number (if it exists) wrapped in an {@link
+     * Optional}.
+     *
+     * @return The configured starting FISS sequence number wrapped in an {@link Optional}
+     */
     public Optional<Long> getStartingFissSeqNum() {
       return Optional.ofNullable(startingFissSeqNum);
     }
 
+    /**
+     * Returns the configured starting MCS sequence number (if it exists) wrapped in an {@link
+     * Optional}.
+     *
+     * @return The configured starting MCS sequence number wrapped in an {@link Optional}
+     */
     public Optional<Long> getStartingMcsSeqNum() {
       return Optional.ofNullable(startingMcsSeqNum);
     }
 
+    /**
+     * Returns true if the job has been configured to process the DLQ, false otherwise.
+     *
+     * @return true if the job has been configured to process the DLQ, false otherwise.
+     */
     public boolean shouldProcessDLQ() {
       return processDLQ;
     }

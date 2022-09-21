@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 
+/** Tests for the {@link RdaSourceConfig} class. */
 public class RdaSourceConfigIT {
 
   /**
@@ -51,6 +52,12 @@ public class RdaSourceConfigIT {
     assertEquals(original, loaded);
   }
 
+  /**
+   * Parameters for the {@link RdaSourceConfigIT#grpcCallLogMessages(String, boolean, Level, String,
+   * String)} test.
+   *
+   * @return The parameters for the associated test.
+   */
   public static Stream<Arguments> grpcCallLogMessages() {
     String claimsToken = Base64.getEncoder().encodeToString("{\"nexp\":0}".getBytes());
     final String NO_EXP_AUTH_TOKEN = String.format("NotAReal.%s.Token", claimsToken);
@@ -109,6 +116,17 @@ public class RdaSourceConfigIT {
             EXPIRED_AUTH_TOKEN));
   }
 
+  /**
+   * Parameterized test to check to see if the appropriate log messages are being created under
+   * various conditions.
+   *
+   * @param testName The name of the test
+   * @param expectLog Denotes if a message is expected or not in the logs.
+   * @param logLevel The {@link Level} of the log message that is expected or not.
+   * @param logMessage The log message that is either expected or not.
+   * @param token The token to use for creating the {@link RdaSourceConfig}.
+   * @throws Exception If there was an unexpected error in the tested logic.
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
   public void grpcCallLogMessages(

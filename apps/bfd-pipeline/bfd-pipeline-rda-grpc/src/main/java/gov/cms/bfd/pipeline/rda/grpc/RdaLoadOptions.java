@@ -38,11 +38,12 @@ public class RdaLoadOptions implements Serializable {
 
   public RdaLoadOptions(
       AbstractRdaLoadJob.Config jobConfig,
-      RdaSourceConfig grpcConfig,
+      RdaSourceConfig rdaSourceConfig,
       RdaServerJob.Config mockServerConfig,
       IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
-    this.grpcConfig = Preconditions.checkNotNull(grpcConfig, "grpcConfig is a required parameter");
+    this.grpcConfig =
+        Preconditions.checkNotNull(rdaSourceConfig, "rdaSourceConfig is a required parameter");
     this.mockServerConfig =
         Preconditions.checkNotNull(mockServerConfig, "mockServerConfig is a required parameter");
     this.idHasherConfig =

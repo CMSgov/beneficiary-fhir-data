@@ -32,33 +32,50 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import utils.TestUtils;
 
+/** Tests for the {@link DLQGrpcRdaSource} class. */
 @ExtendWith(MockitoExtension.class)
 public class DLQGrpcRdaSourceTest {
 
+  /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Long, Long> mockSink;
 
+  /** Mock {@link EntityManager} to use in testing. */
   @Mock private EntityManager mockManager;
 
+  /** Mock {@link ManagedChannel} to use in testing. */
   @Mock private ManagedChannel mockChannel;
 
+  /** Mock {@link RdaSourceConfig} to use in testing. */
   @Mock private RdaSourceConfig mockConfig;
 
+  /** Mock {@link GrpcStreamCaller} to use in testing. */
   @Mock private GrpcStreamCaller<Long> mockCaller;
 
+  /** Mock {@link MetricRegistry} to use in testing. */
   @Mock private MetricRegistry mockMetrics;
 
+  /** Mock {@link DLQGrpcRdaSource.DLQDao} to use in testing. */
   @Mock private DLQGrpcRdaSource.DLQDao mockDao;
 
+  /** Set up the mocks prior to each test. */
   @BeforeEach
   public void setUp() {
     doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
+  /** Testing value to use for the first FISS error sequence number */
   private static final long FISS_ERROR_ONE_SEQ = 5L;
+
+  /** Testing value to use for the second FISS error sequence number */
   private static final long FISS_ERROR_TWO_SEQ = 15L;
+
+  /** Testing value to use for the first MCS error sequence number */
   private static final long MCS_ERROR_ONE_SEQ = 7L;
+
+  /** Testing value to use for the second MCS error sequence number */
   private static final long MCS_ERROR_TWO_SEQ = 9L;
 
+  /** The FISS {@link MessageError} objects to use in testing. */
   private static final List<MessageError> FISS_MOCK_MESSAGE_ERRORS =
       List.of(
           MessageError.builder()
@@ -70,6 +87,7 @@ public class DLQGrpcRdaSourceTest {
               .sequenceNumber(FISS_ERROR_TWO_SEQ)
               .build());
 
+  /** The MCS {@link MessageError} objects to use in testing. */
   private static final List<MessageError> MCS_MOCK_MESSAGE_ERRORS =
       List.of(
           MessageError.builder()
