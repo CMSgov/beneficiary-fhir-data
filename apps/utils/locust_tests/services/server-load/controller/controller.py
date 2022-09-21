@@ -122,7 +122,7 @@ def _main():
             "--master",
             "--master-bind-port=5557",
             f"--expect-workers={initial_worker_nodes}",
-            "--client-cert-path=tmp/bfd_test_cert.pem",
+            "--client-cert-path=/tmp/bfd_test_cert.pem",
             "--enable-rebalancing",
             "--loglevel=DEBUG",
             "--csv=load",
