@@ -1,4 +1,3 @@
-
 - name: Configure server-load Controller
   hosts: localhost
 
@@ -43,7 +42,3 @@
       become: true
       tags:
         - post-ami
-
-  # TODO: Consider removing this task all together... it doesn't seem to be firing, but the solution continues to work
-  handlers:
-    - import_tasks: handlers/main.yml
