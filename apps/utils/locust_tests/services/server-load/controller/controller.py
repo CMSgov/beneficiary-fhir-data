@@ -121,13 +121,15 @@ def _main():
             f"--database-uri={db_dsn}",
             "--master",
             "--master-bind-port=5557",
-            f"--expect-workers={initial_worker_nodes}",
             "--client-cert-path=/tmp/bfd_test_cert.pem",
             "--enable-rebalancing",
             "--loglevel=DEBUG",
             "--csv=load",
             "--headless",
-        ],
+        ]
+        + [f"--expect-workers={initial_worker_nodes}"]
+        if initial_worker_nodes > 0
+        else [],
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
