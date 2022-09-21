@@ -9,7 +9,7 @@ CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
 # we'll default to 'test' and 10 bene's
 TARGET_ENV="${TARGET_ENV:-test}"
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
-SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
+SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-True}"
 
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
@@ -62,8 +62,8 @@ trap "clean_up" INT HUP
 # status denoting non-success.
 error_exit() {
   echo "Error: $*"
-  echo
   clean_up
+  echo
   exit 1
 }
 
@@ -205,43 +205,49 @@ gen_characteristics_file(){
 #----------------- GO! ------------------#
 # genearal fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
-clean_up
+#clean_up
 
 # invoke function to clone the Synthea repo and build it.
-install_synthea_from_git
+#install_synthea_from_git
 
 # invoke function to clone the BFD repo.
-install_bfd_from_git
+#install_bfd_from_git
 
 # invoke function to create a python virtual environment.
-activate_py_env
+#activate_py_env
 
 # invoke function to download proprietary Mitre mapping files.
-download_s3_mapping_files
+#download_s3_mapping_files
 
 # invoke function to download proprietary Mitre shell script files.
-download_s3_script_files
+#download_s3_script_files
 
 # invoke function to download (if available) a previous run's end_state.properties file.
-download_s3_props_file
+#download_s3_props_file
 
 # invoke function to invoke BFD .py script that verifies that:
 #  1) we have all the files necessary to perform a synthea generation run.
 #  2) executes a synthea generation run
-prepare_and_run_synthea
+#prepare_and_run_synthea
 
 # Invoke a functionn to upload the geneerated RIF files to the appropriate BFD
 # ETL pipeline S3 bucket, where the ETL process will pick them up and load data
 # into database.
-upload_synthea_results
+#upload_synthea_results
 
 # Invoke a function that executes a .py script that performs validation of data for
 # the just executed ETL pipeline load.
-do_load_validation
+if ! $SKIP_VALIDATION; then
+  do_load_validation
+fi
 
 # Invoke function that executes a .py script that generates a new synthea characteristics
 # file and uploads it to S3.
-gen_characteristics_file
+if [[ -n ${BEG_BENE_ID} && -n ${END_BENE_ID} ]]; then
+  gen_characteristics_file
+else
+  error_exit "end state BENE_ID variables unset...exiting"
+fi
 
 # return SUCCESS
 exit 0;
