@@ -82,7 +82,7 @@ def get_warm_pool_count(message: Dict[str, str]) -> int:
         raise ValueError(f'Message {message} does not contain a "Cause" key') from exc
 
     count_search = re.search(
-        "increasing the capacity from \d+ to (\d+)", scaling_cause, re.IGNORECASE
+        r"increasing the capacity from \d+ to (\d+)", scaling_cause, re.IGNORECASE
     )
     if not count_search:
         raise ValueError(f"Cause in message {message} does not indicate any scaling occurred")
