@@ -114,10 +114,11 @@ spec:
             directory: 'ops/terraform/services/server/server-load',
             tfVars: terraformVars + ['create_locust_instance': true]
           )
-        }
 
-        echo 'The load test should now be running. View the logs in realtime in Cloudwatch, under '
-             + "the /bfd/${params.ENVIRONMENT}/bfd-server-load/server-load-controller.log log group"
+          echo "The load test should now be running. View the logs in realtime in Cloudwatch, "
+             + "under the /bfd/${params.ENVIRONMENT}/bfd-server-load/server-load-controller.log log "
+             + "group"
+        }
 
         input message: 'Once the run is finished, click either Abort or Proceed to cleanup the test'
       }
