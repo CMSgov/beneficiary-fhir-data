@@ -121,6 +121,7 @@ async def async_main():
         "--csv=load",
         "--headless",
         cwd="../../../",
+        stderr=asyncio.subprocess.STDOUT,
     )
 
     # Get the SQS queue and purge it of any possible stale messages.
