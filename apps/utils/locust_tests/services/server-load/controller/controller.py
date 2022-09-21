@@ -106,6 +106,7 @@ async def async_main():
         return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
+    locust_logfile = open("loucst-master.log", "w", encoding="UTF-8")
     locust_process = await asyncio.create_subprocess_exec(
         "locust",
         "--locustfile=high_volume_suite.py",
@@ -120,8 +121,9 @@ async def async_main():
         "--loglevel=DEBUG",
         "--csv=load",
         "--headless",
-        "--logfile=locust-master.log",
         cwd="../../../",
+        stdout=locust_logfile,
+        stderr=asyncio.subprocess.STDOUT,
     )
 
     # Get the SQS queue and purge it of any possible stale messages.
@@ -222,6 +224,7 @@ async def async_main():
     # pylint: disable=protected-access
     locust_process._transport.close()
 
+    locust_logfile.close()
     print("Locust master process has been stopped")
 
 
