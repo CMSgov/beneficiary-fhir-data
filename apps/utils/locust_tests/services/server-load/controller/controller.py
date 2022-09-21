@@ -184,7 +184,7 @@ async def async_main():
                 spawn_count += 1
                 print(f"Worker node #{spawn_count} spawned successfully")
 
-                next_node_spawn = datetime.now() + timedelta(seconds=next_node_spawn)
+                next_node_spawn = datetime.now() + timedelta(seconds=node_spawn_time)
         elif stop_on_node_limit:
             print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
