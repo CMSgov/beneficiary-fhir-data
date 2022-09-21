@@ -106,7 +106,7 @@ async def async_main():
         return
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
-    locust_logfile = open("loucst-master.log", "w", encoding="UTF-8")
+    locust_logfile = open("../../../locust-master.log", "w", encoding="UTF-8")
     locust_process = await asyncio.create_subprocess_exec(
         "locust",
         "--locustfile=high_volume_suite.py",
