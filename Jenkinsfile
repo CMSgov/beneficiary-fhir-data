@@ -265,8 +265,7 @@ try {
 							bfdEnv: bfdEnv,
 							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 							awsRegion: awsRegion,
-							gitBranchName: gitBranchName,
-							awsAuth.assumeRole
+							gitBranchName: gitBranchName
 						)
 
 							if (migratorDeploymentSuccessful) {
@@ -389,8 +388,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								gitBranchName: gitBranchName,
-								awsAuth.assumeRole
+								gitBranchName: gitBranchName
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -498,8 +496,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								gitBranchName: gitBranchName,
-								awsAuth.assumeRole
+								gitBranchName: gitBranchName
 							)
 
 							if (migratorDeploymentSuccessful) {

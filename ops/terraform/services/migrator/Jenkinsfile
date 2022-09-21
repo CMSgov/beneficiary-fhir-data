@@ -41,8 +41,7 @@ boolean deployMigrator(Map args = [:]) {
         sqsQueueName: sqsQueueName,
         awsRegion: awsRegion,
         heartbeatInterval: heartbeatInterval,
-        maxMessages: 10,
-        awsAuth.assumeRole
+        maxMessages: 10
     )
 
     // re-authenticate
