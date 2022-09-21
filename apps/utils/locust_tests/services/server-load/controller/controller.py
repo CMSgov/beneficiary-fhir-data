@@ -121,6 +121,7 @@ def _main():
             f"--database-uri={db_dsn}",
             "--master",
             "--master-bind-port=5557",
+            f"--expect-workers={initial_worker_nodes}",
             "--client-cert-path=tmp/bfd_test_cert.pem",
             "--enable-rebalancing",
             "--loglevel=DEBUG",
@@ -139,11 +140,17 @@ def _main():
 
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):
+        print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
         _start_node(controller_ip=ip_address, host=test_host)
         spawn_count += 1
+        print(f"Spawned initial worker node #{spawn_count} successfully")
 
     runtime_limit_end = datetime.now() + timedelta(seconds=runtime_limit)
-    next_node_spawn = datetime.now()
+    next_node_spawn = (
+        datetime.now()
+        if spawn_count == 0
+        else datetime.now() + timedelta(seconds=node_spawn_time + 1)
+    )
     while locust_process.returncode is None:
         if datetime.now() >= runtime_limit_end:
             print(f"User provided runtime of {runtime_limit} seconds has been exceeded, stopping")
