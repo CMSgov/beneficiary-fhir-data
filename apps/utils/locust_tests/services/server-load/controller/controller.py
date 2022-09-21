@@ -115,7 +115,7 @@ async def async_main():
         f"--database-uri={db_dsn}",
         "--master",
         "--master-bind-port=5557",
-        "--client-cert-path='tmp/bfd_test_cert.pem'",
+        "--client-cert-path=tmp/bfd_test_cert.pem",
         "--enable-rebalancing",
         "--loglevel=DEBUG",
         "--csv=load",
