@@ -3,6 +3,9 @@
 // Load the sqs-specific methods
 sqs = load('ops/terraform/services/migrator/sqs.groovy')
 
+//declaring library temporarily
+@Library('bfd@jrosenfeld/BFD-2121') _
+
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
 // attempts to deploy and monitor and return `true` when the migrator signals a zero exit status
 boolean deployMigrator(Map args = [:]) {

@@ -1,5 +1,8 @@
 #!/usr/bin/env groovy
 
+//declaring library temporarily
+@Library('bfd@jrosenfeld/BFD-2121') _
+
 /** 
  * Enables Conditional daily build of a latest bfd-data-fda SNAPSHOT artifact from master 
  * using the bfd-cbc-build container image.  Downloads the external file for FDA, calculates the SHA for the file
