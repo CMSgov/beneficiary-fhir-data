@@ -140,15 +140,15 @@ async def async_main():
         spawn_count += 1
 
     runtime_limit_end = datetime.now() + timedelta(seconds=runtime_limit)
+    next_node_spawn = datetime.now()
     while locust_process.returncode is None:
-        current_time = datetime.now()
-        if current_time >= runtime_limit_end:
+        if datetime.now() >= runtime_limit_end:
             print(f"User provided runtime of {runtime_limit} seconds has been exceeded, stopping")
             break
 
         scale_or_stop_events = check_queue(
             queue=queue,
-            timeout=node_spawn_time if spawn_count > 0 else 1,
+            timeout=1,
         )
 
         if any(
@@ -173,15 +173,18 @@ async def async_main():
             break
 
         if spawn_count < max_spawned_nodes:
-            print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-            start_node(
-                lambda_client=lambda_client,
-                node_lambda_name=node_lambda_name,
-                controller_ip=ip_address,
-                host=test_host,
-            )
-            spawn_count += 1
-            print(f"Worker node #{spawn_count} spawned successfully")
+            if datetime.now() >= next_node_spawn:
+                print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
+                start_node(
+                    lambda_client=lambda_client,
+                    node_lambda_name=node_lambda_name,
+                    controller_ip=ip_address,
+                    host=test_host,
+                )
+                spawn_count += 1
+                print(f"Worker node #{spawn_count} spawned successfully")
+
+                next_node_spawn = datetime.now() + timedelta(seconds=next_node_spawn)
         elif stop_on_node_limit:
             print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
