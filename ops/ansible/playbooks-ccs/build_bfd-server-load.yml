@@ -31,20 +31,14 @@
     - name: Apply base Cloudwatch Agent Role
       import_role:
         name: cloudwatch-agent-instrumented
-      tags:
-        - pre-ami
 
     - name: Apply latest host security patches
       import_role:
         name: base_patch
-      tags:
-        - pre-ami
 
     - name: Apply server-load Role
       import_role:
         name: bfd-server-load
-      tags:
-        - pre-ami
 
     - name: Add SSH users
       import_role:
