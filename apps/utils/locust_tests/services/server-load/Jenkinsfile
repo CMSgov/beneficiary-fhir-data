@@ -115,9 +115,10 @@ spec:
             tfVars: terraformVars + ['create_locust_instance': true]
           )
 
-          echo ("The load test should now be running. View the logs in realtime in Cloudwatch, "
+          echo ("The load test should start running soon. View the logs in realtime in Cloudwatch, "
                 + "under the /bfd/${params.ENVIRONMENT}/bfd-server-load/server-load-controller.log "
-                + "log group")
+                + "log group. Note that it can take a few moments for the controller to begin "
+                + "running tests")
 
           try {
             input 'Once the run is finished, click either Abort or Proceed to cleanup the test'
@@ -134,8 +135,21 @@ spec:
     cleanup {
       script {
         if (env.NODE_NAME != null) {
-          // TODO: Send stop signal via SQS
+          awsAuth.assumeRole()
+          queueName = "bfd-${params.ENVIRONMENT}-test-server-load"
+          queueUrl = awsSqs.getQueueUrl(queueName)
+          stopMesage = writeJSON(returnText: true, json: [
+            'Stop': 'Signal'
+          ])
 
+          echo "Sending stop signal to ${queueName} to stop any remaining Locust processes..."
+          awsSqs.sendMessage(
+            sqsQueueUrl: queueUrl,
+            sqsMessage: stopMessage
+          )
+          echo "Stop signal sent successfully"
+
+          awsAuth.assumeRole()
           echo 'Tearing down controller EC2 instance...'
           baseScripts.deployTerraservice(
             env: params.ENVIRONMENT,
