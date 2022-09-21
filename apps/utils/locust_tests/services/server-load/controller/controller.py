@@ -214,13 +214,13 @@ def _main():
     print("Coasting time complete")
 
     print("Stopping Locust master process...")
-    locust_process.wait()
     try:
         locust_process.terminate()
     except ProcessLookupError as e:
         print("Could not terminate Locust master subprocess")
         print(f"Received exception {e}")
 
+    locust_process.wait()
     print("Locust master process has been stopped")
 
 
