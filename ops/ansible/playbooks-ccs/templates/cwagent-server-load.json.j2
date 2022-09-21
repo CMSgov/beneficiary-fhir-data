@@ -26,6 +26,30 @@
             "log_group_name": "/bfd/{{ env }}/bfd-server-load/server-load-controller.log",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
+          },
+          {
+            "file_path": "{{ server_load_dir }}/load_exceptions.csv",
+            "log_group_name": "/bfd/{{ env }}/bfd-server-load/load_exceptions.csv",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
+          },
+          {
+            "file_path": "{{ server_load_dir }}/load_failures.csv",
+            "log_group_name": "/bfd/{{ env }}/bfd-server-load/load_failures.csv",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
+          },
+          {
+            "file_path": "{{ server_load_dir }}/load_stats.csv",
+            "log_group_name": "/bfd/{{ env }}/bfd-server-load/load_stats.csv",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
+          },
+          {
+            "file_path": "{{ server_load_dir }}/load_stats_history.csv",
+            "log_group_name": "/bfd/{{ env }}/bfd-server-load/load_stats_history.csv",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           }
         ]
       }
