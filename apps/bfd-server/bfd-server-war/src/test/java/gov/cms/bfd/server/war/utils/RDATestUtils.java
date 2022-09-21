@@ -144,6 +144,7 @@ public class RDATestUtils {
             .currLoc1('z')
             .currLoc2("Somda")
             .medaProvId("meda12345")
+            .medaProv_6("meda12")
             .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1234.32"))
             .receivedDate(LocalDate.ofEpochDay(0))
@@ -382,6 +383,7 @@ public class RDATestUtils {
                 .idrClmHdIcn("654321")
                 .idrDtlToDate(LocalDate.ofEpochDay(208))
                 .idrProcCode("FDSAE")
+                .idrDtlPrimaryDiagCode("HF3IJIF")
                 .idrModOne("A")
                 .build(),
             RdaMcsDetail.builder()

@@ -166,6 +166,9 @@
   "item": [
     {
       "sequence": 1,
+      "diagnosisSequence": [
+        1
+      ],
       "productOrService": {
         "coding": [
           {
