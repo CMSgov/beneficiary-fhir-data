@@ -137,7 +137,7 @@ spec:
           awsAuth.assumeRole()
           queueName = "bfd-${params.ENVIRONMENT}-server-load"
           queueUrl = awsSqs.getQueueUrl(queueName)
-          stopMesage = writeJSON(returnText: true, json: [
+          stopMessage = writeJSON(returnText: true, json: [
             'Stop': 'Signal'
           ])
 
