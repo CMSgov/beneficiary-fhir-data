@@ -121,11 +121,10 @@ spec:
                 + "running tests")
 
           try {
-            input 'Once the run is finished, click either Abort or Proceed to cleanup the test'
-            echo 'Cleaning up...'
-          } catch(err) {
-            echo 'Cleaning up...'
-          }
+            timeout(time: (params.TEST_RUNTIME_LIMIT.toInteger() + 600), unit: 'SECONDS') {
+              input 'Once the run is finished, click either Abort or Proceed to cleanup the test'
+            }
+          } catch(err) {}
         }
       }
     }
