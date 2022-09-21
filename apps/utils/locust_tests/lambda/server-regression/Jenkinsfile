@@ -46,7 +46,7 @@ spec:
                     withEnv(['AWS_ACCESS_KEY_ID=','AWS_SECRET_ACCESS_KEY=','AWS_SESSION_TOKEN=']) {
                         withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'ROLE')]) {
                             script {
-                                env.SESSION_NAME = env.JOB_NAME
+                                env.SESSION_NAME = env.JOB_BASE_NAME
                                 awsCredentials = sh(
                                     returnStdout: true,
                                     script: 'aws sts assume-role --role-arn "$ROLE" \
