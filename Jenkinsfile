@@ -41,6 +41,7 @@ properties([
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
+		booleanParam(name: 'skip_migrator_deployment', description: 'When true, blow past the migrator deployment in test. Non-trunk/non-master only.', defaultValue: false),
 		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
@@ -251,10 +252,12 @@ try {
 
 			stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
-				lock(resource: 'env_test') {
-					milestone(label: 'stage_deploy_test_migration_start')
-					container('bfd-cbc-build') {
+				if (!params.skip_migrator_deployment || env.BRANCH == "master" ) {
+					lock(resource: 'env_test') {
+						milestone(label: 'stage_deploy_test_migration_start')
+						container('bfd-cbc-build') {
 
+<<<<<<< HEAD
 						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
 							amiId: amiIds.bfdMigratorAmiId,
 							bfdEnv: bfdEnv,
@@ -263,11 +266,22 @@ try {
 							gitBranchName: gitBranchName,
 							awsAuth.assumeRole
 						)
+=======
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								gitBranchName: gitBranchName,
+								this.&awsAssumeRole
+							)
+>>>>>>> 31bf54a92d7e0eb16fac5e8db83d66bdb1909e29
 
-						if (migratorDeploymentSuccessful) {
-							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
-						} else {
-							error('Migrator deployment failed')
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
+							} else {
+								error('Migrator deployment failed')
+							}
 						}
 					}
 				}

@@ -47,3 +47,34 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 5
+
+# SERVER CONFIGURATION
+/bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/server/nonsensitive/data_server_v2_enabled: true
+/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
+## SERVER+MTLS CONFIGURATION
+/bfd/${env}/server/nonsensitive/data_server_appserver_keystore: 'files/prod-sbx-bluebutton-appserver-keystore.jks'
+## NOTE: data_server_ssl_client_certificates_json stores escaped json string to be pre-processed
+##       by e.g. jq's `fromjson` method before being consumed by ansible, et al
+/bfd/${env}/server/nonsensitive/data_server_ssl_client_certificates_json: >-
+  [
+  {"alias":"client_local_test_env_dpr","certificate":"files/client_data_server_local_test_env_dpr_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_dev","certificate":"files/client_data_server_bluebutton_frontend_dev_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_test","certificate":"files/client_data_server_bluebutton_frontend_test_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_sbx","certificate":"files/client_data_server_bluebutton_frontend_sbx_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_local","certificate":"files/client_data_server_bluebutton_frontend_local_certificate.pem"},
+  {"alias":"client_bcda_dev","certificate":"files/client_data_server_bcda_dev_certificate.pem"},
+  {"alias":"client_bcda_test","certificate":"files/client_data_server_bcda_test_certificate.pem"},
+  {"alias":"client_bcda_sbx","certificate":"files/client_data_server_bcda_sbx_certificate.pem"},
+  {"alias":"client_bcda_local","certificate":"files/client_data_server_bcda_local_certificate.pem"},
+  {"alias":"client_performance_tester","certificate":"files/client_data_server_performance_tester_certificate.pem"},
+  {"alias":"client_dpc_prod_sbx","certificate":"files/client_data_server_dpc_prod_sbx_certificate.pem"},
+  {"alias":"client_dpc_test","certificate":"files/client_data_server_dpc_test_certificate.pem"},
+  {"alias":"client_dpc_dev","certificate":"files/client_data_server_dpc_dev_certificate.pem"},
+  {"alias":"client_dpc_local","certificate":"files/client_data_server_dpc_local_certificate.pem"},
+  {"alias":"client_ab2d_dev","certificate":"files/client_data_server_ab2d_dev_certificate.pem"},
+  {"alias":"client_ab2d_sbx","certificate":"files/client_data_server_ab2d_sbx_certificate.pem"},
+  {"alias":"client_ab2d_imp","certificate":"files/client_data_server_ab2d_imp_certificate.pem"}
+  ]
