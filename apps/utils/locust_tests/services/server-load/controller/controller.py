@@ -120,8 +120,8 @@ async def async_main():
         "--loglevel=DEBUG",
         "--csv=load",
         "--headless",
+        "--logfile=locust_master.log",
         cwd="../../../",
-        stderr=asyncio.subprocess.STDOUT,
     )
 
     # Get the SQS queue and purge it of any possible stale messages.
