@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 //declaring library temporarily
-@Library('bfd@jrosenfeld/BFD-2121') _
+//@Library('bfd@jrosenfeld/BFD-2121') _
 
 /** 
  * Enables Conditional daily build of a latest bfd-data-fda SNAPSHOT artifact from master 
