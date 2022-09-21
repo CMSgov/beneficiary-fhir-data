@@ -2,7 +2,7 @@
 A lambda function that starts the load test controller and then periodically launches worker nodes
 until a scaling event occurs.
 """
-import asyncio
+import functools
 import json
 import os
 import socket
@@ -28,6 +28,11 @@ from common.message_filters import (
     WARM_POOL_INSTANCE_LAUNCH_FILTER,
     filter_message_by_keys,
 )
+
+# Default all prints to flush immediately so that print statements are immediately logged to STDOUT
+# instead of waiting to flush the buffer once the Locust process is finished.
+# See https://stackoverflow.com/a/35467658
+print = functools.partial(print, flush=True)  # pylint: disable=redefined-builtin
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
@@ -124,7 +129,7 @@ def _main():
             "--headless",
         ],
         cwd="../../../",
-        stderr=asyncio.subprocess.STDOUT,
+        stderr=subprocess.STDOUT,
     )
 
     # Get the SQS queue and purge it of any possible stale messages.

@@ -4,6 +4,7 @@ This is a modified version of the `server-regression` lambda.
 """
 
 import asyncio
+import functools
 import os
 import sys
 import time
@@ -26,6 +27,11 @@ from common.message_filters import (
     WARM_POOL_INSTANCE_LAUNCH_FILTER,
     filter_message_by_keys,
 )
+
+# Default all prints to flush immediately so that print statements are immediately logged to STDOUT
+# instead of waiting to flush the buffer once the Locust process is finished.
+# See https://stackoverflow.com/a/35467658
+print = functools.partial(print, flush=True)  # pylint: disable=redefined-builtin
 
 # We assume that if this environment variable is not set we are running from this file's directory
 locust_tests_dir = os.environ.get("NODE_LOCUST_TESTS_DIR", "../../../")
