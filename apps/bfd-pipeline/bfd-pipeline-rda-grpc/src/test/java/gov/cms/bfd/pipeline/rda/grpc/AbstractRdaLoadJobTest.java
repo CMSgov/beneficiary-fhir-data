@@ -262,7 +262,8 @@ public class AbstractRdaLoadJobTest {
   }
 
   /**
-   * Tests that if multiple jobs try to execute at the same time, only one will proceed.
+   * Tests that if multiple jobs try to execute at the same time, only one will perform the work.
+   * The second job will complete immediately and return {@link PipelineJobOutcome#NOTHING_TO_DO}.
    *
    * @throws Exception If there was an issue processing the work.
    */
