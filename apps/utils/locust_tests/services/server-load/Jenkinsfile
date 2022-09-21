@@ -116,7 +116,7 @@ spec:
           )
         }
 
-        // TODO: Ask the user to indicate when the load test is finished
+        input message: 'Once the run is finished, click either Abort or Proceed to cleanup the test'
       }
     }
   }
