@@ -65,7 +65,6 @@ def _start_node(controller_ip: str, host: str):
     """
     Invokes the lambda function that runs a Locust worker node process.
     """
-    # TODO: Properly type hint 'lambda_client'
     print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
     payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
 
