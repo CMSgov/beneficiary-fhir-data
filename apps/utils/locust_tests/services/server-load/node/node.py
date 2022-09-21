@@ -23,8 +23,8 @@ from common.boto_utils import (
 )
 from common.convert_utils import to_bool
 from common.message_filters import (
-    QUEUE_STOP_SIGNAL_FILTER,
-    WARM_POOL_INSTANCE_LAUNCH_FILTER,
+    QUEUE_STOP_SIGNAL_FILTERS,
+    WARM_POOL_INSTANCE_LAUNCH_FILTERS,
     filter_message_by_keys,
 )
 
@@ -47,7 +47,6 @@ stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
-autoscaling_client = boto3.client("autoscaling", config=boto_config)
 sqs = boto3.resource("sqs", config=boto_config)
 queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
@@ -156,20 +155,16 @@ async def run_locust(event):
         )
 
         if any(
-            filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
+            filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in scale_or_stop_events
         ):
             has_received_stop = True
             print("Stop signal encountered, stopping")
             break
 
-        if (
-            stop_on_scaling
-            and any(
-                filter_message_by_keys(msg, [WARM_POOL_INSTANCE_LAUNCH_FILTER])
-                for msg in scale_or_stop_events
-            )
-            and get_warm_pool_count(autoscaling_client=autoscaling_client, asg_name=asg_name)
-            >= warm_instance_target
+        if stop_on_scaling and any(
+            filter_message_by_keys(msg, WARM_POOL_INSTANCE_LAUNCH_FILTERS)
+            and get_warm_pool_count(msg) >= warm_instance_target
+            for msg in scale_or_stop_events
         ):
             print(
                 f"Scaling target of {warm_instance_target} instances in {asg_name} has"

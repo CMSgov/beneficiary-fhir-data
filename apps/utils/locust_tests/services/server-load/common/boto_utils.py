@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any, Dict, List
 
 
@@ -62,16 +63,28 @@ def check_queue(queue, timeout: int = 1) -> List[Dict[str, str]]:
     return filtered_messages
 
 
-def get_warm_pool_count(autoscaling_client, asg_name: str) -> int:
-    """Returns the count of instances that are currently in the given ASG's warm pool
+def get_warm_pool_count(message: Dict[str, str]) -> int:
+    """Retrieves the desired warm pool instance count from a given SQS scaling message
 
     Args:
-        autoscaling_client: Boto3 "autoscaling" client
-        asg_name (str): Name of the autoscaling group to check
+        message (Dict[str, str]): An SQS message generated from a scaling event
+
+    Raises:
+        ValueError: Raised if message does not have a Cause key
+        ValueError: Raise if message's Cause does not indicate scaling
 
     Returns:
-        int: The count of instances available in the warm pool
+        int: The number of desired instances to scale to
     """
-    response = autoscaling_client.describe_warm_pool(AutoScalingGroupName=asg_name)
+    try:
+        scaling_cause = message["Cause"]
+    except KeyError as exc:
+        raise ValueError(f'Message {message} does not contain a "Cause" key') from exc
 
-    return len(response["Instances"])
+    count_search = re.search(
+        "increasing the capacity from \d+ to (\d+)", scaling_cause, re.IGNORECASE
+    )
+    if not count_search:
+        raise ValueError(f"Cause in message {message} does not indicate any scaling occurred")
+
+    return int(count_search.group(1))

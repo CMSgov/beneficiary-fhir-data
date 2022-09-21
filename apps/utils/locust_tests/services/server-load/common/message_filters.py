@@ -1,7 +1,10 @@
 from typing import Any, Dict, List
 
-QUEUE_STOP_SIGNAL_FILTER = {"Stop": "Signal"}
-WARM_POOL_INSTANCE_LAUNCH_FILTER = {"Origin": "EC2", "Destination": "WarmPool"}
+QUEUE_STOP_SIGNAL_FILTERS = [{"Stop": "Signal"}]
+WARM_POOL_INSTANCE_LAUNCH_FILTERS = [
+    {"Origin": "EC2", "Destination": "WarmPool"},
+    {"Origin": "WarmPool", "Destination": "AutoScalingGroup"},
+]
 
 
 def filter_message_by_keys(message: Dict[str, Any], message_filters: List[Dict[str, Any]]) -> bool:

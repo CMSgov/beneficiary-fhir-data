@@ -24,8 +24,8 @@ from common.boto_utils import (
 )
 from common.convert_utils import to_bool
 from common.message_filters import (
-    QUEUE_STOP_SIGNAL_FILTER,
-    WARM_POOL_INSTANCE_LAUNCH_FILTER,
+    QUEUE_STOP_SIGNAL_FILTERS,
+    WARM_POOL_INSTANCE_LAUNCH_FILTERS,
     filter_message_by_keys,
 )
 
@@ -56,7 +56,6 @@ boto_config = Config(region_name=region)
 
 ssm_client = boto3.client("ssm", config=boto_config)
 rds_client = boto3.client("rds", config=boto_config)
-autoscaling_client = boto3.client("autoscaling", config=boto_config)
 sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
@@ -162,19 +161,15 @@ def _main():
         )
 
         if any(
-            filter_message_by_keys(msg, [QUEUE_STOP_SIGNAL_FILTER]) for msg in scale_or_stop_events
+            filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in scale_or_stop_events
         ):
             print("Stop signal encountered, stopping")
             break
 
-        if (
-            stop_on_scaling
-            and any(
-                filter_message_by_keys(msg, [WARM_POOL_INSTANCE_LAUNCH_FILTER])
-                for msg in scale_or_stop_events
-            )
-            and get_warm_pool_count(autoscaling_client=autoscaling_client, asg_name=asg_name)
-            >= warm_instance_target
+        if stop_on_scaling and any(
+            filter_message_by_keys(msg, WARM_POOL_INSTANCE_LAUNCH_FILTERS)
+            and get_warm_pool_count(msg) >= warm_instance_target
+            for msg in scale_or_stop_events
         ):
             print(
                 f"Scaling target of {warm_instance_target} instances in {asg_name} has"
@@ -196,7 +191,7 @@ def _main():
 
     # Unconditionally send a stop signal to the queue to force all nodes to stop
     print("Sending stop signal to remaining nodes...")
-    queue.send_message(MessageBody=json.dumps(QUEUE_STOP_SIGNAL_FILTER))
+    queue.send_message(MessageBody=json.dumps(QUEUE_STOP_SIGNAL_FILTERS[0]))
     print("Stop signal sent successfully")
 
     if locust_process.returncode:
