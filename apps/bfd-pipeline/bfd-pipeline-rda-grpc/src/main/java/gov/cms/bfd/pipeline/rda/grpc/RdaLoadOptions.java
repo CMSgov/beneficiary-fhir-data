@@ -32,7 +32,7 @@ public class RdaLoadOptions implements Serializable {
   private static final long serialVersionUID = 7635897362336183L;
 
   private final AbstractRdaLoadJob.Config jobConfig;
-  private final RdaSourceConfig grpcConfig;
+  private final RdaSourceConfig rdaSourceConfig;
   private final RdaServerJob.Config mockServerConfig;
   private final IdHasher.Config idHasherConfig;
 
@@ -42,7 +42,7 @@ public class RdaLoadOptions implements Serializable {
       RdaServerJob.Config mockServerConfig,
       IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
-    this.grpcConfig =
+    this.rdaSourceConfig =
         Preconditions.checkNotNull(rdaSourceConfig, "rdaSourceConfig is a required parameter");
     this.mockServerConfig =
         Preconditions.checkNotNull(mockServerConfig, "mockServerConfig is a required parameter");
@@ -56,12 +56,12 @@ public class RdaLoadOptions implements Serializable {
   }
 
   /** @return settings for the gRPC service caller. */
-  public RdaSourceConfig getGrpcConfig() {
-    return grpcConfig;
+  public RdaSourceConfig getRdaSourceConfig() {
+    return rdaSourceConfig;
   }
 
   public Optional<RdaServerJob> createRdaServerJob() {
-    if (grpcConfig.getServerType() == RdaSourceConfig.ServerType.InProcess) {
+    if (rdaSourceConfig.getServerType() == RdaSourceConfig.ServerType.InProcess) {
       return Optional.of(new RdaServerJob(mockServerConfig));
     } else {
       return Optional.empty();
@@ -83,7 +83,7 @@ public class RdaLoadOptions implements Serializable {
               new DLQGrpcRdaSource<>(
                   appState.getEntityManagerFactory().createEntityManager(),
                   (seqNumber, fissClaimChange) -> seqNumber == fissClaimChange.getSeq(),
-                  grpcConfig,
+                  rdaSourceConfig,
                   new FissClaimStreamCaller(),
                   appState.getMetrics(),
                   "fiss");
@@ -96,7 +96,7 @@ public class RdaLoadOptions implements Serializable {
         preJobTaskFactory,
         () ->
             new StandardGrpcRdaSource<>(
-                grpcConfig,
+                rdaSourceConfig,
                 new FissClaimStreamCaller(),
                 appState.getMetrics(),
                 "fiss",
@@ -152,7 +152,7 @@ public class RdaLoadOptions implements Serializable {
               new DLQGrpcRdaSource<>(
                   appState.getEntityManagerFactory().createEntityManager(),
                   (seqNumber, mcsClaimChange) -> seqNumber == mcsClaimChange.getSeq(),
-                  grpcConfig,
+                  rdaSourceConfig,
                   new McsClaimStreamCaller(),
                   appState.getMetrics(),
                   "mcs");
@@ -165,7 +165,7 @@ public class RdaLoadOptions implements Serializable {
         preJobTaskFactory,
         () ->
             new StandardGrpcRdaSource<>(
-                grpcConfig,
+                rdaSourceConfig,
                 new McsClaimStreamCaller(),
                 appState.getMetrics(),
                 "mcs",
@@ -215,12 +215,13 @@ public class RdaLoadOptions implements Serializable {
       return false;
     }
     RdaLoadOptions that = (RdaLoadOptions) o;
-    return Objects.equals(jobConfig, that.jobConfig) && Objects.equals(grpcConfig, that.grpcConfig);
+    return Objects.equals(jobConfig, that.jobConfig)
+        && Objects.equals(rdaSourceConfig, that.rdaSourceConfig);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobConfig, grpcConfig);
+    return Objects.hash(jobConfig, rdaSourceConfig);
   }
 
   /**
