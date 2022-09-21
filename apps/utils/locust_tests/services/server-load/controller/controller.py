@@ -120,7 +120,7 @@ async def async_main():
         "--loglevel=DEBUG",
         "--csv=load",
         "--headless",
-        "--logfile=locust_master.log",
+        "--logfile=locust-master.log",
         cwd="../../../",
     )
 

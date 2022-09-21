@@ -26,6 +26,12 @@
             "log_group_name": "/bfd/{{ env }}/bfd-server-load/server-load-controller.log",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
+          },
+          {
+            "file_path": "{{ server_load_dir }}/locust-master.log",
+            "log_group_name": "/bfd/{{ env }}/bfd-server-load/locust-master.log",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           }
         ]
       }
