@@ -24,9 +24,13 @@ locals {
   container_image_tag_node = split(":", coalesce(var.container_image_tag_node_override, nonsensitive(data.aws_ssm_parameter.container_image_tag_node.value)))[1]
   container_image_uri_node = "${data.aws_ecr_repository.ecr_node.repository_url}:${local.container_image_tag_node}"
 
-  lambda_timeout_seconds = 360
-  kms_key_arn            = data.aws_kms_key.cmk.arn
-  kms_key_id             = data.aws_kms_key.cmk.key_id
+  # We set the lambda timeout to the smallest value between the maximum timeout of 15 minutes (900
+  # seconds) or the user-provided runtime limit plus an additional 15 seconds to allow the node
+  # to cleanup properly
+  lambda_timeout_seconds = min(900, var.test_runtime_limit + 15)
+
+  kms_key_arn = data.aws_kms_key.cmk.arn
+  kms_key_id  = data.aws_kms_key.cmk.key_id
 
   ami_id                     = data.aws_ami.main.id
   instance_type              = "m5.large"
