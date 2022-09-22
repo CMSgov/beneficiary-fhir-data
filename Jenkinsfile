@@ -260,13 +260,13 @@ try {
 						milestone(label: 'stage_deploy_test_migration_start')
 						container('bfd-cbc-build') {
 
-						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-							amiId: amiIds.bfdMigratorAmiId,
-							bfdEnv: bfdEnv,
-							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-							awsRegion: awsRegion,
-							gitBranchName: gitBranchName
-						)
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								gitBranchName: gitBranchName
+							)
 
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
