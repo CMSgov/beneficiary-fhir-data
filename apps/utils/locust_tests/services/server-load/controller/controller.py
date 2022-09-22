@@ -1,6 +1,7 @@
 """
-A lambda function that starts the load test controller and then periodically launches worker nodes
-until a scaling event occurs.
+This module acts as the single controller in the server-load service architecture. The controller
+is responsible for managing the Locust master process and orchestrating the many Locust workers
+(Lambdas).
 """
 import functools
 import json
