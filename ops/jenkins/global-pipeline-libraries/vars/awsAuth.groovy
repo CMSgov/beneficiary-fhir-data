@@ -20,7 +20,7 @@
  */
 void assumeRole(Map args = [:]) {
 	sessionDurationSeconds = args.sessionDurationSeconds ?: 3600
-	// default `sessionName` as `env.JOB_BASE_NAME` is vaguely sanitized to replace non-alphanumeric
+	// default `sessionName` as `env.JOB_NAME` is vaguely sanitized to replace non-alphanumeric
 	// chars with '-' AND deduplicates consecutive '-'. This is somewhat more restrictive than the
 	// regex used in the STS API for RoleSessionName, i.e. `/[\w+=,.@:\/-]*/`
 	// character limit to 64 to comply with maximum length for AssumeRole
