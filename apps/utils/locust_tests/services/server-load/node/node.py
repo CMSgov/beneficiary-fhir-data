@@ -67,14 +67,10 @@ def handler(event, context):
     Handles execution of a worker node.
     """
 
-    print("Preparing to run async worker...")
     asyncio.run(run_locust(event))
-    print("Async worker terminated.")
 
 
 async def run_locust(event):
-    # We then attempt to extract an InvokeEvent instance from
-    # the JSON body
     try:
         invoke_event = InvokeEvent(**event)
     except TypeError as ex:
@@ -147,7 +143,7 @@ async def run_locust(event):
 
     print(f"Started locust worker with pid {process.pid}")
 
-    has_received_stop = False
+    has_scaling_target_hit = False
     while process.returncode is None:
         scale_or_stop_events = check_queue(
             queue=queue,
@@ -157,7 +153,6 @@ async def run_locust(event):
         if any(
             filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in scale_or_stop_events
         ):
-            has_received_stop = True
             print("Stop signal encountered, stopping")
             break
 
@@ -166,6 +161,7 @@ async def run_locust(event):
             and get_warm_pool_count(msg) >= warm_instance_target
             for msg in scale_or_stop_events
         ):
+            has_scaling_target_hit = True
             print(
                 f"Scaling target of {warm_instance_target} instances in {asg_name} has"
                 " been hit, stopping"
@@ -178,8 +174,8 @@ async def run_locust(event):
         print("Locust worker process ended without intervention, stopping...")
         return
 
-    if not has_received_stop and coasting_time > 0:
-        print(f"Coasting for {coasting_time} seconds before stopping...")
+    if has_scaling_target_hit and coasting_time > 0:
+        print(f"Coasting after scaling event for {coasting_time} seconds before stopping...")
         time.sleep(int(coasting_time))
         print("Coasting time complete")
 

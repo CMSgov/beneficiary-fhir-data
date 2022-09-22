@@ -145,6 +145,7 @@ def _main():
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
     has_received_stop = False
+    has_scaling_target_hit = False
     runtime_limit_end = datetime.now() + timedelta(seconds=runtime_limit)
     next_node_spawn = (
         datetime.now()
@@ -173,6 +174,7 @@ def _main():
             and get_warm_pool_count(msg) >= warm_instance_target
             for msg in scale_or_stop_events
         ):
+            has_scaling_target_hit = True
             print(
                 f"Scaling target of {warm_instance_target} instances in {asg_name} has"
                 " been hit, stopping"
@@ -191,8 +193,8 @@ def _main():
             print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
 
-    if not has_received_stop and coasting_time > 0:
-        print(f"Coasting for {coasting_time} seconds...")
+    if has_scaling_target_hit and coasting_time > 0:
+        print(f"Coasting after scaling event for {coasting_time} seconds...")
         time.sleep(coasting_time)
         print("Coasting time complete")
 
