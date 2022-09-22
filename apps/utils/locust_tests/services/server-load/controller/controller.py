@@ -144,6 +144,7 @@ def _main():
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
+    has_received_stop = False
     runtime_limit_end = datetime.now() + timedelta(seconds=runtime_limit)
     next_node_spawn = (
         datetime.now()
@@ -163,6 +164,7 @@ def _main():
         if any(
             filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in scale_or_stop_events
         ):
+            has_received_stop = True
             print("Stop signal encountered, stopping")
             break
 
@@ -189,6 +191,11 @@ def _main():
             print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
 
+    if not has_received_stop and coasting_time > 0:
+        print(f"Coasting for {coasting_time} seconds...")
+        time.sleep(coasting_time)
+        print("Coasting time complete")
+
     # Unconditionally send a stop signal to the queue to force all nodes to stop
     print("Sending stop signal to remaining nodes...")
     queue.send_message(MessageBody=json.dumps(QUEUE_STOP_SIGNAL_FILTERS[0]))
@@ -200,11 +207,10 @@ def _main():
         print("Locust master process ended without intervention, stopping...")
         return
 
-    # Sleep for the coasting time plus an additional 10 seconds before forcing the master
-    # process to end.
-    print(f"Coasting for {coasting_time + 10} seconds before stopping...")
-    time.sleep(int(coasting_time) + 10)
-    print("Coasting time complete")
+    if not has_received_stop:
+        print("Waiting an addiitional 10 seconds to allow worker nodes to submit statistics...")
+        time.sleep(10)
+        print("10 second wait period has elapsed")
 
     print("Stopping Locust master process...")
     try:
