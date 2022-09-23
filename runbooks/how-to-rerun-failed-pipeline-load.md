@@ -2,7 +2,7 @@
 
 Follow this runbook to successfully reload data via BFD pipeline after a failed run.
 
-Note: If there are pending deployments or db migrations, make sure those those finish before running these steps.
+Note: If there are pending deployments or db migrations, make sure those finish before running these steps.
 
 1. SSH into the AWS ETL EC2 instance for a given environment ```bfd-<test/prod/prod-sbx>-etl``` with ```ssh -i <local ssh key> <aws username>@<EC2 IP Address>```. The entry point is the specific AWS user home directory.
 
