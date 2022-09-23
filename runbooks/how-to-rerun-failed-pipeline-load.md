@@ -8,13 +8,13 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 
 2. Confirm the pipeline has failed to load data. 
 
-    - In AWS S3, the RIF folder containing the data for reloading will still be in 'Incoming' with the file S3 file structure as:
+    - In AWS S3, the RIF folder (i.e. ```<yyyy>-<MM>-<dd>T<HH>:<mm>:<ss>Z```) containing the data for reloading will still be in 'Incoming' with the file S3 file structure as:
         ```
         bfd-<test/prod/prod-sbx>-etl-<aws-account-id>
         │
         └───Incoming/
         │   │
-        │   └───<yyyy>-<MM>-<dd>T<HH>:<mm>:<ss>Z/
+        │   └───2022-09-23T13:44:55Z/
         │   │    │   *_manifest.xml
         │   │    │   *.rif
         │   │    │   ...
@@ -47,7 +47,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
         │   
         └───Done/
         │   │   
-        │   └───<yyyy>-<MM>-<dd>T<HH>:<mm>:<ss>Z/
+        │   └───2022-09-23T13:44:55Z/
         │   │   │   *_manifest.xml
         │   │   │   *.rif
         │   │   │  ...
