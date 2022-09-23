@@ -3,7 +3,7 @@ set -eo pipefail
 
 # global variables
 PROGNAME=${0##*/}
-CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
+CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
 # we'll default to 'test' and 10 bene's
@@ -22,8 +22,8 @@ mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}
 
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /tmp for now
-TARGET_SYNTHEA_DIR=/tmp/synthea
-TARGET_BFD_DIR=/tmp/bfd
+TARGET_SYNTHEA_DIR=/opt/dev/synthea
+TARGET_BFD_DIR=/opt/dev/bfd
 
 # we'll need to keep track of 'begin' and 'end' bene_id values necessary to perform
 # various Synthea generation tasks.
@@ -56,7 +56,7 @@ clean_up() {
   fi
 }
 # we'll trap system interrupts and perform cleanup.
-trap "clean_up" INT HUP
+#trap "clean_up" INT HUP
 
 # utility function that can be invoked to terminate (exit) the script with a system
 # status denoting non-success.
@@ -205,35 +205,35 @@ gen_characteristics_file(){
 #----------------- GO! ------------------#
 # genearal fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
-#clean_up
+clean_up
 
 # invoke function to clone the Synthea repo and build it.
-#install_synthea_from_git
+install_synthea_from_git
 
 # invoke function to clone the BFD repo.
-#install_bfd_from_git
+install_bfd_from_git
 
 # invoke function to create a python virtual environment.
-#activate_py_env
+activate_py_env
 
 # invoke function to download proprietary Mitre mapping files.
-#download_s3_mapping_files
+download_s3_mapping_files
 
 # invoke function to download proprietary Mitre shell script files.
-#download_s3_script_files
+download_s3_script_files
 
 # invoke function to download (if available) a previous run's end_state.properties file.
-#download_s3_props_file
+download_s3_props_file
 
 # invoke function to invoke BFD .py script that verifies that:
 #  1) we have all the files necessary to perform a synthea generation run.
 #  2) executes a synthea generation run
-#prepare_and_run_synthea
+prepare_and_run_synthea
 
 # Invoke a functionn to upload the geneerated RIF files to the appropriate BFD
 # ETL pipeline S3 bucket, where the ETL process will pick them up and load data
 # into database.
-#upload_synthea_results
+upload_synthea_results
 
 # Invoke a function that executes a .py script that performs validation of data for
 # the just executed ETL pipeline load.
