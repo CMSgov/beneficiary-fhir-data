@@ -8,13 +8,9 @@ exec > >(
     done
 )
 
-ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
-
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" . # TODO: remove vault.password in BFD-1786
-
-# TODO: Injection of ansible variables in here does works, but with more modern interpreter/ansible versions, this would needless indirection. This will be addressed after BFD-1890.
+# TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/migrator/" \
@@ -30,16 +26,17 @@ aws ssm get-parameters-by-path \
 
 cat <<EOF > extra_vars.json
 {
-    "db_migrator_db_url": "${db_migrator_db_url}",
-    "env": "${env}",
-    "migrator_monitor_enabled": ${migrator_monitor_enabled},
-    "migrator_monitor_heartbeat_interval_seconds": ${migrator_monitor_heartbeat_interval_seconds}
+  "db_migrator_db_url": "${db_migrator_db_url}",
+  "env": "${env}",
+  "migrator_monitor_enabled": ${migrator_monitor_enabled},
+  "migrator_monitor_heartbeat_interval_seconds": ${migrator_monitor_heartbeat_interval_seconds},
+  "db_migrator_tmp_dir": "{{ db_migrator_dir }}/tmp"
 }
 EOF
 
-ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-db-migrator.yml
+mkdir -p logs
 
-rm vault.password # TODO: remove vault.password in BFD-1786
+ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-db-migrator.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

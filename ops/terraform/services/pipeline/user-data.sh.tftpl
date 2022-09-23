@@ -8,12 +8,9 @@ exec > >(
     done
 )
 
-ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
-
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" . # TODO: pipeline will no longer rely on this with the changes described here, however the bfd ansible configuration encodes an ansible-vault password, and expects it.
-
+# TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/pipeline/" \
@@ -40,9 +37,9 @@ cat <<EOF > extra_vars.json
 }
 EOF
 
-ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
+mkdir -p logs
 
-rm vault.password # TODO: pipeline will no longer rely on this with the changes described here, however the bfd ansible configuration encodes an ansible-vault password, and expects it.
+ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

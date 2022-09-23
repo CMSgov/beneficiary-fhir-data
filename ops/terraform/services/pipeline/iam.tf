@@ -134,7 +134,6 @@ EOF
     aws_iam_policy.aws_cli.arn,
     aws_iam_policy.bfd_pipeline_rif.arn,
     aws_iam_policy.ssm.arn,
-    "arn:aws:iam::${local.account_id}:policy/bfd-ansible-vault-pw-ro-s3", # TODO: pipeline will no longer rely on this with the changes described here, however the bfd ansible configuration encodes an ansible-vault password, and expects it.
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess",
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
     "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
