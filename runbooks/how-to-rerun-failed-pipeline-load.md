@@ -14,7 +14,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
         │
         └───Incoming/
         │   │
-        │   └───<year>-<month>-<day>T<hh>:<mm>:<ss>Z/
+        │   └───<yyyy>-<MM>-<dd>T<HH>:<mm>:<ss>Z/
         │   │    │   *_manifest.xml
         │   │    │   *.rif
         │   │    │   ...
@@ -47,7 +47,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
         │   
         └───Done/
         │   │   
-        │   └───<year>-<month>-<day>T<hh>:<mm>:<ss>Z/
+        │   └───<yyyy>-<MM>-<dd>T<HH>:<mm>:<ss>Z/
         │   │   │   *_manifest.xml
         │   │   │   *.rif
         │   │   │  ...
