@@ -6,7 +6,9 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 
 1. SSH into the AWS ETL EC2 instance for a given environment ```bfd-<test/prod/prod-sbx>-etl``` with ```ssh -i <local ssh key> <aws username>@<EC2 IP Address>```. The entry point is the specific AWS user home directory.
 
-2. Confirm the pipeline has failed to load data. In AWS S3, the RIF folder containing the data for reloading will still be in 'Incoming' with the file S3 file structure as:
+2. Confirm the pipeline has failed to load data. 
+
+    - In AWS S3, the RIF folder containing the data for reloading will still be in 'Incoming' with the file S3 file structure as:
         ```
         bfd-<test/prod/prod-sbx>-etl-<aws-account-id>
         │
