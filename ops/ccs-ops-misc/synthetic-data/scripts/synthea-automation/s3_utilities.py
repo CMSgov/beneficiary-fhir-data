@@ -16,13 +16,6 @@ mitre_synthea_bucket = "bfd-synthea"
 # generic FQN for persisting end_state.properties
 end_state_props_file = "end_state/end_state.properties"
 
-# BFD S3 root buckets for 3 environments
-bfd_etl_s3_buckets = dict([
-    ('prod', 'bfd-prod-etl-577373831711'),
-    ('prod-sbx', 'bfd-prod-sbx-etl-577373831711'), 
-    ('test', 'bfd-test-synthea-etl-577373831711')
-])
-
 # list of proprietary Mitre mapping files that will be downloaded;
 # needed to generate synthetic data.
 code_map_files = [
@@ -53,7 +46,6 @@ code_script_files = [
 def download_synthea_files(target_dir):
     for fn in code_map_files:
         output_fn = target_dir + fn
-        print(f"file_path: {output_fn}")
         try:
             s3_client.download_file(mitre_synthea_bucket, fn, output_fn)
         except botocore.exceptions.ClientError as e:
@@ -72,7 +64,6 @@ def download_synthea_files(target_dir):
 def download_synthea_scripts(target_dir):
     for fn in code_script_files:
         output_fn = target_dir + fn
-        print(f"download_synthea_scripts, file_path: {output_fn}")
         try:
             s3_client.download_file(mitre_synthea_bucket, fn, output_fn)
             os.chmod(os.fspath(output_fn), 0o744)
@@ -109,9 +100,8 @@ def download_end_state_props_file(target_dir):
 # to the Mitre BFD S3 bucket. 
 # Raises a python exception if failure to upload file.
 def upload_end_state_props_file(file_name):
-    print(f"upload_end_state_props_file, file_name: {file_name}")
     # Mitre FQN for storing end_state.properties file
-    mitre_synthea_end_state = "/end_state/end_state.properties"
+    mitre_synthea_end_state = f"/end_state/{file_name}"
     try:
         s3_client.upload_file(file_name, mitre_synthea_bucket, mitre_synthea_end_state)
     except botocore.exceptions.ClientError as e:
@@ -189,7 +179,7 @@ def upload_rif_files(synthea_output_dir, s3_bucket, s3_folder):
 # Raises a python exception if failure to upload file.
 def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
     local_fn = synthea_output_dir + "manifest.xml"
-    remote_fn = s3_folder + "/" + "manifest.xml"
+    remote_fn = s3_folder + "/manifest.xml"
     
     if os.path.exists(local_fn):
         print(f"upload_manifest_file, local_fn: {local_fn}, bucket: {s3_bucket}, remote_fn: {remote_fn}")
@@ -212,20 +202,20 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
 # Param: s3_folder : BFD S3 Bucket/folder that the .CSV files will be uploaded to.
 #
 # Raises a python exception if failure to upload file.
-def path_exists(s3_bucket, s3_resource, key_name, loop_cnt, max_tries):
+def path_exists(s3_resource, s3_bucket, key_name, loop_cnt, max_tries):
     """Check to see if an object exists on S3"""
     cnt = loop_cnt
     print(f"S3 waiting for Bucket: {s3_bucket}, Key: {key_name}")
 
-   try:
-      waiter = s3_client.get_waiter('object_exists')
-      waiter.wait(Bucket=s3_bucket, Key=key_name,
+    try:
+        waiter = s3_client.get_waiter('object_exists')
+        waiter.wait(Bucket=s3_bucket, Key=key_name,
                   WaiterConfig={'Delay': 2, 'MaxAttempts': 5})
-      print(f"Object exists: ' + bucket_name +'/'+key_name)
-   except ClientError as e:
-      raise Exception( "boto3 client error in path_exists: " + e.__str__())
-   except Exception as e:
-      raise Exception( "Unexpected error in path_exists: " + e.__str__())
+        print(f"Object exists: {s3_bucket}/{key_name}")
+    except ClientError as e:
+        raise Exception( "boto3 client error in path_exists: " + e.__str__())
+    except Exception as e:
+        raise Exception( "Unexpected error in path_exists: " + e.__str__())
 
 #    while loop_cnt < max_tries:
 #        try:
@@ -247,17 +237,16 @@ def wait_for_manifest_done(s3_bucket, s3_folder):
 
     try:
       waiter = s3_client.get_waiter('object_exists')
-      waiter.wait(Bucket=s3_bucket, Key = key_name,
-                  WaiterConfig={
-                     'Delay': 2, 'MaxAttempts': 5})
+      waiter.wait(Bucket=s3_bucket, Key=key_name,
+                  WaiterConfig={'Delay': 2, 'MaxAttempts': 5})
       print('Object exists: ' + bucket_name +'/'+key_name)
-   except ClientError as e:
+    except ClientError as e:
       raise Exception( "boto3 client error in path_exists: " + e.__str__())
-   except Exception as e:
+    except Exception as e:
       raise Exception( "Unexpected error in path_exists: " + e.__str__())
 
 
-    loop_cnt = path_exists(s3_resource, key_name, loop_cnt, num_mins_3_days)
+    loop_cnt = path_exists(s3_resource, s3_bucket, key_name, loop_cnt, num_mins_3_days)
     if loop_cnt >= num_mins_3_days:
         raise Exception(f"failed to detect S3 folder using key: {key_name}")
     else:
@@ -266,16 +255,14 @@ def wait_for_manifest_done(s3_bucket, s3_folder):
         if loop_cnt >= num_mins_3_days:
             raise Exception(f"failed to detect manifest.xml using key: {key_name}")
 
-def upload_synthea_results(synthea_output_dir, env):
+def upload_synthea_results(synthea_output_dir, s3_bucket):
     manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
     if len(manifest_ts) < 1:
         raise "Failed to extract timestamp from manifest"
-    s3_bucket = bfd_etl_s3_buckets[env]
     if len(s3_bucket) < 1:
-        raise "Invalid env parameter value"
+        raise "Failed to provide BFD S3 bucket for ETL files"
     s3_folder = s3_bucket + "/Incoming/" + manifest_ts
     print(f"uploading RIF files to bucket: {s3_bucket}, folder: {s3_folder}");
-    upload_rif_files(synthea_output_dir, s3_bucket, s3_folder)
     upload_rif_files(synthea_output_dir, s3_bucket, s3_folder)
     upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder)
 
@@ -283,23 +270,28 @@ def upload_synthea_results(synthea_output_dir, env):
     wait_for_manifest_done(s3_bucket, s3_folder)
 
 def main(args):
-    env = args[0] if len(args) > 0 else "test"
-    target = args[1] if len(args) > 1 else "./"
-    if not target.endswith('/'):
+    if len(args) < 3:
+        raise Exception("ERROR, failed to provide required parameters!")
+
+    target_dir = args[0]
+    op = args[1]
+    bfd_s3_bucket = args[2] if len(args) > 2 else ''
+
+    if not target_dir.endswith('/'):
         target = target + "/"
-    op = args[2] if len(args) > 2 else "download_file"
-    print(f"env: {env}, op: {op}, target_dir: {target}")
+
+    print(f"op: {op}, target_dir: {target_dir}, bfd_s3_bucket: {bfd_s3_bucket}")
     match op:
         case "download_file":
-            download_synthea_files(target)
+            download_synthea_files(target_dir)
         case "download_script":
-            download_synthea_scripts(target)
+            download_synthea_scripts(target_dir)
         case "download_prop":
-            download_end_state_props_file(target)
+            download_end_state_props_file(target_dir)
         case "upload_prop":
-            upload_end_state_props_file(target)
+            upload_end_state_props_file(target_dir)
         case "upload_synthea_results":
-            upload_synthea_results(target, env)
+            upload_synthea_results(target_dir, bfd_s3_bucket)
         case _:
             return 1
 

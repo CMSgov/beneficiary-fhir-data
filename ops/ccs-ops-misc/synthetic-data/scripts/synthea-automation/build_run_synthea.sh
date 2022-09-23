@@ -6,10 +6,11 @@ PROGNAME=${0##*/}
 CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
-# we'll default to 'test' and 10 bene's
+# we'll default to 'test' and 10 bene's for now
 TARGET_ENV="${TARGET_ENV:-test}"
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
 SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-True}"
+S3_BUCKET="${BFD_S3_BUCKET:-bfd-test-synthea-etl-577373831711}"
 
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
@@ -31,7 +32,6 @@ BEG_BENE_ID=
 END_BENE_ID=
 
 # thse are sort of immtuable, aren't they?
-BFD_END_STATE_BUCKET="bfd-test-synthea-etl-577373831711"
 BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
