@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.waiters.WaiterParameters;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -75,20 +74,8 @@ public final class DataSetMoveTask implements Callable<Void> {
 
       // Move the item from where it started into the corresponding output, assume Incoming first
       sourceKey =
-          String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
-      targetKey =
-          String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
-      boolean manifestInIncoming =
-          s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), sourceKey);
-
-      if (!manifestInIncoming) {
-        sourceKey =
-            String.format(
-                "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, s3KeySuffixToMove);
-        targetKey =
-            String.format(
-                "%s/%s", CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS, s3KeySuffixToMove);
-      }
+          String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
+      targetKey = String.format("%s/%s", manifest.getManifestKeyDoneLocation(), s3KeySuffixToMove);
 
       /*
        * Before copying, grab the metadata of the source object to ensure
@@ -129,14 +116,7 @@ public final class DataSetMoveTask implements Callable<Void> {
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
       String sourceKey =
-          String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
-      boolean manifestInIncoming =
-          s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), sourceKey);
-      if (!manifestInIncoming) {
-        sourceKey =
-            String.format(
-                "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, s3KeySuffixToMove);
-      }
+          String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
       DeleteObjectRequest deleteObjectRequest =
           new DeleteObjectRequest(options.getS3BucketName(), sourceKey);
       s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);

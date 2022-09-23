@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
@@ -60,25 +59,14 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
   @Override
   public ManifestEntryDownloadResult call() throws Exception {
     try {
-
-      String location =
-          String.format(
-              "%s/%s/%s",
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              manifestEntry.getParentManifest().getTimestampText(),
-              manifestEntry.getName());
-
-      // Check that our manifest is in Incoming, else check synthetic/incoming
-      if (!s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), location)) {
-        location =
-            String.format(
-                "%s/%s/%s",
-                CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-                manifestEntry.getParentManifest().getTimestampText(),
-                manifestEntry.getName());
-      }
-
-      GetObjectRequest objectRequest = new GetObjectRequest(options.getS3BucketName(), location);
+      GetObjectRequest objectRequest =
+          new GetObjectRequest(
+              options.getS3BucketName(),
+              String.format(
+                  "%s/%s/%s",
+                  manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
+                  manifestEntry.getParentManifest().getTimestampText(),
+                  manifestEntry.getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
       Timer.Context downloadTimer =

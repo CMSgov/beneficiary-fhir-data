@@ -206,8 +206,7 @@ public final class DataSetQueue {
 
       for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
         String key = objectSummary.getKey();
-        if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(key).matches()
-            || CcwRifLoadJob.REGEX_PENDING_MANIFEST_SYNTHETIC.matcher(key).matches()) {
+        if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(key).matches()) {
           /*
            * We've got an object that *looks like* it might be a
            * manifest file. But we need to parse the key to ensure
@@ -217,8 +216,7 @@ public final class DataSetQueue {
           if (manifestId != null) {
             manifestIds.add(manifestId);
           }
-        } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()
-            || CcwRifLoadJob.REGEX_COMPLETED_MANIFEST_SYNTHETIC.matcher(key).matches()) {
+        } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
           completedManifestsCount++;
         }
       }
@@ -255,7 +253,19 @@ public final class DataSetQueue {
     try (S3Object manifestObject =
         s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
 
-      return DataSetManifestFactory.newInstance().parseManifest(manifestObject.getObjectContent());
+      DataSetManifest manifest =
+          DataSetManifestFactory.newInstance().parseManifest(manifestObject.getObjectContent());
+      // Setup the manifest incoming/outgoing location
+      if (manifestToProcessKey.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
+        manifest.setManifestKeyIncomingLocation(
+            CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS);
+        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
+      } else {
+        manifest.setManifestKeyIncomingLocation(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
+        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
+      }
+
+      return manifest;
 
     } catch (AmazonServiceException e) {
       /*

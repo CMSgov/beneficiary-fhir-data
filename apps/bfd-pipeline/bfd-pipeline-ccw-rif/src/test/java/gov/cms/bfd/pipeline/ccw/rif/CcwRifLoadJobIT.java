@@ -76,8 +76,7 @@ public final class CcwRifLoadJobIT {
   @Test
   public void singleDataSetTest() throws Exception {
     validateLoadAtLocations(
-        List.of(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS),
-        List.of(CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS));
+        CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
   }
 
   /**
@@ -89,8 +88,8 @@ public final class CcwRifLoadJobIT {
   @Test
   public void singleSyntheticDataSetTest() throws Exception {
     validateLoadAtLocations(
-        List.of(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS),
-        List.of(CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS));
+        CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
   }
 
   /**
@@ -121,12 +120,16 @@ public final class CcwRifLoadJobIT {
               Instant.now(),
               0,
               false,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
       DataSetManifest manifestSynthetic =
           new DataSetManifest(
               Instant.now().minus(1, ChronoUnit.DAYS),
               0,
               true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER),
               new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT));
 
@@ -260,6 +263,8 @@ public final class CcwRifLoadJobIT {
               Instant.now().minus(1L, ChronoUnit.HOURS),
               0,
               true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
       s3Client.putObject(
@@ -273,6 +278,8 @@ public final class CcwRifLoadJobIT {
               manifestA.getTimestampText(),
               1,
               true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("pde.rif", RifFileType.PDE));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
       s3Client.putObject(
@@ -283,7 +290,12 @@ public final class CcwRifLoadJobIT {
               StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
       DataSetManifest manifestC =
           new DataSetManifest(
-              Instant.now(), 0, true, new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+              Instant.now(),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC));
       s3Client.putObject(
           DataSetTestUtilities.createPutRequest(
@@ -361,6 +373,8 @@ public final class CcwRifLoadJobIT {
               Instant.now(),
               0,
               true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
@@ -439,6 +453,8 @@ public final class CcwRifLoadJobIT {
               Instant.now().plus(3, ChronoUnit.DAYS),
               0,
               true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
@@ -492,15 +508,15 @@ public final class CcwRifLoadJobIT {
   }
 
   /**
-   * Validate load given the input locations to load files and output locations to look for the
-   * files once they're loaded.
+   * Validate load given the input location to load files and output location to look for the files
+   * once they're loaded.
    *
-   * @param inputLocations the input locations (bucket keys) where files should be placed
-   * @param outputLocations the output locations (bucket keys) where files are expected to be moved
-   *     after processing
+   * @param inputLocation the input location (bucket key) where files should be placed initially
+   * @param expectedOutputLocation the expected output location (bucket key) where files are
+   *     expected to be moved after processing
    * @throws Exception the exception
    */
-  private void validateLoadAtLocations(List<String> inputLocations, List<String> outputLocations)
+  private void validateLoadAtLocations(String inputLocation, String expectedOutputLocation)
       throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
@@ -521,20 +537,20 @@ public final class CcwRifLoadJobIT {
               Instant.now(),
               0,
               false,
+              inputLocation,
+              expectedOutputLocation,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
       // Add files to each location the test wants them in
-      for (String location : inputLocations) {
-        putSampleFilesInTestBucket(
-            s3Client,
-            bucket,
-            location,
-            manifest,
-            List.of(
-                StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
-                StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
-      }
+      putSampleFilesInTestBucket(
+          s3Client,
+          bucket,
+          inputLocation,
+          manifest,
+          List.of(
+              StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
+              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -558,19 +574,16 @@ public final class CcwRifLoadJobIT {
       assertEquals(0, listener.getErrorEvents().size());
 
       // Verify that the data set was renamed.
-      for (String location : inputLocations) {
-        DataSetTestUtilities.waitForBucketObjectCount(
-            s3Client, bucket, location, 0, java.time.Duration.ofSeconds(10));
-      }
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
 
-      for (String location : outputLocations) {
-        DataSetTestUtilities.waitForBucketObjectCount(
-            s3Client,
-            bucket,
-            location,
-            1 + manifest.getEntries().size(),
-            java.time.Duration.ofSeconds(10));
-      }
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          expectedOutputLocation,
+          1 + manifest.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+
     } finally {
       if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }

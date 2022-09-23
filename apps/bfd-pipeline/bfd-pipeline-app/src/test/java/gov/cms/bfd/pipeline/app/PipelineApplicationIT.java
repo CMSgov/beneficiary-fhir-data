@@ -201,6 +201,8 @@ public final class PipelineApplicationIT {
               Instant.now(),
               0,
               false,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));

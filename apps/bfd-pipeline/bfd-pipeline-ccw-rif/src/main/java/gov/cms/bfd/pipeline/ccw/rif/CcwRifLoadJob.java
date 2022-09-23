@@ -113,30 +113,24 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
    * DataSetManifestId} fields.
    */
   public static final Pattern REGEX_PENDING_MANIFEST =
-      Pattern.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
-
-  /**
-   * A regex for {@link DataSetManifest} keys in S3 for synthetic files. Provides capturing groups
-   * for the {@link DataSetManifestId} fields.
-   */
-  public static final Pattern REGEX_PENDING_MANIFEST_SYNTHETIC =
       Pattern.compile(
-          "^" + S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
+          "^("
+              + S3_PREFIX_PENDING_DATA_SETS
+              + "|"
+              + S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+              + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
   /**
    * A regex that can be used for checking for a manifest in the {@link
    * #S3_PREFIX_COMPLETED_DATA_SETS} location.
    */
   public static final Pattern REGEX_COMPLETED_MANIFEST =
-      Pattern.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
-
-  /**
-   * A regex that can be used for checking for a manifest in the {@link
-   * #S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS} location.
-   */
-  public static final Pattern REGEX_COMPLETED_MANIFEST_SYNTHETIC =
       Pattern.compile(
-          "^" + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
+          "^("
+              + S3_PREFIX_COMPLETED_DATA_SETS
+              + "|"
+              + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+              + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
   private final MetricRegistry appMetrics;
   private final ExtractionOptions options;
@@ -318,32 +312,9 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
      * option #1.
      */
 
-    String prefix =
-        String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
-    String syntheticPrefix =
-        String.format("%s/%s/", S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS, manifest.getTimestampText());
-
-    String sampleItemLocation = manifest.getEntries().get(0).getName();
-
-    // Do a check and see if the manifest's first file is in the synthetic incoming folder or the
-    // Incoming folder
-    if (!s3TaskManager
-            .getS3Client()
-            .doesObjectExist(options.getS3BucketName(), prefix + sampleItemLocation)
-        && !s3TaskManager
-            .getS3Client()
-            .doesObjectExist(options.getS3BucketName(), syntheticPrefix + sampleItemLocation)) {
-      // If the file isn't anywhere, let's save some time and bail early; we're still downloading
-      // files
-      return false;
-    } else if (!s3TaskManager
-        .getS3Client()
-        .doesObjectExist(options.getS3BucketName(), prefix + sampleItemLocation)) {
-      prefix = syntheticPrefix;
-    }
-
-    // Value must be final for lambda expression using them to be happy
-    final String dataSetKeyPrefix = prefix;
+    String dataSetKeyPrefix =
+        String.format(
+            "%s/%s/", manifest.getManifestKeyIncomingLocation(), manifest.getTimestampText());
 
     ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
     s3BucketListRequest.setBucketName(options.getS3BucketName());
