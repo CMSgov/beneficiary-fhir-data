@@ -54,6 +54,10 @@ Note: If there are pending deployments or db migrations, make sure those finish 
         │   │ 
         │   └───...
         ```
+7. With the data successfully loaded, in the EC2 instance, make sure to disable idempotent mode for the pipeline again:
+    - Open the file ```../../../bluebutton-data-pipeline/bfd-pipeline-service.sh```.
+    - Change the line ```export IDEMPOTENCY_REQUIRED='true'``` to ```export IDEMPOTENCY_REQUIRED='false'```.
+    - Save and close the file.
 
 
 
