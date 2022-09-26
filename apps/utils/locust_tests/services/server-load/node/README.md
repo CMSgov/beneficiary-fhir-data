@@ -1,36 +1,36 @@
-```mermaid
-sequenceDiagram
-    autonumber
-    actor u as User
-    participant csh as controller.sh
-    Note over csh: controller.sh runs main<br>locust process
-    participant cpy as controller.py
-    participant n as node.py &lambda;
-    participant sqs as SQS
-    participant sns as SNS
-    participant asg as ASG
-    u -->> csh: Starts controller.sh
-    activate csh
-    u -->> cpy: Starts controller.py
-    activate cpy
-    loop Until autoscaling notification received via SNS subscription<br>or maximum number of nodes reached
-        par
-            cpy -->> n: Invoke worker node &lambda;
-            cpy -->> sqs: Check for scaling event
-        and
-            n --> asg: Run load tests against ASG via port 443
-            n --> csh: Report load test statistics via port 5557
-            n -->> sqs: Check for scaling event
-        end
-    end
-    alt When scaling event occurs
-        asg -->> sns: Scaling event notification
-        sns -->> sqs: Forward scaling event notification
-        par
-            cpy -->> cpy: Stop spawning nodes
-            n -->> n: Stop running locust worker
-        end
-        Note over csh: Locust worker death causes<br>termination of controller
-    end
-    deactivate csh
-    deactivate cpy
+# `bfd-server-load` Node
+
+## Overview
+
+The files within this directory comprise of the Python source code executed by each node Lambda, the
+Docker files used to build the node Lambda Docker image, and the Jenkinsfile and related build
+script for the `bfd-server-load-build` Jenkins pipeline.
+
+## Building the `bfd-mgmt-server-load-node` Docker Image
+
+### Building the Image Locally
+
+As the `Dockerfile` for this image is not at the root of this `locust_tests` project, we need to
+ensure the [Docker build
+context](https://docs.docker.com/engine/reference/commandline/build/#description) is properly set to
+the root. This can be achieved in two ways:
+
+#### Option 1 -- Specifying the `services/server-load/node/node.Dockerfile` from the Root
+
+This option is _preferred_ to option 2, as it is generally better form to run `docker build` from
+the directory of the build context itself.
+
+Ensure you current working directory is `/apps/utils/locust_tests` and run:
+
+```bash
+docker build -f services/server-load/node/node.Dockerfile -t "<your-tag>" --platform linux/amd64 .
+```
+
+#### Option 2 -- Specifying the Context Relative to This Directory
+
+This option simply tells Docker that the build context is the grandparent directory, via
+`../../../`. Ensure your current working directory is `services/server-load/node` and run:
+
+```bash
+docker build -t "<your-tag>" --platform linux/amd64 ../../../.
+```
