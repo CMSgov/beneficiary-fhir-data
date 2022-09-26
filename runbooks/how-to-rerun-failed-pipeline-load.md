@@ -36,7 +36,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 
 6. Confirm restarting the pipleine and loading data in idempotent mode is succesful: 
     - The output of running ```sudo systemctl status bfd-pipeline``` should say "active(running) since …".
-    - As data is loading check the logs by running ```tail ../../../bluebutton-data-pipeline/bluebutton-data-pipeline.log -f```. 
+    - As data is loading check the logs by running ```tail /bluebutton-data-pipeline/bluebutton-data-pipeline.log -f```. 
     - When data is loaded properly, in AWS S3, the RIF folder containing the data for reloading will have automatically moved from 'Incoming' to 'Done' with the file S3 file structure as:
         ```
         bfd-<test/prod/prod-sbx>-etl-<aws-account-id>
