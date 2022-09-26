@@ -59,7 +59,7 @@ clean_up() {
   fi
 }
 # we'll trap system interrupts and perform cleanup.
-#trap "clean_up" INT HUP
+trap "clean_up" INT HUP
 
 # utility function that can be invoked to terminate (exit) the script with a system
 # status denoting non-success.
