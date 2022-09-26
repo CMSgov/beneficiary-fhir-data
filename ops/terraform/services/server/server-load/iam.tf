@@ -161,29 +161,6 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
-# NOTE: autoscaling:DescribeWarmPool does not support resource-specific permissions, nor does it
-# support any useful conditions. This is why all resources are permitted to be described 
-resource "aws_iam_policy" "asg" {
-  name        = "bfd-${local.env}-${local.service}-asg"
-  description = "Permissions to describe the warm pool of the ${local.env} environment auto-scaling group"
-  policy      = <<-EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "autoscaling:DescribeWarmPool"
-            ],
-            "Resource": [
-                "*"
-            ]
-        }
-    ]
-}
-EOF
-}
-
 resource "aws_iam_role" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda"
   path        = "/"
@@ -211,8 +188,7 @@ resource "aws_iam_role" "lambda" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.logs.arn,
-    aws_iam_policy.sqs.arn,
-    aws_iam_policy.asg.arn
+    aws_iam_policy.sqs.arn
   ]
 }
 
@@ -244,8 +220,7 @@ resource "aws_iam_role" "ec2" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.sqs.arn,
-    aws_iam_policy.lambda.arn,
-    aws_iam_policy.asg.arn
+    aws_iam_policy.lambda.arn
   ]
 }
 
