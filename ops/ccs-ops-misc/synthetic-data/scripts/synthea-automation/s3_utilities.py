@@ -280,7 +280,7 @@ def main(args):
     if not target_dir.endswith('/'):
         target_dir = target_dir + "/"
 
-    print(f"op: {op}, target_dir: {target_dir}, bfd_s3_bucket: {bfd_s3_bucket}")
+    print(f"op: {op}, target_dir: {target_dir}")
     match op:
         case "download_file":
             download_synthea_files(target_dir)
@@ -293,6 +293,7 @@ def main(args):
         case "upload_synthea_results":
             upload_synthea_results(target_dir, bfd_s3_bucket)
         case _:
+            print(f"unrecognized S3 operation: {op}...exiting with error status!")
             return 1
 
 

@@ -22,7 +22,7 @@ mvn_dep_ver="2.10"
 mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}:list"
 
 
-# the root will probably be passed in by Jenkins (maybe /opt?)...using /tmp for now
+# the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
 TARGET_SYNTHEA_DIR=/opt/dev/synthea
 TARGET_BFD_DIR=/opt/dev/bfd
 
@@ -30,12 +30,15 @@ TARGET_BFD_DIR=/opt/dev/bfd
 # various Synthea generation tasks.
 BEG_BENE_ID=
 END_BENE_ID=
+BFD_CHARACTERISTICS=
 
 # thse are sort of immtuable, aren't they?
 BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
+# BFD characteristics file
+BFD_CHARACTERISTICS_FILE_NAME="characteristics.csv"
 
 # assorted variables used by the script.
 BFD_SYNTHEA_AUTO_LOCATION="${TARGET_BFD_DIR}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
@@ -194,10 +197,18 @@ do_load_validation(){
 # 2: bene id end (exclusive, taken from new output end state properties)
 # 3: file system location to write the characteristics file
 # 4: which environment to check, should be a single value from the list of [test prd-sbx prod]
+#
+# script will check the number of lines written to the characteristics.csv file; if only the header row (row #1)
+# then we'll exit out.
 gen_characteristics_file(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
   python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
+  # check the generated output file; must have more than just the header line
+  line_cnt=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l`
+  if [[ "$line_cnt" -gt 1 ]]; then
+    BFD_CHARACTERISTICS="${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
+  fi
   deactivate
 }
 
@@ -241,15 +252,19 @@ if ! $SKIP_VALIDATION; then
   do_load_validation
 fi
 
-# Invoke a functionn to upload the new end_state.properties file.
-upload_s3_props_file
-
 # Invoke function that executes a .py script that generates a new synthea characteristics
 # file and uploads it to S3.
 if [[ -n ${BEG_BENE_ID} && -n ${END_BENE_ID} ]]; then
   gen_characteristics_file
 else
   error_exit "end state BENE_ID variables unset...exiting"
+fi
+
+# Invoke a function to upload the new end_state.properties file and the new characteristics.csv file
+if [[ -n ${BEG_BENE_ID} && -n ${BFD_CHARACTERISTICS} ]]; then
+  upload_s3_props_file
+else
+  error_exit "end state BEG_BENE_ID and BFD_CHARACTERISTICS variables unset...exiting"
 fi
 
 # return SUCCESS
