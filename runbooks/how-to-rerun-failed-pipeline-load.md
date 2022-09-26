@@ -61,7 +61,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
     - Change the line ```export IDEMPOTENCY_REQUIRED='true'``` to ```export IDEMPOTENCY_REQUIRED='false'```.
     - Save and close the file.
 
-8. Restart the pipeline ```sudo systemctl start bfd-pipeline```.
+8. Restart the pipeline ```sudo systemctl restart bfd-pipeline```.
 
 
 
