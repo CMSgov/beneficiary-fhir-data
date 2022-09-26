@@ -5,8 +5,6 @@
     - name: Apply server-load Role
       import_role:
         name: bfd-server-load
-      tags:
-        - post-ami
       vars:
         # Variables listed are applied from user-data.sh inside the server-load terraform module
         #server_load_sqs_queue_name:
@@ -25,7 +23,6 @@
         #server_load_stop_on_scaling:
         #server_load_stop_on_node_limit:
 
-    # TODO: Consider moving the CloudWatch agent configuration elsewhere, potentially in the application role or a cloudwatch-specific role. This is a little awkward.
     - name: Build CloudWatch unified agent configuration
       template:
         src: cwagent-server-load.json.j2

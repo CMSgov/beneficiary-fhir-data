@@ -6,9 +6,8 @@
   hosts: all
   become: true
   remote_user: ec2-user
-  gather_facts: yes
+  gather_facts: no
   vars:
-    ansible_ssh_pipelining: no
     server_load_dir: /opt/server-load
     # TODO: Consider removing `env` when SSH/sudoer users have been resolved in SSM BFD-2068
     env: "test"
