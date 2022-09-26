@@ -88,7 +88,7 @@ def download_synthea_scripts(target_dir):
 # redudnant data. 
 #
 # Param: target_dir : unix filesystem directory where downloaded S3 end_state.properties
-# file is written to.
+#        file is written to.
 # Raises a python exception if failure to download file.
 def download_end_state_props_file(target_dir):
     base_name = os.path.basename(end_state_props_file)
@@ -105,14 +105,13 @@ def download_end_state_props_file(target_dir):
 # run, to the Mitre BFD S3 bucket. This file will be downloaded from the S3 bucket
 # as a prerequisite to the next synthea generation run. 
 #
-# Param: file_name : unix filesystem filename of the end_state.properties file to upload
-# to the Mitre BFD S3 bucket. 
+# Param: synthea_output_dir : unix filesystem directory where synthea writes the end_state.properties to.
 # Raises a python exception if failure to upload file.
-def upload_end_state_props_file(file_name):
+def upload_end_state_props_file(synthea_output_dir):
     # Mitre FQN for storing end_state.properties file
-    mitre_synthea_end_state = f"/end_state/{file_name}"
     try:
-        s3_client.upload_file(file_name, mitre_synthea_bucket, mitre_synthea_end_state)
+        file_name = synthea_output_dir + "/end_state.properties"
+        s3_client.upload_file(file_name, mitre_synthea_bucket, end_state_props_file)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")

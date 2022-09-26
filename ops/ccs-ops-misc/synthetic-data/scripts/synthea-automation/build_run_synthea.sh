@@ -140,7 +140,7 @@ upload_s3_props_file(){
   echo "upload end_state.properties file from S3"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES}" "upload_prop"
+  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_prop"
   # extract the bene_id_start variable from the newly created end_state.properties file.
   # It will be used in a later function/operation.
   END_BENE_ID=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//'`
