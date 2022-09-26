@@ -118,6 +118,22 @@ def upload_end_state_props_file(synthea_output_dir):
         else:
             raise
 
+# Function to upload a newly generated characteristics.csv file from the synthea
+# validation, to the Mitre BFD S3 bucket. 
+#
+# Param: bfd_output_dir : unix filesystem directory where BFD .py script writes the characteristics.csv to.
+# Raises a python exception if failure to upload file.
+def upload_characteristics_file_file(bfd_output_dir):
+    try:
+        file_name = bfd_output_dir + "/characteristics.csv"
+        s3_filename = "end_state/characteristics.csv"
+        s3_client.upload_file(file_name, mitre_synthea_bucket, s3_filename)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+        else:
+            raise
+
 # Function to extract a Unix timestamp from the manifest.xml file that is
 # generated during the synthea generation run. This file is a key component to
 # BFD's ETL processing of RIF files; this script needs the timestamp to create an
@@ -290,6 +306,8 @@ def main(args):
             download_end_state_props_file(target_dir)
         case "upload_prop":
             upload_end_state_props_file(target_dir)
+        case "upload_characteristics":
+            upload_characteristics_file(target_dir)
         case "upload_synthea_results":
             upload_synthea_results(target_dir, bfd_s3_bucket)
         case _:

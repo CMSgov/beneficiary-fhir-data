@@ -137,20 +137,6 @@ download_s3_props_file(){
   deactivate
 }
 
-# Function to upload the new end state properties file to an S3 bucket; it also extracts
-# the newest bene_id_start variable for use in a later function/operation.
-upload_s3_props_file(){
-  echo "upload end_state.properties file from S3"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
-  source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_prop"
-  # extract the bene_id_start variable from the newly created end_state.properties file.
-  # It will be used in a later function/operation.
-  END_BENE_ID=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//'`
-  echo "END_BENE_ID=${END_BENE_ID}"
-  deactivate
-}
-
 # Args:
 # 1: end state properties file path
 # 2: location of synthea git repo
@@ -191,6 +177,18 @@ do_load_validation(){
   deactivate
 }
 
+# Function to extract the bene_id from the latest synthea run that can be used to verify
+# that the load completed successfully
+extract_end_bene_id(){
+  echo "extract_end_bene_id"
+  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  source .venv/bin/activate
+  # extract the bene_id_start variable from the newly created end_state.properties file.
+  # It will be used in a later function/operation.
+  END_BENE_ID=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//'`
+  echo "END_BENE_ID=${END_BENE_ID}"
+  deactivate
+}
 
 # Args:
 # 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
@@ -205,10 +203,33 @@ gen_characteristics_file(){
   source .venv/bin/activate
   python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
   # check the generated output file; must have more than just the header line
-  line_cnt=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l`
+  line_cnt=`cat ${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l`
   if [[ "$line_cnt" -gt 1 ]]; then
-    BFD_CHARACTERISTICS="${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
+    BFD_CHARACTERISTICS="${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
+    echo "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} successfully discovered"
+  else
+    echo "failed to read meaningful data from: ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
   fi
+  deactivate
+}
+
+# Function to upload the new end state properties file to an S3 bucket; it also extracts
+# the newest bene_id_start variable for use in a later function/operation.
+upload_characteristics_file_to_s3(){
+  echo "upload ${BFD_CHARACTERISTICS_FILE_NAME} file to S3"
+  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  source .venv/bin/activate
+  python3 ./s3_utilities.py "${BFD_SYNTHEA_AUTO_LOCATION}" "upload_characteristics"
+  deactivate
+}
+
+# Function to upload the new end state properties file to an S3 bucket; it also extracts
+# the newest bene_id_start variable for use in a later function/operation.
+upload_props_file_to_s3(){
+  echo "upload end_state.properties file to S3"
+  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  source .venv/bin/activate
+  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_prop"
   deactivate
 }
 
@@ -252,6 +273,9 @@ if ! $SKIP_VALIDATION; then
   do_load_validation
 fi
 
+# Invoke a functionn to determine the last bene_id for the just completed synthea generationxs
+extract_end_bene_id
+
 # Invoke function that executes a .py script that generates a new synthea characteristics
 # file and uploads it to S3.
 if [[ -n ${BEG_BENE_ID} && -n ${END_BENE_ID} ]]; then
@@ -262,9 +286,9 @@ fi
 
 # Invoke a function to upload the new end_state.properties file and the new characteristics.csv file
 if [[ -n ${BEG_BENE_ID} && -n ${BFD_CHARACTERISTICS} ]]; then
-  upload_s3_props_file
+  upload_props_file_to_s3
 else
-  error_exit "end state BEG_BENE_ID and BFD_CHARACTERISTICS variables unset...exiting"
+  error_exit "end state BEG_BENE_ID or BFD_CHARACTERISTICS variables unset...exiting"
 fi
 
 # return SUCCESS
