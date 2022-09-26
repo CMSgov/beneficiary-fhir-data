@@ -25,7 +25,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
         │    │   
         │    └───...
         ```
-        The AWS S3 bucket name in the file structure above can be found within the ETL EC2 instance by running ```grep S3_BUCKET_NAME /bluebutton-data-pipeline/bfd-pipeline-service.sh | cut -f2 -d=```
+        The AWS S3 bucket name in the file structure above can be found within the ETL EC2 instance by running ```grep S3_BUCKET_NAME /bluebutton-data-pipeline/bfd-pipeline-service.sh | cut -f2 -d=```.
 
 3. Check if the pipeline is running with ```sudo systemctl status bfd-pipeline```, and if so, stop it with ```sudo systemctl stop bfd-pipeline```.
 
