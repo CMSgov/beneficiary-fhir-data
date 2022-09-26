@@ -1,10 +1,14 @@
+"""This module contains constants and utilty functions related to filtering SQS messages shared by
+both the node and controller modules"""
 from typing import Any, Dict, List
 
 QUEUE_STOP_SIGNAL_FILTERS = [{"Stop": "Signal"}]
+"""Filters that indicate an operator posted an immediate stop signal"""
 WARM_POOL_INSTANCE_LAUNCH_FILTERS = [
     {"Origin": "EC2", "Destination": "WarmPool"},
     {"Origin": "WarmPool", "Destination": "AutoScalingGroup"},
 ]
+"""Filters that indicate a scaling event against the target ASG has occurred"""
 
 
 def filter_message_by_keys(message: Dict[str, Any], message_filters: List[Dict[str, Any]]) -> bool:

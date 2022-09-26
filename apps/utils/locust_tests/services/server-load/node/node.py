@@ -1,7 +1,5 @@
-"""
-A lambda function that starts a worker node which coordinates tests between a swarm of worker nodes.
-This is a modified version of the `server-regression` lambda.
-"""
+"""A lambda function that coordinates running a Locuster worker node in a swarm of many Locust
+workers all communicating with a single Locust master, the "controller"."""
 
 import asyncio
 import functools
@@ -67,10 +65,10 @@ def handler(event, context):
     Handles execution of a worker node.
     """
 
-    asyncio.run(run_locust(event))
+    asyncio.run(_async_handler(event))
 
 
-async def run_locust(event):
+async def _async_handler(event):
     try:
         invoke_event = InvokeEvent(**event)
     except TypeError as ex:

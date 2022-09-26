@@ -1,9 +1,25 @@
+"""This module contains various utility functions shared between the node and controller that are
+related to boto3"""
 import json
 import re
 from typing import Any, Dict, List
 
 
 def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
+    """Retrieves the value of the given SSM parameter optionally decrypting it if specified
+
+    Args:
+        ssm_client: An instance of boto3's SSM client
+        name (str): The name of the SSM parameter to retrieve
+        with_decrypt (bool, optional): Whether or not to decrypt the retrieved SSM paraemeter.
+        Defaults to False.
+
+    Raises:
+        ValueError: Raised if the parameter was not found
+
+    Returns:
+        str: The value of the SSM parameter
+    """
     # TODO: Properly type hint 'ssm_client'
     response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
 
@@ -14,6 +30,18 @@ def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
 
 
 def get_rds_db_uri(rds_client, cluster_id: str) -> str:
+    """Retrieves the RDS database URI for a given cluster ID's reader endpoint
+
+    Args:
+        rds_client: An instance of boto3's RDS client
+        cluster_id (str): The cluster ID to get the reader endpoint URI from
+
+    Raises:
+        ValueError: Raised if no reader endpoint was found for the given cluster ID
+
+    Returns:
+        str: The URI for the cluster's reader endpoint
+    """
     # TODO: Properly type hint 'rds_client'
     response = rds_client.describe_db_clusters(DBClusterIdentifier=cluster_id)
 
