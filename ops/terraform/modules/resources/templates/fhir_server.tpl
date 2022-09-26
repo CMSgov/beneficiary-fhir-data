@@ -10,8 +10,11 @@ exec > >(
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
+# TODO: references to the ansible-vault vault.password file are still necessary for bfd-server until
+#       we develop an alternative for the vault-encrypted JKS file
 aws s3 --quiet cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 
+# TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/server/" \
@@ -28,8 +31,6 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
 
-# The extra_vars.json file from the previous build step contains a few incorrect values
-# and needs to get trimmed down to the following
 cat <<EOF > extra_vars.json
 {
   "data_server_appserver_jvmargs": "-Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer",
