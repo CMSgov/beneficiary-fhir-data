@@ -205,7 +205,7 @@ gen_characteristics_file(){
 #----------------- GO! ------------------#
 # genearal fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
-#clean_up
+clean_up
 
 # invoke function to clone the Synthea repo and build it.
 install_synthea_from_git

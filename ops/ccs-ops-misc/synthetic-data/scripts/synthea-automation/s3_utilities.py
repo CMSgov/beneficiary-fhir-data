@@ -17,11 +17,11 @@ s3_wait_delay = 30
 # willing to wait for up to 3 days:
 #   1440 mins / day * 3 days == 4320
 #   multiply times 2 since we'll try every 30 secs
-#s3_wait_max_retries = 8640
-s3_wait_max_retries = 10
+s3_wait_max_retries = 8640
 
 # Mitre S3 bucket
 mitre_synthea_bucket = "bfd-synthea"
+
 # generic FQN for persisting end_state.properties
 end_state_props_file = "end_state/end_state.properties"
 
@@ -40,7 +40,7 @@ code_map_files = [
     'external_codes.csv'
     ]
 
-# Mitre shell script files that will be downloaded; used to generated synthetic data.
+# Mitre shell script files that need to be downloaded; used to generated synthetic data.
 code_script_files = [
     'national_bfd.sh',
     'national_bfd_v2.sh'
@@ -166,7 +166,7 @@ def upload_rif_files(synthea_output_dir, s3_bucket, s3_folder):
             try:
                 local_fn = synthea_output_dir + fn
                 remote_fn = s3_folder + "/" + fn
-                print(f"{local_fn}, remote_fn: {remote_fn}")
+                print(f"{local_fn} ==> S3: {s3_bucket} : {remote_fn}")
                 s3_client.upload_file(local_fn, s3_bucket, remote_fn)
             except botocore.exceptions.ClientError as e:
                 if e.response['Error']['Code'] == "404":
@@ -190,7 +190,7 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
     remote_fn = s3_folder + "/manifest.xml"
     
     if os.path.exists(local_fn):
-        print(f"upload_manifest_file, {local_fn}, bucket: {s3_bucket}, remote_fn: {remote_fn}")
+        print(f"S3 upload: {local_fn}, bucket: {s3_bucket}, remote_fn: {remote_fn}")
         try:
             s3_client.upload_file(local_fn, s3_bucket, remote_fn)
         except botocore.exceptions.ClientError as e:
@@ -213,27 +213,16 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
 #
 # Raises a python exception if failure to upload file.
 def wait_for_manifest_done(s3_bucket, s3_folder):
-    print(f"wait_for_manifest_done, S3 bucket: {s3_bucket}, S3 folder: {s3_folder}")
+    key_name = s3_folder + "/manifest.xml"
     s3_resource = boto3.resource('s3', config=boto_config)
-    key_name = s3_folder + "/"
 
     # use AWS Waiter object to check for the mainfest.xml showing up in the appropriate
-    # /Done folder; this is done in two parts:
-    #   1) check for the presence of the /Done/yyyy-MM-dd'T'hh:mm:ssZ folder
-    #   2) once the have confirmation that the FQN folder exists, then we can wait for the
-    #      actual manifest.xml file to show up, which signifies that the ETL has successfully
-    #      finished processing.
+    # /Done folder.
     try:
         waiter = s3_client.get_waiter('object_exists')
-        waiter.wait(Bucket=s3_bucket, Key=key_name,
-                    WaiterConfig={'Delay': s3_wait_delay, 'MaxAttempts': s3_wait_max_retries})
-        print('Object exists: ' + bucket_name + '/' + key_name)
-
-        # if we've fallen through to here, then the folder exists, so wait for manifest.xml
-        key_name = s3_folder + "/manifest.xml"
+        print(f"S3 waiting for manifest: {s3_bucket} : {key_name}")
         waiter.wait(Bucket=s3_bucket, Key=key_name,
                 WaiterConfig={'Delay': s3_wait_delay, 'MaxAttempts': s3_wait_max_retries})
-
     except ClientError as e:
         raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
     except WaiterError as e:
@@ -242,20 +231,45 @@ def wait_for_manifest_done(s3_bucket, s3_folder):
     except Exception as e:
         raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
 
+# Function to upload synthea generated .CSV files generated in the BFD synthea
+# output directory to the BFD ETL S3 bucket folder. 
+#
+# Param: synthea_output_dir : unix filesystem directory that the synthea generation
+#        process  wrote its output files.
+# Param: s3_folder : BFD S3 Bucket/folder that the .CSV files will be uploaded to.
+#
+# Raises a python exception if failure to upload file.
 def upload_synthea_results(synthea_output_dir, s3_bucket):
     manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
+    # need to extract the timestamp from the manifest.xml file. If we don't get
+    # it, then raise an excetion (and exit).
     if len(manifest_ts) < 1:
         raise "Failed to extract timestamp from manifest"
     if len(s3_bucket) < 1:
         raise "Failed to provide BFD S3 bucket for ETL files"
-    s3_folder = s3_bucket + "/Incoming/" + manifest_ts
-    print(f"uploading RIF files to bucket: {s3_bucket}, folder: {s3_folder}");
+
+    # using the timestamp just derived, upload all RIF (.csv) files to the S3 bucket/folder
+    s3_folder = "Incoming/" + manifest_ts
+    print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}");
     upload_rif_files(synthea_output_dir, s3_bucket, s3_folder)
+
+    # now upload the manifest.xml file to the S3 bucket/folder; this is done last after
+    # all RIF files are uploaded because once the ETL process sees an /Incoming manifest
+    # it will begin processing.
     upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder)
-    #s3_folder = s3_bucket + "/Done/" + manifest_ts
-    s3_folder = "/Done/" + manifest_ts
+
+    # now we wait....the ETL pipeline will move processed files to the Done/ folder; when it
+    # has completed processing all RIF (.csv) files, it then moves the manifest.xml file to
+    # the Done/ folder signifying job job completion so we'll wait for that to happen.
+    s3_folder = "Done/" + manifest_ts
     wait_for_manifest_done(s3_bucket, s3_folder)
 
+# Function to handle S3 processing for the synthea generation shell script.
+# Requires at least 2 arguments from the invocation stack:
+# args[0] : the output directory where the BFD synthea process writes RIF files.
+# args[1] : an operation identifier to perform.
+# args[2] : environment-driven (prod, test, or prod-sbx) AWS S3 bucket; only used
+#           when uploading synthea-generated result files to appropriate S3 bucket.
 def main(args):
     if len(args) < 2:
         raise Exception("ERROR, failed to provide required parameters!")
