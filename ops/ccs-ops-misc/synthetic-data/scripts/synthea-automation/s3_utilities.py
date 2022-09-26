@@ -5,11 +5,20 @@ import botocore
 import fnmatch
 import time
 from botocore.config import Config
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, WaiterError
 from pathlib import Path
 
 boto_config = Config(region_name="us-east-1")
 s3_client = boto3.client('s3', config=boto_config)
+
+# wait config for checking presence of manifest.xml in /Done folder
+# check very 30 seconds
+s3_wait_delay = 30
+# willing to wait for up to 3 days:
+#   1440 mins / day * 3 days == 4320
+#   multiply times 2 since we'll try every 30 secs
+#s3_wait_max_retries = 8640
+s3_wait_max_retries = 10
 
 # Mitre S3 bucket
 mitre_synthea_bucket = "bfd-synthea"
@@ -148,7 +157,6 @@ def extract_timestamp_from_manifest(synthea_output_dir) -> str:
 #
 # Raises a python exception if failure to upload file.
 def upload_rif_files(synthea_output_dir, s3_bucket, s3_folder):
-    print(f"upload_rif_files, bucket: {s3_bucket}, remote_fn: {s3_folder}")
     for fn in os.listdir(synthea_output_dir):
         ## ignore the export_summary.csv
         if fn.startswith("export_summary"):
@@ -158,7 +166,7 @@ def upload_rif_files(synthea_output_dir, s3_bucket, s3_folder):
             try:
                 local_fn = synthea_output_dir + fn
                 remote_fn = s3_folder + "/" + fn
-                print(f"upload_rif_files, local_fn: {local_fn}, remote_fn: {remote_fn}")
+                print(f"{local_fn}, remote_fn: {remote_fn}")
                 s3_client.upload_file(local_fn, s3_bucket, remote_fn)
             except botocore.exceptions.ClientError as e:
                 if e.response['Error']['Code'] == "404":
@@ -182,7 +190,7 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
     remote_fn = s3_folder + "/manifest.xml"
     
     if os.path.exists(local_fn):
-        print(f"upload_manifest_file, local_fn: {local_fn}, bucket: {s3_bucket}, remote_fn: {remote_fn}")
+        print(f"upload_manifest_file, {local_fn}, bucket: {s3_bucket}, remote_fn: {remote_fn}")
         try:
             s3_client.upload_file(local_fn, s3_bucket, remote_fn)
         except botocore.exceptions.ClientError as e:
@@ -190,6 +198,8 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
                 print("The object does not exist.")
             else:
                 raise
+    else:
+        raise f"Failed to find file: {local_fn}"
 
 # Function to upload synthea generated manifest.xml file to the BFD ETL /Incoming
 # S3 bucket folder. This occurs after successfully uploading beneficiary and
@@ -202,58 +212,35 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
 # Param: s3_folder : BFD S3 Bucket/folder that the .CSV files will be uploaded to.
 #
 # Raises a python exception if failure to upload file.
-def path_exists(s3_resource, s3_bucket, key_name, loop_cnt, max_tries):
-    """Check to see if an object exists on S3"""
-    cnt = loop_cnt
-    print(f"S3 waiting for Bucket: {s3_bucket}, Key: {key_name}")
-
-    try:
-        waiter = s3_client.get_waiter('object_exists')
-        waiter.wait(Bucket=s3_bucket, Key=key_name,
-                  WaiterConfig={'Delay': 2, 'MaxAttempts': 5})
-        print(f"Object exists: {s3_bucket}/{key_name}")
-    except ClientError as e:
-        raise Exception( "boto3 client error in path_exists: " + e.__str__())
-    except Exception as e:
-        raise Exception( "Unexpected error in path_exists: " + e.__str__())
-
-#    while loop_cnt < max_tries:
-#        try:
-#            s3_resource.ObjectSummary(bucket_name=bfd_synthea_bucket, key=key_name).load()
-#            return cnt
-#        except botocore.exceptions.ClientError as e:
-#            if e.response['Error']['Code'] == '404':
-#                cnt += 1
-#                continue
-#            else:
-#                raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
-    
 def wait_for_manifest_done(s3_bucket, s3_folder):
     print(f"wait_for_manifest_done, S3 bucket: {s3_bucket}, S3 folder: {s3_folder}")
     s3_resource = boto3.resource('s3', config=boto_config)
-    num_mins_3_days = 4320
-    loop_cnt = 0
     key_name = s3_folder + "/"
 
+    # use AWS Waiter object to check for the mainfest.xml showing up in the appropriate
+    # /Done folder; this is done in two parts:
+    #   1) check for the presence of the /Done/yyyy-MM-dd'T'hh:mm:ssZ folder
+    #   2) once the have confirmation that the FQN folder exists, then we can wait for the
+    #      actual manifest.xml file to show up, which signifies that the ETL has successfully
+    #      finished processing.
     try:
-      waiter = s3_client.get_waiter('object_exists')
-      waiter.wait(Bucket=s3_bucket, Key=key_name,
-                  WaiterConfig={'Delay': 2, 'MaxAttempts': 5})
-      print('Object exists: ' + bucket_name +'/'+key_name)
-    except ClientError as e:
-      raise Exception( "boto3 client error in path_exists: " + e.__str__())
-    except Exception as e:
-      raise Exception( "Unexpected error in path_exists: " + e.__str__())
+        waiter = s3_client.get_waiter('object_exists')
+        waiter.wait(Bucket=s3_bucket, Key=key_name,
+                    WaiterConfig={'Delay': s3_wait_delay, 'MaxAttempts': s3_wait_max_retries})
+        print('Object exists: ' + bucket_name + '/' + key_name)
 
-
-    loop_cnt = path_exists(s3_resource, s3_bucket, key_name, loop_cnt, num_mins_3_days)
-    if loop_cnt >= num_mins_3_days:
-        raise Exception(f"failed to detect S3 folder using key: {key_name}")
-    else:
+        # if we've fallen through to here, then the folder exists, so wait for manifest.xml
         key_name = s3_folder + "/manifest.xml"
-        loop_cnt = path_exists(s3_resource, key_name, loop_cnt, num_mins_3_days)
-        if loop_cnt >= num_mins_3_days:
-            raise Exception(f"failed to detect manifest.xml using key: {key_name}")
+        waiter.wait(Bucket=s3_bucket, Key=key_name,
+                WaiterConfig={'Delay': s3_wait_delay, 'MaxAttempts': s3_wait_max_retries})
+
+    except ClientError as e:
+        raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
+    except WaiterError as e:
+        print("boto3 client timed out: " + e.__str__())
+        sys.exit(1)
+    except Exception as e:
+        raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
 
 def upload_synthea_results(synthea_output_dir, s3_bucket):
     manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
@@ -265,12 +252,12 @@ def upload_synthea_results(synthea_output_dir, s3_bucket):
     print(f"uploading RIF files to bucket: {s3_bucket}, folder: {s3_folder}");
     upload_rif_files(synthea_output_dir, s3_bucket, s3_folder)
     upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder)
-
-    s3_folder = s3_bucket + "/Done/" + manifest_ts
+    #s3_folder = s3_bucket + "/Done/" + manifest_ts
+    s3_folder = "/Done/" + manifest_ts
     wait_for_manifest_done(s3_bucket, s3_folder)
 
 def main(args):
-    if len(args) < 3:
+    if len(args) < 2:
         raise Exception("ERROR, failed to provide required parameters!")
 
     target_dir = args[0]
@@ -278,7 +265,7 @@ def main(args):
     bfd_s3_bucket = args[2] if len(args) > 2 else ''
 
     if not target_dir.endswith('/'):
-        target = target + "/"
+        target_dir = target_dir + "/"
 
     print(f"op: {op}, target_dir: {target_dir}, bfd_s3_bucket: {bfd_s3_bucket}")
     match op:

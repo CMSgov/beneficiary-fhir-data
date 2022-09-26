@@ -169,7 +169,7 @@ upload_synthea_results(){
   echo "upload synthea results to S3"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results"
+  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${S3_BUCKET}"
   deactivate
 }
 
@@ -205,7 +205,7 @@ gen_characteristics_file(){
 #----------------- GO! ------------------#
 # genearal fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
-clean_up
+#clean_up
 
 # invoke function to clone the Synthea repo and build it.
 install_synthea_from_git
