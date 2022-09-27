@@ -9,8 +9,8 @@ CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 # we'll default to 'test' and 10 bene's for now
 TARGET_ENV="${TARGET_ENV:-test}"
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
-SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-True}"
-S3_BUCKET="${BFD_S3_BUCKET:-bfd-test-synthea-etl-577373831711}"
+SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
+S3_BUCKET="${BFD_S3_BUCKET:-bfd-test-etl-577373831711}"
 
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
@@ -32,11 +32,13 @@ BEG_BENE_ID=
 END_BENE_ID=
 BFD_CHARACTERISTICS=
 
-# thse are sort of immtuable, aren't they?
+# the#se are sort of immtuable, aren't they?
 BFD_END_STATE_PROPERTIES="end_state.properties"
+
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
+
 # BFD characteristics file
 BFD_CHARACTERISTICS_FILE_NAME="characteristics.csv"
 
@@ -124,12 +126,14 @@ download_s3_script_files(){
 
 # Function that invokes a python S3 utility to download the synthea end_state.properties file.
 download_s3_props_file(){
-  echo "download BFD end_state.properties file from S3 to: ${BFD_SYNTHEA_AUTO_LOCATION}"
+  echo "download BFD ${BFD_END_STATE_PROPERTIES} file from S3 to: ${BFD_SYNTHEA_AUTO_LOCATION}"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
   python3 s3_utilities.py "./" "download_prop"
+
   # Make a copy of the downloaded end state properties file.
   cat ./${BFD_END_STATE_PROPERTIES} > ${BFD_END_STATE_PROPERTIES_ORIG}
+
   # extract the bene_id_start variable from the downloaded end state properties file.
   # It will be used in a later function/operation.
   BEG_BENE_ID=`cat ./${BFD_END_STATE_PROPERTIES_ORIG} |grep bene_id_start |sed 's/.*=//'`
@@ -147,7 +151,7 @@ download_s3_props_file(){
 prepare_and_run_synthea(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 prepare-and-run-synthea.py ${BFD_END_STATE_PROPERTIES} ${TARGET_SYNTHEA_DIR} ${NUM_GENERATED_BENES} "${TARGET_ENV}" True
+  python3 prepare-and-run-synthea.py ${BFD_END_STATE_PROPERTIES} ${TARGET_SYNTHEA_DIR} ${NUM_GENERATED_BENES} "${TARGET_ENV}" "${SKIP_VALIDATION}"
   deactivate
 }
 
@@ -273,7 +277,7 @@ if ! $SKIP_VALIDATION; then
   do_load_validation
 fi
 
-# Invoke a functionn to determine the last bene_id for the just completed synthea generationxs
+# Invoke a function to determine the last bene_id for the just completed synthea generationxs
 extract_end_bene_id
 
 # Invoke function that executes a .py script that generates a new synthea characteristics
