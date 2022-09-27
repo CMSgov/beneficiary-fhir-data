@@ -19,6 +19,9 @@ s3_wait_delay = 30
 #   multiply times 2 since we'll try every 30 secs
 s3_wait_max_retries = 8640
 
+# generic FQN for persisting end_state.properties
+end_state_props_file = "end_state/end_state.properties"
+
 # Mitre S3 bucket
 mitre_synthea_bucket = "bfd-synthea"
 
