@@ -22,9 +22,6 @@ s3_wait_max_retries = 8640
 # Mitre S3 bucket
 mitre_synthea_bucket = "bfd-synthea"
 
-# generic FQN for persisting end_state.properties
-end_state_props_file = "end_state/end_state.properties"
-
 # list of proprietary Mitre mapping files that will be downloaded;
 # needed to generate synthetic data.
 code_map_files = [
@@ -102,8 +99,8 @@ def download_end_state_props_file(target_dir):
             raise
 
 # Function to upload a newly generated end_state.properties file from the synthea
-# run, to the Mitre BFD S3 bucket. This file will be downloaded from the S3 bucket
-# as a prerequisite to the next synthea generation run. 
+# run, to the Mitre BFD S3 bucket. We'll also upload the _orig version of that same
+# file which was created based on the previous synthea run. 
 #
 # Param: synthea_output_dir : unix filesystem directory where synthea writes the end_state.properties to.
 # Raises a python exception if failure to upload file.
@@ -111,7 +108,10 @@ def upload_end_state_props_file(synthea_output_dir):
     # Mitre FQN for storing end_state.properties file
     try:
         file_name = synthea_output_dir + "/end_state.properties"
-        s3_client.upload_file(file_name, mitre_synthea_bucket, end_state_props_file)
+        s3_client.upload_file(file_name, mitre_synthea_bucket, "end_state/end_state.properties")
+        # also want to keep a copy of the previous end_state.properties file
+        file_name = file_name + "_orig"
+        s3_client.upload_file(file_name, mitre_synthea_bucket, "end_state/end_state.properties_orig")
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The object does not exist.")
