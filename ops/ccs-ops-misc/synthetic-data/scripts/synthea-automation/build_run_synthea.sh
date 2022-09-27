@@ -174,23 +174,10 @@ upload_synthea_results(){
 # 4: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
 do_load_validation(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
-  cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//' > end_state.properties_new
-  END_BENE_ID=`cat end_state.properties_new`
-  source .venv/bin/activate
-  python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
-  deactivate
-}
-
-# Function to extract the bene_id from the latest synthea run that can be used to verify
-# that the load completed successfully
-extract_end_bene_id(){
-  echo "extract_end_bene_id"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
-  source .venv/bin/activate
-  # extract the bene_id_start variable from the newly created end_state.properties file.
-  # It will be used in a later function/operation.
   END_BENE_ID=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//'`
   echo "END_BENE_ID=${END_BENE_ID}"
+  source .venv/bin/activate
+  python3 validate_synthea_load.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
   deactivate
 }
 
@@ -276,9 +263,6 @@ upload_synthea_results
 if ! $SKIP_VALIDATION; then
   do_load_validation
 fi
-
-# Invoke a function to determine the last bene_id for the just completed synthea generationxs
-extract_end_bene_id
 
 # Invoke function that executes a .py script that generates a new synthea characteristics
 # file and uploads it to S3.
