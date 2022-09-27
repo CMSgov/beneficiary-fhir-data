@@ -6,9 +6,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,12 +36,15 @@ public class AttributionBuilder {
    */
   public void run(DataSampler<String> dataSampler) {
     try {
+      Path templatePath = Path.of(attributionTemplate);
+      Path baseDir = templatePath.getParent();
+      String templateFile = templatePath.getFileName().toString();
       Configuration config = new Configuration(Configuration.VERSION_2_3_31);
-      config.setDirectoryForTemplateLoading(new File("."));
+      config.setDirectoryForTemplateLoading(baseDir.toFile());
       config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
       config.setLogTemplateExceptions(false);
 
-      Template t = config.getTemplate(attributionTemplate);
+      Template t = config.getTemplate(templateFile);
       BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript));
       Map<String, List<SimpleScalar>> model =
           Map.of(
