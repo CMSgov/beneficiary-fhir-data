@@ -197,7 +197,7 @@ public final class TransformerUtilsV2 {
      * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
      * See JIRA ticket: https://jira.cms.gov/browse/BFD-1895
      */
-    if (codingSystem == IcdCode.CODING_SYSTEM_ICD_10) {
+    if (codingSystem.equals(IcdCode.CODING_SYSTEM_ICD_10)) {
       addCodingToCodeableConcept(
           codeableConcept,
           IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,

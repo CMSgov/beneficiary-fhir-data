@@ -91,7 +91,6 @@ data.
       where
         metadata.hash = 'ae770dea971f3be467a42717654a42c5c26c7da394f690c3db23e9aa4c4e2f92'
         and contains(metadata.tags, 'master')
-        and (metadata.total_runtime - 30) < 3.0
       order by metadata.timestamp asc
       ```
 
@@ -137,7 +136,6 @@ data.
       where
         metadata.hash = '6dde56a7a303693c0d5b92820619d86929a3a3840d2c2be8d038d76a7b0fe637'
         and contains(metadata.tags, 'master')
-        and (metadata.total_runtime - 30) < 3.0
       order by metadata.timestamp asc
       ```
 
@@ -183,7 +181,6 @@ data.
       where
         metadata.hash = 'b0971964769c07457547f8a2084dd9014566da3d7a366d42e5dce01b4f12148e'
         and contains(metadata.tags, 'master')
-        and (metadata.total_runtime - 30) < 3.0
       order by metadata.timestamp asc
       ```
 
