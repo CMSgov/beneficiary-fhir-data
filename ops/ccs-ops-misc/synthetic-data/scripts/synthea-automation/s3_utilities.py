@@ -205,7 +205,7 @@ def upload_rif_files(synthea_output_dir, s3_bucket, s3_folder):
 # Raises a python exception if failure to upload file.
 def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
     local_fn = synthea_output_dir + "manifest.xml"
-    remote_fn = s3_folder + "/manifest.xml"
+    remote_fn = s3_folder + "/0_manifest.xml"
     
     if os.path.exists(local_fn):
         print(f"S3 upload: {local_fn}, bucket: {s3_bucket}, remote_fn: {remote_fn}")
@@ -231,7 +231,7 @@ def upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder):
 #
 # Raises a python exception if failure to upload file.
 def wait_for_manifest_done(s3_bucket, s3_folder):
-    key_name = s3_folder + "/manifest.xml"
+    key_name = s3_folder + "/0_manifest.xml"
     s3_resource = boto3.resource('s3', config=boto_config)
 
     # use AWS Waiter object to check for the mainfest.xml showing up in the appropriate
