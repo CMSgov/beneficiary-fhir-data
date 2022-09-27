@@ -5,23 +5,8 @@
     - name: Apply server-load Role
       import_role:
         name: bfd-server-load
-      vars:
-        # Variables listed are applied from user-data.sh inside the server-load terraform module
-        #server_load_sqs_queue_name:
-        #server_load_node_lambda_name:
-        #server_load_asg_name:
-        #server_load_test_host:
-        #server_load_aws_current_region:
-        #server_load_initial_worker_nodes:
-        #server_load_node_spawn_time:
-        #server_load_max_spawned_nodes:
-        #server_load_max_spawned_users:
-        #server_load_user_spawn_rate:
-        #server_load_test_runtime_limit:
-        #server_load_coasting_time:
-        #server_load_warm_instance_target:
-        #server_load_stop_on_scaling:
-        #server_load_stop_on_node_limit:
+      # Variables for this task are retrieved from user-data.sh inside the server-load terraform
+      # module
 
     - name: Build CloudWatch unified agent configuration
       template:
