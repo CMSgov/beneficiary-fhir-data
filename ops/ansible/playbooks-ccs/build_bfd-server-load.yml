@@ -18,7 +18,7 @@
         repo: https://github.com/CMSgov/beneficiary-fhir-data.git
         dest: /beneficiary-fhir-data
         # use hash from `git_commit` when on stable master branch, otherwise use git_branch name
-        version: "{{ git_branch if git_branch != 'master' else git_commit }}"
+        version: "{{ git_commit if git_branch == 'master' else git_branch }}"
       tags: [pre-ami, post-ami]
 
     # TODO: Remove include_vars when SSH/sudoer users have been resolved in SSM BFD-2068
