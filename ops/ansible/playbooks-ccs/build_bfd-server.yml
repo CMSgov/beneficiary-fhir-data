@@ -2,32 +2,31 @@
 ##
 # Configures the ETL Server and data-pipeline app for CCS env
 ##
-
 - name: Configure BFD Data Server
   hosts: all
   become: true
   remote_user: ec2-user
   gather_facts: no
   vars:
-    ansible_ssh_pipelining: no
-    bfd_server_dir: '/usr/local/bfd-server'
+    data_server_dir: '/usr/local/bfd-server'
+    # TODO: Consider removing `env` when SSH/sudoer users have been resolved in SSM BFD-2068
     env: "test"
 
   tasks:
-    - name: Include global variables
-      include_vars:
-        file: vars/000_cross_env_vars.yml
+    - name: Download BFD Repository
+      git:
+        repo: https://github.com/CMSgov/beneficiary-fhir-data.git
+        dest: /beneficiary-fhir-data
+        # use hash from `git_commit` when on stable master branch, otherwise use git_branch name
+        version: "{{ git_commit if git_branch == 'master' else git_branch }}"
       tags: [pre-ami, post-ami]
-    
+
+    # TODO: Remove include_vars when SSH/sudoer users have been resolved in SSM BFD-2068
     - name: Include env specific variables
       include_vars:
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
 
-    - name: Apply base Cloudwatch Agent Role
-      import_role:
-        name: cloudwatch-agent-instrumented
-    
     - name: Apply latest host security patches
       import_role:
         name: base_patch
@@ -36,32 +35,14 @@
       import_role:
         name: bfd-server
       vars:
-        data_server_dir: "{{ bfd_server_dir }}"
         data_server_tmp_dir: "{{ data_server_dir }}/tmp"
-        data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
-        data_server_container_name: jboss-eap-7.0
-        data_server_appserver_jvmargs: "-Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ bfd_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer"
-        data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
-        data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
-        data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
-        data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
-        # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
-        # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:
-        data_server_db_url: "{{ vault_data_db_secondary_url }}"
-        data_server_db_username: "{{ vault_data_server_db_username }}"
-        data_server_db_password: "{{ vault_data_server_db_password }}"
-        data_server_db_connections_max: "{{ ansible_processor_vcpus * 10 }}" # Oracle recommends 1-10 connections per CPU core
-        data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
-        data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
-        data_server_new_relic_environment: "{{ env_name_std }}"
-        data_server_new_relic_metric_key: "{{ vault_data_server_new_relic_metric_key }}"
+
+    - name: Apply base Cloudwatch Agent Role
+      import_role:
+        name: cloudwatch-agent-instrumented
 
     - name: Add SSH users
       import_role:
         name: ssh_users
       tags:
         - pre-ami
-        
-  handlers:
-    
-    - import_tasks: handlers/main.yml

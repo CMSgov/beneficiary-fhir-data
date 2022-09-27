@@ -25,16 +25,14 @@ Variables that must be defined to use the role:
 
 * `data_server_launcher`: The path (on the management system) to the app server launcher ZIP to be deployed.
 * `data_server_war`: The path (on the management system) to the WAR file to be deployed.
-* `data_server_ssl_server_genkeypair_args`: The arguments to pass to the `keytool` command when generating a server keypair.
-* `data_server_ssl_client_cas`: A list of the SSL client certificate authorities that will be given access to the server.
-    * `alias`: The alias to assign to the SSL client certificate authority in the server's Java trust store.
-    * `certificate`: The contents of the public certificate authority for the SSL client to authorize.
 * `data_server_ssl_client_certificates`: A list of the (non-CA) SSL client certificates that will be given access to the server.
     * `alias`: The alias to assign to the SSL client certificate in the server's Java trust store.
     * `certificate`: The contents of the public certificate for the SSL client to authorize.
 * `data_server_db_url`: The JDBC URL to connect to.
 * `data_server_db_username`: The DB username to connect as.
 * `data_server_db_password`: The DB user's password to connect with.
+* `test_client_cert`: Certificate portion of the test client keypair for use in readiness checks and regression tests
+* `test_client_key`: Key portion of the test client keypair for use in readiness checks and regression tests
 * `data_server_new_relic_license_key`: Optional. The license key for the New Relic agent.
 * `data_server_new_relic_app_name`: Optional. The value to use for the `newrelic.app_name` setting, e.g. "BFD Server (prod)".
 * `data_server_new_relic_environment`: Optional. The value to use for the `newrelic.environment` setting. If provided, should be one of "test", "prod-sbx", or "prod". 

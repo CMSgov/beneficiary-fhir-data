@@ -34,24 +34,39 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
 
+  /** Denotes the s3 key where the manifest was located when it was first read. */
+  @XmlTransient private String manifestKeyIncomingLocation;
+
+  /**
+   * Denotes the s3 key where the manifest and its files should be placed when it's processing is
+   * complete.
+   */
+  @XmlTransient private String manifestKeyDoneLocation;
+
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
    * @param syntheticData the value to use for {@link #isSyntheticData()}
+   * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
+   * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
       String timestampText,
       int sequenceId,
       boolean syntheticData,
+      String manifestKeyIncomingLocation,
+      String manifestKeyDoneLocation,
       List<DataSetManifestEntry> entries) {
     this.timestampText = timestampText;
     this.sequenceId = sequenceId;
     this.syntheticData = syntheticData;
     this.entries = entries;
     this.entries.forEach(entry -> entry.parentManifest = this);
+    this.manifestKeyIncomingLocation = manifestKeyIncomingLocation;
+    this.manifestKeyDoneLocation = manifestKeyDoneLocation;
   }
 
   /**
@@ -67,7 +82,15 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       int sequenceId,
       boolean syntheticData,
       List<DataSetManifestEntry> entries) {
-    this(DateTimeFormatter.ISO_INSTANT.format(timestamp), sequenceId, syntheticData, entries);
+    // This appears to only be used in dead test code, so hardcoding the input/output locations to
+    // the old locations unless we need otherwise
+    this(
+        DateTimeFormatter.ISO_INSTANT.format(timestamp),
+        sequenceId,
+        syntheticData,
+        CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+        entries);
   }
 
   /**
@@ -76,14 +99,24 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * @param timestampText the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
    * @param syntheticData the value to use for {@link #isSyntheticData()}
+   * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
+   * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
       String timestampText,
       int sequenceId,
       boolean syntheticData,
+      String manifestKeyIncomingLocation,
+      String manifestKeyDoneLocation,
       DataSetManifestEntry... entries) {
-    this(timestampText, sequenceId, syntheticData, Arrays.asList(entries));
+    this(
+        timestampText,
+        sequenceId,
+        syntheticData,
+        manifestKeyIncomingLocation,
+        manifestKeyDoneLocation,
+        Arrays.asList(entries));
   }
 
   /**
@@ -92,14 +125,23 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * @param timestamp the value to use for {@link #getTimestampText()}
    * @param sequenceId the value to use for {@link #getSequenceId()}
    * @param syntheticData the value to use for {@link #isSyntheticData()}
+   * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
+   * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
    * @param entries the value to use for {@link #getEntries()}
    */
   public DataSetManifest(
-      Instant timestamp, int sequenceId, boolean syntheticData, DataSetManifestEntry... entries) {
+      Instant timestamp,
+      int sequenceId,
+      boolean syntheticData,
+      String manifestKeyIncomingLocation,
+      String manifestKeyDoneLocation,
+      DataSetManifestEntry... entries) {
     this(
         DateTimeFormatter.ISO_INSTANT.format(timestamp),
         sequenceId,
         syntheticData,
+        manifestKeyIncomingLocation,
+        manifestKeyDoneLocation,
         Arrays.asList(entries));
   }
 
@@ -157,6 +199,42 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /** @return the list of {@link DataSetManifestEntry} included in this {@link DataSetManifest} */
   public List<DataSetManifestEntry> getEntries() {
     return entries;
+  }
+
+  /**
+   * Sets the {@link #manifestKeyIncomingLocation}.
+   *
+   * @param location the location
+   */
+  public void setManifestKeyIncomingLocation(String location) {
+    this.manifestKeyIncomingLocation = location;
+  }
+
+  /**
+   * Sets the {@link #manifestKeyDoneLocation}.
+   *
+   * @param location the location
+   */
+  public void setManifestKeyDoneLocation(String location) {
+    this.manifestKeyDoneLocation = location;
+  }
+
+  /**
+   * Gets the {@link #manifestKeyIncomingLocation}.
+   *
+   * @return the incoming location key
+   */
+  public String getManifestKeyIncomingLocation() {
+    return manifestKeyIncomingLocation;
+  }
+
+  /**
+   * Gets the {@link #manifestKeyDoneLocation}.
+   *
+   * @return the done location key
+   */
+  public String getManifestKeyDoneLocation() {
+    return manifestKeyDoneLocation;
   }
 
   /** @see java.lang.Comparable#compareTo(java.lang.Object) */
@@ -315,14 +393,14 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 
       if (!keyMatchesRegex) return null;
 
-      String dataSetTimestampText = manifestKeyMatcher.group(1);
+      String dataSetTimestampText = manifestKeyMatcher.group(2);
       try {
         Instant.parse(dataSetTimestampText);
       } catch (DateTimeParseException e) {
         return null;
       }
 
-      int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
+      int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(3));
 
       return new DataSetManifestId(dataSetTimestampText, dataSetSequenceId);
     }
