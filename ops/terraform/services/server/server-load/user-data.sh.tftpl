@@ -10,8 +10,6 @@ exec > >(
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-aws s3 cp "s3://bfd-mgmt-admin-${account_id}/ansible/vault.password" . # TODO: remove vault.password in BFD-1786
-
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
