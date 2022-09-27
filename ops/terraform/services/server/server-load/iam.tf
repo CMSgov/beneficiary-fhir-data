@@ -210,7 +210,6 @@ resource "aws_iam_role" "ec2" {
   managed_policy_arns = [
     data.aws_iam_policy.cloudwatch_agent_policy.arn,
     data.aws_iam_policy.cloudwatch_agent_xray_policy.arn,
-    data.aws_iam_policy.ansible_vault_ro.arn,
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
