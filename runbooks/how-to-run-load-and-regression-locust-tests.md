@@ -310,83 +310,83 @@ particular BFD Server host.
 
 10. Download and decrypt the testing certificate from SSM and store it to a local file:
 
-```bash
-aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_key" \
-   --region "us-east-1" \
-   --with-decryption | jq -r '.Parameter.Value' > $BFD_ROOT/bfd-test-cert.pem
-aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_cert" \
-   --region "us-east-1" \
-   --with-decryption | jq -r '.Parameter.Value' >> $BFD_ROOT/bfd-test-cert.pem
-```
+    ```bash
+    aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_key" \
+       --region "us-east-1" \
+       --with-decryption | jq -r '.Parameter.Value' > $BFD_ROOT/bfd-test-cert.pem
+    aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_cert" \
+       --region "us-east-1" \
+       --with-decryption | jq -r '.Parameter.Value' >> $BFD_ROOT/bfd-test-cert.pem
+    ```
 
-1. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
-   sensitive SSM parameters in the environment under test
+11. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
+    sensitive SSM parameters in the environment under test
 
-2. Set `CLIENT_CERT_PATH` to the unsecured certificate available in the repository:
+12. Set `CLIENT_CERT_PATH` to the unsecured certificate available in the repository:
 
-   ```bash
-   CLIENT_CERT_PATH=$BFD_ROOT/bfd-test-cert.pem
-   ```
+    ```bash
+    CLIENT_CERT_PATH=$BFD_ROOT/bfd-test-cert.pem
+    ```
 
-3. Set `DATABASE_CONSTR` to the database connection string for the reader endpoint of the
-   environment under test:
+13. Set `DATABASE_CONSTR` to the database connection string for the reader endpoint of the
+    environment under test:
 
-   ```bash
-   DB_CLUSTER_ID=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/common/nonsensitive/rds_cluster_identifier" \
-                    --region "us-east-1" | jq -r '.Parameter.Value')
-   DB_USERNAME=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_username" \
-                    --with-decryption \
-                    --region "us-east-1" | jq -r '.Parameter.Value')
-   DB_RAW_PASSWORD=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_password" \
-                    --with-decryption \
-                    --region "us-east-1" | jq -r '.Parameter.Value')
-   DB_PASSWORD=$(printf %s "$DB_RAW_PASSWORD" | jq -sRr @uri)
-   DB_READER_URI=$(aws rds describe-db-clusters --db-cluster-identifier "$DB_CLUSTER_ID" \
-                    --region "us-east-1" | jq -r '.DBClusters[0].ReaderEndpoint')
-   DATABASE_CONSTR="postgres://$DB_USERNAME:$DB_PASSWORD@$DB_READER_URI:5432/fhirdb"
-   ```
+    ```bash
+    DB_CLUSTER_ID=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/common/nonsensitive/rds_cluster_identifier" \
+                     --region "us-east-1" | jq -r '.Parameter.Value')
+    DB_USERNAME=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_username" \
+                     --with-decryption \
+                     --region "us-east-1" | jq -r '.Parameter.Value')
+    DB_RAW_PASSWORD=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_password" \
+                     --with-decryption \
+                     --region "us-east-1" | jq -r '.Parameter.Value')
+    DB_PASSWORD=$(printf %s "$DB_RAW_PASSWORD" | jq -sRr @uri)
+    DB_READER_URI=$(aws rds describe-db-clusters --db-cluster-identifier "$DB_CLUSTER_ID" \
+                     --region "us-east-1" | jq -r '.DBClusters[0].ReaderEndpoint')
+    DATABASE_CONSTR="postgres://$DB_USERNAME:$DB_PASSWORD@$DB_READER_URI:5432/fhirdb"
+    ```
 
-   1. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
-      sensitive SSM parameters in the environment under test
+    1. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
+       sensitive SSM parameters in the environment under test
 
-4. Run the Locust tests using `locust`. Replace `<NUM_USERS>` with the number of simulated users
-   (amount of load) to run with, `<SPAWN_RATE>` with the rate at which you would like the simulated
-   users to spawn per-second, and `<RUNTIME>` with the amount of time you would like to run the
-   performance tests for _once all users have spawned_ (you can specify runtime like "10m30s" or
-   "30s"):
+14. Run the Locust tests using `locust`. Replace `<NUM_USERS>` with the number of simulated users
+    (amount of load) to run with, `<SPAWN_RATE>` with the rate at which you would like the simulated
+    users to spawn per-second, and `<RUNTIME>` with the amount of time you would like to run the
+    performance tests for _once all users have spawned_ (you can specify runtime like "10m30s" or
+    "30s"):
 
-   ```bash
-   locust -f v2/regression_suite.py \
-     --users=<NUM_USERS> \
-     --host="https://$BFD_ENV.bfd.cms.gov" \
-     --spawn-rate=<SPAWN_RATE> \
-     --spawned-runtime="<RUNTIME>" \
-     --client-cert-path="$CLIENT_CERT_PATH" \
-     --database-uri="$DATABASE_CONSTR"
-     --headless
-   ```
+    ```bash
+    locust -f v2/regression_suite.py \
+      --users=<NUM_USERS> \
+      --host="https://$BFD_ENV.bfd.cms.gov" \
+      --spawn-rate=<SPAWN_RATE> \
+      --spawned-runtime="<RUNTIME>" \
+      --client-cert-path="$CLIENT_CERT_PATH" \
+      --database-uri="$DATABASE_CONSTR"
+      --headless
+    ```
 
-   1. Note that `--host` can be anything (including the IP address of another instance that you
-      would like to target specifically). However, if you are targeting a particular environment and
-      have detached an instance from that environment's ASG, you should stick with only testing
-      instances under that environment (or the default provided here)
+    1. Note that `--host` can be anything (including the IP address of another instance that you
+       would like to target specifically). However, if you are targeting a particular environment and
+       have detached an instance from that environment's ASG, you should stick with only testing
+       instances under that environment (or the default provided here)
 
-5. Once the regression tests have ended, Locust will print a summary table with the performance
-   statistics of the previous run for each endpoint as well as an aggregated total of all endpoint
-   performance
-6. Delete the `bfd-test-cert.pem`:
+15. Once the regression tests have ended, Locust will print a summary table with the performance
+    statistics of the previous run for each endpoint as well as an aggregated total of all endpoint
+    performance
+16. Delete the `bfd-test-cert.pem`:
 
-   ```bash
-   rm -f $CLIENT_CERT_PATH
-   ```
+    ```bash
+    rm -f $CLIENT_CERT_PATH
+    ```
 
-7. In your web browser, navigate back to AWS and sign-in (if necessary)
-8. Navigate to Services > EC2
-9. Navigate to Instances in the navigation bar on the left side
-10. Find the detached instance by searching for its name or Instance ID
-11. Select the checkbox to the left of the name of the detached instance
-12. Click on the "Instance state" dropdown in the top right of the screen
-13. Select "Terminate instance" and accept any dialogs that appear
+17. In your web browser, navigate back to AWS and sign-in (if necessary)
+18. Navigate to Services > EC2
+19. Navigate to Instances in the navigation bar on the left side
+20. Find the detached instance by searching for its name or Instance ID
+21. Select the checkbox to the left of the name of the detached instance
+22. Click on the "Instance state" dropdown in the top right of the screen
+23. Select "Terminate instance" and accept any dialogs that appear
 
 ### How to Run a Scaling Load Test Using the `bfd-run-server-load` Jenkins Job
 
