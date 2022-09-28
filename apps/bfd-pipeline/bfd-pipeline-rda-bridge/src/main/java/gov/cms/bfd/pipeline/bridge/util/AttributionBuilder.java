@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.bridge.util;
 
+import com.google.common.collect.Lists;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -10,8 +11,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,8 +44,7 @@ public class AttributionBuilder {
 
       Template t = config.getTemplate(templateFile);
       BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript));
-      List<String> values =
-          StreamSupport.stream(dataSampler.spliterator(), false).collect(Collectors.toList());
+      List<String> values = Lists.newArrayList(dataSampler);
       t.process(Map.of("value", values), writer);
     } catch (IOException | TemplateException e) {
       log.error("Unable to create attribution sql script", e);
