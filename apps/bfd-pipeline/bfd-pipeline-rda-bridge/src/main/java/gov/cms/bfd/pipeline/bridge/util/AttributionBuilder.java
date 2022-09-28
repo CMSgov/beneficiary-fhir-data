@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.bridge.util;
 
 import freemarker.template.Configuration;
-import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
@@ -46,13 +45,9 @@ public class AttributionBuilder {
 
       Template t = config.getTemplate(templateFile);
       BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript));
-      Map<String, List<SimpleScalar>> model =
-          Map.of(
-              "value",
-              StreamSupport.stream(dataSampler.spliterator(), false)
-                  .map(SimpleScalar::new)
-                  .collect(Collectors.toList()));
-      t.process(model, writer);
+      List<String> values =
+          StreamSupport.stream(dataSampler.spliterator(), false).collect(Collectors.toList());
+      t.process(Map.of("value", values), writer);
     } catch (IOException | TemplateException e) {
       log.error("Unable to create attribution sql script", e);
     }
