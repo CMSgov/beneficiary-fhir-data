@@ -40,6 +40,7 @@ import lombok.experimental.FieldNameConstants;
 @IdClass(FissPayer.PK.class)
 public class FissPayer {
   @Id
+  @EqualsAndHashCode.Include
   @ManyToOne
   @JoinColumn(
       name = "`dcn`",

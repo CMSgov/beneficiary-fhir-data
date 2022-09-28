@@ -8,17 +8,56 @@ exec > >(
     done
 )
 
-ansible localhost -m git -a 'repo=https://github.com/CMSgov/beneficiary-fhir-data.git dest=/beneficiary-fhir-data version=${git_repo_version} force=true'
+cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-cd /beneficiary-fhir-data/apps/utils/locust_tests
-python3 -m pip install --upgrade pip --quiet
-python3 -m pip install -r requirements.txt --quiet
-PATH="/usr/local/bin:$${PATH}"
-chmod +x lambda/server-load/controller.sh
+aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
 
-# TODO: This IS NOT prodction ready until a non-privileged user runs load test logic; BFD-1883 et al
-# NOTE: Run locust controller AND spawn nodes if locust process isn't running, otherwise do nothing
-if ! pgrep locust >/dev/null; then
-  lambda/server-load/controller.sh &>>locust.log &
-  python3 lambda/server-load/controller.py &
+# These variables come from terraform variables in the server-load module
+cat <<EOF > extra_vars.json
+{
+    "env": "${env}",
+    "server_load_sqs_queue_name": "${sqs_queue_name}",
+    "server_load_node_lambda_name": "${node_lambda_name}",
+    "server_load_asg_name": "${asg_name}",
+    "server_load_test_host": "${test_host}",
+    "server_load_aws_current_region": "${aws_current_region}",
+    "server_load_initial_worker_nodes": "${initial_worker_nodes}",
+    "server_load_node_spawn_time": "${node_spawn_time}",
+    "server_load_max_spawned_nodes": "${max_spawned_nodes}",
+    "server_load_max_spawned_users": "${max_spawned_users}",
+    "server_load_user_spawn_rate": "${user_spawn_rate}",
+    "server_load_test_runtime_limit": "${test_runtime_limit}",
+    "server_load_coasting_time": "${coasting_time}",
+    "server_load_warm_instance_target": "${warm_instance_target}",
+    "server_load_stop_on_scaling": "${stop_on_scaling}",
+    "server_load_stop_on_node_limit": "${stop_on_node_limit}"
+}
+EOF
+
+mkdir -p logs
+
+ansible-playbook --extra-vars '@common_vars.json' \
+  --extra-vars '@extra_vars.json' \
+  --tags "post-ami" \
+  launch_bfd-server-load.yml
+
+# Set login environment for all users:
+# 1. make BFD_ENV_NAME available to all logins
+# 2. change prompt color based on environment (red for prod and yellow for prod-sbx)
+cat <<EOF > /etc/profile.d/set-bfd-login-env.sh
+# make BFD_ENV_NAME available to all logins
+export BFD_ENV_NAME="${env}"
+
+# set prompt color based on environment (only if we are in an interactive shell)
+if [[ \$- == *i* ]]; then
+    case "\$BFD_ENV_NAME" in
+        "prod") export PS1="[\[\033[1;31m\]\u@\h\[\033[00m\]:\[\033[1;31m\]\w\[\033[00m\]] " ;;
+        "prod-sbx") export PS1="[\[\033[0;33m\]\u@\h\[\033[00m\]:\[\033[0;33m\]\w\[\033[00m\]] " ;;
+    esac
 fi
+EOF
+chmod 0644 /etc/profile.d/set-bfd-login-env.sh

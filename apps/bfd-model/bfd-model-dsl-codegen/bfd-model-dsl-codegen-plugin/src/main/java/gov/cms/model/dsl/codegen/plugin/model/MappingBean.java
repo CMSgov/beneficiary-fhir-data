@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -168,6 +169,62 @@ public class MappingBean {
     return table.getJoins().stream()
         .filter(j -> !arrayFieldNames.contains(j.getFieldName()))
         .collect(ImmutableList.toImmutableList());
+  }
+
+  /**
+   * Attempts to produce a {@link ColumnBean} suitable for use in defining a database column
+   * associated with either a {@link ColumnBean} or a {@link JoinBean} in this mapping.
+   *
+   * @param root {@link RootBean} containing all known {@link MappingBean} objects
+   * @param columnName used to find a suitable {@link ColumnBean} or {@link JoinBean} in this
+   *     mapping
+   * @return possibly empty {@link Optional} to hold the resulting {@link ColumnBean}
+   */
+  @Nonnull
+  public Optional<ColumnBean> getRealOrJoinedColumnByColumnName(RootBean root, String columnName) {
+    return getTable()
+        .getColumnByColumnName(columnName)
+        .or(() -> getJoinedColumnByColumnName(root, columnName));
+  }
+
+  /**
+   * Attempts to produce a {@link ColumnBean} suitable for use in defining a database column
+   * associated with a {@link JoinBean} in this mapping. This is done by searching for a {@link
+   * JoinBean} whose {@link JoinBean#joinColumnName} matches the provided name and then invoking
+   * {@link MappingBean#mapJoinToParentColumnBean} for that {@link JoinBean}.
+   *
+   * @param root {@link RootBean} containing all known {@link MappingBean} objects
+   * @param columnName used to find a suitable {@link JoinBean} in this mapping
+   * @return possibly empty {@link Optional} to hold the resulting {@link ColumnBean}
+   */
+  @Nonnull
+  public Optional<ColumnBean> getJoinedColumnByColumnName(RootBean root, String columnName) {
+    return getNonArrayJoins().stream()
+        .filter(join -> join.hasColumnName() && columnName.equals(join.getJoinColumnName()))
+        .findAny()
+        .flatMap(join -> mapJoinToParentColumnBean(root, join));
+  }
+
+  /**
+   * Attempts to produce a {@link ColumnBean} suitable for use in defining a database column
+   * associated with the specified {@link JoinBean}. This is done by searching for the {@link
+   * ColumnBean} with the given joins {@link JoinBean#joinColumnName} in the joins parent mapping.
+   * The returned value is {@link Optional} and will be empty if no such column exists for any
+   * reason.
+   *
+   * @param root {@link RootBean} containing all known {@link MappingBean} objects
+   * @param join {@link JoinBean} to be mapped
+   * @return possibly empty {@link Optional} to hold the resulting {@link ColumnBean}
+   */
+  public Optional<ColumnBean> mapJoinToParentColumnBean(RootBean root, JoinBean join) {
+    var filteredJoin = join.hasColumnName() ? Optional.of(join) : Optional.<JoinBean>empty();
+    var parentMapping =
+        filteredJoin.flatMap(j -> root.findMappingWithEntityClassName(j.getEntityClass()));
+    var parentColumn =
+        parentMapping.flatMap(
+            pm -> pm.getRealOrJoinedColumnByColumnName(root, join.getJoinColumnName()));
+    var noSequenceColumn = parentColumn.map(c -> c.toBuilder().sequence(null).build());
+    return noSequenceColumn;
   }
 
   /** Enum used to define the type of source objects for the transformations. */
