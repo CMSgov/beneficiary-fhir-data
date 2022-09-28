@@ -22,6 +22,9 @@ the pipeline.  To preserve the integrity of the data (as we currently understand
 the ingestion job will log the message to a table in the database (`message_errors`) along with details
 about why the message couldn't be ingested.
 
+Being that the messages contain PII/PHI, standard logging practices would not be acceptable, thus
+utilizing the database offers a safe to store and retrieve the messages for later debugging.
+
 Once per job run, the DLQ table will be re-processed, attempting to re-fetch the offending messages from
 the RDA API to attempt to ingest them again.
  - If the message is ingested successfully (meaning an upstream
