@@ -199,9 +199,9 @@ public class ClaimDao {
       List<String> serviceDateAttributeNames) {
     final var serviceDatePredicates =
         serviceDateAttributeNames.stream()
-            .map(root::<LocalDate>get)
-            .map(dateColumn -> serviceDatePredicate(builder, serviceDate, dateColumn))
-            .toArray(Predicate[]::new);
+            .map(attributeName -> root.<LocalDate>get(attributeName))
+            .map(datePath -> serviceDatePredicate(builder, serviceDate, datePath))
+            .toArray(arraySize -> new Predicate[arraySize]);
     return builder.or(serviceDatePredicates);
   }
 
