@@ -54,7 +54,7 @@
 			<!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.7.7</version>
+			<version>2.0.1</version>
 		</dependency>
 		
 		<dependency>

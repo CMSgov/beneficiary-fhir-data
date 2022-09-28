@@ -75,10 +75,10 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.2.11</metrics.version>
-		<dropwizard-metrics-newrelic.version>0.7.0</dropwizard-metrics-newrelic.version>
+		<metrics.version>4.2.12</metrics.version>
+		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.278</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.305</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
 		but not all (in particular, entity-manager does not have a 6.0 version available yet).
@@ -86,17 +86,17 @@
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.0</junit.version>
 		<jackson.version>2.13.4</jackson.version>
-		<mockito.version>4.6.1</mockito.version>
-		<postgresql.version>42.4.1</postgresql.version>
+		<mockito.version>4.8.0</mockito.version>
+		<postgresql.version>42.5.0</postgresql.version>
 		<hsqldb.version>2.7.0</hsqldb.version>
-		<slf4j.version>1.7.36</slf4j.version>
+		<slf4j.version>2.0.1</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelic.agent.version>7.9.0</newrelic.agent.version>
-		<checkstyle.version>10.3.2</checkstyle.version>
+		<newrelic.agent.version>7.10.0</newrelic.agent.version>
+		<checkstyle.version>10.3.3</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
-		<logback.classic.version>1.2.11</logback.classic.version>
+		<logback.classic.version>1.4.1</logback.classic.version>
 		<zjsonpatch.version>0.4.12</zjsonpatch.version>
 
 		<!--  Dependencies required for org.apache.commons -->
@@ -112,7 +112,7 @@
 		<!-- Dependencies required for connecting to a gRPC API -->
 		<grpc_java.version>1.48.1</grpc_java.version>
 		<protoc.version>3.21.2</protoc.version>
-		<protobuf.version>3.21.2</protobuf.version>
+		<protobuf.version>3.21.6</protobuf.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -650,7 +650,7 @@ checkJavaFormat
 				<artifactId>versions-maven-plugin</artifactId>
 				<version>2.11.0</version>
 				<configuration>
-					<rulesUri>file://${project.basedir}/rules.xml</rulesUri>
+					<rulesUri>file://${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
 				</configuration>
 			</plugin>
 			<plugin>
