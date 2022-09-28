@@ -16,7 +16,6 @@ module "stateless" {
   }
 
   fhir_ami        = var.fhir_ami
-  etl_ami         = var.etl_ami
   ssh_key_name    = var.ssh_key_name
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
