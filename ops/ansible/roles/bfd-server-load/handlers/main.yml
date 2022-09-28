@@ -1,0 +1,10 @@
+---
+- name: Enable server-load Service
+  command: /usr/bin/systemctl --system enable bfd-server-load
+  become: true
+
+- name: Restart server-load Service
+  service:
+    name: bfd-server-load
+    state: restarted
+  become: true
