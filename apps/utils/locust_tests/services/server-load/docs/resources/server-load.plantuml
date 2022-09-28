@@ -1,0 +1,82 @@
+@startuml server-load
+title server-load Service Deployment Diagram
+actor operator
+database "github" #LightGreen
+participant "bfd-server-load-build" #LightSkyBlue
+database "AWS ECR" #LightGreen
+database "parameter store" #LightGreen
+participant "deployment pipeline" #LightSkyBlue
+database "EC2 AMI Catalog" #LightGreen
+participant "bfd-run-server-load" #LightSkyBlue
+participant "EC2" #LightGreen
+participant "controller" #LightSkyBlue
+participant "AWS Lambda" #LightGreen
+queue "sqs queue" #LightSkyBlue
+group Image Deployment
+  autonumber 1
+  operator -> github: Submit change set
+  operator <-- github 
+  operator -> "bfd-server-load-build": Trigger Image Build
+  "bfd-server-load-build" -> github: Request change set
+  "bfd-server-load-build" <-- github : Return change set
+  "bfd-server-load-build" -> "bfd-server-load-build": build-push.sh:\nbuild lambda Docker image
+  "bfd-server-load-build" -> "AWS ECR": build-push.sh:\npush Docker image to bfd-mgmt-server-load
+  "bfd-server-load-build" <-- "AWS ECR" 
+  "bfd-server-load-build" -> "parameter store": build-push.sh:\nwrite image tag SSM parameter
+  "bfd-server-load-build" <-- "parameter store" 
+  operator <-- "bfd-server-load-build" 
+end
+group BFD Deployment Excerpt
+  autonumber 1
+  operator -> github: Submit change set
+  operator <-- github 
+  operator -> "deployment pipeline": Trigger deployment pipeline
+  "deployment pipeline" -> github: Request change set
+  "deployment pipeline" <-- github : Return change set
+  "deployment pipeline" -> "deployment pipeline": Run Prepare, Set Branch Name,\nBuild Platinum AMI, Build Apps
+  group Build App AMIs
+    "deployment pipeline" -> "deployment pipeline": packer:\nBuild all AMIs,\nincluding server-load
+    "deployment pipeline" -> "EC2 AMI Catalog": packer:\nStore AMIs to catalog,\nincluding server-load
+    "deployment pipeline" <-- "EC2 AMI Catalog"
+  end
+  "deployment pipeline" -> "deployment pipeline": Run remaining stages
+  operator <-- "deployment pipeline"
+end
+group bfd-run-server-load
+  autonumber 1
+  operator -> "bfd-run-server-load": Trigger bfd-run-server-load with parameters
+  "bfd-run-server-load" -> "bfd-run-server-load": Collect parameters
+  "bfd-run-server-load" -> "bfd-run-server-load": terraform:\nPlan and apply with\nparameters
+  "bfd-run-server-load" -> "parameter store": terraform:\nRequest latest Docker image tag
+  "bfd-run-server-load" <-- "parameter store": Return latest Docker image tag
+  "bfd-run-server-load" -> "AWS Lambda": terraform:\nUpdate/deploy server-load Lambda\nto ENV using tagged Docker image
+  "bfd-run-server-load" <-- "AWS Lambda"
+  "bfd-run-server-load" -> "EC2 AMI Catalog": terraform:\nRequest latest server-load AMI
+  "bfd-run-server-load" <-- "EC2 AMI Catalog": Return latest server-load AMI ID
+  "bfd-run-server-load" -> "EC2": terraform:\nDeploy server-load controller\nto EC2 using latest AMI
+  "bfd-run-server-load" <-- "EC2"
+  "AWS Lambda" -> "AWS ECR": Retrieve tagged server-load Docker Image
+  "AWS Lambda" <-- "AWS ECR" 
+  "AWS Lambda" -> "AWS Lambda": Create server-load from\nbfd-mgmt-server-load image
+  "bfd-run-server-load" <-- "AWS Lambda" 
+  "EC2" -> "controller": Start controller instance
+  "EC2" <-- "controller"
+  "controller" -> "controller": cloud-init:\nRun user-data.sh
+  "controller" -> "controller": user-data.sh:\nRun Ansible launch\nvariant
+  "controller" -> "controller": Ansible:\nSetup bfd-server-load\nsystemd service
+  "controller" -> "controller": systemd:\nStart bfd-server-load\n(controller.py)
+  note right 
+    See the README for more information
+    on load testing execution process
+  end note
+  operator -> "bfd-run-server-load": Monitors server-load and manually stops bfd-run-server-load
+  "bfd-run-server-load" -> "sqs queue": Post stop signal
+  "bfd-run-server-load" <-- "sqs queue"
+  "bfd-run-server-load" -> "bfd-run-server-load": terraform:\nPlan and apply\nbut destroy controller
+  "bfd-run-server-load" -> "EC2": terraform:\nDestroy controller EC2 instance
+  "EC2" -> "controller": Destroy instance
+  "EC2" <-- "controller"
+  "bfd-run-server-load" <-- "EC2"
+  operator <-- "bfd-run-server-load" 
+end
+@enduml

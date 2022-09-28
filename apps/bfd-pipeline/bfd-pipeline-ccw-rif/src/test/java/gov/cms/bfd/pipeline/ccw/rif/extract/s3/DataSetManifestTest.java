@@ -1,9 +1,11 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
@@ -185,6 +187,36 @@ public final class DataSetManifestTest {
   }
 
   /**
+   * Verifies that {@link DataSetManifest} with a future date correctly returns {@link
+   * DataSetManifestId#isFutureManifest} as {@code true}.
+   *
+   * @throws JAXBException failure reading in test code
+   */
+  @Test
+  public void whenFutureTimestampExpectFutureManifestTrue() throws JAXBException, SAXException {
+    InputStream manifestStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-e.xml");
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+
+    assertTrue(manifest.getId().isFutureManifest());
+  }
+
+  /**
+   * Verifies that {@link DataSetManifest} with a past date correctly returns {@link
+   * DataSetManifestId#isFutureManifest} as {@code false}.
+   *
+   * @throws JAXBException failure reading in test code
+   */
+  @Test
+  public void whenPastTimestampExpectFutureManifestFalse() throws JAXBException, SAXException {
+    InputStream manifestStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("manifest-sample-a.xml");
+    DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(manifestStream);
+
+    assertFalse(manifest.getId().isFutureManifest());
+  }
+
+  /**
    * Verifies that {@link DataSetManifestId}s can be round-tripped, as expected. A regression test
    * case for <a href="http://issues.hhsdevcloud.us/browse/CBBD-298">CBBD-298: Error reading some
    * data set manifests in S3: "AmazonS3Exception: The specified key does not exist"</a>.
@@ -196,6 +228,21 @@ public final class DataSetManifestTest {
     DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Key);
 
     assertEquals(s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS));
+  }
+
+  /**
+   * Verifies that {@link DataSetManifestId}s can be round-tripped as expected when using the
+   * synthetic load key.
+   */
+  @Test
+  public void manifestSyntheticIdRoundtrip() {
+    String s3Key =
+        CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+            + "/2017-07-11T00:00:00.000Z/1_manifest.xml";
+    DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Key);
+
+    assertEquals(
+        s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS));
   }
 
   /**
@@ -211,6 +258,8 @@ public final class DataSetManifestTest {
             Instant.now(),
             0,
             true,
+            CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+            CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
             new DataSetManifestEntry("foo.xml", RifFileType.BENEFICIARY),
             new DataSetManifestEntry("bar.xml", RifFileType.PDE));
 
