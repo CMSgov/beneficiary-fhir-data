@@ -61,7 +61,12 @@ spec:
     string(name: 'MAX_SPAWNED_USERS',
            defaultValue: '5000',
            description: 'The maximum number of simulated Locust users (not worker nodes) to spawn. '
-                        + 'Use this and spawn rate to constrain the load during a test run')
+                        + 'Use this and spawn rate to constrain the load during a test run. '
+                        + 'Generally speaking, at any moment the ratio of simulated users to '
+                        + 'worker nodes should not exceed 10:1 (10 users to 1 worker) in order to '
+                        + 'get the best performance. Try to adjust NODE_SPAWN_TIME, '
+                        + 'INITIAL_WORKER_NODES, MAX_SPAWNED_NODES, and USER_SPAWN_RATE such that '
+                        + 'at any given time during the test run this ratio is not exceeded')
 
     string(name: 'USER_SPAWN_RATE',
            defaultValue: '1',
