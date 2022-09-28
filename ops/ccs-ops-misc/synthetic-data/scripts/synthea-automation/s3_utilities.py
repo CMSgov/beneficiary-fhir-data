@@ -267,7 +267,7 @@ def upload_synthea_results(synthea_output_dir, s3_bucket):
         raise "Failed to provide BFD S3 bucket for ETL files"
 
     # using the timestamp just derived, upload all RIF (.csv) files to the S3 bucket/folder
-    s3_folder = "Incoming/" + manifest_ts
+    s3_folder = "Synthetic/Incoming/" + manifest_ts
     print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}");
     upload_rif_files(synthea_output_dir, s3_bucket, s3_folder)
 
@@ -279,7 +279,7 @@ def upload_synthea_results(synthea_output_dir, s3_bucket):
     # now we wait....the ETL pipeline will move processed files to the Done/ folder; when it
     # has completed processing all RIF (.csv) files, it then moves the manifest.xml file to
     # the Done/ folder signifying job job completion so we'll wait for that to happen.
-    s3_folder = "Done/" + manifest_ts
+    s3_folder = "Synthetic/Done/" + manifest_ts
     wait_for_manifest_done(s3_bucket, s3_folder)
 
 # Function to handle S3 processing for the synthea generation shell script.

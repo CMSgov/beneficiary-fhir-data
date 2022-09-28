@@ -10,7 +10,8 @@ CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 TARGET_ENV="${TARGET_ENV:-test}"
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
 SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
-S3_BUCKET="${BFD_S3_BUCKET:-bfd-test-etl-577373831711}"
+
+S3_TEST_BUCKET="${BFD_S3_BUCKET:-bfd-test-etl-577373831711}"
 
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
@@ -168,7 +169,7 @@ upload_synthea_results(){
 
   # now upload the RIF (.csv) files to S3 ETL bucket
   source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${S3_BUCKET}"
+  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${S3_TEST_BUCKET}"
   deactivate
 }
 
