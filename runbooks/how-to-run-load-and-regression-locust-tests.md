@@ -15,9 +15,9 @@ particular BFD Server host.
 
 ## Glossary
 
-|  Term  |                                    Definition                                    |
-| :----: | :------------------------------------------------------------------------------: |
-| Locust | A load testing library that allows for performance tests to be written in Python |
+|             Term             |                                    Definition                                    |
+| :--------------------------: | :------------------------------------------------------------------------------: |
+| [Locust](https://locust.io/) | A load testing library that allows for performance tests to be written in Python |
 
 <!-- ## FAQ -->
 <!-- This section should contain frequently-asked-questions as sub-headers with answers as sub-paragraphs. Since this is a living document, this section should be added to as needed. -->
@@ -32,8 +32,6 @@ particular BFD Server host.
   - This runbook will assume you are using `pew` as it is fairly simple to work with and has a
     relatively intuitive UX
 - Access to AWS
-  - Access to _read_ and _decrypt_ SSM Parameters
-  - Access to
 - Access to the CMS VPN
 
 ## Instructions
