@@ -161,6 +161,12 @@ prepare_and_run_synthea(){
 upload_synthea_results(){
   echo "upload synthea results to S3"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
+
+  # first make a copy of all the .csv files into a "backup" directory
+  mkdir ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup
+  cp ${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup
+
+  # now upload the RIF (.csv) files to S3 ETL bucket
   source .venv/bin/activate
   python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${S3_BUCKET}"
   deactivate
@@ -174,10 +180,15 @@ upload_synthea_results(){
 # 4: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
 do_load_validation(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  # restore the copy of the RIF (.csv) files back to the synthea output directory
+  cp ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup/*.csv ${BFD_SYNTHEA_OUTPUT_LOCATION}
+
+  # now perform the validation of the run.
   END_BENE_ID=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//'`
   echo "END_BENE_ID=${END_BENE_ID}"
+
   source .venv/bin/activate
-  python3 validate_synthea_load.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
+  python3 validate-synthea-load.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${TARGET_SYNTHEA_DIR}" "${TARGET_ENV}"
   deactivate
 }
 
@@ -193,6 +204,7 @@ gen_characteristics_file(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
   python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
+
   # check the generated output file; must have more than just the header line
   line_cnt=`cat ${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l`
   if [[ "$line_cnt" -gt 1 ]]; then
@@ -220,7 +232,7 @@ upload_props_file_to_s3(){
   echo "upload end_state.properties file to S3"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_prop"
+  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_prop" "${BFD_SYNTHEA_AUTO_LOCATION}"
   deactivate
 }
 
@@ -279,5 +291,8 @@ else
   error_exit "end state BEG_BENE_ID or BFD_CHARACTERISTICS variables unset...exiting"
 fi
 
+echo "============================================="
+echo "BFD Synthea Generation completed SUCCESFULLY!"
+echo "============================================="
 # return SUCCESS
 exit 0;

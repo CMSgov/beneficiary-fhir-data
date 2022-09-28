@@ -107,13 +107,13 @@ def download_end_state_props_file(target_dir):
 #
 # Param: synthea_output_dir : unix filesystem directory where synthea writes the end_state.properties to.
 # Raises a python exception if failure to upload file.
-def upload_end_state_props_file(synthea_output_dir):
+def upload_end_state_props_file(synthea_output_dir, bfd_dir):
     # Mitre FQN for storing end_state.properties file
     try:
         file_name = synthea_output_dir + "/end_state.properties"
         s3_client.upload_file(file_name, mitre_synthea_bucket, "end_state/end_state.properties")
         # also want to keep a copy of the previous end_state.properties file
-        file_name = file_name + "_orig"
+        file_name = bfd_dir + "/end_state.properties_orig"
         s3_client.upload_file(file_name, mitre_synthea_bucket, "end_state/end_state.properties_orig")
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
@@ -294,7 +294,7 @@ def main(args):
 
     target_dir = args[0]
     op = args[1]
-    bfd_s3_bucket = args[2] if len(args) > 2 else ''
+    bfd_s3_bucket_or_dir = args[2] if len(args) > 2 else ''
 
     if not target_dir.endswith('/'):
         target_dir = target_dir + "/"
@@ -308,11 +308,11 @@ def main(args):
         case "download_prop":
             download_end_state_props_file(target_dir)
         case "upload_prop":
-            upload_end_state_props_file(target_dir)
+            upload_end_state_props_file(target_dir, bfd_s3_bucket_or_dir)
         case "upload_characteristics":
             upload_characteristics_file(target_dir)
         case "upload_synthea_results":
-            upload_synthea_results(target_dir, bfd_s3_bucket)
+            upload_synthea_results(target_dir, bfd_s3_bucket_or_dir)
         case _:
             print(f"unrecognized S3 operation: {op}...exiting with error status!")
             return 1
