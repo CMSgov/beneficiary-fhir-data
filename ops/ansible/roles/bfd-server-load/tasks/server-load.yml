@@ -1,0 +1,76 @@
+---
+- name: Install Pre-requisites
+  yum:
+    pkg:
+      - gcc
+      - python3-devel
+      - python3-setuptools
+  become: true
+  tags:
+    - pre-ami
+
+- name: Create server-load Service User
+  user:
+    name: "{{ server_load_user }}"
+    shell: /bin/false
+  become: true
+  tags: 
+    - pre-ami
+
+- name: Create server-load Service Directory
+  file:
+    path: "{{ server_load_dir }}"
+    state: directory
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  tags: 
+    - pre-ami
+
+- name: Copy server-load Application
+  copy:
+    src: "{{ git_repo_root }}/apps/utils/locust_tests/"
+    remote_src: yes
+    dest: "{{ server_load_dir }}"
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+  become: true
+  tags:
+    - pre-ami
+
+- name: Install server-load Application Requirements
+  pip:
+    requirements: "{{ server_load_dir }}/requirements.txt"
+    executable: pip3
+    umask: "0022"
+  become: true
+  tags:
+    - pre-ami
+
+- name: Create server-load Service Wrapper Script
+  template:
+    src: bfd-server-load-service.sh.j2
+    dest: "{{ server_load_dir }}/bfd-server-load-service.sh"
+    owner: "{{ server_load_user }}"
+    group: "{{ server_load_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  notify:
+    - Restart server-load Service
+  tags:
+    - post-ami
+
+- name: Create server-load Service Definition
+  template:
+    src: bfd-server-load.service.j2
+    dest: /etc/systemd/system/bfd-server-load.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - Enable server-load Service
+    - Restart server-load Service
+  tags:
+    - post-ami

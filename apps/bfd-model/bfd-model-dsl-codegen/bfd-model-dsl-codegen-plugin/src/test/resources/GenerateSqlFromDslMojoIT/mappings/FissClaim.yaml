@@ -6,6 +6,7 @@ mappings:
     table:
       name: FissClaims
       schema: pre_adj
+      quoteNames: true
       primaryKeyColumns:
         - dcn
       columns:

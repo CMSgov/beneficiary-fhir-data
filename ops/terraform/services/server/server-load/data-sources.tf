@@ -11,7 +11,7 @@ data "aws_kms_key" "cmk" {
 data "aws_ami" "main" {
   most_recent = true
   owners      = ["self"]
-  name_regex  = ".+db-migrator.+"
+  name_regex  = ".*server-load.*"
 
   filter {
     name   = "tag:Branch"
