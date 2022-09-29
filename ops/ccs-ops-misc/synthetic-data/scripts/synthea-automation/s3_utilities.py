@@ -254,13 +254,13 @@ def wait_for_manifest_done(s3_bucket, s3_folder):
 #
 # Param: synthea_output_dir : unix filesystem directory that the synthea generation
 #        process  wrote its output files.
-# Param: s3_folder : BFD S3 Bucket/folder that the .CSV files will be uploaded to.
+# Param: s3_bucket : BFD S3 Bucket that the .CSV files will be uploaded to.
 #
 # Raises a python exception if failure to upload file.
 def upload_synthea_results(synthea_output_dir, s3_bucket):
     manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
     # need to extract the timestamp from the manifest.xml file. If we don't get
-    # it, then raise an excetion (and exit).
+    # it, then raise an exception (and exit).
     if len(manifest_ts) < 1:
         raise "Failed to extract timestamp from manifest"
     if len(s3_bucket) < 1:
@@ -276,11 +276,45 @@ def upload_synthea_results(synthea_output_dir, s3_bucket):
     # it will begin processing.
     upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder)
 
+# Function to check if synthea generated .CSV files were loaded into db as determined
+# by the presence of the manifest.xml file in the S3 bucket's /Done folder.
+#
+# Param: synthea_output_dir : unix filesystem directory that the synthea generation
+#        process  wrote its output files.
+# Param: s3_bucket : BFD S3 Bucket to check
+#
+# Raises a python exception if failure to upload file.
+def wait_for_manifest_done(synthea_output_dir, s3_bucket):
+    manifest_ts = extract_timestamp_from_manifest(synthea_output_dir)
+    # need to extract the timestamp from the manifest.xml file. If we don't get
+    # it, then raise an exception (and exit).
+    if len(manifest_ts) < 1:
+        raise "Failed to extract timestamp from manifest"
+    if len(s3_bucket) < 1:
+        raise "Failed to provide BFD S3 bucket for ETL files"
+
+    key_name = "Synthetic/Done/" + manifest_ts + "/0_manifest.xml"
+
     # now we wait....the ETL pipeline will move processed files to the Done/ folder; when it
     # has completed processing all RIF (.csv) files, it then moves the manifest.xml file to
     # the Done/ folder signifying job job completion so we'll wait for that to happen.
-    s3_folder = "Synthetic/Done/" + manifest_ts
-    wait_for_manifest_done(s3_bucket, s3_folder)
+
+    s3_resource = boto3.resource('s3', config=boto_config)
+
+    # use AWS Waiter object to check for the 0_manifest.xml showing up in the appropriate
+    # /Done folder.
+    try:
+        waiter = s3_client.get_waiter('object_exists')
+        print(f"S3 waiting for manifest: {s3_bucket} : {key_name}")
+        waiter.wait(Bucket=s3_bucket, Key=key_name,
+                WaiterConfig={'Delay': s3_wait_delay, 'MaxAttempts': s3_wait_max_retries})
+    except ClientError as e:
+        raise Exception( "boto3 client error in wait_for_manifest_done: " + e.__str__())
+    except WaiterError as e:
+        print("boto3 client timed out: " + e.__str__())
+        sys.exit(1)
+    except Exception as e:
+        raise Exception( "Unexpected error in wait_for_manifest_done: " + e.__str__())
 
 # Function to handle S3 processing for the synthea generation shell script.
 # Requires at least 2 arguments from the invocation stack:
@@ -313,6 +347,8 @@ def main(args):
             upload_characteristics_file(target_dir)
         case "upload_synthea_results":
             upload_synthea_results(target_dir, bfd_s3_bucket_or_dir)
+        case "wait_for_manifest_done":
+            wait_for_manifest_done(target_dir, bfd_s3_bucket_or_dir)
         case _:
             print(f"unrecognized S3 operation: {op}...exiting with error status!")
             return 1
