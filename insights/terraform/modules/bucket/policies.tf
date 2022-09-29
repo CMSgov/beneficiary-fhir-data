@@ -189,11 +189,9 @@ resource "aws_s3_bucket_policy" "cross_account" {
               "Action": [
                   "s3:AbortMultipartUpload",
                   "s3:GetBucketLocation",
-                  "s3:GetObject*",
                   "s3:ListBucket",
                   "s3:ListBucketMultipartUploads",
-                  "s3:PutObject*",
-                  "s3:DeleteObject*"
+                  "s3:*Object"
               ],
               "Resource": [
                   "${aws_s3_bucket.main.arn}/*",
