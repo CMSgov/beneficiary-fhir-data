@@ -10,7 +10,7 @@ CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 TARGET_ROOT_DIR="/opt/dev"
 TARGET_ENV="${TARGET_ENV:-test}"
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
-SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-True}"
+SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
 
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
@@ -299,35 +299,35 @@ upload_props_file_to_s3(){
 #----------------- GO! ------------------#
 # genearal fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
-#clean_up
+clean_up
 
 # invoke function to clone the Synthea repo and build it.
-#install_synthea_from_git
+install_synthea_from_git
 
 # invoke function to clone the BFD repo.
-#install_bfd_from_git
+install_bfd_from_git
 
 # invoke function to create a python virtual environment.
-#activate_py_env
+activate_py_env
 
 # invoke function to download proprietary Mitre mapping files.
-#download_s3_mapping_files
+download_s3_mapping_files
 
 # invoke function to download proprietary Mitre shell script files.
-#download_s3_script_files
+download_s3_script_files
 
 # invoke function to download (if available) a previous run's end_state.properties file.
-#download_s3_props_file
+download_s3_props_file
 
 # invoke function to invoke BFD .py script that verifies that:
 #  1) we have all the files necessary to perform a synthea generation run.
 #  2) executes a synthea generation run
-#prepare_and_run_synthea
+prepare_and_run_synthea
 
 # Invoke a functionn to upload the generated RIF files to the appropriate BFD
 # ETL pipeline S3 bucket, where the ETL process will pick them up and load data
 # into database.
-#upload_synthea_results
+upload_synthea_results
 
 # Invoke a functionn to wait on / check the appropriate BFD ETL pipeline S3 bucket for
 # the 0_manifest file to appear in the S3 bucket's /Done folder.
