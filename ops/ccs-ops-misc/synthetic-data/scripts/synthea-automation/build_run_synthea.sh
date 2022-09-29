@@ -7,11 +7,10 @@ CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
 # we'll default to 'test' and 10 bene's for now
+TARGET_ROOT_DIR="/opt/dev"
 TARGET_ENV="${TARGET_ENV:-test}"
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
-SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
-
-S3_TEST_BUCKET="${BFD_S3_BUCKET:-bfd-test-etl-577373831711}"
+SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-True}"
 
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
@@ -22,16 +21,56 @@ br_name_re="^(master|main)$"
 mvn_dep_ver="2.10"
 mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}:list"
 
-
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
-TARGET_SYNTHEA_DIR=/opt/dev/synthea
-TARGET_BFD_DIR=/opt/dev/bfd
+TARGET_SYNTHEA_DIR=${TARGET_ROOT_DIR}/synthea
+TARGET_BFD_DIR=${TARGET_ROOT_DIR}/bfd
 
 # we'll need to keep track of 'begin' and 'end' bene_id values necessary to perform
 # various Synthea generation tasks.
 BEG_BENE_ID=
 END_BENE_ID=
 BFD_CHARACTERISTICS=
+# Need to support up to 3 concurrent environments (prod, prod-sbx, test) for a given run;
+# each environment uses a distinct S3 bucket
+declare -A S3_BUCKETS
+
+# various S3 buckets used by the ETL pipeline
+PROD_S3_BUCKET="bfd-prod-etl-577373831711"
+TEST_S3_BUCKET="bfd-test-etl-577373831711"
+PROD_SBX_S3_BUCKET="bfd-prod-sbx-etl-577373831711"
+
+# save IFS context (in case bash doesn't...)
+oIFS=${IFS}
+# Set comma as delimiter
+IFS=','
+# Read the split words into an array based on comma delimiter; make
+# sure there are no dupe entries
+read -a arr <<< "${TARGET_ENV}"
+
+# use assocaite array to ensure uniqueness (i.e., only one instance of ea env)
+# lots of other ways to do this, but nice to have key/value pairs at our disposal
+for nam in ${arr[@]}; do
+  case "$nam" in
+    test)
+      S3_BUCKETS[test]="${TEST_S3_BUCKET}"
+      ;;
+    prod)
+      S3_BUCKETS[prod]="${PROD_S3_BUCKET}"
+      ;;
+    prod-sbx)
+      S3_BUCKETS[prod-sbx]="${PROD_SBX_S3_BUCKET}"
+      ;;
+    *)
+	  echo "Unrecognized environemnt: ${nam}"
+	  ;;
+  esac
+done
+
+# create single string that can be passed to validation .py scripts
+UNIQUE_ENVS_PARAM=$(echo "${!S3_BUCKETS[*]}")
+
+# restore IFS
+IFS=${oIFS}
 
 # the#se are sort of immtuable, aren't they?
 BFD_END_STATE_PROPERTIES="end_state.properties"
@@ -146,13 +185,13 @@ download_s3_props_file(){
 # 1: end state properties file path
 # 2: location of synthea git repo
 # 3: number of beneficiaries to be generated
-# 4: environment to load/validate; should be either: test, prod-sbx, prod
+# 4: environment to load/validate; either: test, prod-sbx, prod or comma-delimited string containing any of them
 # 5: (optional) boolean to skip validation (true); useful if re-generating a bad batch, defaults to False
 #
 prepare_and_run_synthea(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 prepare-and-run-synthea.py ${BFD_END_STATE_PROPERTIES} ${TARGET_SYNTHEA_DIR} ${NUM_GENERATED_BENES} "${TARGET_ENV}" "${SKIP_VALIDATION}"
+  python3 prepare-and-run-synthea.py ${BFD_END_STATE_PROPERTIES} ${TARGET_SYNTHEA_DIR} ${NUM_GENERATED_BENES} "${UNIQUE_ENVS_PARAM}" "${SKIP_VALIDATION}"
   deactivate
 }
 
@@ -167,9 +206,28 @@ upload_synthea_results(){
   mkdir ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup
   cp ${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup
 
-  # now upload the RIF (.csv) files to S3 ETL bucket
+  # now upload the RIF (.csv) files to S3 ETL bucket(s); one per environment, passed in as arg
   source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${S3_TEST_BUCKET}"
+  for s3_bucket in "${S3_BUCKETS[@]}"; do
+    python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
+  done
+  deactivate
+}
+
+# Function that invokes an S3 utility to wiat until the manifest file (0_manifest.xml) shows
+# up in the S3 bucket's /Done folder; the ETL pipeline moves the manifest file once it has
+# completed processing of the /Incoming RIF (.csv) files.
+wait_for_manifest_done(){
+  echo "waiting for manifest Done"
+  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+
+  # wait until the 0_manifest.xml file exists in the /Done folder for all environments being prcoessed; this
+  # op is synchronous meaning that we'll check/wait on one environemnt at a time. Since we have an 'all or nothing'
+  # processing model, the extra time to do this synchronously really doesn't matter.
+  source .venv/bin/activate
+  for s3_bucket in "${S3_BUCKETS[@]}"; do
+    python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "wait_for_manifest_done" "${s3_bucket}"
+  done
   deactivate
 }
 
@@ -189,7 +247,7 @@ do_load_validation(){
   echo "END_BENE_ID=${END_BENE_ID}"
 
   source .venv/bin/activate
-  python3 validate-synthea-load.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${TARGET_SYNTHEA_DIR}" "${TARGET_ENV}"
+  python3 validate-synthea-load.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${TARGET_SYNTHEA_DIR}" "${UNIQUE_ENVS_PARAM}"
   deactivate
 }
 
@@ -204,7 +262,7 @@ do_load_validation(){
 gen_characteristics_file(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${TARGET_ENV}"
+  python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${UNIQUE_ENVS_PARAM}"
 
   # check the generated output file; must have more than just the header line
   line_cnt=`cat ${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l`
@@ -241,35 +299,39 @@ upload_props_file_to_s3(){
 #----------------- GO! ------------------#
 # genearal fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
-clean_up
+#clean_up
 
 # invoke function to clone the Synthea repo and build it.
-install_synthea_from_git
+#install_synthea_from_git
 
 # invoke function to clone the BFD repo.
-install_bfd_from_git
+#install_bfd_from_git
 
 # invoke function to create a python virtual environment.
-activate_py_env
+#activate_py_env
 
 # invoke function to download proprietary Mitre mapping files.
-download_s3_mapping_files
+#download_s3_mapping_files
 
 # invoke function to download proprietary Mitre shell script files.
-download_s3_script_files
+#download_s3_script_files
 
 # invoke function to download (if available) a previous run's end_state.properties file.
-download_s3_props_file
+#download_s3_props_file
 
 # invoke function to invoke BFD .py script that verifies that:
 #  1) we have all the files necessary to perform a synthea generation run.
 #  2) executes a synthea generation run
-prepare_and_run_synthea
+#prepare_and_run_synthea
 
 # Invoke a functionn to upload the generated RIF files to the appropriate BFD
 # ETL pipeline S3 bucket, where the ETL process will pick them up and load data
 # into database.
-upload_synthea_results
+#upload_synthea_results
+
+# Invoke a functionn to wait on / check the appropriate BFD ETL pipeline S3 bucket for
+# the 0_manifest file to appear in the S3 bucket's /Done folder.
+wait_for_manifest_done
 
 # Invoke a function that executes a .py script that performs validation of data for
 # the just executed ETL pipeline load.
