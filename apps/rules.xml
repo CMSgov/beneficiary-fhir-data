@@ -9,5 +9,6 @@
         <ignoreVersion type="regex">.*[bB]eta[0-9]{1,}</ignoreVersion>
         <ignoreVersion type="regex">.*.Final</ignoreVersion>
         <ignoreVersion type="regex">.*CR.</ignoreVersion>
+        <ignoreVersion type="regex">.*[rR][cC]*.*</ignoreVersion>
     </ignoreVersions>
 </ruleset>

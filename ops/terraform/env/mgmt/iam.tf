@@ -189,6 +189,57 @@ POLICY
   tags        = local.shared_tags
 }
 
+
+resource "aws_iam_policy" "code_artifact_rw" {
+  description = "CodeArtifact read/write permissions"
+  name        = "bfd-${local.env}-codeartifact-rw"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": [
+        "codeartifact:CopyPackageVersions",
+        "codeartifact:DeletePackageVersions",
+        "codeartifact:DescribePackageVersion",
+        "codeartifact:DescribeRepository",
+        "codeartifact:GetPackageVersionAsset",
+        "codeartifact:GetPackageVersionReadme",
+        "codeartifact:GetRepositoryEndpoint",
+        "codeartifact:ListPackageVersionAssets",
+        "codeartifact:ListPackageVersionDependencies",
+        "codeartifact:ListPackageVersions",
+        "codeartifact:ListPackages",
+        "codeartifact:PublishPackageVersion",
+        "codeartifact:PutPackageMetadata",
+        "codeartifact:ReadFromRepository",
+        "codeartifact:TagResource",
+        "codeartifact:UntagResource",
+        "codeartifact:UpdatePackageVersionsStatus"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:codeartifact:*:${local.account_id}:package/*/*/*/*/*",
+        "${aws_codeartifact_repository.this.arn}",
+        "${aws_codeartifact_domain.this.arn}"
+      ],
+      "Sid": "CodeArtifactReadWrite"
+    },
+    {
+      "Action": "codeartifact:GetAuthorizationToken",
+      "Effect": "Allow",
+      "Resource": [
+        "${aws_codeartifact_domain.this.arn}"
+      ],
+      "Sid": "CodeArtifactAuthToken"
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+  tags        = local.shared_tags
+}
+
 resource "aws_iam_policy" "jenkins_volume" {
   description = "Jenkins Data Volume Policy"
   name        = "bfd-${local.env}-jenkins-volume"
@@ -236,7 +287,8 @@ POLICY
   force_detach_policies = false
   managed_policy_arns = [
     aws_iam_policy.jenkins_permission_boundary.arn,
-    aws_iam_policy.jenkins_volume.arn
+    aws_iam_policy.jenkins_volume.arn,
+    aws_iam_policy.code_artifact_rw.arn,
   ]
   max_session_duration = 3600
   name                 = "cloudbees-jenkins"

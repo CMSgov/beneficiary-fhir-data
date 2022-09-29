@@ -425,7 +425,7 @@
             "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
             "valueCoding" : {
               "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
-              "code" : "987654321"
+              "code" : "000000000"
             }
           } ],
           "coding" : [ {
@@ -3840,7 +3840,8 @@
           "url" : "http://hl7.org/fhir/sid/ndc",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "49035044700"
+            "code" : "000000000",
+            "display" : "Fake Diluent - WATER"
           }
         } ],
         "sequence" : 6,
