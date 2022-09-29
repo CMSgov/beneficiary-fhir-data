@@ -19,7 +19,6 @@ ignore_list:
     - file_pattern: .*/claim.*\.json
       error_patterns:
         - ".*Claim\\.insurance: minimum required = 1, but only found 0.*"             # Missing required field (2 errors)
-        - ".*Claim\\.insurance\\.coverage: minimum required = 1, but only found 0.*"  # Missing required field (4 errors)
     - file_pattern: .*/coverage.*\.json
       error_patterns:
         - ".*Coverage\\.meta\\.profile:supportedProfile: minimum required.*"          # Unsupported profile? (5 errors)
