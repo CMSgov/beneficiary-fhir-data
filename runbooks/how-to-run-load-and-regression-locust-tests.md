@@ -175,7 +175,7 @@ particular BFD Server host.
    1. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
       sensitive SSM parameters in the environment under test
 
-10. Set `CLIENT_CERT_PATH` to the unsecured certificate available in the repository:
+10. Set `CLIENT_CERT_PATH` to the downloaded testing certificate from the previous step:
 
     ```bash
     CLIENT_CERT_PATH=$HOME/bfd-test-cert.pem
@@ -320,7 +320,7 @@ particular BFD Server host.
 11. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
     sensitive SSM parameters in the environment under test
 
-12. Set `CLIENT_CERT_PATH` to the unsecured certificate available in the repository:
+12. Set `CLIENT_CERT_PATH` to the testing certificate from the previous step:
 
     ```bash
     CLIENT_CERT_PATH=$BFD_ROOT/bfd-test-cert.pem
