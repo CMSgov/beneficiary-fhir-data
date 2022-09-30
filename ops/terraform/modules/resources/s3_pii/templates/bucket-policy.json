@@ -75,6 +75,21 @@ ${jsonencode(
             "s3:x-amz-server-side-encryption": "aws:kms"
         }
       }
+    },
+    {
+      "Sid": "AllowSSLRequestsOnly",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+          "arn:aws:s3:::${bucket_id}",
+          "arn:aws:s3:::${bucket_id}/*"
+      ],
+      "Condition": {
+          "Bool": {
+              "aws:SecureTransport": "false"
+          }
+      }
     }
   ]
 }

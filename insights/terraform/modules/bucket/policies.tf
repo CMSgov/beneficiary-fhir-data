@@ -197,7 +197,22 @@ resource "aws_s3_bucket_policy" "cross_account" {
                   "${aws_s3_bucket.main.arn}/*",
                   "${aws_s3_bucket.main.arn}"
               ]
-          }
+          },
+        {
+            "Sid": "AllowSSLRequestsOnly",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": "s3:*",
+            "Resource": [
+                  "${aws_s3_bucket.main.arn}",
+                  "${aws_s3_bucket.main.arn}/*"
+            ],
+            "Condition": {
+                "Bool": {
+                    "aws:SecureTransport": "false"
+                }
+            }
+        }
       ]
     }
     POLICY
