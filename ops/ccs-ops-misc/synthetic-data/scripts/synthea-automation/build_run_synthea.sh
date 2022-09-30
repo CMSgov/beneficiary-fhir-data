@@ -68,7 +68,12 @@ echo "enviroments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
 
 # restore IFS to original state
 IFS=${oIFS}
+
 # these names are immtuable
+SYNTHEA_GIT_REPO="https://github.com/synthetichealth/synthea.git"
+BFD_GIT_REPO="https://github.com/CMSgov/beneficiary-fhir-data.git"
+
+# filename to maintain the ends state of a synthea run
 BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
@@ -111,7 +116,7 @@ error_exit() {
 # files from GitHub; it then builds the application via gradle.
 install_synthea_from_git(){
   echo "installing synthea from git"
-  git clone https://github.com/synthetichealth/synthea.git ${TARGET_SYNTHEA_DIR}
+  git clone ${SYNTHEA_GIT_REPO} ${TARGET_SYNTHEA_DIR}
   cd ${TARGET_SYNTHEA_DIR}
   ./gradlew clean check
 }
@@ -120,7 +125,7 @@ install_synthea_from_git(){
 # scripts do not need to be built, but will need read/execute.
 install_bfd_from_git(){
   echo "installing bfd from git"
-  git clone https://github.com/CMSgov/beneficiary-fhir-data.git ${TARGET_BFD_DIR}
+  git clone ${BFD_GIT_REPO} ${TARGET_BFD_DIR}
   cd ${TARGET_BFD_DIR}
   git checkout ${BFD_BRANCH}
   chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
