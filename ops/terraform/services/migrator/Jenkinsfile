@@ -32,7 +32,7 @@ boolean deployMigrator(Map args = [:]) {
 		directory: "ops/terraform/services/migrator",
 		tfVars: [
             amiId: amiId,
-            createMigratorInstance: true
+            createMigratorInstance: true,
 		    gitBranchName: gitBranchName,
             heartbeatInterval: heartbeatInterval
 		]
@@ -58,7 +58,7 @@ boolean deployMigrator(Map args = [:]) {
             directory: "ops/terraform/services/migrator",
             tfVars: [
                 amiId: amiId,
-                createMigratorInstance: false
+                createMigratorInstance: false,
                 gitBranchName: gitBranchName,
                 heartbeatInterval: heartbeatInterval
             ]
