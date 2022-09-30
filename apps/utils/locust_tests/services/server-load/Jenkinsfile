@@ -130,8 +130,12 @@ spec:
                 + "log group. Note that it can take a few moments for the controller to begin "
                 + "running tests")
 
+          runtimeLimit = params.TEST_RUNTIME_LIMIT.toInteger()
+          coastingTime = params.COASTING_TIME.toInteger()
+          maxRuntime = params.STOP_ON_SCALING ? runtimeLimit + coastingTime
+                                              : runtimeLimit
           try {
-            timeout(time: (params.TEST_RUNTIME_LIMIT.toInteger() + 600), unit: 'SECONDS') {
+            timeout(time: (maxRuntime + 600), unit: 'SECONDS') {
               input 'Once the run is finished, click either Abort or Proceed to cleanup the test'
             }
           } catch(err) {}
