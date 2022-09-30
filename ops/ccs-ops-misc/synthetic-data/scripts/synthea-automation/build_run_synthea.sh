@@ -2,31 +2,23 @@
 set -eo pipefail
 
 # global variables
-#PROGNAME=${0##*/}
 CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
 # we'll default to 'test' and 10 bene's for now
-TARGET_ROOT_DIR="/opt/dev"
+BUILD_ROOT_DIR="${BUILD_ROOT_DIR:-/opt/dev}"
 TARGET_ENV="${TARGET_ENV:-test}"
+BFD_BRANCH="${BFD_DEPLOY_BRANCH:-master}"
+
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
 SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
 
-# Git branch to build from...how does this actually work? from build params?
-BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
-
-#br_name="master" # name of the main branch
-#br_name_re="^(master|main)$"
-
-#mvn_dep_ver="2.10"
-#mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}:list"
-
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
-TARGET_SYNTHEA_DIR=${TARGET_ROOT_DIR}/synthea
-TARGET_BFD_DIR=${TARGET_ROOT_DIR}/bfd
+TARGET_SYNTHEA_DIR=${BUILD_ROOT_DIR}/synthea
+TARGET_BFD_DIR=${BUILD_ROOT_DIR}/bfd
 
 # we'll need to keep track of 'begin' and 'end' bene_id values necessary to perform
-# various Synthea generation tasks.
+# various Synthea generation and validation tasks.
 BEG_BENE_ID=
 END_BENE_ID=
 BFD_CHARACTERISTICS=
@@ -69,13 +61,13 @@ for nam in "${arr[@]}"; do
   esac
 done
 
-# create single string that can be passed to validation .py scripts
+# create single string that can be passed to validation .py scripts; this is a comma-separated
+# list of target deployment tags (i.e., prod,test)
 UNIQUE_ENVS_PARAM=$(echo "${!S3_BUCKETS[*]}")
 echo "enviroments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
 
-# restore IFS
+# restore IFS to original state
 IFS=${oIFS}
-
 # these names are immtuable
 BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
@@ -85,8 +77,8 @@ BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
 BFD_CHARACTERISTICS_FILE_NAME="characteristics.csv"
 # assorted variables used by the script.
 BFD_SYNTHEA_AUTO_LOCATION="${TARGET_BFD_DIR}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
+# the directory for synthea output 
 BFD_SYNTHEA_OUTPUT_LOCATION="${TARGET_SYNTHEA_DIR}/output/bfd"
-
 # directory where Mitre synthea mapping files will be downlowded to.
 MAPPING_FILES_LOCATION="${TARGET_SYNTHEA_DIR}/src/main/resources/export"
 
@@ -214,12 +206,12 @@ upload_synthea_results_to_s3(){
   source .venv/bin/activate
   for s3_bucket in "${S3_BUCKETS[@]}"; do
     echo "uploading RIF files to: ${s3_bucket}"
-    #python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
+    python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
   done
   deactivate
 }
 
-# Function that invokes an S3 utility to wiat until the manifest file (0_manifest.xml) shows
+# Function that invokes an S3 utility to wait until the manifest file (0_manifest.xml) shows
 # up in the S3 bucket's /Done folder; the ETL pipeline moves the manifest file once it has
 # completed processing of the /Incoming RIF (.csv) files.
 wait_for_manifest_done(){
