@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # global variables
-PROGNAME=${0##*/}
+#PROGNAME=${0##*/}
 CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
@@ -15,11 +15,11 @@ SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
 # Git branch to build from...how does this actually work? from build params?
 BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
 
-br_name="master" # name of the main branch
-br_name_re="^(master|main)$"
+#br_name="master" # name of the main branch
+#br_name_re="^(master|main)$"
 
-mvn_dep_ver="2.10"
-mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}:list"
+#mvn_dep_ver="2.10"
+#mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}:list"
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
 TARGET_SYNTHEA_DIR=${TARGET_ROOT_DIR}/synthea
@@ -30,8 +30,11 @@ TARGET_BFD_DIR=${TARGET_ROOT_DIR}/bfd
 BEG_BENE_ID=
 END_BENE_ID=
 BFD_CHARACTERISTICS=
+
 # Need to support up to 3 concurrent environments (prod, prod-sbx, test) for a given run;
-# each environment uses a distinct S3 bucket
+# each environment uses a distinct S3 bucket; lower-case the TARGET_ENV string to ensure
+# deterministic outcome(s)
+TARGET_ENV=$(echo "$TARGET_ENV" | tr '[:upper:]' '[:lower:]')
 declare -A S3_BUCKETS
 
 # various S3 buckets used by the ETL pipeline
@@ -49,8 +52,8 @@ read -a arr <<< "${TARGET_ENV}"
 
 # use assocaite array to ensure uniqueness (i.e., only one instance of ea env)
 # lots of other ways to do this, but nice to have key/value pairs at our disposal
-for nam in ${arr[@]}; do
-  case "$nam" in
+for nam in "${arr[@]}"; do
+  case "${nam}" in
     test)
       S3_BUCKETS[test]="${TEST_S3_BUCKET}"
       ;;
@@ -68,20 +71,18 @@ done
 
 # create single string that can be passed to validation .py scripts
 UNIQUE_ENVS_PARAM=$(echo "${!S3_BUCKETS[*]}")
+echo "enviroments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
 
 # restore IFS
 IFS=${oIFS}
 
-# the#se are sort of immtuable, aren't they?
+# these names are immtuable
 BFD_END_STATE_PROPERTIES="end_state.properties"
-
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
-
 # BFD characteristics file
 BFD_CHARACTERISTICS_FILE_NAME="characteristics.csv"
-
 # assorted variables used by the script.
 BFD_SYNTHEA_AUTO_LOCATION="${TARGET_BFD_DIR}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
 BFD_SYNTHEA_OUTPUT_LOCATION="${TARGET_SYNTHEA_DIR}/output/bfd"
@@ -124,14 +125,17 @@ install_synthea_from_git(){
 }
 
 # Function to clone BFD repository from GitHub; this shell script and associated python
-# scripts do not need to be built, but will need to be execute permission.
+# scripts do not need to be built, but will need read/execute.
 install_bfd_from_git(){
   echo "installing bfd from git"
   git clone https://github.com/CMSgov/beneficiary-fhir-data.git ${TARGET_BFD_DIR}
   cd ${TARGET_BFD_DIR}
   git checkout ${BFD_BRANCH}
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
-  chmod 644 *.py
+  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
+  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
+  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
+  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
+  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
 }
 
 # Utility function to create a python virtual environment that will be used during the
@@ -147,7 +151,7 @@ activate_py_env(){
 
 # Function to download proprietary Mitre synthea mapping files necessary for generating
 # synthetic beneficiaries and claims.
-download_s3_mapping_files(){
+download_mapping_files_from_s3(){
   echo "download mapping files from S3 to: ${MAPPING_FILES_LOCATION}"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
@@ -156,7 +160,7 @@ download_s3_mapping_files(){
 }
 
 # Function that invokes a python S3 utility to download synthea script files.
-download_s3_script_files(){
+download_script_files_from_s3(){
   echo "download script files from S3 from: ${TARGET_SYNTHEA_DIR}"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
@@ -165,7 +169,7 @@ download_s3_script_files(){
 }
 
 # Function that invokes a python S3 utility to download the synthea end_state.properties file.
-download_s3_props_file(){
+download_props_file_from_s3(){
   echo "download BFD ${BFD_END_STATE_PROPERTIES} file from S3 to: ${BFD_SYNTHEA_AUTO_LOCATION}"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
@@ -176,7 +180,7 @@ download_s3_props_file(){
 
   # extract the bene_id_start variable from the downloaded end state properties file.
   # It will be used in a later function/operation.
-  BEG_BENE_ID=`cat ./${BFD_END_STATE_PROPERTIES_ORIG} |grep bene_id_start |sed 's/.*=//'`
+  BEG_BENE_ID=$(cat ./${BFD_END_STATE_PROPERTIES_ORIG} |grep bene_id_start |sed 's/.*=//')
   echo "BEG_BENE_ID=${BEG_BENE_ID}"
   deactivate
 }
@@ -191,14 +195,14 @@ download_s3_props_file(){
 prepare_and_run_synthea(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
-  python3 prepare-and-run-synthea.py ${BFD_END_STATE_PROPERTIES} ${TARGET_SYNTHEA_DIR} ${NUM_GENERATED_BENES} "${UNIQUE_ENVS_PARAM}" "${SKIP_VALIDATION}"
+  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${UNIQUE_ENVS_PARAM}" "${SKIP_VALIDATION}"
   deactivate
 }
 
 # Function that invokes an S3 utility to upload new generated synthetic data to an
 # S3 folder where the BFD ETL pipeline will discover the synthetic RIF files and
 # load them data into the appropriate BFD database.
-upload_synthea_results(){
+upload_synthea_results_to_s3(){
   echo "upload synthea results to S3"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
 
@@ -209,7 +213,8 @@ upload_synthea_results(){
   # now upload the RIF (.csv) files to S3 ETL bucket(s); one per environment, passed in as arg
   source .venv/bin/activate
   for s3_bucket in "${S3_BUCKETS[@]}"; do
-    python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
+    echo "uploading RIF files to: ${s3_bucket}"
+    #python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
   done
   deactivate
 }
@@ -243,7 +248,7 @@ do_load_validation(){
   cp ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup/*.csv ${BFD_SYNTHEA_OUTPUT_LOCATION}
 
   # now perform the validation of the run.
-  END_BENE_ID=`cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//'`
+  END_BENE_ID=$(cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//')
   echo "END_BENE_ID=${END_BENE_ID}"
 
   source .venv/bin/activate
@@ -265,7 +270,7 @@ gen_characteristics_file(){
   python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${UNIQUE_ENVS_PARAM}"
 
   # check the generated output file; must have more than just the header line
-  line_cnt=`cat ${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l`
+  line_cnt=$(cat ${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l)
   if [[ "$line_cnt" -gt 1 ]]; then
     BFD_CHARACTERISTICS="${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
     echo "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} successfully discovered"
@@ -311,23 +316,23 @@ install_bfd_from_git
 activate_py_env
 
 # invoke function to download proprietary Mitre mapping files.
-download_s3_mapping_files
+download_mapping_files_from_s3
 
 # invoke function to download proprietary Mitre shell script files.
-download_s3_script_files
+download_script_files_from_s3
 
 # invoke function to download (if available) a previous run's end_state.properties file.
-download_s3_props_file
+download_props_file_from_s3
 
 # invoke function to invoke BFD .py script that verifies that:
 #  1) we have all the files necessary to perform a synthea generation run.
 #  2) executes a synthea generation run
 prepare_and_run_synthea
 
-# Invoke a functionn to upload the generated RIF files to the appropriate BFD
-# ETL pipeline S3 bucket, where the ETL process will pick them up and load data
-# into database.
-upload_synthea_results
+# Invoke a function to upload the generated RIF files to the appropriate BFD
+# ETL pipeline S3 /Incoming bucket, where the ETL process will pick them up and
+# load the synthetic data into database.
+upload_synthea_results_to_s3
 
 # Invoke a functionn to wait on / check the appropriate BFD ETL pipeline S3 bucket for
 # the 0_manifest file to appear in the S3 bucket's /Done folder.
@@ -353,7 +358,7 @@ if [[ -n ${BEG_BENE_ID} && -n ${BFD_CHARACTERISTICS} ]]; then
 else
   error_exit "end state BEG_BENE_ID or BFD_CHARACTERISTICS variables unset...exiting"
 fi
-
+echo
 echo "============================================="
 echo "BFD Synthea Generation completed SUCCESFULLY!"
 echo "============================================="
