@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class ColumnBean {
   /** Regex used to recognize numeric columns by their SQL type. */
   private static final Pattern NumericTypeRegex =
