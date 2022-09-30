@@ -96,9 +96,9 @@ spec:
 
     booleanParam(name: 'STOP_ON_SCALING',
                  defaultValue: true,
-                 description: 'Whether the load test run should end once receiving a scaling '
-                              + 'notification. Set to false for scenarios where a static load test '
-                              + 'is desired')
+                 description: 'Whether the load test run should end, if COASTING_TIME is zero, or '
+                              + 'start coasting once receiving a scaling notification. Set to '
+                              + 'false for scenarios where a static load test is desired')
 
     booleanParam(name: 'STOP_ON_NODE_LIMIT',
                  defaultValue: true,

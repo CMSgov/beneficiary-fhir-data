@@ -77,7 +77,7 @@ variable "warm_instance_target" {
 }
 
 variable "stop_on_scaling" {
-  description = "Whether the load test run should end once receiving a scaling notification. Set to false for scenarios where a static load test is desired"
+  description = "Whether the load test run should end, if coasting_time is zero, or start coasting once receiving a scaling notification. Set to false for scenarios where a static load test is desired"
   type        = bool
   default     = true
 }
