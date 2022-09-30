@@ -1,10 +1,10 @@
-"""A lambda function that coordinates running a Locuster worker node in a swarm of many Locust
+"""A lambda function that coordinates running a Locust worker node in a swarm of many Locust
 workers all communicating with a single Locust master, the "controller"."""
 
-import asyncio
 import datetime
 import functools
 import os
+import subprocess
 import sys
 import urllib.parse
 from dataclasses import dataclass
@@ -66,10 +66,6 @@ def handler(event, context):
     Handles execution of a worker node.
     """
 
-    asyncio.run(_async_handler(event))
-
-
-async def _async_handler(event):
     try:
         invoke_event = InvokeEvent(**event)
     except TypeError as ex:
@@ -126,24 +122,27 @@ async def _async_handler(event):
         f"master-port: {invoke_event.locust_port}"
     )
 
-    process = await asyncio.create_subprocess_exec(
-        "locust",
-        f"--locustfile={os.path.join(locust_tests_dir, 'high_volume_suite.py')}",
-        f"--host={invoke_event.host}",
-        f"--database-uri={db_dsn}",
-        f"--client-cert-path={cert_path}",
-        "--worker",
-        f"--master-host={invoke_event.controller_ip}",
-        f"--master-port={invoke_event.locust_port}",
-        "--headless",
-        "--only-summary",
+    process = subprocess.Popen(
+        [
+            "locust",
+            f"--locustfile={os.path.join(locust_tests_dir, 'high_volume_suite.py')}",
+            f"--host={invoke_event.host}",
+            f"--database-uri={db_dsn}",
+            f"--client-cert-path={cert_path}",
+            "--worker",
+            f"--master-host={invoke_event.controller_ip}",
+            f"--master-port={invoke_event.locust_port}",
+            "--headless",
+            "--only-summary",
+        ],
         cwd=locust_tests_dir,
+        stderr=subprocess.STDOUT,
     )
 
     print(f"Started locust worker with pid {process.pid}")
 
     has_scaling_target_hit = False
-    while process.returncode is None:
+    while process.poll() is None:
         scale_or_stop_events = check_queue(
             queue=queue,
             timeout=1,
@@ -167,8 +166,8 @@ async def _async_handler(event):
             )
             break
 
-    if process.returncode:
-        # If returncode is not None, then the locust process has finished on its own and we do not
+    if process.poll():
+        # If poll() is not None, then the locust process has finished on its own and we do not
         # need to end it manually
         print("Locust worker process ended without intervention, stopping...")
         return
@@ -196,12 +195,5 @@ async def _async_handler(event):
         print("Could not terminate Locust worker subprocess")
         print(f"Received exception {e}")
 
-    await process.wait()
-
-    # Accessing a protected member on purpose to work around known problem with
-    # orphaned processes in asyncio.
-    # If the process is already closed, this is a noop.
-    # pylint: disable=protected-access
-    process._transport.close()
-
+    process.wait()
     print("Locust worker node process has been stopped")
