@@ -65,7 +65,7 @@ variable "test_runtime_limit" {
 }
 
 variable "coasting_time" {
-  description = "The amount of time the load test should continue for after receiving a scaling notification. Does not effect operator stop signals"
+  description = "The amount of time, in seconds, the load test should continue for after receiving a scaling notification. Does not effect operator stop signals"
   type        = number
   default     = 0
 }
