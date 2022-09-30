@@ -11,7 +11,15 @@ These tests are intended to be run from a server instance which has access permi
 do this is outside the scope of this document, but instructions for this can be found in this more detailed run guide on confluence:
 https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests. 
 
+The following test suites ([Locustfiles](https://docs.locust.io/en/stable/writing-a-locustfile.html)) are available to run:
 
+| Suite Name | Path | Purpose
+| - | - | - |
+| V2 Regression Suite | `v2/regression_suite.py` | Used to test performance regressions for BFD Server's most popular V2 API endpoints |
+| PACA Smoke Tests | `v2/partially_adjudicated_smoketest.py` | Tests for Partially Adjudicated Claims endpoints to error check the transformers |
+| PACA Test Suite | `v2/partially_adjudicated_smoketest.py` | Tests for Partially Adjudicated Claims endpoints to test their performance |
+| V1 Regression Suite | `v1/regression_suite.py` | Used to test performance regressions for BFD Server's most popular V1 API endpoints |
+| Load Testing Suite | `high_volume_suite.py` | Used to exhibit distributed load on a target BFD Server to produce performance metrics under stress. Invoked by the `bfd-run-server-load` Jenkins pipeline job |
 ## Dependencies
 
 > **Important:** This project is targeting Python 3.8. Ensure that your local Python is version 3.8 **before** attempting to work in this project!
