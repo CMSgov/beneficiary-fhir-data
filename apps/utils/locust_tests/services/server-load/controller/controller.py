@@ -153,7 +153,7 @@ def _main():
         if spawn_count == 0
         else datetime.now() + timedelta(seconds=node_spawn_time + 1)
     )
-    while locust_process.returncode is None:
+    while locust_process.poll() is None:
         if datetime.now() >= runtime_limit_end:
             print(f"User provided runtime of {runtime_limit} seconds has been exceeded, stopping")
             break
@@ -195,8 +195,23 @@ def _main():
             break
 
     if has_scaling_target_hit and coasting_time > 0:
-        print(f"Coasting after scaling event for {coasting_time} seconds...")
-        time.sleep(coasting_time)
+        print(
+            f"Coasting after scaling event for {coasting_time} seconds, or until the Locust process"
+            " has ended..."
+        )
+
+        coast_until_time = datetime.now() + timedelta(seconds=coasting_time)
+        while datetime.now() < coast_until_time and locust_process.poll() is None:
+            messages = check_queue(
+                queue=queue,
+                timeout=1,
+            )
+
+            if any(filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in messages):
+                has_received_stop = True
+                print("Stop signal encountered, stopping")
+                break
+
         print("Coasting time complete")
 
     # Unconditionally send a stop signal to the queue to force all nodes to stop
@@ -204,14 +219,14 @@ def _main():
     queue.send_message(MessageBody=json.dumps(QUEUE_STOP_SIGNAL_FILTERS[0]))
     print("Stop signal sent successfully")
 
-    if locust_process.returncode:
-        # If returncode is not None, then the locust process has finished on its own and we do not
+    if locust_process.poll():
+        # If poll() is not None, then the locust process has finished on its own and we do not
         # need to end it manually
         print("Locust master process ended without intervention, stopping...")
         return
 
     if not has_received_stop:
-        print("Waiting an addiitional 10 seconds to allow worker nodes to submit statistics...")
+        print("Waiting an additional 10 seconds to allow worker nodes to submit statistics...")
         time.sleep(10)
         print("10 second wait period has elapsed")
 
