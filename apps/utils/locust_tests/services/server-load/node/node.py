@@ -173,10 +173,13 @@ def handler(event, context):
         return
 
     if has_scaling_target_hit and coasting_time > 0:
-        print(f"Coasting after scaling event for {coasting_time} seconds before stopping...")
+        print(
+            f"Coasting after scaling event for {coasting_time} seconds, or until the Locust process"
+            " has ended..."
+        )
 
         coast_until_time = datetime.now() + timedelta(seconds=coasting_time)
-        while datetime.now() < coast_until_time:
+        while datetime.now() < coast_until_time and process.poll() is None:
             messages = check_queue(
                 queue=queue,
                 timeout=1,
