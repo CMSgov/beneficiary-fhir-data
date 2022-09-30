@@ -45,4 +45,3 @@ terraform workspace select "$bfdEnv" -no-color
     }
 }
 
-return this
