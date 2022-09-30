@@ -81,8 +81,8 @@ spec:
 
     string(name: 'COASTING_TIME',
            defaultValue: '10',
-           description: 'The amount of time the load test should continue for after receiving a '
-                        + 'scaling notification. Does not effect operator stop signals')
+           description: 'The amount of time, in seconds, the load test should continue for after '
+                        + 'receiving a scaling notification. Does not effect operator stop signals')
 
     string(name: 'WARM_INSTANCE_TARGET',
            defaultValue: '7',
