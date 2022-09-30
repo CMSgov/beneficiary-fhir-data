@@ -35,7 +35,7 @@ public class JoinBean {
   /** Type of join annotation to apply to this field. */
   private JoinType joinType;
 
-  /** Name of the {@link FetchType}. Either {@link FetchType.EAGER} or @{link FetchType.LAZY}. */
+  /** Name of the {@link FetchType}. Either {@link FetchType#EAGER} or @{link FetchType.LAZY}. */
   private FetchType fetchType;
 
   /** Optional comment string to be added to the join field in the generated entity. */

@@ -1,3 +1,13 @@
+# TODO: consider refactoring, hoisting IAM resources into a centrally managed environmental configuration for services
+data "aws_iam_policy" "cloudwatch_agent_policy" {
+  arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+# AWS CloudWatch agent needs extra IAM permissions for x-ray
+data "aws_iam_policy" "cloudwatch_agent_xray_policy" {
+  arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
 resource "aws_iam_policy" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda-invocation"
   description = "Allow invocation of locust worker ${local.service} 'node' lambda in ${local.env}"
@@ -198,6 +208,8 @@ resource "aws_iam_role" "ec2" {
   EOF
 
   managed_policy_arns = [
+    data.aws_iam_policy.cloudwatch_agent_policy.arn,
+    data.aws_iam_policy.cloudwatch_agent_xray_policy.arn,
     aws_iam_policy.ssm.arn,
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,

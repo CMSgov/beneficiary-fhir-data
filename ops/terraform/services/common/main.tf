@@ -3,12 +3,28 @@ provider "aws" {
 }
 
 locals {
-  env     = terraform.workspace
-  service = "common"
+  env            = terraform.workspace
+  service        = "common"
+  legacy_service = "admin"
+  layer          = "data"
+
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.name
+
+  # NOTE: AWS Account Roots for Access Log Delivery
+  # https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html
+  aws_classic_loadbalancer_account_roots = {
+    us-east-1 = "arn:aws:iam::127311923021:root"
+    us-west-2 = "arn:aws:iam::797873946194:root"
+  }
 
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
   seed_env         = lookup(local.nonsensitive_config, "ephemeral_environment_seed", null)
   is_ephemeral_env = local.seed_env == null ? false : true
+
+  # TODO: support ephemeral environments... which bucket should the ephemeral environment use for its admin bucket?
+  admin_bucket   = "bfd-${local.env}-admin-${local.account_id}"
+  logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
 
   shared_tags = {
     Environment = local.env
@@ -46,10 +62,15 @@ locals {
 
   # General SSM lookups
   kms_key_alias = local.nonsensitive_config["kms_key_alias"]
+  kms_key_id    = data.aws_kms_key.cmk.arn
   vpc_name      = local.nonsensitive_config["vpc_name"]
 }
 
 data "aws_availability_zones" "main" {}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
 
 data "aws_vpc" "main" {
   filter {
