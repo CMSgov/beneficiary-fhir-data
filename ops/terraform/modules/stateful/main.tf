@@ -160,11 +160,20 @@ resource "aws_iam_user" "etl" {
   name = "bfd-${local.env_config.env}-etl"
 }
 
-resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
-  user       = aws_iam_user.etl.name
-  policy_arn = aws_iam_policy.etl_rw_s3.arn
+resource "aws_iam_group" "etl" {
+  name = "bfd-${local.env_config.env}-etl"
+  path = "/"
 }
 
+resource "aws_iam_group_membership" "etl" {
+  name = "bfd-${local.env_config.env}-etl"
+
+  users = [
+    aws_iam_user.etl.name,
+  ]
+
+  group = aws_iam_group.etl.name
+}
 
 ## S3 bucket, policy, and KMS key for medicare opt out data
 #
