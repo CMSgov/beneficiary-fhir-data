@@ -63,6 +63,8 @@ def gitRepoUrl
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
 
+@Library('bfd@jrosenfeld/BFD-2161') _ 
+
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
 	// we will use this to display a link to diffs in the message. This assumes we are using git+https not git+ssh
