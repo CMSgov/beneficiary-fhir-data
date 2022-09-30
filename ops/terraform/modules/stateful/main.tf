@@ -2,11 +2,22 @@
 # Stateful resources for an environment and associated KMS needed by both stateful and stateless resources
 
 locals {
+  account_id        = data.aws_caller_identity.current.account_id
   azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config        = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
   is_prod           = substr(var.env_config.env, 0, 4) == "prod"
   victor_ops_url    = var.victor_ops_url
   enable_victor_ops = local.is_prod # only wake people up for prod alarms
+}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_s3_bucket" "logs" {
+  bucket = "bfd-${local.env_config.env}-logs-${local.account_id}"
+}
+
+data "aws_s3_bucket" "etl" {
+  bucket = "bfd-${local.env_config.env}-etl-${local.account_id}"
 }
 
 # vpc
@@ -106,59 +117,6 @@ resource "aws_sns_topic_subscription" "ok" {
   endpoint_auto_confirms = true
 }
 
-
-## Aurora module: supplants separate param groups, rds modules, and rds alarms modules
-#
-module "aurora" {
-  source             = "../resources/aurora"
-  module_features    = var.module_features
-  env_config         = local.env_config
-  aurora_config      = var.aurora_config
-  aurora_node_params = var.aurora_node_params
-  stateful_config = {
-    azs        = local.azs
-    subnet_ids = [for s in data.aws_subnet.data_subnets : s.id]
-    kms_key_id = data.aws_kms_key.master_key.arn
-    vpc_sg_ids = [
-      data.aws_security_group.vpn.id,
-      data.aws_security_group.tools.id,
-      data.aws_security_group.management.id
-    ]
-  }
-}
-
-
-## S3 Buckets
-#
-
-# admin bucket for adminstrative stuff
-module "admin" {
-  source     = "../resources/s3"
-  role       = "admin"
-  env_config = local.env_config
-  kms_key_id = data.aws_kms_key.master_key.arn
-  log_bucket = module.logs.id
-}
-
-# bucket for logs
-module "logs" {
-  source     = "../resources/s3"
-  role       = "logs"
-  env_config = local.env_config
-  acl        = "log-delivery-write" # For AWS bucket logs
-  kms_key_id = null                 # Use AWS encryption to support AWS Agents writing to this bucket
-}
-
-# bucket for etl files
-module "etl" {
-  source     = "../resources/s3"
-  role       = "etl"
-  env_config = local.env_config
-  kms_key_id = data.aws_kms_key.master_key.arn
-  log_bucket = module.logs.id
-}
-
-
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
 # provision these resources for all environments since the mechanism
@@ -182,7 +140,7 @@ resource "aws_iam_policy" "etl_rw_s3" {
       "Sid": "ETLRWBucketList",
       "Action": ["s3:ListBucket"],
       "Effect": "Allow",
-      "Resource": ["${module.etl.arn}"]
+      "Resource": ["${data.aws_s3_bucket.etl.arn}"]
     },
     {
       "Sid": "ETLRWBucketActions",
@@ -191,7 +149,7 @@ resource "aws_iam_policy" "etl_rw_s3" {
         "s3:PutObject"
       ],
       "Effect": "Allow",
-      "Resource": ["${module.etl.arn}/*"]
+      "Resource": ["${data.aws_s3_bucket.etl.arn}/*"]
     }
   ]
 }
@@ -216,7 +174,7 @@ module "medicare_opt_out" {
 
   pii_bucket_config = {
     name        = "medicare-opt-out"
-    log_bucket  = module.logs.id
+    log_bucket  = data.aws_s3_bucket.logs.id
     read_arns   = var.medicare_opt_out_config.read_roles
     write_accts = var.medicare_opt_out_config.write_accts
     admin_arns  = var.medicare_opt_out_config.admin_users
