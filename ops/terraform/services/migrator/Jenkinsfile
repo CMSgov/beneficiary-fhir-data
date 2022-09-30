@@ -34,7 +34,7 @@ boolean deployMigrator(Map args = [:]) {
             amiId: amiId,
             createMigratorInstance: true
 		    gitBranchName: gitBranchName,
-            heartbeatInterval: heartbeatInterval,
+            heartbeatInterval: heartbeatInterval
 		]
     )
 
@@ -60,7 +60,7 @@ boolean deployMigrator(Map args = [:]) {
                 amiId: amiId,
                 createMigratorInstance: false
                 gitBranchName: gitBranchName,
-                heartbeatInterval: heartbeatInterval,
+                heartbeatInterval: heartbeatInterval
             ]
     )
     } else {
