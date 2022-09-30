@@ -74,13 +74,18 @@ spec:
 
     string(name: 'TEST_RUNTIME_LIMIT',
            defaultValue: '630',
-           description: 'The maximum runtime, in seconds, for the current load test. Acts as a '
-                        + 'failsafe against runaway load testing')
+           description: 'Runtime limit in seconds. If STOP_ON_SCALING is false, this limit is the '
+                        + 'total amount of time the load test has to run. If STOP_ON_SCALING is '
+                        + 'true, this limit indicates the amount of time to check for scaling '
+                        + 'notifications during a test run before stopping. In this case, the '
+                        + 'total maximum runtime is assumed to be '
+                        + 'TEST_RUNTIME_LIMIT + COASTING_TIME')
 
     string(name: 'COASTING_TIME',
            defaultValue: '10',
-           description: 'The amount of time the load test should continue for after receiving a '
-                        + 'scaling notification. Does not effect operator stop signals')
+           description: 'The amount of time, in seconds, the load test should continue for after '
+                        + 'receiving a scaling notification. Ignored if STOP_ON_SCALING is false. '
+                        + 'Ends immediately on operator stop signal')
 
     string(name: 'WARM_INSTANCE_TARGET',
            defaultValue: '7',
@@ -89,9 +94,9 @@ spec:
 
     booleanParam(name: 'STOP_ON_SCALING',
                  defaultValue: true,
-                 description: 'Whether the load test run should end once receiving a scaling '
-                              + 'notification. Set to false for scenarios where a static load test '
-                              + 'is desired')
+                 description: 'Whether the load test run should end, if COASTING_TIME is zero, or '
+                              + 'start coasting once receiving a scaling notification. Set to '
+                              + 'false for scenarios where a static load test is desired')
 
     booleanParam(name: 'STOP_ON_NODE_LIMIT',
                  defaultValue: true,
@@ -121,8 +126,12 @@ spec:
                 + "log group. Note that it can take a few moments for the controller to begin "
                 + "running tests")
 
+          runtimeLimit = params.TEST_RUNTIME_LIMIT.toInteger()
+          coastingTime = params.COASTING_TIME.toInteger()
+          maxRuntime = params.STOP_ON_SCALING ? runtimeLimit + coastingTime
+                                              : runtimeLimit
           try {
-            timeout(time: (params.TEST_RUNTIME_LIMIT.toInteger() + 600), unit: 'SECONDS') {
+            timeout(time: (maxRuntime + 600), unit: 'SECONDS') {
               input 'Once the run is finished, click either Abort or Proceed to cleanup the test'
             }
           } catch(err) {}
