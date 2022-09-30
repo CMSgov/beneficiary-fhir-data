@@ -8,7 +8,7 @@ ${jsonencode(
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          for arn in concat(readers, writers) : "${arn}"
+          for arn in sort(concat(readers, writers)) : "${arn}"
         ]
       },
       "Action": [
@@ -23,14 +23,13 @@ ${jsonencode(
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          for arn in concat(readers, writers) : "${arn}"
+          for arn in sort(concat(readers, writers)) : "${arn}"
         ]
       },
       "Action": [
         "s3:GetObject",
       ],
       "Resource": [
-        "arn:aws:s3:::${bucket_id}",
         "arn:aws:s3:::${bucket_id}/*"
       ]
     },
@@ -39,7 +38,7 @@ ${jsonencode(
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          for arn in writers : "${arn}"
+          for arn in sort(writers) : "${arn}"
         ]
       },
       "Action": [
@@ -56,7 +55,7 @@ ${jsonencode(
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          for arn in concat(admins, root) : "${arn}"
+          for arn in sort(concat(admins, root)) : "${arn}"
         ]
       },
       "Action": "s3:*",
