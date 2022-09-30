@@ -59,13 +59,13 @@ variable "user_spawn_rate" {
 }
 
 variable "test_runtime_limit" {
-  description = "The maximum runtime, in seconds, for the current load test. Acts as a failsafe against runaway load testing"
+  description = "Runtime limit in seconds. If stop_on_scaling is false, this limit is the total amount of time the load test has to run. If stop_on_scaling is true, this limit indicates the amount of time to check for scaling notifications during a test run before stopping"
   type        = number
   default     = 0
 }
 
 variable "coasting_time" {
-  description = "The amount of time, in seconds, the load test should continue for after receiving a scaling notification. Does not effect operator stop signals"
+  description = "The amount of time, in seconds, the load test should continue for after receiving a scaling notification. Ignored if stop_on_scaling is false. Ends immediately on operator stop signal"
   type        = number
   default     = 0
 }
