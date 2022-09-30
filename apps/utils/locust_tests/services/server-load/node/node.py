@@ -2,12 +2,13 @@
 workers all communicating with a single Locust master, the "controller"."""
 
 import asyncio
+import datetime
 import functools
 import os
 import sys
-import time
 import urllib.parse
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 import boto3
 from botocore.config import Config
@@ -174,7 +175,18 @@ async def _async_handler(event):
 
     if has_scaling_target_hit and coasting_time > 0:
         print(f"Coasting after scaling event for {coasting_time} seconds before stopping...")
-        time.sleep(int(coasting_time))
+
+        coast_until_time = datetime.now() + timedelta(seconds=coasting_time)
+        while datetime.now() < coast_until_time:
+            messages = check_queue(
+                queue=queue,
+                timeout=1,
+            )
+
+            if any(filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in messages):
+                print("Stop signal encountered, stopping")
+                break
+
         print("Coasting time complete")
 
     print("Terminating worker node...")

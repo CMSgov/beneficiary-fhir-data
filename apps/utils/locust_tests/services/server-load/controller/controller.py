@@ -196,7 +196,19 @@ def _main():
 
     if has_scaling_target_hit and coasting_time > 0:
         print(f"Coasting after scaling event for {coasting_time} seconds...")
-        time.sleep(coasting_time)
+
+        coast_until_time = datetime.now() + timedelta(seconds=coasting_time)
+        while datetime.now() < coast_until_time:
+            messages = check_queue(
+                queue=queue,
+                timeout=1,
+            )
+
+            if any(filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in messages):
+                has_received_stop = True
+                print("Stop signal encountered, stopping")
+                break
+
         print("Coasting time complete")
 
     # Unconditionally send a stop signal to the queue to force all nodes to stop
