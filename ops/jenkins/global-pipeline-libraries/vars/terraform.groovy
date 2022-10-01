@@ -12,7 +12,14 @@
 void deployTerraservice(Map args = [:]) {
     bfdEnv = args.env
     serviceDirectory = args.directory
+    amiId = args.amiId
+    heartbeatInterval = args.heartbeatInterval
+    awsRegion = args.awsRegion
+    gitBranchName = args.gitBranchName
+
+
     tfVars = args.tfVars ?: [:]
+
 
     // format terraform variables
     terraformVariables = tfVars.collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
