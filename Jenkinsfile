@@ -255,15 +255,73 @@ try {
 						milestone(label: 'stage_deploy_test_migration_start')
 						container('bfd-cbc-build') {
 
-							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+							awsAuth.assumeRole()
+
+							// set sqsQueueName
+							sqsQueueName = "bfd-${bfdEnv}-migrator"
+
+							// precheck
+							if (migratorScripts.canMigratorDeploymentProceed(sqsQueueName, awsRegion)) {
+								println "Proceeding to Migrator Deployment"
+							} else {
+								println "Halting Migrator Deployment. Check the SQS Queue ${sqsQueueName}."
+								return false
+							}
+
+							// plan/apply terraform
+							terraform.deployTerraservice(
+								bfdEnv: bfdEnv,
+								directory: "ops/terraform/services/migrator",
+								tfVars: [
+									amiId: amiIds.bfdMigratorAmiId,
+									createMigratorInstance: true,
+									gitBranchName: gitBranchName,
+									heartbeatInterval: 30
+								]
+							)
+
+							/*migratorDeploymentSuccessful = migratorScripts.deployMigrator(
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
 								gitBranchName: gitBranchName
+							)*/
+
+							 // monitor migrator deployment
+							finalMigratorStatus = migratorScripts.monitorMigrator(
+								sqsQueueName: sqsQueueName,
+								awsRegion: awsRegion,
+								heartbeatInterval: 30,
+								maxMessages: 10
 							)
 
-							if (migratorDeploymentSuccessful) {
+							// re-authenticate
+							awsAuth.assumeRole()
+
+							// set return value for final disposition
+							if (finalMigratorStatus == '0') {
+								migratorDeployedSuccessfully = true
+								// Teardown when there is a healthy exit status
+								terraform.deployTerraservice(
+									env: bfdEnv,
+									directory: "ops/terraform/services/migrator",
+									tfVars: [
+										amiId: amiId,
+										createMigratorInstance: false,
+										gitBranchName: gitBranchName,
+										heartbeatInterval: heartbeatInterval
+									]
+								)
+								} else {
+									migratorDeployedSuccessfully = false
+								}
+
+								sqs.purgeQueue(sqsQueueName)
+
+								println "Migrator completed with exit status ${finalMigratorStatus}"
+
+							if (migratorDeployedSuccessfully) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
 								error('Migrator deployment failed')
