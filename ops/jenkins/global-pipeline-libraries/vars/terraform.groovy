@@ -13,14 +13,14 @@ void deployTerraservice(Map args = [:]) {
     bfdEnv = args.env
     serviceDirectory = args.directory
     tfVars = args.tfVars ?: [:]
-    
+
     //additional tf vars
     amiId = args.amiId
     heartbeatInterval = args.heartbeatInterval
     awsRegion = args.awsRegion
     gitBranchName = args.gitBranchName
     git_repo_version = args.git_repo_version
-    ami_id_override = args.git_repo_version
+    ami_id_override = args.ami_id_override
 
 
 
