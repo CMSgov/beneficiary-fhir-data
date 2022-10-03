@@ -1,11 +1,13 @@
 package gov.cms.bfd.server.war.commons;
 
+/** Collection of BlueButton related coding systems */
 public class BBCodingSystems {
 
   public static final String BB_BASE_URL = "https://bluebutton.cms.gov/resources";
 
   private BBCodingSystems() {}
 
+  /** FISS targeted BlueButton coding systems */
   public static class FISS {
 
     private static final String FISS_BASE = BB_BASE_URL + "/variables/fiss";
@@ -35,6 +37,7 @@ public class BBCodingSystems {
     private FISS() {}
   }
 
+  /** MCS targeted BlueButton coding systems */
   public static class MCS {
 
     private static final String MCS_BASE = BB_BASE_URL + "/variables/mcs";

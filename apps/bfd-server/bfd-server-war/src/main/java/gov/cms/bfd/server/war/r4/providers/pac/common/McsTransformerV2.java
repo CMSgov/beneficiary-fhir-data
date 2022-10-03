@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.r4.providers.pac.common;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 
+/** Class for performing common MCS based transformation logic */
 public class McsTransformerV2 {
 
+  /** The MCS specific gender mapping to use to map from RDA to FHIR. */
   private static final Map<String, Enumerations.AdministrativeGender> GENDER_MAP =
       Map.of(
           "m", Enumerations.AdministrativeGender.MALE,
@@ -16,12 +19,11 @@ public class McsTransformerV2 {
   private McsTransformerV2() {}
 
   /**
-   * Parses out patient data from the given {@link RdaMcsClaim} object, creating a generic {@link
-   * AbstractTransformerV2.PatientInfo} object containing the patient data.
+   * Creates a {@link Patient} object using the given {@link RdaMcsClaim} information.
    *
-   * @param claimGroup the {@link RdaMcsClaim} to parse.
-   * @return The generated {@link AbstractTransformerV2.PatientInfo} object with the parsed patient
-   *     data.
+   * @param claimGroup The {@link RdaMcsClaim} information to use to build the {@link Patient}
+   *     object.
+   * @return The constructed {@link Patient} object.
    */
   public static Resource getContainedPatient(RdaMcsClaim claimGroup) {
     AbstractTransformerV2.PatientInfo patientInfo =

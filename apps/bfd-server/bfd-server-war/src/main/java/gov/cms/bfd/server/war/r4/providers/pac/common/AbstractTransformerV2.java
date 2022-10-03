@@ -32,33 +32,41 @@ import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
+/** Base logic for RDA transformations containing common logic */
 // S1118 - Can't make constructor private because children won't be able to have one due to no
 // public constructor being defined.
 @SuppressWarnings("squid:S1118")
 public class AbstractTransformerV2 {
 
-  private static final Map<String, Enumerations.AdministrativeGender> GENDER_MAP =
-      Map.of(
-          "m", Enumerations.AdministrativeGender.MALE,
-          "f", Enumerations.AdministrativeGender.FEMALE,
-          // Fiss uses 'u', MCS uses 'o', we're mapping both to UNKNOWN
-          "u", Enumerations.AdministrativeGender.UNKNOWN,
-          "o", Enumerations.AdministrativeGender.UNKNOWN);
-
-  protected static Map<String, Enumerations.AdministrativeGender> genderMap() {
-    return GENDER_MAP;
-  }
-
+  /**
+   * Converts a {@link LocalDate} (used by RDA messages) to a {@link Date} (used by FHIR)
+   *
+   * @param localDate The {@link LocalDate} to convert.
+   * @return The converted {@link Date} object.
+   */
   protected static Date localDateToDate(LocalDate localDate) {
     return localDate == null
         ? null
         : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
 
+  /**
+   * Normalizes the given code, removing whitespace, decimals, and setting a standard casing.
+   *
+   * @param code The code to normalize.
+   * @return The normalized code.
+   */
   private static String normalizeIcdCode(String code) {
     return code.trim().replace(".", "").toUpperCase();
   }
 
+  /**
+   * Helper method to check if the given codes are equal, null checking and normalizing them.
+   *
+   * @param code1 The code being checked against.
+   * @param code2 The code being compared for equality.
+   * @return True if the codes are equal, post normalization, False otherwise.
+   */
   protected static boolean codesAreEqual(String code1, String code2) {
     return code1 != null
         && code2 != null
@@ -79,6 +87,13 @@ public class AbstractTransformerV2 {
         .setValue(id);
   }
 
+  /**
+   * Builds a {@link Patient} object from the given MBI and {@link PatientInfo}.
+   *
+   * @param mbi The MBI to use to build the {@link Patient} object.
+   * @param patientInfo The {@link PatientInfo} to use to build the {@link Patient} object.
+   * @return The constructed {@link Patient} object.
+   */
   protected static Patient getContainedPatient(String mbi, PatientInfo patientInfo) {
     Patient patient =
         new Patient()
@@ -109,6 +124,14 @@ public class AbstractTransformerV2 {
     return patient;
   }
 
+  /**
+   * Helper method to create a {@link HumanName} list from the given {@link PatientInfo}
+   * information.
+   *
+   * @param patientInfo The {@link PatientInfo} information to use to build a {@link HumanName}
+   *     list.
+   * @return The constructed list of {@link HumanName}s.
+   */
   protected static List<HumanName> createHumanNameFrom(PatientInfo patientInfo) {
     List<HumanName> names;
 
@@ -150,6 +173,13 @@ public class AbstractTransformerV2 {
     return names;
   }
 
+  /**
+   * Helper method to construct the {@link HumanName#getText()} property of a {@link HumanName}.
+   *
+   * @param patientInfo The {@link PatientInfo} information to use to construct the {@link
+   *     HumanName} text.
+   * @return The constructed {@link HumanName} text.
+   */
   private static String createNameText(PatientInfo patientInfo) {
     List<String> nodeNames = new ArrayList<>();
     List<String> nodeFormats = new ArrayList<>();
@@ -175,6 +205,13 @@ public class AbstractTransformerV2 {
     return nodeName + " " + nodeFormat;
   }
 
+  /**
+   * Helper method to add the federal tax number {@link Identifier} to a given {@link Organization}.
+   *
+   * @param organization The {@link Organization} to add the tax number {@link Identifier} to.
+   * @param system The system to use for the {@link Organization} {@link Identifier}.
+   * @param taxNumber The tax number to use for the {@link Identifier}.
+   */
   protected static void addFedTaxNumberIdentifier(
       Organization organization, String system, String taxNumber) {
     if (Strings.isNotBlank(taxNumber)) {
@@ -193,6 +230,12 @@ public class AbstractTransformerV2 {
     }
   }
 
+  /**
+   * Helper method to add an NPI {@link Identifier} to a given {@link Organization}.
+   *
+   * @param organization The {@link Organization} to add the NPI {@link Identifier} to.
+   * @param npi The NPI to use for the {@link Identifier}.
+   */
   protected static void addNpiIdentifier(Organization organization, String npi) {
     if (Strings.isNotBlank(npi)) {
       organization
@@ -210,6 +253,13 @@ public class AbstractTransformerV2 {
     }
   }
 
+  /**
+   * Helper method to create a {@link CodeableConcept} with the given details.
+   *
+   * @param system The system to use in the created {@link CodeableConcept}.
+   * @param value The value to use in the created {@link CodeableConcept}.
+   * @return The created {@link CodeableConcept}.
+   */
   protected static CodeableConcept createCodeableConcept(String system, String value) {
     return new CodeableConcept(new Coding(system, value, null));
   }
@@ -356,6 +406,15 @@ public class AbstractTransformerV2 {
     return total;
   }
 
+  /**
+   * Helper method to execute some {@link UnaryOperator} if the given object is not null.
+   *
+   * @param object The object to check for null.
+   * @param processor The {@link UnaryOperator} logic to execute if the object is not null.
+   * @return The result of the {@link UnaryOperator} if the object is not null, otherwise it returns
+   *     null.
+   * @param <T> The type of object given and expected by the {@link UnaryOperator}.
+   */
   protected static <T> T ifNotNull(T object, UnaryOperator<T> processor) {
     if (object == null) {
       return null;
@@ -364,12 +423,22 @@ public class AbstractTransformerV2 {
     }
   }
 
+  /**
+   * Helper method to execute some {@link UnaryOperator} if the given object is not null.
+   *
+   * @param object The object to check for null.
+   * @param consumer The {@link Consumer} logic to execute if the object is not null.
+   * @param <T> The type of object given and expected by the {@link Consumer}.
+   */
   protected static <T> void ifNotNull(T object, Consumer<T> consumer) {
     if (object != null) {
       consumer.accept(object);
     }
   }
 
+  /**
+   * Source ambiguous data structure to store patient info to allow common logic execution on it.
+   */
   protected static class PatientInfo {
 
     private final String firstName;

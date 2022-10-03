@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
+  /** Date used to determine if an ICD code is ICD9 (before date) or ICD10 (on or after date) */
   private static final LocalDate ICD_9_CUTOFF_DATE = LocalDate.of(2015, 10, 1);
 
   private static final String MEDICARE = "MEDICARE";

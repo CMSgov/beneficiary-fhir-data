@@ -8,8 +8,10 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 
+/** Class for performing common FISS based transformation logic */
 public class FissTransformerV2 {
 
+  /** The FISS specific gender mapping to use to map from RDA to FHIR. */
   private static final Map<String, Enumerations.AdministrativeGender> GENDER_MAP =
       Map.of(
           "m", Enumerations.AdministrativeGender.MALE,
@@ -18,16 +20,23 @@ public class FissTransformerV2 {
 
   private FissTransformerV2() {}
 
+  /**
+   * Creates a {@link Patient} object using the given {@link RdaFissClaim} information.
+   *
+   * @param claimGroup The {@link RdaFissClaim} information to use to build the {@link Patient}
+   *     object.
+   * @return The constructed {@link Patient} object.
+   */
   public static Resource getContainedPatient(RdaFissClaim claimGroup) {
-    Optional<RdaFissPayer> optional =
+    Optional<RdaFissPayer> benePayerOptional =
         claimGroup.getPayers().stream()
             .filter(p -> p.getPayerType() == RdaFissPayer.PayerType.BeneZ)
             .findFirst();
 
     Patient patient;
 
-    if (optional.isPresent()) {
-      RdaFissPayer benePayer = optional.get();
+    if (benePayerOptional.isPresent()) {
+      RdaFissPayer benePayer = benePayerOptional.get();
 
       patient =
           AbstractTransformerV2.getContainedPatient(
