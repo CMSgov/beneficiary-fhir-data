@@ -254,7 +254,9 @@ public class SpringConfiguration {
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
   public static boolean isPacOldMbiHashEnabled() {
-    return Boolean.TRUE.toString().equalsIgnoreCase(System.getProperty("log", "false"));
+    return Boolean.TRUE
+        .toString()
+        .equalsIgnoreCase(System.getProperty("bfdServer.pac.oldMbiHash.enabled", "false"));
   }
 
   /**

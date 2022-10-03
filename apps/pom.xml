@@ -129,6 +129,9 @@
 
 		<!-- Whether the old MBI hash query feature should be enabled -->
 		<local.pac.oldMbiHash.enabled>true</local.pac.oldMbiHash.enabled>
+
+		<!-- The source types to enable for PAC resources -->
+		<local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
 	</properties>
 
 	<dependencyManagement>
