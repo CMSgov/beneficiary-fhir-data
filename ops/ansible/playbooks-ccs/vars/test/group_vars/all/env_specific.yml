@@ -11,6 +11,9 @@ data_server_v2_enabled: true
 # Whether to enable BFD Partially Adjudicated Claims Resources
 pac_resources_enabled: true
 
+# Configures the type of enabled source types for PAC claims
+pac_claim_source_types: 'fiss,mcs'
+
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_server_new_relic_metric_path: '/metric/v1'

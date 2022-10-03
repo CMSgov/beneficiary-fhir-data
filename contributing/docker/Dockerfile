@@ -43,6 +43,7 @@ RUN useradd dev && \
 USER dev
 ENV BFD_V2_ENABLED true
 ENV BFD_PAC_ENABLED true
+ENV BFD_CLAIM_SOURCE_TYPES "fiss,mcs"
 ENV MAVEN_HOME /opt/maven
 ENV PATH="${PATH}:${MAVEN_HOME}/bin"
 RUN mkdir -p $HOME/.m2 && \

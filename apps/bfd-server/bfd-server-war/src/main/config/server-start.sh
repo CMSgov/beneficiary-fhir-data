@@ -55,6 +55,7 @@ dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
 pacEnabled="true"
 pacOldMbiHashEnabled="false"
+pacClaimSourceTypes="fiss,mcs"
 while true; do
 	case "$1" in
 		-j )
@@ -73,6 +74,8 @@ while true; do
 			pacEnabled="$2"; shift 2 ;;
 		-o )
 			pacOldMbiHashEnabled="$2"; shift 2 ;;
+	  -s )
+	    pacClaimSourceTypes="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -194,6 +197,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
 	"-DbfdServer.pac.enabled=${pacEnabled}" \
 	"-DbfdServer.pac.oldMbiHash.enabled=${pacOldMbiHashEnabled}" \
+	"-DbfdServer.pac.claimSourceTypes=${pacClaimSourceTypes}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \

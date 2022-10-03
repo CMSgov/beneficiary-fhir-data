@@ -34,6 +34,10 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
+  /**
+   * Defined mapping for converting from FISS outcomes to standard FHIR {@link
+   * ClaimResponse.RemittanceOutcome}s.
+   */
   private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME =
       Map.of(
           ' ', ClaimResponse.RemittanceOutcome.QUEUED,

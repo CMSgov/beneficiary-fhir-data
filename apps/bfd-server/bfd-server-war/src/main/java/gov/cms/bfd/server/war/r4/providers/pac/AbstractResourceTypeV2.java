@@ -17,8 +17,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     implements ResourceTypeV2<TResource, TEntity> {
   /** Name used when parsing parameter string to find appropriate instance. */
   protected final String nameForParsing;
-  /** Value returned by {@link ResourceTypeV2#getNameForMetrics} */
-  protected final String nameForMetrics;
+  /** Value returned by {@link ResourceTypeV2#getTypeLabel()} */
+  protected final String typeLabel;
   /** The JPA entity class. */
   protected final Class<TEntity> entityClass;
   /** The attribute holding the MBI in the entity class. */
@@ -33,7 +33,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   /**
    * Constructor intended for use by derived classes to set values in common fields.
    *
-   * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
+   * @param typeLabel value returned by {@link ResourceTypeV2#getTypeLabel()}
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
@@ -43,14 +43,14 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
    */
   protected AbstractResourceTypeV2(
       String nameForParsing,
-      String nameForMetrics,
+      String typeLabel,
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       String entityEndDateAttribute,
       ResourceTransformer<TResource> transformer) {
     this.nameForParsing = nameForParsing;
-    this.nameForMetrics = nameForMetrics;
+    this.typeLabel = typeLabel;
     this.entityClass = entityClass;
     this.entityMbiRecordAttribute = entityMbiRecordAttribute;
     this.entityIdAttribute = entityIdAttribute;
@@ -59,8 +59,13 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   }
 
   @Override
+  public String getTypeLabel() {
+    return typeLabel;
+  }
+
+  @Override
   public String getNameForMetrics() {
-    return nameForMetrics;
+    return typeLabel;
   }
 
   @Override
