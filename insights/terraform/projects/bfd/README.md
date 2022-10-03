@@ -78,7 +78,7 @@ OR
 This process will be done via a series of complex Athena queries, in order to reduce the amount of
 AWS Glue we have to perform. This approach is far more cost-effective and faster.
 
-**TODO: Add a reference to the runbook once completed.**
+The process is outlined in this [Runbook](../../../../runbooks/how-to-load-cloudwatch-historical-data.md).
 
 ## Analysis
 
