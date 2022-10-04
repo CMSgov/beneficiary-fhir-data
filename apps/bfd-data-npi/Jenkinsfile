@@ -99,19 +99,19 @@ EOF
                         npiOrgFileStatusCode = sh(
                             returnStdout: true,
                             script: '''
-                            month=$(date +%B)
-                            year=$(date +%Y)
-                            curl -s -o /dev/null -I -w "%{http_code}" https://download.cms.gov/nppes/NPPES_Data_Dissemination_$month_$year.zip
+                            month="$(date +%B)"
+                            year="$(date +%Y)"
+                            curl -s -o /dev/null -I -w "%{http_code}" "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip"
 '''
                         )
 
-                        if(npiOrgFileStatusCode.trim()==200){
+                        if(npiOrgFileStatusCode.trim()=='200'){
                          npiOrgNameSha256 = sh(
                             returnStdout: true,
                             script: '''
-                            month=$(date +%B)
-                            year=$(date +%Y)
-                            curl -fsSL https://download.cms.gov/nppes/NPPES_Data_Dissemination_$month_$year.zip | sha256sum | awk '{ print $1 }'
+                            month="$(date +%B)"
+                            year="$(date +%Y)"
+                            curl -fsSL "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip" | sha256sum | awk '{ print $1 }'
 '''
                         )
                         awsAuth.assumeRole()
