@@ -74,8 +74,8 @@ while true; do
 			pacEnabled="$2"; shift 2 ;;
 		-o )
 			pacOldMbiHashEnabled="$2"; shift 2 ;;
-	  -s )
-	    pacClaimSourceTypes="$2"; shift 2 ;;
+		-s )
+			pacClaimSourceTypes="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac

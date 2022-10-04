@@ -64,11 +64,6 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   }
 
   @Override
-  public String getNameForMetrics() {
-    return typeLabel;
-  }
-
-  @Override
   public Class<TEntity> getEntityClass() {
     return entityClass;
   }

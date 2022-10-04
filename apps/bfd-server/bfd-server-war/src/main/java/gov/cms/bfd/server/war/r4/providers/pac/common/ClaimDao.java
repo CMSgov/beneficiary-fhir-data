@@ -142,8 +142,7 @@ public class ClaimDao {
   @VisibleForTesting
   void logQueryMetric(
       ResourceTypeV2<?, ?> resourceType, String queryName, long queryTime, int querySize) {
-    final String combinedQueryId =
-        String.format("%s_%s", queryName, resourceType.getNameForMetrics());
+    final String combinedQueryId = String.format("%s_%s", queryName, resourceType.getTypeLabel());
     TransformerUtilsV2.recordQueryInMdc(combinedQueryId, queryTime, querySize);
   }
 
@@ -278,6 +277,6 @@ public class ClaimDao {
   static String createMetricNameForResourceQuery(
       ResourceTypeV2<?, ?> resourceType, String queryName) {
     return MetricRegistry.name(
-        ClaimDao.class.getSimpleName(), "query", queryName, resourceType.getNameForMetrics());
+        ClaimDao.class.getSimpleName(), "query", queryName, resourceType.getTypeLabel());
   }
 }

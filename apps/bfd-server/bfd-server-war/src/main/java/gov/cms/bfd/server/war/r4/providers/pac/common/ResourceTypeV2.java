@@ -16,9 +16,6 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
   /** @return A label for the resource type that uniquely identifies it */
   String getTypeLabel();
 
-  /** @return a name for use when building drop wizard metric names */
-  String getNameForMetrics();
-
   /**
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
    *     ResourceTypeV2} in the database
