@@ -23,8 +23,9 @@ void assumeRole(Map args = [:]) {
 	// default `sessionName` as `env.JOB_NAME` is vaguely sanitized to replace non-alphanumeric
 	// chars with '-' AND deduplicates consecutive '-'. This is somewhat more restrictive than the
 	// regex used in the STS API for RoleSessionName, i.e. `/[\w+=,.@:\/-]*/`
+	// character limit to 64 to comply with maximum length for AssumeRole
 	// See https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
-	sessionName = args.sessionName ?: env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
+	sessionName = args.sessionName ?: env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-').take(64)
 	credentialsId = args.credentialsId ?: 'bfd-aws-assume-role'
 	awsRegion = args.awsRegion ?: 'us-east-1'
 

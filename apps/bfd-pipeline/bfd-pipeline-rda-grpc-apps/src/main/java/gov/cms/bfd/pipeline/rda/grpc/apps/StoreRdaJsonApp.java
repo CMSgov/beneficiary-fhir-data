@@ -4,8 +4,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
@@ -96,7 +96,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   }
 
   private static class Config {
-    final GrpcRdaSource.Config grpcConfig;
+    final RdaSourceConfig grpcConfig;
     private final ClaimType claimType;
     private final int maxToReceive;
     private final File outputFile;
@@ -108,8 +108,8 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
       outputFile = options.writeableFile("output.file");
       startingSequenceNumber = options.longOption("output.seq").orElse(RdaChange.MIN_SEQUENCE_NUM);
       grpcConfig =
-          GrpcRdaSource.Config.builder()
-              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+          RdaSourceConfig.builder()
+              .serverType(RdaSourceConfig.ServerType.Remote)
               .host(options.stringValue("api.host", "localhost"))
               .port(options.intValue("api.port", 5003))
               .authenticationToken(options.stringValue("api.token", ""))

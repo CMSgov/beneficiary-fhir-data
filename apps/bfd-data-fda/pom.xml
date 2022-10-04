@@ -19,17 +19,7 @@
 		FDA Drug code lookup jar
 	</description>
 
-	<properties>
-		<junit>3.8.1</junit>
-	</properties>
-
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>
@@ -124,8 +114,28 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<mkdir dir="${basedir}/src/main/resources"/>
+								<mkdir dir="${basedir}/target/fda-drug-csv-output"/>
 							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<executions>
+					<execution>
+						<id>download-fda-drug-data</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>gov.cms.bfd.data.fda.utility.App</mainClass>
+							<arguments>
+								<argument>${basedir}/target/fda-drug-csv-output</argument>
+							</arguments>
 						</configuration>
 					</execution>
 				</executions>
@@ -136,15 +146,15 @@
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-							<phase>package</phase>
+							<phase>process-classes</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target</outputDirectory>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/src/main/resources</directory>
+									<directory>${basedir}/target/fda-drug-csv-output</directory>
 								<filtering>false</filtering>
 								</resource>
 							</resources>
