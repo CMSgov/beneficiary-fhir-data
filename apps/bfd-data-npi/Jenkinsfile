@@ -111,7 +111,7 @@ EOF
                             script: '''
                             month=$(date +%B)
                             year=$(date +%Y)
-                            curl -fsSL https://download.cms.gov/nppes/NPPES_Data_Dissemination_$month_$year.zip| sha256sum | awk '{ print $1 }'
+                            curl -fsSL https://download.cms.gov/nppes/NPPES_Data_Dissemination_$month_$year.zip | sha256sum | awk '{ print $1 }'
 '''
                         )
                         awsAuth.assumeRole()
@@ -148,7 +148,7 @@ aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha2
                             echo "NPI Org file already up-to-date. Nothing to do!"
                         }
                       } else {
-                          echo "NPI File not found!!"
+                          echo "Curl Command for NPI File returned: " + npiOrgFileStatusCode
                       }
                     }
                 }
