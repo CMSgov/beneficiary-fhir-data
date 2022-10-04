@@ -95,11 +95,23 @@ EOF
             steps {
                 script {
                     container('bfd-cbc-build') {
-                      // Download and Calculate FDA DrugCode Sha256 from the external source
-                        npiOrgNameSha256 = sh(
+                      // Download and Calculate NPI Org File Sha256 from the external source
+                        npiOrgFileStatusCode = sh(
                             returnStdout: true,
                             script: '''
-curl -fsSL https://www.accessdata.fda.gov/cder/ndctext.zip | sha256sum | awk '{ print $1 }'
+                            month=$(date +%B)
+                            year=$(date +%Y)
+                            curl -s -o /dev/null -I -w "%{http_code}" https://download.cms.gov/nppes/NPPES_Data_Dissemination_$month_$year.zip
+'''
+                        )
+
+                        if(npiOrgFileStatusCode.trim()==200){
+                         npiOrgNameSha256 = sh(
+                            returnStdout: true,
+                            script: '''
+                            month=$(date +%B)
+                            year=$(date +%Y)
+                            curl -fsSL https://download.cms.gov/nppes/NPPES_Data_Dissemination_$month_$year.zip| sha256sum | awk '{ print $1 }'
 '''
                         )
                         awsAuth.assumeRole()
@@ -135,6 +147,7 @@ aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha2
                         } else {
                             echo "NPI Org file already up-to-date. Nothing to do!"
                         }
+                      }
                     }
                 }
             }
