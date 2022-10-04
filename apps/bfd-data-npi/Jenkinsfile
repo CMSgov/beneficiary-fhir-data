@@ -147,6 +147,8 @@ aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha2
                         } else {
                             echo "NPI Org file already up-to-date. Nothing to do!"
                         }
+                      } else {
+                          echo "NPI File not found!!"
                       }
                     }
                 }
