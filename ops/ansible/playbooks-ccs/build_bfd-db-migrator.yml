@@ -6,14 +6,21 @@
   hosts: all
   become: true
   remote_user: ec2-user
-  gather_facts: yes
+  gather_facts: no
   vars:
-    ansible_ssh_pipelining: no
-    bfd_migrator_dir: /opt/bfd-db-migrator
+    db_migrator_dir: /opt/bfd-db-migrator
     # TODO: Consider removing `env` when SSH/sudoer users have been resolved in SSM BFD-2068
     env: "test"
 
   tasks:
+    - name: Download BFD Repository
+      git:
+        repo: https://github.com/CMSgov/beneficiary-fhir-data.git
+        dest: /beneficiary-fhir-data
+        # use hash from `git_commit` when on stable master branch, otherwise use git_branch name
+        version: "{{ git_commit if git_branch == 'master' else git_branch }}"
+      tags: [pre-ami, post-ami]
+
     # TODO: Remove include_vars when SSH/sudoer users have been resolved in SSM BFD-2068
     - name: Include env specific variables
       include_vars:
@@ -32,8 +39,7 @@
       import_role:
         name: bfd-db-migrator
       vars:
-        db_migrator_dir: "{{ bfd_migrator_dir }}"
-        db_migrator_tmp_dir: "{{ bfd_migrator_dir }}/tmp"
+        db_migrator_tmp_dir: "{{ db_migrator_dir }}/tmp"
 
     - name: Add SSH users
       import_role:

@@ -19,8 +19,6 @@ data_server_appserver_jvmargs: ''
 data_server_appserver_https_port: 8443
 
 # The client certs/CAs that will be authorized to connect to the server.
-# At least one of these should be defined, otherwise no clients will be authorized to connect to the server.
-data_server_ssl_client_cas: []
 data_server_ssl_client_certificates: []
 
 # The max size of the DB connection pool for the Blue Button Data Server.

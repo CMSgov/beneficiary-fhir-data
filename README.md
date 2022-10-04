@@ -89,8 +89,9 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 1. Install pre-commit hooks `mvn -f apps initialize`
 
 ### Native Setup
-1. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-2. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+1. Change to the `apps/bfd-data-fda` directory and `mvn clean install`. 
+2. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
+3. Set up a Postgres 14 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
     ```sh
     docker run \
       -d \
@@ -100,9 +101,9 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
       -p '5432:5432' \
       -v 'bfd_pgdata:/var/lib/postgresql/data' \
-      postgres:12 -c max_connections=200
+      postgres:14 -c max_connections=200
     ```
-3. Set up a local S3 using Minio Docker Container
+4. Set up a local S3 using Minio Docker Container
     ```sh
     docker run \
       -p 9000:9000 \
@@ -111,7 +112,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
       minio/minio server /data --console-address ":9001"
     ```
-4. Run mvn install with the following 
+5. Run mvn install with the following 
     ```
      mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
     ```
@@ -141,6 +142,54 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
     ```
     mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
     ```
+
+### Adding Reference to AWS CodeArtifact 
+(This step is optional, if you want to not use AWS Code artifact, you need to run the bfd-data-fda project first by changing to the `apps/bfd-data-fda` directory and running `mvn clean install`.)
+1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS CodeArtifact).  Replace {aws account id goes here} with the aws account id
+
+'''sh
+export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`
+'''
+
+2.  For your settings settings.xml file add the following (Replace {aws account id goes here} with the aws account id):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <!-- servers
+   | This is a list of authentication profiles, keyed by the server-id used within the system.
+   | Authentication profiles can be used whenever maven must make a connection to a remote server.
+   |-->
+  <servers>
+    <server>
+      <id>bfd-mgmt-bfd-mgmt</id>
+      <username>aws</username>
+      <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+    </server>
+  </servers>
+
+  <profiles>
+   <profile>
+      <id>bfd-mgmt-bfd-mgmt</id>
+      <activation>
+      <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+          <repository>
+            <id>bfd-mgmt-bfd-mgmt</id>
+            <url>https://bfd-mgmt-{aws account id goes here}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/</url>
+            <releases>
+              <enabled>false</enabled>
+            </releases>
+          </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>
+```
 
 ### Certificates
 

@@ -6,20 +6,23 @@
 
 #BFD Pipeline and Server Codeowners
 /rfcs @cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell @mjburling
-/ops @keithdadkins @christrotteradhoc @mjburling
+/ops @keithdadkins @christrotteradhoc @mjburling @malessi
 /apps @cbrunefearless @mackec1 @christrotteradhoc @lsmitchell
 
+#BFD Performance Testing Utilities
+/apps/utils/locust_tests @christrotteradhoc @lsmitchell @mjburling @malessi
+
 #BFD Insights Codeowners
-/insights @keithdadkins @mackec1 @christrotteradhoc @lsmitchell @mjburling
+/insights @keithdadkins @mackec1 @christrotteradhoc @lsmitchell @mjburling @malessi
 
 #BCDA Insights Codeowners
-/insights/terraform/projects/bcda @keithdadkins @mjburling @christrotteradhoc
+/insights/terraform/projects/bcda @keithdadkins @mjburling @christrotteradhoc @malessi
 
 #AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @sharshar-sb @keithdadkins @mjburling @christrotteradhoc
+/insights/terraform/projects/ab2d @sharshar-sb @keithdadkins @mjburling @christrotteradhoc @malessi
 
 #BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @christrotteradhoc
+/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @christrotteradhoc @malessi
 
 #PACA Pipeline Codeowners
 /apps/bfd-pipeline/bfd-pipeline-rda-* @ericbuckley @brianburton @kyrobbins @christrotteradhoc
@@ -29,4 +32,4 @@
 /apps/bfd-model/bfd-model-rda @ericbuckley @brianburton @kyrobbins @christrotteradhoc
 
 #GitHub Actions Workflows
-/.github/workflows @keithdadkins @mjburling @christrotteradhoc
+/.github/workflows @keithdadkins @mjburling @christrotteradhoc @malessi
