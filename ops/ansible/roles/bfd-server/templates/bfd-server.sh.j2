@@ -152,6 +152,6 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
   "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
   "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
-	"-DbfdServer.pac.claimSourceTypes=${BFD_CLAIM_SOURCE_TYPES}" \
+  "-DbfdServer.pac.claimSourceTypes=${BFD_CLAIM_SOURCE_TYPES}" \
   "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
   >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
