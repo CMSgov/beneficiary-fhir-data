@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-// entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
+// Entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
 // attempts to deploy and monitor and return `true` when the migrator signals a zero exit status
 boolean deployMigrator(Map args = [:]) {
     amiId = args.amiId
