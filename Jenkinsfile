@@ -160,7 +160,7 @@ try {
 
 					// terraservice deployments...
 					baseScripts = load('ops/terraform/services/base/deploy.groovy')
-					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
+					migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
 					pipelineScripts = load('ops/terraform/services/pipeline/deploy.groovy')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
