@@ -1,8 +1,5 @@
 #!/usr/bin/env groovy
 
-// Load the sqs-specific methods
-sqs = load('ops/terraform/services/migrator/sqs.groovy')
-
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
 // attempts to deploy and monitor and return `true` when the migrator signals a zero exit status
 boolean deployMigrator(Map args = [:]) {
@@ -67,7 +64,7 @@ boolean deployMigrator(Map args = [:]) {
         migratorDeployedSuccessfully = false
     }
 
-    sqs.purgeQueue(sqsQueueName)
+    awsSqs.purgeQueue(sqsQueueName)
 
     println "Migrator completed with exit status ${finalMigratorStatus}"
     return migratorDeployedSuccessfully
@@ -82,10 +79,10 @@ String monitorMigrator(Map args = [:]) {
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
 
-    sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
+    sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
     while (true) {
         awsAuth.assumeRole()
-        messages = sqs.receiveMessages(
+        messages = awsSqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
             awsRegion: awsRegion,
             visibilityTimeoutSeconds: 30,
@@ -98,7 +95,7 @@ String monitorMigrator(Map args = [:]) {
         for (msg in messages) {
             migratorStatus = msg.body.status
             printMigratorMessage(msg)
-            sqs.deleteMessage(msg.receipt, sqsQueueUrl)
+            awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (migratorStatus != '0/0') {
                 return migratorStatus
             }
@@ -123,10 +120,10 @@ void printMigratorMessage(message) {
 boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
     println "Checking Migrator Queue ${sqsQueueName} State..."
 
-    if (sqs.queueExists(sqsQueueName)) {
-        sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
+    if (awsSqs.queueExists(sqsQueueName)) {
+        sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
         println "Queue ${sqsQueueName} exists. Checking for messages in ${sqsQueueUrl} ..."
-        migratorMessages = sqs.receiveMessages(
+        migratorMessages = awsSqs.receiveMessages(
                 sqsQueueUrl: sqsQueueUrl,
                 awsRegion: awsRegion,
                 maxMessages: 10,

@@ -159,7 +159,7 @@ try {
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
 					// terraservice deployments...
-					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
+					migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
 					awsAuth.assumeRole()
