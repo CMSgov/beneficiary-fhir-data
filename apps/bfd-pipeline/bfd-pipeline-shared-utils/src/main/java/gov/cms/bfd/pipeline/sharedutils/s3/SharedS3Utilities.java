@@ -113,41 +113,49 @@ public final class SharedS3Utilities {
     final int randomId = ThreadLocalRandom.current().nextInt(100000);
     final String bucketName = String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username, randomId);
 
-    // per CMS security constraints, even ephemeral buckets should be configured for:
-    //  - no public access
-    //  - support only TLS-enabled connections
-    //  - data is encrypted
-    final Bucket bucket =
-        s3Client.createBucket(
-            new CreateBucketRequest(bucketName)
-                .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
+    // if not running S3 inside minio (i.e., vs. real AWS S3 buckets), then we need
+    // to be observant of CMS security constraints; inside minio, not so much!
+    Bucket bucket = null;
 
-    // block everything public related
-    s3Client.setPublicAccessBlock(
-        new SetPublicAccessBlockRequest()
-            .withBucketName(bucketName)
-            .withPublicAccessBlockConfiguration(
-                new PublicAccessBlockConfiguration()
-                    .withBlockPublicAcls(true)
-                    .withIgnorePublicAcls(true)
-                    .withBlockPublicPolicy(true)
-                    .withRestrictPublicBuckets(true)));
+    if (S3MinioConfig.Singleton().useMinio) {
+      bucket = s3Client.createBucket(bucketName);
+    } else {
+      // per CMS security constraints, even ephemeral buckets should be configured for:
+      //  - no public access
+      //  - support only TLS-enabled connections
+      //  - data is encrypted
+      bucket =
+          s3Client.createBucket(
+              new CreateBucketRequest(bucketName)
+                  .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
 
-    // bucket encryption using: AES256 and default S3 key id
-    s3Client.setBucketEncryption(
-        new SetBucketEncryptionRequest()
-            .withBucketName(bucketName)
-            .withServerSideEncryptionConfiguration(
-                new ServerSideEncryptionConfiguration()
-                    .withRules(
-                        new ServerSideEncryptionRule()
-                            .withApplyServerSideEncryptionByDefault(
-                                new ServerSideEncryptionByDefault()
-                                    .withSSEAlgorithm(SSEAlgorithm.AES256)))));
+      // block everything public related
+      s3Client.setPublicAccessBlock(
+          new SetPublicAccessBlockRequest()
+              .withBucketName(bucketName)
+              .withPublicAccessBlockConfiguration(
+                  new PublicAccessBlockConfiguration()
+                      .withBlockPublicAcls(true)
+                      .withIgnorePublicAcls(true)
+                      .withBlockPublicPolicy(true)
+                      .withRestrictPublicBuckets(true)));
 
-    // we'll shortcut this with a JSON policy
-    final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
-    s3Client.setBucketPolicy(bucketName, tlsPolicy);
+      // bucket encryption using: AES256 and default S3 key id
+      s3Client.setBucketEncryption(
+          new SetBucketEncryptionRequest()
+              .withBucketName(bucketName)
+              .withServerSideEncryptionConfiguration(
+                  new ServerSideEncryptionConfiguration()
+                      .withRules(
+                          new ServerSideEncryptionRule()
+                              .withApplyServerSideEncryptionByDefault(
+                                  new ServerSideEncryptionByDefault()
+                                      .withSSEAlgorithm(SSEAlgorithm.AES256)))));
+
+      // we'll shortcut this with a JSON policy
+      final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
+      s3Client.setBucketPolicy(bucketName, tlsPolicy);
+    }
 
     waitForBucketToExist(s3Client, bucketName);
     return bucket;
