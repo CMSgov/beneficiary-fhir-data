@@ -17,7 +17,7 @@ spec:
   serviceAccount: bfd
   containers:
   - name: bfd-cbc-build
-    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv # TODO: make sure this is coming from somewhere sane
+    image: public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv # TODO: resolve the container image rather than hard-coding it
     command:
     - sleep
     args:
@@ -40,7 +40,7 @@ spec:
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
     }
     stages {
-        stage('Maven') {
+        stage('Setup') {
             steps {
                 script {
                     container('bfd-cbc-build') {

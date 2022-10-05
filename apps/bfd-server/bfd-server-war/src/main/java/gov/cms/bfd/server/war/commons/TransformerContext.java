@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import java.util.Optional;
 
 /**
