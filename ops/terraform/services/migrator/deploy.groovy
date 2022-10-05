@@ -24,13 +24,13 @@ boolean deployMigrator(Map args = [:]) {
 
     // plan/apply terraform
     terraform.deployTerraservice(
-		env: bfdEnv,
-		directory: "ops/terraform/services/migrator",
-		tfVars: [
+	    env: bfdEnv,
+	    directory: "ops/terraform/services/migrator",
+	    tfVars: [
             ami_id: amiId,
             create_migrator_instance: true,
             migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
-		]
+	    ]
     )
 
     // monitor migrator deployment
@@ -55,7 +55,7 @@ boolean deployMigrator(Map args = [:]) {
                 ami_id: amiId,
                 create_migrator_instance: false
             ]
-    )
+        )
     } else {
         migratorDeployedSuccessfully = false
     }
