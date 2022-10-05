@@ -10,12 +10,21 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PublicAccessBlockConfiguration;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SSEAlgorithm;
+import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
+import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
+import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
+import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
+import com.amazonaws.services.s3.model.SetPublicAccessBlockRequest;
 import com.amazonaws.waiters.WaiterParameters;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
@@ -29,6 +38,23 @@ public final class SharedS3Utilities {
   public static final Regions REGION_DEFAULT = Regions.US_EAST_1;
 
   private static final String BUCKET_NAME_PREFIX = "bb-test";
+
+  private static final String BUCKET_POLICY_TLS =
+      "{"
+          + " \"Version\": \"2012-10-17\","
+          + " \"Statement\": [{"
+          + "  \"Sid\": \"AllowSSLRequestsOnly\","
+          + "  \"Effect\": \"Deny\","
+          + "  \"Principal\": \"*\","
+          + "  \"Action\": \"s3:*\","
+          + "  \"Resource\": [\"arn:aws:s3:::%s\", \"arn:aws:s3:::%s/*\"],"
+          + "    \"Condition\": {"
+          + "	   \"Bool\": {"
+          + "	   \"aws:SecureTransport\": \"false\""
+          + "	  }"
+          + "   }"
+          + " }]"
+          + "}";
 
   /**
    * Creates a AmazonS3 that connects to either a local Minio or real Amazon S3 based on the
@@ -87,9 +113,43 @@ public final class SharedS3Utilities {
     final int randomId = ThreadLocalRandom.current().nextInt(100000);
     final String bucketName = String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username, randomId);
 
-    final Bucket bucket = s3Client.createBucket(bucketName);
-    waitForBucketToExist(s3Client, bucketName);
+    // per CMS security constraints, even ephemeral buckets should be configured for:
+    //  - no public access
+    //  - support only TLS-enabled connections
+    //  - data is encrypted
+    final Bucket bucket =
+        s3Client.createBucket(
+            new CreateBucketRequest(bucketName)
+                .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
 
+    // block everything public related
+    s3Client.setPublicAccessBlock(
+        new SetPublicAccessBlockRequest()
+            .withBucketName(bucketName)
+            .withPublicAccessBlockConfiguration(
+                new PublicAccessBlockConfiguration()
+                    .withBlockPublicAcls(true)
+                    .withIgnorePublicAcls(true)
+                    .withBlockPublicPolicy(true)
+                    .withRestrictPublicBuckets(true)));
+
+    // bucket encryption using: AES256 and default S3 key id
+    s3Client.setBucketEncryption(
+        new SetBucketEncryptionRequest()
+            .withBucketName(bucketName)
+            .withServerSideEncryptionConfiguration(
+                new ServerSideEncryptionConfiguration()
+                    .withRules(
+                        new ServerSideEncryptionRule()
+                            .withApplyServerSideEncryptionByDefault(
+                                new ServerSideEncryptionByDefault()
+                                    .withSSEAlgorithm(SSEAlgorithm.AES256)))));
+
+    // we'll shortcut this with a JSON policy
+    final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
+    s3Client.setBucketPolicy(bucketName, tlsPolicy);
+
+    waitForBucketToExist(s3Client, bucketName);
     return bucket;
   }
 
