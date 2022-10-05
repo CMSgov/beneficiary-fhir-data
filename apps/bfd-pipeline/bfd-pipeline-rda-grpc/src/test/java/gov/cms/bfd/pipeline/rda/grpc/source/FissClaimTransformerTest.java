@@ -123,6 +123,8 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForClaimObjectTransformation() {
     claim.setDcn("dcn");
     claim.setSequenceNumber(42L);
+    claim.setPhase((short) 1);
+    claim.setPhaseSeqNum((short) 0);
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');

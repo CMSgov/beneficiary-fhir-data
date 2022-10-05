@@ -110,6 +110,8 @@ public class McsClaimTransformerTest {
   @Test
   public void basicFieldsTestForClaimObjectTransformation() {
     claim.setSequenceNumber(42L);
+    claim.setPhase((short) 1);
+    claim.setPhaseSeqNum((short) 0);
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrHic("123456789012");
