@@ -300,7 +300,7 @@ try {
 
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-								bfdEnv: bfdEnv,
+								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
 									docker_image_tag_override: params.server_regression_image_override
@@ -430,7 +430,7 @@ try {
 
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								bfdEnv: bfdEnv,
+								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
 									docker_image_tag_override: params.server_regression_image_override
@@ -541,7 +541,7 @@ try {
 
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								bfdEnv: bfdEnv,
+								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
 									docker_image_tag_override: params.server_regression_image_override

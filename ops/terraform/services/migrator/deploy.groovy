@@ -24,7 +24,7 @@ boolean deployMigrator(Map args = [:]) {
 
     // plan/apply terraform
     terraform.deployTerraservice(
-		bfdEnv: bfdEnv,
+		env: bfdEnv,
 		directory: "ops/terraform/services/migrator",
 		tfVars: [
             ami_id: amiId,
@@ -49,7 +49,7 @@ boolean deployMigrator(Map args = [:]) {
         migratorDeployedSuccessfully = true
         // Teardown when there is a healthy exit status
         terraform.deployTerraservice(
-            bfdEnv: bfdEnv,
+            env: bfdEnv,
             directory: "ops/terraform/services/migrator",
             tfVars: [
                 ami_id: amiId,
