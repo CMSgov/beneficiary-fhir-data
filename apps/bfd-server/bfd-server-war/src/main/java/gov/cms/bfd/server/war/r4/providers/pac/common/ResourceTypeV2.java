@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
 import gov.cms.bfd.server.war.r4.providers.pac.AbstractR4ResourceProvider;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,8 +29,12 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
   /** @return The attribute name for the entity's mbiRecord attribute. */
   String getEntityMbiRecordAttribute();
 
-  /** @return The attribute name for the entity's service end date attribute. */
-  String getEntityEndDateAttribute();
+  /**
+   * List of attribute names for the entity's service start and/or end dates.
+   *
+   * @return List of attribute names for use in service date queries.
+   */
+  List<String> getEntityServiceDateAttributes();
 
   /**
    * @return the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances

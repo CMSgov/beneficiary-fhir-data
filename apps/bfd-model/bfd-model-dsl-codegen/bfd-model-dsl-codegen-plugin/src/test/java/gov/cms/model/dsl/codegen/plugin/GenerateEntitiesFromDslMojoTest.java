@@ -163,6 +163,7 @@ public class GenerateEntitiesFromDslMojoTest {
         new FieldDefinition(
             FieldSpec.builder(fieldType, "af", Modifier.PRIVATE)
                 .addAnnotation(Id.class)
+                .addAnnotation(EqualsAndHashCode.Include.class)
                 .addAnnotation(OneToOne.class)
                 .build(),
             new AccessorSpec("af", fieldType, fieldType, false, false)),

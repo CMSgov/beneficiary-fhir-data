@@ -74,8 +74,21 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   /** The directory name that pending/incoming RIF data sets will be pulled from in S3. */
   public static final String S3_PREFIX_PENDING_DATA_SETS = "Incoming";
 
+  /**
+   * The directory name that pending/incoming synthetic RIF data sets can be pulled from in S3. In
+   * essence this is just a second Incoming folder we can use for organization; it is not
+   * functionally different from {@link #S3_PREFIX_PENDING_DATA_SETS}.
+   */
+  public static final String S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS = "Synthetic/Incoming";
+
   /** The directory name that completed/done RIF data sets will be moved to in S3. */
   public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
+
+  /**
+   * The directory name that completed/done RIF data sets loaded from {@link
+   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
+   */
+  public static final String S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS = "Synthetic/Done";
 
   /**
    * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} goes and
@@ -100,10 +113,24 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
    * DataSetManifestId} fields.
    */
   public static final Pattern REGEX_PENDING_MANIFEST =
-      Pattern.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
+      Pattern.compile(
+          "^("
+              + S3_PREFIX_PENDING_DATA_SETS
+              + "|"
+              + S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+              + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
+  /**
+   * A regex that can be used for checking for a manifest in the {@link
+   * #S3_PREFIX_COMPLETED_DATA_SETS} location.
+   */
   public static final Pattern REGEX_COMPLETED_MANIFEST =
-      Pattern.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
+      Pattern.compile(
+          "^("
+              + S3_PREFIX_COMPLETED_DATA_SETS
+              + "|"
+              + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+              + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
   private final MetricRegistry appMetrics;
   private final ExtractionOptions options;
@@ -286,7 +313,8 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
      */
 
     String dataSetKeyPrefix =
-        String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
+        String.format(
+            "%s/%s/", manifest.getManifestKeyIncomingLocation(), manifest.getTimestampText());
 
     ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
     s3BucketListRequest.setBucketName(options.getS3BucketName());

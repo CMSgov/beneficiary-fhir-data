@@ -73,6 +73,15 @@ resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.bfd-insights-bfd-app-logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 # TODO: Replace the following when/if insights Terraform is merged with main Terraform
 resource "aws_s3_bucket_notification" "bucket_notifications" {
   bucket = module.bucket.id

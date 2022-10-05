@@ -139,7 +139,7 @@ public class DiagnosisUtilV2 {
      * must be added. A coding with the ICD-10 system URL will still be present for backwards compatibility.
      * See JIRA ticket: https://jira.cms.gov/browse/BFD-1894
      */
-    if (system == IcdCode.CODING_SYSTEM_ICD_10) {
+    if (system.equals(IcdCode.CODING_SYSTEM_ICD_10)) {
       addCodingToCodeableConcept(codeableConcept, IcdCode.CODING_SYSTEM_ICD_10_CM, code);
     }
     addCodingToCodeableConcept(codeableConcept, system, code);

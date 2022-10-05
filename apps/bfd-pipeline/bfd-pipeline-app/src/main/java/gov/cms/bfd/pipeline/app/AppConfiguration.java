@@ -12,7 +12,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
@@ -69,11 +70,11 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * The name of the environment variable that should be used to provide an integer size for the
    * in-memory cache of computed hicn/mbi hash values. Used to set the {@link
-   * IdHasher.Config#getCachSize()}.
+   * IdHasher.Config#getCacheSize()}.
    */
   private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
 
-  /** Default value for {@link IdHasher.Config#getCachSize()}. */
+  /** Default value for {@link IdHasher.Config#getCacheSize()}. */
   private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
 
   /**
@@ -145,16 +146,16 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that specifies which type of RDA API server to connect to.
-   * {@link GrpcRdaSource.Config#getServerType()}
+   * {@link RdaSourceConfig#getServerType()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE}. */
-  public static final GrpcRdaSource.Config.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
-      GrpcRdaSource.Config.ServerType.Remote;
+  public static final RdaSourceConfig.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
+      RdaSourceConfig.ServerType.Remote;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getHost()} ()} value.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getHost()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_HOST}. */
@@ -162,7 +163,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getPort()} value.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getPort()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
@@ -171,7 +172,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * The name of the environment variable that specifies the name of an in-process mock RDA API
    * server. This name is used when instantiating the server as well as when connecting to it.
-   * {@link GrpcRdaSource.Config#getInProcessServerName()}
+   * {@link RdaSourceConfig#getInProcessServerName()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
       "RDA_GRPC_INPROC_SERVER_NAME";
@@ -180,8 +181,8 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} value. This variable value
-   * should be in seconds.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getMaxIdle()} value. This variable value should be
+   * in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
@@ -189,7 +190,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMinIdleTimeBeforeConnectionDrop()} value.
+   * #getRdaLoadOptions()} {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop} value.
    * This variable value should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
@@ -203,7 +204,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getAuthenticationToken()} value.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getAuthenticationToken()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN}. */
@@ -222,6 +223,13 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
       "RDA_JOB_STARTING_MCS_SEQ_NUM";
+
+  /**
+   * The name of the boolean environment variable that should be used to determine if the {@link
+   * gov.cms.bfd.pipeline.rda.grpc.source.DLQGrpcRdaSource} task should be run on subsequent job
+   * runs.
+   */
+  public static final String ENV_VAR_KEY_PROCESS_DLQ = "RDA_JOB_PROCESS_DLQ";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -492,11 +500,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(jobConfig::startingFissSeqNum);
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingMcsSeqNum);
-    final GrpcRdaSource.Config grpcConfig =
-        GrpcRdaSource.Config.builder()
+    readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    final RdaSourceConfig grpcConfig =
+        RdaSourceConfig.builder()
             .serverType(
                 readEnvParsedOptional(
-                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, GrpcRdaSource.Config.ServerType::valueOf)
+                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType::valueOf)
                     .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE))
             .host(
                 readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST)
