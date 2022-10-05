@@ -7,7 +7,6 @@ boolean deployMigrator(Map args = [:]) {
     bfdEnv = args.bfdEnv
     heartbeatInterval = args.heartbeatInterval ?: 30
     awsRegion = args.awsRegion ?: 'us-east-1'
-    gitBranchName = args.gitBranchName
 
     // authenticate
     awsAuth.assumeRole()
@@ -28,10 +27,9 @@ boolean deployMigrator(Map args = [:]) {
 		bfdEnv: bfdEnv,
 		directory: "ops/terraform/services/migrator",
 		tfVars: [
-            amiId: amiId,
-            createMigratorInstance: true,
-		    gitBranchName: gitBranchName,
-            heartbeatInterval: heartbeatInterval
+            ami_id: amiId,
+            create_migrator_instance: true,
+            migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
 		]
     )
 
@@ -54,10 +52,8 @@ boolean deployMigrator(Map args = [:]) {
             env: bfdEnv,
             directory: "ops/terraform/services/migrator",
             tfVars: [
-                amiId: amiId,
-                createMigratorInstance: false,
-                gitBranchName: gitBranchName,
-                heartbeatInterval: heartbeatInterval
+                ami_id: amiId,
+                create_migrator_instance: false
             ]
     )
     } else {

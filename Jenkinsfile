@@ -259,8 +259,7 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -283,7 +282,6 @@ try {
 							env: bfdEnv,
 							directory: "ops/terraform/services/pipeline",
 							tfVars: [
-								git_repo_version: gitCommitId,
 								ami_id_override: amiIds.bfdPipelineAmiId
 							]
 						)
@@ -305,7 +303,7 @@ try {
 								bfdEnv: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-								dockerImageTagOverride: params.server_regression_image_override
+									docker_image_tag_override: params.server_regression_image_override
 								]
 							)
 
@@ -385,8 +383,7 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -412,7 +409,6 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/pipeline",
 								tfVars: [
-									git_repo_version: gitCommitId,
 									ami_id_override: amiIds.bfdPipelineAmiId
 								]
 							)
@@ -437,7 +433,7 @@ try {
 								bfdEnv: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-								dockerImageTagOverride: params.server_regression_image_override
+									docker_image_tag_override: params.server_regression_image_override
 								]
 							)
 
@@ -496,8 +492,7 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -521,9 +516,8 @@ try {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
-								directory: "ops/terraform/services/pipeline",
+								directory: "ops/terr aform/services/pipeline",
 								tfVars: [
-									git_repo_version: gitCommitId,
 									ami_id_override: amiIds.bfdPipelineAmiId
 								]
 							)
@@ -550,7 +544,7 @@ try {
 								bfdEnv: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-								dockerImageTagOverride: params.server_regression_image_override
+									docker_image_tag_override: params.server_regression_image_override
 								]
 							)
 
