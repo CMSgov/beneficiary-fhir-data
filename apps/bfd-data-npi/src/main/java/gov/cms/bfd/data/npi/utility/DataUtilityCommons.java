@@ -164,7 +164,9 @@ public class DataUtilityCommons {
         f.listFiles(
             new FilenameFilter() {
               public boolean accept(File dir, String name) {
-                return name.startsWith("npidata_pfile_") && !name.endsWith("_FileHeader.csv");
+                return name.startsWith("npidata_pfile_")
+                    && !name.endsWith("_FileHeader.csv")
+                    && !name.endsWith("_fileheader.csv");
               }
             });
 
