@@ -480,7 +480,8 @@
             "url" : "http://hl7.org/fhir/sid/ndc",
             "valueCoding" : {
               "system" : "http://hl7.org/fhir/sid/ndc",
-              "code" : "987654321"
+              "code" : "000000000",
+              "display" : "Fake Diluent - WATER"
             }
           } ],
           "coding" : [ {
@@ -5198,7 +5199,8 @@
             "url" : "http://hl7.org/fhir/sid/ndc",
             "valueCoding" : {
               "system" : "http://hl7.org/fhir/sid/ndc",
-              "code" : "49035044700"
+              "code" : "000000000",
+              "display" : "Fake Diluent - WATER"
             }
           } ],
           "coding" : [ {

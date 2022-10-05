@@ -1,6 +1,8 @@
 package gov.cms.bfd.data.npi.utility;
 
+import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +33,27 @@ public final class App {
     if (args.length < 1) {
       throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
     }
+
     if (args.length > 1) {
       throw new IllegalArgumentException("Invalid arguments supplied for NPI download.");
     }
-    DataUtilityCommons.getNPIOrgNames(args[0], NPI_RESOURCE);
+
+    String outputDir = null;
+    Optional<String> downloadUrl = Optional.empty();
+
+    if (args.length == 1) {
+      if (Strings.isNullOrEmpty(args[0])) {
+        throw new IllegalArgumentException("OUTPUT_DIR argument not specified for NPI download.");
+      }
+      outputDir = args[0];
+    }
+
+    String downloadUrlProperty = System.getProperty("npi.downloadUrl");
+
+    if (!Strings.isNullOrEmpty(downloadUrlProperty)) {
+      downloadUrl = Optional.of(downloadUrlProperty);
+    }
+
+    DataUtilityCommons.getNPIOrgNames(outputDir, downloadUrl, NPI_RESOURCE);
   }
 }

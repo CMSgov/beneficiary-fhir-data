@@ -1,5 +1,12 @@
 #!/usr/bin/env groovy
 
+/** 
+ * Enables Conditional daily build of a latest bfd-data-npi SNAPSHOT artifact from master 
+ * using the bfd-cbc-build container image.  Downloads the external file for NPI Org names, calculates the SHA for the file
+ * Check in SSM to see if the SHA is empty or if the new SHA is not equal to the previously stored file SHA. If
+ * this is the case, then it delivers to bfd-mgmt AWS CodeArtifact Maven Repository as appropriate.
+ */
+
 pipeline {
     agent {
         kubernetes {
@@ -25,8 +32,9 @@ spec:
 """
         }
     }
+    // Run Everyday at 2pm
      triggers {
-        cron('0 0 28 * *')
+        cron('0 14 * * *')
     }
     parameters {
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
@@ -39,49 +47,112 @@ spec:
                         // Address limitations resulting from CVE-2022-24767
                         sh 'git config --global --add safe.directory "$WORKSPACE"'
 
+                        // Setup AWS Credentials
+                        awsAuth.assumeRole()
 
-                            dir('apps/bfd-data-npi/') {
-                                // inject code artifact credentials into maven ~/.m2/settings.xml
-                                // Setup AWS Credentials
-                       awsAuth.assumeRole()
+                        // Use our account credentials and get a authorization token for our aws code artifact
                         withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
                             codeArtifactAuthToken = sh(
+                            returnStdout: true,
+                            script: '''
+aws codeartifact get-authorization-token --domain bfd-mgmt \
+ --domain-owner "$ACCOUNT_ID" \
+ --output text --query authorizationToken
+'''
+                            ).trim()
+                            // Get our endpoint url for our aws code artifact
+                            codeArtifactEndpoint = sh(
                                 returnStdout: true,
-                                script: 'aws codeartifact get-authorization-token --domain bfd-mgmt \
-                                        --domain-owner "$ACCOUNT_ID" \
-                                        --output text --query authorizationToken'
-                                ).trim()
-
+                                script: '''
+aws codeartifact get-repository-endpoint \
+--domain bfd-mgmt --repository bfd-mgmt \
+--format maven --output text
+'''
+                            )
                             env.CODEARTIFACT_AUTH_TOKEN = codeArtifactAuthToken
-
-                                sh '''
+                            env.CODEARTIFACT_ENDPOINT = codeArtifactEndpoint
+                        }
+                        // Add the authorization token and uername for our aws code artifact repository
+                        sh '''
 cat <<EOF > ~/.m2/settings.xml
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-    <servers>
-        <server>
-        <username>aws</username>
-        <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-        <id>bfd-mgmt-bfd-mgmt</id>
-        </server>
-    </servers>
+<settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
+xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+<servers>
+    <server>
+    <username>aws</username>
+    <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+    <id>bfd-mgmt-bfd-mgmt</id>
+    </server>
+</servers>
 </settings>
 EOF
 '''
-                                def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
-                                sh "mvn ${quietFlags} clean install"
-                                sh """mvn ${quietFlags} exec:java \
-    -Dexec.mainClass="gov.cms.bfd.data.npi.utility.App" \
-    -Dexec.args="./src/main/resources/"
-    """
-                                sh "mvn ${quietFlags} package"
-                                sh 'mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"'
-                            }
-                            }
-                        }
                     }
                 }
             }
-    }
-} 
+        }
+        stage('Maven Build') {
+            steps {
+                script {
+                    container('bfd-cbc-build') {
+                      // Download and Calculate NPI Org File Sha256 from the external source
+                        npiOrgFileStatusCode = sh(
+                            returnStdout: true,
+                            script: '''
+                            month="$(date +%B)"
+                            year="$(date +%Y)"
+                            curl -s -o /dev/null -I -w "%{http_code}" "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip"
+'''
+                        )
 
+                        if(npiOrgFileStatusCode.trim()=='200'){
+                         npiOrgNameSha256 = sh(
+                            returnStdout: true,
+                            script: '''
+                            month="$(date +%B)"
+                            year="$(date +%Y)"
+                            curl -fsSL "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip" | sha256sum | awk '{ print $1 }'
+'''
+                        )
+                        awsAuth.assumeRole()
+                        // Check whether the npi sha parameter exists and has a value
+                        ssmLookupSha256 = sh(
+                            returnStdout: true,
+                            script: '''
+if parameter_lookup="$(aws ssm get-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256 \
+--region us-east-1 --output text --query Parameter.Value 2>/dev/null)"; then
+   echo "$parameter_lookup"
+fi
+'''
+                        )
+                        // Check whether the parameter is empty or the sha value is not equal to the new sha value, if either 
+                        // it is empty or doesnt exist we build the project and deploy the new jar to aws code artifact
+                        if (ssmLookupSha256.isEmpty() || npiOrgNameSha256.trim() != ssmLookupSha256.trim()) {
+                            dir('apps/bfd-data-npi') {
+                                def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
+                                sh "mvn ${quietFlags} -Dnpi.downloadUrl=\"${downloadUrl}\" clean install"
+                                sh 'echo "$CODEARTIFACT_ENDPOINT"'
+
+                                withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
+                                    sh '''
+mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mgmt-${ACCOUNT_ID}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/"
+'''
+                                }
+                                awsAuth.assumeRole()
+                                sh """
+aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256 \
+--type String --region us-east-1  --overwrite --value "${npiOrgNameSha256}"
+"""
+                            }
+                        } else {
+                            echo "NPI Org file already up-to-date. Nothing to do!"
+                        }
+                      } else {
+                          echo "Curl Command for NPI File returned: " + npiOrgFileStatusCode
+                      }
+                    }
+                }
+            }
+        }
+    }
+}

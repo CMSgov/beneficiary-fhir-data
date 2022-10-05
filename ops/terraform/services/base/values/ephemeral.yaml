@@ -1,0 +1,60 @@
+---
+# COMMON CONFIGURATION
+## NOTE: select `test` environment resources in-use to avoid per-environment creation of more complex resources
+##       and provide isolation of development, ephemeral environments from production workloads
+/bfd/${env}/common/nonsensitive/enterprise_tools_security_group: bfd-test-enterprise-tools
+/bfd/${env}/common/nonsensitive/management_security_group: bfd-test-remote-management
+/bfd/${env}/common/nonsensitive/vpc_name: bfd-test-vpc
+/bfd/${env}/common/nonsensitive/vpn_security_group: bfd-test-vpn-private
+
+/bfd/${env}/common/nonsensitive/env_name_std: ${env}
+/bfd/${env}/common/nonsensitive/key_pair: bfd-${seed_env}
+/bfd/${env}/common/nonsensitive/kms_key_alias: alias/bfd-${seed_env}-cmk
+/bfd/${env}/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
+/bfd/${env}/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
+
+## COMMON RDS CONFIGURATION
+/bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
+/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: false
+
+# MIGRATOR CONFIGURATION
+/bfd/${env}/migrator/nonsensitive/instance_type: m5.large
+/bfd/${env}/migrator/nonsensitive/volume_size: 100
+/bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-${env}-migrator
+/bfd/${env}/migrator/nonsensitive/new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/migrator/nonsensitive/new_relic_metric_path: *newRelicMetricPath
+
+# NOTE: At the time of this writing, there is less emphasis on pipeline instances in ephemeral environments
+# PIPELINE CONFIGURATION
+## PIPELINE GENERAL
+/bfd/${env}/pipeline/nonsensitive/bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_dir: *bfdPipelineDir
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_user: bb-etl
+/bfd/${env}/pipeline/nonsensitive/instance_type: m5a.large
+
+## PIPELINE CCW
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
+
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
+
+## PIPELINE RDA
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: false
+
+# Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 3600
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: 0
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 5
+
+# ALWAYS excluded from parameter store. Only valid when data_pipeline_rda_grpc_server_type is InProcess
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: ''
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_directory: ''
+# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_region: ''
