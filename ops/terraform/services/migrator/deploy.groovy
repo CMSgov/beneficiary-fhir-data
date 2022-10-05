@@ -27,9 +27,9 @@ boolean deployMigrator(Map args = [:]) {
 	    env: bfdEnv,
 	    directory: "ops/terraform/services/migrator",
 	    tfVars: [
-            ami_id: amiId,
-            create_migrator_instance: true,
-            migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
+                ami_id: amiId,
+                create_migrator_instance: true,
+                migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
 	    ]
     )
 
