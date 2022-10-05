@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,8 +21,8 @@ public class RdaLoadOptionsTest {
                 .runInterval(Duration.ofDays(12))
                 .batchSize(9832)
                 .build(),
-            GrpcRdaSource.Config.builder()
-                .serverType(GrpcRdaSource.Config.ServerType.Remote)
+            RdaSourceConfig.builder()
+                .serverType(RdaSourceConfig.ServerType.Remote)
                 .host("localhost")
                 .port(5432)
                 .maxIdle(Duration.ofMinutes(59))
