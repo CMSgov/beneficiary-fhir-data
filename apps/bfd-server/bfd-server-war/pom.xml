@@ -230,6 +230,15 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
+
+                <dependency>
+                    <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+                    <!-- providd because it's only needed at compile time -->
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+
 		<dependency>
 			<!-- Used to proxy JDBC usage, for monitoring. -->
 			<groupId>net.ttddyy</groupId>
@@ -261,6 +270,13 @@
 			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
+                <dependency>
+                        <!-- Mockito utilities for JUnit / Jupiter. -->
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-junit-jupiter</artifactId>
+                        <version>${mockito.version}</version>
+                        <scope>test</scope>
+                </dependency>
         <!-- This will get hamcrest-core automatically -->
         <dependency>
             <groupId>org.hamcrest</groupId>
