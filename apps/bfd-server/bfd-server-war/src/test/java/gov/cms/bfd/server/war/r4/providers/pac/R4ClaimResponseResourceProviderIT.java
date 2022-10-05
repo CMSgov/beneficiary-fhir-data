@@ -76,7 +76,8 @@ public class R4ClaimResponseResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when a search is done for {@link ClaimResponse}s
-   * using given mbi and service-date range
+   * using given mbi and service-date range. In this test case the query finds the matched claims
+   * because their to dates are within the date range even though their from dates are not.
    */
   @Test
   void shouldGetCorrectClaimResponseResourcesByMbiHash() {
@@ -91,7 +92,7 @@ public class R4ClaimResponseResourceProviderIT {
                     "mbi", Collections.singletonList(new ReferenceParam(RDATestUtils.MBI_OLD_HASH)),
                     "service-date",
                         Arrays.asList(
-                            new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
+                            new DateParam("gt1970-07-18"), new DateParam("lt1970-07-25"))))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -110,7 +111,9 @@ public class R4ClaimResponseResourceProviderIT {
 
   /**
    * Tests to see if the correct paginated response is given when a search is done for {@link
-   * ClaimResponse}s using given mbi and service-date range
+   * ClaimResponse}s using given mbi and service-date range. In this test case the query finds the
+   * matched claims because their from dates are within the date range even though their to dates
+   * are not.
    */
   @Test
   void shouldGetCorrectClaimResponseResourcesByMbiHashWithPagination() {
@@ -125,7 +128,7 @@ public class R4ClaimResponseResourceProviderIT {
                     "mbi",
                     Collections.singletonList(new ReferenceParam(RDATestUtils.MBI_OLD_HASH)),
                     "service-date",
-                    Arrays.asList(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30")),
+                    Arrays.asList(new DateParam("ge1970-07-10"), new DateParam("le1970-07-18")),
                     "_count",
                     List.of(new NumberParam("5")),
                     "startIndex",
