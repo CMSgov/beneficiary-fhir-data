@@ -101,9 +101,9 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                     RecordSource.newBuilder()
                         .setPhase("P1")
                         .setPhaseSeqNum(1)
-                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
+                        .setExtractDate(LocalDate.now(clock).minusDays(2).toString())
                         .setTransmissionTimestamp(
-                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
+                            clock.instant().minus(1, ChronoUnit.DAYS).toString())
                         .build())
                 .build());
   }
@@ -126,9 +126,9 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                     RecordSource.newBuilder()
                         .setPhase("P1")
                         .setPhaseSeqNum(1)
-                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
+                        .setExtractDate(LocalDate.now(clock).minusDays(2).toString())
                         .setTransmissionTimestamp(
-                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
+                            clock.instant().minus(1, ChronoUnit.DAYS).toString())
                         .build())
                 .build());
   }

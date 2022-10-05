@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -35,9 +36,25 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
+
+  /**
+   * Denotes the preferred execution of a sink
+   *
+   * <p>This enum is used with sink factories to help determine what type of sink should be created
+   * by the factory. When followup actions depend on the outcome of a sink write, synchronous
+   * execution may be desired.
+   */
+  public enum SinkTypePreference {
+    NONE,
+    SYNCHRONOUS,
+    ASYNCHRONOUS
+  }
+
   private final Config config;
+  private final Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory;
   private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
-  private final Callable<RdaSink<TResponse, TClaim>> sinkFactory;
+  private final ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception>
+      sinkFactory;
   private final Logger logger; // each subclass provides its own logger
   private final Metrics metrics;
   // This is used to enforce that this job can only be executed by a single thread at any given
@@ -46,11 +63,13 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
 
   AbstractRdaLoadJob(
       Config config,
+      Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory,
       Callable<RdaSource<TResponse, TClaim>> sourceFactory,
-      Callable<RdaSink<TResponse, TClaim>> sinkFactory,
+      ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception> sinkFactory,
       MetricRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
+    this.preJobTaskFactory = Preconditions.checkNotNull(preJobTaskFactory);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
     this.logger = logger;
@@ -73,6 +92,11 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
+      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.SYNCHRONOUS)) {
+        source.retrieveAndProcessObjects(1, sink);
+      }
+
       int processedCount;
       try {
         processedCount = callRdaServiceAndStoreRecords();
@@ -101,7 +125,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     try {
       metrics.calls.mark();
       try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {
@@ -183,18 +207,23 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      */
     @Nullable private final Long startingMcsSeqNum;
 
+    /** Determines if the DLQ should be processed for subsequent job runs. */
+    private final boolean processDLQ;
+
     @Builder
     private Config(
         Duration runInterval,
         int batchSize,
         int writeThreads,
         @Nullable Long startingFissSeqNum,
-        @Nullable Long startingMcsSeqNum) {
+        @Nullable Long startingMcsSeqNum,
+        boolean processDLQ) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
       this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
       this.startingFissSeqNum = startingFissSeqNum;
       this.startingMcsSeqNum = startingMcsSeqNum;
+      this.processDLQ = processDLQ;
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
@@ -202,12 +231,33 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
     }
 
+    /**
+     * Returns the configured starting FISS sequence number (if it exists) wrapped in an {@link
+     * Optional}.
+     *
+     * @return The configured starting FISS sequence number wrapped in an {@link Optional}
+     */
     public Optional<Long> getStartingFissSeqNum() {
       return Optional.ofNullable(startingFissSeqNum);
     }
 
+    /**
+     * Returns the configured starting MCS sequence number (if it exists) wrapped in an {@link
+     * Optional}.
+     *
+     * @return The configured starting MCS sequence number wrapped in an {@link Optional}
+     */
     public Optional<Long> getStartingMcsSeqNum() {
       return Optional.ofNullable(startingMcsSeqNum);
+    }
+
+    /**
+     * Returns true if the job has been configured to process the DLQ, false otherwise.
+     *
+     * @return true if the job has been configured to process the DLQ, false otherwise.
+     */
+    public boolean shouldProcessDLQ() {
+      return processDLQ;
     }
   }
 
