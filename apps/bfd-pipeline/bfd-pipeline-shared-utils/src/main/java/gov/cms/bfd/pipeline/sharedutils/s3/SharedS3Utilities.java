@@ -39,6 +39,23 @@ public final class SharedS3Utilities {
 
   private static final String BUCKET_NAME_PREFIX = "bb-test";
 
+  private static final String BUCKET_POLICY_TLS =
+      "{"
+          + " \"Version\": \"2012-10-17\","
+          + " \"Statement\": [{"
+          + "  \"Sid\": \"AllowSSLRequestsOnly\","
+          + "  \"Effect\": \"Deny\","
+          + "  \"Principal\": \"*\","
+          + "  \"Action\": \"s3:*\","
+          + "  \"Resource\": [\"arn:aws:s3:::%s\", \"arn:aws:s3:::%s/*\"],"
+          + "    \"Condition\": {"
+          + "	   \"Bool\": {"
+          + "	   \"aws:SecureTransport\": \"false\""
+          + "	  }"
+          + "   }"
+          + " }]"
+          + "}";
+
   /**
    * Creates a AmazonS3 that connects to either a local Minio or real Amazon S3 based on the
    * MinioConfig singleton's useMinio value.
@@ -127,6 +144,10 @@ public final class SharedS3Utilities {
                             .withApplyServerSideEncryptionByDefault(
                                 new ServerSideEncryptionByDefault()
                                     .withSSEAlgorithm(SSEAlgorithm.AES256)))));
+
+    // we'll shortcut this with a JSON policy
+    final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
+    s3Client.setBucketPolicy(bucketName, tlsPolicy);
 
     waitForBucketToExist(s3Client, bucketName);
     return bucket;
