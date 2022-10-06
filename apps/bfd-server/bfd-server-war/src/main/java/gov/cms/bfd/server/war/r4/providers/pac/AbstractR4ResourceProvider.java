@@ -75,7 +75,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private Class<T> resourceType;
 
-  private ResourceFilter<T> resourceFilter;
+  private ResourceFilter resourceFilter;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -97,7 +97,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   /** @param resourceFilter the {@link ResourceFilter} to use */
   @Inject
-  public void setResourceFilter(ResourceFilter<T> resourceFilter) {
+  public void setResourceFilter(ResourceFilter resourceFilter) {
     this.resourceFilter = resourceFilter;
   }
 

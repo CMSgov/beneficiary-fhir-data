@@ -6,6 +6,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.google.common.base.Strings;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
@@ -16,17 +17,20 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.PhaseResourceFilter;
 import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceFilter;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.config.SemanticVersionRange;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.EntityManager;
@@ -34,6 +38,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
+import lombok.extern.slf4j.Slf4j;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -52,6 +57,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
+@Slf4j
 public class SpringConfiguration {
   public static final String PROP_DB_URL = "bfdServer.db.url";
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
@@ -67,6 +73,11 @@ public class SpringConfiguration {
    * should only be set to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+  /**
+   * The property containing a semantic version number range. The range is used to restrict which
+   * partially adjudicated claims are allowed to be returned to clients.
+   */
+  public static final String PROP_PAC_PHASE_NUMBER_RANGE = "bfdServer.include.pac.phase.range";
 
   public static final int TRANSACTION_TIMEOUT = 30;
 
@@ -369,12 +380,30 @@ public class SpringConfiguration {
 
   /**
    * This bean provides a method to control whether or not certain claims will be returned to
-   * clients.
+   * clients. By default all claims will be returned to clients but if property {@link
+   * SpringConfiguration#PROP_PAC_PHASE_NUMBER_RANGE} is defined its value is used to restrict
+   * claims to only those whose phase falls within the specified semantic range.
    *
+   * <p>In the event of a configuration error where the property contains an invalid value an error
+   * message is logged an all claims will be rejected.
+   *
+   * @param phaseNumberRange semantic version number range to accept
    * @return an instance of {@link ResourceFilter}
    */
   @Bean
-  public ResourceFilter pacResourceFilter() {
-    return (resourceTypeV2, entity) -> true;
+  public ResourceFilter pacResourceFilter(
+      @Value("${" + PROP_PAC_PHASE_NUMBER_RANGE + ":}") String phaseNumberRange) {
+    Optional<ResourceFilter> filter = Optional.empty();
+    if (!Strings.isNullOrEmpty(phaseNumberRange)) {
+      filter = SemanticVersionRange.parse(phaseNumberRange).map(PhaseResourceFilter::new);
+      if (filter.isEmpty()) {
+        log.error(
+            "Invalid value for property {}, no paca claims will be returned to clients: {}",
+            PROP_PAC_PHASE_NUMBER_RANGE,
+            phaseNumberRange);
+        filter = Optional.of(ResourceFilter.RetainNothing);
+      }
+    }
+    return filter.orElse(ResourceFilter.RetainEverything);
   }
 }

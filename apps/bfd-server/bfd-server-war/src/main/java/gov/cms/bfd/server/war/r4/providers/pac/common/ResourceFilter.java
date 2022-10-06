@@ -1,15 +1,17 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 /**
  * Implementations of this interface are used to limit which claims are used to generate responses
  * in {@link gov.cms.bfd.server.war.r4.providers.pac.AbstractR4ResourceProvider}.
- *
- * @param <T> The specific fhir resource the concrete provider will serve.
  */
 @FunctionalInterface
-public interface ResourceFilter<T extends IBaseResource> {
+public interface ResourceFilter {
+  /** Instance that returns false for every entity passed to {@link ResourceFilter#shouldRetain}. */
+  ResourceFilter RetainNothing = (resourceTypeV2, entity) -> false;
+
+  /** Instance that returns true every entity passed to {@link ResourceFilter#shouldRetain}. */
+  ResourceFilter RetainEverything = (resourceTypeV2, entity) -> true;
+
   /**
    * Determine if the claim should be included in the result set. The class of the entity object
    * must be the same as that of the {@link ResourceTypeV2#getEntityClass()}.
@@ -18,5 +20,5 @@ public interface ResourceFilter<T extends IBaseResource> {
    * @param entity the entity object
    * @return true if the claim should be included in results
    */
-  boolean shouldRetain(ResourceTypeV2<T, ?> resourceType, Object entity);
+  boolean shouldRetain(ResourceTypeV2<?, ?> resourceType, Object entity);
 }

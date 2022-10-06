@@ -130,7 +130,9 @@ public class SemanticVersionRange {
   /** An upper or lower bound for the range. */
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   private static class Bound {
+    /** The type of bound. */
     private final BoundType type;
+    /** The value of the bound. */
     private final SemanticVersion value;
 
     /**

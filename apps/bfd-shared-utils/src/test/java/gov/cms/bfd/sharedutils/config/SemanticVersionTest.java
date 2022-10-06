@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link SemanticVersion} */
+/** Unit tests for {@link SemanticVersion}. */
 public class SemanticVersionTest {
   /** Verifies that parsing invalid strings returns empty value. */
   @Test
@@ -46,7 +46,7 @@ public class SemanticVersionTest {
     assertEquals(0, v5_0_0.compareTo(new SemanticVersion(5, 0, 0)));
   }
 
-  /** Verifies that {@link SemanticVersion::isValid} works as expected. */
+  /** Verifies that {@link SemanticVersion#isValid} works as expected. */
   @Test
   public void invalidVersionsShouldBeRecognized() {
     assertFalse(new SemanticVersion(0, 0, 0).isValid());
