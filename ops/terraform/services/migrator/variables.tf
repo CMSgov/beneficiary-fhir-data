@@ -10,12 +10,6 @@ variable "create_migrator_instance" {
   type        = bool
 }
 
-variable "git_repo_version" {
-  description = "Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version)"
-  type        = string
-  default     = "master"
-}
-
 variable "migrator_monitor_enabled_override" {
   default     = null
   description = "When true, migrator system emits signals to SQS. Defaults to `true` via locals"
