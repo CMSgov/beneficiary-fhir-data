@@ -79,7 +79,6 @@ resource "aws_instance" "this" {
     account_id                                  = local.account_id
     db_migrator_db_url                          = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
     env                                         = local.env
-    git_repo_version                            = var.git_repo_version # TODO: This works for now, but it's probably more appropriate for image to contain ansible configuration
     migrator_monitor_enabled                    = local.migrator_monitor_enabled
     migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
   })
