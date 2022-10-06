@@ -112,7 +112,7 @@
 		<!-- Dependencies required for connecting to a gRPC API -->
 		<grpc_java.version>1.48.1</grpc_java.version>
 		<protoc.version>3.21.2</protoc.version>
-		<protobuf.version>3.21.6</protobuf.version>
+		<protobuf.version>3.21.7</protobuf.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
