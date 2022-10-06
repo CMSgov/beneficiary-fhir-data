@@ -1,6 +1,5 @@
 #!/usr/bin/env groovy
-
-// TODO: Consider further generalizing this and hoisting into a new ops/jenkins/global-pipeline-libs/terraform.groovy
+// terraform.groovy contains global method for deploying various terraservice
 
 /* Deploys base terraservice
  * @param args a {@link Map} must include `env`, `directory`
@@ -46,4 +45,3 @@ terraform workspace select "$bfdEnv" -no-color
     }
 }
 
-return this
