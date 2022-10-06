@@ -138,6 +138,9 @@ public final class EndpointJsonResponseComparatorIT {
         arguments(
             "eobReadCarrierWithTaxNumbers",
             (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithTaxNumbers),
+        arguments(
+            "eobReadCarrierMultipleLines",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithMultipleLines),
         arguments("eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDme),
         arguments(
             "eobReadDmeWithTaxNumbers",
@@ -909,6 +912,43 @@ public final class EndpointJsonResponseComparatorIT {
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
+
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setHeaders(requestHeader);
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    CarrierClaim carrClaim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
+   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
+   *     Carrier claims, with the {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>false
+   *     </code>
+   */
+  public static String eobReadCarrierWithMultipleLines() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "false");
 
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
     extraParamsInterceptor.setHeaders(requestHeader);
