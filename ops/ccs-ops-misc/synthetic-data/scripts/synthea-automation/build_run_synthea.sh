@@ -1,6 +1,9 @@
 #!/usr/local/bin/bash
 set -eo pipefail
 
+# Git branch to build from...how does this actually work? from build params?
+# BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
+
 # global variables
 CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 
@@ -8,7 +11,8 @@ CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
 # we'll default to 'test' and 10 bene's for now
 BUILD_ROOT_DIR="${BUILD_ROOT_DIR:-/opt/dev}"
 TARGET_ENV="${TARGET_ENV:-test}"
-BFD_BRANCH="${BFD_DEPLOY_BRANCH:-master}"
+BFD_BRANCH="${BFD_DEPLOY_BRANCH:-}"
+SKIP_SYNTHEA_BUILD="${SKIP_SYNTHEA_BUILD:-True}"
 
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
 SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
@@ -42,7 +46,7 @@ IFS=','
 # sure there are no dupe entries
 read -a arr <<< "${TARGET_ENV}"
 
-# use assocaite array to ensure uniqueness (i.e., only one instance of ea env)
+# use associate array to ensure uniqueness (i.e., only one instance of ea env)
 # lots of other ways to do this, but nice to have key/value pairs at our disposal
 for nam in "${arr[@]}"; do
   case "${nam}" in
@@ -70,7 +74,9 @@ echo "enviroments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
 IFS=${oIFS}
 
 # these names are immtuable
+SYNTHEA_JAR_FILE="synthea-with-dependencies.jar"
 SYNTHEA_GIT_REPO="https://github.com/synthetichealth/synthea.git"
+SYNTHEA_LATEST_JAR="https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/${SYNTHEA_JAR_FILE}"
 BFD_GIT_REPO="https://github.com/CMSgov/beneficiary-fhir-data.git"
 
 # filename to maintain the ends state of a synthea run
@@ -115,10 +121,18 @@ error_exit() {
 # Function to clone the synthea generation application, scripts, and ancillary
 # files from GitHub; it then builds the application via gradle.
 install_synthea_from_git(){
-  echo "installing synthea from git"
-  git clone ${SYNTHEA_GIT_REPO} ${TARGET_SYNTHEA_DIR}
-  cd ${TARGET_SYNTHEA_DIR}
-  ./gradlew clean check
+    echo "installing synthea from git repo"
+    git clone ${SYNTHEA_GIT_REPO} ${TARGET_SYNTHEA_DIR}
+    cd ${TARGET_SYNTHEA_DIR}
+
+  if [ $SKIP_SYNTHEA_BUILD ]; then
+    echo "installing pre-built synthea release jar"
+    curl -LkSs "${SYNTHEA_LATEST_JAR}" -o ./${SYNTHEA_JAR_FILE}
+    chmod 744 ./${SYNTHEA_JAR_FILE}
+  else
+    # mitre synthea build has sporadic build failures
+    ./gradlew clean check
+  fi
 }
 
 # Function to clone BFD repository from GitHub; this shell script and associated python
@@ -127,12 +141,15 @@ install_bfd_from_git(){
   echo "installing bfd from git"
   git clone ${BFD_GIT_REPO} ${TARGET_BFD_DIR}
   cd ${TARGET_BFD_DIR}
-  git checkout ${BFD_BRANCH}
-  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
-  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
-  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
-  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
-  chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
+  if [[ -n ${BFD_BRANCH} ]]; then
+    git checkout ${BFD_BRANCH}
+  fi
+  # make sure the scripts are executable
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
 }
 
 # Utility function to create a python virtual environment that will be used during the
@@ -142,6 +159,7 @@ activate_py_env(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   python3 -m venv .venv
   source .venv/bin/activate
+  # need the following
   pip3 install awscli boto3 psycopg2
   deactivate
 }
@@ -162,6 +180,9 @@ download_script_files_from_s3(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
   python3 ./s3_utilities.py "${TARGET_SYNTHEA_DIR}" "download_script"
+  # make sure the scripts are executable
+  chmod 744 "${TARGET_SYNTHEA_DIR}/national_bfd.sh"
+  chmod 744 "${TARGET_SYNTHEA_DIR}/national_bfd_v2.sh"
   deactivate
 }
 
@@ -171,7 +192,7 @@ download_props_file_from_s3(){
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
   source .venv/bin/activate
   python3 s3_utilities.py "./" "download_prop"
-
+  chmod 644 "${BFD_END_STATE_PROPERTIES}"
   # Make a copy of the downloaded end state properties file.
   cat ./${BFD_END_STATE_PROPERTIES} > ${BFD_END_STATE_PROPERTIES_ORIG}
 
@@ -200,6 +221,7 @@ prepare_and_run_synthea(){
 # S3 folder where the BFD ETL pipeline will discover the synthetic RIF files and
 # load them data into the appropriate BFD database.
 upload_synthea_results_to_s3(){
+  
   echo "upload synthea results to S3"
   cd ${BFD_SYNTHEA_AUTO_LOCATION}
 
