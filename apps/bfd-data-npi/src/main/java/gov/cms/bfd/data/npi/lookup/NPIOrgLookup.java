@@ -120,6 +120,7 @@ public class NPIOrgLookup {
       }
     } else {
       LOGGER.error("Unable to read stream for NPI Resource");
+      throw new IOException("Unable to read stream for NPI Resource");
     }
 
     if (includeFakeNPIOrgCode) {
