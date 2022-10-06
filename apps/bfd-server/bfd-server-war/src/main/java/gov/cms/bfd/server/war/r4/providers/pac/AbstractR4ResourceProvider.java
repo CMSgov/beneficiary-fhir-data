@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.SpringConfiguration;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceFilter;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -74,6 +75,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private Class<T> resourceType;
 
+  private ResourceFilter<T> resourceFilter;
+
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
@@ -90,6 +93,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setSamhsaFilterer(R4ClaimSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
+  }
+
+  /** @param resourceFilter the {@link ResourceFilter} to use */
+  @Inject
+  public void setResourceFilter(ResourceFilter<T> resourceFilter) {
+    this.resourceFilter = resourceFilter;
   }
 
   @PostConstruct
@@ -310,6 +319,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       resources.addAll(
           entities.stream()
               .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
+              .filter(e -> resourceFilter.shouldRetain(type, e))
               .map(e -> type.getTransformer().transform(metricRegistry, e))
               .collect(Collectors.toList()));
     }

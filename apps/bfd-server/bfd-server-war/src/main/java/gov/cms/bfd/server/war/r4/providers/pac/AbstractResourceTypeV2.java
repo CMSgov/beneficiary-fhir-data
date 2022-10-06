@@ -2,9 +2,11 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -28,6 +30,13 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   protected final String entityIdAttribute;
   /** The attribute holding the end date for range queries in the entity class. */
   protected final List<String> entityServiceDateAttributes;
+
+  /** Accessor method to extract a (possibly null) phase number from an entity. */
+  protected final Function<TEntity, Short> entityPhaseGetter;
+
+  /** Accessor method to extract a (possibly null) phase sequence number from an entity. */
+  protected final Function<TEntity, Short> entityPhaseSeqNumGetter;
+
   /** The {@link ResourceTransformer} to convert an entity into a response object. */
   protected final ResourceTransformer<TResource> transformer;
 
@@ -50,6 +59,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       List<String> entityServiceDateAttributes,
+      Function<TEntity, Short> entityPhaseGetter,
+      Function<TEntity, Short> entityPhaseSeqNumGetter,
       ResourceTransformer<TResource> transformer) {
     this.nameForParsing = nameForParsing;
     this.nameForMetrics = nameForMetrics;
@@ -57,6 +68,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     this.entityMbiRecordAttribute = entityMbiRecordAttribute;
     this.entityIdAttribute = entityIdAttribute;
     this.entityServiceDateAttributes = entityServiceDateAttributes;
+    this.entityPhaseGetter = entityPhaseGetter;
+    this.entityPhaseSeqNumGetter = entityPhaseSeqNumGetter;
     this.transformer = transformer;
   }
 
@@ -88,6 +101,27 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   @Override
   public ResourceTransformer<TResource> getTransformer() {
     return transformer;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>If either phase or phase sequence number are null in the claim they are represented as zero
+   * in the version string.
+   *
+   * @param entityObject object of type TEntity
+   * @return a valid semantic version number
+   */
+  @Override
+  public String createPhaseVersionString(Object entityObject) {
+    if (!entityClass.isInstance(entityObject)) {
+      throw new BadCodeMonkeyException("received an incorrect entity type");
+    }
+
+    final TEntity entity = entityClass.cast(entityObject);
+    final Short phase = entityPhaseGetter.apply(entity);
+    final Short phaseSeqNum = entityPhaseSeqNumGetter.apply(entity);
+    return String.format("%d.%d", phase != null ? phase : 0, phaseSeqNum != null ? phaseSeqNum : 0);
   }
 
   /**

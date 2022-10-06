@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvide
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceFilter;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
@@ -364,5 +365,16 @@ public class SpringConfiguration {
     } else {
       return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
     }
+  }
+
+  /**
+   * This bean provides a method to control whether or not certain claims will be returned to
+   * clients.
+   *
+   * @return an instance of {@link ResourceFilter}
+   */
+  @Bean
+  public ResourceFilter pacResourceFilter() {
+    return (resourceTypeV2, entity) -> true;
   }
 }

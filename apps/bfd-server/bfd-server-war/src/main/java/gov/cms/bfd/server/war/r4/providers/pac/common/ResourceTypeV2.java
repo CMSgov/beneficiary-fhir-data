@@ -41,4 +41,15 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
    *     into FHIR instances
    */
   ResourceTransformer<TResource> getTransformer();
+
+  /**
+   * Constructs a version string based on the phase+phaseSeqNum of the claim. The entity is untyped
+   * to avoid type mismatch issues when calling this method from the claim resource provider. The
+   * resulting string must be of the form {@code P.S} where {@code P} is the phase number and {@code
+   * S} is the phase sequence number.
+   *
+   * @param entityObject object of type TEntity
+   * @return a semantic version number describing the phase
+   */
+  String createPhaseVersionString(Object entityObject);
 }
