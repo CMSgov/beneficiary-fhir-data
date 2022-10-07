@@ -2,12 +2,12 @@
 # Stateful resources for an environment and associated KMS needed by both stateful and stateless resources
 
 locals {
-  account_id        = data.aws_caller_identity.current.account_id
-  azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config        = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
-  is_prod           = substr(var.env_config.env, 0, 4) == "prod"
-  victor_ops_url    = var.victor_ops_url
-  enable_victor_ops = local.is_prod # only wake people up for prod alarms
+  account_id                       = data.aws_caller_identity.current.account_id
+  azs                              = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env_config                       = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
+  is_prod                          = substr(var.env_config.env, 0, 4) == "prod"
+  victor_ops_url                   = var.victor_ops_url
+  enable_victor_ops                = local.is_prod # only wake people up for prod alarms
   cloudwatch_sns_topic_policy_spec = <<-EOF
 {
   "Version": "2008-10-17",
@@ -132,7 +132,7 @@ resource "aws_sns_topic" "cloudwatch_alarms" {
 }
 
 resource "aws_sns_topic_policy" "cloudwatch_alarms" {
-  arn = aws_sns_topic.cloudwatch_alarms.arn
+  arn    = aws_sns_topic.cloudwatch_alarms.arn
   policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms.arn, aws_sns_topic.cloudwatch_alarms.arn)
 }
 
@@ -153,7 +153,7 @@ resource "aws_sns_topic" "cloudwatch_ok" {
 }
 
 resource "aws_sns_topic_policy" "cloudwatch_ok" {
-  arn = aws_sns_topic.cloudwatch_ok.arn
+  arn    = aws_sns_topic.cloudwatch_ok.arn
   policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_ok.arn, aws_sns_topic.cloudwatch_ok.arn)
 }
 
