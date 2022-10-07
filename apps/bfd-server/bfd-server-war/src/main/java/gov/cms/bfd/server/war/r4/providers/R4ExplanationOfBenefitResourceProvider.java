@@ -184,10 +184,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
 
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", "1");
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", "0");
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new ResourceNotFoundException(eobId);
     } finally {

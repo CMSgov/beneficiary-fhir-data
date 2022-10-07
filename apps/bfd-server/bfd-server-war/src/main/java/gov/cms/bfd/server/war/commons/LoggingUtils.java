@@ -61,6 +61,15 @@ public class LoggingUtils {
   }
 
   /**
+   * Log resource count returned to client given size of single element or bundle to BfdMDC.
+   *
+   * @param count of resources returned to client to log
+   */
+  public static void logResourceCountToMdc(int count) {
+    BfdMDC.put("resource_count", String.format("%d", count));
+  }
+
+  /**
    * Helper function for aggregating bene_ids within a bundle in v1. If no bene_ids found, an empty
    * set is returned.
    *

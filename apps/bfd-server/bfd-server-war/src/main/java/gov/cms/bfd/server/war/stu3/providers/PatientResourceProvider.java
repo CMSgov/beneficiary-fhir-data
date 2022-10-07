@@ -167,10 +167,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       // Add bene_id and number of resources to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
-      BfdMDC.put("resource_count", "1");
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", "0");
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new ResourceNotFoundException(patientId);
     } finally {

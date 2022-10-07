@@ -41,6 +41,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -3263,12 +3264,12 @@ public final class TransformerUtils {
       paging.setTotal(resources.size()).addLinks(bundle);
 
       // Add number of paginated resources to MDC logs
-      BfdMDC.put("resource_count", String.format("%d", resourcesSubList.size()));
+      LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
 
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", String.format("%d", bundle.getTotal()));
+      LoggingUtils.logResourceCountToMdc(bundle.getTotal());
     }
 
     /*
@@ -3332,7 +3333,7 @@ public final class TransformerUtils {
                 : Date.from(maxBundleDate));
 
     // Add number of resources to MDC logs
-    BfdMDC.put("resource_count", String.format("%d", bundle.getTotal()));
+    LoggingUtils.logResourceCountToMdc(bundle.getTotal());
 
     return bundle;
   }

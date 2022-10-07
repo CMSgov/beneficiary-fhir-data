@@ -17,7 +17,6 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -132,10 +131,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
       // Add bene_id and number of resources to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
-      BfdMDC.put("resource_count", "1");
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", "0");
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));

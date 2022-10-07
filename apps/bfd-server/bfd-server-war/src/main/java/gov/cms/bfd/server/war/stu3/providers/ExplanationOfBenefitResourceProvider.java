@@ -23,7 +23,6 @@ import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -181,10 +180,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
 
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", "1");
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
-      BfdMDC.put("resource_count", "0");
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new ResourceNotFoundException(eobId);
     } finally {
