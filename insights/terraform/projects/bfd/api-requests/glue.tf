@@ -1321,7 +1321,7 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
-      "name"    = "mdc_resource_count",
+      "name"    = "mdc_resources_returned_count",
       "type"    = "string",
       "comment" = ""
     }
