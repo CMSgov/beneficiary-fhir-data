@@ -1554,7 +1554,6 @@ public final class TransformerUtilsV2 {
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
-
     return bundle;
   }
 
