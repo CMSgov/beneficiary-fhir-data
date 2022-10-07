@@ -5,7 +5,7 @@ set -eo pipefail
 # BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
 
 # global variables
-CLEANUP="${CLEANUP:-false}" # defaults to removing inv on error, interupt, etc.
+CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
 # we'll default to 'test' and 10 bene's for now
@@ -128,7 +128,6 @@ install_synthea_from_git(){
   if [ $SKIP_SYNTHEA_BUILD ]; then
     echo "installing pre-built synthea release jar"
     curl -LkSs "${SYNTHEA_LATEST_JAR}" -o ./${SYNTHEA_JAR_FILE}
-    chmod 744 ./${SYNTHEA_JAR_FILE}
   else
     # mitre synthea build has sporadic build failures
     ./gradlew clean check
@@ -145,11 +144,11 @@ install_bfd_from_git(){
     git checkout ${BFD_BRANCH}
   fi
   # make sure the scripts are executable
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
+  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
+  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
+  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
+  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
+  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
 }
 
 # Utility function to create a python virtual environment that will be used during the
@@ -181,8 +180,8 @@ download_script_files_from_s3(){
   source .venv/bin/activate
   python3 ./s3_utilities.py "${TARGET_SYNTHEA_DIR}" "download_script"
   # make sure the scripts are executable
-  chmod 744 "${TARGET_SYNTHEA_DIR}/national_bfd.sh"
-  chmod 744 "${TARGET_SYNTHEA_DIR}/national_bfd_v2.sh"
+  chmod +x "${TARGET_SYNTHEA_DIR}/national_bfd.sh"
+  chmod +x "${TARGET_SYNTHEA_DIR}/national_bfd_v2.sh"
   deactivate
 }
 
