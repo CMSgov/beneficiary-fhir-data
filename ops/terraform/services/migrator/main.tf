@@ -64,7 +64,7 @@ resource "aws_instance" "this" {
   ebs_optimized               = true
 
   subnet_id              = data.aws_subnet.main.id
-  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
+  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this[0].id]
 
   root_block_device {
     tags                  = merge(local.common_tags, { snapshot = "true" })
