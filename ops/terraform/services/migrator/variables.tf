@@ -6,7 +6,7 @@ variable "ami_id" {
 
 variable "create_migrator_instance" {
   default     = false
-  description = "When true, create the migrator instance"
+  description = "When true, create the migrator instance, security group, and RDS security group rules"
   type        = bool
 }
 

@@ -2,12 +2,56 @@
 # Stateful resources for an environment and associated KMS needed by both stateful and stateless resources
 
 locals {
-  account_id        = data.aws_caller_identity.current.account_id
-  azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config        = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
-  is_prod           = substr(var.env_config.env, 0, 4) == "prod"
-  victor_ops_url    = var.victor_ops_url
-  enable_victor_ops = local.is_prod # only wake people up for prod alarms
+  account_id                       = data.aws_caller_identity.current.account_id
+  azs                              = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env_config                       = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
+  is_prod                          = substr(var.env_config.env, 0, 4) == "prod"
+  victor_ops_url                   = var.victor_ops_url
+  enable_victor_ops                = local.is_prod # only wake people up for prod alarms
+  cloudwatch_sns_topic_policy_spec = <<-EOF
+{
+  "Version": "2008-10-17",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+        "Sid": "Allow_Publish_Alarms",
+        "Effect": "Allow",
+        "Principal":
+        {
+            "Service": [
+                "cloudwatch.amazonaws.com"
+            ]
+        },
+        "Action": "sns:Publish",
+        "Resource": "%s"
+    },
+    {
+      "Sid": "__default_statement_ID",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": [
+        "SNS:GetTopicAttributes",
+        "SNS:SetTopicAttributes",
+        "SNS:AddPermission",
+        "SNS:RemovePermission",
+        "SNS:DeleteTopic",
+        "SNS:Subscribe",
+        "SNS:ListSubscriptionsByTopic",
+        "SNS:Publish",
+        "SNS:Receive"
+      ],
+      "Resource": "%s",
+      "Condition": {
+        "StringEquals": {
+          "AWS:SourceOwner": "${local.account_id}"
+        }
+      }
+    }
+  ]
+}
+EOF
 }
 
 data "aws_caller_identity" "current" {}
@@ -31,11 +75,6 @@ data "aws_vpc" "main" {
 # kms 
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
-}
-
-# sns kms key
-data "aws_kms_key" "sns_key" {
-  key_id = "alias/aws/sns"
 }
 
 # subnets
@@ -86,11 +125,15 @@ module "local_zone" {
 ## CloudWatch SNS Topics for Alarms
 #
 resource "aws_sns_topic" "cloudwatch_alarms" {
-  name         = "bfd-${var.env_config.env}-cloudwatch-alarms"
-  display_name = "BFD Cloudwatch Alarm. Created by Terraform."
-  tags         = var.env_config.tags
-  
-  kms_master_key_id = data.aws_kms_key.sns_key.id
+  name              = "bfd-${var.env_config.env}-cloudwatch-alarms"
+  display_name      = "BFD Cloudwatch Alarm. Created by Terraform."
+  tags              = var.env_config.tags
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms" {
+  arn    = aws_sns_topic.cloudwatch_alarms.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms.arn, aws_sns_topic.cloudwatch_alarms.arn)
 }
 
 resource "aws_sns_topic_subscription" "alarm" {
@@ -106,7 +149,12 @@ resource "aws_sns_topic" "cloudwatch_ok" {
   display_name = "BFD Cloudwatch OK notifications. Created by Terraform."
   tags         = var.env_config.tags
 
-  kms_master_key_id = data.aws_kms_key.sns_key.id
+  kms_master_key_id = data.aws_kms_key.master_key.arn
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_ok" {
+  arn    = aws_sns_topic.cloudwatch_ok.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_ok.arn, aws_sns_topic.cloudwatch_ok.arn)
 }
 
 resource "aws_sns_topic_subscription" "ok" {
