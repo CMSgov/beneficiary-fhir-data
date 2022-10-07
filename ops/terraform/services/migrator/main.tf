@@ -64,7 +64,7 @@ resource "aws_instance" "this" {
   ebs_optimized               = true
 
   subnet_id              = data.aws_subnet.main.id
-  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
+  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this[0].id]
 
   root_block_device {
     tags                  = merge(local.common_tags, { snapshot = "true" })
@@ -79,7 +79,6 @@ resource "aws_instance" "this" {
     account_id                                  = local.account_id
     db_migrator_db_url                          = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
     env                                         = local.env
-    git_repo_version                            = var.git_repo_version # TODO: This works for now, but it's probably more appropriate for image to contain ansible configuration
     migrator_monitor_enabled                    = local.migrator_monitor_enabled
     migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
   })

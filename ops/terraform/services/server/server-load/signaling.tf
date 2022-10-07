@@ -4,9 +4,9 @@ resource "aws_sqs_queue" "this" {
   visibility_timeout_seconds = 0
 }
 
-# TODO: Consider relying on existing SNS topic used by the cloudwatch alarms instead
 resource "aws_sns_topic" "this" {
-  name = local.queue_name
+  name              = local.queue_name
+  kms_master_key_id = local.kms_key_id
 }
 
 resource "aws_autoscaling_notification" "this" {

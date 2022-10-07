@@ -92,7 +92,6 @@ resource "aws_instance" "this" {
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     account_id       = local.account_id
     env              = local.env
-    git_repo_version = var.git_repo_version # TODO: This works for now, but it's probably more appropriate for image to contain ansible configuration
     pipeline_bucket  = aws_s3_bucket.this.bucket
     writer_endpoint  = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
   })
