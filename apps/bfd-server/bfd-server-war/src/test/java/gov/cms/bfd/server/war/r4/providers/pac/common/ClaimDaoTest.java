@@ -595,8 +595,6 @@ class ClaimDaoTest {
           "mbiAttribute",
           "somePropertyName",
           List.of("endDateAttribute"),
-          x -> (short) 1,
-          x -> (short) 2,
           null);
     }
   }

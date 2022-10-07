@@ -7,18 +7,16 @@ package gov.cms.bfd.server.war.r4.providers.pac.common;
 @FunctionalInterface
 public interface ResourceFilter {
   /** Instance that returns false for every entity passed to {@link ResourceFilter#shouldRetain}. */
-  ResourceFilter RetainNothing = (resourceTypeV2, entity) -> false;
+  ResourceFilter RetainNothing = (entity) -> false;
 
-  /** Instance that returns true every entity passed to {@link ResourceFilter#shouldRetain}. */
-  ResourceFilter RetainEverything = (resourceTypeV2, entity) -> true;
+  /** Instance that returns true for every entity passed to {@link ResourceFilter#shouldRetain}. */
+  ResourceFilter RetainEverything = (entity) -> true;
 
   /**
-   * Determine if the claim should be included in the result set. The class of the entity object
-   * must be the same as that of the {@link ResourceTypeV2#getEntityClass()}.
+   * Determine if the claim should be included in the result set.
    *
-   * @param resourceType used to interrogate the entity object
    * @param entity the entity object
    * @return true if the claim should be included in results
    */
-  boolean shouldRetain(ResourceTypeV2<?, ?> resourceType, Object entity);
+  boolean shouldRetain(Object entity);
 }

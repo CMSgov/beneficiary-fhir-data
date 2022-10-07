@@ -402,6 +402,8 @@ public class SpringConfiguration {
             PROP_PAC_PHASE_NUMBER_RANGE,
             phaseNumberRange);
         filter = Optional.of(ResourceFilter.RetainNothing);
+      } else {
+        log.info("Enforcing paca claim phase restriction using range {}", phaseNumberRange);
       }
     }
     return filter.orElse(ResourceFilter.RetainEverything);

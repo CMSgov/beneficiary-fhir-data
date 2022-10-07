@@ -6,7 +6,6 @@ import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import org.hl7.fhir.r4.model.Claim;
 
 /**
@@ -25,8 +24,6 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.dcn,
           List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
-          RdaFissClaim::getPhase,
-          RdaFissClaim::getPhaseSeqNum,
           FissClaimTransformerV2::transform);
 
   /** Instance for MCS claims. */
@@ -38,8 +35,6 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
           List.of(RdaMcsClaim.Fields.idrHdrToDateOfSvc),
-          RdaMcsClaim::getPhase,
-          RdaMcsClaim::getPhaseSeqNum,
           McsClaimTransformerV2::transform);
 
   /** Immutable list of all possible instances of this class. */
@@ -65,8 +60,6 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
       String entityMbiRecordAttribute,
       String entityIdAttribute,
       List<String> entityServiceDateAttributes,
-      Function<TEntity, Short> entityPhaseGetter,
-      Function<TEntity, Short> entityPhaseSeqNumGetter,
       ResourceTransformer<Claim> transformer) {
     super(
         nameForParsing,
@@ -75,8 +68,6 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
         entityMbiRecordAttribute,
         entityIdAttribute,
         entityServiceDateAttributes,
-        entityPhaseGetter,
-        entityPhaseSeqNumGetter,
         transformer);
   }
 

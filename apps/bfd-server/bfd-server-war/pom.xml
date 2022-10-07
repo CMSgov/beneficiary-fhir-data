@@ -270,6 +270,15 @@
 			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <!-- Configures mockito to use the inline implementation, which allows mocking
+		         of final classes, etc.  Without this, the fallback implementation results in
+		         illegal reflection access (JDK9+) in certain circumstances -->
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-inline</artifactId>
+		    <version>${mockito.version}</version>
+		    <scope>test</scope>
+		</dependency>
                 <dependency>
                         <!-- Mockito utilities for JUnit / Jupiter. -->
                         <groupId>org.mockito</groupId>

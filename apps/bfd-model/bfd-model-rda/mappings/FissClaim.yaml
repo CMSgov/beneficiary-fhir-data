@@ -2,6 +2,7 @@ mappings:
 - id: FissClaim
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissClaim
   entityClassName: gov.cms.bfd.model.rda.RdaFissClaim
+  entityInterfaces: [ "gov.cms.bfd.model.rda.EntityWithPhaseNumber" ]
   transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.FissClaimParser
   table:
     name: fiss_claims
@@ -29,7 +30,7 @@ mappings:
     - name: phaseSeqNum
       dbName: phase_seq_num
       sqlType: smallint
-      comment:  'The phase sequence number.
+      comment: 'The phase sequence number.
         
         The Phase I Sequence is set to zeros on new day claims and increments on pending claims not
         in an approved to pay location when the claim moves to a new pending location or has had a

@@ -14,7 +14,7 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
   /** Regex used to parse version strings into their component parts. */
   private static final Pattern VERSION_REGEX = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?");
 
-  /** Shared valid to use when needing a default, invalid value. */
+  /** Shared instance to use when needing a default, invalid value. */
   public static SemanticVersion ZERO = new SemanticVersion(0, 0, 0);
 
   /** {@link Comparator} used to compare two versions in ascending order. */
@@ -60,6 +60,21 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
               .filter(v -> v.isValid());
     }
     return version;
+  }
+
+  /**
+   * Combine the provided components of the version and construct a {@link SemanticVersion}.
+   * Validate that the components are valid and return either an {@link Optional} containing a valid
+   * version or an empty {@link Optional} if they are invalid.
+   *
+   * @param major Major version number
+   * @param minor Minor version number
+   * @param patch Patch version number
+   * @return Filled {@link Optional} if the components are valid or an empty one if they are not.
+   */
+  public static Optional<SemanticVersion> fromComponents(int major, int minor, int patch) {
+    var version = new SemanticVersion(major, minor, patch);
+    return version.isValid() ? Optional.of(version) : Optional.empty();
   }
 
   @Override

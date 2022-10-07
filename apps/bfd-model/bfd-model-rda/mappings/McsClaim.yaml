@@ -2,6 +2,7 @@ mappings:
 - id: McsClaim
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsClaim
   entityClassName: gov.cms.bfd.model.rda.RdaMcsClaim
+  entityInterfaces: [ "gov.cms.bfd.model.rda.EntityWithPhaseNumber" ]
   transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.McsClaimParser
   table:
     name: mcs_claims

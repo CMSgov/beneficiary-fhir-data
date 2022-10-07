@@ -31,6 +31,21 @@ public class SemanticVersionTest {
         Optional.of(new SemanticVersion(12, 345, 6789)), SemanticVersion.parse("12.345.6789"));
   }
 
+  /**
+   * Verifies that constructing from components properly filters out invalid versions and returns
+   * valid ones.
+   */
+  @Test
+  public void fromComponentsShouldFilterInvalidVersions() {
+    assertEquals(Optional.empty(), SemanticVersion.fromComponents(0, 0, 0));
+    assertEquals(Optional.empty(), SemanticVersion.fromComponents(-1, 2, 3));
+    assertEquals(Optional.empty(), SemanticVersion.fromComponents(1, -2, 3));
+    assertEquals(Optional.empty(), SemanticVersion.fromComponents(1, 2, -3));
+    assertEquals(SemanticVersion.parse("1"), SemanticVersion.fromComponents(1, 0, 0));
+    assertEquals(SemanticVersion.parse("1.2"), SemanticVersion.fromComponents(1, 2, 0));
+    assertEquals(SemanticVersion.parse("1.2.3"), SemanticVersion.fromComponents(1, 2, 3));
+  }
+
   /** Verifies that comparisons are performed in ascending order. */
   @Test
   public void compareShouldSortInAscendingOrder() {

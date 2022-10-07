@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import gov.cms.bfd.model.rda.EntityWithPhaseNumber;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceFilter;
-import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import gov.cms.bfd.sharedutils.config.SemanticVersion;
 import gov.cms.bfd.sharedutils.config.SemanticVersionRange;
 import lombok.AllArgsConstructor;
@@ -18,18 +18,26 @@ public class PhaseResourceFilter implements ResourceFilter {
   /**
    * {@inheritDoc}
    *
-   * <p>This implementation treats the claim's {@link ResourceTypeV2#createPhaseVersionString} value
-   * as a semantic version number and ensures that the number falls within the range allowed by this
-   * filter.
+   * <p>This implementation only filters entities that implement the {@link EntityWithPhaseNumber}
+   * interface. It constructs a {@link SemanticVersion} from the claim's phase numbers and ensures
+   * that the version falls within the range allowed by this filter. Any entity that does not
+   * implement the interface is retained.
    *
-   * @param resourceType used to interrogate the entity object
    * @param entity the entity object
    * @return true if the claim should be returned to clients
    */
   @Override
-  public boolean shouldRetain(ResourceTypeV2<?, ?> resourceType, Object entity) {
-    final var phaseVersionString = resourceType.createPhaseVersionString(entity);
-    final var phaseVersionNumber = SemanticVersion.parse(phaseVersionString);
-    return allowedRange.contains(phaseVersionNumber.orElse(SemanticVersion.ZERO));
+  public boolean shouldRetain(Object entity) {
+    var answer = true;
+    if (entity instanceof EntityWithPhaseNumber) {
+      final var phaseEntity = (EntityWithPhaseNumber) entity;
+      final var phaseNum = phaseEntity.getPhase();
+      final var phaseSeqNum = phaseEntity.getPhaseSeqNum();
+      final var phaseVersionNumber =
+          SemanticVersion.fromComponents(
+              phaseNum != null ? phaseNum : 0, phaseSeqNum != null ? phaseSeqNum : 0, 0);
+      answer = allowedRange.contains(phaseVersionNumber.orElse(SemanticVersion.ZERO));
+    }
+    return answer;
   }
 }

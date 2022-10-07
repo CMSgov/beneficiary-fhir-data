@@ -67,14 +67,20 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Digit}+)");
 
+  /** Used to access the database. */
   private EntityManager entityManager;
+  /** Used to track performance metrics. */
   private MetricRegistry metricRegistry;
+  /** Used to determine if a {@link Claim} (i.e. claim) is SAMHSA-related. */
   private R4ClaimSamhsaMatcher samhsaMatcher;
 
+  /** Used to query for entities. */
   private ClaimDao claimDao;
 
+  /** Class of the fhir resource that we provide. */
   private Class<T> resourceType;
 
+  /** Used to filter entities based on some criteria. */
   private ResourceFilter resourceFilter;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -99,6 +105,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setResourceFilter(ResourceFilter resourceFilter) {
     this.resourceFilter = resourceFilter;
+  }
+
+  /** @param claimDao the {@link ClaimDao} to use for testing */
+  @VisibleForTesting
+  void setClaimDao(ClaimDao claimDao) {
+    this.claimDao = claimDao;
   }
 
   @PostConstruct
@@ -318,8 +330,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
+              .filter(e -> resourceFilter.shouldRetain(e))
               .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
-              .filter(e -> resourceFilter.shouldRetain(type, e))
               .map(e -> type.getTransformer().transform(metricRegistry, e))
               .collect(Collectors.toList()));
     }
