@@ -514,7 +514,7 @@ try {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
-								directory: "ops/terr aform/services/pipeline",
+								directory: "ops/terraform/services/pipeline",
 								tfVars: [
 									ami_id_override: amiIds.bfdPipelineAmiId
 								]
