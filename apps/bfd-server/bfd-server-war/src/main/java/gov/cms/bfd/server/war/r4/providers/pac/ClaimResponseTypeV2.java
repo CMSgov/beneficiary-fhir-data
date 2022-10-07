@@ -35,7 +35,7 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaMcsClaim.class,
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
-          List.of(RdaMcsClaim.Fields.idrHdrToDateOfSvc),
+          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc),
           McsClaimResponseTransformerV2::transform);
 
   /** Immutable list of all possible instances of this class. */
