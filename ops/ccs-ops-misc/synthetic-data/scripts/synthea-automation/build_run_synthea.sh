@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 set -eo pipefail
 
 # Git branch to build from...how does this actually work? from build params?
