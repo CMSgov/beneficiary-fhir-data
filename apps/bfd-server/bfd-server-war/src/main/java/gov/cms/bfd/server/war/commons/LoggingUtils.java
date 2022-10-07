@@ -66,7 +66,7 @@ public class LoggingUtils {
    * @param count of resources returned to client to log
    */
   public static void logResourceCountToMdc(int count) {
-    BfdMDC.put("resource_count", String.format("%d", count));
+    BfdMDC.put("resources_returned_count", String.format("%d", count));
   }
 
   /**
