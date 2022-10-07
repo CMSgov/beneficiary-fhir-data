@@ -386,13 +386,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
 
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
-    Bundle bundle =
-        TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
-
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
-    return bundle;
+    return TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
 
   /*
