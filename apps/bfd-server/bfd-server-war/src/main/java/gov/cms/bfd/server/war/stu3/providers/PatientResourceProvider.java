@@ -165,8 +165,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
 
-      // Add bene_id and number of resources to MDC logs
+      // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs

@@ -159,8 +159,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
 
-      // Add bene_id and number of resources to MDC logs
+      // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneId);
+      // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
