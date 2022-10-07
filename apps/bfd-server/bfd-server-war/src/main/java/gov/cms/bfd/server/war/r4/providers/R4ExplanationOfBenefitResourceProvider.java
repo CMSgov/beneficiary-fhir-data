@@ -23,7 +23,6 @@ import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -297,9 +296,6 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
-
-      // Log number of resources to MDC
-      BfdMDC.put("resource_count", String.format("%d", eobs.size()));
 
       return TransformerUtilsV2.createBundle(
           paging, eobs, loadedFilterManager.getTransactionTime());
