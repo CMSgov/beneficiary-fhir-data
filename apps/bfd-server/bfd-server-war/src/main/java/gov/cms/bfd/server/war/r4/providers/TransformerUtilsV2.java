@@ -1524,8 +1524,14 @@ public final class TransformerUtilsV2 {
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
+
+      // Add number of paginated resources to MDC logs
+      BfdMDC.put("resource_count", String.format("%d", resourcesSubList.size()));
     } else {
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resources);
+
+      // Add number of resources to MDC logs
+      BfdMDC.put("resource_count", String.format("%d", bundle.getTotal()));
     }
 
     /*
@@ -1547,6 +1553,7 @@ public final class TransformerUtilsV2 {
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
+
     return bundle;
   }
 
@@ -1586,6 +1593,10 @@ public final class TransformerUtilsV2 {
             transactionTime.isAfter(maxBundleDate)
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
+
+    // Add number of resources to MDC logs
+    BfdMDC.put("resource_count", String.format("%d", bundle.getTotal()));
+
     return bundle;
   }
 
