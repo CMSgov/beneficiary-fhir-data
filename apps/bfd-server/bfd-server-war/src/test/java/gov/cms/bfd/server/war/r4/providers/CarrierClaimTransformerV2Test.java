@@ -667,6 +667,34 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
+  public void shouldHaveTwoCareTeamEntries() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+
+    CarrierClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit genEob =
+        CarrierClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    assertEquals(2, eob.getCareTeam().size());
+  }
+
+  @Test
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
 
