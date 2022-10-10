@@ -224,6 +224,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdatedRange)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new NoResultException();
     }
