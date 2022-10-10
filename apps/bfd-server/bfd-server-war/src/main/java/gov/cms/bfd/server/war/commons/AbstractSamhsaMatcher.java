@@ -445,10 +445,10 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     return isSamhsaCoding(
         concept,
         this::isSamhsaIcd9Diagnosis,
-        null,
+        this::invalidPredicateForCodingSystem,
         this::isSamhsaIcd10Diagnosis,
         this::isSamhsaIcd10CmDiagnosis,
-        null);
+        this::invalidPredicateForCodingSystem);
   }
 
   /**
@@ -467,8 +467,22 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
         this::isSamhsaIcd9Procedure,
         this::isSamhsaIcd9MedicareProcedure,
         this::isSamhsaIcd10Procedure,
-        null,
+        this::invalidPredicateForCodingSystem,
         this::isSamhsaIcd10MedicareProcedure);
+  }
+
+  /**
+   * Captures attempts to use an inappropriate predicate for the given coding system. Replaces the
+   * use of a null value that could throw a {@link NullPointerException} with a more meaningful
+   * {@link BadCodeMonkeyException} that also reports which coding system was involved.
+   *
+   * @param coding the coding system being tested inappropriatelt
+   * @return nothing is actually returned
+   * @throws BadCodeMonkeyException indicating the coding system being tested
+   */
+  private boolean invalidPredicateForCodingSystem(Coding coding) {
+    throw new BadCodeMonkeyException(
+        "an invalid predicate was invoked for coding: " + coding.getSystem());
   }
 
   /**

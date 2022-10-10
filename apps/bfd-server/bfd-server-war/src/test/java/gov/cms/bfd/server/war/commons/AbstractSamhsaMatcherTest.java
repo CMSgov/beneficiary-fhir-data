@@ -2,7 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -21,6 +21,7 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -402,13 +403,14 @@ public class AbstractSamhsaMatcherTest {
 
       Coding mockCoding = mock(Coding.class);
 
-      assertNull(icd9MedicareCallCaptor.getValue());
-      assertNull(icd10MedicareCallCaptor.getValue());
-
       // Invoke the captured lambdas to check they were the right ones
       icd9CallCaptor.getValue().test(mockCoding);
       icd10CallCaptor.getValue().test(mockCoding);
       icd10CmCallCaptor.getValue().test(mockCoding);
+      assertThrows(
+          BadCodeMonkeyException.class, () -> icd9MedicareCallCaptor.getValue().test(mockCoding));
+      assertThrows(
+          BadCodeMonkeyException.class, () -> icd10MedicareCallCaptor.getValue().test(mockCoding));
 
       verify(matcherSpy, times(1)).isSamhsaIcd9Diagnosis(mockCoding);
       verify(matcherSpy, times(1)).isSamhsaIcd10Diagnosis(mockCoding);
@@ -479,13 +481,13 @@ public class AbstractSamhsaMatcherTest {
 
       Coding mockCoding = mock(Coding.class);
 
-      assertNull(icd10CmCallCaptor.getValue());
-
       // Invoke the captured lambdas to check they were the right ones
       icd9CallCaptor.getValue().test(mockCoding);
       icd9MedicareCallCaptor.getValue().test(mockCoding);
       icd10CallCaptor.getValue().test(mockCoding);
       icd10MedicareCallCaptor.getValue().test(mockCoding);
+      assertThrows(
+          BadCodeMonkeyException.class, () -> icd10CmCallCaptor.getValue().test(mockCoding));
 
       verify(matcherSpy, times(1)).isSamhsaIcd9Procedure(mockCoding);
       verify(matcherSpy, times(1)).isSamhsaIcd9MedicareProcedure(mockCoding);
