@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Git branch to build from...how does this actually work? from build params?
-# BFD_BRANCH="cmac/BFD-1912-Jenkins-Build-Synthea-Pipeline"
-
 # global variables
 CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
 # we'll default to 'test' and 10 bene's for now
+BFD_ROOT_DIR="${BFD_ROOT_DIR:-$PWD}"
 BUILD_ROOT_DIR="${BUILD_ROOT_DIR:-/opt/dev}"
 TARGET_ENV="${TARGET_ENV:-test}"
-BFD_BRANCH="${BFD_DEPLOY_BRANCH:-}"
 SKIP_SYNTHEA_BUILD="${SKIP_SYNTHEA_BUILD:-True}"
 
 NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
@@ -19,7 +16,6 @@ SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
 TARGET_SYNTHEA_DIR=${BUILD_ROOT_DIR}/synthea
-TARGET_BFD_DIR=${BUILD_ROOT_DIR}/bfd
 
 # we'll need to keep track of 'begin' and 'end' bene_id values necessary to perform
 # various Synthea generation and validation tasks.
@@ -79,6 +75,9 @@ SYNTHEA_GIT_REPO="https://github.com/synthetichealth/synthea.git"
 SYNTHEA_LATEST_JAR="https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/${SYNTHEA_JAR_FILE}"
 BFD_GIT_REPO="https://github.com/CMSgov/beneficiary-fhir-data.git"
 
+# assorted variables used by the script.
+BFD_SYNTHEA_AUTO_LOCATION="${BFD_ROOT_DIR}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
+
 # filename to maintain the ends state of a synthea run
 BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
@@ -86,8 +85,6 @@ BFD_END_STATE_PROPERTIES="end_state.properties"
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
 # BFD characteristics file
 BFD_CHARACTERISTICS_FILE_NAME="characteristics.csv"
-# assorted variables used by the script.
-BFD_SYNTHEA_AUTO_LOCATION="${TARGET_BFD_DIR}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
 # the directory for synthea output 
 BFD_SYNTHEA_OUTPUT_LOCATION="${TARGET_SYNTHEA_DIR}/output/bfd"
 # directory where Mitre synthea mapping files will be downlowded to.
@@ -101,7 +98,15 @@ clean_up() {
   if $CLEANUP; then
     echo "performing cleanup"
     rm -fR "${TARGET_SYNTHEA_DIR}"
-    rm -fR "${TARGET_BFD_DIR}"
+    # put bfd back together as we found it...
+    rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES}"
+    rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES_ORIG}"
+    rm -fR "${BFD_SYNTHEA_AUTO_LOCATION}/__pycache__/"
+    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
+    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
+    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
+    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
+    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
   fi
 }
 # we'll trap system interrupts and perform cleanup.
@@ -137,18 +142,12 @@ install_synthea_from_git(){
 # Function to clone BFD repository from GitHub; this shell script and associated python
 # scripts do not need to be built, but will need read/execute.
 install_bfd_from_git(){
-  echo "installing bfd from git"
-  git clone ${BFD_GIT_REPO} ${TARGET_BFD_DIR}
-  cd ${TARGET_BFD_DIR}
-  if [[ -n ${BFD_BRANCH} ]]; then
-    git checkout ${BFD_BRANCH}
-  fi
   # make sure the scripts are executable
-  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
-  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
-  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
-  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
-  chmod +x "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
+  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
 }
 
 # Utility function to create a python virtual environment that will be used during the
