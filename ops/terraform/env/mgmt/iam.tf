@@ -24,49 +24,6 @@ POLICY
   tags        = local.shared_tags
 }
 
-resource "aws_iam_policy" "github_actions_s3its" {
-  description = "GitHub Actions policy for S3 integration tests"
-  name        = "bfd-${local.env}-github-actions-s3its"
-  path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
-    {
-      "Action": [
-        "s3:CreateBucket",
-        "s3:ListAllMyBuckets"
-      ],
-      "Effect": "Allow",
-      "Resource": "*",
-      "Sid": "BFDGitHubActionsS3ITs"
-    },
-    {
-      "Action": [
-        "s3:DeleteBucket",
-        "s3:HeadBucket",
-        "s3:ListBucket"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:s3:::bb-test-*",
-      "Sid": "BFDGitHubActionsS3ITsBucket"
-    },
-    {
-      "Action": [
-        "s3:DeleteObject",
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:s3:::bb-test-*/*",
-      "Sid": "BFDGitHubActionsS3ITsObject"
-    }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
-  tags        = local.shared_tags
-}
-
 #TODO: Determine if the bfd-packages sees continued use
 resource "aws_iam_policy" "packer_s3" {
   description = "packer S3 Policy"
@@ -97,98 +54,6 @@ resource "aws_iam_policy" "packer_s3" {
 POLICY
   tags        = local.shared_tags
 }
-
-resource "aws_iam_user" "github_actions" {
-  force_destroy = false
-  name          = "bfd-${local.env}-github-actions"
-  path          = "/"
-  tags          = local.shared_tags
-}
-
-resource "aws_iam_policy" "jenkins_permission_boundary" {
-  description = "Jenkins Permission Boundary Policy"
-  name        = "bfd-${local.env}-jenkins-permission-boundary"
-  path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
-    {
-      "Action": [
-        "kms:List*",
-        "rds:*",
-        "ec2:Reset*",
-        "cloudtrail:GetTrailStatus",
-        "logs:*",
-        "kms:Get*",
-        "dynamodb:*",
-        "autoscaling:*",
-        "kms:ReEncrypt*",
-        "iam:GetPolicy*",
-        "rds:Describe*",
-        "cloudtrail:ListTags",
-        "ec2:DeleteNetworkAcl*",
-        "config:*",
-        "iam:GetServiceLastAccessed*",
-        "events:*",
-        "ec2:Associate*",
-        "sns:*",
-        "cloudtrail:LookupEvents",
-        "iam:GetRole",
-        "iam:GetGroup*",
-        "kms:Describe*",
-        "ecr-public:*",
-        "ec2:Cancel*",
-        "cloudtrail:DescribeTrails",
-        "iam:*",
-        "ec2:Modify*",
-        "cloudwatch:*",
-        "ec2:*",
-        "waf-regional:*",
-        "iam:GetAccount*",
-        "ec2:AssignPrivateIpAddresses*",
-        "iam:GetUser*",
-        "cloudtrail:GetEventSelectors",
-        "iam:ListAttached*",
-        "ec2:Request*",
-        "sqs:*",
-        "iam:PassRole",
-        "ses:*",
-        "kms:*",
-        "ec2:Import*",
-        "ec2:Release*",
-        "iam:GetRole*",
-        "ec2:Purchase*",
-        "ec2:Bundle*",
-        "elasticfilesystem:*",
-        "s3:*",
-        "ec2:Copy*",
-        "ec2:Replace*",
-        "sts:*",
-        "iam:ListRoles",
-        "elasticloadbalancing:*",
-        "iam:Simulate*",
-        "ec2:Describe*",
-        "cloudtrail:ListPublicKeys",
-        "iam:GetContextKeys*",
-        "route53:*",
-        "ec2:Allocate*",
-        "ecr:*",
-        "iam:Upload*",
-        "ssm:*",
-        "lambda:*",
-        "glue:*"
-      ],
-      "Effect": "Allow",
-      "Resource": "*",
-      "Sid": "VisualEditor2"
-    }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
-  tags        = local.shared_tags
-}
-
 
 resource "aws_iam_policy" "code_artifact_rw" {
   description = "CodeArtifact read/write permissions"
@@ -238,6 +103,44 @@ resource "aws_iam_policy" "code_artifact_rw" {
 }
 POLICY
   tags        = local.shared_tags
+}
+
+resource "aws_iam_policy" "code_artifact_ro" {
+  description = "Allows Access to env:mgmt AWS Code Artifact Resources"
+  name        = "bfd-${local.env}-code-artifact-ro"
+  path        = "/"
+  policy      = <<-POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "CodeArtifactDownload",
+            "Effect": "Allow",
+            "Action": [
+                "codeartifact:GetPackageVersionReadme",
+                "codeartifact:GetAuthorizationToken",
+                "codeartifact:ListPackages",
+                "codeartifact:ReadFromRepository",
+                "codeartifact:GetRepositoryEndpoint",
+                "codeartifact:DescribePackageVersion",
+                "codeartifact:GetPackageVersionAsset",
+                "codeartifact:ListPackageVersions"
+            ],
+            "Resource": [
+                "arn:aws:codeartifact:us-east-1:${local.account_id}:package/*/*/*/*/*",
+                "${aws_codeartifact_repository.this.arn}",
+                "${aws_codeartifact_domain.this.arn}"
+            ]
+        },
+        {
+            "Sid": "TempCreds",
+            "Effect": "Allow",
+            "Action": "sts:GetServiceBearerToken",
+            "Resource": "*"
+        }
+    ]
+}
+POLICY
 }
 
 resource "aws_iam_policy" "jenkins_volume" {
