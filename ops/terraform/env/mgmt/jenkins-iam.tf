@@ -95,5 +95,4 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
     ],
     "Version": "2012-10-17"
 })
-  tags = local.shared_tags
 }
