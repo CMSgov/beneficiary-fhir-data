@@ -1,8 +1,7 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
+package gov.cms.bfd.pipeline.rda.grpc;
 
 import javax.annotation.concurrent.ThreadSafe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Several classes contain multiple resources that require cleanup in a close method. An exception
@@ -12,8 +11,8 @@ import org.slf4j.LoggerFactory;
  * completed.
  */
 @ThreadSafe
+@Slf4j
 public class MultiCloser {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MultiCloser.class);
 
   private Exception error = null;
 
@@ -26,7 +25,7 @@ public class MultiCloser {
     try {
       closer.close();
     } catch (Exception ex) {
-      LOGGER.error("captured exception: message={}", ex.getMessage(), ex);
+      log.error("captured exception: message={}", ex.getMessage(), ex);
       if (error == null) {
         error = ex;
       } else {
