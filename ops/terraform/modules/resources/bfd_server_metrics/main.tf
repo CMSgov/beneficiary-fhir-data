@@ -103,7 +103,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_not_by_contra
                             " $.mdc.http_access_request_uri = \"${local.endpoints.patientAll}\" &&",
                             " $.mdc.http_access_request_operation != \"*by=*contract*\" &&",
                             " $.mdc.http_access_request_operation != \"*by=*Contract*\" &&",
-                            " $.mdc.http_access_response_duration_milliseconds = * ")
+                            " $.mdc.http_access_response_duration_milliseconds = *}")
   log_group_name = local.log_groups.access
 
   metric_transformation {
@@ -125,7 +125,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_by_contract_c
                             " $.mdc.http_access_request_query_string = \"*_count=4000*\" &&",
                             " ($.mdc.http_access_request_operation = \"*by=*contract*\" ||",
                             " $.mdc.http_access_request_operation = \"*by=*Contract*\") &&",
-                            " $.mdc.http_access_response_duration_milliseconds = *")
+                            " $.mdc.http_access_response_duration_milliseconds = *}")
   log_group_name = local.log_groups.access
 
   metric_transformation {
