@@ -7,17 +7,6 @@ locals {
   test_kms_key_id         = data.aws_kms_key.test_cmk.arn
   prod_sbx_kms_key_id     = data.aws_kms_key.prod_sbx_cmk.arn
   prod_kms_key_id         = data.aws_kms_key.prod_cmk.arn
-
-  tf_module_root = join("/", slice(split("/", abspath(path.root)), index(split("/", abspath(path.root)), "beneficiary-fhir-data"), length(split("/", abspath(path.root)))))
-
-  shared_tags = {
-    Environment    = local.env
-    application    = "bfd"
-    business       = "oeda"
-    stack          = local.env
-    Terraform      = true
-    tf_module_root = local.tf_module_root
-  }
 }
 
 data "aws_caller_identity" "current" {}
