@@ -135,3 +135,22 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_by_contract_c
     default_value = null
   }
 }
+
+# Latency per-KB for all EoB endpoints (for SLOs)
+resource "aws_cloudwatch_log_metric_filter" "http_requests_eob_all_latency_by_kb" {
+  for_each       = local.partners
+  name           = "bfd-${var.env}/bfd-server/http-requests/latencyByKB/eobAll/${each.key}"
+  # Terraform HCL has no support for breaking long strings, so the join() function is used as a
+  # poor, but functional, substitute. Otherwise this pattern would be far too long
+  pattern        = join("", "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" &&",
+                            " $.mdc.http_access_request_uri = \"${local.endpoints.eobAll}\" &&",
+                            " $.mdc.http_access_response_duration_per_kb = *}")
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/latencyByKB/eobAll/${each.key}"
+    namespace     = local.namespace
+    value         = "$.mdc.http_access_response_duration_per_kb"
+    default_value = null
+  }
+}
