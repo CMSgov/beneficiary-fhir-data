@@ -107,7 +107,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_not_by_contra
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "http-requests/http-requests/latency/patientByContract/${each.key}"
+    name          = "http-requests/latency/patientNotByContract/${each.key}"
     namespace     = local.namespace
     value         = "$.mdc.http_access_response_duration_milliseconds"
     default_value = null
