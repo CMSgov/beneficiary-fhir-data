@@ -72,7 +72,8 @@ public class R4ClaimResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when a search is done for {@link Claim}s using
-   * given mbi and service-date range
+   * given mbi and service-date range. In this test case the query finds the matched claims because
+   * their to dates are within the date range even though their from dates are not.
    */
   @Test
   public void shouldGetCorrectClaimResourcesByMbiHash() {
@@ -87,7 +88,7 @@ public class R4ClaimResourceProviderIT {
                     "mbi",
                     List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
                     "service-date",
-                    List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
+                    List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-25"))))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -106,7 +107,8 @@ public class R4ClaimResourceProviderIT {
 
   /**
    * Tests to see if the correct paginated response is given when a search is done for {@link
-   * Claim}s using given mbi and service-date range
+   * Claim}s using given mbi and service-date range. In this test case the query finds the matched
+   * claims because their from dates are within the date range even though their to dates are not.
    */
   @Test
   public void shouldGetCorrectClaimResourcesByMbiHashWithPagination() {
@@ -121,7 +123,7 @@ public class R4ClaimResourceProviderIT {
                     "mbi",
                     List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
                     "service-date",
-                    List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30")),
+                    List.of(new DateParam("ge1970-07-10"), new DateParam("le1970-07-18")),
                     "_count",
                     List.of(new NumberParam("5")),
                     "startIndex",
