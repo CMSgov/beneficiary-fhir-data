@@ -100,10 +100,10 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_not_by_contra
   # Terraform HCL has no support for breaking long strings, so the join() function is used as a
   # poor, but functional, substitute. Otherwise this pattern would be far too long
   pattern        = join("", "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" &&",
-                            " $.mdc.http_access_response_duration_milliseconds = * &&",
                             " $.mdc.http_access_request_uri = \"${local.endpoints.patientAll}\" &&",
                             " $.mdc.http_access_request_operation != \"*by=*contract*\" &&",
-                            " $.mdc.http_access_request_operation != \"*by=*Contract*\"")
+                            " $.mdc.http_access_request_operation != \"*by=*Contract*\" &&",
+                            " $.mdc.http_access_response_duration_milliseconds = * ")
   log_group_name = local.log_groups.access
 
   metric_transformation {
