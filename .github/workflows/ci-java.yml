@@ -200,7 +200,6 @@ jobs:
         uses: wei/wget@v1
         with:
           args: https://github.com/hapifhir/org.hl7.fhir.core/releases/download/5.6.68/validator_cli.jar
-          #args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
       - name: 'Verify FHIR resource'
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'
