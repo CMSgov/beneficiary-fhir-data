@@ -76,7 +76,7 @@ public final class CarrierClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void careTeam() throws FHIRException {
+  public void shouldHaveTwoCareTeamMembers() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
