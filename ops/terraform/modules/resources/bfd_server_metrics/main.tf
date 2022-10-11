@@ -92,3 +92,24 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_not_2xx" {
     default_value = "0"
   }
 }
+
+# Latency per-partner for Patient endpoints by contract (for SLOs)
+resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_by_contract_latency" {
+  for_each       = local.partners
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/patientByContract/${each.key}"
+  # Terraform HCL has no support for breaking long strings, so the join() function is used as a
+  # poor, but functional, substitute. Otherwise this pattern would be far too long
+  pattern        = join("", "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" &&",
+                            " $.mdc.http_access_response_duration_milliseconds = * &&",
+                            " $.mdc.http_access_request_uri = \"*/fhir/Patient\" &&",
+                            " ($.mdc.http_access_request_operation = \"*by=*contract*\" ||",
+                            " $.mdc.http_access_request_operation = \"*by=*Contract*\") ")
+  log_group_name = local.log_groups.access
+
+  metric_transformation {
+    name          = "http-requests/http-requests/latency/patientByContract/${each.key}"
+    namespace     = local.namespace
+    value         = "$.mdc.http_access_response_duration_milliseconds"
+    default_value = null
+  }
+}
