@@ -155,6 +155,7 @@ public class RDATestUtils {
         RdaFissClaim.builder()
             .sequenceNumber(1L)
             .dcn(FISS_CLAIM_A_DCN)
+            .phase((short) 1)
             .hicNo("hicnumber")
             .currStatus('a')
             .currLoc1('z')
@@ -255,6 +256,7 @@ public class RDATestUtils {
         RdaFissClaim.builder()
             .sequenceNumber(2L)
             .dcn(FISS_CLAIM_B_DCN)
+            .phase((short) 2)
             .hicNo("hicnumbe2")
             .currStatus('\0')
             .currLoc1('r')
@@ -346,6 +348,7 @@ public class RDATestUtils {
     RdaMcsClaim claim =
         RdaMcsClaim.builder()
             .sequenceNumber(1L)
+            .phase((short) 1)
             .idrClmHdIcn("654321")
             .idrContrId("contr")
             .idrHic("HicValue")
@@ -416,6 +419,7 @@ public class RDATestUtils {
     RdaMcsClaim claim =
         RdaMcsClaim.builder()
             .sequenceNumber(1L)
+            .phase((short) 2)
             .idrClmHdIcn("654323")
             .idrContrId("contr")
             .idrHic("HicValue")

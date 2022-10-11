@@ -110,6 +110,8 @@ public class McsClaimTransformerTest {
   @Test
   public void basicFieldsTestForClaimObjectTransformation() {
     claim.setSequenceNumber(42L);
+    claim.setPhase((short) 1);
+    claim.setPhaseSeqNum((short) 2);
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrHic("123456789012");
@@ -180,7 +182,7 @@ public class McsClaimTransformerTest {
         .setSource(
             RecordSource.newBuilder()
                 .setPhase("P1")
-                .setPhaseSeqNum(0)
+                .setPhaseSeqNum(2)
                 .setExtractDate("1970-01-01")
                 .setTransmissionTimestamp("1970-01-01T00:00:00.000001Z")
                 .build());

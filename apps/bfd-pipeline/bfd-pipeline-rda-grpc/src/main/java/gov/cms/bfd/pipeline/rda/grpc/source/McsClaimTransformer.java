@@ -73,6 +73,8 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
     final RdaMcsClaim to = claimParser.transformMessage(from, transformer, clock.instant());
     to.setSequenceNumber(change.getSeq());
     final RdaChange.Source source = transformSource(change.getSource(), transformer);
+    to.setPhase(source.getPhase());
+    to.setPhaseSeqNum(source.getPhaseSeqNum());
 
     final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {

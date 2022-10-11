@@ -123,6 +123,8 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForClaimObjectTransformation() {
     claim.setDcn("dcn");
     claim.setSequenceNumber(42L);
+    claim.setPhase((short) 1);
+    claim.setPhaseSeqNum((short) 2);
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -188,7 +190,7 @@ public class FissClaimTransformerTest {
         .setSource(
             RecordSource.newBuilder()
                 .setPhase("P1")
-                .setPhaseSeqNum(0)
+                .setPhaseSeqNum(2)
                 .setExtractDate("1970-01-01")
                 .setTransmissionTimestamp("1970-01-01T00:00:00.000001Z")
                 .build());

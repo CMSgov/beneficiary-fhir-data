@@ -4,12 +4,14 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.EntityWithPhaseNumber;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -36,6 +38,8 @@ public class ClaimDao {
   private final MetricRegistry metricRegistry;
   /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
+  /** Minimum phase number for claim query. */
+  private final short minimumPhaseNumber;
 
   /**
    * Gets an entity by it's ID for the given claim type.
@@ -106,6 +110,7 @@ public class ClaimDao {
             isMbiSearchValueHashed,
             lastUpdated,
             serviceDate);
+    createPhasePredicate(builder, root, resourceType).ifPresent(predicates::add);
 
     criteria.where(predicates.toArray(new Predicate[0]));
 
@@ -208,6 +213,7 @@ public class ClaimDao {
   /**
    * Helper method for easier mocking related to metrics.
    *
+   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
    * @param queryTime The amount of time passed executing the query.
    * @param querySize The number of entities returned by the query.
    */
@@ -240,6 +246,31 @@ public class ClaimDao {
     if (isMbiSearchValueHashed && isOldMbiHashEnabled) {
       var oldHashPredicate = builder.equal(root.get(Mbi.Fields.oldHash), mbiSearchValue);
       answer = builder.or(answer, oldHashPredicate);
+    }
+    return answer;
+  }
+
+  /**
+   * Optionally create a {@link Predicate} for the where clause that limits returned entities to
+   * those with a phase number greater than or equal to our {@link ClaimDao#minimumPhaseNumber}.
+   * Only creates the predicate for resources that implement the {@link EntityWithPhaseNumber}
+   * interface.
+   *
+   * @param builder The {@link CriteriaBuilder} being used in current query.
+   * @param root The {@link Root} for the claim in the query
+   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
+   * @return {@link Optional} that is empty if no query needed or filled with a {@link Predicate} if
+   *     one is needed
+   */
+  Optional<Predicate> createPhasePredicate(
+      CriteriaBuilder builder, Path<?> root, ResourceTypeV2<?, ?> resourceType) {
+    var answer = Optional.<Predicate>empty();
+    if (minimumPhaseNumber > 0
+        && EntityWithPhaseNumber.class.isAssignableFrom(resourceType.getEntityClass())) {
+      final var phaseNumber = root.<Short>get(EntityWithPhaseNumber.PhaseFieldName);
+      final var notNullPredicate = builder.isNotNull(phaseNumber);
+      final var valuePredicate = builder.greaterThanOrEqualTo(phaseNumber, minimumPhaseNumber);
+      answer = Optional.of(builder.and(notNullPredicate, valuePredicate));
     }
     return answer;
   }

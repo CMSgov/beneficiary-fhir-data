@@ -2,6 +2,7 @@ mappings:
 - id: McsClaim
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsClaim
   entityClassName: gov.cms.bfd.model.rda.RdaMcsClaim
+  entityInterfaces: [ "gov.cms.bfd.model.rda.EntityWithPhaseNumber" ]
   transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.McsClaimParser
   table:
     name: mcs_claims
@@ -22,6 +23,19 @@ mappings:
       sqlType: bigint
       nullable: false
       dbName: sequence_number
+    - name: phase
+      sqlType: smallint
+      comment: 'Identifies the particular phase associated with this claim (1, 2, 3).'
+    - name: phaseSeqNum
+      dbName: phase_seq_num
+      sqlType: smallint
+      comment:  'The phase sequence number.
+        
+        The Phase I Sequence is set to zeros on new day claims and increments on pending claims not
+        in an approved to pay location when the claim moves to a new pending location or has had a
+        location date change since the last batch cycle.
+        
+        For Phase II and Phase III, this field is zeros.'
     - name: idrContrId
       sqlType: varchar(5)
       nullable: false

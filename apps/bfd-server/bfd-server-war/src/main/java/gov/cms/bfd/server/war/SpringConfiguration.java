@@ -6,6 +6,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.google.common.base.Strings;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
@@ -33,6 +34,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
+import lombok.extern.slf4j.Slf4j;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -51,6 +53,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
+@Slf4j
 public class SpringConfiguration {
   public static final String PROP_DB_URL = "bfdServer.db.url";
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
@@ -253,6 +256,31 @@ public class SpringConfiguration {
     return Boolean.TRUE
         .toString()
         .equalsIgnoreCase(System.getProperty("bfdServer.pac.oldMbiHash.enabled", "false"));
+  }
+
+  /**
+   * Determines if the partially adjudicated claims returned by the API should be limited by phase
+   * number. If the property is not defined all claims will be returned. If the property value is
+   * not a valid integer then an error is logged and no claims will be returned.
+   *
+   * @return 0 if all claims can be returned or a positive value to enforce a min phase number
+   */
+  public static short getMinimumPacClaimPhaseNumber() {
+    String propertyName = "bfdServer.pac.minimumPhaseNumber";
+    String minimumPhaseNumberString = System.getProperty(propertyName);
+    short minimumPhaseNumber = 0;
+    if (!Strings.isNullOrEmpty(minimumPhaseNumberString)) {
+      try {
+        minimumPhaseNumber = Short.parseShort(minimumPhaseNumberString);
+      } catch (NumberFormatException ex) {
+        minimumPhaseNumber = Short.MAX_VALUE;
+        log.error(
+            "invalid value for {}: PAC claims minimum phase number set to {}",
+            propertyName,
+            minimumPhaseNumber);
+      }
+    }
+    return minimumPhaseNumber;
   }
 
   /**

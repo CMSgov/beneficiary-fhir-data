@@ -49,7 +49,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithKnownMbiFindsMatch() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, (short) 0);
     testUtils.seedData(false);
     var claims = runFissMbiQuery(claimDao, RDATestUtils.MBI);
     assertEquals(2, claims.size());
@@ -58,7 +59,8 @@ public class ClaimDaoIT {
   /** Verifies that doing a claims search with an unknown MBI will return no claims. */
   @Test
   public void verifyQueryWithUnknownMbiFindsNothing() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, (short) 0);
     testUtils.seedData(false);
     var claims = runFissMbiQuery(claimDao, "not-an-mbi");
     assertEquals(0, claims.size());
@@ -70,7 +72,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithKnownMbiHashFindsMatch() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, (short) 0);
     testUtils.seedData(false);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
     assertEquals(2, claims.size());
@@ -79,7 +82,8 @@ public class ClaimDaoIT {
   /** Verifies that doing a claims search with an unknown MBI hash will return no claims. */
   @Test
   public void verifyQueryWithUnknownMbiHashFindsNothing() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, (short) 0);
     testUtils.seedData(false);
     var claims = runMcsMbiHashQuery(claimDao, "not-an-mbi-hash");
     assertEquals(0, claims.size());
@@ -91,7 +95,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashDisabledIgnoresOldHash() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, (short) 0);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
     assertEquals(0, claims.size());
@@ -103,7 +108,7 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashEnabledFindsHash() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
+    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true, (short) 0);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
     assertEquals(2, claims.size());
@@ -115,7 +120,7 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashEnabledFindsOldHash() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
+    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true, (short) 0);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
     assertEquals(2, claims.size());
@@ -127,7 +132,7 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashEnabledAndUnknownHashFindsNothing() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
+    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true, (short) 0);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, "not-a-hash");
     assertEquals(0, claims.size());
@@ -147,26 +152,30 @@ public class ClaimDaoIT {
             goodMbiHash,
             null,
             null,
+            (short) 0,
             List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)),
         new ServiceDateQueryParam(
-            "bad-mbi-matches-none-no-dates", badMbiHash, null, null, List.of()),
+            "bad-mbi-matches-none-no-dates", badMbiHash, null, null, (short) 0, List.of()),
         new ServiceDateQueryParam(
             "bad-mbi-matches-none-last-updated",
             badMbiHash,
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
             null,
+            (short) 0,
             List.of()),
         new ServiceDateQueryParam(
             "bad-mbi-matches-none-service-date",
             badMbiHash,
             null,
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
+            (short) 0,
             List.of()),
         new ServiceDateQueryParam(
             "lastUpdated-mismatch",
             goodMbiHash,
             new DateRangeParam(new DateParam("gt1970-08-08"), null),
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
+            (short) 0,
             List.of()),
         new ServiceDateQueryParam(
             "lastUpdated-matches-1",
@@ -174,31 +183,43 @@ public class ClaimDaoIT {
             new DateRangeParam(
                 new DateParam("ge1970-08-01T00:00:00Z"), new DateParam("lt1970-08-07T00:00:00Z")),
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
+            (short) 0,
             List.of(RDATestUtils.FISS_CLAIM_A_DCN)),
         new ServiceDateQueryParam(
             "lastUpdated-matches-2",
             goodMbiHash,
             new DateRangeParam(new DateParam("ge1970-08-01T00:00:00Z"), null),
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
+            (short) 0,
             List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)),
         new ServiceDateQueryParam(
             "serviceDate-matches-1-from",
             goodMbiHash,
             null,
             new DateRangeParam(null, new DateParam("lt1970-07-11")),
+            (short) 0,
             List.of(RDATestUtils.FISS_CLAIM_A_DCN)),
         new ServiceDateQueryParam(
             "serviceDate-matches-1-to",
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("gt1970-08-01"), null),
+            (short) 0,
             List.of(RDATestUtils.FISS_CLAIM_B_DCN)),
         new ServiceDateQueryParam(
             "serviceDate-matches-2",
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("ge1970-07-19"), new DateParam("lt1970-08-01")),
-            List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)));
+            (short) 0,
+            List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)),
+        new ServiceDateQueryParam(
+            "serviceDate-matches-2-phase-2-only",
+            goodMbiHash,
+            null,
+            new DateRangeParam(new DateParam("ge1970-07-19"), new DateParam("lt1970-08-01")),
+            (short) 2,
+            List.of(RDATestUtils.FISS_CLAIM_B_DCN)));
   }
 
   /**
@@ -209,7 +230,9 @@ public class ClaimDaoIT {
   @ParameterizedTest()
   @MethodSource("getFissServiceDateQueryParameters")
   protected void testFissServiceDateQuery(ServiceDateQueryParam testParam) {
-    final ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    final ClaimDao claimDao =
+        new ClaimDao(
+            testUtils.getEntityManager(), metricRegistry, false, testParam.minimumPhaseNumber);
     testUtils.seedData(false);
     final var claims =
         claimDao.findAllByMbiAttribute(
@@ -237,6 +260,7 @@ public class ClaimDaoIT {
             goodMbiHash,
             null,
             null,
+            (short) 0,
             List.of(
                 "both-same",
                 "claim-earlier",
@@ -247,36 +271,41 @@ public class ClaimDaoIT {
                 "multi-detail",
                 "no-dates")),
         new ServiceDateQueryParam(
-            "bad-mbi-matches-none-no-dates", badMbiHash, null, null, List.of()),
+            "bad-mbi-matches-none-no-dates", badMbiHash, null, null, (short) 0, List.of()),
         new ServiceDateQueryParam(
             "bad-mbi-matches-none-last-updated",
             badMbiHash,
             new DateRangeParam(new DateParam("ge2022-01-01"), null),
             null,
+            (short) 0,
             List.of()),
         new ServiceDateQueryParam(
             "bad-mbi-matches-none-service-date",
             badMbiHash,
             null,
             new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            (short) 0,
             List.of()),
         new ServiceDateQueryParam(
             "lastUpdated-mismatch",
             goodMbiHash,
             new DateRangeParam(new DateParam("gt2022-08-03"), null),
             new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            (short) 0,
             List.of()),
         new ServiceDateQueryParam(
             "lastUpdated-matches-3",
             goodMbiHash,
             new DateRangeParam(new DateParam("ge2022-06-06T00:00:00Z"), null),
             new DateRangeParam(new DateParam("ge2022-01-01"), null),
+            (short) 0,
             List.of("claim-earlier", "detail-earlier", "multi-detail")),
         new ServiceDateQueryParam(
             "serviceDate-matches-all-dated",
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("ge2022-05-25"), new DateParam("le2022-06-01")),
+            (short) 0,
             List.of(
                 "both-same", "claim-empty-dtl", "claim-only", "detail-earlier", "multi-detail")),
         new ServiceDateQueryParam(
@@ -284,6 +313,7 @@ public class ClaimDaoIT {
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("ge2022-05-28"), new DateParam("le2022-05-30")),
+            (short) 0,
             List.of("both-same", "detail-earlier")));
   }
 
@@ -295,7 +325,8 @@ public class ClaimDaoIT {
   @ParameterizedTest()
   @MethodSource("getMcsServiceDateQueryParameters")
   protected void testMcsServiceDateQuery(ServiceDateQueryParam testParam) {
-    final ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    final ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, (short) 0);
     testUtils.seedMbiRecord();
     testUtils.seedMcsClaimForServiceIdTest("no-dates", LocalDate.of(2022, 6, 1), null, List.of());
     testUtils.seedMcsClaimForServiceIdTest(
@@ -392,6 +423,8 @@ public class ClaimDaoIT {
     @Nullable private final DateRangeParam lastUpdatedParam;
     /** serviceDateParam value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
     @Nullable private final DateRangeParam serviceDateParam;
+    /** minimumPhaseNumber value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
+    private final short minimumPhaseNumber;
     /** List of claimId values expected in the query result. */
     private final List<String> expectedClaimIds;
 

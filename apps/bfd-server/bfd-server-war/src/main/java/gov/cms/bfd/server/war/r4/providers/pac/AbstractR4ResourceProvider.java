@@ -95,7 +95,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @PostConstruct
   public void init() {
     claimDao =
-        new ClaimDao(entityManager, metricRegistry, SpringConfiguration.isPacOldMbiHashEnabled());
+        new ClaimDao(
+            entityManager,
+            metricRegistry,
+            SpringConfiguration.isPacOldMbiHashEnabled(),
+            SpringConfiguration.getMinimumPacClaimPhaseNumber());
 
     setResourceType();
   }

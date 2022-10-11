@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.rda.EntityWithPhaseNumber;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
@@ -29,6 +30,7 @@ import gov.cms.bfd.server.war.r4.providers.pac.ClaimTypeV2;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
@@ -96,7 +98,7 @@ class ClaimDaoTest {
 
     Object expected = 5L;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, (short) 0));
 
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
     // rawtypes - Due to mocking the object.
@@ -156,7 +158,7 @@ class ClaimDaoTest {
   void shouldGetEntityByIdWhenNull() {
     String claimId = "123";
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, (short) 0));
 
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
     // rawtypes - Due to mocking the object.
@@ -218,7 +220,7 @@ class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false, (short) 0));
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -274,7 +276,7 @@ class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false, (short) 0));
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -324,7 +326,7 @@ class ClaimDaoTest {
   @Test
   @SuppressWarnings("unchecked") // untyped mock creation is harmless
   public void testCreateServiceDatePredicates() {
-    final var daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    final var daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, (short) 0));
     final Root<RdaFissClaim> root = mock(Root.class);
     final var serviceDateParam = mock(DateRangeParam.class);
 
@@ -401,7 +403,7 @@ class ClaimDaoTest {
     final Root<TEntity> claim = mock(Root.class);
     doReturn(claim).when(claimsQuery).from(resourceType.getEntityClass());
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false, (short) 0));
 
     final Predicate wherePredicate = mock(Predicate.class);
     doReturn(List.of(wherePredicate))
@@ -484,7 +486,7 @@ class ClaimDaoTest {
     final Path<?> mbiRecord = mock(Path.class);
     doReturn(mbiRecord).when(claim).get(resourceType.getEntityMbiRecordAttribute());
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false, (short) 0));
 
     final List<Predicate> expectedPredicates = new ArrayList<>();
 
@@ -538,7 +540,7 @@ class ClaimDaoTest {
     doReturn(mbiPredicate).when(mockBuilder).equal(mbi, searchString);
     doReturn(mbi).when(root).get(Mbi.Fields.mbi);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false, (short) 0));
     assertSame(mbiPredicate, dao.createMbiPredicate(root, searchString, false, mockBuilder));
   }
 
@@ -556,7 +558,7 @@ class ClaimDaoTest {
     doReturn(hashPredicate).when(mockBuilder).equal(hash, searchString);
     doReturn(hash).when(root).get(Mbi.Fields.hash);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false, (short) 0));
     assertSame(hashPredicate, dao.createMbiPredicate(root, searchString, true, mockBuilder));
   }
 
@@ -580,8 +582,32 @@ class ClaimDaoTest {
     doReturn(hash).when(root).get(Mbi.Fields.hash);
     doReturn(oldHash).when(root).get(Mbi.Fields.oldHash);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, true, (short) 0));
     assertSame(combinedPredicate, dao.createMbiPredicate(root, searchString, true, mockBuilder));
+  }
+
+  /**
+   * Test the {@link ClaimDao#createPhasePredicate} method to verify it creates a predicate when a
+   * minimum has been configured.
+   */
+  @Test
+  @SuppressWarnings("unchecked") // untyped mock creation is harmless
+  void testCreateMinimumPhaseNumberPredicate() {
+    final Path<?> root = mock(Path.class);
+    final Path<Short> phase = mock(Path.class);
+    final Predicate notNullPredicate = mock(Predicate.class);
+    final Predicate phasePredicate = mock(Predicate.class);
+    final Predicate combinedPredicate = mock(Predicate.class);
+
+    doReturn(phase).when(root).get(EntityWithPhaseNumber.PhaseFieldName);
+
+    doReturn(notNullPredicate).when(mockBuilder).isNotNull(phase);
+    doReturn(phasePredicate).when(mockBuilder).greaterThanOrEqualTo(phase, (short) 2);
+    doReturn(combinedPredicate).when(mockBuilder).and(notNullPredicate, phasePredicate);
+
+    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, true, (short) 2));
+    assertEquals(
+        Optional.of(combinedPredicate), dao.createPhasePredicate(mockBuilder, root, ClaimTypeV2.F));
   }
 
   /** A helper class to use for testing methods in place of actual resources. */
