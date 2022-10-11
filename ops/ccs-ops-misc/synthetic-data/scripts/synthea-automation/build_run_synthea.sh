@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # global variables
-CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
+CLEANUP="${CLEANUP:-True}" # defaults to removing inv on error, interupt, etc.
 
 # pseudo-env variables passed in by Jenkins?
 # we'll default to 'test' and 10 bene's for now
@@ -98,7 +98,9 @@ clean_up() {
   if $CLEANUP; then
     echo "performing cleanup"
     rm -fR "${TARGET_SYNTHEA_DIR}"
-    # put bfd back together as we found it...
+    # put bfd back together as we found it...mainly useful if this
+    # script is run outside of Jenkins (i.e., by a developer) and
+    # we want the git status to reflect no changes.
     rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES}"
     rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES_ORIG}"
     rm -fR "${BFD_SYNTHEA_AUTO_LOCATION}/__pycache__/"
@@ -122,6 +124,9 @@ error_exit() {
 }
 
 #-------------------- MAIN LOGIC --------------------#
+
+# ensure known good state
+clean_up
 
 # Function to clone the synthea generation application, scripts, and ancillary
 # files from GitHub; it then builds the application via gradle.
@@ -371,10 +376,15 @@ fi
 
 # Invoke a function to upload the new end_state.properties file and the new characteristics.csv file
 if [[ -n ${BEG_BENE_ID} && -n ${BFD_CHARACTERISTICS} ]]; then
+  upload_characteristics_file_to_s3
   upload_props_file_to_s3
 else
   error_exit "end state BEG_BENE_ID or BFD_CHARACTERISTICS variables unset...exiting"
 fi
+
+# cleanup after ourselves...
+clean_up
+
 echo
 echo "============================================="
 echo "BFD Synthea Generation completed SUCCESFULLY!"
