@@ -137,7 +137,12 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
 
       // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
@@ -219,6 +224,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdatedRange)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new NoResultException();
     }

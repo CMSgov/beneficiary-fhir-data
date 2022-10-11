@@ -181,7 +181,13 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             .time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
@@ -290,6 +296,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
 
       return TransformerUtilsV2.createBundle(
           paging, eobs, loadedFilterManager.getTransactionTime());
