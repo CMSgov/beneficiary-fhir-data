@@ -126,7 +126,7 @@ def upload_end_state_props_file(synthea_output_dir, bfd_dir):
 #
 # Param: bfd_output_dir : unix filesystem directory where BFD .py script writes the characteristics.csv to.
 # Raises a python exception if failure to upload file.
-def upload_characteristics_file_file(bfd_output_dir):
+def upload_characteristics_file(bfd_output_dir):
     try:
         file_name = bfd_output_dir + "/characteristics.csv"
         s3_filename = "end_state/characteristics.csv"
