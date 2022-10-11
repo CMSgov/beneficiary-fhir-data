@@ -103,6 +103,7 @@ clean_up() {
     # we want the git status to reflect no changes.
     rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES}"
     rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES_ORIG}"
+    rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
     rm -fR "${BFD_SYNTHEA_AUTO_LOCATION}/__pycache__/"
     chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
     chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
