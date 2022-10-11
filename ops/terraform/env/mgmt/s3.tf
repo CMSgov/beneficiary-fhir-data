@@ -1,10 +1,10 @@
 resource "aws_s3_bucket" "admin" {
   bucket = "bfd-${local.env}-admin-${local.account_id}"
 
-  tags = merge(local.shared_tags, {
+  tags = {
     role  = "admin"
     Layer = "data"
-  })
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "admin" {
@@ -65,10 +65,10 @@ POLICY
 
 resource "aws_s3_bucket" "logging" {
   bucket = "bfd-${local.env}-logs-${local.account_id}"
-  tags = merge(local.shared_tags, {
+  tags = {
     Layer = "data"
     role  = "logs"
-  })
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
