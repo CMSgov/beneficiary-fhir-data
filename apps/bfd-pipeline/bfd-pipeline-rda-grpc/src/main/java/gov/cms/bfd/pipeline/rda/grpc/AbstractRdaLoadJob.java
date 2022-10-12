@@ -109,6 +109,14 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     }
   }
 
+  @Override
+  public boolean isSmokeTestSuccessful() throws Exception {
+    try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
+        RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
+      return source.performSmokeTest(sink);
+    }
+  }
+
   /**
    * Invokes the RdaSource and RdaSink objects to download data from the RDA API and store it into
    * the database.
