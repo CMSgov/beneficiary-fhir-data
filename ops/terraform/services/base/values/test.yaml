@@ -47,6 +47,7 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: 0
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 5
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_process_dlq: false
 
 # SERVER CONFIGURATION
 /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server

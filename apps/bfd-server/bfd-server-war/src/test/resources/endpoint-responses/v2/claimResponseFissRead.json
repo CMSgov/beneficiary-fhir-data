@@ -25,6 +25,7 @@
       ],
       "name": [
         {
+          "text": "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
           "family": "baker",
           "given": [
             "jim",
@@ -47,6 +48,10 @@
     {
       "url": "https://bluebutton.cms.gov/resources/variables/fiss/recd-dt-cymd",
       "valueDate": "1970-01-01"
+    },
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-tran-dt-cymd",
+      "valueDate": "1970-01-02"
     }
   ],
   "identifier": [
@@ -60,7 +65,7 @@
           }
         ]
       },
-      "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
       "value": "123456"
     }
   ],

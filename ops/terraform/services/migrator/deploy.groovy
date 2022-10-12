@@ -1,8 +1,5 @@
 #!/usr/bin/env groovy
 
-// Load the sqs-specific methods
-sqs = load('ops/terraform/services/migrator/sqs.groovy')
-
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
 // attempts to deploy and monitor and return `true` when the migrator signals a zero exit status
 boolean deployMigrator(Map args = [:]) {
@@ -10,7 +7,6 @@ boolean deployMigrator(Map args = [:]) {
     bfdEnv = args.bfdEnv
     heartbeatInterval = args.heartbeatInterval ?: 30
     awsRegion = args.awsRegion ?: 'us-east-1'
-    gitBranchName = args.gitBranchName
 
     // authenticate
     awsAuth.assumeRole()
@@ -27,11 +23,15 @@ boolean deployMigrator(Map args = [:]) {
     }
 
     // plan/apply terraform
-    executeTerraform(amiId: amiId,
-                     bfdEnv: bfdEnv,
-                     gitBranchName: gitBranchName,
-                     heartbeatInterval: heartbeatInterval,
-                     createMigratorInstance: true)
+    terraform.deployTerraservice(
+	    env: bfdEnv,
+	    directory: "ops/terraform/services/migrator",
+	    tfVars: [
+                ami_id: amiId,
+                create_migrator_instance: true,
+                migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
+	    ]
+    )
 
     // monitor migrator deployment
     finalMigratorStatus = monitorMigrator(
@@ -48,12 +48,19 @@ boolean deployMigrator(Map args = [:]) {
     if (finalMigratorStatus == '0') {
         migratorDeployedSuccessfully = true
         // Teardown when there is a healthy exit status
-        executeTerraform(amiId: amiId, bfdEnv: bfdEnv, gitBranchName: gitBranchName)
+        terraform.deployTerraservice(
+            env: bfdEnv,
+            directory: "ops/terraform/services/migrator",
+            tfVars: [
+                ami_id: amiId,
+                create_migrator_instance: false
+            ]
+        )
     } else {
         migratorDeployedSuccessfully = false
     }
 
-    sqs.purgeQueue(sqsQueueName)
+    awsSqs.purgeQueue(sqsQueueName)
 
     println "Migrator completed with exit status ${finalMigratorStatus}"
     return migratorDeployedSuccessfully
@@ -68,10 +75,10 @@ String monitorMigrator(Map args = [:]) {
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
 
-    sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
+    sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
     while (true) {
         awsAuth.assumeRole()
-        messages = sqs.receiveMessages(
+        messages = awsSqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
             awsRegion: awsRegion,
             visibilityTimeoutSeconds: 30,
@@ -84,7 +91,7 @@ String monitorMigrator(Map args = [:]) {
         for (msg in messages) {
             migratorStatus = msg.body.status
             printMigratorMessage(msg)
-            sqs.deleteMessage(msg.receipt, sqsQueueUrl)
+            awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (migratorStatus != '0/0') {
                 return migratorStatus
             }
@@ -109,10 +116,10 @@ void printMigratorMessage(message) {
 boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
     println "Checking Migrator Queue ${sqsQueueName} State..."
 
-    if (sqs.queueExists(sqsQueueName)) {
-        sqsQueueUrl = sqs.getQueueUrl(sqsQueueName)
+    if (awsSqs.queueExists(sqsQueueName)) {
+        sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
         println "Queue ${sqsQueueName} exists. Checking for messages in ${sqsQueueUrl} ..."
-        migratorMessages = sqs.receiveMessages(
+        migratorMessages = awsSqs.receiveMessages(
                 sqsQueueUrl: sqsQueueUrl,
                 awsRegion: awsRegion,
                 maxMessages: 10,
@@ -128,48 +135,6 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
     } else {
         println "Queue ${sqsQueueName} can not be found. Migrator deployment can proceed!"
         return true
-    }
-}
-
-// initializes, selects appropriate workspace, plans, and applies terraform
-def executeTerraform(Map args = [:]) {
-    amiId = args.amiId
-    bfdEnv = args.bfdEnv
-    gitBranchName = args.gitBranchName
-    createMigratorInstance = args.createMigratorInstance ?: false
-    heartbeatInterval = args.heartbeatInterval ?: 30
-
-    dir("${workspace}/ops/terraform/services/migrator") {
-        // Debug output terraform version
-        sh "terraform --version"
-
-        // Initilize terraform
-        sh "terraform init -no-color"
-
-        // - Attempt to create the desired workspace
-        // - Select the desired workspace
-        // NOTE: this is the terraform concept of workspace **NOT** Jenkins
-        sh """
-terraform workspace new "$bfdEnv" 2> /dev/null || true &&\
-terraform workspace select "$bfdEnv" -no-color
-"""
-        // Gathering terraform plan
-        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-        sh """
-terraform plan \
--var='ami_id=${amiId}' \
--var='create_migrator_instance=${createMigratorInstance}' \
--var='git_repo_version=${gitBranchName}' \
--var='migrator_monitor_heartbeat_interval_seconds_override=${heartbeatInterval}' \
--no-color -out=tfplan
-"""
-        // Apply Terraform plan
-        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-        sh '''
-terraform apply \
--no-color -input=false tfplan
-'''
-        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
     }
 }
 

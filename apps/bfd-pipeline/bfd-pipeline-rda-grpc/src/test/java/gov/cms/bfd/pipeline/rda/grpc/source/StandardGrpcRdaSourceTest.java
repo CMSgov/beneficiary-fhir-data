@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Throwables;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
@@ -30,11 +31,7 @@ import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -48,11 +45,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-/** Unit tests for the {@link GrpcRdaSource} class. */
-public class GrpcRdaSourceTest {
+/** Unit tests for the {@link StandardGrpcRdaSource} class. */
+@ExtendWith(MockitoExtension.class)
+public class StandardGrpcRdaSourceTest {
   /** Value used as result from {@link RdaSink#readMaxExistingSequenceNumber()}. */
   public static final long DATABASE_SEQUENCE_NUMBER = 42;
   /** Value used when passing a non-empty configured sequence number to the constructor. */
@@ -63,7 +62,9 @@ public class GrpcRdaSourceTest {
    */
   private static final Instant BASE_TIME_FOR_TEST =
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
-  /** Configuration setting for {@link GrpcRdaSource.Config#minIdleTimeBeforeConnectionDrop}. */
+  /** Configuration setting for {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop}. */
+  // JavadocReference - Just for documentation
+  @SuppressWarnings("JavadocReference")
   private static final long MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP =
       Duration.ofMinutes(2).toMillis();
 
@@ -96,12 +97,9 @@ public class GrpcRdaSourceTest {
   /** A mock response stream used to simulate claims arriving from the RDA API server. */
   @Mock private GrpcResponseStream<Integer> mockResponseStream;
   /** The object we are testing. */
-  private GrpcRdaSource<Integer, Integer> source;
-  /**
-   * Shortcut for accessing the {@link gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource.Metrics}
-   * object.
-   */
-  private GrpcRdaSource.Metrics metrics;
+  private StandardGrpcRdaSource<Integer, Integer> source;
+  /** Shortcut for accessing the {@link StandardGrpcRdaSource.Metrics} object. */
+  private StandardGrpcRdaSource.Metrics metrics;
 
   /**
    * Establishes a baseline configuration consisting of mocks and real objects in the unit test
@@ -111,11 +109,10 @@ public class GrpcRdaSourceTest {
    */
   @BeforeEach
   public void setUp() throws Exception {
-    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     source =
         spy(
-            new GrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -124,10 +121,10 @@ public class GrpcRdaSourceTest {
                 "ints",
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
-    doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
-    doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
+    lenient().doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
+    lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
-    doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
+    lenient().doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
   }
 
   /** Verify that all expected metrics are defined and have expected names. */
@@ -135,13 +132,13 @@ public class GrpcRdaSourceTest {
   public void metricNames() {
     assertEquals(
         Arrays.asList(
-            "GrpcRdaSource.ints.batches",
-            "GrpcRdaSource.ints.calls",
-            "GrpcRdaSource.ints.failures",
-            "GrpcRdaSource.ints.objects.received",
-            "GrpcRdaSource.ints.objects.stored",
-            "GrpcRdaSource.ints.successes",
-            "GrpcRdaSource.ints.uptime"),
+            "StandardGrpcRdaSource.ints.batches",
+            "StandardGrpcRdaSource.ints.calls",
+            "StandardGrpcRdaSource.ints.failures",
+            "StandardGrpcRdaSource.ints.objects.received",
+            "StandardGrpcRdaSource.ints.objects.stored",
+            "StandardGrpcRdaSource.ints.successes",
+            "StandardGrpcRdaSource.ints.uptime"),
         new ArrayList<>(appMetrics.getNames()));
   }
 
@@ -186,7 +183,7 @@ public class GrpcRdaSourceTest {
   public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
     source =
         spy(
-            new GrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -198,7 +195,7 @@ public class GrpcRdaSourceTest {
     doReturn(createResponse(CLAIM_1))
         .when(caller)
         .callService(channel, CallOptions.DEFAULT, CONFIGURED_SEQUENCE_NUMBER - 1);
-    doReturn(1).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1));
+    doReturn(1).when(sink).writeMessages(VERSION, List.of(CLAIM_1));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
     assertEquals(1, result);
@@ -242,7 +239,7 @@ public class GrpcRdaSourceTest {
     } catch (ProcessingException ex) {
       assertEquals(3, ex.getProcessedCount());
       assertNotNull(ex.getCause());
-      assertSame(error, ex.getCause().getCause());
+      assertSame(error, Throwables.getRootCause(ex));
     }
     assertMeterReading(1, "calls", metrics.getCalls());
     assertMeterReading(4, "received", metrics.getObjectsReceived());
@@ -268,11 +265,13 @@ public class GrpcRdaSourceTest {
   public void testHandlesExceptionFromCaller() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
+    // unchecked - This is fine for making a mock.
+    //noinspection unchecked
     final GrpcStreamCaller<Integer> caller = mock(GrpcStreamCaller.class);
     doThrow(error).when(caller).callService(any(), any(), anyLong());
     source =
         spy(
-            new GrpcRdaSource<>(
+            new StandardGrpcRdaSource<>(
                 clock,
                 channel,
                 caller,
@@ -315,7 +314,11 @@ public class GrpcRdaSourceTest {
     doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     final Exception error = new RuntimeException("oops");
-    doThrow(error).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_3, CLAIM_4));
+    doThrow(error)
+        // Second doThrow() prevents "self-suppression" from testing logic
+        .doThrow(new RuntimeException("oops 2"))
+        .when(sink)
+        .writeMessages(VERSION, Arrays.asList(CLAIM_3, CLAIM_4));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -347,6 +350,8 @@ public class GrpcRdaSourceTest {
   public void testHandlesInterruptFromStream() throws Exception {
     doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
     // Creates a response with 3 valid values followed by an interrupt.
+    // unchecked - This is fine for making a mock.
+    //noinspection unchecked
     final GrpcResponseStream<Integer> response = mock(GrpcResponseStream.class);
     when(response.next()).thenReturn(CLAIM_1, CLAIM_2, CLAIM_3);
     when(response.hasNext())
@@ -382,34 +387,6 @@ public class GrpcRdaSourceTest {
     source.close(); // second call does nothing
     verify(channel, times(1)).shutdown();
     verify(channel, times(1)).awaitTermination(anyLong(), any(TimeUnit.class));
-  }
-
-  /**
-   * Verify the {@link gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource.Config} class is
-   * serializable.
-   *
-   * @throws Exception required in signature because tested method has checked exceptions
-   */
-  @Test
-  public void configIsSerializable() throws Exception {
-    final GrpcRdaSource.Config original =
-        GrpcRdaSource.Config.builder()
-            .serverType(GrpcRdaSource.Config.ServerType.Remote)
-            .host("localhost")
-            .port(5432)
-            .maxIdle(Duration.ofMinutes(59))
-            .authenticationToken("secret")
-            .build();
-    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-      out.writeObject(original);
-    }
-    GrpcRdaSource.Config loaded;
-    try (ObjectInputStream inp =
-        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-      loaded = (GrpcRdaSource.Config) inp.readObject();
-    }
-    assertEquals(original, loaded);
   }
 
   /**
@@ -543,7 +520,7 @@ public class GrpcRdaSourceTest {
 
   /**
    * Verifies that if an InterruptedException is thrown while waiting for the {@link ManagedChannel}
-   * to close and again when we retry that we punt and call {@link shutdownNow}.
+   * to close and again when we retry that we punt and call {@link ManagedChannel#shutdownNow()}.
    *
    * @throws Exception required since method being tested has checked exceptions
    */
