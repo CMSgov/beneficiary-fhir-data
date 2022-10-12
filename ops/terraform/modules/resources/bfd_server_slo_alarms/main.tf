@@ -639,8 +639,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_alert" {
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_alert" {
-  alarm_name          = "${local.app}-${var.env}-slo-http500-count-mean-1hr-alert"
+resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_warning" {
+  alarm_name          = "${local.app}-${var.env}-slo-http500-count-mean-1hr-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "3600"
