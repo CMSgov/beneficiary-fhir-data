@@ -615,3 +615,49 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
 }
+
+resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_alert" {
+  alarm_name          = "${local.app}-${var.env}-slo-http500-count-mean-1hr-alert"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  period              = "3600"
+  statistic           = "Average"
+  threshold           = "0.0001"
+
+  alarm_description = join("", [
+    "Percent HTTP 500 (error) responses over 1 hour exceeded ALERT SLO threshold of 0.01% for ",
+    "${local.app} in ${var.env} environment"
+  ])
+
+  metric_name = "${local.metrics.all_error_rate}/all"
+  namespace   = local.namespace
+
+  alarm_actions = local.alert_arn
+  ok_actions    = local.ok_arn
+
+  datapoints_to_alarm = "1"
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_alert" {
+  alarm_name          = "${local.app}-${var.env}-slo-http500-count-mean-1hr-alert"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  period              = "3600"
+  statistic           = "Average"
+  threshold           = "0.00001"
+
+  alarm_description = join("", [
+    "Percent HTTP 500 (error) responses over 1 hour exceeded WARNING SLO threshold of 0.001% for ",
+    "${local.app} in ${var.env} environment"
+  ])
+
+  metric_name = "${local.metrics.all_error_rate}/all"
+  namespace   = local.namespace
+
+  alarm_actions = local.warning_arn
+  ok_actions    = local.ok_arn
+
+  datapoints_to_alarm = "1"
+  treat_missing_data  = "notBreaching"
+}
