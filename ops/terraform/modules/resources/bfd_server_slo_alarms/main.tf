@@ -282,7 +282,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response 99% 15 minute BULK latency exceeded ALERT SLO ",
     "threshold of ${local.partner_timeouts_ms[each.key]} ms for partner ${each.key} for ",
-    "${local.app}"
+    "${local.app} in ${var.env} environment"
   ])
 
   metric_name = "${local.metrics.eob_latency}/${each.key}"
@@ -308,7 +308,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warn
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response 99% 15 minute BULK latency per KB exceeded WARNING SLO ",
     "threshold of ${local.partner_timeouts_ms[each.key]} ms/KB for partner ${each.key} for ",
-    "${local.app}"
+    "${local.app} in ${var.env} environment"
   ])
 
   metric_name = "${local.metrics.eob_latency_by_kb}/${each.key}"
