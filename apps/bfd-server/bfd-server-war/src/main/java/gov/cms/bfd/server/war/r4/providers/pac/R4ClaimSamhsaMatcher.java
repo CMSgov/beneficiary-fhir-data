@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.r4.ClaimAdapter;
-import gov.cms.bfd.server.war.r4.providers.AbstractR4SamhsaMatcher;
+import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.function.Predicate;
 import org.hl7.fhir.r4.model.Claim;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Component;
  * as a singleton.
  */
 @Component
-public final class R4ClaimSamhsaMatcher extends AbstractR4SamhsaMatcher<Claim> {
+public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
 
   /** {@inheritDoc} */
   @Override
@@ -27,5 +29,28 @@ public final class R4ClaimSamhsaMatcher extends AbstractR4SamhsaMatcher<Claim> {
     return containsSamhsaIcdProcedureCode(adapter.getProcedure())
         || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
         || containsSamhsaLineItem(adapter.getItem());
+  }
+
+  /**
+   * Checks if the given {@link CodeableConcept} contains only known coding systems.
+   *
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains only the
+   *     carin HCPCS system, <code>false</code> otherwise.
+   */
+  @Override
+  protected boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
+    return procedureConcept.getCoding().stream()
+        .allMatch(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_CARIN_HCPCS));
+  }
+
+  /**
+   * Partially adjudicated data uses the Carin HCPCS system.
+   *
+   * @return The Carin HCPCS system.
+   */
+  @Override
+  protected String getHcpcsSystem() {
+    return TransformerConstants.CODING_SYSTEM_CARIN_HCPCS;
   }
 }
