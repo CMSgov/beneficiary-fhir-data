@@ -1,4 +1,5 @@
 # TODO: Consider using an OIDC authentication workflow instead of a service-specific IAM User
+#       This requires better solutions before the end of 2022 to avoid AWS IAM key rotation maintenance
 resource "aws_iam_group" "github_actions" {
   name = "bfd-mgmt-github-actions"
   path = "/"
@@ -72,7 +73,21 @@ resource "aws_iam_user" "github_actions" {
   force_destroy = false
   name          = "bfd-${local.env}-github-actions"
   path          = "/"
+}
 
+resource "aws_iam_access_key" "github_actions" {
+  user = aws_iam_user.github_actions.name
+}
+
+resource "aws_ssm_parameter" "github_actions" {
+  key_id    = local.kms_key_id
+  name      = "/bfd/mgmt/github/sensitive/iam_access_key"
+  overwrite = true
+  type      = "SecureString"
+  value = jsonencode({
+    "aws_access_key_id"     = aws_iam_access_key.github_actions.id
+    "aws_secret_access_key" = aws_iam_access_key.github_actions.secret
+  })
 }
 
 resource "aws_iam_group_membership" "github_actions" {
