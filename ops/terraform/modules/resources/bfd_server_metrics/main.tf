@@ -4,13 +4,13 @@ locals {
   }
   namespace = "bfd-${var.env}/bfd-server"
   endpoints = {
-    all                 = "*/fhir/*"
-    metadata            = "*/fhir/metadata"
-    coverageAll         = "*/fhir/Coverage"
-    patientAll          = "*/fhir/Patient"
-    eobAll              = "*/fhir/ExplanationOfBenefit"
-    claimAll            = "*/fhir/Claim"
-    claimResponseAll    = "*/fhir/ClaimResponse"
+    all              = "*/fhir/*"
+    metadata         = "*/fhir/metadata"
+    coverageAll      = "*/fhir/Coverage"
+    patientAll       = "*/fhir/Patient"
+    eobAll           = "*/fhir/ExplanationOfBenefit"
+    claimAll         = "*/fhir/Claim"
+    claimResponseAll = "*/fhir/ClaimResponse"
   }
 
   partners = {
@@ -97,14 +97,17 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_not_2xx" {
 resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_not_by_contract_latency" {
   for_each       = local.partners
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/patientNotByContract/${each.key}"
+  log_group_name = local.log_groups.access
+
   # Terraform HCL has no support for breaking long strings, so the join() function is used as a
   # poor, but functional, substitute. Otherwise this pattern would be far too long
-  pattern        = join("", ["{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" &&",
-                            " $.mdc.http_access_request_uri = \"${local.endpoints.patientAll}\" &&",
-                            " $.mdc.http_access_request_operation != \"*by=*contract*\" &&",
-                            " $.mdc.http_access_request_operation != \"*by=*Contract*\" &&",
-                            " $.mdc.http_access_response_duration_milliseconds = *}"])
-  log_group_name = local.log_groups.access
+  pattern = join("", [
+    "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" && ",
+    "$.mdc.http_access_request_uri = \"${local.endpoints.patientAll}\" && ",
+    "$.mdc.http_access_request_operation != \"*by=*contract*\" && ",
+    "$.mdc.http_access_request_operation != \"*by=*Contract*\" && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
 
   metric_transformation {
     name          = "http-requests/latency/patientNotByContract/${each.key}"
@@ -118,15 +121,16 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_not_by_contra
 resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_by_contract_count_4000_latency" {
   for_each       = local.partners
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/patientByContractCount4000/${each.key}"
-  # Terraform HCL has no support for breaking long strings, so the join() function is used as a
-  # poor, but functional, substitute. Otherwise this pattern would be far too long
-  pattern        = join("", ["{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" &&",
-                            " $.mdc.http_access_request_uri = \"${local.endpoints.patientAll}\" &&",
-                            " $.mdc.http_access_request_query_string = \"*_count=4000*\" &&",
-                            " ($.mdc.http_access_request_operation = \"*by=*contract*\" ||",
-                            " $.mdc.http_access_request_operation = \"*by=*Contract*\") &&",
-                            " $.mdc.http_access_response_duration_milliseconds = *}"])
   log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" && ",
+    "$.mdc.http_access_request_uri = \"${local.endpoints.patientAll}\" && ",
+    "$.mdc.http_access_request_query_string = \"*_count=4000*\" && ",
+    "($.mdc.http_access_request_operation = \"*by=*contract*\" || ",
+    "$.mdc.http_access_request_operation = \"*by=*Contract*\") && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
 
   metric_transformation {
     name          = "http-requests/latency/patientByContractCount4000/${each.key}"
@@ -140,12 +144,13 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_patient_by_contract_c
 resource "aws_cloudwatch_log_metric_filter" "http_requests_eob_all_latency_by_kb" {
   for_each       = local.partners
   name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/eobAll/${each.key}"
-  # Terraform HCL has no support for breaking long strings, so the join() function is used as a
-  # poor, but functional, substitute. Otherwise this pattern would be far too long
-  pattern        = join("", ["{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" &&",
-                            " $.mdc.http_access_request_uri = \"${local.endpoints.eobAll}\" &&",
-                            " $.mdc.http_access_response_duration_per_kb = *}"])
   log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" && ",
+    "$.mdc.http_access_request_uri = \"${local.endpoints.eobAll}\" && ",
+    "$.mdc.http_access_response_duration_per_kb = *}"
+  ])
 
   metric_transformation {
     name          = "http-requests/latency-by-kb/eobAll/${each.key}"
