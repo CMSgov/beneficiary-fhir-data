@@ -154,3 +154,25 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_eob_all_latency_by_kb
     default_value = null
   }
 }
+
+# Latency for all EoB endpoints with no resources returned (for SLOs)
+resource "aws_cloudwatch_log_metric_filter" "http_requests_eob_all_no_resources_latency" {
+  for_each       = local.partners
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eobAllNoResources/${each.key}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" && ",
+    "$.mdc.http_access_request_uri = \"${local.endpoints.eobAll}\" && ",
+    # TODO: Determine correct metric for indicating no reources returned
+    "$.mdc.http_access_response_output_size_in_bytes < 300 && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
+
+  metric_transformation {
+    name          = "http-requests/latency/eobAllNoResources/${each.key}"
+    namespace     = local.namespace
+    value         = "$.mdc.http_access_response_duration_milliseconds"
+    default_value = null
+  }
+}
