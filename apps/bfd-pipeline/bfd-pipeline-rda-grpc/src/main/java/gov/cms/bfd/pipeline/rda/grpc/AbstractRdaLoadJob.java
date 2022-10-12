@@ -109,6 +109,14 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This implementation calls {@link RdaSource#performSmokeTest} to perform the actual testing.
+   *
+   * @return true if the test completed successfully
+   * @throws Exception if the test threw an exception
+   */
   @Override
   public boolean isSmokeTestSuccessful() throws Exception {
     try (RdaSource<TResponse, TClaim> source = sourceFactory.call();

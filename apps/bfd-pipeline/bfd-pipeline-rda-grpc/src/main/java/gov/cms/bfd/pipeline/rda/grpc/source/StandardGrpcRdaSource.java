@@ -115,6 +115,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    */
   @Override
   public boolean performSmokeTest(RdaSink<TMessage, TClaim> sink) throws Exception {
+    boolean successful = false;
     log.info("smoke test: starting");
 
     // Query the database to get a starting sequence number.  This verifies that the database is
@@ -139,11 +140,15 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             "smoke test: successfully translated claim: seq={}",
             sink.getSequenceNumberForObject(message));
       }
+      successful = true;
     } finally {
-      responseStream.cancelStream("smoke test: finished");
+      // be a nice client that lets the server know when we are leaving before the stream is done
+      if (successful && responseStream.hasNext()) {
+        responseStream.cancelStream("smoke test: finished");
+      }
     }
 
-    return true;
+    return successful;
   }
 
   /**
