@@ -169,8 +169,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_eob_all_no_resources_
   pattern = join("", [
     "{$.mdc.http_access_request_clientSSL_DN = \"${each.value}\" && ",
     "$.mdc.http_access_request_uri = \"${local.endpoints.eobAll}\" && ",
-    # TODO: Determine correct metric for indicating no reources returned
-    "$.mdc.http_access_response_output_size_in_bytes < 300 && ",
+    "$.mdc.resources_returned_count = 0 && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
   ])
 
