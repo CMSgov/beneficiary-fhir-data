@@ -71,6 +71,7 @@ resource "aws_iam_policy" "etl-rw-s3" {
 }
 
 resource "aws_iam_group_policy_attachment" "etl-rw-s3" {
+  count      = local.create_etl_user ? 1 : 0
   group      = aws_iam_group.this[0].id
   policy_arn = aws_iam_policy.etl-rw-s3[0].arn
 }
