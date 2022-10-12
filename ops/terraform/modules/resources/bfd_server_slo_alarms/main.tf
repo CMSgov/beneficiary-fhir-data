@@ -77,7 +77,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert" {
-  for_each = local.bulk_partners
+  for_each = toset(local.bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -103,7 +103,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert"
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warning" {
-  for_each = local.bulk_partners
+  for_each = toset(local.bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-bulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -128,7 +128,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warnin
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_alert" {
-  for_each = local.non_bulk_partners
+  for_each = toset(local.non_bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-nonbulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -153,7 +153,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_ale
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_warning" {
-  for_each = local.non_bulk_partners
+  for_each = toset(local.non_bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-nonbulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -270,7 +270,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_latency_per_kb_mean_15m_warning"
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
-  for_each = local.bulk_partners
+  for_each = toset(local.bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -296,7 +296,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warning" {
-  for_each = local.bulk_partners
+  for_each = toset(local.bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-bulk-latency-per-kb-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -322,7 +322,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warn
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_alert" {
-  for_each = local.non_bulk_partners
+  for_each = toset(local.non_bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-nonbulk-latency-per-kb-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -347,7 +347,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_a
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_warning" {
-  for_each = local.non_bulk_partners
+  for_each = toset(local.non_bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-nonbulk-latency-per-kb-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -419,7 +419,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_alert" {
-  for_each = local.bulk_partners
+  for_each = toset(local.bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -445,7 +445,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_warning" {
-  for_each = local.bulk_partners
+  for_each = toset(local.bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-bulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -470,7 +470,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_99p_15m_alert" {
-  for_each = local.non_bulk_partners
+  for_each = toset(local.non_bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-nonbulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -495,7 +495,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_99p_15m_warning" {
-  for_each = local.non_bulk_partners
+  for_each = toset(local.non_bulk_partners)
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-nonbulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -566,7 +566,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_99p_15m_alert" {
-  for_each = concat(local.bulk_partners, local.non_bulk_partners)
+  for_each = toset(concat(local.bulk_partners, local.non_bulk_partners))
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-by-contract-count-4000-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -592,7 +592,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_99p_15m_warning" {
-  for_each = concat(local.bulk_partners, local.non_bulk_partners)
+  for_each = toset(concat(local.bulk_partners, local.non_bulk_partners))
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-by-contract-count-4000-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
