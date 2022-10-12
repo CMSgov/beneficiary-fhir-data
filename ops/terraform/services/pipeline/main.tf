@@ -78,15 +78,12 @@ resource "aws_instance" "this" {
   secondary_private_ips                = []
   source_dest_check                    = true
   subnet_id                            = local.subnet_id
-  tags = merge(
-    local.shared_tags,
-    {
-      Layer    = local.layer
-      Name     = "bfd-${local.env}-${local.legacy_service}"
-      role     = local.legacy_service
-      snapshot = "true"
-    }
-  )
+  tags = {
+    Layer    = local.layer
+    Name     = "bfd-${local.env}-${local.legacy_service}"
+    role     = local.legacy_service
+    snapshot = "true"
+  }
 
   tenancy = "default"
 
