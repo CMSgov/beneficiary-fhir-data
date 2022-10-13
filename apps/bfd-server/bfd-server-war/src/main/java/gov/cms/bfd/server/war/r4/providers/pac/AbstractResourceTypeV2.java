@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -26,7 +27,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   /** The attribute holding the claim ID in the entity class. */
   protected final String entityIdAttribute;
   /** The attribute holding the end date for range queries in the entity class. */
-  protected final String entityEndDateAttribute;
+  protected final List<String> entityServiceDateAttributes;
   /** The {@link ResourceTransformer} to convert an entity into a response object. */
   protected final ResourceTransformer<TResource> transformer;
 
@@ -37,7 +38,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
-   * @param entityEndDateAttribute the attribute name for the service end date on the entity class
+   * @param entityServiceDateAttributes the attribute name for the service end date on the entity
+   *     class
    * @param transformer the transformer used to convert from the given entity to the associated
    *     resource type
    */
@@ -47,14 +49,14 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      String entityEndDateAttribute,
+      List<String> entityServiceDateAttributes,
       ResourceTransformer<TResource> transformer) {
     this.nameForParsing = nameForParsing;
     this.typeLabel = typeLabel;
     this.entityClass = entityClass;
     this.entityMbiRecordAttribute = entityMbiRecordAttribute;
     this.entityIdAttribute = entityIdAttribute;
-    this.entityEndDateAttribute = entityEndDateAttribute;
+    this.entityServiceDateAttributes = entityServiceDateAttributes;
     this.transformer = transformer;
   }
 
@@ -79,8 +81,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   }
 
   @Override
-  public String getEntityEndDateAttribute() {
-    return entityEndDateAttribute;
+  public List<String> getEntityServiceDateAttributes() {
+    return entityServiceDateAttributes;
   }
 
   @Override

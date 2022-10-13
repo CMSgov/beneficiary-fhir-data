@@ -6,14 +6,8 @@ variable "ami_id" {
 
 variable "create_migrator_instance" {
   default     = false
-  description = "When true, create the migrator instance"
+  description = "When true, create the migrator instance, security group, and RDS security group rules"
   type        = bool
-}
-
-variable "git_repo_version" {
-  description = "Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version)"
-  type        = string
-  default     = "master"
 }
 
 variable "migrator_monitor_enabled_override" {

@@ -3,6 +3,7 @@ locals {
   bfd_state_bucket        = "bfd-tf-state"
   bcda_aws_account_number = data.aws_ssm_parameter.bcda_aws_account_number.value
   kms_key_id              = data.aws_kms_key.state.arn
+  legacy_kms_key_id       = data.aws_kms_key.legacy.arn
   cloudtrail_logs_bucket  = "bfd-cloudtrail-logs"
 }
 
@@ -20,6 +21,11 @@ data "aws_ssm_parameter" "bcda_aws_account_number" {
 
 data "aws_kms_key" "state" {
   key_id = "alias/bfd-tf-state"
+}
+
+data "aws_kms_key" "legacy" {
+  # TODO: Add alias/legacy_kms_key for this key and update here
+  key_id = "alias/cloudformation_kms_key"
 }
 
 resource "aws_s3_bucket" "state" {
@@ -121,19 +127,22 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
   #   role  = TODO
   #   Layer = TODO
   # }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-# TODO: Address in BFD-2164. Unsure of which key is most appropriate here
-# resource "aws_s3_bucket_server_side_encryption_configuration" "cloudtrail_logs" {
-#   bucket = aws_s3_bucket.cloudtrail_logs.id
-#   rule {
-#     apply_server_side_encryption_by_default {
-#       sse_algorithm     = "aws:kms"
-#       kms_master_key_id = local.kms_key_id
-#     }
-#   }
-# }
-#
+resource "aws_s3_bucket_server_side_encryption_configuration" "cloudtrail_logs" {
+  bucket = aws_s3_bucket.cloudtrail_logs.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = local.legacy_kms_key_id
+    }
+  }
+}
+
 
 resource "aws_s3_bucket_versioning" "cloudtrail_logs" {
   bucket = aws_s3_bucket.cloudtrail_logs.id
