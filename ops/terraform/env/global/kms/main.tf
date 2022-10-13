@@ -1,19 +1,16 @@
-provider "aws" {
-  version = "~> 4"
-  region  = "us-east-1"
-}
-
 locals {
   account_id     = data.aws_caller_identity.current.account_id
   env            = terraform.workspace
   kms_key_alias  = "alias/bfd-${local.env}-cmk"
   kms_key_admins = sort([for user in values(data.aws_iam_user.kms_key_admins) : user.arn])
 
-  shared_tags = {
-    Environment = local.env
-    application = "bfd"
-    business    = "oeda"
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/env/global/kms"
   }
 }
 
@@ -34,7 +31,6 @@ data "aws_iam_user" "kms_key_admins" {
 resource "aws_kms_key" "this" {
   enable_key_rotation                = true
   bypass_policy_lockout_safety_check = false
-  tags                               = local.shared_tags
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
