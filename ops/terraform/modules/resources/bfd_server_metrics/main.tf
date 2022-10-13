@@ -29,7 +29,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count" {
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{${each.value} &&",
+    "{${each.value} && ",
     "${local.client_ssl_pattern}}",
   ])
 
@@ -49,7 +49,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{${each.value} &&",
+    "{${each.value} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
   ])
@@ -68,7 +68,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" 
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_response_status = 500 &&",
+    "{$.mdc.http_access_response_status = 500 && ",
     "${local.client_ssl_pattern}}",
   ])
   metric_transformation {
@@ -85,7 +85,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_respons
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_response_status != 200 &&",
+    "{$.mdc.http_access_response_status != 200 && ",
     "${local.client_ssl_pattern}}",
   ])
 
