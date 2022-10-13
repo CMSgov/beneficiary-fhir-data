@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.junit.jupiter.api.Test;
 
@@ -186,6 +187,38 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNull(fiNumExtension);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamMatchingExtensions(
+   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies if
+   * an extension is found
+   */
+  @Test
+  public void careTeamMatchingExtensionsTest() {
+    String referenceUrl = "http://test.url";
+    String codeValue = "code";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtilsV2.careTeamMatchingExtensions(careTeamComponent, referenceUrl, codeValue);
+
+    assertTrue(returnResult);
+
+    returnResult = TransformerUtilsV2.careTeamMatchingExtensions(careTeamComponent, "", codeValue);
+
+    assertFalse(returnResult);
+
+    returnResult =
+        TransformerUtilsV2.careTeamMatchingExtensions(careTeamComponent, "http://test.url", "");
+
+    assertFalse(returnResult);
   }
 
   /**

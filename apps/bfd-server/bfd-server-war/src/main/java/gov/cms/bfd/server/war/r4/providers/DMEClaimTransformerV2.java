@@ -193,22 +193,35 @@ final class DMEClaimTransformerV2 {
               line.getProviderNPI());
 
       // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
+      if (performing.isPresent()) {
+        performing.get().setResponsible(true);
 
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing
+            .get()
+            .setQualification(
                 TransformerUtilsV2.createCodeableConcept(
                     eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        boolean matchingExtension =
+            (line.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtilsV2.careTeamMatchingExtensions(
+                    performing.get(),
+                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(line.getProviderParticipatingIndCode().get()))
+                : false;
+
+        if (!matchingExtension) {
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.PRTCPTNG_IND_CD,
+                      line.getProviderParticipatingIndCode()));
+        }
+      }
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (item.getLocation() != null) {

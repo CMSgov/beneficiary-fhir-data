@@ -1933,15 +1933,20 @@ public final class TransformerUtilsV2 {
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
             .filter(ctc -> ctc.getProvider().hasIdentifier())
-            .filter(
-                ctc ->
-                    type.getSystem().equals(ctc.getProvider().getIdentifier().getSystem())
-                        && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
             .filter(ctc -> ctc.hasRole())
             .filter(
                 ctc ->
-                    roleCode.equals(ctc.getRole().getCodingFirstRep().getCode())
-                        && roleSystem.equals(ctc.getRole().getCodingFirstRep().getSystem()))
+                    ctc.getProvider().getIdentifier().getType().getCoding().stream()
+                            .anyMatch(c -> c.getSystem().equalsIgnoreCase(type.getSystem()))
+                        && ctc.getProvider().getIdentifier().getType().getCoding().stream()
+                            .anyMatch(c -> c.getCode().equalsIgnoreCase(type.name()))
+                        && practitionerIdValue.equalsIgnoreCase(
+                            ctc.getProvider().getIdentifier().getValue()))
+            .filter(
+                ctc ->
+                    roleCode.equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getCode())
+                        && roleSystem.equalsIgnoreCase(
+                            ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 
@@ -3652,6 +3657,48 @@ public final class TransformerUtilsV2 {
     }
 
     return item;
+  }
+
+  /**
+   * Gets the reference variable
+   *
+   * @param ccwCodebookVariable the {@ CcwCodebookVariable} to get the url
+   * @return url as a string
+   */
+  static String getReferenceUrl(CcwCodebookVariable ccwCodebookVariable) {
+    return CCWUtils.calculateVariableReferenceUrl(ccwCodebookVariable);
+  }
+
+  /**
+   * Retrieves the NPI display value from an NPI code look up file
+   *
+   * @param careTeamComponent - Careteam component
+   * @param referenceUrl - the reference url to compare
+   * @param codeValue - the code value to compare
+   * @return boolean whether it was found or not
+   */
+  public static boolean careTeamMatchingExtensions(
+      CareTeamComponent careTeamComponent, String referenceUrl, String codeValue) {
+
+    if (!Strings.isNullOrEmpty(referenceUrl)
+        && !Strings.isNullOrEmpty(codeValue)
+        && careTeamComponent.getExtension().size() > 0) {
+      List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
+
+      for (Extension ext : extensions) {
+        Coding coding = null;
+
+        if (ext.getValue() instanceof Coding) {
+          coding = (Coding) ext.getValue();
+        }
+
+        if (coding != null && coding.getCode().equals(codeValue)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**

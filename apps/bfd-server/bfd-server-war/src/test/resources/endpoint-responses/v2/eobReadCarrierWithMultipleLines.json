@@ -322,396 +322,6 @@
         "display" : "Primary provider"
       } ]
     }
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-        "code" : "0"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-        "code" : "1",
-        "display" : "Participating"
-      }
-    } ],
-    "sequence" : 5,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "performing",
-        "display" : "Performing provider"
-      } ]
-    },
-    "qualification" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        "code" : "41",
-        "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 6,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1497758544"
-      },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
-      } ]
-    }
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-        "code" : "0"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-        "code" : "1",
-        "display" : "Participating"
-      }
-    } ],
-    "sequence" : 7,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "performing",
-        "display" : "Performing provider"
-      } ]
-    },
-    "qualification" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        "code" : "41",
-        "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 8,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1497758544"
-      },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
-      } ]
-    }
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-        "code" : "0"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-        "code" : "1",
-        "display" : "Participating"
-      }
-    } ],
-    "sequence" : 9,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "performing",
-        "display" : "Performing provider"
-      } ]
-    },
-    "qualification" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        "code" : "41",
-        "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 10,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1497758544"
-      },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
-      } ]
-    }
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-        "code" : "0"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-        "code" : "1",
-        "display" : "Participating"
-      }
-    } ],
-    "sequence" : 11,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "performing",
-        "display" : "Performing provider"
-      } ]
-    },
-    "qualification" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        "code" : "41",
-        "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 12,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1497758544"
-      },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
-      } ]
-    }
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-        "code" : "0"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-        "code" : "1",
-        "display" : "Participating"
-      }
-    } ],
-    "sequence" : 13,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "performing",
-        "display" : "Performing provider"
-      } ]
-    },
-    "qualification" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        "code" : "41",
-        "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 14,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1497758544"
-      },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
-      } ]
-    }
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
-        "code" : "0"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
-        "code" : "1",
-        "display" : "Participating"
-      }
-    } ],
-    "sequence" : 15,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "performing",
-        "display" : "Performing provider"
-      } ]
-    },
-    "qualification" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        "code" : "41",
-        "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 16,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1497758544"
-      },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
-      } ]
-    }
   } ],
   "supportingInfo" : [ {
     "sequence" : 1,
@@ -1268,7 +878,7 @@
       }
     } ],
     "sequence" : 2,
-    "careTeamSequence" : [ 5, 6 ],
+    "careTeamSequence" : [ 3, 4 ],
     "diagnosisSequence" : [ 5 ],
     "informationSequence" : [ 3 ],
     "category" : {
@@ -1540,7 +1150,7 @@
       }
     } ],
     "sequence" : 3,
-    "careTeamSequence" : [ 7, 8 ],
+    "careTeamSequence" : [ 3, 4 ],
     "diagnosisSequence" : [ 5 ],
     "informationSequence" : [ 4 ],
     "category" : {
@@ -1812,7 +1422,7 @@
       }
     } ],
     "sequence" : 4,
-    "careTeamSequence" : [ 9, 10 ],
+    "careTeamSequence" : [ 3, 4 ],
     "diagnosisSequence" : [ 5 ],
     "informationSequence" : [ 5 ],
     "category" : {
@@ -2084,7 +1694,7 @@
       }
     } ],
     "sequence" : 5,
-    "careTeamSequence" : [ 11, 12 ],
+    "careTeamSequence" : [ 3, 4 ],
     "diagnosisSequence" : [ 5 ],
     "informationSequence" : [ 6 ],
     "category" : {
@@ -2356,7 +1966,7 @@
       }
     } ],
     "sequence" : 6,
-    "careTeamSequence" : [ 13, 14 ],
+    "careTeamSequence" : [ 3, 4 ],
     "diagnosisSequence" : [ 5 ],
     "informationSequence" : [ 7 ],
     "category" : {
@@ -2628,7 +2238,7 @@
       }
     } ],
     "sequence" : 7,
-    "careTeamSequence" : [ 15, 16 ],
+    "careTeamSequence" : [ 3, 4 ],
     "diagnosisSequence" : [ 5 ],
     "informationSequence" : [ 8 ],
     "category" : {

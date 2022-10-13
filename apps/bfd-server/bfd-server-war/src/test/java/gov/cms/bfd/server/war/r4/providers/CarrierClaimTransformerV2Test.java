@@ -667,7 +667,7 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
-  public void shouldHaveTwoCareTeamEntries() {
+  public void shouldHaveFourCareTeamEntries() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -691,7 +691,7 @@ public class CarrierClaimTransformerV2Test {
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
 
-    assertEquals(2, eob.getCareTeam().size());
+    assertEquals(4, eob.getCareTeam().size());
   }
 
   @Test
