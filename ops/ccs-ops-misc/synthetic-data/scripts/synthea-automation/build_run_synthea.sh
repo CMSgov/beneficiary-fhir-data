@@ -307,7 +307,9 @@ upload_synthea_results_to_s3(){
 
   # first make a copy of all the .csv files into a "backup" directory
   mkdir "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
-  cp "${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv" "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
+  if [ -f "${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv" ]; then
+    cp "${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv" "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
+  fi
 
   # now upload the RIF (.csv) files to S3 ETL bucket(s); one per environment, passed in as arg
   source .venv/bin/activate
