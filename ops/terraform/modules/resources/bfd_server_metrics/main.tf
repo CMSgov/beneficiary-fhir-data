@@ -64,7 +64,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
 
 # Count HTTP 5xxs with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/500-responses/all"
+  name           = "bfd-${var.env}/bfd-server/http-requests/count/500-responses"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -72,7 +72,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" 
     "${local.client_ssl_pattern}}",
   ])
   metric_transformation {
-    name       = "http-requests/count/500-responses/all"
+    name       = "http-requests/count/500-responses"
     namespace  = local.namespace
     value      = "1"
     dimensions = local.dimensions
@@ -81,7 +81,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" 
 
 # Count HTTP non-2XXs with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_responses" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/non-2xx-responses/all"
+  name           = "bfd-${var.env}/bfd-server/http-requests/count/non-2xx-responses"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -90,7 +90,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_respons
   ])
 
   metric_transformation {
-    name       = "http-requests/count/non-2xx-responses/all"
+    name       = "http-requests/count/non-2xx-responses"
     namespace  = local.namespace
     value      = "1"
     dimensions = local.dimensions
