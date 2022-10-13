@@ -150,7 +150,6 @@ IFS=${oIFS}
 SYNTHEA_JAR_FILE="synthea-with-dependencies.jar"
 SYNTHEA_GIT_REPO="https://github.com/synthetichealth/synthea.git"
 SYNTHEA_LATEST_JAR="https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/${SYNTHEA_JAR_FILE}"
-BFD_GIT_REPO="https://github.com/CMSgov/beneficiary-fhir-data.git"
 
 # assorted variables used by the script.
 BFD_SYNTHEA_AUTO_LOCATION="${BFD_ROOT_DIR}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
@@ -210,12 +209,12 @@ clean_up
 # files from GitHub; it then builds the application via gradle.
 install_synthea_from_git(){
     echo "installing synthea from git repo"
-    git clone ${SYNTHEA_GIT_REPO} ${TARGET_SYNTHEA_DIR}
-    cd ${TARGET_SYNTHEA_DIR}
+    git clone "${SYNTHEA_GIT_REPO}" "${TARGET_SYNTHEA_DIR}"
+    cd "${TARGET_SYNTHEA_DIR}"
 
-  if [ $SKIP_SYNTHEA_BUILD ]; then
+  if [ "$SKIP_SYNTHEA_BUILD" ]; then
     echo "installing pre-built synthea release jar"
-    curl -LkSs "${SYNTHEA_LATEST_JAR}" -o ./${SYNTHEA_JAR_FILE}
+    curl -LkSs "${SYNTHEA_LATEST_JAR}" -o "./${SYNTHEA_JAR_FILE}"
   else
     # mitre synthea build has sporadic build failures
     ./gradlew clean check
@@ -237,7 +236,7 @@ install_bfd_from_git(){
 # course of executing the various python scripts used by this shell script.
 activate_py_env(){
   echo "activating python env in: ${BFD_SYNTHEA_AUTO_LOCATION}"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   python3 -m venv .venv
   source .venv/bin/activate
   # need the following
@@ -249,7 +248,7 @@ activate_py_env(){
 # synthetic beneficiaries and claims.
 download_mapping_files_from_s3(){
   echo "download mapping files from S3 to: ${MAPPING_FILES_LOCATION}"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 ./s3_utilities.py "${MAPPING_FILES_LOCATION}" "download_file"
   deactivate
@@ -258,7 +257,7 @@ download_mapping_files_from_s3(){
 # Function that invokes a python S3 utility to download synthea script files.
 download_script_files_from_s3(){
   echo "download script files from S3 from: ${TARGET_SYNTHEA_DIR}"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 ./s3_utilities.py "${TARGET_SYNTHEA_DIR}" "download_script"
   # make sure the scripts are executable
@@ -270,16 +269,16 @@ download_script_files_from_s3(){
 # Function that invokes a python S3 utility to download the synthea end_state.properties file.
 download_props_file_from_s3(){
   echo "download BFD ${BFD_END_STATE_PROPERTIES} file from S3 to: ${BFD_SYNTHEA_AUTO_LOCATION}"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 s3_utilities.py "./" "download_prop"
   chmod 644 "${BFD_END_STATE_PROPERTIES}"
   # Make a copy of the downloaded end state properties file.
-  cat ./${BFD_END_STATE_PROPERTIES} > ${BFD_END_STATE_PROPERTIES_ORIG}
+  cat "./${BFD_END_STATE_PROPERTIES}" > "${BFD_END_STATE_PROPERTIES_ORIG}"
 
   # extract the bene_id_start variable from the downloaded end state properties file.
   # It will be used in a later function/operation.
-  BEG_BENE_ID=$(cat ./${BFD_END_STATE_PROPERTIES_ORIG} |grep bene_id_start |sed 's/.*=//')
+  BEG_BENE_ID=$(cat "./${BFD_END_STATE_PROPERTIES_ORIG}" |grep bene_id_start |sed 's/.*=//')
   echo "BEG_BENE_ID=${BEG_BENE_ID}"
   deactivate
 }
@@ -292,7 +291,7 @@ download_props_file_from_s3(){
 # 5: (optional) boolean to skip validation (true); useful if re-generating a bad batch, defaults to False
 #
 prepare_and_run_synthea(){
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${UNIQUE_ENVS_PARAM}" "${SKIP_VALIDATION}"
   deactivate
@@ -304,11 +303,11 @@ prepare_and_run_synthea(){
 upload_synthea_results_to_s3(){
   
   echo "upload synthea results to S3"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
 
   # first make a copy of all the .csv files into a "backup" directory
-  mkdir ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup
-  cp ${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup
+  mkdir "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
+  cp "${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv" "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
 
   # now upload the RIF (.csv) files to S3 ETL bucket(s); one per environment, passed in as arg
   source .venv/bin/activate
@@ -324,7 +323,7 @@ upload_synthea_results_to_s3(){
 # completed processing of the /Incoming RIF (.csv) files.
 wait_for_manifest_done(){
   echo "waiting for manifest Done"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
 
   # wait until the 0_manifest.xml file exists in the /Done folder for all environments being prcoessed; this
   # op is synchronous meaning that we'll check/wait on one environemnt at a time. Since we have an 'all or nothing'
@@ -343,12 +342,12 @@ wait_for_manifest_done(){
 # 3: file system location of synthea folder
 # 4: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
 do_load_validation(){
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   # restore the copy of the RIF (.csv) files back to the synthea output directory
-  cp ${BFD_SYNTHEA_OUTPUT_LOCATION}/backup/*.csv ${BFD_SYNTHEA_OUTPUT_LOCATION}
+  cp "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup/*.csv" "${BFD_SYNTHEA_OUTPUT_LOCATION}"
 
   # now perform the validation of the run.
-  END_BENE_ID=$(cat ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES} |grep bene_id_start |sed 's/.*=//')
+  END_BENE_ID=$(cat "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES}" |grep bene_id_start |sed 's/.*=//')
   echo "END_BENE_ID=${END_BENE_ID}"
 
   source .venv/bin/activate
@@ -365,12 +364,12 @@ do_load_validation(){
 # script will check the number of lines written to the characteristics.csv file; if only the header row (row #1)
 # then we'll exit out.
 gen_characteristics_file(){
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${UNIQUE_ENVS_PARAM}"
 
   # check the generated output file; must have more than just the header line
-  line_cnt=$(cat ${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} |wc -l)
+  line_cnt=$(cat "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}" |wc -l)
   if [[ "$line_cnt" -gt 1 ]]; then
     BFD_CHARACTERISTICS="${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
     echo "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} successfully discovered"
@@ -384,7 +383,7 @@ gen_characteristics_file(){
 # the newest bene_id_start variable for use in a later function/operation.
 upload_characteristics_file_to_s3(){
   echo "upload ${BFD_CHARACTERISTICS_FILE_NAME} file to S3"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 ./s3_utilities.py "${BFD_SYNTHEA_AUTO_LOCATION}" "upload_characteristics"
   deactivate
@@ -394,7 +393,7 @@ upload_characteristics_file_to_s3(){
 # the newest bene_id_start variable for use in a later function/operation.
 upload_props_file_to_s3(){
   echo "upload end_state.properties file to S3"
-  cd ${BFD_SYNTHEA_AUTO_LOCATION}
+  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_prop" "${BFD_SYNTHEA_AUTO_LOCATION}"
   deactivate
