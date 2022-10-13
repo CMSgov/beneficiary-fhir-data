@@ -28,7 +28,6 @@ import sys
 import fileinput
 import shlex
 import concurrent.futures
-import pandas as pd
 
 import datetime
 
