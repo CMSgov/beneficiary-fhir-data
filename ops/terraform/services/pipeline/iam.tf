@@ -1,3 +1,81 @@
+resource "aws_iam_user" "this" {
+  count         = local.create_etl_user ? 1 : 0
+  force_destroy = false
+  name          = "bfd-${local.env}-${local.legacy_service}"
+  path          = "/"
+  tags = merge(local.shared_tags, {
+    Note    = "NoRotate"
+    Purpose = "ETL PUT"
+    UsedBy  = "CCW"
+  })
+}
+
+resource "aws_iam_access_key" "this" {
+  count = local.create_etl_user ? 1 : 0
+  user  = aws_iam_user.this[0].name
+}
+
+resource "aws_iam_group" "this" {
+  count = local.create_etl_user ? 1 : 0
+  name  = "bfd-${local.env}-${local.legacy_service}"
+  path  = "/"
+}
+
+resource "aws_iam_group_membership" "this" {
+  count = local.create_etl_user ? 1 : 0
+  group = aws_iam_group.this[0].name
+  name  = "bfd-${local.env}-${local.legacy_service}"
+  users = [aws_iam_user.this[0].name]
+}
+
+resource "aws_iam_policy" "etl-rw-s3" {
+  count       = local.create_etl_user ? 1 : 0
+  description = "ETL read-write S3 policy"
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "ETLRWKMS",
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            local.kms_key_id
+          ]
+        },
+        {
+          "Sid" : "ETLRWBucketList",
+          "Action" : [
+            "s3:ListBucket"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            aws_s3_bucket.this.arn
+          ]
+        },
+        {
+          "Sid" : "ETLRWBucketActions",
+          "Action" : [
+            "s3:GetObject",
+            "s3:PutObject"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "${aws_s3_bucket.this.arn}/*"
+          ]
+        }
+      ]
+  })
+}
+
+resource "aws_iam_group_policy_attachment" "etl-rw-s3" {
+  count      = local.create_etl_user ? 1 : 0
+  group      = aws_iam_group.this[0].id
+  policy_arn = aws_iam_policy.etl-rw-s3[0].arn
+}
+
 resource "aws_iam_policy" "aws_cli" {
   description = "AWS cli privileges for the BFD Pipeline instance role."
   name        = "bfd-${local.service}-${local.env}-cli"
