@@ -1,13 +1,3 @@
-variable "aurora_config" {
-  description = "Aurora sizing and version config"
-  type        = object({ instance_class = string, cluster_nodes = number, engine_version = string, param_version = string })
-}
-
-variable "aurora_node_params" {
-  description = "Aurora node parameter group config"
-  type        = list(object({ name = string, value = string, apply_on_reboot = bool }))
-}
-
 variable "env_config" {
   description = "All high-level info for the whole vpc"
   type        = object({ env = string, tags = map(string) })

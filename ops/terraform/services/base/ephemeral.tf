@@ -14,6 +14,12 @@ locals {
     "/bfd/${local.env}/migrator/sensitive/db_migrator_db_username" = "/bfd/${local.seed_env}/migrator/sensitive/db_migrator_db_username",
     "/bfd/${local.env}/migrator/sensitive/db_migrator_db_password" = "/bfd/${local.seed_env}/migrator/sensitive/db_migrator_db_password"
   } : {}
+
+  # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
+  pipeline_seed_paths = local.is_ephemeral_env ? {
+    "/bfd/${local.env}/pipeline/sensitive/data_pipeline_db_username" = "/bfd/${local.seed_env}/pipeline/sensitive/data_pipeline_db_username",
+    "/bfd/${local.env}/pipeline/sensitive/data_pipeline_db_password" = "/bfd/${local.seed_env}/pipeline/sensitive/data_pipeline_db_password"
+  } : {}
 }
 
 data "aws_db_cluster_snapshot" "seed" {
@@ -48,6 +54,16 @@ resource "aws_ssm_parameter" "ephemeral_common" {
 # Copy targeted MIGRATOR hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_migrator" {
   for_each  = local.migrator_seed_paths
+  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  name      = each.key
+  overwrite = true
+  type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
+  value     = local.seed[each.value]
+}
+
+# Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
+resource "aws_ssm_parameter" "ephemeral_pipeline" {
+  for_each  = local.pipeline_seed_paths
   key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
   name      = each.key
   overwrite = true

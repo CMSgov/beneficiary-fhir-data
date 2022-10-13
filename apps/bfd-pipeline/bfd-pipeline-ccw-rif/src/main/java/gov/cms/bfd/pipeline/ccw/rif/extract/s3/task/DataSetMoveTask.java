@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.waiters.WaiterParameters;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -21,8 +20,11 @@ import org.slf4j.LoggerFactory;
 public final class DataSetMoveTask implements Callable<Void> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMoveTask.class);
 
+  /** Handle by which to invoke s3 tasks. */
   private final S3TaskManager s3TaskManager;
+  /** The extraction options which contain metadata such as the bucket the files are in. */
   private final ExtractionOptions options;
+  /** The Manifest for the files being moved. */
   private final DataSetManifest manifest;
 
   /**
@@ -40,7 +42,7 @@ public final class DataSetMoveTask implements Callable<Void> {
     this.manifest = manifest;
   }
 
-  /** @see java.util.concurrent.Callable#call() */
+  /** {@inheritDoc} */
   @Override
   public Void call() throws Exception {
     LOGGER.debug("Renaming data set '{}' in S3, now that processing is complete...", manifest);
@@ -67,10 +69,13 @@ public final class DataSetMoveTask implements Callable<Void> {
      * bulk copy operation).
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
-      String sourceKey =
-          String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
-      String targetKey =
-          String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
+      String sourceKey;
+      String targetKey;
+
+      // Move the item from where it started into the corresponding output, assume Incoming first
+      sourceKey =
+          String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
+      targetKey = String.format("%s/%s", manifest.getManifestKeyDoneLocation(), s3KeySuffixToMove);
 
       /*
        * Before copying, grab the metadata of the source object to ensure
@@ -111,7 +116,7 @@ public final class DataSetMoveTask implements Callable<Void> {
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
       String sourceKey =
-          String.format("%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
+          String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
       DeleteObjectRequest deleteObjectRequest =
           new DeleteObjectRequest(options.getS3BucketName(), sourceKey);
       s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);

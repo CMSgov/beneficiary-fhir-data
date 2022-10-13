@@ -6,6 +6,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -38,9 +39,9 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -3261,8 +3262,14 @@ public final class TransformerUtils {
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
+
+      // Add number of paginated resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(bundle.getTotal());
     }
 
     /*
@@ -3323,6 +3330,10 @@ public final class TransformerUtils {
             transactionTime.isAfter(maxBundleDate)
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
+
+    // Add number of resources to MDC logs
+    LoggingUtils.logResourceCountToMdc(bundle.getTotal());
+
     return bundle;
   }
 

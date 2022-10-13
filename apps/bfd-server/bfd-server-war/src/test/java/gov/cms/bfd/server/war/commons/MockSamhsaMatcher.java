@@ -3,9 +3,10 @@ package gov.cms.bfd.server.war.commons;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import java.util.HashSet;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** Mock class for testing the default implementations of the {@link AbstractSamhsaMatcher}. */
-public class MockSamhsaMatcher extends AbstractSamhsaMatcher {
+public class MockSamhsaMatcher extends AbstractSamhsaMatcher<IBaseResource> {
 
   /** Instantiates a new Mock samhsa matcher with no data set. */
   public MockSamhsaMatcher() {
@@ -52,7 +53,7 @@ public class MockSamhsaMatcher extends AbstractSamhsaMatcher {
 
   /** {@inheritDoc} */
   @Override
-  public boolean test(Object o) {
+  public boolean test(IBaseResource o) {
     return false;
   }
 }

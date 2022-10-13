@@ -68,13 +68,13 @@ CREATE TABLE "pre_adj"."FissProcCodes" (
 /*
  * MbiCache
  */
-CREATE TABLE "rda"."MbiCache" (
-    "mbiId" bigint NOT NULL,
-    "mbi" varchar(11) NOT NULL,
-    "hash" varchar(64) NOT NULL,
-    "oldHash" varchar(64),
-    "lastUpdated" timestamp with time zone NOT NULL,
-    CONSTRAINT "MbiCache_key" PRIMARY KEY ("mbiId")
+CREATE TABLE rda.MbiCache (
+    mbiId bigint NOT NULL,
+    mbi varchar(11) NOT NULL,
+    hash varchar(64) NOT NULL,
+    oldHash varchar(64),
+    lastUpdated timestamp with time zone NOT NULL,
+    CONSTRAINT MbiCache_key PRIMARY KEY (mbiId)
 );
 
 
@@ -131,8 +131,8 @@ ALTER TABLE "pre_adj"."FissProcCodes" ADD "lastUpdated" timestamp with time zone
 /*
  * MbiCache
  */
-ALTER TABLE "rda"."MbiCache" ADD "mbiId" bigint NOT NULL;
-ALTER TABLE "rda"."MbiCache" ADD "mbi" varchar(11) NOT NULL;
-ALTER TABLE "rda"."MbiCache" ADD "hash" varchar(64) NOT NULL;
-ALTER TABLE "rda"."MbiCache" ADD "oldHash" varchar(64);
-ALTER TABLE "rda"."MbiCache" ADD "lastUpdated" timestamp with time zone NOT NULL;
+ALTER TABLE rda.MbiCache ADD mbiId bigint NOT NULL;
+ALTER TABLE rda.MbiCache ADD mbi varchar(11) NOT NULL;
+ALTER TABLE rda.MbiCache ADD hash varchar(64) NOT NULL;
+ALTER TABLE rda.MbiCache ADD oldHash varchar(64);
+ALTER TABLE rda.MbiCache ADD lastUpdated timestamp with time zone NOT NULL;

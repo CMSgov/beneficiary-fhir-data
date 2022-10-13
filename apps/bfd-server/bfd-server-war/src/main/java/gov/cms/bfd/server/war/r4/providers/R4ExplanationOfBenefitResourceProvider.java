@@ -21,9 +21,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -181,7 +181,13 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             .time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
@@ -288,6 +294,11 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
+      // Add bene_id to MDC logs when _lastUpdated filter is in effect
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       return TransformerUtilsV2.createBundle(
           paging, eobs, loadedFilterManager.getTransactionTime());
     }

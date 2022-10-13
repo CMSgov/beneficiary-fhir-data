@@ -34,4 +34,5 @@ For asynchronous (i.e. bulk) requests, BFD users SHALL include meaningful values
 * `BlueButton-OriginalQueryId`: (see above; same thing)
     * For asynchronous jobs, users SHALL use the `BlueButton-OriginalQueryId` for the HTTP request that created/submitted/whatever the job.
 * `BULK-CLIENTID`: a unique identifier of the bulk client for whom this request is for (i.e. UUID, ACO ID, NPI, Part D Contract)
+* `BULK-CLIENTNAME`: a human readable name for the bulk client for whom this request is for to aid in tracing and debugging.
 * `BULK-JOBID`: a unique identifier for the job (Job ID, UUID, etc.)

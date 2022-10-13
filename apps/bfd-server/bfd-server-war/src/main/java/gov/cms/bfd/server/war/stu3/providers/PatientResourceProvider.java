@@ -167,7 +167,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(patientId);
     } finally {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
@@ -278,6 +283,11 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     List<IBaseResource> patients;
     if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
+      // Add bene_id to MDC logs when _lastUpdated filter is in effect
+      LoggingUtils.logBeneIdToMdc(logicalId.getValue());
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       patients = Collections.emptyList();
     } else {
       try {

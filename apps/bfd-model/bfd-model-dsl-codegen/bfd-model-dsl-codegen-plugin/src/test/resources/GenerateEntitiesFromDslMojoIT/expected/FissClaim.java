@@ -200,7 +200,8 @@ public class FissClaim {
   @SequenceGenerator(
       name = "beneficiaryhistory_beneficiaryhistoryid_seq",
       sequenceName = "beneficiaryhistory_beneficiaryhistoryid_seq",
-      allocationSize = 50
+      allocationSize = 50,
+      schema = "`pre_adj`"
   )
   private long beneHistoryId;
 
