@@ -182,3 +182,44 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_re
     dimensions = local.dimensions
   }
 }
+
+# This metric filter is deprecrated, but an existing CloudWatch alarm (bfd-${env}-server-all-500s)
+# depends on it.
+# TODO: Remove this metric filter in BFD-1773
+resource "aws_cloudwatch_log_metric_filter" "deprecated_http_requests_count_500" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/count-500/all"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{($.mdc.http_access_request_clientSSL_DN = \"*\") && ",
+    "($.mdc.http_access_response_status = 500)}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/count-500/all"
+    namespace  = local.namespace
+    value      = "1"
+    default_value = "0"
+  }
+}
+
+# This metric filter is deprecrated, but an existing CloudWatch alarm
+# (bfd-${env}-server-all-eob-6s-p95) depends on it. 
+# TODO: Remove this metric filter in BFD-1773
+resource "aws_cloudwatch_log_metric_filter" "deprecated_http_requests_latency_eob_all" {
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eobAll/all"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{($.mdc.http_access_request_clientSSL_DN = \"*\") && ",
+    "($.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\") && ",
+    "($.mdc.http_access_response_duration_milliseconds = *)}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency/eobAll/all"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_milliseconds"
+    default_value = null
+  }
+}
