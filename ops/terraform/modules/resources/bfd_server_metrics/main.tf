@@ -13,7 +13,7 @@ locals {
     claim_response_all = "*/fhir/ClaimResponse"
   }
 
-  endpoint_patterns = { for name, pattern in local.endpoints : name => "$.mdc.http_access_request_uri = \"${pattern}\"" }
+  endpoint_patterns = { for name, pattern in local.endpoints : replace(name, "_", "-") => "$.mdc.http_access_request_uri = \"${pattern}\"" }
 
   client_ssl_pattern = "$.mdc.http_access_request_clientSSL_DN = \"*\""
   dimensions = {
