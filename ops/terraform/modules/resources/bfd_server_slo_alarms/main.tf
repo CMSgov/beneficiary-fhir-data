@@ -7,13 +7,22 @@ locals {
 
   namespace = "bfd-${var.env}/${local.app}"
   metrics = {
-    coverage_latency                    = "http-requests/latency/coverageAll"
-    eob_latency                         = "http-requests/latency/eobAll"
-    eob_no_resources_latency            = "http-requests/latency/eobAllNoResources"
-    eob_latency_by_kb                   = "http-requests/latency-by-kb/eobAll"
-    patient_no_contract_latency         = "http-requests/latency/patientNotByContract"
-    patient_contract_count_4000_latency = "http-requests/latency/patientByContractCount4000"
-    all_error_rate                      = "http-requests/count-500"
+    coverage_latency                    = "http-requests/latency/coverage-all"
+    eob_latency                         = "http-requests/latency/eob-all"
+    eob_no_resources_latency            = "http-requests/latency/eob-all-no-resources"
+    eob_latency_by_kb                   = "http-requests/latency-by-kb/eob-all"
+    patient_no_contract_latency         = "http-requests/latency/patient-not-by-contract"
+    patient_contract_count_4000_latency = "http-requests/latency/patient-by-contract-count-4000"
+    all_error_rate                      = "http-requests/count/500-responses"
+  }
+
+  partner_regexs = {
+    all  = ".*"
+    bb   = ".*BlueButton.*"
+    bcda = ".*bcda.*"
+    dpc  = ".*dpc.*"
+    ab2d = ".*ab2d.*"
+    test = ".*data-server-client-test.*"
   }
 
   bulk_partners = [
@@ -21,7 +30,6 @@ locals {
     "dpc",
     "abd2d"
   ]
-
   non_bulk_partners = [
     "bb"
   ]
