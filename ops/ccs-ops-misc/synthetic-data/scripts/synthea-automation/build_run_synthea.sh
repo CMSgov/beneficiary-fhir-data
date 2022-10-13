@@ -4,15 +4,89 @@ set -eo pipefail
 # global variables
 CLEANUP="${CLEANUP:-True}" # defaults to removing inv on error, interupt, etc.
 
-# pseudo-env variables passed in by Jenkins?
-# we'll default to 'test' and 10 bene's for now
-BFD_ROOT_DIR="${BFD_ROOT_DIR:-$PWD}"
-BUILD_ROOT_DIR="${BUILD_ROOT_DIR:-/opt/dev}"
-TARGET_ENV="${TARGET_ENV:-test}"
-SKIP_SYNTHEA_BUILD="${SKIP_SYNTHEA_BUILD:-True}"
+help() {
+  echo
+  echo "build_run_synthea.sh:"
+  echo "----------------------  ------------------------------------------------------------------------"
+  echo "--num, -n               : number of beneficiaires to generate (default 100)"
+  echo "--build_root, -b        : root directory for Synthea build (default /tmp"
+  echo "--target_env, -t        : comma-separated string, combination of: 'prod', 'test', 'prod-sbx' (default test)"
+  echo "--synthea_jar, -j       : boolean (true/false) indicating to use Synthea Release jar file (default true)"
+  echo "--synthea_validate, -v  : boolean (true/false) whether to perform pre-validation of previous Synthea run (default true)"
+  exit 1;
+}
 
-NUM_GENERATED_BENES="${NUM_GENERATED_BENES:-10}"
-SKIP_VALIDATION="${SKIP_SYNTHEA_VALIDATION:-False}"
+# setup vars with defaults; override from ars as appropriate
+BFD_ROOT_DIR=${PWD}
+BUILD_ROOT_DIR="/tmp"
+TARGET_ENV="test"
+NUM_GENERATED_BENES=10
+SKIP_SYNTHEA_BUILD="true"
+SKIP_VALIDATION="false"
+
+# setup for args we'll handle
+args=$(getopt -l "num:build_root:target_env:synthea_jar:synthea_validate:help" -o "n:b:t:j:v:h" -- "$@")
+
+# parse the args
+num_regex="^[0-9]+$"
+# parse the args
+while [ $# -ge 1 ]; do
+    case "$1" in
+        --)
+            # No more options left.
+            shift
+            break
+            ;;
+        -n|--num)
+              if ! [[ $2 =~ $num_regex ]] ; then
+                echo "ERROR, non-numeric specified ($2)...exiting" >&2; exit 1
+              fi
+              NUM_GENERATED_BENES="$2"
+              shift
+              ;;
+        -b|--build_root)
+              BUILD_ROOT_DIR="$2"
+              if [[ ! -d "${BUILD_ROOT_DIR}" ]] ; then
+                echo "ERROR, Synthea build directory does not exist: ${BUILD_ROOT_DIR}"
+                help
+              fi
+              shift
+              ;;
+        -t|--target_env)
+              TARGET_ENV="$2"
+              shift
+              ;;
+        -j|--synthea_jar)
+              SKIP_SYNTHEA_BUILD=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+              if [[ "${SKIP_SYNTHEA_BUILD}" != "true" && "${SKIP_SYNTHEA_BUILD}" != "false" ]]; then
+                echo "ERROR, Invalid boolean value for using Synthea jar: ${SKIP_SYNTHEA_BUILD}"
+                help
+              fi
+              shift
+              ;;
+        -v|--synthea_validate)
+              SKIP_VALIDATION=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+              if [[ "${SKIP_VALIDATION}" != "true" && "${SKIP_VALIDATION}" != "false" ]]; then
+                echo "ERROR, Invalid boolean value for Synthea validation: ${SKIP_VALIDATION}"
+                help
+              fi
+              shift
+              ;;
+        -h|--help)
+              help
+              ;;
+    esac
+    shift
+done
+
+echo "Runnning script with args:"
+echo "=================================================="
+echo "BFD environment(s)          : ${TARGET_ENV}"
+echo "Num beneficiaries to create : ${NUM_GENERATED_BENES}"
+echo "Synthea build directory     : ${BUILD_ROOT_DIR}"
+echo "Use Synthea release jar     : ${SKIP_SYNTHEA_BUILD}"
+echo "Skip Synthea pre-validation : ${SKIP_VALIDATION}"
+echo ""
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
 TARGET_SYNTHEA_DIR=${BUILD_ROOT_DIR}/synthea
@@ -56,7 +130,7 @@ for nam in "${arr[@]}"; do
       S3_BUCKETS[prod-sbx]="${PROD_SBX_S3_BUCKET}"
       ;;
     *)
-	  echo "Unrecognized environemnt: ${nam}"
+	  echo "Unrecognized environment, ignoring: ${nam}"
 	  ;;
   esac
 done
@@ -64,8 +138,11 @@ done
 # create single string that can be passed to validation .py scripts; this is a comma-separated
 # list of target deployment tags (i.e., prod,test)
 UNIQUE_ENVS_PARAM=$(echo "${!S3_BUCKETS[*]}")
+if [ -z "${UNIQUE_ENVS_PARAM}" ] ; then
+  echo "ERROR, no valid environment specified!"
+  help
+fi
 echo "enviroments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
-
 # restore IFS to original state
 IFS=${oIFS}
 
@@ -325,9 +402,9 @@ upload_props_file_to_s3(){
 
 
 #----------------- GO! ------------------#
-# genearal fail-safe to perform cleanup of any directories and files germane to executing
-# this shell script.
-clean_up
+# general fail-safe to perform cleanup of any directories and files germane to executing
+# this shell script. Commented out for now
+# clean_up
 
 # invoke function to clone the Synthea repo and build it.
 install_synthea_from_git
