@@ -113,7 +113,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_b
   ])
 
   metric_transformation {
-    name       = "http-requests/latency/patientNotByContract"
+    name       = "http-requests/latency/patient-not-by-contract"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = local.dimensions
