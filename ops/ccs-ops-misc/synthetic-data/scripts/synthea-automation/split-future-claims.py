@@ -37,7 +37,7 @@ manifest_date_format = "%Y-%m-%dT12:00:00Z"
 lines_per_thread = 500000
 failed_validation = False
 ## helps understand the days of the week related to calendar date calculation
-SUN, MON, TUE, WED, THU, FRI, SAT = range(7)
+MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
 load_day = WED
 
 def split_future_synthea_load(args):
