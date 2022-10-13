@@ -22,11 +22,13 @@ locals {
   admin_bucket   = "bfd-${local.env}-admin-${local.account_id}"
   logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
 
-  shared_tags = {
-    Environment = local.env
-    application = "bfd"
-    business    = "oeda"
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/common"
   }
 
   # Two-step map creation and redefinition creates `config` and `secret` maps of simplified parameter names to values
