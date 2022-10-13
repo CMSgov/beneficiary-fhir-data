@@ -66,7 +66,7 @@ def validate_and_run(args):
 
     generated_benes = args[2]
     envs = args[3].split(',')
-    skip_validation = True if len(args) > 4 and args[4] == "True" else False
+    skip_validation = True if len(args) > 4 and args[4].lower() == "true" else False
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
     
