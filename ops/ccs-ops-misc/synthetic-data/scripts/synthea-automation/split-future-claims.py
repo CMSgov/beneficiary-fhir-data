@@ -2,6 +2,20 @@
 # Script for taking the results of a synthea run and splitting the claims from future dates into their own loads.
 # This will allow us to have those loads queued up in the Synthetic/Incoming folder to load as if they were updates. 
 #
+# The script does the following:
+#
+# 1. Using threads, reads each file and stores its lines into memory
+# 2. Splits up the lines based on date, per file;
+#   a. Any line with a date less than or equal to todays date remains in the "current" bucket of line data for that file
+#   b. Any future lines get placed in a dictionary based on the week they fall into. The dictionary is keyed off the 2 Wednesdays past the line's date (~2 weeks ahead). This is to simulate file processing time in prod for future loads.
+# 3. After all files are read and split, the counts are validated to ensure the lines the file started with match the total of all the split lines added together, per file
+# 4. After successful validation, folders are made for every week that was required for any file by looking at the dictionary keys. These folders are placed in /bfd/output automatically
+# 5. Manifests are made for each of the future folders, using the same timestamp as the folder for the manifest, adding only the files that had lines for that date
+# 6. Files are generated in each weeks' folder for each file that had lines for that week, plus header
+# 7. The "current" data, which is now the original data minus the future data, overwrites the original files in the synthea dir/bfd/output
+#
+# Note that the future files will be loaded on the day specified by load_day and at the time specified in the manifest_date_format.
+#
 # Args:
 # 1: file system location of synthea folder, for finding the output result to split the files for
 #
@@ -22,6 +36,9 @@ import datetime
 manifest_date_format = "%Y-%m-%dT12:00:00Z"
 lines_per_thread = 500000
 failed_validation = False
+## helps understand the days of the week related to calendar date calculation
+SUN, MON, TUE, WED, THU, FRI, SAT = range(7)
+load_day = WED
 
 def split_future_synthea_load(args):
     """
@@ -255,7 +272,7 @@ def get_target_wednesday(checked_date):
     amount of time that simulates data processing time to be more prod-like.)
     '''
     ## Check how many days are between now and weds (possibly negative offset)
-    days_until_weds_offset = 2 - checked_date.weekday()
+    days_until_weds_offset = load_day - checked_date.weekday()
     ## go 2 week forward + offset until following weds
     days_ahead = 14 + days_until_weds_offset
     return checked_date + datetime.timedelta(days_ahead)
