@@ -1,16 +1,14 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 locals {
-  shared_tags = {
-    Environment = local.env
-    Layer       = local.layer
-    Name        = "bfd-${local.env}-${local.service}"
-    application = "bfd"
-    business    = "oeda"
-    role        = local.service
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    Layer          = local.layer
+    Name           = "bfd-${local.env}-${local.service}"
+    application    = "bfd"
+    business       = "oeda"
+    role           = local.service
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/server/server-load"
   }
 
   account_id             = data.aws_caller_identity.current.account_id
@@ -43,7 +41,6 @@ locals {
 resource "aws_lambda_function" "node" {
   function_name = "bfd-${local.env}-${local.service}-node"
   description   = "Lambda to run the Locust worker node for load testing on the ${local.env} server"
-  tags          = local.shared_tags
   kms_key_arn   = local.kms_key_arn
   image_uri     = local.container_image_uri_node
   package_type  = "Image"
@@ -80,13 +77,12 @@ resource "aws_instance" "this" {
   instance_type               = local.instance_type
   key_name                    = local.key_pair
   monitoring                  = false
-  tags                        = local.shared_tags
 
   subnet_id              = data.aws_subnet.main[0].id
   vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
 
   root_block_device {
-    tags                  = merge(local.shared_tags, { snapshot = "false" })
+    tags                  = local.default_tags
     volume_type           = "gp2"
     volume_size           = local.volume_size
     delete_on_termination = true
