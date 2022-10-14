@@ -72,6 +72,7 @@ public final class CarrierClaimTransformerTest {
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
+   * has two care members under the care team component and doesnt duplicate its results
    *
    * @throws FHIRException (indicates test failure)
    */
