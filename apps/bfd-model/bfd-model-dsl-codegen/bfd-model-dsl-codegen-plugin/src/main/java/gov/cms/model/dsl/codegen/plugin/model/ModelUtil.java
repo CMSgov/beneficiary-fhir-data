@@ -7,10 +7,17 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /** Utility methods for use by and with the various model classes. */
 public class ModelUtil {
@@ -91,21 +98,43 @@ public class ModelUtil {
       throws IOException {
     final var file = new File(mappingPath);
     final var fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+    RootBean root;
     if (fileAttributes.isRegularFile()) {
-      return objectMapper.readValue(file, RootBean.class);
-    }
-    if (!fileAttributes.isDirectory()) {
+      root = objectMapper.readValue(file, RootBean.class);
+    } else if (!fileAttributes.isDirectory()) {
       throw new IOException("expected a file or directory: " + mappingPath);
-    }
-
-    var combinedRoot = new RootBean(new ArrayList<>());
-    var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
-    if (mappingFiles != null) {
-      for (File mappingFile : mappingFiles) {
-        combinedRoot.addMappingsFrom(objectMapper.readValue(mappingFile, RootBean.class));
+    } else {
+      root = new RootBean(new ArrayList<>());
+      var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
+      if (mappingFiles != null) {
+        for (File mappingFile : mappingFiles) {
+          root.addMappingsFrom(objectMapper.readValue(mappingFile, RootBean.class));
+        }
       }
     }
-    return combinedRoot;
+
+    var duplicateIds = findDuplicateMappingIds(root);
+    if (duplicateIds.size() > 0) {
+      throw new IOException("multiple mappings have same id: " + duplicateIds);
+    }
+    return root;
+  }
+
+  /**
+   * Scan all {@link MappingBean}s in the given model and return a {@link List} of mapping ids that
+   * appear in more than one {@link MappingBean}. Duplicate detection uses case-insensitive
+   * comparison to catch potentially confusing cases where ids are the same except for case
+   * mismatch.
+   *
+   * @param root {@link RootBean} containing all {@link MappingBean}s to scan
+   * @return {@link List} or duplicate mapping ids
+   */
+  private static List<String> findDuplicateMappingIds(RootBean root) {
+    final Set<String> uniqueIds = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+    return root.getMappings().stream()
+        .map(MappingBean::getId)
+        .filter(id -> !uniqueIds.add(id))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -143,5 +172,37 @@ public class ModelUtil {
           return Optional.empty();
         }
     }
+  }
+
+  /**
+   * Determines an appropriate java type to use for the given sql type name.
+   *
+   * @param sqlType SQL type name to map
+   * @return an {@link Optional} containing an appropriate {@link TypeName} or empty if no mapping
+   *     could be found
+   */
+  public static Optional<TypeName> mapSqlTypeToTypeName(String sqlType) {
+    if (sqlType.contains("char")) {
+      return Optional.of(ClassName.get(String.class));
+    }
+    if (sqlType.contains("smallint")) {
+      return Optional.of(ClassName.get(Short.class));
+    }
+    if (sqlType.equals("bigint")) {
+      return Optional.of(ClassName.get(Long.class));
+    }
+    if (sqlType.equals("int")) {
+      return Optional.of(ClassName.get(Integer.class));
+    }
+    if (sqlType.contains("decimal") || sqlType.contains("numeric")) {
+      return Optional.of(ClassName.get(BigDecimal.class));
+    }
+    if (sqlType.contains("date")) {
+      return Optional.of(ClassName.get(LocalDate.class));
+    }
+    if (sqlType.contains("timestamp")) {
+      return Optional.of(ClassName.get(Instant.class));
+    }
+    return Optional.empty();
   }
 }

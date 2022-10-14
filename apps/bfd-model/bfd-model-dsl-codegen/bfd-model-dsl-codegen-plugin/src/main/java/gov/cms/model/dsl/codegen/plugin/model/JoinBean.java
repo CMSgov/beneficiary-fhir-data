@@ -3,6 +3,10 @@ package gov.cms.model.dsl.codegen.plugin.model;
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,14 +26,17 @@ import lombok.Singular;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class JoinBean {
+public class JoinBean implements ModelBean {
   /** Name of the field in this entity object that holds the joined entity. */
-  private String fieldName;
+  @NotNull @JavaName private String fieldName;
 
   /** Full class name of the joined entity. Must include the package as well as the class name. */
+  @NotNull
+  @JavaName(type = JavaNameType.Compound)
   private String entityClass;
 
   /** Name of the column in this entity that will hold the joined table's primary key. */
+  @JavaName(type = JavaNameType.Compound)
   private String joinColumnName;
 
   /** Type of join annotation to apply to this field. */
@@ -42,16 +49,16 @@ public class JoinBean {
   private String comment;
 
   /** Type of collection to use for storing joined objects. */
-  @Builder.Default private CollectionType collectionType = CollectionType.List;
+  @NotNull @Builder.Default private CollectionType collectionType = CollectionType.List;
 
   /** Value for {@code mappedBy} argument to annotation. */
-  private String mappedBy;
+  @JavaName private String mappedBy;
 
   /** Value for {@code orphanRemoval} argument to annotation. */
   private Boolean orphanRemoval;
 
   /** {@link CascadeType}s to use as argument to the annotation. */
-  @Builder.Default private List<CascadeType> cascadeTypes = new ArrayList<>();
+  @NotNull @Builder.Default private List<CascadeType> cascadeTypes = new ArrayList<>();
 
   /**
    * Optionally specifies an order by expression to add using an {@link javax.persistence.OrderBy}
@@ -157,6 +164,11 @@ public class JoinBean {
     return fetchType != null;
   }
 
+  @Override
+  public String getDescription() {
+    return "join " + fieldName + " to " + entityClass;
+  }
+
   /**
    * An enum type used to specify which annotation to use for the join and whether the join returns
    * a single value or multiple values.
@@ -214,15 +226,15 @@ public class JoinBean {
      * Name of the property in the containing entity. The generated getter name will be {@code get}
      * followed by the capitalized {@link Property#name}.
      */
-    private String name;
+    @NotNull @JavaName private String name;
 
     /** Name of the field in the joined object to get a value from when the getter is called. */
-    private String fieldName;
+    @NotNull @JavaName private String fieldName;
 
     /**
      * Indicates the java type to use for the return value of the getter. Values must be recognized
      * by {@link ModelUtil#mapJavaTypeToTypeName}.
      */
-    private String javaType;
+    @JavaType private String javaType;
   }
 }

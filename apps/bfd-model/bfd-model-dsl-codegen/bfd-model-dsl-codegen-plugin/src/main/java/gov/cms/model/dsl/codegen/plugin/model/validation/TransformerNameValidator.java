@@ -1,0 +1,25 @@
+package gov.cms.model.dsl.codegen.plugin.model.validation;
+
+import gov.cms.model.dsl.codegen.plugin.transformer.FieldTransformer;
+import gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+/**
+ * Custom {@link ConstraintValidator} that verifies that the string matches a transformation
+ * recognized by {@link TransformerUtil}.
+ */
+public class TransformerNameValidator implements ConstraintValidator<TransformerName, String> {
+  /**
+   * Searches for a {@link FieldTransformer} with the given name. Returns true if one was found, or
+   * false otherwise.
+   *
+   * @param value object to validate
+   * @param context context in which the constraint is evaluated
+   * @return true if the string matches the name of a {@link FieldTransformer}
+   */
+  @Override
+  public boolean isValid(String value, ConstraintValidatorContext context) {
+    return value == null || TransformerUtil.getFieldTransformer(value).isPresent();
+  }
+}
