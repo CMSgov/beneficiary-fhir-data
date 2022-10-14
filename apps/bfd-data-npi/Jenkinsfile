@@ -101,22 +101,8 @@ EOF
                         npiOrgFileStatusCode = sh(
                             returnStdout: true,
                             script: '''
-                            month=""
-                            year=""
-                            if [ -z "${filemonth}" ]
-                            then
-                               month="$(date +%B)"
-                            else
-                               month="${filemonth}"
-                            fi
-
-                            if [ -z "${fileyear}" ]
-                            then
-                                 year="$(date +%Y)"
-                            else
-                               year="${fileyear}"
-                            fi
-                           
+                             month=${filemonth:-"$(date +%B)"}
+                            year=${fileyear:-"$(date +%Y)"}
                             curl -s -o /dev/null -I -w "%{http_code}" "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip"
 '''
                         )
@@ -125,22 +111,8 @@ EOF
                          npiOrgNameSha256 = sh(
                             returnStdout: true,
                             script: '''
-                            month=""
-                            year=""
-                            if [ -z "${filemonth}" ]
-                            then
-                               month="$(date +%B)"
-                            else
-                               month="${filemonth}"
-                            fi
-
-                            if [ -z "${fileyear}" ]
-                            then
-                                 year="$(date +%Y)"
-                            else
-                               year="{fileyear}"
-                            fi
-
+                            month=${filemonth:-"$(date +%B)"}
+                            year=${fileyear:-"$(date +%Y)"}
                             curl -fsSL "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip" | sha256sum | awk '{ print $1 }'
 '''
                         )
