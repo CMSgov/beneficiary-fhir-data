@@ -98,7 +98,7 @@ EOF
                 script {
                     container('bfd-cbc-build') {
                       // Get url 
-                        npiOrgFileDownloadUrl= sh(
+                        npiOrgFileDownloadUrl = sh(
                             returnStdout: true,
                             script: '''
                             month=${filemonth:-"$(date +%B)"}
@@ -113,7 +113,7 @@ EOF
                         npiOrgFileStatusCode = sh(
                             returnStdout: true,
                             script: '''
-                            curl -s -o /dev/null -I -w "%{http_code}" "${npiOrgFileDownloadUrl}"
+                            curl -s -o /dev/null -I -w "%{http_code}" $npiOrgFileDownloadUrl
 '''
                         )
 
@@ -121,7 +121,7 @@ EOF
                          npiOrgNameSha256 = sh(
                             returnStdout: true,
                             script: '''
-                            curl -fsSL "${npiOrgFileDownloadUrl}" | sha256sum | awk '{ print $1 }'
+                            curl -fsSL $npiOrgFileDownloadUrl | sha256sum | awk '{ print $1 }'
 '''
                         )
                         awsAuth.assumeRole()
