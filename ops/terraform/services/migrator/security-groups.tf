@@ -4,7 +4,7 @@ resource "aws_security_group" "this" {
   count       = local.migrator_instance_count
   description = "${local.service} application security group in ${local.env}"
   name        = "bfd-${local.env}-${local.service}-app"
-  tags        = merge(local.common_tags, { Name = "bfd-${local.env}-${local.service}-app" })
+  tags        = { Name = "bfd-${local.env}-${local.service}-app" }
   vpc_id      = data.aws_vpc.main.id
 
   # NOTE: This application does not currently listen on any ports, so no ingress rules are needed.

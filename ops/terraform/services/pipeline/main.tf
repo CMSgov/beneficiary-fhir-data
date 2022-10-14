@@ -10,11 +10,13 @@ locals {
   service        = "pipeline"
   legacy_service = "etl"
 
-  shared_tags = {
-    Environment = local.env
-    application = "bfd"
-    business    = "oeda"
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/pipeline"
   }
 
   # NOTE: nonsensitive service-oriented and common config
@@ -78,15 +80,12 @@ resource "aws_instance" "this" {
   secondary_private_ips                = []
   source_dest_check                    = true
   subnet_id                            = local.subnet_id
-  tags = merge(
-    local.shared_tags,
-    {
-      Layer    = local.layer
-      Name     = "bfd-${local.env}-${local.legacy_service}"
-      role     = local.legacy_service
-      snapshot = "true"
-    }
-  )
+  tags = {
+    Layer    = local.layer
+    Name     = "bfd-${local.env}-${local.legacy_service}"
+    role     = local.legacy_service
+    snapshot = true
+  }
 
   tenancy = "default"
 
@@ -98,12 +97,12 @@ resource "aws_instance" "this" {
   })
 
   volume_tags = merge(
-    local.shared_tags,
+    local.default_tags,
     {
       Layer    = local.layer
       Name     = "bfd-${local.env}-${local.legacy_service}"
       role     = local.legacy_service
-      snapshot = "true" # are we sure?
+      snapshot = true
     }
   )
 
