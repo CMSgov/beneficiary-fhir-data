@@ -2,30 +2,37 @@
 set -eo pipefail
 
 # global variables
-CLEANUP="${CLEANUP:-True}" # defaults to removing inv on error, interupt, etc.
+CLEANUP="True" # defaults to removing generated files on error, interupt, etc.
 
 help() {
   echo
   echo "build_run_synthea.sh:"
   echo "----------------------  ------------------------------------------------------------------------"
-  echo "--num, -n               : number of beneficiaires to generate (default 100)"
-  echo "--build_root, -b        : root directory for Synthea build (default /tmp"
+  echo "--num, -n               : number of beneficiaries to generate (default 100)"
+  echo "--build_root, -b        : root directory for Synthea build (default /tmp)"
   echo "--target_env, -t        : comma-separated string, combination of: 'prod', 'test', 'prod-sbx' (default test)"
   echo "--synthea_jar, -j       : boolean (true/false) indicating to use Synthea Release jar file (default true)"
   echo "--synthea_validate, -v  : boolean (true/false) whether to perform pre-validation of previous Synthea run (default true)"
+  echo "--cleanup, -c           : boolean (true/false) whether to perform 'pre' and 'post' file cleanup (default true)"
   exit 1;
 }
 
 # setup vars with defaults; override from ars as appropriate
+# root directory of BFD git branch
 BFD_ROOT_DIR=${PWD}
+# root directory for checkout of Synthea git master 
 BUILD_ROOT_DIR="/tmp"
+# comma-separated string denoting which BFD db environments to populate with synthetic data
 TARGET_ENV="test"
-NUM_GENERATED_BENES=10
+# number of 'synthetic' beneficiaries to create
+NUM_GENERATED_BENES=100
+# boolean indicating if Synthea will use its Release .jar file (true) or if we need to build Synthea
 SKIP_SYNTHEA_BUILD="true"
+# boolean if we should perform pre-validation of target env(s) db to check if we can proceed
 SKIP_VALIDATION="false"
 
 # setup for args we'll handle
-args=$(getopt -l "num:build_root:target_env:synthea_jar:synthea_validate:help" -o "n:b:t:j:v:h" -- "$@")
+args=$(getopt -l "num:build_root:target_env:synthea_jar:synthea_validate:cleanup:help" -o "n:b:t:j:v:c:h" -- "$@")
 
 # parse the args
 num_regex="^[0-9]+$"
@@ -47,8 +54,7 @@ while [ $# -ge 1 ]; do
         -b|--build_root)
               BUILD_ROOT_DIR="$2"
               if [[ ! -d "${BUILD_ROOT_DIR}" ]] ; then
-                echo "ERROR, Synthea build directory does not exist: ${BUILD_ROOT_DIR}"
-                help
+                echo "ERROR, Synthea build directory does not exist: ${BUILD_ROOT_DIR}" >&2; exit 1
               fi
               shift
               ;;
@@ -59,16 +65,21 @@ while [ $# -ge 1 ]; do
         -j|--synthea_jar)
               SKIP_SYNTHEA_BUILD=$(echo "$2" | tr '[:upper:]' '[:lower:]')
               if [[ "${SKIP_SYNTHEA_BUILD}" != "true" && "${SKIP_SYNTHEA_BUILD}" != "false" ]]; then
-                echo "ERROR, Invalid boolean value for using Synthea jar: ${SKIP_SYNTHEA_BUILD}"
-                help
+                echo "ERROR, Invalid boolean value for using Synthea jar: ${SKIP_SYNTHEA_BUILD}" >&2; exit 1
               fi
               shift
               ;;
         -v|--synthea_validate)
               SKIP_VALIDATION=$(echo "$2" | tr '[:upper:]' '[:lower:]')
               if [[ "${SKIP_VALIDATION}" != "true" && "${SKIP_VALIDATION}" != "false" ]]; then
-                echo "ERROR, Invalid boolean value for Synthea validation: ${SKIP_VALIDATION}"
-                help
+                echo "ERROR, Invalid boolean value for Synthea validation: ${SKIP_VALIDATION}" >&2; exit 1
+              fi
+              shift
+              ;;
+        -c|--cleanup)
+              CLEANUP=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+              if [[ "${CLEANUP}" != "true" && "${CLEANUP}" != "false" ]]; then
+                echo "ERROR, Invalid boolean value for setting CLEANUP flag: ${CLEANUP}" >&2; exit 1
               fi
               shift
               ;;
@@ -86,6 +97,7 @@ echo "Num beneficiaries to create : ${NUM_GENERATED_BENES}"
 echo "Synthea build directory     : ${BUILD_ROOT_DIR}"
 echo "Use Synthea release jar     : ${SKIP_SYNTHEA_BUILD}"
 echo "Skip Synthea pre-validation : ${SKIP_VALIDATION}"
+echo "Perform file cleanup        : ${CLEANUP}"
 echo ""
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
@@ -112,11 +124,10 @@ PROD_SBX_S3_BUCKET="bfd-prod-sbx-etl-577373831711"
 oIFS=${IFS}
 # Set comma as delimiter
 IFS=','
-# Read the split words into an array based on comma delimiter; make
-# sure there are no dupe entries
+# Read / split the string into an array using comma as delimiter
 read -a arr <<< "${TARGET_ENV}"
 
-# use associate array to ensure uniqueness (i.e., only one instance of ea env)
+# use associate array to ensure uniqueness (i.e., only one instance of ea env);
 # lots of other ways to do this, but nice to have key/value pairs at our disposal
 for nam in "${arr[@]}"; do
   case "${nam}" in
@@ -221,8 +232,8 @@ install_synthea_from_git(){
   fi
 }
 
-# Function to clone BFD repository from GitHub; this shell script and associated python
-# scripts do not need to be built, but will need read/execute.
+# Function to ensure the BFD repository has proper permissions; this shell script
+# and associated python scripts do not need to be built, but will need read/execute.
 install_bfd_from_git(){
   # make sure the scripts are executable
   chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
@@ -239,13 +250,13 @@ activate_py_env(){
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   python3 -m venv .venv
   source .venv/bin/activate
-  # need the following
+  # we'll need the following python packages
   pip3 install awscli boto3 psycopg2
   deactivate
 }
 
-# Function to download proprietary Mitre synthea mapping files necessary for generating
-# synthetic beneficiaries and claims.
+# Function to download proprietary Mitre synthea mapping files, necessary
+# for generating synthetic beneficiaries and claims.
 download_mapping_files_from_s3(){
   echo "download mapping files from S3 to: ${MAPPING_FILES_LOCATION}"
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
@@ -299,19 +310,13 @@ prepare_and_run_synthea(){
 
 # Function that invokes an S3 utility to upload new generated synthetic data to an
 # S3 folder where the BFD ETL pipeline will discover the synthetic RIF files and
-# load them data into the appropriate BFD database.
+# load them into the appropriate BFD database.
 upload_synthea_results_to_s3(){
   
   echo "upload synthea results to S3"
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
 
-  # first make a copy of all the .csv files into a "backup" directory
-  mkdir "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
-  if [ -f "${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv" ]; then
-    cp "${BFD_SYNTHEA_OUTPUT_LOCATION}/*.csv" "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup"
-  fi
-
-  # now upload the RIF (.csv) files to S3 ETL bucket(s); one per environment, passed in as arg
+  # upload the RIF (.csv) files to S3 ETL bucket(s); once per environment, passed in as arg
   source .venv/bin/activate
   for s3_bucket in "${S3_BUCKETS[@]}"; do
     echo "uploading RIF files to: ${s3_bucket}"
@@ -337,7 +342,6 @@ wait_for_manifest_done(){
   deactivate
 }
 
-
 # Args:
 # 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
 # 2: bene id end (exclusive, taken from new output end state properties)
@@ -345,9 +349,6 @@ wait_for_manifest_done(){
 # 4: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
 do_load_validation(){
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
-  # restore the copy of the RIF (.csv) files back to the synthea output directory
-  cp "${BFD_SYNTHEA_OUTPUT_LOCATION}/backup/*.csv" "${BFD_SYNTHEA_OUTPUT_LOCATION}"
-
   # now perform the validation of the run.
   END_BENE_ID=$(cat "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES}" |grep bene_id_start |sed 's/.*=//')
   echo "END_BENE_ID=${END_BENE_ID}"
@@ -401,11 +402,10 @@ upload_props_file_to_s3(){
   deactivate
 }
 
-
 #----------------- GO! ------------------#
 # general fail-safe to perform cleanup of any directories and files germane to executing
-# this shell script. Commented out for now
-# clean_up
+# this shell script.
+clean_up
 
 # invoke function to clone the Synthea repo and build it.
 install_synthea_from_git
@@ -435,15 +435,14 @@ prepare_and_run_synthea
 # load the synthetic data into database.
 upload_synthea_results_to_s3
 
-# Invoke a functionn to wait on / check the appropriate BFD ETL pipeline S3 bucket for
+# Invoke a function to wait on / check the appropriate BFD ETL pipeline S3 bucket for
 # the 0_manifest file to appear in the S3 bucket's /Done folder.
 wait_for_manifest_done
 
 # Invoke a function that executes a .py script that performs validation of data for
-# the just executed ETL pipeline load.
-if ! $SKIP_VALIDATION; then
-  do_load_validation
-fi
+# the just executed ETL pipeline load. We ALWAYS want to validate the results of
+# the completed run.
+do_load_validation
 
 # Invoke function that executes a .py script that generates a new synthea characteristics
 # file and uploads it to S3.
