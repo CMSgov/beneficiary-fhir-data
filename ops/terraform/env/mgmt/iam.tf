@@ -21,7 +21,7 @@ resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   "Version": "2012-10-17"
 }
 POLICY
-  tags        = local.shared_tags
+
 }
 
 #TODO: Determine if the bfd-packages sees continued use
@@ -52,7 +52,7 @@ resource "aws_iam_policy" "packer_s3" {
   "Version": "2012-10-17"
 }
 POLICY
-  tags        = local.shared_tags
+
 }
 
 resource "aws_iam_policy" "code_artifact_rw" {
@@ -102,7 +102,7 @@ resource "aws_iam_policy" "code_artifact_rw" {
   "Version": "2012-10-17"
 }
 POLICY
-  tags        = local.shared_tags
+
 }
 
 resource "aws_iam_policy" "code_artifact_ro" {
@@ -167,7 +167,7 @@ resource "aws_iam_policy" "jenkins_volume" {
   "Version": "2012-10-17"
 }
 POLICY
-  tags        = local.shared_tags
+
 }
 
 resource "aws_iam_role" "cloudbees" {
@@ -196,7 +196,7 @@ POLICY
   max_session_duration = 3600
   name                 = "cloudbees-jenkins"
   path                 = "/"
-  tags                 = local.shared_tags
+
 }
 
 resource "aws_iam_group" "app_engineers" {
@@ -284,7 +284,7 @@ resource "aws_iam_policy" "s3_integration_tests" {
   "Version": "2012-10-17"
 }
 POLICY
-  tags   = local.shared_tags
+
 }
 
 resource "aws_iam_group_policy_attachment" "app_engineers_s3_integration_tests" {
@@ -341,7 +341,7 @@ resource "aws_iam_policy" "bfd_ssm_ro" {
   "Version": "2012-10-17"
 }
 POLICY
-  tags        = local.shared_tags
+
 }
 
 resource "aws_iam_group_policy_attachment" "app_engineers_bfd_ssm_ro" {

@@ -77,5 +77,6 @@
   {"alias":"client_dpc_local","certificate":"files/client_data_server_dpc_local_certificate.pem"},
   {"alias":"client_ab2d_dev","certificate":"files/client_data_server_ab2d_dev_certificate.pem"},
   {"alias":"client_ab2d_sbx","certificate":"files/client_data_server_ab2d_sbx_certificate.pem"},
-  {"alias":"client_ab2d_imp","certificate":"files/client_data_server_ab2d_imp_certificate.pem"}
+  {"alias":"client_ab2d_imp","certificate":"files/client_data_server_ab2d_imp_certificate.pem"},
+  {"alias":"client_act_pentest_sbx","certificate":"files/client_data_server_act_pentest_certificate.pem"}
   ]

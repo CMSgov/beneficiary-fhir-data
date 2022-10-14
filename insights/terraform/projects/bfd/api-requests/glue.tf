@@ -1319,6 +1319,11 @@ module "glue-table-api-requests" {
       "name"    = "mdc_jpa_query_eobs_by_bene_id_snf_record_count",
       "type"    = "string",
       "comment" = ""
+    },
+    {
+      "name"    = "mdc_resources_returned_count",
+      "type"    = "string",
+      "comment" = ""
     }
   ]
 }

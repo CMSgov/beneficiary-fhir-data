@@ -25,7 +25,8 @@
       ],
       "name": [
         {
-          "family": "S.",
+          "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+          "family": "SMITH",
           "given": [
             "J.",
             "D."
@@ -63,7 +64,7 @@
           }
         ]
       },
-      "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+      "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
       "value": "654321"
     }
   ],
