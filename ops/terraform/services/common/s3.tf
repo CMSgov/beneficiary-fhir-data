@@ -2,13 +2,10 @@ resource "aws_s3_bucket" "this" {
   bucket        = local.is_ephemeral_env ? null : local.admin_bucket
   bucket_prefix = local.is_ephemeral_env ? "bfd-${local.env}-${local.legacy_service}" : null
 
-  tags = merge(
-    local.shared_tags,
-    {
-      Layer = local.layer,
-      role  = local.legacy_service
-    }
-  )
+  tags = {
+    Layer = local.layer,
+    role  = local.legacy_service
+  }
 }
 
 # block public access to the bucket
@@ -35,13 +32,13 @@ resource "aws_s3_bucket_logging" "this" {
   # TODO: Make this work better for ephemeral environments, etc
   count = local.is_ephemeral_env ? 0 : 1
 
-  bucket                = aws_s3_bucket.this.id
+  bucket = aws_s3_bucket.this.id
 
   # TODO: consider adding this...
   # expected_bucket_owner = local.account_id
 
-  target_bucket         = local.logging_bucket
-  target_prefix         = "${local.legacy_service}_s3_access_logs/"
+  target_bucket = local.logging_bucket
+  target_prefix = "${local.legacy_service}_s3_access_logs/"
 }
 
 resource "aws_s3_bucket_acl" "this" {
@@ -51,10 +48,10 @@ resource "aws_s3_bucket_acl" "this" {
 
 resource "aws_s3_bucket" "logging" {
   bucket = local.logging_bucket
-  tags = merge(local.shared_tags, {
+  tags = {
     Layer = local.layer
     role  = "logs"
-  })
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
