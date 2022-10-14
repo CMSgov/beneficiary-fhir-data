@@ -34,7 +34,7 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaMcsClaim.class,
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
-          List.of(RdaMcsClaim.Fields.idrHdrToDateOfSvc),
+          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc),
           McsClaimTransformerV2::transform);
 
   /** Immutable list of all possible instances of this class. */

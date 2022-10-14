@@ -3,17 +3,20 @@ locals {
   env              = terraform.workspace
   layer            = "data"
   established_envs = ["test", "prod-sbx", "prod"]
+  create_etl_user  = local.env == "prod" || var.force_etl_user_creation
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
   service        = "pipeline"
   legacy_service = "etl"
 
-  shared_tags = {
-    Environment = local.env
-    application = "bfd"
-    business    = "oeda"
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/pipeline"
   }
 
   # NOTE: nonsensitive service-oriented and common config
@@ -77,32 +80,29 @@ resource "aws_instance" "this" {
   secondary_private_ips                = []
   source_dest_check                    = true
   subnet_id                            = local.subnet_id
-  tags = merge(
-    local.shared_tags,
-    {
-      Layer    = local.layer
-      Name     = "bfd-${local.env}-${local.legacy_service}"
-      role     = local.legacy_service
-      snapshot = "true"
-    }
-  )
+  tags = {
+    Layer    = local.layer
+    Name     = "bfd-${local.env}-${local.legacy_service}"
+    role     = local.legacy_service
+    snapshot = true
+  }
 
   tenancy = "default"
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    account_id       = local.account_id
-    env              = local.env
-    pipeline_bucket  = aws_s3_bucket.this.bucket
-    writer_endpoint  = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
+    account_id      = local.account_id
+    env             = local.env
+    pipeline_bucket = aws_s3_bucket.this.bucket
+    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
   })
 
   volume_tags = merge(
-    local.shared_tags,
+    local.default_tags,
     {
       Layer    = local.layer
       Name     = "bfd-${local.env}-${local.legacy_service}"
       role     = local.legacy_service
-      snapshot = "true" # are we sure?
+      snapshot = true
     }
   )
 

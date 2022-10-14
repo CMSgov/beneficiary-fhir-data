@@ -1,15 +1,11 @@
-# TODO add retention policy
 resource "aws_s3_bucket" "this" {
   bucket        = local.is_ephemeral_env ? null : local.pipeline_bucket
   bucket_prefix = local.is_ephemeral_env ? "bfd-${local.env}-${local.legacy_service}" : null
 
-  tags = merge(
-    local.shared_tags,
-    {
-      Layer = local.layer,
-      role  = local.legacy_service
-    }
-  )
+  tags = {
+    Layer = local.layer,
+    role  = local.legacy_service
+  }
 }
 
 # block public access to the bucket

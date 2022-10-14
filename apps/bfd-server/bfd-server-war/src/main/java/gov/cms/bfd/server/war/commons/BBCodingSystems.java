@@ -1,24 +1,13 @@
 package gov.cms.bfd.server.war.commons;
 
+/** Collection of BlueButton related coding systems */
 public class BBCodingSystems {
 
   public static final String BB_BASE_URL = "https://bluebutton.cms.gov/resources";
 
-  public static final String CLM_FACILITY_TYPE_CODE = BB_BASE_URL + "/variables/clm_fac_type_cd";
-
-  public static final String CLM_FREQ_CODE = BB_BASE_URL + "/variables/clm_freq_cd";
-
-  public static final String CLM_SERVICE_CLSFCTN_TYPE_CODE =
-      BB_BASE_URL + "/variables/clm_srvc_clsfctn_type_cd";
-
-  public static final String CLM_POA_IND = BB_BASE_URL + "/variables/clm_poa_ind_sw1";
-
-  public static final String HCPCS = BB_BASE_URL + "/codesystem/hcpcs";
-
-  public static final String PROVIDER_NUM = BB_BASE_URL + "/variables/prvdr_num";
-
   private BBCodingSystems() {}
 
+  /** FISS targeted BlueButton coding systems */
   public static class FISS {
 
     private static final String FISS_BASE = BB_BASE_URL + "/variables/fiss";
@@ -33,9 +22,22 @@ public class BBCodingSystems {
 
     public static final String TAX_NUM = FISS_BASE + "/fed-tax-nb";
 
+    public static final String DCN = FISS_BASE + "/dcn";
+
+    public static final String SERV_TYP_CD = FISS_BASE + "/serv-typ-cd";
+
+    public static final String FREQ_CD = FISS_BASE + "/freq-cd";
+
+    public static final String MEDA_PROV_6 = FISS_BASE + "/meda-prov-6";
+
+    public static final String LOB_CD = FISS_BASE + "/lob-cd";
+
+    public static final String DIAG_POA_IND = FISS_BASE + "/diag-poa-ind";
+
     private FISS() {}
   }
 
+  /** MCS targeted BlueButton coding systems */
   public static class MCS {
 
     private static final String MCS_BASE = BB_BASE_URL + "/variables/mcs";
@@ -48,11 +50,13 @@ public class BBCodingSystems {
 
     public static final String CLAIM_RECEIPT_DATE = MCS_BASE + "/claim-receipt-date";
 
-    public static final String CLM_TYPE = MCS_BASE + "/clm-type";
+    public static final String CLAIM_TYPE = MCS_BASE + "/claim-type";
 
     public static final String STATUS_CODE = MCS_BASE + "/status-code";
 
     public static final String STATUS_DATE = MCS_BASE + "/status-date";
+
+    public static final String ICN = MCS_BASE + "/icn";
 
     private MCS() {}
   }
