@@ -5,11 +5,15 @@ locals {
   kms_key_id              = data.aws_kms_key.state.arn
   legacy_kms_key_id       = data.aws_kms_key.legacy.arn
   cloudtrail_logs_bucket  = "bfd-cloudtrail-logs"
-}
 
-provider "aws" {
-  version = "~> 4"
-  region  = "us-east-1"
+  default_tags = {
+    Environment    = "global"
+    application    = "bfd"
+    business       = "oeda"
+    stack          = "global"
+    Terraform      = true
+    tf_module_root = "ops/terraform/env/global/s3"
+  }
 }
 
 data "aws_caller_identity" "current" {}
