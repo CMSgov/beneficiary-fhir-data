@@ -49,3 +49,7 @@ ignore_list:
       error_patterns:
         - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
         - ".*ReferralRequest\\.intent.* minimum required.*"                             # Missing field (8 errors)
+    # V2 specific validation issues
+    - file_pattern: .*/v2/.*\.json
+      error_patterns:
+        - ".*ReferralRequest\\.intent.* minimum required.*"
