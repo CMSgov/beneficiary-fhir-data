@@ -33,32 +33,6 @@ Mitre S3 bucket
 mitre_synthea_bucket = "bfd-synthea"
 
 '''
-list of proprietary Mitre mapping files that will be downloaded;
-needed by Synthea to generate synthetic data.
-'''
-code_map_files = [
-    'betos_code_map.json',
-    'condition_code_map.json',
-    'dme_code_map.json',
-    'drg_code_map.json',
-    'hha_rev_cntr_code_map.json',
-    'hcpcs_code_map.json',
-    'medication_code_map.json',
-    'snf_pdpm_code_map.json',
-    'snf_pps_code_map.json',
-    'snf_rev_cntr_code_map.json',
-    'external_codes.csv'
-    ]
-
-'''
-Mitre shell script files that need to be downloaded; used to generated synthetic data.
-'''
-code_script_files = [
-    'national_bfd.sh',
-    'national_bfd_v2.sh'
-    ]
-
-'''
 Function to download proprietary Mitre mapping files from an S3 bucket; the files
 are necessary to generate synthetic data. The mapping filenames are listed in an
 array of filenames so this function loops over names in the code_map_files array.
@@ -68,6 +42,24 @@ Param: target_dir : unix filesystem directory where downloaded S3 file(s) are wr
 Raises a python exception if failure to download file.
 '''
 def download_synthea_files(target_dir):
+    '''
+    list of proprietary Mitre mapping files that will be downloaded;
+    needed by Synthea to generate synthetic data.
+    '''
+    code_map_files = [
+        'betos_code_map.json',
+        'condition_code_map.json',
+        'dme_code_map.json',
+        'drg_code_map.json',
+        'hha_rev_cntr_code_map.json',
+        'hcpcs_code_map.json',
+        'medication_code_map.json',
+        'snf_pdpm_code_map.json',
+        'snf_pps_code_map.json',
+        'snf_rev_cntr_code_map.json',
+        'external_codes.csv'
+        ]
+
     for fn in code_map_files:
         output_fn = target_dir + fn
         try:
@@ -90,6 +82,14 @@ Param: target_dir : unix filesystem directory where downloaded S3 file(s) are wr
 Raises a python exception if failure to download file.
 '''
 def download_synthea_scripts(target_dir):
+    '''
+    Mitre shell script files that need to be downloaded; used to generated synthetic data.
+    '''
+    code_script_files = [
+        'national_bfd.sh',
+        'national_bfd_v2.sh'
+        ]
+
     for fn in code_script_files:
         output_fn = target_dir + fn
         try:
