@@ -127,8 +127,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * works as expected for a {@link CarrierClaim}lines -derived {@link ExplanationOfBenefit} that
+   * does exist in the DB. Outputs to make sure CareTeamComponent entries and their extensions are
+   * not duplicated when there are several Carrier Claim Lines associated with a claim.
    *
    * @throws FHIRException (indicates test failure)
    */

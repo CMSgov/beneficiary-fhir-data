@@ -146,13 +146,13 @@ final class CarrierClaimTransformer {
             TransformerUtils.createCodeableConcept(
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
-        boolean matchingExtension =
-            TransformerUtils.careTeamMatchingExtensions(
+        boolean performingHasMatchingExtension =
+            TransformerUtils.careTeamHasMatchingExtension(
                 performingCareTeamMember,
                 TransformerUtils.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
                 String.valueOf(claimLine.getProviderTypeCode()));
 
-        if (!matchingExtension) {
+        if (!performingHasMatchingExtension) {
           // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
           performingCareTeamMember.addExtension(
               TransformerUtils.createExtensionCoding(
@@ -161,15 +161,15 @@ final class CarrierClaimTransformer {
                   claimLine.getProviderTypeCode()));
         }
 
-        matchingExtension =
+        performingHasMatchingExtension =
             (claimLine.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtils.careTeamMatchingExtensions(
+                ? TransformerUtils.careTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
                     String.valueOf(claimLine.getProviderParticipatingIndCode().get()))
                 : false;
 
-        if (!matchingExtension) {
+        if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(
               TransformerUtils.createExtensionCoding(
                   eob,
@@ -181,13 +181,13 @@ final class CarrierClaimTransformer {
         // addExtensionReference
         if (claimLine.getOrganizationNpi().isPresent()) {
 
-          matchingExtension =
-              TransformerUtils.careTeamMatchingExtensions(
+          performingHasMatchingExtension =
+              TransformerUtils.careTeamHasMatchingExtension(
                   performingCareTeamMember,
                   TransformerConstants.CODING_NPI_US,
                   String.valueOf(claimLine.getOrganizationNpi().get()));
 
-          if (!matchingExtension) {
+          if (!performingHasMatchingExtension) {
             TransformerUtils.addExtensionCoding(
                 performingCareTeamMember,
                 TransformerConstants.CODING_NPI_US,

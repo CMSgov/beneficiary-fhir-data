@@ -1948,9 +1948,10 @@ public final class TransformerUtilsV2 {
             .filter(
                 ctc ->
                     ctc.getProvider().getIdentifier().getType().getCoding().stream()
-                            .anyMatch(c -> c.getSystem().equalsIgnoreCase(type.getSystem()))
-                        && ctc.getProvider().getIdentifier().getType().getCoding().stream()
-                            .anyMatch(c -> c.getCode().equalsIgnoreCase(type.name()))
+                            .anyMatch(
+                                c ->
+                                    c.getSystem().equalsIgnoreCase(type.getSystem())
+                                        && c.getCode().equalsIgnoreCase(type.name()))
                         && practitionerIdValue.equalsIgnoreCase(
                             ctc.getProvider().getIdentifier().getValue()))
             .filter(
@@ -3681,14 +3682,15 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Retrieves the NPI display value from an NPI code look up file
+   * Checks to see if there is a extension that already exists in the careteamcomponent so a
+   * duplicate entry for extension is not added
    *
    * @param careTeamComponent - Careteam component
-   * @param referenceUrl - the reference url to compare
-   * @param codeValue - the code value to compare
-   * @return boolean whether it was found or not
+   * @param referenceUrl the {@link String} is the reference url to compare
+   * @param codeValue - the {@link String} is the code value to compare
+   * @return {@link Boolean} whether it was found or not
    */
-  public static boolean careTeamMatchingExtensions(
+  public static boolean careTeamHasMatchingExtension(
       CareTeamComponent careTeamComponent, String referenceUrl, String codeValue) {
 
     if (!Strings.isNullOrEmpty(referenceUrl)

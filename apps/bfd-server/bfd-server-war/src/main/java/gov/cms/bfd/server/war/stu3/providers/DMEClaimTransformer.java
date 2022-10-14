@@ -176,15 +176,15 @@ final class DMEClaimTransformer {
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        boolean matchingExtension =
+        boolean performingHasMatchingExtension =
             (claimLine.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtils.careTeamMatchingExtensions(
+                ? TransformerUtils.careTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
                     String.valueOf(claimLine.getProviderParticipatingIndCode()))
                 : false;
 
-        if (!matchingExtension) {
+        if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(
               TransformerUtils.createExtensionCoding(
                   eob,

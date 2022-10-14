@@ -933,9 +933,12 @@ public final class EndpointJsonResponseComparatorIT {
   }
 
   /**
+   * This is a integration tests to make sure CareTeamComponent entries and their extensions are not
+   * duplicated when there are multiple carrier claim lines present
+   *
    * @return the results of the {@link
    *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     Carrier claims, with the {@link
+   *     multiple Carrier claims lines, with the {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>false
    *     </code>
    */

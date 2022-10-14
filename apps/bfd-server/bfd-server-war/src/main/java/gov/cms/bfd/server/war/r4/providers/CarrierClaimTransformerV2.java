@@ -207,13 +207,13 @@ public class CarrierClaimTransformerV2 {
                 TransformerUtilsV2.createCodeableConcept(
                     eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-        boolean matchingExtension =
-            TransformerUtilsV2.careTeamMatchingExtensions(
+        boolean performingHasMatchingExtension =
+            TransformerUtilsV2.careTeamHasMatchingExtension(
                 performing.get(),
                 TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
                 String.valueOf(line.getProviderTypeCode()));
 
-        if (!matchingExtension) {
+        if (!performingHasMatchingExtension) {
           // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
           performing
               .get()
@@ -224,15 +224,15 @@ public class CarrierClaimTransformerV2 {
                       line.getProviderTypeCode()));
         }
 
-        matchingExtension =
+        performingHasMatchingExtension =
             (line.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtilsV2.careTeamMatchingExtensions(
+                ? TransformerUtilsV2.careTeamHasMatchingExtension(
                     performing.get(),
                     TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
                     String.valueOf(line.getProviderParticipatingIndCode().get()))
                 : false;
 
-        if (!matchingExtension) {
+        if (!performingHasMatchingExtension) {
           performing
               .get()
               .addExtension(
