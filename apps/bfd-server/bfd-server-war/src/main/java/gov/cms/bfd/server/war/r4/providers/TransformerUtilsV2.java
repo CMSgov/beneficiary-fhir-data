@@ -1951,7 +1951,7 @@ public final class TransformerUtilsV2 {
                             .anyMatch(
                                 c ->
                                     c.getSystem().equalsIgnoreCase(type.getSystem())
-                                        && c.getCode().equalsIgnoreCase(type.name()))
+                                        && c.getCode().equalsIgnoreCase(type.toCode()))
                         && practitionerIdValue.equalsIgnoreCase(
                             ctc.getProvider().getIdentifier().getValue()))
             .filter(
