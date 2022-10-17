@@ -89,7 +89,7 @@ data.
         metadata.timestamp as raw_timestamp
       from "bfd-insights-bfd-test"."bfd_insights_bfd_test_server_regression"
       where
-        metadata.hash = 'ae770dea971f3be467a42717654a42c5c26c7da394f690c3db23e9aa4c4e2f92'
+        metadata.hash = '85d93b342368c8f57f8e78ea6c56979ad5e32901776aaeaffdd8467e4cee1df9'
         and contains(metadata.tags, 'master')
       order by metadata.timestamp asc
       ```
@@ -179,7 +179,7 @@ data.
         metadata.timestamp as raw_timestamp
       from "bfd-insights-bfd-prod"."bfd_insights_bfd_prod_server_regression"
       where
-        metadata.hash = 'b0971964769c07457547f8a2084dd9014566da3d7a366d42e5dce01b4f12148e'
+        metadata.hash = '727a44e865e717728ac409e8e23a7e13ce73a155874f3832a0caef1fde17e95c'
         and contains(metadata.tags, 'master')
       order by metadata.timestamp asc
       ```
