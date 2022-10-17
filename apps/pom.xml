@@ -88,7 +88,7 @@
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
-		<jackson.version>2.13.4.2</jackson.version>
+		<jackson-databind.version>2.13.4.2</jackson-databind.version>
 		<jackson-datatype-jdk8.version>2.13.4</jackson-datatype-jdk8.version>
 		<jackson-dataformat-yaml.version>2.13.4</jackson-dataformat-yaml.version>
 		<jackson-datatype-jsr310.version>2.13.4</jackson-datatype-jsr310.version>
