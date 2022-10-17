@@ -666,6 +666,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare4.equalsDeep(member4));
   }
 
+  /**
+   * CareTeam list
+   *
+   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
+   * are added in the same order. This means we can look them up by sequence number. There should be
+   * a total of 4 unique care team members.
+   */
   @Test
   public void shouldHaveFourCareTeamEntries() {
     List<Object> parsedRecords =

@@ -3699,14 +3699,12 @@ public final class TransformerUtilsV2 {
       List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
 
       for (Extension ext : extensions) {
-        Coding coding = null;
-
         if (ext.getValue() instanceof Coding) {
-          coding = (Coding) ext.getValue();
-        }
+          Coding coding = (Coding) ext.getValue();
 
-        if (coding != null && coding.getCode().equals(codeValue)) {
-          return true;
+          if (coding != null && coding.getCode().equals(codeValue)) {
+            return true;
+          }
         }
       }
     }

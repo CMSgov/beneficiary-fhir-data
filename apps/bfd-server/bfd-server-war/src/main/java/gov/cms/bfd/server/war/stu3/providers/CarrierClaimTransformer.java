@@ -177,7 +177,6 @@ final class CarrierClaimTransformer {
                   claimLine.getProviderParticipatingIndCode()));
         }
 
-        // FIXME: Following addExtensionCoding should be a new method
         // addExtensionReference
         if (claimLine.getOrganizationNpi().isPresent()) {
 

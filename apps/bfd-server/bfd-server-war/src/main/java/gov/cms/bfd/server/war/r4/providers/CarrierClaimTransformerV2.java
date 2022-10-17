@@ -233,6 +233,7 @@ public class CarrierClaimTransformerV2 {
                 : false;
 
         if (!performingHasMatchingExtension) {
+          // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
           performing
               .get()
               .addExtension(
