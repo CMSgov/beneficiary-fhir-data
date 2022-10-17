@@ -73,13 +73,13 @@
             <!-- Adds java-8 types to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-datatype-jdk8.version}</version>
         </dependency>
         <dependency>
             <!-- Adds java-8 date/time classes to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
 
         <dependency>
