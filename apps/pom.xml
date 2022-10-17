@@ -85,7 +85,12 @@
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.0</junit.version>
+
+		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
+			when vulnerabilities or other fixes affect some but not all components -->
 		<jackson.version>2.13.4.2</jackson.version>
+		<jackson-dataformat-yaml.version>2.13.4</jackson-dataformat-yaml.version>
+
 		<mockito.version>4.8.0</mockito.version>
 		<postgresql.version>42.5.0</postgresql.version>
 		<hsqldb.version>2.7.0</hsqldb.version>
