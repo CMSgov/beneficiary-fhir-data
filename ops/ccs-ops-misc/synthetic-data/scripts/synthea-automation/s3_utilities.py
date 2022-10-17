@@ -311,6 +311,43 @@ def upload_synthea_results(synthea_output_dir, s3_bucket):
     it will begin processing.
     '''
     upload_manifest_file(synthea_output_dir, s3_bucket, s3_folder)
+    
+'''
+Function to upload a ready-to-go synthea folder to the BFD ETL S3 bucket folder. 
+
+Param: folder_dir : unix filesystem directory to upload to S3.
+Param: s3_bucket : BFD S3 Bucket that the folder and files will be uploaded to.
+
+Raises a python exception if failure to upload file.
+'''
+def upload_synthea_result_folder(folder_dir, s3_bucket):
+    
+    print(f"Folder dir: {folder_dir}")
+    folder_name = folder_dir.split('/')[-2]
+    
+    '''
+    using the timestamp just derived, upload all RIF (.csv) files to the S3 bucket/folder
+    '''
+    s3_folder = "Synthetic/Incoming/" + folder_name
+    print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}");
+    upload_rif_files(folder_dir, s3_bucket, s3_folder)
+
+    '''
+    now upload the manifest.xml file to the S3 bucket/folder; this is done last after
+    all RIF files are uploaded because once the ETL process sees an /Incoming manifest
+    it will begin processing.
+    '''
+    manifest_fn = folder_dir + "0_manifest.xml"
+    destination_fn = s3_folder + "/0_manifest.xml"
+    print(f"S3 upload: {manifest_fn}, bucket: {s3_bucket}, remote_fn: {destination_fn}")
+    try:
+        s3_client.upload_file(manifest_fn, s3_bucket, destination_fn)
+    except ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print(f"The S3 object does not exist: {fn}")
+        raise e
+    except Exception as e:
+        raise Exception( "Unexpected error in upload_manifest_file: " + e.__str__())
 
 '''
 Function to check if synthea generated .CSV files were loaded into db as determined
@@ -392,6 +429,8 @@ def main(args):
             upload_characteristics_file(target_dir)
         case "upload_synthea_results":
             upload_synthea_results(target_dir, bfd_s3_bucket_or_dir)
+        case "upload_synthea_result_folder":
+            upload_synthea_result_folder(target_dir, bfd_s3_bucket_or_dir)
         case "wait_for_manifest_done":
             wait_for_manifest_done(target_dir, bfd_s3_bucket_or_dir)
         case _:
