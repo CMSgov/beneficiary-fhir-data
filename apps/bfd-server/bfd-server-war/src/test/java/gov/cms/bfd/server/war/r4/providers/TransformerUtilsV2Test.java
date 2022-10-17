@@ -298,7 +298,7 @@ public class TransformerUtilsV2Test {
     CareTeamComponent careTeamComponent = new CareTeamComponent();
     careTeamComponent.addExtension(extension);
 
-    returnResult =
+    boolean returnResult =
         TransformerUtilsV2.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, null);
 
     assertFalse(returnResult);
