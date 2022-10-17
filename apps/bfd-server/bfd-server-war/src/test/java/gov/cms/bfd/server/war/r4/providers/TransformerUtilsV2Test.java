@@ -216,10 +216,33 @@ public class TransformerUtilsV2Test {
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
    * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a reference url is null or empty.
+   * returns false when a reference url is null.
    */
   @Test
-  public void careTeamHasMatchingExtensionReturnsFalseWithNullOrEmptyReferenceUrl() {
+  public void careTeamHasMatchingExtensionReturnsFalseWithNullReferenceUrl() {
+    String referenceUrl = null;
+    String codeValue = "code";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtilsV2.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
+
+    assertFalse(returnResult);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
+   * returns false when a reference url is empty.
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsFalseWithEmptyReferenceUrl() {
     String referenceUrl = "";
     String codeValue = "code";
     Coding coding = new Coding();
@@ -233,22 +256,18 @@ public class TransformerUtilsV2Test {
         TransformerUtilsV2.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
 
     assertFalse(returnResult);
-
-    TransformerUtilsV2.careTeamHasMatchingExtension(careTeamComponent, null, codeValue);
-
-    assertFalse(returnResult);
   }
 
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
    * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a code valueis null or empty.
+   * returns false when a code value is null.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithNullOrEmptyCodeValue() {
     String referenceUrl = "http://test.url";
-    String codeValue = "";
+    String codeValue = null;
     Coding coding = new Coding();
     coding.setCode(codeValue);
     Extension extension = new Extension(referenceUrl);
@@ -260,6 +279,24 @@ public class TransformerUtilsV2Test {
         TransformerUtilsV2.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
 
     assertFalse(returnResult);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
+   * returns false when a code value is empty.
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsFalseWithEmptyCodeValue() {
+    String referenceUrl = "http://test.url";
+    String codeValue = "";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
 
     returnResult =
         TransformerUtilsV2.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, null);
