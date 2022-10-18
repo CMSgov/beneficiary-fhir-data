@@ -16,32 +16,44 @@ locals {
     all_error_rate                      = "http-requests/count/500-responses"
   }
 
-  partner_regexs = {
-    all  = ".*"
-    bb   = ".*BlueButton.*"
-    bcda = ".*bcda.*"
-    dpc  = ".*dpc.*"
-    ab2d = ".*ab2d.*"
-    test = ".*data-server-client-test.*"
+  partners = {
+    bulk = {
+      ab2d = {
+        timeout_ms = (300 * 1000) / 2
+        client_ssl_regex = {
+          test     = ".*ab2d.*"
+          prod_sbx = ".*ab2d.*"
+          prod     = ".*ab2d.*"
+        }
+      }
+      bcda = {
+        timeout_ms = (45 * 1000) / 2
+        client_ssl_regex = {
+          test     = ".*bcda.*"
+          prod_sbx = ".*bcda.*"
+          prod     = ".*bcda.*"
+        }
+      }
+      dpc = {
+        timeout_ms = (30 * 1000) / 2
+        client_ssl_regex = {
+          test     = ".*dpc.*"
+          prod_sbx = ".*dpc.*"
+          prod     = ".*dpc.*"
+        }
+      }
+    }
+    non_bulk = {
+      bb = {
+        timeout_ms = (120 * 1000) / 2
+        client_ssl_regex = {
+          test     = ".*BlueButton.*"
+          prod_sbx = ".*BlueButton.*"
+          prod     = ".*BlueButton.*"
+        }
+      }
+    }
   }
-
-  bulk_partners = [
-    "bcda",
-    "dpc",
-    "abd2d"
-  ]
-  non_bulk_partners = [
-    "bb"
-  ]
-
-  partner_timeouts_ms = {
-    ab2d = (300 * 1000) / 2
-    bcda = (45 * 1000) / 2
-    dpc  = (30 * 1000) / 2
-    bb   = (120 * 1000) / 2
-  }
-
-  ext_stat_99p = "p99"
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
