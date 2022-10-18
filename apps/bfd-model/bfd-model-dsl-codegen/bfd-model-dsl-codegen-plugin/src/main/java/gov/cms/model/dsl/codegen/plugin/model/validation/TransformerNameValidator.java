@@ -11,8 +11,9 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class TransformerNameValidator implements ConstraintValidator<TransformerName, String> {
   /**
-   * Searches for a {@link FieldTransformer} with the given name. Returns true if one was found, or
-   * false otherwise.
+   * Validate that the transformer name can be mapped to a {@link FieldTransformer} using the {@link
+   * TransformerUtil#getFieldTransformer} method. Null values are treated as valid so that the
+   * annotation can be applied to optional fields.
    *
    * @param value object to validate
    * @param context context in which the constraint is evaluated

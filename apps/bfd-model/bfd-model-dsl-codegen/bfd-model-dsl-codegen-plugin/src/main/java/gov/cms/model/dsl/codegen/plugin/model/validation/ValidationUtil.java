@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
@@ -63,6 +64,7 @@ public class ValidationUtil {
                           ModelBean.describeBean(violation.getLeafBean()),
                           violation.getInvalidValue(),
                           violation.getMessage()))
+              .sorted()
               .collect(ImmutableList.toImmutableList());
       return new ValidationResult(mapping, errors);
     }
@@ -112,7 +114,8 @@ public class ValidationUtil {
    * Bean containing data needed by custom validators. Added to the validation context as payload
    * and then accessed by the validators using static accessor methods in this class.
    */
-  @Data
+  @AllArgsConstructor
+  @Getter
   private static class ValidationPayload {
     /** Used to look up other objects in the data model. */
     private final RootBean root;
@@ -123,7 +126,8 @@ public class ValidationUtil {
   }
 
   /** Bean containing a {@link MappingBean} and any associated validation error messages. */
-  @Data
+  @AllArgsConstructor
+  @Getter
   public static class ValidationResult {
     /** The mapping that was validated. */
     private final MappingBean mapping;

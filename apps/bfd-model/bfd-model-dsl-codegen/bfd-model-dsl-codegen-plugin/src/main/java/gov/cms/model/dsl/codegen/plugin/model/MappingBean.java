@@ -29,7 +29,7 @@ public class MappingBean implements ModelBean {
    * MappingBean#id} values.
    */
   public static final Comparator<MappingBean> IdComparator =
-      Comparator.comparing(MappingBean::getId);
+      Comparator.comparing(mapping -> Strings.nullToEmpty(mapping.getId()));
 
   /** Unique identifier for the mapping. */
   @NotNull @JavaName private String id;
@@ -74,7 +74,8 @@ public class MappingBean implements ModelBean {
   private List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();
 
   /** List of extra interfaces to add to the entity class. */
-  @NotNull @Singular private List<String> entityInterfaces = new ArrayList<>();
+  @NotNull @Singular
+  private List<@JavaName(type = JavaNameType.Compound) String> entityInterfaces = new ArrayList<>();
 
   /**
    * Finds the {@link EnumTypeBean} in this mapping with the given name and returns it.

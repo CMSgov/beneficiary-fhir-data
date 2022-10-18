@@ -225,13 +225,13 @@ public class TableBean implements ModelBean {
   @Builder
   public static class AdditionalFieldName {
     /** Name of the constant added to the {@code Fields} class. */
-    private String name;
+    @JavaName private String name;
 
     /**
      * Optional value to use instead of {@code name} as the value of the constant in the {@code
      * Fields} class.
      */
-    private String value;
+    @JavaName private String value;
 
     /**
      * Gets the value to use in the generated constant. Defaults to the same as {@link

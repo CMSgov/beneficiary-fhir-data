@@ -22,7 +22,7 @@ public class EnumExistsInSameMappingValidator
   public boolean isValid(String value, ConstraintValidatorContext context) {
     return value == null
         || ValidationUtil.getMappingBeanFromContext(context)
-            .flatMap(root -> root.getEnum(value))
+            .flatMap(mapping -> mapping.getEnum(value))
             .isPresent();
   }
 }

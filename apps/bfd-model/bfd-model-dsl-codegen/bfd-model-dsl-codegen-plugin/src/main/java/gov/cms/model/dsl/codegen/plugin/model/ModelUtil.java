@@ -13,11 +13,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /** Utility methods for use by and with the various model classes. */
 public class ModelUtil {
@@ -98,43 +94,21 @@ public class ModelUtil {
       throws IOException {
     final var file = new File(mappingPath);
     final var fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-    RootBean root;
     if (fileAttributes.isRegularFile()) {
-      root = objectMapper.readValue(file, RootBean.class);
-    } else if (!fileAttributes.isDirectory()) {
+      return objectMapper.readValue(file, RootBean.class);
+    }
+    if (!fileAttributes.isDirectory()) {
       throw new IOException("expected a file or directory: " + mappingPath);
-    } else {
-      root = new RootBean(new ArrayList<>());
-      var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
-      if (mappingFiles != null) {
-        for (File mappingFile : mappingFiles) {
-          root.addMappingsFrom(objectMapper.readValue(mappingFile, RootBean.class));
-        }
+    }
+
+    var combinedRoot = new RootBean(new ArrayList<>());
+    var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
+    if (mappingFiles != null) {
+      for (File mappingFile : mappingFiles) {
+        combinedRoot.addMappingsFrom(objectMapper.readValue(mappingFile, RootBean.class));
       }
     }
-
-    var duplicateIds = findDuplicateMappingIds(root);
-    if (duplicateIds.size() > 0) {
-      throw new IOException("multiple mappings have same id: " + duplicateIds);
-    }
-    return root;
-  }
-
-  /**
-   * Scan all {@link MappingBean}s in the given model and return a {@link List} of mapping ids that
-   * appear in more than one {@link MappingBean}. Duplicate detection uses case-insensitive
-   * comparison to catch potentially confusing cases where ids are the same except for case
-   * mismatch.
-   *
-   * @param root {@link RootBean} containing all {@link MappingBean}s to scan
-   * @return {@link List} or duplicate mapping ids
-   */
-  private static List<String> findDuplicateMappingIds(RootBean root) {
-    final Set<String> uniqueIds = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-    return root.getMappings().stream()
-        .map(MappingBean::getId)
-        .filter(id -> !uniqueIds.add(id))
-        .collect(Collectors.toList());
+    return combinedRoot;
   }
 
   /**

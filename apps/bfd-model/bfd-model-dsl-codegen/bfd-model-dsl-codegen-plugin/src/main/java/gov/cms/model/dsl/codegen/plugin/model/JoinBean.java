@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeName;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -79,7 +80,7 @@ public class JoinBean implements ModelBean {
    * Optional list of properties to generate for single-value joins to simplify access to fields in
    * the joined entity.
    */
-  @Singular private List<Property> properties = new ArrayList<>();
+  @Singular private List<@Valid Property> properties = new ArrayList<>();
 
   /**
    * Determine if the entity class name is valid.
