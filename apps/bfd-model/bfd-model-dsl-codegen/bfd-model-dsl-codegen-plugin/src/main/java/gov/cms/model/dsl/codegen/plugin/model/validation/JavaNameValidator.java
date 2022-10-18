@@ -21,7 +21,7 @@ public class JavaNameValidator implements ConstraintValidator<JavaName, String> 
 
   /**
    * Validate that a given string is a valid java identifier or class name string. Null values are
-   * treated as valid.
+   * treated as valid so that the annotation can be applied to optional fields.
    *
    * @param value string to validate
    * @param context context in which the constraint is evaluated
