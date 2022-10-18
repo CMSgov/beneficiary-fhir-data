@@ -16,54 +16,70 @@ locals {
   endpoint_patterns = { for name, pattern in local.endpoints : replace(name, "_", "-") => "$.mdc.http_access_request_uri = \"${pattern}\"" }
 
   client_ssl_pattern = "$.mdc.http_access_request_clientSSL_DN = \"*\""
-  dimensions = {
-    client_ssl = "$.mdc.http_access_request_clientSSL_DN"
+
+  ssl_dimensions = {
+    all_partners = null
+    by_partner = {
+      client_ssl = "$.mdc.http_access_request_clientSSL_DN"
+    }
   }
+
+  endpoint_filters_config = merge([
+    for endpoint_key, endpoint_pattern in local.endpoint_patterns : {
+      for filter_type, dimensions in local.ssl_dimensions : "${endpoint_key}_${filter_type}" => {
+        "resource_name"    = endpoint_key
+        "endpoint_pattern" = endpoint_pattern
+        "dimensions"       = dimensions
+      }
+    }
+  ]...)
 }
 
 # Count requests per endpoint with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count" {
-  for_each = local.endpoint_patterns
+  for_each = local.endpoint_filters_config
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/${each.key}"
+  name           = "bfd-${var.env}/bfd-server/http-requests/count/${each.value.resource_name}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{${each.value} && ",
+    "{${each.value.endpoint_pattern} && ",
     "${local.client_ssl_pattern}}",
   ])
 
   metric_transformation {
-    name       = "http-requests/count/${each.key}"
+    name       = "http-requests/count/${each.value.resource_name}"
     namespace  = local.namespace
     value      = "1"
-    dimensions = local.dimensions
+    dimensions = each.value.dimensions
   }
 }
 
 # Latency per endpoint with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
-  for_each = local.endpoint_patterns
+  for_each = local.endpoint_filters_config
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/${each.key}"
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/${each.value.resource_name}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{${each.value} && ",
+    "{${each.value.endpoint_pattern} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
   ])
 
   metric_transformation {
-    name       = "http-requests/latency/${each.key}"
+    name       = "http-requests/latency/${each.value.resource_name}"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
-    dimensions = local.dimensions
+    dimensions = each.value.dimensions
   }
 }
 
 # Count HTTP 5xxs with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" {
+  for_each = local.ssl_dimensions
+
   name           = "bfd-${var.env}/bfd-server/http-requests/count/500-responses"
   log_group_name = local.log_groups.access
 
@@ -75,12 +91,14 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" 
     name       = "http-requests/count/500-responses"
     namespace  = local.namespace
     value      = "1"
-    dimensions = local.dimensions
+    dimensions = each.value
   }
 }
 
 # Count HTTP non-2XXs with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_responses" {
+  for_each = local.ssl_dimensions
+
   name           = "bfd-${var.env}/bfd-server/http-requests/count/non-2xx-responses"
   log_group_name = local.log_groups.access
 
@@ -93,12 +111,14 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_respons
     name       = "http-requests/count/non-2xx-responses"
     namespace  = local.namespace
     value      = "1"
-    dimensions = local.dimensions
+    dimensions = each.value
   }
 }
 
 # Latency for Patient endpoints _not_ by contract (for SLOs) with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_by_contract" {
+  for_each = local.ssl_dimensions
+
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/patient-not-by-contract"
   log_group_name = local.log_groups.access
 
@@ -116,13 +136,15 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_b
     name       = "http-requests/latency/patient-not-by-contract"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
-    dimensions = local.dimensions
+    dimensions = each.value
   }
 }
 
 # Latency for Patient endpoints by contract with count = 4000 (for SLOs) with partner client SSL as
 # dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_by_contract_count_4000" {
+  for_each = local.ssl_dimensions
+
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/patient-by-contract-count-4000"
   log_group_name = local.log_groups.access
 
@@ -139,12 +161,14 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_by_co
     name       = "http-requests/latency/patient-by-contract-count-4000"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
-    dimensions = local.dimensions
+    dimensions = each.value
   }
 }
 
 # Latency per-KB for all EoB endpoints (for SLOs) with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all" {
+  for_each = local.ssl_dimensions
+
   name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/eob-all"
   log_group_name = local.log_groups.access
 
@@ -158,13 +182,15 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
     name       = "http-requests/latency-by-kb/eob-all"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_per_kb"
-    dimensions = local.dimensions
+    dimensions = each.value
   }
 }
 
 # Latency for all EoB endpoints with no resources returned (for SLOs) with partner client SSL as
 # dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_resources" {
+  for_each = local.ssl_dimensions
+
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/eob-all-no-resources"
   log_group_name = local.log_groups.access
 
@@ -179,7 +205,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_re
     name       = "http-requests/latency/eob-all-no-resources"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
-    dimensions = local.dimensions
+    dimensions = each.value
   }
 }
 
@@ -196,9 +222,9 @@ resource "aws_cloudwatch_log_metric_filter" "deprecated_http_requests_count_500"
   ])
 
   metric_transformation {
-    name       = "http-requests/count-500/all"
-    namespace  = local.namespace
-    value      = "1"
+    name          = "http-requests/count-500/all"
+    namespace     = local.namespace
+    value         = "1"
     default_value = "0"
   }
 }
@@ -217,9 +243,9 @@ resource "aws_cloudwatch_log_metric_filter" "deprecated_http_requests_latency_eo
   ])
 
   metric_transformation {
-    name       = "http-requests/latency/eobAll/all"
-    namespace  = local.namespace
-    value      = "$.mdc.http_access_response_duration_milliseconds"
+    name          = "http-requests/latency/eobAll/all"
+    namespace     = local.namespace
+    value         = "$.mdc.http_access_response_duration_milliseconds"
     default_value = null
   }
 }
