@@ -1,16 +1,14 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 locals {
-  shared_tags = {
-    Environment = local.env
-    Layer       = local.layer
-    Name        = "bfd-${local.env}-${local.service}"
-    application = "bfd"
-    business    = "oeda"
-    role        = local.service
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    Layer          = local.layer
+    Name           = "bfd-${local.env}-${local.service}"
+    application    = "bfd"
+    business       = "oeda"
+    role           = local.service
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/server/server-regression"
   }
 
   account_id = data.aws_caller_identity.current.account_id
@@ -41,7 +39,6 @@ locals {
 resource "aws_lambda_function" "this" {
   function_name = "bfd-${local.env}-${local.service}"
   description   = "Lambda to run the Locust regression suite against the ${local.env} BFD Server"
-  tags          = local.shared_tags
   kms_key_arn   = local.kms_key_arn
 
   image_uri    = local.docker_image_uri
@@ -83,7 +80,7 @@ resource "aws_sqs_queue" "pipeline_signal" {
 
 resource "aws_glue_crawler" "this" {
   name = "${local.insights_database}-${local.service}"
-  tags = merge(local.shared_tags, { Name = "${local.insights_database}-${local.service}", application = "bfd-insights" })
+  tags = { Name = "${local.insights_database}-${local.service}", application = "bfd-insights" }
 
   database_name = local.insights_database
 
@@ -119,7 +116,7 @@ resource "aws_lambda_permission" "allow_s3_glue_trigger" {
 resource "aws_lambda_function" "glue_trigger" {
   description   = "Triggers the bfd-${local.env}-${local.service} Glue Crawler to run when new statistics are uploaded to S3"
   function_name = "bfd-${local.env}-${local.service}-glue-trigger"
-  tags          = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}-glue-trigger" })
+  tags          = { Name = "bfd-${local.env}-${local.service}-glue-trigger" }
   kms_key_arn   = local.kms_key_arn
 
   filename         = data.archive_file.glue_trigger.output_path

@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -1524,8 +1525,14 @@ public final class TransformerUtilsV2 {
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
+
+      // Add number of paginated resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resources);
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(bundle.getTotal());
     }
 
     /*
@@ -1586,6 +1593,10 @@ public final class TransformerUtilsV2 {
             transactionTime.isAfter(maxBundleDate)
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
+
+    // Add number of resources to MDC logs
+    LoggingUtils.logResourceCountToMdc(bundle.getTotal());
+
     return bundle;
   }
 
