@@ -66,9 +66,12 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
   statistic           = "Average"
   threshold           = "260"
 
-  alarm_description = "/v*/fhir/Coverage response mean 15 minute latency exceeded ALERT SLO threshold of 260ms for ${local.app} in ${var.env} environment"
+  alarm_description = join("", [
+    "/v*/fhir/Coverage response mean 15 minute latency exceeded ALERT SLO threshold of 260ms for ",
+    "${local.app} in ${var.env} environment"
+  ])
 
-  metric_name = "${local.metrics.coverage_latency}/all"
+  metric_name = local.metrics.coverage_latency
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
@@ -86,9 +89,12 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
   statistic           = "Average"
   threshold           = "180"
 
-  alarm_description = "/v*/fhir/Coverage response mean 15 minute latency exceeded WARNING SLO threshold of 180ms for ${local.app} in ${var.env} environment"
+  alarm_description = join("", [
+    "/v*/fhir/Coverage response mean 15 minute latency exceeded WARNING SLO threshold of 180ms ",
+    "for ${local.app} in ${var.env} environment"
+  ])
 
-  metric_name = "${local.metrics.coverage_latency}/all"
+  metric_name = local.metrics.coverage_latency
   namespace   = local.namespace
 
   alarm_actions = local.warning_arn
@@ -99,23 +105,31 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert" {
-  for_each = toset(local.bulk_partners)
-
+  # Only create per-partner alarms for partners that have dimensioned metrics in the current
+  # environment. This set intersection returns a set of partners that have corresponding metrics
+  for_each = setintersection(
+    toset(keys(local.partners.bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
+  ) 
+  
   alarm_name          = "${local.app}-${var.env}-slo-coverage-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
-  threshold           = "${local.partner_timeouts_ms[each.key]}"
+  extended_statistic  = "p99"
+  threshold           = local.partners.bulk[each.key].timeout_ms
 
   alarm_description = join("", [
     "/v*/fhir/Coverage response 99% 15 minute BULK latency exceeded ALERT SLO threshold of ",
-    "${local.partner_timeouts_ms[each.key]} ms for partner ${each.key} for ${local.app} ",
-    "in ${var.env} environment"
+    "${local.partners.bulk[each.key].timeout_ms} ms for partner ${each.key} for ${local.app} in ",
+    "${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.coverage_latency}/${each.key}"
+  metric_name = local.metrics.coverage_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["coverage_latency"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -125,13 +139,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert"
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warning" {
-  for_each = toset(local.bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-bulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "1440"
 
   alarm_description = join("", [
@@ -139,8 +156,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warnin
     "ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.coverage_latency}/${each.key}"
+  metric_name = local.metrics.coverage_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["coverage_latency"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -150,13 +170,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warnin
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_alert" {
-  for_each = toset(local.non_bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.non_bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-nonbulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "2050"
 
   alarm_description = join("", [
@@ -164,8 +187,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_ale
     "2050 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.coverage_latency}/${each.key}"
+  metric_name = local.metrics.coverage_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["coverage_latency"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -175,13 +201,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_ale
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_warning" {
-  for_each = toset(local.non_bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.non_bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-nonbulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "1440"
 
   alarm_description = join("", [
@@ -189,8 +218,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_war
     "1440 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.coverage_latency}/${each.key}"
+  metric_name = local.metrics.coverage_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["coverage_latency"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -212,7 +244,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_al
     "exceeded ALERT SLO threshold of 440 ms for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_no_resources_latency}/all"
+  metric_name = local.metrics.eob_no_resources_latency
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
@@ -235,7 +267,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_wa
     "exceeded WARNING SLO threshold of 310 ms for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_no_resources_latency}/all"
+  metric_name = local.metrics.eob_no_resources_latency
   namespace   = local.namespace
 
   alarm_actions = local.warning_arn
@@ -258,7 +290,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_latency_per_kb_mean_15m_alert" {
     "threshold of 450 ms/KB for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_latency_by_kb}/all"
+  metric_name = local.metrics.eob_latency_by_kb
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
@@ -281,7 +313,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_latency_per_kb_mean_15m_warning"
     "threshold of 320 ms/KB for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_latency_by_kb}/all"
+  metric_name = local.metrics.eob_latency_by_kb
   namespace   = local.namespace
 
   alarm_actions = local.warning_arn
@@ -292,23 +324,29 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_latency_per_kb_mean_15m_warning"
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
-  for_each = toset(local.bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["eob_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
-  threshold           = "${local.partner_timeouts_ms[each.key]}"
+  extended_statistic  = "p99"
+  threshold           = local.partners.bulk[each.key].timeout_ms
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response 99% 15 minute BULK latency exceeded ALERT SLO ",
-    "threshold of ${local.partner_timeouts_ms[each.key]} ms for partner ${each.key} for ",
+    "threshold of ${local.partners.bulk[each.key].timeout_ms} ms for partner ${each.key} for ",
     "${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_latency}/${each.key}"
+  metric_name = local.metrics.eob_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["eob_latency"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -318,23 +356,28 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warning" {
-  for_each = toset(local.bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["eob_latency_by_kb"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-bulk-latency-per-kb-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "480"
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response 99% 15 minute BULK latency per KB exceeded WARNING SLO ",
-    "threshold of ${local.partner_timeouts_ms[each.key]} ms/KB for partner ${each.key} for ",
-    "${local.app} in ${var.env} environment"
+    "threshold of 480 ms/KB for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_latency_by_kb}/${each.key}"
+  metric_name = local.metrics.eob_latency_by_kb
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["eob_latency_by_kb"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -344,13 +387,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warn
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_alert" {
-  for_each = toset(local.non_bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.non_bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["eob_latency_by_kb"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-nonbulk-latency-per-kb-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "690"
 
   alarm_description = join("", [
@@ -358,8 +404,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_a
     "SLO threshold of 690 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.eob_latency_by_kb}/${each.key}"
+  metric_name = local.metrics.eob_latency_by_kb
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["eob_latency_by_kb"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -369,13 +418,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_a
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_warning" {
-  for_each = toset(local.non_bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.non_bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["eob_latency_by_kb"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-nonbulk-latency-per-kb-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "480"
 
   alarm_description = join("", [
@@ -384,8 +436,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_w
     "environment"
   ])
 
-  metric_name = "${local.metrics.eob_latency_by_kb}/${each.key}"
+  metric_name = local.metrics.eob_latency_by_kb
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["eob_latency_by_kb"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -407,7 +462,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
     "threshold of 80 ms for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_no_contract_latency}/all"
+  metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
@@ -430,7 +485,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
     "threshold of 60 ms for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_no_contract_latency}/all"
+  metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
 
   alarm_actions = local.warning_arn
@@ -441,23 +496,29 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_alert" {
-  for_each = toset(local.bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
-  threshold           = "${local.partner_timeouts_ms[each.key]}"
+  extended_statistic  = "p99"
+  threshold           = local.partners.bulk[each.key].timeout_ms
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute BULK latency exceeded ALERT SLO ",
-    "threshold of ${local.partner_timeouts_ms[each.key]} ms for partner ${each.key} for ",
+    "threshold of ${local.partners.bulk[each.key].timeout_ms} ms for partner ${each.key} for ",
     "${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_no_contract_latency}/${each.key}"
+  metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["patient_no_contract_latency"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -467,13 +528,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_warning" {
-  for_each = toset(local.bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-bulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "110"
 
   alarm_description = join("", [
@@ -481,8 +545,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
     "threshold of 110 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_no_contract_latency}/${each.key}"
+  metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["patient_no_contract_latency"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -492,13 +559,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_99p_15m_alert" {
-  for_each = toset(local.non_bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.non_bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-nonbulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "160"
 
   alarm_description = join("", [
@@ -506,8 +576,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
     "SLO threshold of 160 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_no_contract_latency}/${each.key}"
+  metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["patient_no_contract_latency"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -517,13 +590,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_99p_15m_warning" {
-  for_each = toset(local.non_bulk_partners)
+  for_each = setintersection(
+    toset(keys(local.partners.non_bulk)), 
+    toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-nonbulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "110"
 
   alarm_description = join("", [
@@ -531,8 +607,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
     "SLO threshold of 110 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_no_contract_latency}/${each.key}"
+  metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["patient_no_contract_latency"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -554,7 +633,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
     "SLO threshold of 40 seconds for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_contract_count_4000_latency}/all"
+  metric_name = local.metrics.patient_contract_count_4000_latency
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
@@ -577,7 +656,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
     "SLO threshold of 40 seconds for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_contract_count_4000_latency}/all"
+  metric_name = local.metrics.patient_contract_count_4000_latency
   namespace   = local.namespace
 
   alarm_actions = local.warning_arn
@@ -588,23 +667,29 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_99p_15m_alert" {
-  for_each = toset(concat(local.bulk_partners, local.non_bulk_partners))
+  for_each = setintersection(
+    toset(keys(local.all_partners)), 
+    toset(keys(data.external.client_ssls_by_partner["patient_contract_count_4000_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-by-contract-count-4000-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
-  threshold           = "${local.partner_timeouts_ms[each.key]}"
+  extended_statistic  = "p99"
+  threshold           = local.all_partners[each.key].timeout_ms
 
   alarm_description = join("", [
     "/v*/fhir/Patient (by contract, count 4000) response 99% 15 minute latency exceeded ALERT ",
-    "SLO threshold of ${local.partner_timeouts_ms[each.key]} ms for partner ${each.key} for ",
+    "SLO threshold of ${local.all_partners[each.key].timeout_ms} ms for partner ${each.key} for ",
     "${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_contract_count_4000_latency}/${each.key}"
+  metric_name = local.metrics.patient_contract_count_4000_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["patient_contract_count_4000_latency"].result[each.key]
+  }
 
   alarm_actions = local.alert_arn
   ok_actions    = local.ok_arn
@@ -614,13 +699,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_99p_15m_warning" {
-  for_each = toset(concat(local.bulk_partners, local.non_bulk_partners))
+  for_each = setintersection(
+    toset(keys(local.all_partners)), 
+    toset(keys(data.external.client_ssls_by_partner["patient_contract_count_4000_latency"].result))
+  ) 
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-by-contract-count-4000-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
-  extended_statistic  = local.ext_stat_99p
+  extended_statistic  = "p99"
   threshold           = "44000"
 
   alarm_description = join("", [
@@ -628,8 +716,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
     "SLO threshold of 44 seconds for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.patient_contract_count_4000_latency}/${each.key}"
+  metric_name = local.metrics.patient_contract_count_4000_latency
   namespace   = local.namespace
+  dimensions = {
+    client_ssl = data.external.client_ssls_by_partner["patient_contract_count_4000_latency"].result[each.key]
+  }
 
   alarm_actions = local.warning_arn
   ok_actions    = local.ok_arn
@@ -651,7 +742,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_alert" {
     "${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.all_error_rate}/all"
+  metric_name = local.metrics.all_error_rate
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
@@ -674,7 +765,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_warning" {
     "${local.app} in ${var.env} environment"
   ])
 
-  metric_name = "${local.metrics.all_error_rate}/all"
+  metric_name = local.metrics.all_error_rate
   namespace   = local.namespace
 
   alarm_actions = local.warning_arn
