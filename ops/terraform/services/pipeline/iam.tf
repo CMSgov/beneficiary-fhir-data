@@ -3,11 +3,11 @@ resource "aws_iam_user" "this" {
   force_destroy = false
   name          = "bfd-${local.env}-${local.legacy_service}"
   path          = "/"
-  tags = merge(local.shared_tags, {
+  tags = {
     Note    = "NoRotate"
     Purpose = "ETL PUT"
     UsedBy  = "CCW"
-  })
+  }
 }
 
 resource "aws_iam_access_key" "this" {
@@ -94,7 +94,6 @@ resource "aws_iam_policy" "aws_cli" {
   "Version": "2012-10-17"
 }
 EOF
-  tags        = local.shared_tags
 }
 
 resource "aws_iam_policy" "bfd_pipeline_rif" {
@@ -146,14 +145,12 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
   "Version": "2012-10-17"
 }
 EOF
-  tags        = local.shared_tags
 }
 
 resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-bfd_${local.service}-profile"
   path = "/"
   role = aws_iam_role.this.name
-  tags = local.shared_tags
 }
 
 resource "aws_iam_policy" "ssm" {
@@ -188,7 +185,6 @@ resource "aws_iam_policy" "ssm" {
   "Version": "2012-10-17"
 }
 EOF
-  tags        = local.shared_tags
 }
 
 resource "aws_iam_role" "this" {
@@ -219,5 +215,4 @@ EOF
   max_session_duration = 3600
   name                 = "bfd-${local.env}-bfd_${local.service}-role"
   path                 = "/"
-  tags                 = local.shared_tags
 }

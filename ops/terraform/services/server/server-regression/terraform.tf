@@ -8,7 +8,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "services/pipeline/terraform.tfstate"
+    key            = "services/server-regression/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"
@@ -17,7 +17,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.22"
+      version = "~> 4.12"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "2.2.0"
     }
   }
 }
