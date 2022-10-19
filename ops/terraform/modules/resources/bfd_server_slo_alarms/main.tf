@@ -54,6 +54,8 @@ locals {
       }
     }
   }
+
+  all_partners = merge(local.partners.bulk, local.partners.non_bulk)
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {

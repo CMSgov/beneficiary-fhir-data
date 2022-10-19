@@ -17,7 +17,7 @@ IFS=$'\n' read -r -d '' -a partners < <(
   jq -r 'keys[]' <<<"${partners_regex_json}" && printf '\0'
 )
 
-partner_metrics=()
+client_ssls=()
 for partner in "${partners[@]}"; do
   partner_regex=$(jq -r ".[\"${partner}\"]" <<<"${partners_regex_json}")
   applicable_dimension=$(
@@ -35,16 +35,16 @@ for partner in "${partners[@]}"; do
     continue
   fi
 
-  partner_dimensioned_metrics=$(
+  partner_client_ssl=$(
     jq -c "{
-      ${partner}: { 
-        name: \"${metric_name}\", 
-        namespace: \"${metric_namespace}\", 
-        dimension: .
-      }
+      ${partner}: . 
     }" <<<"${applicable_dimension}"
   )
-  partner_metrics+=("${partner_dimensioned_metrics}")
+  client_ssls+=("${partner_client_ssl}")
 done
 
-jq -s "add" <<<"${partner_metrics[@]}"
+if [[ "${client_ssls+defined}" = defined ]]; then
+  jq -s "add" <<<"${client_ssls[@]}"
+else
+  echo '{}'
+fi
