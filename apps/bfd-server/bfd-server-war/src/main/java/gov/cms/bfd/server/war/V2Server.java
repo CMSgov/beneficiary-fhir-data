@@ -113,5 +113,7 @@ public class V2Server extends RestfulServer {
     // Default to XML and pretty printing.
     setDefaultResponseEncoding(EncodingEnum.JSON);
     setDefaultPrettyPrint(false);
+
+    registerInterceptor(new TimerInterceptor());
   }
 }
