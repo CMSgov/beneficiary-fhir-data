@@ -66,6 +66,7 @@ select
     coalesce(partner_counts['bb2'], 0) as bb2_new_benes,
     coalesce(partner_counts['bcda'], 0) as bcda_new_benes,
     coalesce(partner_counts['dpc'], 0) as dpc_new_benes,
+    coalesce(partner_counts['bulk'], 0) as bulk_new_benes,
     coalesce(partner_counts['bfd'], 0) as bfd_new_benes
 from (
     select map_agg(partner, bene_count) as partner_counts, day
@@ -80,6 +81,7 @@ from (
             where partner in ('ab2d', 'bb2', 'bcda', 'dpc')
                   and bene > 0
                   and response_status = '200'
+                  and "mdc_http_access_request_operation" not like '%by=coverageContractForYearMonth%'
             group by bene, partner
         )
         group by day, partner
@@ -93,6 +95,21 @@ from (
             where partner in ('ab2d', 'bb2', 'bcda', 'dpc')
                   and bene > 0
                   and response_status = '200'
+                  and "mdc_http_access_request_operation" not like '%by=coverageContractForYearMonth%'
+            group by bene
+        )
+        group by day
+        union
+        select 'bulk', day, count(*) as bene_count
+        from (
+            select
+                bene,
+                date_format(from_iso8601_timestamp(min("timestamp")), '%Y-%m-%d') AS day
+            from api_requests_by_bene
+            where partner in ('ab2d', 'bcda', 'dpc')
+                  and bene > 0
+                  and response_status = '200'
+                  and "mdc_http_access_request_operation" not like '%by=coverageContractForYearMonth%'
             group by bene
         )
         group by day
