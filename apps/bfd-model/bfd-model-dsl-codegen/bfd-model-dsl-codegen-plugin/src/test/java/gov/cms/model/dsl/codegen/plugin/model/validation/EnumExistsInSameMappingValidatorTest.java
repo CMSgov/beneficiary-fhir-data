@@ -16,7 +16,7 @@ import org.mockito.Mockito;
 
 /** Unit tests for EnumExistsInSameMappingValidator. */
 public class EnumExistsInSameMappingValidatorTest {
-  /** Used to mack static method called by the validator. */
+  /** Used to mock static method called by the validator. */
   private MockedStatic<ValidationUtil> validationUtil;
   /** Used to mock context passed to the validator. */
   private ConstraintValidatorContext context;
