@@ -160,6 +160,7 @@ public class RDATestUtils {
             .currLoc1('z')
             .currLoc2("Somda")
             .medaProvId("meda12345")
+            .medaProv_6("meda12")
             .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1234.32"))
             .receivedDate(LocalDate.of(1970, 1, 1))
@@ -182,6 +183,7 @@ public class RDATestUtils {
             RdaFissProcCode.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 0)
+                .rdaPosition((short) 1)
                 .procCode("CODEABC")
                 .procFlag("FLAG")
                 .procDate(LocalDate.of(1970, 7, 20))
@@ -190,6 +192,7 @@ public class RDATestUtils {
             RdaFissProcCode.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 1)
+                .rdaPosition((short) 2)
                 .procCode("CODECBA")
                 .procFlag("FLA2")
                 .lastUpdated(lastUpdated)
@@ -200,18 +203,21 @@ public class RDATestUtils {
             RdaFissDiagnosisCode.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 0)
+                .rdaPosition((short) 1)
                 .diagCd2("admitcd")
                 .diagPoaInd("Z")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 1)
+                .rdaPosition((short) 2)
                 .diagCd2("other")
                 .diagPoaInd("U")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 2)
+                .rdaPosition((short) 3)
                 .diagCd2("princcd")
                 .diagPoaInd("n")
                 .build());
@@ -221,6 +227,7 @@ public class RDATestUtils {
             RdaFissPayer.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 0)
+                .rdaPosition((short) 1)
                 .beneFirstName("jim")
                 .beneMidInit("k")
                 .beneLastName("baker")
@@ -232,6 +239,7 @@ public class RDATestUtils {
             RdaFissPayer.builder()
                 .dcn(FISS_CLAIM_A_DCN)
                 .priority((short) 1)
+                .rdaPosition((short) 2)
                 .insuredName("BAKER  JIM  K")
                 .payerType(RdaFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
@@ -282,6 +290,7 @@ public class RDATestUtils {
             RdaFissProcCode.builder()
                 .dcn(FISS_CLAIM_B_DCN)
                 .priority((short) 0)
+                .rdaPosition((short) 1)
                 .procCode("CODEABD")
                 .procFlag("FLAC")
                 .procDate(LocalDate.of(1970, 7, 31))
@@ -293,18 +302,21 @@ public class RDATestUtils {
             RdaFissDiagnosisCode.builder()
                 .dcn(FISS_CLAIM_B_DCN)
                 .priority((short) 0)
+                .rdaPosition((short) 1)
                 .diagCd2("princcc")
                 .diagPoaInd("Y")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn(FISS_CLAIM_B_DCN)
                 .priority((short) 1)
+                .rdaPosition((short) 2)
                 .diagCd2("other2")
                 .diagPoaInd("w")
                 .build(),
             RdaFissDiagnosisCode.builder()
                 .dcn(FISS_CLAIM_B_DCN)
                 .priority((short) 2)
+                .rdaPosition((short) 3)
                 .diagCd2("admitcc")
                 .diagPoaInd("1")
                 .build());
@@ -314,6 +326,7 @@ public class RDATestUtils {
             RdaFissPayer.builder()
                 .dcn(FISS_CLAIM_B_DCN)
                 .priority((short) 0)
+                .rdaPosition((short) 1)
                 .beneFirstName("alice")
                 .beneMidInit("r")
                 .beneLastName("smith")
@@ -325,6 +338,7 @@ public class RDATestUtils {
             RdaFissPayer.builder()
                 .dcn(FISS_CLAIM_B_DCN)
                 .priority((short) 1)
+                .rdaPosition((short) 2)
                 .insuredName("SMITH  ALICE  R")
                 .payerType(RdaFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
@@ -382,15 +396,17 @@ public class RDATestUtils {
         Set.of(
             RdaMcsDetail.builder()
                 .priority((short) 0)
+                .idrDtlNumber((short) 1)
                 .idrClmHdIcn("654321")
                 .idrDtlToDate(LocalDate.of(1970, 7, 30))
                 .idrProcCode("FDSAE")
+                .idrDtlPrimaryDiagCode("HF3IJIF")
                 .idrModOne("A")
                 .build(),
             RdaMcsDetail.builder()
                 .priority((short) 1)
+                .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654321")
-                .idrProcCode("FDAAA")
                 .idrModTwo("B")
                 .build());
 
@@ -401,7 +417,7 @@ public class RDATestUtils {
             new RdaMcsDiagnosisCode(
                 "654321", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654321", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654321", (short) 1, (short) 2, "9", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }
@@ -452,6 +468,7 @@ public class RDATestUtils {
         Set.of(
             RdaMcsDetail.builder()
                 .priority((short) 0)
+                .idrDtlNumber((short) 1)
                 .idrClmHdIcn("654323")
                 .idrDtlToDate(LocalDate.of(1970, 7, 28))
                 .idrProcCode("FDSAE")
@@ -459,6 +476,7 @@ public class RDATestUtils {
                 .build(),
             RdaMcsDetail.builder()
                 .priority((short) 1)
+                .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654323")
                 .idrProcCode("FDAAA")
                 .idrModTwo("B")
@@ -471,7 +489,7 @@ public class RDATestUtils {
             new RdaMcsDiagnosisCode(
                 "654323", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new RdaMcsDiagnosisCode(
-                "654323", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+                "654323", (short) 1, (short) 2, "9", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }

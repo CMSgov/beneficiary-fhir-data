@@ -69,6 +69,7 @@ public class DataUtilityCommons {
       buildNPIResource(convertedNpiDataFile, downloadUrl, tempDir);
     } catch (IOException exception) {
       LOGGER.error("NPI data file could not be read.  Error:", exception);
+      throw new IOException(exception);
     } finally {
       recursivelyDelete(tempDir);
     }

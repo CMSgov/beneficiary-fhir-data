@@ -91,51 +91,18 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
-      
-      - name: 'Run Maven Build'
-        run: |
-          ACCOUNT_ID="$(python3 -c 'import json,sys;print(json.loads(sys.argv[1])["Account"])' "$(aws sts get-caller-identity)")"
-            CODEARTIFACT_ENDPOINT="$(aws codeartifact get-repository-endpoint --domain bfd-mgmt --repository bfd-mgmt --format maven --output text)"
-            CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain bfd-mgmt \
-            --domain-owner "$ACCOUNT_ID" \
-            --output text --query authorizationToken)"
-            cat <<EOF > ~/.m2/settings.xml
-            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-                <profiles>
-                    <profile>
-                        <id>bfd-mgmt-bfd-mgmt</id>
-                        <activation>
-                        <activeByDefault>true</activeByDefault>
-                        </activation>
-                        <repositories>
-                            <repository>
-                                <id>bfd-mgmt-bfd-mgmt</id>
-                                <url>${CODEARTIFACT_ENDPOINT}</url>
-                            </repository>
-                        </repositories>
-                    </profile>
-                </profiles>
-                <servers>
-                    <server>
-                    <username>aws</username>
-                    <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-                    <id>bfd-mgmt-bfd-mgmt</id>
-                    </server>
-                </servers>
-            </settings>
-          EOF
-          mvn --quiet --batch-mode --threads 1C verify
-        working-directory: ./apps
-        
       - name: 'Run Maven Build on FDA Drug Utility'
-        run: mvn --batch-mode --threads 1C verify
+        run: mvn --batch-mode --threads 1C install
         working-directory: ./apps/bfd-data-fda
 
       - name: 'Run Maven Build on NPI Org Utility'
-        run: mvn --batch-mode --threads 1C verify
+        run: mvn --batch-mode --threads 1C install
         working-directory: ./apps/bfd-data-npi
 
+      - name: 'Run Maven Build'
+        run: mvn --quiet --batch-mode --threads 1C verify
+        working-directory: ./apps
+      
       - name: Login to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" \
@@ -199,7 +166,8 @@ jobs:
         if: steps.run_check.outputs.skip == 'false'
         uses: wei/wget@v1
         with:
-          args: https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+          #TODO: Pinning to 5.6.68 due to bug in latest release, re-evaluate later.
+          args: https://github.com/hapifhir/org.hl7.fhir.core/releases/download/5.6.68/validator_cli.jar
       - name: 'Verify FHIR resource'
         id: validate_fhir
         if: steps.run_check.outputs.skip == 'false'

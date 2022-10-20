@@ -49,7 +49,7 @@ data "aws_security_group" "rds" {
 }
 
 data "aws_kms_key" "insights_s3" {
-  key_id = "9bfd6886-7124-4229-931a-4a30ce61c0ea" # TODO: Replace with SSM or a smarter method
+  key_id = "alias/bfd-insights-bfd-cmk"
 }
 
 data "aws_iam_role" "insights" {

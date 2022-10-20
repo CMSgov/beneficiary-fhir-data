@@ -38,6 +38,8 @@ spec:
     }
     parameters {
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
+        string(name: 'filemonth', description: 'The month of the npi file will download', defaultValue: '')
+        string(name: 'fileyear',  description: 'The year of the npi file will download', defaultValue: '')
     }
     stages {
         stage('Setup') {
@@ -95,28 +97,37 @@ EOF
             steps {
                 script {
                     container('bfd-cbc-build') {
-                      // Download and Calculate NPI Org File Sha256 from the external source
-                        npiOrgFileStatusCode = sh(
+                      // Get url 
+                        env.npiOrgFileDownloadUrl = sh(
                             returnStdout: true,
                             script: '''
-                            month="$(date +%B)"
-                            year="$(date +%Y)"
-                            curl -s -o /dev/null -I -w "%{http_code}" "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip"
+                            month=${filemonth:-"$(date +%B)"}
+                            year=${fileyear:-"$(date +%Y)"}
+                            echo "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip"
+'''
+                        ).trim()
+
+                        echo "NPI File Download Url: " + npiOrgFileDownloadUrl
+
+                        
+                      // Download and Calculate NPI Org File Sha256 from the external source
+                        env.npiOrgFileStatusCode = sh(
+                            returnStdout: true,
+                            script: '''
+                            curl -s -o /dev/null -I -w "%{http_code}" "${npiOrgFileDownloadUrl}"
 '''
                         )
 
-                        if(npiOrgFileStatusCode.trim()=='200'){
-                         npiOrgNameSha256 = sh(
+                        if(env.npiOrgFileStatusCode.trim()=='200'){
+                         env.npiOrgNameSha256 = sh(
                             returnStdout: true,
                             script: '''
-                            month="$(date +%B)"
-                            year="$(date +%Y)"
-                            curl -fsSL "https://download.cms.gov/nppes/NPPES_Data_Dissemination_${month}_${year}.zip" | sha256sum | awk '{ print $1 }'
+                            curl -fsSL ${npiOrgFileDownloadUrl} | sha256sum | awk '{ print $1 }'
 '''
                         )
                         awsAuth.assumeRole()
                         // Check whether the npi sha parameter exists and has a value
-                        ssmLookupSha256 = sh(
+                        env.ssmLookupSha256 = sh(
                             returnStdout: true,
                             script: '''
 if parameter_lookup="$(aws ssm get-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256 \
@@ -127,10 +138,10 @@ fi
                         )
                         // Check whether the parameter is empty or the sha value is not equal to the new sha value, if either 
                         // it is empty or doesnt exist we build the project and deploy the new jar to aws code artifact
-                        if (ssmLookupSha256.isEmpty() || npiOrgNameSha256.trim() != ssmLookupSha256.trim()) {
+                        if (env.ssmLookupSha256.isEmpty() || env.npiOrgNameSha256.trim() != env.ssmLookupSha256.trim()) {
                             dir('apps/bfd-data-npi') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
-                                sh "mvn ${quietFlags} -Dnpi.downloadUrl=\"${downloadUrl}\" clean install"
+                                sh "mvn ${quietFlags} -Dnpi.downloadUrl=\"${npiOrgFileDownloadUrl}\" clean install"
                                 sh 'echo "$CODEARTIFACT_ENDPOINT"'
 
                                 withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {

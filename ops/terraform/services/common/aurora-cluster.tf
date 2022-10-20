@@ -1,9 +1,6 @@
 resource "aws_db_subnet_group" "aurora_cluster" {
   description = "Subnet group for aurora cluster"
   name        = "bfd-${local.env}-aurora-cluster" # NOTE: Ephemeral environment compatible.
-  tags        = local.shared_tags
-  tags_all    = local.shared_tags
-
   subnet_ids = [
     data.aws_subnet.data[0].id,
     data.aws_subnet.data[1].id,
@@ -33,7 +30,7 @@ resource "aws_security_group" "aurora_cluster" {
     },
   ]
 
-  tags = merge(local.shared_tags, { Name = "bfd-${local.env}-aurora-cluster" })
+  tags = { Name = "bfd-${local.env}-aurora-cluster" }
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
@@ -55,7 +52,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   skip_final_snapshot                 = true
   storage_encrypted                   = true
   # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
-  tags = merge(local.shared_tags, { "cpm backup" = "Weekly Monthly", "Layer" = "data" })
+  tags = { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password
@@ -84,8 +81,6 @@ resource "aws_db_parameter_group" "aurora_cluster" {
   description = "Sets node parameters for ${local.rds_aurora_family}"
   family      = local.rds_aurora_family
   name_prefix = "bfd-${local.env}-aurora-node"
-  tags        = local.shared_tags
-  tags_all    = local.shared_tags
 
   dynamic "parameter" {
     for_each = local.db_parameters
@@ -116,7 +111,7 @@ resource "aws_rds_cluster_instance" "nodes" {
   performance_insights_kms_key_id = aws_rds_cluster.aurora_cluster.kms_key_id
   preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
   publicly_accessible             = false
-  tags                            = merge(local.shared_tags, { Layer = "data" })
+  tags                            = { Layer = "data" }
 }
 
 ### The following configuration is almost exlcusively for separated, custom reader endpoints

@@ -3,8 +3,14 @@ BFD NPI to Organization Name Lookup
 
 This maven project produces a jar file that provides functionality to retrieve organization names given an NPI as input. This lookup is backed by a data file stored in the jar files as a resource.
 
+For more information about our NPI source can be found here:
+https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination
+
+The latest data source file can be downloaded here:
+https://download.cms.gov/nppes/NPI_Files.html
+
 The data file is constructed from 
-NPI|Entity Type Code|Replacement NPI|Employer Identification Number (EIN)|Provider Organization Name (Legal Business Name)Provider Last Name (Legal Name)|Provider First Name|
+NPI|Entity Type Code|Replacement NPI|Employer Identification Number (EIN)|Provider Organization Name (Legal Business Name)|Provider Last Name (Legal Name)|Provider First Name|
 --- | --- | --- | --- |--- |--- |--- 
 1497758544|2| |<UNAVAIL>|CUMBERLAND COUNTY HOSPITAL SYSTEM, INC| |
 1215930367|1| | | |GRESSOT|LAURENT|

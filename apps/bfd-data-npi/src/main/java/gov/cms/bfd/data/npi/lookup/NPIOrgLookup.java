@@ -36,7 +36,7 @@ public class NPIOrgLookup {
    *
    * @return the {@link NPIOrgLookup }
    */
-  public static NPIOrgLookup createNpiOrgLookupForTesting() {
+  public static NPIOrgLookup createNpiOrgLookupForTesting() throws IOException {
     if (npiOrgLookupForTesting == null) {
       npiOrgLookupForTesting = new NPIOrgLookup(true);
     }
@@ -50,7 +50,7 @@ public class NPIOrgLookup {
    *
    * @return the {@link NPIOrgLookup }
    */
-  public static NPIOrgLookup createNpiOrgLookupForProduction() {
+  public static NPIOrgLookup createNpiOrgLookupForProduction() throws IOException {
     if (npiOrgLookupForProduction == null) {
       npiOrgLookupForProduction = new NPIOrgLookup(false);
     }
@@ -63,7 +63,7 @@ public class NPIOrgLookup {
    *
    * @param includeFakeNpiOrgName whether to include the fake testing npi org name or not
    */
-  private NPIOrgLookup(boolean includeFakeNpiOrgName) {
+  private NPIOrgLookup(boolean includeFakeNpiOrgName) throws IOException {
     readNPIOrgDataFile(includeFakeNpiOrgName);
   }
 
@@ -79,7 +79,7 @@ public class NPIOrgLookup {
      * Handle bad data (e.g. our random test data) if npiNumber is empty
      */
     if (!npiNumber.isPresent() && npiOrgHashMap.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
     if (npiOrgHashMap.containsKey(npiNumber.get())) {
@@ -98,7 +98,7 @@ public class NPIOrgLookup {
    *
    * @param includeFakeNPIOrgCode whether to include the fake testing NPI Org
    */
-  private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) {
+  private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) throws IOException {
     final InputStream npiOrgStream =
         App.class.getClassLoader().getResourceAsStream(App.NPI_RESOURCE);
 
@@ -107,18 +107,20 @@ public class NPIOrgLookup {
           new BufferedReader(new InputStreamReader(npiOrgStream))) {
         String line = "";
         while ((line = npiOrgIn.readLine()) != null) {
-          String npiProductColumns[] = line.split("\t");
-          if (npiProductColumns.length == 2) {
+          String npiOrgColumns[] = line.split("\t");
+          if (npiOrgColumns.length == 2) {
             npiOrgHashMap.put(
-                npiProductColumns[0].replace("\"", ""), npiProductColumns[1].replace("\"", ""));
+                npiOrgColumns[0].replace("\"", ""), npiOrgColumns[1].replace("\"", ""));
           }
         }
 
       } catch (IOException e) {
         LOGGER.error("Unable to read NPI data:" + e.getMessage());
+        throw new IOException(e);
       }
     } else {
       LOGGER.error("Unable to read stream for NPI Resource");
+      throw new IOException("Unable to read stream for NPI Resource");
     }
 
     if (includeFakeNPIOrgCode) {

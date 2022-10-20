@@ -1,20 +1,18 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 locals {
   env     = terraform.workspace
   service = "migrator"
   layer   = "data"
 
-  common_tags = {
-    Environment = local.env
-    Layer       = local.layer
-    Name        = "bfd-${local.env}-${local.service}"
-    application = "bfd"
-    business    = "oeda"
-    role        = local.service
-    stack       = local.env
+  default_tags = {
+    Environment    = local.env
+    Layer          = local.layer
+    Name           = "bfd-${local.env}-${local.service}"
+    application    = "bfd"
+    business       = "oeda"
+    role           = local.service
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/migrator"
   }
 
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
@@ -58,16 +56,15 @@ resource "aws_instance" "this" {
   iam_instance_profile = aws_iam_instance_profile.this.name
 
   availability_zone           = data.external.rds.result["WriterAZ"]
-  tags                        = local.common_tags
   monitoring                  = true
   associate_public_ip_address = false
   ebs_optimized               = true
 
   subnet_id              = data.aws_subnet.main.id
-  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
+  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this[0].id]
 
   root_block_device {
-    tags                  = merge(local.common_tags, { snapshot = "true" })
+    tags                  = merge(local.default_tags, { snapshot = "true" }) # TODO: Consider removing the tag from migrator instances
     volume_type           = "gp2"
     volume_size           = local.volume_size
     delete_on_termination = true
@@ -79,7 +76,6 @@ resource "aws_instance" "this" {
     account_id                                  = local.account_id
     db_migrator_db_url                          = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
     env                                         = local.env
-    git_repo_version                            = var.git_repo_version # TODO: This works for now, but it's probably more appropriate for image to contain ansible configuration
     migrator_monitor_enabled                    = local.migrator_monitor_enabled
     migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
   })

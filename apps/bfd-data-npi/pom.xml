@@ -125,7 +125,7 @@
 				<version>1.5.0</version>
 				<executions>
 					<execution>
-						<id>download-fda-drug-data</id>
+						<id>download-npi-org-data</id>
 						<phase>process-classes</phase>
 						<goals>
 							<goal>java</goal>
