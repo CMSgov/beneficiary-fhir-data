@@ -13,6 +13,18 @@ The following is a list of known discrepencies in the data, with dates and reaso
 * 09/02/22 - 09/09/22: Due to a typo in the column name, the
 `mdc_jpa_query_eobs_by_bene_id_snf_record_count` field was not being captured.
 
+## Known data limitations for bene_id
+
+The bene_id field is populated on requests for Patient, Coverage, and ExplanationOfBenefit resources
+and contains a list of all beneficiary IDs whose data was either explicitly requested or whose data
+was returned from a call to get Patient resources by contract. The support for this field has evolved
+over time as follows:
+
+* 03/26/2021 - Initial support added that included support for requests that return resources for a single beneficiary. (BFD-693)
+* 10/28/2021 - Support added for `Patient By Contract` requests which typically return multiple beneficiaries per call. (BFD-1209)
+* 07/22/2022 - Fixed a defect that was causing Coverage `read` operations to not log the beneficiary ID. (BFD-1897)
+* 09/15/2022 - Fixed a defect that was causing some requests that resulted in empty responses from logging the beneficiary ID. (BFD-2119)
+
 ## API-Requests
 
 API-Requests is the portion of the project that ingests the logs and stores them in Glue tables.
