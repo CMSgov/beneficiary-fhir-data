@@ -5,12 +5,12 @@ locals {
   namespace = "bfd-${var.env}/bfd-server"
   endpoints = {
     all                = "*/fhir/*"
-    metadata           = "*/fhir/metadata"
-    coverage_all       = "*/fhir/Coverage"
-    patient_all        = "*/fhir/Patient"
-    eob_all            = "*/fhir/ExplanationOfBenefit"
-    claim_all          = "*/fhir/Claim"
-    claim_response_all = "*/fhir/ClaimResponse"
+    metadata           = "*/fhir/metadata*"
+    coverage_all       = "*/fhir/Coverage*"
+    patient_all        = "*/fhir/Patient*"
+    eob_all            = "*/fhir/ExplanationOfBenefit*"
+    claim_all          = "*/fhir/Claim*"
+    claim_response_all = "*/fhir/ClaimResponse*"
   }
 
   endpoint_patterns = {
