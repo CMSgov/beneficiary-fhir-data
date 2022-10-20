@@ -91,6 +91,7 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
+
       - name: 'Run Maven Build on FDA Drug Utility'
         run: mvn --batch-mode --threads 1C install
         working-directory: ./apps/bfd-data-fda
