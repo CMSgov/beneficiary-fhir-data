@@ -9,6 +9,7 @@ import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import java.time.Clock;
@@ -107,7 +108,10 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    * {@inheritDoc}
    *
    * <p>This implementation reads starting sequence number from the database, gets the API version
-   * number from RDA API, then downloads and transforms several claims from the API.
+   * number from RDA API, then downloads and transforms several claims from the API. Since old
+   * claims might be ones that failed to transform in the past we only fail the test if we are
+   * unable to transform any claim at all. In that case we log one of the failures as a
+   * representative of the problem.
    *
    * @param sink to process batches of objects
    * @return true if all actions were completed successfully
@@ -133,14 +137,34 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
     final GrpcResponseStream<TMessage> responseStream =
         caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
     try {
-      for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
+      int downloads = 0;
+      int transforms = 0;
+      Exception lastError = null;
+      long lastFailedSeq = 0;
+      while (downloads < 3 && responseStream.hasNext()) {
         final TMessage message = responseStream.next();
-        sink.transformMessage(apiVersion, message);
-        log.info(
-            "smoke test: successfully translated claim: seq={}",
-            sink.getSequenceNumberForObject(message));
+        downloads += 1;
+        try {
+          sink.transformMessage(apiVersion, message);
+          log.info(
+              "smoke test: successfully transformed claim: seq={}",
+              sink.getSequenceNumberForObject(message));
+          transforms += 1;
+        } catch (DataTransformer.TransformationException ex) {
+          lastError = ex;
+          lastFailedSeq = sink.getSequenceNumberForObject(message);
+        }
       }
-      successful = true;
+      // Consider the test successful if there was nothing to download or we were able to transform
+      // at least one claim successfully.
+      successful = downloads == 0 || transforms > 0;
+      if (!successful && lastError != null) {
+        log.error(
+            "smoke test: unable to transform any claims, sample error: seq={} error={}",
+            lastFailedSeq,
+            lastError.getMessage(),
+            lastError);
+      }
     } finally {
       // be a nice client that lets the server know when we are leaving before the stream is done
       if (successful && responseStream.hasNext()) {
