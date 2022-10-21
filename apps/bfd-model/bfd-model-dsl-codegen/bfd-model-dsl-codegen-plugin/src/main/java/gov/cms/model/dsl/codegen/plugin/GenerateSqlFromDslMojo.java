@@ -55,6 +55,7 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
       outputFile.getParentFile().mkdirs();
       try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)))) {
         RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
+        MojoUtil.validateModel(root);
         List<MappingBean> rootMappings = getSortedMappings(root);
         out.println("/*");
         out.println(" ************************** WARNING **************************");
