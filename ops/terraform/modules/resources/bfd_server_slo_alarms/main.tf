@@ -37,7 +37,7 @@ locals {
         client_ssl_regex = {
           prod_sbx = ".*dpc-prod-sbx-client.*"
           # jq requires escaped characters be escaped with 2 backslashes
-          prod     = ".*dpc\\\\.prod\\\\.client.*"
+          prod = ".*dpc\\\\.prod\\\\.client.*"
         }
       }
     }
@@ -105,10 +105,10 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert"
   # Only create per-partner alarms for partners that have dimensioned metrics in the current
   # environment. This set intersection returns a set of partners that have corresponding metrics
   for_each = setintersection(
-    toset(keys(local.partners.bulk)), 
+    toset(keys(local.partners.bulk)),
     toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
-  ) 
-  
+  )
+
   alarm_name          = "${local.app}-${var.env}-slo-coverage-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
@@ -137,9 +137,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert"
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.partners.bulk)), 
+    toset(keys(local.partners.bulk)),
     toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-bulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -168,9 +168,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warnin
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_alert" {
   for_each = setintersection(
-    toset(keys(local.partners.non_bulk)), 
+    toset(keys(local.partners.non_bulk)),
     toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-nonbulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -199,9 +199,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_ale
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.partners.non_bulk)), 
+    toset(keys(local.partners.non_bulk)),
     toset(keys(data.external.client_ssls_by_partner["coverage_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-coverage-nonbulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -322,9 +322,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_latency_per_kb_mean_15m_warning"
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
   for_each = setintersection(
-    toset(keys(local.partners.bulk)), 
+    toset(keys(local.partners.bulk)),
     toset(keys(data.external.client_ssls_by_partner["eob_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -354,9 +354,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_99p_15m_alert" {
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.partners.bulk)), 
+    toset(keys(local.partners.bulk)),
     toset(keys(data.external.client_ssls_by_partner["eob_latency_by_kb"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-bulk-latency-per-kb-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -385,9 +385,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_bulk_latency_per_kb_99p_15m_warn
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_alert" {
   for_each = setintersection(
-    toset(keys(local.partners.non_bulk)), 
+    toset(keys(local.partners.non_bulk)),
     toset(keys(data.external.client_ssls_by_partner["eob_latency_by_kb"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-nonbulk-latency-per-kb-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -416,9 +416,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_a
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_nonbulk_latency_per_kb_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.partners.non_bulk)), 
+    toset(keys(local.partners.non_bulk)),
     toset(keys(data.external.client_ssls_by_partner["eob_latency_by_kb"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-eob-nonbulk-latency-per-kb-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -494,9 +494,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_alert" {
   for_each = setintersection(
-    toset(keys(local.partners.bulk)), 
+    toset(keys(local.partners.bulk)),
     toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-bulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -526,9 +526,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.partners.bulk)), 
+    toset(keys(local.partners.bulk)),
     toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-bulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -557,9 +557,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_99p_15m_alert" {
   for_each = setintersection(
-    toset(keys(local.partners.non_bulk)), 
+    toset(keys(local.partners.non_bulk)),
     toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-nonbulk-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -588,9 +588,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.partners.non_bulk)), 
+    toset(keys(local.partners.non_bulk)),
     toset(keys(data.external.client_ssls_by_partner["patient_no_contract_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-no-contract-nonbulk-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -665,9 +665,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_99p_15m_alert" {
   for_each = setintersection(
-    toset(keys(local.all_partners)), 
+    toset(keys(local.all_partners)),
     toset(keys(data.external.client_ssls_by_partner["patient_contract_count_4000_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-by-contract-count-4000-latency-99p-15m-alert-${each.key}"
   comparison_operator = "GreaterThanThreshold"
@@ -697,9 +697,9 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 
 resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_99p_15m_warning" {
   for_each = setintersection(
-    toset(keys(local.all_partners)), 
+    toset(keys(local.all_partners)),
     toset(keys(data.external.client_ssls_by_partner["patient_contract_count_4000_latency"].result))
-  ) 
+  )
 
   alarm_name          = "${local.app}-${var.env}-slo-patient-by-contract-count-4000-latency-99p-15m-warning-${each.key}"
   comparison_operator = "GreaterThanThreshold"
