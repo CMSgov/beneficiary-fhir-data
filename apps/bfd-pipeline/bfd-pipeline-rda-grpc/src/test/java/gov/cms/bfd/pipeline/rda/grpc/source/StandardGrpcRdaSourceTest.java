@@ -47,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -164,9 +163,6 @@ public class StandardGrpcRdaSourceTest {
     verify(caller).callVersionService(channel, CallOptions.DEFAULT);
     verify(sink).readMaxExistingSequenceNumber();
     verify(caller).callService(channel, CallOptions.DEFAULT, RdaChange.MIN_SEQUENCE_NUM);
-    ArgumentCaptor<Integer> claimArgument = ArgumentCaptor.forClass(Integer.class);
-    verify(sink, times(3)).transformMessage(eq(VERSION), claimArgument.capture());
-    assertEquals(List.of(CLAIM_1, CLAIM_2, CLAIM_3), claimArgument.getAllValues());
     verify(responseStream).cancelStream(anyString());
   }
 
