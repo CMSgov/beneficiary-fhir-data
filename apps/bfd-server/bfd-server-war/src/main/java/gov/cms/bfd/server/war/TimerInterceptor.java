@@ -10,7 +10,7 @@ import org.slf4j.MDC;
 
 @Interceptor
 public class TimerInterceptor {
-
+  http_access.response.server_outgoing_response_duration
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
   public void requestPreHandled(ServletRequestDetails theRequestDetails) {
     // Record the time before the BFD Handler is called.
@@ -19,7 +19,7 @@ public class TimerInterceptor {
     if (requestStartMilliseconds != null) {
       // convert requestStartMilliseconds to timestamp
       Timestamp requestStart = new Timestamp(requestStartMilliseconds);
-      MDC.put(
+      BfdMDC.put(
           "http_access.request.server_incoming_request_pre_handle_time", requestStart.toString());
     }
   }
@@ -30,7 +30,7 @@ public class TimerInterceptor {
     Long requestStartMilliseconds =
         (Long) theRequestDetails.getServletRequest().getAttribute(BfdMDC.REQUEST_START_KEY);
     if (requestStartMilliseconds != null)
-      MDC.put(
+      BfdMDC.put(
           "http_access.response.server_outgoing_response_duration",
           Long.toString(System.currentTimeMillis() - requestStartMilliseconds));
   }
