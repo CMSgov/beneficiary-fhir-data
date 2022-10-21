@@ -52,7 +52,10 @@ resource "aws_iam_policy" "etl-rw-s3" {
           ],
           "Effect" : "Allow",
           "Resource" : [
-            aws_s3_bucket.this.arn
+            aws_s3_bucket.this.arn,
+            # NOTE: Only included in the prod environment for CCW verification
+            # TODO: Remove after CCW Verification is complete, ca Q1 2023.
+            "%{ if local.is_prod }${aws_s3_bucket.ccw-verification[0].arn}%{ endif }"
           ]
         },
         {
@@ -63,7 +66,10 @@ resource "aws_iam_policy" "etl-rw-s3" {
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "${aws_s3_bucket.this.arn}/*"
+            "${aws_s3_bucket.this.arn}/*",
+            # NOTE: Only included in the prod environment for CCW verification
+            # TODO: Remove after CCW Verification is complete, ca Q1 2023.
+            "%{ if local.is_prod }${aws_s3_bucket.ccw-verification[0].arn}/*%{ endif }"
           ]
         }
       ]
