@@ -23,6 +23,7 @@ import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -378,7 +379,8 @@ public class SpringConfiguration {
    */
   @Bean
   public NPIOrgLookup npiOrgLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") Boolean includeFakeOrgName) {
+      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") Boolean includeFakeOrgName)
+      throws IOException {
     if (includeFakeOrgName) {
       return NPIOrgLookup.createNpiOrgLookupForTesting();
     } else {

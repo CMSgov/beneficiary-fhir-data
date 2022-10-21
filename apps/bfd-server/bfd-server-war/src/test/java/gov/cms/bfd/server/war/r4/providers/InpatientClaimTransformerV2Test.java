@@ -17,6 +17,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -79,7 +80,7 @@ public final class InpatientClaimTransformerV2Test {
   }
 
   @BeforeEach
-  public void before() {
+  public void before() throws IOException {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         InpatientClaimTransformerV2.transform(
@@ -1811,7 +1812,7 @@ public final class InpatientClaimTransformerV2Test {
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException {
+  public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
         InpatientClaimTransformerV2.transform(
             new TransformerContext(

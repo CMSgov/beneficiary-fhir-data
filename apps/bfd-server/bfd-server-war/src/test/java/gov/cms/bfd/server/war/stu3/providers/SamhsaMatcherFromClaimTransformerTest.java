@@ -22,6 +22,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +71,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    *
    * @return the collection
    */
-  public static Stream<Arguments> data() {
+  public static Stream<Arguments> data() throws IOException {
 
     // Load and transform the various claim types for testing
 
