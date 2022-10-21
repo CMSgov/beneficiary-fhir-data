@@ -48,7 +48,7 @@ create or replace view api_requests_by_bene AS
     cross join unnest(split(benes, ',')) as x(bene);
 
 --
--- This view is the basis for the Quicksight dashboard 'BFD Unique Beneficiaries' and
+-- This view is the basis for the Quicksight dashboard 'BFD Unique Medicare Enrollees' and
 -- returns one row for each day that one of the 4 partners (ab2d, bb2, bcda, dpc)
 -- accessed a new beneficiary. The content of the returned rows is the number of new beneficiaries
 -- that were seen on that day by partner, and from BFD as a whole.
