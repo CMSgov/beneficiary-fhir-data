@@ -85,7 +85,14 @@
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.0</junit.version>
-		<jackson.version>2.13.4</jackson.version>
+
+		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
+			when vulnerabilities or other fixes affect some but not all components -->
+		<jackson-databind.version>2.13.4.2</jackson-databind.version>
+		<jackson-datatype-jdk8.version>2.13.4</jackson-datatype-jdk8.version>
+		<jackson-dataformat-yaml.version>2.13.4</jackson-dataformat-yaml.version>
+		<jackson-datatype-jsr310.version>2.13.4</jackson-datatype-jsr310.version>
+
 		<mockito.version>4.8.0</mockito.version>
 		<postgresql.version>42.5.0</postgresql.version>
 		<hsqldb.version>2.7.0</hsqldb.version>
@@ -304,7 +311,7 @@
 				<!-- Add YAML support to jackson -->
 				<groupId>com.fasterxml.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson-dataformat-yaml.version}</version>
 			</dependency>
 
 			<dependency>
