@@ -247,12 +247,9 @@ module "fhir_asg" {
 
 
 ## FHIR server metrics, per partner
-#
-
 module "bfd_server_metrics" {
   source = "../resources/bfd_server_metrics"
   env    = var.env_config.env
-  asg_id = module.fhir_asg.asg_id
 }
 
 module "bfd_server_slo_alarms" {
