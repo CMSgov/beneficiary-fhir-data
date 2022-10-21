@@ -51,6 +51,18 @@ public interface PipelineJob<A extends PipelineJobArguments> extends Callable<Pi
   boolean isInterruptible();
 
   /**
+   * Perform a job-specific smoke test and returns true if the test was successful. A failed test
+   * indicates that the job cannot proceed and should not be scheduled. The default implementation
+   * simply returns true.
+   *
+   * @return true if the test passed, false otherwise
+   * @throws Exception test can pass through uncaught exceptions for reporting by the pipeline app
+   */
+  default boolean isSmokeTestSuccessful() throws Exception {
+    return true;
+  }
+
+  /**
    * Each scheduled/triggered execution of this {@link PipelineJob}, the job orchestrator will run
    * this {@link #call()} method. The {@link PipelineJob} SHALL:
    *
