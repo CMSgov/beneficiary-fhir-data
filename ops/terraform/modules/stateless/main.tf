@@ -254,6 +254,12 @@ module "bfd_server_metrics" {
   env    = var.env_config.env
   asg_id = module.fhir_asg.asg_id
 }
+
+module "bfd_server_slo_alarms" {
+  source = "../resources/bfd_server_slo_alarms"
+  env = var.env_config.env
+}
+
 # TODO: purge all access.txt 
 #all 
 module "bfd_server_metrics_all" {
