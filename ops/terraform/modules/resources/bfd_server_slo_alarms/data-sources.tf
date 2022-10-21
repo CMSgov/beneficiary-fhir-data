@@ -7,7 +7,8 @@ data "external" "client_ssls_by_partner" {
     each.value,
     local.namespace,
     jsonencode({
-      for partner, config in local.all_partners : partner => config.client_ssl_regex[var.env]
+      for partner, config in local.all_partners : 
+      partner => lookup(config.client_ssl_regex, var.env, null)
     })
   ]
 }
