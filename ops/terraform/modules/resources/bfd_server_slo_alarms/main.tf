@@ -21,25 +21,23 @@ locals {
       ab2d = {
         timeout_ms = (300 * 1000) / 2
         client_ssl_regex = {
-          test     = ".*ab2d.*"
-          prod_sbx = ".*ab2d.*"
-          prod     = ".*ab2d.*"
+          prod_sbx = ".*ab2d-sbx-client.*"
+          prod     = ".*ab2d-prod-client.*"
         }
       }
       bcda = {
         timeout_ms = (45 * 1000) / 2
         client_ssl_regex = {
-          test     = ".*bcda.*"
-          prod_sbx = ".*bcda.*"
-          prod     = ".*bcda.*"
+          prod_sbx = ".*bcda-sbx-client.*"
+          prod     = ".*bcda-prod-client.*"
         }
       }
       dpc = {
         timeout_ms = (30 * 1000) / 2
         client_ssl_regex = {
-          test     = ".*dpc.*"
-          prod_sbx = ".*dpc.*"
-          prod     = ".*dpc.*"
+          prod_sbx = ".*dpc-prod-sbx-client.*"
+          # jq requires escaped characters be escaped with 2 backslashes
+          prod     = ".*dpc\\\\.prod\\\\.client.*"
         }
       }
     }
@@ -47,7 +45,6 @@ locals {
       bb = {
         timeout_ms = (120 * 1000) / 2
         client_ssl_regex = {
-          test     = ".*BlueButton.*"
           prod_sbx = ".*BlueButton.*"
           prod     = ".*BlueButton.*"
         }
