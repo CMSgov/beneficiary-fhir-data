@@ -961,6 +961,11 @@ module "glue-table-api-requests" {
       "comment" = ""
     },
     {
+      "name"    = "mdc_hapi_server_incoming_request_pre_handle_time",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
       "name"    = "mdc_http_access_request_type",
       "type"    = "string",
       "comment" = ""
@@ -1042,6 +1047,11 @@ module "glue-table-api-requests" {
     },
     {
       "name"    = "mdc_http_access_response_output_size_in_bytes",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_hapi_server_outgoing_response_duration",
       "type"    = "string",
       "comment" = ""
     },
