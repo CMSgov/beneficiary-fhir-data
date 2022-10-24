@@ -107,10 +107,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    * {@inheritDoc}
    *
    * <p>This implementation reads starting sequence number from the database, gets the API version
-   * number from RDA API, then downloads and transforms several claims from the API. Since old
-   * claims might be ones that failed to transform in the past we only fail the test if we are
-   * unable to transform any claim at all. In that case we log one of the failures as a
-   * representative of the problem.
+   * number from RDA API, then downloads several claims from the API.
    *
    * @param sink to process batches of objects
    * @return true if all actions were completed successfully
