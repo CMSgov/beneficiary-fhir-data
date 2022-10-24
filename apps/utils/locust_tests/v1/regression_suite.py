@@ -91,19 +91,6 @@ class RegressionV1User(BFDUserBase):
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
-    @tag("coverage", "coverage_test_id_last_updated")
-    @task
-    def coverage_test_id_last_updated(self):
-        """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/Coverage",
-            params={
-                "_lastUpdated": f"gt{self.last_updated}",
-                "beneficiary": self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
-        )
-
     @tag("eob", "eob_test_id_count_type_pde")
     @task
     def eob_test_id_count_type_pde(self):
@@ -119,48 +106,32 @@ class RegressionV1User(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
         )
 
-    @tag("eob", "eob_test_id_last_updated_count")
+    @tag("eob", "eob_test_id_count")
     @task
-    def eob_test_id_last_updated_count(self):
-        """Explanation of Benefit search by ID, last updated, paginated"""
+    def eob_test_id_count(self):
+        """Explanation of Benefit search by ID, paginated"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
                 "patient": self.bene_ids.pop(),
                 "_format": "json",
                 "_count": "100",
-                "_lastUpdated": f"gt{self.last_updated}",
             },
-            name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
+            name="/v1/fhir/ExplanationOfBenefit search by id / count = 100",
         )
 
-    @tag("eob", "eob_test_id_include_tax_number_last_updated")
+    @tag("eob", "eob_test_id_include_tax_number")
     @task
-    def eob_test_id_include_tax_number_last_updated(self):
-        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
+    def eob_test_id_include_tax_number(self):
+        """Explanation of Benefit search by ID, Include Tax Numbers"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
                 "patient": self.bene_ids.pop(),
                 "_format": "json",
-                "_lastUpdated": f"gt{self.last_updated}",
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
-        )
-
-    @tag("eob", "eob_test_id_last_updated")
-    @task
-    def eob_test_id_last_updated(self):
-        """Explanation of Benefit search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/ExplanationOfBenefit",
-            params={
-                "patient": self.bene_ids.pop(),
-                "_format": "json",
-                "_lastUpdated": f"gt{self.last_updated}",
-            },
-            name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
+            name="/v1/fhir/ExplanationOfBenefit search by id / includeTaxNumbers",
         )
 
     @tag("eob", "eob_test_id")
@@ -199,7 +170,7 @@ class RegressionV1User(BFDUserBase):
     @tag("patient", "patient_test_hashed_mbi")
     @task
     def patient_test_hashed_mbi(self):
-        """Patient search by ID, Last Updated, include MBI, include Address"""
+        """Patient search by ID, include MBI, include Address"""
 
         def make_url():
             return create_url_path(
@@ -215,19 +186,18 @@ class RegressionV1User(BFDUserBase):
             url_callback=make_url,
         )
 
-    @tag("patient", "patient_test_id_last_updated_include_mbi_include_address")
+    @tag("patient", "patient_test_id_include_mbi_include_address")
     @task
-    def patient_test_id_last_updated_include_mbi_include_address(self):
-        """Patient search by ID, Last Updated, include MBI, include Address"""
+    def patient_test_id_include_mbi_include_address(self):
+        """Patient search by ID, include MBI, include Address"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
                 "_id": self.bene_ids.pop(),
-                "_lastUpdated": f"gt{self.last_updated}",
                 "_IncludeIdentifiers": "mbi",
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
+            name="/v1/fhir/Patient/id search by id / includeTaxNumbers / mbi",
         )
 
     @tag("patient", "patient_test_id")
