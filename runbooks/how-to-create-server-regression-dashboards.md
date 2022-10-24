@@ -134,7 +134,7 @@ data.
         metadata.timestamp as raw_timestamp
       from "bfd-insights-bfd-prod-sbx"."bfd_insights_bfd_prod_sbx_server_regression"
       where
-        metadata.hash = '6dde56a7a303693c0d5b92820619d86929a3a3840d2c2be8d038d76a7b0fe637'
+        metadata.hash = '71a5310d52e0ffb8c03dc74cdee7bf635bc7fbd75dfe1d8f647fcfb11e5b65ce'
         and contains(metadata.tags, 'master')
       order by metadata.timestamp asc
       ```
