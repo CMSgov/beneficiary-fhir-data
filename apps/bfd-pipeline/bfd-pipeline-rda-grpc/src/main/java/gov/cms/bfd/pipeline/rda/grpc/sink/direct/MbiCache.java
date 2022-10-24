@@ -205,7 +205,6 @@ public class MbiCache {
           final Throwable rootCause = Throwables.getRootCause(ex);
           log.debug(
               "caught exception while caching MBI: retry={} class={} message={} causeClass={} causeMessage={}",
-
               retryNumber,
               ex.getClass().getSimpleName(),
               ex.getMessage(),
