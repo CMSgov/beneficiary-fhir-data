@@ -213,7 +213,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H5555"
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
       } ]
     },
     "type" : [ {
@@ -228,7 +229,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H8888"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     }
   }, {
@@ -236,7 +238,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H66666"
+        "code" : "B04",
+        "display" : "MONKEYPOX"
       } ]
     }
   }, {
@@ -244,7 +247,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H77777"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     }
   }, {
@@ -252,7 +256,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H12345"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     }
   } ],
@@ -304,7 +309,8 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "49035044700"
+        "code" : "000000000",
+        "display" : "Fake Diluent - WATER"
       }
     } ],
     "sequence" : 6,

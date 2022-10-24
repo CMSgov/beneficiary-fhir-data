@@ -17,84 +17,98 @@ from common.stats.stats_config import StatsConfiguration, StatsStorageType
 monkey.patch_all()
 import boto3
 
+__s3_client = boto3.client("s3")
+
 
 def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    """Writes aggregated performance stats to user-specified storage
+
+    Args:
+        stats_config (StatsConfiguration): The user-specified configuration for stats-related
+        operations from the command-line or from configuration files
+        stats (AggregatedStats): The current run's aggregated stats
+    """
     logger = logging.getLogger()
-    if stats_config.store == StatsStorageType.FILE:
+    if stats_config.stats_store == StatsStorageType.FILE:
         logger.info("Writing aggregated performance statistics to file.")
-
-        stats_json_writer = StatsJsonFileWriter(stats)
-        stats_json_writer.write(stats_config.path or "")
-    elif stats_config.store == StatsStorageType.S3:
+        _write_file(stats_config, stats)
+    elif stats_config.stats_store == StatsStorageType.S3:
         logger.info("Writing aggregated performance statistics to S3.")
-
-        stats_s3_writer = StatsJsonS3Writer(stats)
-        if not stats_config.bucket:
-            raise ValueError("S3 bucket must be provided when writing stats to S3")
-        stats_s3_writer.write(stats_config.bucket)
+        _write_s3(stats_config, stats)
 
 
-class StatsJsonFileWriter(object):
-    """Writes an AggegratedStats instance to a specified directory path in JSON format"""
+def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    """Writes the JSON-formatted statistics to the given path
 
-    def __init__(self, stats: AggregatedStats) -> None:
-        """Creates a new instance of StatsJsonFileWriter given an StatsCollector object
+    Args:
+        path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
 
-        Args:
-            stats (AggregatedStats): An AggregatedStats object that represents the stats of a test suite run
-        """
-        super().__init__()
+    Raises:
+        ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
+    """
+    if not stats.metadata:
+        raise ValueError("AggregatedStats instance must have metadata to write to file")
 
-        self.stats = stats
+    stats_hash = stats.metadata.hash
+    parent_path = stats_config.stats_store_file_path or "./"
+    full_path = os.path.join(parent_path, f"{int(time.time())}-{stats_hash}.stats.json")
+    with open(
+        full_path,
+        mode="x",
+        encoding="utf-8",
+    ) as json_file:
+        json_file.write(json.dumps(asdict(stats), indent=4))
 
-    def write(self, path: str = "") -> None:
-        """Writes the JSON-formatted statistics to the given path
-
-        Args:
-            path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
-
-        Raises:
-            ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
-        """
-        if not self.stats.metadata:
-            raise ValueError("AggregatedStats instance must have metadata to write to file")
-
-        env_name = self.stats.metadata.environment.name
-        store_tag = self.stats.metadata.tag
-        with open(
-            os.path.join(path, f"{env_name}-{store_tag}-{int(time.time())}.stats.json"), "x"
-        ) as json_file:
-            json_file.write(json.dumps(asdict(self.stats), indent=4))
+    logging.getLogger().info("Wrote aggregated performance statistics to file path: %s", full_path)
 
 
-class StatsJsonS3Writer(object):
-    """Writes an AggegratedStats instance to a specified S3 bucket in JSON format"""
+def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
+    """Writes the JSON-formatted statistics to the given S3 bucket to a pre-determined path
+    following BFD Insights data organization standards
 
-    def __init__(self, stats: AggregatedStats) -> None:
-        """Creates a new instance of StatsJsonS3Writer given an AggregatedStats object
+    Args:
+        bucket (str): The S3 bucket in AWS to write the JSON to
 
-        Args:
-            stats (AggregatedStats): An AggregatedStats object that represents the stats of a test suite run
-        """
-        super().__init__()
+    Raises:
+        ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
+    """
+    if not stats.metadata:
+        raise ValueError("AggregatedStats instance must have metadata to write to S3")
 
-        self.stats = stats
-        self.s3 = boto3.client("s3")
+    if not stats_config.stats_store_s3_bucket:
+        raise ValueError("--stats-store-s3-bucket must be specified")
 
-    def write(self, bucket: str) -> None:
-        """Writes the JSON-formatted statistics to the given S3 bucket to a pre-determined path
-        following BFD Insights data organization standards
+    if not stats_config.stats_store_s3_database:
+        raise ValueError("--stats-store-s3-database must be specified")
 
-        Args:
-            bucket (str): The S3 bucket in AWS to write the JSON to
+    if not stats_config.stats_store_s3_table:
+        raise ValueError("--stats-store-s3-table must be specified")
 
-        Raises:
-            ValueError: Raised if this object's AggregatedStats instance does not have any StatsMetadata
-        """
-        if not self.stats.metadata:
-            raise ValueError("AggregatedStats instance must have metadata to write to S3")
+    stats_hash = stats.metadata.hash
+    s3_path = "/".join(
+        [
+            "databases",
+            stats_config.stats_store_s3_database,
+            stats_config.stats_store_s3_table,
+            f"hash={stats_hash}",
+            f"{int(time.time())}.stats.json",
+        ]
+    )
+    try:
+        put_response = __s3_client.put_object(
+            Bucket=stats_config.stats_store_s3_bucket, Key=s3_path, Body=json.dumps(asdict(stats))
+        )
 
-        env_name = self.stats.metadata.environment.name
-        store_tag = self.stats.metadata.tag
-        s3_path = f"databases/bfd/test_performance_stats/env={env_name}/tag={store_tag}/{int(time.time())}.json"
-        self.s3.put_object(Bucket=bucket, Key=s3_path, Body=json.dumps(asdict(self.stats)))
+        logging.getLogger().info(
+            'Wrote aggregated performance statistics to s3 bucket "%s" at path: %s',
+            stats_config.stats_store_s3_bucket,
+            s3_path,
+        )
+        if not put_response:
+            raise RuntimeError(
+                f"Storing stats to {s3_path} failed as an invalid response from AWS was returned"
+            )
+    except __s3_client.exceptions.NoSuchBucket as exc:
+        raise ValueError(f"S3 bucket {stats_config.stats_store_s3_bucket} does not exist") from exc
+    except __s3_client.exceptions.ClientError as exc:
+        raise RuntimeError(f"Unable to upload to {s3_path}") from exc

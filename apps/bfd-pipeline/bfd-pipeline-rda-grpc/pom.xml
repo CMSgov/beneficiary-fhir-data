@@ -27,6 +27,12 @@
             <artifactId>bfd-model-rda</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <!-- contains the data transformation library classes needed to transform incoming data -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-dsl-codegen-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -61,19 +67,19 @@
             <!-- Used to serialize and deserialize objects to JSON during testing. -->
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
         <dependency>
             <!-- Adds java-8 types to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-datatype-jdk8.version}</version>
         </dependency>
         <dependency>
             <!-- Adds java-8 date/time classes to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
 
         <dependency>
@@ -141,7 +147,7 @@
                    https://github.com/awaitility/awaitility -->
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>2.0.0</version>
+            <version>${awaitility.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -201,6 +207,22 @@
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <mappingPath>${project.basedir}/../../bfd-model/bfd-model-rda/mappings</mappingPath>
+                    <outputDirectory>${project.build.directory}/generated-sources/transformers</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>transformers</goal>
                         </goals>
                     </execution>
                 </executions>

@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -551,7 +551,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(7, eob.getExtension().size());
+    assertEquals(9, eob.getExtension().size());
   }
 
   @Test
@@ -688,13 +688,15 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R4444", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A37", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R4444", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A37", "WHOOPING COUGH"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A37", "WHOOPING COUGH")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "admitting",
@@ -705,13 +707,15 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A40", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A40", "STREPTOCOCCAL SEPSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -722,13 +726,15 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("A7777", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A52", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A7777", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -739,13 +745,15 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R8888", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A06", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R8888", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", "AMEBIASIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -756,13 +764,15 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
-        TransformerTestUtilsV2.findDiagnosisByCode("K71234", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A15", eob.getDiagnosis());
 
     DiagnosisComponent cmp5 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "K71234", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", "RESPIRATORY TUBERCULOSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -773,13 +783,15 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
 
     DiagnosisComponent diag6 =
-        TransformerTestUtilsV2.findDiagnosisByCode("7840", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B01", eob.getDiagnosis());
 
     DiagnosisComponent cmp6 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "7840", "HEADACHE"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B01", "VARICELLA [CHICKENPOX]"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -790,13 +802,17 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp6.equalsDeep(diag6));
 
     DiagnosisComponent diag7 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A01", eob.getDiagnosis());
 
     DiagnosisComponent cmp7 =
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag7.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null),
+            List.of(
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A01", "TYPHOID AND PARATYPHOID FEVERS"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "A01", "TYPHOID AND PARATYPHOID FEVERS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -807,13 +823,16 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp7.equalsDeep(diag7));
 
     DiagnosisComponent diag8 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A02", eob.getDiagnosis());
 
     DiagnosisComponent cmp8 =
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag8.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null),
+            List.of(
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A02", "OTHER SALMONELLA INFECTIONS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", "OTHER SALMONELLA INFECTIONS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -833,70 +852,114 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("0TCDDEE", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BQ0HZZZ", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "0TCDDEE", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "BQ0HZZZ",
+                    "PLAIN RADIOGRAPHY OF LEFT ANKLE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "BQ0HZZZ",
+                    "PLAIN RADIOGRAPHY OF LEFT ANKLE")),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 0TCDDEE");
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code BQ0HZZZ");
 
     ProcedureComponent proc2 =
-        TransformerTestUtilsV2.findProcedureByCode("302DDAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("CD1YYZZ", eob.getProcedure());
 
     ProcedureComponent cmp2 =
         TransformerTestUtilsV2.createProcedure(
             proc2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302DDAA", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
             "2016-01-16T00:00:00-06:00");
 
-    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code 302DDAA");
+    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
 
     ProcedureComponent proc3 =
-        TransformerTestUtilsV2.findProcedureByCode("302ZZXX", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("2W52X6Z", eob.getProcedure());
 
     ProcedureComponent cmp3 =
         TransformerTestUtilsV2.createProcedure(
             proc3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302ZZXX", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "2W52X6Z",
+                    "REMOVAL OF PRESSURE DRESSING ON NECK"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "2W52X6Z",
+                    "REMOVAL OF PRESSURE DRESSING ON NECK")),
             "2016-01-15T00:00:00-06:00");
 
-    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 302ZZXX");
+    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 2W52X6Z");
 
     ProcedureComponent proc4 =
-        TransformerTestUtilsV2.findProcedureByCode("5566AAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BP17ZZZ", eob.getProcedure());
 
     ProcedureComponent cmp4 =
         TransformerTestUtilsV2.createProcedure(
             proc4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "5566AAA", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "BP17ZZZ",
+                    "FLUOROSCOPY OF LEFT SCAPULA"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA")),
             "2016-01-17T00:00:00-06:00");
 
-    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code 5566AAA");
+    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code BP17ZZZ");
 
     ProcedureComponent proc5 =
-        TransformerTestUtilsV2.findProcedureByCode("6677BBB", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("D9YD8ZZ", eob.getProcedure());
 
     ProcedureComponent cmp5 =
         TransformerTestUtilsV2.createProcedure(
             proc5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "6677BBB", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "D9YD8ZZ",
+                    "HYPERTHERMIA OF NASOPHARYNX"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX")),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code 6677BBB");
+    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code D9YD8ZZ");
 
     ProcedureComponent proc6 =
-        TransformerTestUtilsV2.findProcedureByCode("8109", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("F00ZCKZ", eob.getProcedure());
 
     ProcedureComponent cmp6 =
         TransformerTestUtilsV2.createProcedure(
             proc6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "8109", "REFUSION OF SPINE"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "F00ZCKZ",
+                    "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "F00ZCKZ",
+                    "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT")),
             "2016-01-24T00:00:00-06:00");
 
-    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code 8109");
+    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
   }
 
   /** Insurance */
@@ -1696,6 +1759,47 @@ public final class InpatientClaimTransformerV2Test {
             .orElse(null);
     assertNotNull(fiNumExtension);
     assertEquals("8299", ((Coding) fiNumExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fiClmActnCd is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimActionCode is present.
+   */
+  @Test
+  public void shouldHaveFiClaimActionCdExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmActCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiClmActCdExtension);
+    assertEquals("1", ((Coding) fiClmActCdExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimProcessDate is present.
+   */
+  @Test
+  public void shouldHaveFiClaimProcessDateExtension() {
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+            new DateType("2016-02-19"));
+
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**

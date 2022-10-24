@@ -2,8 +2,11 @@
 #
 
 locals {
-  tags    = merge({ Layer = "data", role = var.pii_bucket_config.name }, var.env_config.tags)
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
+  tags    = {
+    Layer = "data"
+    role = var.pii_bucket_config.name
+  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -48,7 +51,7 @@ resource "aws_s3_bucket" "pii_bucket" {
 
   logging {
     target_bucket = var.pii_bucket_config.log_bucket
-    target_prefix = "${var.pii_bucket_config.name}_s3_access_logs"
+    target_prefix = "${var.pii_bucket_config.name}_s3_access_logs/"
   }
 
   versioning {

@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -32,7 +33,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
-import gov.cms.bfd.server.war.commons.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -122,6 +122,32 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     // Compare result to transformed EOB
     compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
+   * throws an exception as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit}
+   * that provides an non-numeric claim identifer.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForNonNumericClaimId() throws FHIRException {
+    ca.uhn.fhir.rest.server.exceptions.InternalErrorException thrown =
+        assertThrows(
+            ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
+            () -> {
+              IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+              ExplanationOfBenefit eob =
+                  fhirClient
+                      .read()
+                      .resource(ExplanationOfBenefit.class)
+                      .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, "junk"))
+                      .execute();
+            },
+            "Unsupported ID pattern: junk");
   }
 
   /**

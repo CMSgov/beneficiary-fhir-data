@@ -42,19 +42,19 @@
             <!-- Used to serialize and deserialize objects to JSON. -->
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
         <dependency>
             <!-- Adds java-8 types to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-datatype-jdk8.version}</version>
         </dependency>
         <dependency>
             <!-- Adds java-8 date/time classes to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
         <!-- Testing -->
         <dependency>
@@ -82,5 +82,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <mappingPath>${project.basedir}/mappings</mappingPath>
+                    <outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>entities</goal>
+                            <goal>sql</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

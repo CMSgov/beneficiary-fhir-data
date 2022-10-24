@@ -4,7 +4,6 @@
 locals {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config      = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
-  is_prod         = substr(var.env_config.env, 0, 4) == "prod"
   port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
@@ -211,18 +210,16 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config = {
-    min             = local.is_prod ? 2 * length(local.azs) : length(local.azs)
+    min             = local.env_config.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
     max             = 8 * length(local.azs)
     max_warm        = 4 * length(local.azs)
-    desired         = local.is_prod ? 2 * length(local.azs) : length(local.azs)
+    desired         = local.env_config.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    # test == c5.xlarge (4 vCPUs and 8GiB mem)
-    # prod and prod-sbx == c5.4xlarge (16 vCPUs and 32GiB mem )
     instance_type = "c5.4xlarge"
     volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
@@ -362,37 +359,6 @@ module "bfd_server_alarm_all_eob_6s-p95" {
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
-}
-
-## ETL server
-#
-module "bfd_pipeline" {
-  source = "../resources/bfd_pipeline"
-
-  env_config = local.env_config
-  az         = "us-east-1b" # same as the master db
-
-  launch_config = {
-    ami_id       = var.etl_ami
-    account_id   = data.aws_caller_identity.current.account_id
-    ssh_key_name = var.ssh_key_name
-    git_branch   = var.git_branch_name
-    git_commit   = var.git_commit_id
-  }
-
-  db_config = {
-    db_sg = data.aws_security_group.aurora_cluster.id
-  }
-
-  mgmt_config = {
-    vpn_sg    = data.aws_security_group.vpn.id
-    tool_sg   = data.aws_security_group.tools.id
-    remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
-  }
-
-  alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
 }
 
 ## This is where cloudwatch dashboards are managed. 

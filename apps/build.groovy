@@ -26,18 +26,66 @@ class AppBuildResults implements Serializable {
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
 def build(boolean verboseMaven) {
+	withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
+		// Set the auth token for aws code artifact
+		env.CODEARTIFACT_AUTH_TOKEN = sh(
+			returnStdout: true,
+			script: '''
+aws codeartifact get-authorization-token --domain bfd-mgmt \
+ --domain-owner "$ACCOUNT_ID" \
+ --output text --query authorizationToken
+'''
+		).trim()
+
+		// Get our endpoint url for our aws code artifact
+		env.CODEARTIFACT_ENDPOINT = sh(
+			returnStdout: true,
+			script: '''
+aws codeartifact get-repository-endpoint \
+--domain bfd-mgmt --repository bfd-mgmt \
+--format maven --output text
+'''
+		).trim()
+	}
+
+	// Add the authorization token and username for our aws code artifact repository
+	// Added the repositories section in order to not pull from the aws code artifact first instead
+	// of the regular maven repository.  Decreases build times assoiated with this change.
+	sh '''
+cat <<EOF > ~/.m2/settings.xml
+<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd\">
+    <profiles>
+        <profile>
+            <id>bfd-mgmt-bfd-mgmt</id>
+            <activation>
+            <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+               <repository>
+                   <id>bfd-mgmt-bfd-mgmt</id>
+                   <url>${CODEARTIFACT_ENDPOINT}</url>
+                   <releases>
+                   <enabled>false</enabled>
+                   </releases>
+               </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <servers>
+        <server>
+          <username>aws</username>
+          <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+          <id>bfd-mgmt-bfd-mgmt</id>
+        </server>
+    </servers>
+</settings>
+EOF
+'''
+
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-
-		sh "mvn ${quietFlags} --threads 1C --update-snapshots -Dmaven.test.failure.ignore clean verify"
-		/*
-		 * Fingerprint the output artifacts and archive the test results.
-		 *
-		 * Archiving the artifacts here would waste space, as the build deploys them to the local Maven repository.
-		 */
-		fingerprint '**/target/*.jar,**/target/*.war,**/target/*.zip'
-		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
-		archiveArtifacts artifacts: '**/target/*.jar,**/target/*.war,**/target/*.zip,**/target/*-reports/*.txt', allowEmptyArchive: true
+		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
 	}
 
 	return new AppBuildResults(

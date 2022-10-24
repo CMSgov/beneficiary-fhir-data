@@ -41,6 +41,7 @@ properties([
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
+		booleanParam(name: 'skip_migrator_deployment', description: 'When true, blow past the migrator deployment in test. Non-trunk/non-master only.', defaultValue: false),
 		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
@@ -135,7 +136,7 @@ try {
 		containers: [
 			containerTemplate(
 				name: 'bfd-cbc-build',
-				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv',
+				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6', // TODO: consider a smarter solution for resolving this image
 				command: 'cat',
 				ttyEnabled: true,
 				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
@@ -154,10 +155,12 @@ try {
 					// Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
-					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
+
+					// terraservice deployments...
+					migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
-					awsAssumeRole()
+					awsAuth.assumeRole()
 
 					// Find the most current AMI IDs (if any).
 					amiIds = null
@@ -178,9 +181,9 @@ try {
 				}
 			}
 
-			/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
-			value if the build is a PR as the BRANCH_NAME var is populated with the build 
-			name during PR builds. 
+			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
+			value if the build is a PR as the BRANCH_NAME var is populated with the build
+			name during PR builds.
 			*/
 			stage('Set Branch Name') {
 				currentStage = env.STAGE_NAME
@@ -228,51 +231,96 @@ try {
 				}
 			}
 
-			stage('Deploy Migrator to TEST') {
-				bfdEnv = 'test'
+			bfdEnv = 'test'
+			stage('Deploy Base to TEST') {
 				currentStage = env.STAGE_NAME
-
 				lock(resource: 'env_test') {
-					milestone(label: 'stage_deploy_test_migration_start')
+					milestone(label: 'stage_deploy_test_base_start')
 					container('bfd-cbc-build') {
-
-						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-							amiId: amiIds.bfdMigratorAmiId,
-							bfdEnv: bfdEnv,
-							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-							awsRegion: awsRegion,
-							gitBranchName: gitBranchName,
-							this.&awsAssumeRole
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/base"
 						)
+					}
+				}
+			}
 
-						if (migratorDeploymentSuccessful) {
-							println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
-						} else {
-							error('Migrator deployment failed')
+			stage('Deploy Migrator to TEST') {
+				currentStage = env.STAGE_NAME
+				if (!params.skip_migrator_deployment || env.BRANCH == "master" ) {
+					lock(resource: 'env_test') {
+						milestone(label: 'stage_deploy_test_migration_start')
+						container('bfd-cbc-build') {
+
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion
+							)
+
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
+							} else {
+								error('Migrator deployment failed')
+							}
 						}
 					}
 				}
 			}
 
-			stage('Deploy to TEST') {
+			stage('Deploy Pipeline to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_pipeline_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/pipeline",
+							tfVars: [
+								ami_id_override: amiIds.bfdPipelineAmiId
+							]
+						)
+					}
+				}
+			}
+
+			stage('Deploy Server to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
-						awsAssumeRole()
+						awsAuth.assumeRole()
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 
-						awsAssumeRole()
-						serverScripts.deployServerRegression(
-							bfdEnv: bfdEnv,
-							dockerImageTagOverride: params.server_regression_image_override
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server/server-regression",
+							tfVars: [
+								docker_image_tag_override: params.server_regression_image_override
+							]
 						)
 
-						awsAssumeRole()
-						serverScripts.runServerRegression(
+						awsAuth.assumeRole()
+						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
+							gitBranchName: gitBranchName
 						)
+
+						if (hasRegressionRunSucceeded) {
+							println 'Regression suite passed, proceeding to next stage...'
+						} else {
+							try {
+								input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+								echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+							} catch(err) {
+								error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+							}
+						}
 					}
 				}
 			}
@@ -303,8 +351,26 @@ try {
 				}
 			}
 
+			bfdEnv = 'prod-sbx'
+			stage('Deploy Base to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_base_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
 			stage('Deploy Migrator to PROD-SBX') {
-				bfdEnv = 'prod-sbx'
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
@@ -315,13 +381,11 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName,
-								this.&awsAssumeRole
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
-								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
 								error('Migrator deployment failed')
 							}
@@ -332,24 +396,19 @@ try {
 				}
 			}
 
-			stage('Deploy to PROD-SBX') {
+			stage('Deploy Pipeline to PROD-SBX') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
-						milestone(label: 'stage_deploy_prod_sbx_start')
+						milestone(label: 'stage_deploy_prod_sbx_pipeline_start')
 						container('bfd-cbc-build') {
-							awsAssumeRole()
-							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
-
-							awsAssumeRole()
-							serverScripts.deployServerRegression(
-								bfdEnv: bfdEnv,
-								dockerImageTagOverride: params.server_regression_image_override
-							)
-
-							awsAssumeRole()
-							serverScripts.runServerRegression(
-								bfdEnv: bfdEnv,
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+									ami_id_override: amiIds.bfdPipelineAmiId
+								]
 							)
 						}
 					}
@@ -358,8 +417,68 @@ try {
 				}
 			}
 
+			stage('Deploy Server to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
+
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+									docker_image_tag_override: params.server_regression_image_override
+								]
+							)
+
+							awsAuth.assumeRole()
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
+							)
+
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
+
+			bfdEnv = 'prod'
+			stage('Deploy Base to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_base_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
 			stage('Deploy Migrator to PROD') {
-				bfdEnv = 'prod'
 				currentStage = env.STAGE_NAME
 
 				if (willDeployToProdEnvs) {
@@ -371,13 +490,11 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName,
-								this.&awsAssumeRole
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
-								println "Proceeding to Stage: 'Deploy to ${bfdEnv.toUpperCase()}'"
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
 								error('Migrator deployment failed')
 							}
@@ -388,26 +505,63 @@ try {
 				}
 			}
 
-			stage('Deploy to PROD') {
+			stage('Deploy Pipeline to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_pipeline_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+									ami_id_override: amiIds.bfdPipelineAmiId
+								]
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
+
+			stage('Deploy Server to PROD') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
-							awsAssumeRole()
+							awsAuth.assumeRole()
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
 
-							awsAssumeRole()
-							serverScripts.deployServerRegression(
-								bfdEnv: bfdEnv,
-								dockerImageTagOverride: params.server_regression_image_override
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+									docker_image_tag_override: params.server_regression_image_override
+								]
 							)
 
-							// TODO: regression suite is too slow for production and nondeterministic. Addressing in BFD-1778.
-							// serverScripts.runServerRegression(
-							// 	bfdEnv: bfdEnv,
-							// )
+							awsAuth.assumeRole()
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
+							)
+
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
+							}
 						}
 					}
 				} else {
@@ -424,65 +578,4 @@ try {
 	throw ex
 } finally {
 	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-}
-
-/**
- * Wrap the awscli to authenticate with AWS by assuming a specific, fully qualified role. The role
- * must be the id of an available Jenkins secret.
- *
- * In addition to the setting credentials as environment variables for AWS requests, this also
- * sets AWS_REGION, DEFAULT_AWS_REGION, and a special NEXT_AWS_AUTH. NEXT_AWS_AUTH contains the
- * the time at which ~50% of the requested session has elapsed. If this environment variable is
- * populated, the script will only re-authenticate if there is less than half the time left in the
- * current session. By default, this requests a 60 minute session and subsequent calls of this
- * method will only reauthenticate if there are fewer than 30 minutes remaining on the session. This
- * keeps both the Jenkins logs tidier and avoids excessive role assumption as recorded in cloudwatch
- * logs. This is an especially important consideration in tight loops that seek to ensure valid AWS
- * credentials before or after each iteration.
- *
- * TODO: consider transitioning away from wrapped awscli role assumption to something in groovy/java
- * TODO: implement validation safety surrounding e.g. credentialsId, sessionName
- *
- * @param args {@link Map} that optionally includes sessionDurationSeconds, sessionName, awsRegion,
- * and credentialsId
- */
-void awsAssumeRole(Map args = [:]) {
-	sessionDurationSeconds = args.sessionDurationSeconds ?: 3600
-	// default `sessionName` as `env.JOB_NAME` is vaguely sanitized to replace non-alphanumeric
-	// chars with '-' AND deduplicates consecutive '-'. This is somewhat more restrictive than the
-	// regex used in the STS API for RoleSessionName, i.e. `/[\w+=,.@:\/-]*/`
-	// See https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
-	sessionName = args.sessionName ?: env.JOB_NAME.replaceAll(/[^a-zA-Z\d]/, '-').replaceAll(/[\-]+/, '-')
-	credentialsId = args.credentialsId ?: 'bfd-aws-assume-role'
-	awsRegion = args.awsRegion ?: 'us-east-1'
-
-	if (env.NEXT_AWS_AUTH == null || java.time.Instant.now() > java.time.Instant.parse(env.NEXT_AWS_AUTH)) {
-		echo "Authenticating..."
-		withEnv(["DURATION=${sessionDurationSeconds}",
-				 "SESSION_NAME=${sessionName}",
-				 'AWS_ACCESS_KEY_ID=',
-				 'AWS_SECRET_ACCESS_KEY=',
-				 'AWS_SESSION_TOKEN=']) {
-			withCredentials([string(credentialsId: credentialsId, variable: 'JENKINS_ROLE')]) {
-				awsCredentials = sh(
-					returnStdout: true,
-					script: '''
-aws sts assume-role \
-  --duration-seconds "$DURATION" \
-  --role-arn "$JENKINS_ROLE" \
-  --role-session-name "$SESSION_NAME" \
-  --output text --query Credentials
-'''
-				).trim().split(/\s+/)
-				// Set nextAuthSeconds to renew through ~50% of original session's duration
-				nextAuthSeconds = (sessionDurationSeconds / 2).longValue()
-				env.NEXT_AWS_AUTH = java.time.Instant.now().plus(java.time.Duration.ofSeconds(nextAuthSeconds))
-				env.AWS_REGION = awsRegion
-				env.AWS_DEFAULT_REGION = awsRegion
-				env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-				env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-				env.AWS_SESSION_TOKEN = awsCredentials[3]
-			}
-		}
-	}
 }

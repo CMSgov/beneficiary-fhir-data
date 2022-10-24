@@ -58,6 +58,9 @@
           "value" : "32490593716374487"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2011-02-18"
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -324,8 +327,13 @@
         "sequence" : 1,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A40",
+            "display" : "STREPTOCOCCAL SEPSIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R5555"
+            "code" : "A40",
+            "display" : "STREPTOCOCCAL SEPSIS"
           } ]
         },
         "type" : [ {
@@ -339,8 +347,13 @@
         "sequence" : 2,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "I9999"
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
           } ]
         },
         "type" : [ {
@@ -354,8 +367,13 @@
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A06",
+            "display" : "AMEBIASIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R2222"
+            "code" : "A06",
+            "display" : "AMEBIASIS"
           } ]
         },
         "type" : [ {
@@ -369,8 +387,13 @@
         "sequence" : 4,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A15",
+            "display" : "RESPIRATORY TUBERCULOSIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R3333"
+            "code" : "A15",
+            "display" : "RESPIRATORY TUBERCULOSIS"
           } ]
         },
         "type" : [ {
@@ -384,8 +407,13 @@
         "sequence" : 5,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R1122"
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
           } ]
         },
         "type" : [ {
@@ -401,8 +429,13 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0AABBZZ"
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
           } ]
         }
       } ],
@@ -440,7 +473,8 @@
             "url" : "http://hl7.org/fhir/sid/ndc",
             "valueCoding" : {
               "system" : "http://hl7.org/fhir/sid/ndc",
-              "code" : "987654321"
+              "code" : "000000000",
+              "display" : "Fake Diluent - WATER"
             }
           } ],
           "coding" : [ {
@@ -1052,8 +1086,13 @@
         "sequence" : 1,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B04",
+            "display" : "MONKEYPOX"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R5555"
+            "code" : "B04",
+            "display" : "MONKEYPOX"
           } ]
         },
         "type" : [ {
@@ -1067,8 +1106,13 @@
         "sequence" : 2,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R6666"
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
           } ]
         },
         "type" : [ {
@@ -1082,8 +1126,13 @@
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A25",
+            "display" : "RAT-BITE FEVERS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "G6666"
+            "code" : "A25",
+            "display" : "RAT-BITE FEVERS"
           } ]
         },
         "type" : [ {
@@ -1574,6 +1623,9 @@
           "value" : "08683096577486"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2015-10-30"
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -1860,7 +1912,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "H5555"
+            "code" : "53081",
+            "display" : "ESOPHAGEAL REFLUX"
           } ]
         },
         "type" : [ {
@@ -1874,8 +1927,13 @@
         "sequence" : 2,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "H8888"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           } ]
         },
         "type" : [ {
@@ -1889,8 +1947,13 @@
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B05",
+            "display" : "MEASLES"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R2222"
+            "code" : "B05",
+            "display" : "MEASLES"
           } ]
         },
         "type" : [ {
@@ -1904,8 +1967,13 @@
         "sequence" : 4,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B30",
+            "display" : "VIRAL CONJUNCTIVITIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R3333"
+            "code" : "B30",
+            "display" : "VIRAL CONJUNCTIVITIS"
           } ]
         },
         "type" : [ {
@@ -2145,6 +2213,13 @@
           "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+          "code" : "1",
+          "display" : "Original debit action (always a 1 for all regular bills)"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
         "valueMoney" : {
           "value" : 66125.51,
@@ -2162,6 +2237,9 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
           "value" : "28486613848"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2016-02-19"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
@@ -2540,8 +2618,13 @@
         "sequence" : 1,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R4444"
+            "code" : "A37",
+            "display" : "WHOOPING COUGH"
           } ]
         },
         "type" : [ {
@@ -2563,8 +2646,13 @@
         "sequence" : 2,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A40",
+            "display" : "STREPTOCOCCAL SEPSIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R5555"
+            "code" : "A40",
+            "display" : "STREPTOCOCCAL SEPSIS"
           } ]
         },
         "type" : [ {
@@ -2586,8 +2674,13 @@
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "A7777"
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
           } ]
         },
         "type" : [ {
@@ -2609,8 +2702,13 @@
         "sequence" : 4,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A06",
+            "display" : "AMEBIASIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R8888"
+            "code" : "A06",
+            "display" : "AMEBIASIS"
           } ]
         },
         "type" : [ {
@@ -2632,8 +2730,13 @@
         "sequence" : 5,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A15",
+            "display" : "RESPIRATORY TUBERCULOSIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "K71234"
+            "code" : "A15",
+            "display" : "RESPIRATORY TUBERCULOSIS"
           } ]
         },
         "type" : [ {
@@ -2655,9 +2758,13 @@
         "sequence" : 6,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "7840",
-            "display" : "HEADACHE"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           } ]
         },
         "type" : [ {
@@ -2679,8 +2786,13 @@
         "sequence" : 7,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A01",
+            "display" : "TYPHOID AND PARATYPHOID FEVERS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R2222"
+            "code" : "A01",
+            "display" : "TYPHOID AND PARATYPHOID FEVERS"
           } ]
         },
         "type" : [ {
@@ -2702,8 +2814,13 @@
         "sequence" : 8,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A02",
+            "display" : "OTHER SALMONELLA INFECTIONS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R3333"
+            "code" : "A02",
+            "display" : "OTHER SALMONELLA INFECTIONS"
           } ]
         },
         "type" : [ {
@@ -2719,8 +2836,13 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "BQ0HZZZ",
+            "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "0TCDDEE"
+            "code" : "BQ0HZZZ",
+            "display" : "PLAIN RADIOGRAPHY OF LEFT ANKLE"
           } ]
         }
       }, {
@@ -2728,8 +2850,13 @@
         "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "302DDAA"
+            "code" : "CD1YYZZ",
+            "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
           } ]
         }
       }, {
@@ -2737,8 +2864,13 @@
         "date" : "2016-01-15T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "2W52X6Z",
+            "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "302ZZXX"
+            "code" : "2W52X6Z",
+            "display" : "REMOVAL OF PRESSURE DRESSING ON NECK"
           } ]
         }
       }, {
@@ -2746,8 +2878,13 @@
         "date" : "2016-01-17T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "BP17ZZZ",
+            "display" : "FLUOROSCOPY OF LEFT SCAPULA"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "5566AAA"
+            "code" : "BP17ZZZ",
+            "display" : "FLUOROSCOPY OF LEFT SCAPULA"
           } ]
         }
       }, {
@@ -2755,8 +2892,13 @@
         "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "D9YD8ZZ",
+            "display" : "HYPERTHERMIA OF NASOPHARYNX"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "6677BBB"
+            "code" : "D9YD8ZZ",
+            "display" : "HYPERTHERMIA OF NASOPHARYNX"
           } ]
         }
       }, {
@@ -2764,9 +2906,13 @@
         "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+            "code" : "F00ZCKZ",
+            "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "8109",
-            "display" : "REFUSION OF SPINE"
+            "code" : "F00ZCKZ",
+            "display" : "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"
           } ]
         }
       } ],
@@ -3175,11 +3321,21 @@
           "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+          "code" : "1",
+          "display" : "Original debit action (always a 1 for all regular bills)"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
         "valueIdentifier" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
           "value" : "23443453453"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-02-07"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
@@ -3626,7 +3782,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "R4444"
+            "code" : "6202",
+            "display" : "OVARIAN CYST NEC/NOS"
           } ]
         },
         "type" : [ {
@@ -3641,7 +3798,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "R5555"
+            "code" : "3736",
+            "display" : "PARASITIC INFEST EYELID"
           } ]
         },
         "type" : [ {
@@ -3656,7 +3814,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "R6666"
+            "code" : "V0182",
+            "display" : "EXPOSURE TO SARS"
           } ]
         },
         "type" : [ {
@@ -3671,7 +3830,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "R2222"
+            "code" : "E9281",
+            "display" : "EXPOSURE TO NOISE"
           } ]
         },
         "type" : [ {
@@ -3686,7 +3846,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "R3333"
+            "code" : "3310",
+            "display" : "ALZHEIMER'S DISEASE"
           } ]
         },
         "type" : [ {
@@ -3703,7 +3864,8 @@
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "0TCCCCC"
+            "code" : "9214",
+            "display" : "BONE SCAN"
           } ]
         }
       } ],
@@ -4860,8 +5022,13 @@
         "sequence" : 1,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A02",
+            "display" : "OTHER SALMONELLA INFECTIONS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "H5555"
+            "code" : "A02",
+            "display" : "OTHER SALMONELLA INFECTIONS"
           } ]
         },
         "type" : [ {
@@ -4875,8 +5042,13 @@
         "sequence" : 2,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A06",
+            "display" : "AMEBIASIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "H8888"
+            "code" : "A06",
+            "display" : "AMEBIASIS"
           } ]
         },
         "type" : [ {
@@ -4890,8 +5062,13 @@
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B04",
+            "display" : "MONKEYPOX"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "H66666"
+            "code" : "B04",
+            "display" : "MONKEYPOX"
           } ]
         },
         "type" : [ {
@@ -4905,8 +5082,13 @@
         "sequence" : 4,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B05",
+            "display" : "MEASLES"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "H77777"
+            "code" : "B05",
+            "display" : "MEASLES"
           } ]
         },
         "type" : [ {
@@ -4920,8 +5102,13 @@
         "sequence" : 5,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "H12345"
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
           } ]
         },
         "type" : [ {
@@ -5002,7 +5189,8 @@
             "url" : "http://hl7.org/fhir/sid/ndc",
             "valueCoding" : {
               "system" : "http://hl7.org/fhir/sid/ndc",
-              "code" : "49035044700"
+              "code" : "000000000",
+              "display" : "Fake Diluent - WATER"
             }
           } ],
           "coding" : [ {
@@ -5352,6 +5540,9 @@
           "value" : "2718813985998"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-10-07"
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -5609,7 +5800,8 @@
         "diagnosisCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-            "code" : "R5555"
+            "code" : "72761",
+            "display" : "ROTATOR CUFF RUPTURE"
           } ]
         },
         "type" : [ {
@@ -5623,8 +5815,13 @@
         "sequence" : 2,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B30",
+            "display" : "VIRAL CONJUNCTIVITIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R6666"
+            "code" : "B30",
+            "display" : "VIRAL CONJUNCTIVITIS"
           } ]
         },
         "type" : [ {
@@ -5638,8 +5835,13 @@
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R2222"
+            "code" : "B01",
+            "display" : "VARICELLA [CHICKENPOX]"
           } ]
         },
         "type" : [ {
@@ -5653,8 +5855,13 @@
         "sequence" : 4,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
+          }, {
             "system" : "http://hl7.org/fhir/sid/icd-10",
-            "code" : "R3333"
+            "code" : "A52",
+            "display" : "LATE SYPHILIS"
           } ]
         },
         "type" : [ {

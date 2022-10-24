@@ -33,7 +33,8 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.BatchSize;
 
 /**
- * JPA class for the {@code FissClaims} table. */
+ * JPA class for the {@code FissClaims} table.
+ */
 @Entity
 @Builder
 @AllArgsConstructor
@@ -159,7 +160,8 @@ public class FissClaim {
   private String freqCd;
 
   /**
-   * String specifying the source of the data contained in this record. Generally this will be the version string returned by the RDA API server but when populating data from mock server it will also include information about the mode the server was running in. */
+   * String specifying the source of the data contained in this record. Generally this will be the version string returned by the RDA API server but when populating data from mock server it will also include information about the mode the server was running in.
+   */
   @Column(
       name = "`apiSource`",
       nullable = true,
@@ -168,7 +170,8 @@ public class FissClaim {
   private String apiSource;
 
   /**
-   * Paid Date */
+   * Paid Date
+   */
   @Column(
       name = "`paidDt`",
       nullable = true
@@ -176,7 +179,8 @@ public class FissClaim {
   private LocalDate paidDt;
 
   /**
-   * Source of Admission */
+   * Source of Admission
+   */
   @Column(
       name = "`admSource`",
       nullable = true,
@@ -196,7 +200,8 @@ public class FissClaim {
   @SequenceGenerator(
       name = "beneficiaryhistory_beneficiaryhistoryid_seq",
       sequenceName = "beneficiaryhistory_beneficiaryhistoryid_seq",
-      allocationSize = 50
+      allocationSize = 50,
+      schema = "`pre_adj`"
   )
   private long beneHistoryId;
 
@@ -213,7 +218,8 @@ public class FissClaim {
   private Set<FissProcCode> procCodes = new HashSet<>();
 
   /**
-   * List of FissPayers for this claim. */
+   * List of FissPayers for this claim.
+   */
   @OneToMany(
       mappedBy = "parentClaim",
       fetch = FetchType.LAZY,
@@ -418,7 +424,8 @@ public class FissClaim {
   }
 
   /**
-   * Defines extra field names. Lombok will append all of the other fields to this class automatically. */
+   * Defines extra field names. Lombok will append all of the other fields to this class automatically.
+   */
   public static class Fields {
     public static final String first = "first";
     public static final String second = "Second";

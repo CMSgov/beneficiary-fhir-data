@@ -121,6 +121,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     try {
       final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
+      MojoUtil.validateModel(root);
       generateEnumClasses(outputDir, root);
       generateEntityClasses(outputDir, root);
       if (project != null) {
@@ -409,6 +410,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
         FieldSpec.builder(fieldType, join.getFieldName()).addModifiers(Modifier.PRIVATE);
     if (mapping.getTable().isPrimaryKey(join)) {
       fieldSpec.addAnnotation(Id.class);
+      fieldSpec.addAnnotation(EqualsAndHashCode.Include.class);
     }
     if (join.hasComment()) {
       fieldSpec.addJavadoc(join.getComment());
@@ -680,6 +682,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
           "identity columns cannot have sequences: mapping=%s column=%s",
           mapping.getId(), column.getName());
     }
+
     if (column.getFieldType() == ColumnBean.FieldType.Transient
         && mapping.getTable().isPrimaryKey(column.getName())) {
       throw MojoUtil.createException(
@@ -704,12 +707,16 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
                 .addMember("strategy", "$T.$L", GenerationType.class, GenerationType.SEQUENCE)
                 .addMember("generator", "$S", column.getSequence().getName())
                 .build());
-        annotationSpecs.add(
+        final var sequenceGenerator =
             AnnotationSpec.builder(SequenceGenerator.class)
                 .addMember("name", "$S", column.getSequence().getName())
                 .addMember("sequenceName", "$S", column.getSequence().getName())
-                .addMember("allocationSize", "$L", column.getSequence().getAllocationSize())
-                .build());
+                .addMember("allocationSize", "$L", column.getSequence().getAllocationSize());
+        final var table = mapping.getTable();
+        if (table.hasSchema()) {
+          sequenceGenerator.addMember("schema", "$S", table.quoteName(table.getSchema()));
+        }
+        annotationSpecs.add(sequenceGenerator.build());
       }
     }
     return annotationSpecs;

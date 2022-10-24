@@ -1,10 +1,10 @@
 resource "aws_s3_bucket" "admin" {
   bucket = "bfd-${local.env}-admin-${local.account_id}"
 
-  tags = merge(local.shared_tags, {
+  tags = {
     role  = "admin"
     Layer = "data"
-  })
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "admin" {
@@ -18,17 +18,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "admin" {
 }
 
 resource "aws_s3_bucket_public_access_block" "admin" {
+  bucket = aws_s3_bucket.admin.id
+
   block_public_acls       = true
   block_public_policy     = true
-  bucket                  = aws_s3_bucket.admin.id
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_logging" "admin" {
   bucket        = aws_s3_bucket.admin.id
   target_bucket = aws_s3_bucket.logging.id
-  target_prefix = "admin_s3_access_logs"
+  target_prefix = "admin_s3_access_logs/"
 }
 
 resource "aws_s3_bucket_acl" "admin" {
@@ -64,10 +65,10 @@ POLICY
 
 resource "aws_s3_bucket" "logging" {
   bucket = "bfd-${local.env}-logs-${local.account_id}"
-  tags = merge(local.shared_tags, {
+  tags = {
     Layer = "data"
     role  = "logs"
-  })
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
@@ -80,11 +81,12 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
 }
 
 resource "aws_s3_bucket_public_access_block" "logging" {
+  bucket = aws_s3_bucket.logging.id
+
   block_public_acls       = true
   block_public_policy     = true
-  bucket                  = aws_s3_bucket.logging.id
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_acl" "logging" {

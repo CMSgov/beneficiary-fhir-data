@@ -23,7 +23,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
 /**
- * This is a comment */
+ * This is a comment
+ */
 @Entity
 @Builder
 @AllArgsConstructor
@@ -39,6 +40,7 @@ import lombok.experimental.FieldNameConstants;
 @IdClass(FissPayer.PK.class)
 public class FissPayer {
   @Id
+  @EqualsAndHashCode.Include
   @ManyToOne
   @JoinColumn(
       name = "`dcn`",
@@ -79,7 +81,8 @@ public class FissPayer {
   private BigDecimal estAmtDue;
 
   /**
-   * BeneZ only */
+   * BeneZ only
+   */
   @Column(
       name = "`beneRel`",
       nullable = true,
@@ -88,7 +91,8 @@ public class FissPayer {
   private String beneRel;
 
   /**
-   * Insured only */
+   * Insured only
+   */
   @Column(
       name = "`insuredName`",
       nullable = true,
@@ -232,7 +236,8 @@ public class FissPayer {
   }
 
   /**
-   * PK class for the FissPayers table */
+   * PK class for the FissPayers table
+   */
   @Getter
   @EqualsAndHashCode
   @NoArgsConstructor

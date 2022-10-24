@@ -7,8 +7,8 @@ data "external" "rds" {
 
 data "aws_caller_identity" "current" {}
 
-data "aws_kms_key" "main" {
-  key_id = "alias/bfd-${local.env}-cmk"
+data "aws_kms_key" "cmk" {
+  key_id = local.kms_key_alias
 }
 
 data "aws_vpc" "main" {
@@ -31,7 +31,7 @@ data "aws_security_group" "vpn" {
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-vpn-private"]
+    values = [local.nonsensitive_common_config["vpn_security_group"]]
   }
 }
 
@@ -49,14 +49,14 @@ data "aws_key_pair" "main" {
   key_name = local.key_pair
 }
 
-data "aws_ami" "main" {
-  owners = ["self"]
-  filter {
-    name   = "image-id"
-    values = [local.ami_id]
-  }
-}
-
 data "aws_rds_cluster" "rds" {
   cluster_identifier = local.rds_cluster_identifier
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive_common" {
+  path = "/bfd/${local.env}/common/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive" {
+  path = "/bfd/${local.env}/${local.service}/nonsensitive"
 }

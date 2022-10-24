@@ -45,6 +45,9 @@
       "value" : "2718813985998"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2014-10-07"
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -302,7 +305,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R5555"
+        "code" : "72761",
+        "display" : "ROTATOR CUFF RUPTURE"
       } ]
     },
     "type" : [ {
@@ -316,8 +320,13 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R6666"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       } ]
     },
     "type" : [ {
@@ -331,8 +340,13 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     },
     "type" : [ {
@@ -346,8 +360,13 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {

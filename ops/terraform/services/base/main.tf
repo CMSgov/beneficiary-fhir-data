@@ -1,17 +1,7 @@
-provider "aws" {
-  region = "us-east-1"
-  default_tags {
-    tags = {
-      Environment = local.env
-      application = "bfd"
-      business    = "oeda"
-      stack       = local.env
-    }
-  }
-}
-
 locals {
-  env = terraform.workspace
+  env              = terraform.workspace
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
+
   established_envs = [
     "test",
     "mgmt",
@@ -19,7 +9,14 @@ locals {
     "prod"
   ]
 
-  kms_key_alias = "alias/bfd-${local.env}-cmk"
+  default_tags = {
+    Environment    = local.env
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/base"
+  }
 }
 
 data "aws_kms_key" "cmk" {

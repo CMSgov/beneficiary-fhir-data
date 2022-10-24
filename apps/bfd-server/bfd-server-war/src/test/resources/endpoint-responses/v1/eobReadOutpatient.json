@@ -291,7 +291,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -306,7 +307,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "I9999"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     }
   }, {
@@ -314,7 +316,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     },
     "type" : [ {
@@ -329,7 +332,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
       } ]
     },
     "type" : [ {
@@ -344,7 +348,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R1122"
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
       } ]
     },
     "type" : [ {
@@ -361,7 +366,8 @@
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "0AABBZZ"
+        "code" : "CD1YYZZ",
+        "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
       } ]
     }
   } ],
@@ -400,7 +406,7 @@
         "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
-          "code" : "987654321"
+          "code" : "000000000"
         }
       } ],
       "coding" : [ {

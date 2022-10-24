@@ -8,6 +8,7 @@ import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.Test;
 public final class DataServerLauncherAppIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
-  /** Regex for access log entries */
+  /** Regex for access log entries. */
   private static final String accessLogPattern =
       new StringJoiner(" ")
           .add("^(\\S+)") // Address or Hostname
@@ -62,7 +63,7 @@ public final class DataServerLauncherAppIT {
 
   /**
    * Verifies the regex for valdiating our access log entries adequately avoids edge cases that
-   * could break our alerts, which depend on logs
+   * could break our alerts, which depend on logs.
    */
   @Test
   public void checkAccessLogFormat() {
@@ -170,13 +171,12 @@ public final class DataServerLauncherAppIT {
   }
 
   /**
-   * Verifies that {@link DataServerLauncherApp} starts up as expected when properly configured
+   * Verifies that {@link DataServerLauncherApp} starts up as expected when properly configured.
    *
    * @throws IOException (indicates a test error)
-   * @throws InterruptedException
    */
   @Test
-  public void normalUsage() throws IOException, InterruptedException {
+  public void normalUsage() throws IOException {
     ServerProcess serverProcess = null;
     try {
       // Launch the server.
@@ -231,8 +231,9 @@ public final class DataServerLauncherAppIT {
       assertTrue(Files.size(accessLogJson) > 0);
       assertTrue(
           Files.readString(accessLogJson)
-              .contains(DataServerLauncherApp.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
-
+              .contains(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
+      assertTrue(
+          Files.readString(accessLogJson).contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB));
       // Stop the application.
       serverProcess.close();
 

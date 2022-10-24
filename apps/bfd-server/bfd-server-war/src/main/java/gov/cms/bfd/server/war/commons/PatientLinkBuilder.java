@@ -53,21 +53,25 @@ public final class PatientLinkBuilder implements LinkBuilder {
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isPagingRequested() {
     return count != null;
   }
 
+  /** {@inheritDoc} */
   @Override
   public int getPageSize() {
     return isPagingRequested() ? count : MAX_PAGE_SIZE;
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isFirstPage() {
     return cursor == null || !isPagingRequested();
   }
 
+  /** {@inheritDoc} */
   @Override
   public void addLinks(Bundle to) {
     List<BundleEntryComponent> entries = to.getEntry();
@@ -91,6 +95,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public void addLinks(org.hl7.fhir.r4.model.Bundle to) {
     List<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> entries = to.getEntry();

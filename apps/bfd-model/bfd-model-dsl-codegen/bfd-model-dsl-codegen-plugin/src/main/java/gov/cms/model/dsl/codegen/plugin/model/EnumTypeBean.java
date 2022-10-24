@@ -1,6 +1,9 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,14 +17,15 @@ import lombok.Singular;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EnumTypeBean {
+public class EnumTypeBean implements ModelBean {
   /** Unique name of the enum class. */
-  private String name;
+  @NotNull @JavaName private String name;
   /** Optional package name for this enum if it is not an inner class of the entity. */
+  @JavaName(type = JavaNameType.Compound)
   private String packageName;
 
   /** List of names for the values of the enum. */
-  @Singular private List<String> values = new ArrayList<>();
+  @NotNull @Singular private List<@JavaName String> values = new ArrayList<>();
 
   /**
    * Looks up a value with the given name and returns the value if it is present. Otherwise throws
@@ -47,5 +51,10 @@ public class EnumTypeBean {
    */
   public boolean isInnerClass() {
     return Strings.isNullOrEmpty(packageName);
+  }
+
+  @Override
+  public String getDescription() {
+    return "enum " + name;
   }
 }

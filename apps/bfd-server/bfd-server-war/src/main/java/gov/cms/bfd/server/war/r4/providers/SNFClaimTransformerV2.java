@@ -114,6 +114,7 @@ public class SNFClaimTransformerV2 {
     // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
     // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
     // CLM_DRG_CD                       => ExplanationOfBenefit.supportingInfo.code
+    // FI_CLM_ACTN_CD                   => ExplanationOfBenefit.extension
     TransformerUtilsV2.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -122,7 +123,8 @@ public class SNFClaimTransformerV2 {
         claimGroup.getNoncoveredStayThroughDate(),
         claimGroup.getCoveredCareThroughDate(),
         claimGroup.getMedicareBenefitsExhaustedDate(),
-        claimGroup.getDiagnosisRelatedGroupCd());
+        claimGroup.getDiagnosisRelatedGroupCd(),
+        claimGroup.getFiscalIntermediaryClaimActionCode());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
     claimGroup
@@ -254,6 +256,7 @@ public class SNFClaimTransformerV2 {
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -267,7 +270,8 @@ public class SNFClaimTransformerV2 {
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated(),
-        claimGroup.getFiDocumentClaimControlNumber());
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiscalIntermediaryClaimProcessDate());
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept

@@ -7,9 +7,9 @@ import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.StringList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.io.IOException;
 import java.util.List;
@@ -47,6 +47,15 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   }
 
   @Override
+  int getInsertCount(RdaFissClaim claim) {
+    return 1 // Add one for the base claim
+        + claim.getProcCodes().size()
+        + claim.getDiagCodes().size()
+        + claim.getPayers().size()
+        + claim.getAuditTrail().size();
+  }
+
+  @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaFissClaim> change) {
     final RdaFissClaim claim = change.getClaim();
     return RdaClaimMessageMetaData.builder()
@@ -58,6 +67,10 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .receivedDate(claim.getLastUpdated())
         .locations(new StringList().add(claim.getCurrLoc1()).addIfNonEmpty(claim.getCurrLoc2()))
         .transactionDate(claim.getCurrTranDate())
+        .phase(change.getSource().getPhase())
+        .phaseSeqNum(change.getSource().getPhaseSeqNum())
+        .extractDate(change.getSource().getExtractDate())
+        .transmissionTimestamp(change.getSource().getTransmissionTimestamp())
         .build();
   }
 
@@ -72,6 +85,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .apiSource(apiVersion)
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))
         .message(protobufObjectWriter.print(change))
+        .status(MessageError.Status.UNRESOLVED)
         .build();
   }
 }

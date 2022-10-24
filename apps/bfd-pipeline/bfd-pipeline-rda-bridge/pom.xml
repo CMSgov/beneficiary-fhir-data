@@ -17,7 +17,7 @@
     <description>Utility project for creating RDA data</description>
 
     <properties>
-        <commons-cli.version>1.4</commons-cli.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
 
         <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
         <bfd-pipeline-rda-grpcs.version>1.0.0-SNAPSHOT</bfd-pipeline-rda-grpcs.version>
@@ -59,6 +59,12 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- Templating Engine -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.31</version>
+        </dependency>
         <!-- BFD -->
         <dependency>
             <groupId>gov.cms.bfd</groupId>
@@ -87,7 +93,7 @@
                  https://github.com/flipkart-incubator/zjsonpatch for details. -->
             <groupId>com.flipkart.zjsonpatch</groupId>
             <artifactId>zjsonpatch</artifactId>
-            <version>0.4.6</version>
+            <version>${zjsonpatch.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -12,6 +12,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 /**
  * Class containing static helper methods for implementing and finding implementations of {@link
@@ -99,14 +100,20 @@ public class TransformerUtil {
    * Regex used to detect special values in the {@code from} field of a {@link TransformationBean}
    * that indicate there is no corresponding {@link FieldTransformer}.
    */
-  private static final Pattern NoMappingFromNamesRegex =
+  private static final Pattern NoCodeFromNamesRegex =
       Pattern.compile(String.format("%s|%s|%s", NoMappingFromName, ParentFromName, IndexFromName));
+
+  /** Shared instance of {@link NoCodeFieldTransformer}. */
+  private static final NoCodeFieldTransformer NoCodeInstance = new NoCodeFieldTransformer();
 
   /** Shared instance of {@link CharFieldTransformer}. */
   private static final CharFieldTransformer CharInstance = new CharFieldTransformer();
 
   /** Shared instance of {@link IntFieldTransformer}. */
   private static final IntFieldTransformer IntInstance = new IntFieldTransformer();
+
+  /** Shared instance of {@link LongFieldTransformer}. */
+  private static final LongFieldTransformer LongInstance = new LongFieldTransformer();
 
   /** Shared instance of {@link DateFieldTransformer}. */
   private static final DateFieldTransformer DateInstance = new DateFieldTransformer();
@@ -233,14 +240,15 @@ public class TransformerUtil {
   public static Optional<FieldTransformer> selectTransformerForField(
       ColumnBean column, TransformationBean transformation) {
     if (transformation.hasTransformer()) {
-      return Optional.ofNullable(transformersByName.get(transformation.getTransformer()));
+      return getFieldTransformer(transformation.getTransformer());
     }
 
     Optional<FieldTransformer> answer =
         Optional.ofNullable(transformersByFrom.get(transformation.getFrom()));
-    if (!(answer.isPresent()
-        || NoMappingFromNamesRegex.matcher(transformation.getFrom()).matches())) {
-      if (column.isEnum()) {
+    if (answer.isEmpty()) {
+      if (NoCodeFromNamesRegex.matcher(transformation.getFrom()).matches()) {
+        answer = Optional.of(NoCodeInstance);
+      } else if (column.isEnum()) {
         answer = Optional.empty();
       } else if (column.isChar()) {
         answer = Optional.of(CharInstance);
@@ -250,6 +258,8 @@ public class TransformerUtil {
         answer = Optional.of(StringInstance);
       } else if (column.isInt()) {
         answer = Optional.of(IntInstance);
+      } else if (column.isLong()) {
+        answer = Optional.of(LongInstance);
       } else if (column.isNumeric()) {
         answer = Optional.of(AmountInstance);
       } else if (column.isDate()) {
@@ -258,6 +268,17 @@ public class TransformerUtil {
     }
 
     return answer;
+  }
+
+  /**
+   * Looks for a {@link FieldTransformer} with the given name.
+   *
+   * @param transformerName name of the {@link FieldTransformer}
+   * @return {@link Optional} containing the transformer, empty otherwise
+   */
+  @Nonnull
+  public static Optional<FieldTransformer> getFieldTransformer(String transformerName) {
+    return Optional.ofNullable(transformersByName.get(transformerName));
   }
 
   /**

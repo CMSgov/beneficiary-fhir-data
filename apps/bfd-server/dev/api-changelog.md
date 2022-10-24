@@ -1,5 +1,110 @@
 # API Changelog
 
+## BFD-1895: Add CARIN conformant coding system in Procedure Coding list element in V2
+
+Add an additional coding for ICD procedure codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. .http://www.cms.gov/Medicare/Coding/ICD10).
+The existing coding has been left in place for backwards compatibility.
+
+New diagnosis:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "procedure" : [{
+        "sequence" : 1,
+        "date" : "2016-01-16T00:00:00+00:00",
+        "procedureCodeableConcept" : {
+            "coding" : [
+                { "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+                "code" : "4A0204Z",
+                "display": "MEASUREMENT OF CARDIAC ELECTRICAL ACTIVITY, OPEN APPROACH"
+                }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10",
+                "code" : "4A0204Z",
+                "display": "MEASUREMENT OF CARDIAC ELECTRICAL ACTIVITY, OPEN APPROACH"
+                }
+        ]},
+        ...
+      ]},
+    ...
+  }
+```
+
+## BFD-1894: Add CARIN conformant coding system in Diagnosis Coding list element in V2
+
+Add an additional coding for ICD diagnoses codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. http://hl7.org/fhir/sid/icd-10-cm).
+The existing coding has been left in place for backwards compatibility.
+
+New diagnosis:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "diagnosis" : [{
+        "sequence" : 1,
+        "diagnosisCodeableConcept" : {
+            "coding" : [
+                { "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "A00",
+                "display": "CHOLERA"
+                }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10",
+                "code" : "A00",
+                "display": "CHOLERA"
+                }
+        ]},
+        ...
+      ]},
+    ...
+  }
+```
+
+## BFD-1916: Map FI Claim Action Code in V2
+
+FI Claim Action Code data has been mapped for V2. This data is now available in the extensions for SNF and Inpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Action Code Example:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "extension": [{
+       ...
+          {
+            "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+            "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)"
+            }
+          },
+        ...
+      }]
+    ...
+  }
+```
+
+## BFD-1917: Map FI Claim Process Date in V1 and V2
+
+FI Claim Process Date data has been mapped for V2. This data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Process Date Example:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+     "extension": [{
+      ...
+        {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-02-07"
+        },
+      ...
+    }]
+  ...
+  }
+```
+
 ## BFD-1620: Add Total Slices for CARIN Compliance
 
 Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.

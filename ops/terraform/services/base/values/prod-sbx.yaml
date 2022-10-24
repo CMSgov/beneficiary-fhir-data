@@ -1,12 +1,13 @@
 ---
+# env:prod-sbx
 # COMMON CONFIGURATION
 /bfd/prod-sbx/common/nonsensitive/enterprise_tools_security_group: bfd-prod-sbx-enterprise-tools
 /bfd/prod-sbx/common/nonsensitive/env_name_std: prod-sbx
 /bfd/prod-sbx/common/nonsensitive/key_pair: bfd-prod-sbx
 /bfd/prod-sbx/common/nonsensitive/kms_key_alias: alias/bfd-prod-sbx-cmk
 /bfd/prod-sbx/common/nonsensitive/management_security_group: bfd-prod-sbx-remote-management
-/bfd/prod-sbx/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
-/bfd/prod-sbx/common/nonsensitive/new_relic_metric_path: /metric/v1
+/bfd/prod-sbx/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
+/bfd/prod-sbx/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 /bfd/prod-sbx/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/prod-sbx/common/nonsensitive/rds_backup_retention_period: 21 # in days TODO: is a 21 day retention period sensible default?
 /bfd/prod-sbx/common/nonsensitive/rds_iam_database_authentication_enabled: false
@@ -17,3 +18,65 @@
 /bfd/prod-sbx/common/nonsensitive/rds_security_group: bfd-prod-sbx-aurora-cluster
 /bfd/prod-sbx/common/nonsensitive/vpc_name: bfd-prod-sbx-vpc
 /bfd/prod-sbx/common/nonsensitive/vpn_security_group: bfd-prod-sbx-vpn-private
+
+# MIGRATOR CONFIGURATION
+/bfd/prod-sbx/migrator/nonsensitive/instance_type: m5.large
+/bfd/prod-sbx/migrator/nonsensitive/volume_size: 100
+/bfd/prod-sbx/migrator/nonsensitive/sqs_queue_name: bfd-prod-sbx-migrator
+/bfd/prod-sbx/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
+/bfd/prod-sbx/migrator/nonsensitive/db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
+
+# PIPELINE CONFIGURATION
+/bfd/${env}/pipeline/nonsensitive/bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_dir: *bfdPipelineDir
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_user: bb-etl
+/bfd/${env}/pipeline/nonsensitive/instance_type: m5.xlarge
+## PIPELINE CCW
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
+## PIPELINE+RDA
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: 'S3'
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'InProcess'
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 3600 # 60 minutes
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 5
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_process_dlq: false
+
+# SERVER CONFIGURATION
+/bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/server/nonsensitive/data_server_v2_enabled: true
+/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
+## SERVER+MTLS CONFIGURATION
+/bfd/${env}/server/nonsensitive/data_server_appserver_keystore: 'files/prod-sbx-bluebutton-appserver-keystore.jks'
+## NOTE: data_server_ssl_client_certificates_json stores escaped json string to be pre-processed
+##       by e.g. jq's `fromjson` method before being consumed by ansible, et al
+/bfd/${env}/server/nonsensitive/data_server_ssl_client_certificates_json: >-
+  [
+  {"alias":"client_local_test_env_dpr","certificate":"files/client_data_server_local_test_env_dpr_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_dev","certificate":"files/client_data_server_bluebutton_frontend_dev_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_test","certificate":"files/client_data_server_bluebutton_frontend_test_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_sbx","certificate":"files/client_data_server_bluebutton_frontend_sbx_certificate.pem"},
+  {"alias":"client_bluebutton_frontend_local","certificate":"files/client_data_server_bluebutton_frontend_local_certificate.pem"},
+  {"alias":"client_bcda_dev","certificate":"files/client_data_server_bcda_dev_certificate.pem"},
+  {"alias":"client_bcda_test","certificate":"files/client_data_server_bcda_test_certificate.pem"},
+  {"alias":"client_bcda_sbx","certificate":"files/client_data_server_bcda_sbx_certificate.pem"},
+  {"alias":"client_bcda_local","certificate":"files/client_data_server_bcda_local_certificate.pem"},
+  {"alias":"client_performance_tester","certificate":"files/client_data_server_performance_tester_certificate.pem"},
+  {"alias":"client_dpc_prod_sbx","certificate":"files/client_data_server_dpc_prod_sbx_certificate.pem"},
+  {"alias":"client_dpc_test","certificate":"files/client_data_server_dpc_test_certificate.pem"},
+  {"alias":"client_dpc_dev","certificate":"files/client_data_server_dpc_dev_certificate.pem"},
+  {"alias":"client_dpc_local","certificate":"files/client_data_server_dpc_local_certificate.pem"},
+  {"alias":"client_ab2d_dev","certificate":"files/client_data_server_ab2d_dev_certificate.pem"},
+  {"alias":"client_ab2d_sbx","certificate":"files/client_data_server_ab2d_sbx_certificate.pem"},
+  {"alias":"client_ab2d_imp","certificate":"files/client_data_server_ab2d_imp_certificate.pem"},
+  {"alias":"client_act_pentest_sbx","certificate":"files/client_data_server_act_pentest_certificate.pem"}
+  ]

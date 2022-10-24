@@ -56,7 +56,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
    */
   private static final Pattern COVERAGE_ID_PATTERN =
-      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Alnum}+)");
+      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProvider.class);
 
@@ -82,7 +82,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return Coverage.class;
@@ -131,7 +131,12 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
       // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
     }
@@ -211,6 +216,11 @@ public final class CoverageResourceProvider implements IResourceProvider {
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdatedRange)) {
+      // Add bene_id to MDC logs when _lastUpdated filter is in effect
+      LoggingUtils.logBeneIdToMdc(beneId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new NoResultException();
     }
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
