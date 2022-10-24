@@ -121,6 +121,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     try {
       final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
+      MojoUtil.validateModel(root);
       generateEnumClasses(outputDir, root);
       generateEntityClasses(outputDir, root);
       if (project != null) {

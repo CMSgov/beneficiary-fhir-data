@@ -1,6 +1,10 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.MappingExists;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,19 +15,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ArrayBean {
+public class ArrayBean implements ModelBean {
   /** Name of field in source object to copy array data from. */
-  private String from;
+  @NotNull @JavaName private String from;
+
   /** Name of field in destination object to copy array data to. */
-  private String to;
+  @NotNull @JavaName private String to;
+
   /** Name of DSL mapping for the array element objects. */
-  private String mapping;
+  @NotNull @JavaName @MappingExists private String mapping;
+
   /**
    * Prefix to use in error messages for any errors encountered when copying data to array elements.
    */
-  private String namePrefix;
+  @NotEmpty private String namePrefix;
+
   /** Name of field in array element objects to store link to the parent object. */
-  private String parentField;
+  @JavaName private String parentField;
 
   /**
    * Tests whether or not the array element objects have a field to hold a reference to the parent
@@ -33,5 +41,10 @@ public class ArrayBean {
    */
   public boolean hasParentField() {
     return !Strings.isNullOrEmpty(parentField);
+  }
+
+  @Override
+  public String getDescription() {
+    return String.format("array of %s", mapping);
   }
 }

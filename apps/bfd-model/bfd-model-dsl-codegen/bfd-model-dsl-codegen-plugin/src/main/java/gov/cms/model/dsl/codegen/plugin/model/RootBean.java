@@ -37,7 +37,7 @@ public class RootBean {
    * @return {@link Optional} containing the mapping if it exists or empty if it does not exist
    */
   public Optional<MappingBean> findMappingWithId(String id) {
-    return mappings.stream().filter(m -> m.getId().equals(id)).findAny();
+    return mappings.stream().filter(m -> id.equals(m.getId())).findAny();
   }
 
   /**
@@ -47,6 +47,6 @@ public class RootBean {
    * @return {@link Optional} containing the mapping if it exists or empty if it does not exist
    */
   public Optional<MappingBean> findMappingWithEntityClassName(String entityClassName) {
-    return mappings.stream().filter(m -> m.getEntityClassName().equals(entityClassName)).findAny();
+    return mappings.stream().filter(m -> entityClassName.equals(m.getEntityClassName())).findAny();
   }
 }

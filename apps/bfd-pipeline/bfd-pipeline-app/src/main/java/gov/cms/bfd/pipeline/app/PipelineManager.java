@@ -52,12 +52,6 @@ public final class PipelineManager implements AutoCloseable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
-  /**
-   * This {@link System#exit(int)} value should be used when the application exits due to an
-   * unhandled exception in {@link PipelineManager}.
-   */
-  public static final int EXIT_CODE_MONITOR_ERROR = 2;
-
   /** The {@link MetricRegistry} used to track the application's performance and events. */
   private final MetricRegistry appMetrics;
 

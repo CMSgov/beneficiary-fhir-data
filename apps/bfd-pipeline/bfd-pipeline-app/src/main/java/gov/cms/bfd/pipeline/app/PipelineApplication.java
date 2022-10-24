@@ -26,6 +26,8 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -49,7 +51,13 @@ public final class PipelineApplication {
    * This {@link System#exit(int)} value should be used when the application exits due to an
    * unhandled exception.
    */
-  static final int EXIT_CODE_JOB_FAILED = PipelineManager.EXIT_CODE_MONITOR_ERROR;
+  static final int EXIT_CODE_JOB_FAILED = 2;
+
+  /**
+   * This {@link System#exit(int)} value should be used when the smoke test for one or more jobs
+   * fails.
+   */
+  static final int EXIT_CODE_SMOKE_TEST_FAILURE = 3;
 
   /**
    * This method is the one that will get called when users launch the application from the command
@@ -107,18 +115,74 @@ public final class PipelineApplication {
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
+    // Create a pooled data source for use by any registered jobs.
+    final HikariDataSource pooledDataSource =
+        PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+
     /*
-     * Create the PipelineManager that will be responsible for running and managing the various
-     * jobs.
+     * Create all jobs and run their smoke tests.
+     */
+    final var jobs = createAllJobs(appConfig, appMetrics, pooledDataSource);
+    if (anySmokeTestFailed(jobs)) {
+      LOGGER.info("Pipeline terminating due to smoke test failure.");
+      pooledDataSource.close();
+      System.exit(EXIT_CODE_SMOKE_TEST_FAILURE);
+    }
+
+    /*
+     * Create the PipelineManager and register all jobs.
      */
     PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
     PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     registerShutdownHook(appMetrics, pipelineManager);
+    jobs.forEach(pipelineManager::registerJob);
     LOGGER.info("Job processing started.");
 
-    // Create a pooled data source for use by any registered jobs.
-    final HikariDataSource pooledDataSource =
-        PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+    /*
+     * At this point, we're done here with the main thread. From now on, the PipelineManager's
+     * executor service should be the only non-daemon thread running (and whatever it kicks off).
+     * Once/if that thread stops, the application will run all registered shutdown hooks and Wait
+     * for the PipelineManager to stop running jobs, and then check to see if we should exit
+     * normally with 0 or abnormally with a non-0 because a job failed.
+     */
+  }
+
+  /**
+   * Run the smoke test for all jobs and log any failures. Return true if any of them failed. Even
+   * if one test fails all of the others are also run so that error reporting can be as complete as
+   * possible.
+   *
+   * @param jobs all {@link PipelineJob} to test
+   * @return true if any test failed
+   */
+  private static boolean anySmokeTestFailed(List<PipelineJob<?>> jobs) {
+    boolean anyTestFailed = false;
+    for (PipelineJob<?> job : jobs) {
+      try {
+        if (!job.isSmokeTestSuccessful()) {
+          anyTestFailed = true;
+          LOGGER.error("smoke test reported failure: job={}", job.getType());
+        }
+      } catch (Exception ex) {
+        LOGGER.error(
+            "smoke test threw exception: job={} error={}", job.getType(), ex.getMessage(), ex);
+        anyTestFailed = true;
+      }
+    }
+    return anyTestFailed;
+  }
+
+  /**
+   * Create all pipeline jobs and return them in a list.
+   *
+   * @param appConfig our {@link AppConfiguration} for configuring jobs
+   * @param appMetrics our {@link MetricRegistry} for metrics reporting
+   * @param pooledDataSource our {@link javax.sql.DataSource}
+   * @return list of {@link PipelineJob}s to be registered
+   */
+  private static List<PipelineJob<?>> createAllJobs(
+      AppConfiguration appConfig, MetricRegistry appMetrics, HikariDataSource pooledDataSource) {
+    final var jobs = new ArrayList<PipelineJob<?>>();
 
     /*
      * Create and register the other jobs.
@@ -133,8 +197,7 @@ public final class PipelineApplication {
               PipelineApplicationState.PERSISTENCE_UNIT_NAME,
               Clock.systemUTC());
 
-      pipelineManager.registerJob(
-          createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
+      jobs.add(createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
       LOGGER.warn("CcwRifLoadJob is disabled in app configuration.");
@@ -155,28 +218,21 @@ public final class PipelineApplication {
 
       final Optional<RdaServerJob> mockServerJob = rdaLoadOptions.createRdaServerJob();
       if (mockServerJob.isPresent()) {
-        pipelineManager.registerJob(mockServerJob.get());
+        jobs.add(mockServerJob.get());
         LOGGER.warn("Registered RdaServerJob.");
       } else {
         LOGGER.info("Skipping RdaServerJob registration - not enabled in app configuration.");
       }
 
-      pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      jobs.add(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
 
-      pipelineManager.registerJob(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
       LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");
     }
-
-    /*
-     * At this point, we're done here with the main thread. From now on, the PipelineManager's
-     * executor service should be the only non-daemon thread running (and whatever it kicks off).
-     * Once/if that thread stops, the application will run all registered shutdown hooks and Wait
-     * for the PipelineManager to stop running jobs, and then check to see if we should exit
-     * normally with 0 or abnormally with a non-0 because a job failed.
-     */
+    return jobs;
   }
 
   /**
