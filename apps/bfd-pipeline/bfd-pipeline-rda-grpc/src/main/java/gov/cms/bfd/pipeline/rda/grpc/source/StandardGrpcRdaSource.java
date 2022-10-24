@@ -128,7 +128,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
     final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
     log.info("smoke test: apiVersion={}", apiVersion);
 
-    // Retrieve a few claims and verify we can transform them.
     // Doesn't use startingSequenceNumber because we should not block waiting for new data.
     final GrpcResponseStream<TMessage> responseStream =
         caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
