@@ -3,7 +3,7 @@ data "external" "client_ssls_by_partner" {
 
   program = [
     "bash",
-    "get-partner-client-ssl.sh",
+    "${path.module}/get-partner-client-ssl.sh",
     each.value,
     local.namespace,
     jsonencode({
