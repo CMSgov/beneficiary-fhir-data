@@ -12,7 +12,10 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -245,6 +248,121 @@ public final class DataSetManifestTest {
         s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS));
   }
 
+  private DataSetManifest convertStreamToManifest(InputStream inStr)
+      throws SAXParseException, Exception {
+    return DataSetManifestFactory.newInstance().parseManifest(inStr);
+  }
+
+  @Test
+  public void manifestSyntheticEndStateValid() {
+    InputStream manifestStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream("manifest-sample-end-state-valid.xml");
+    DataSetManifest manifest = null;
+    try {
+      manifest = convertStreamToManifest(manifestStream);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    assertNotNull(manifest);
+    DataSetManifest.SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties();
+    assertNotNull(endProps);
+    assertEquals(-1000010, endProps.getBeneIdStart());
+    assertEquals(-1000020, endProps.getBeneIdEnd());
+    assertEquals("Tue Oct 18 15:24:11 EDT 2022", endProps.getGeneratedTs());
+    assertEquals("1S00E00AA10", endProps.getMbiStart());
+    assertEquals("T01000010A", endProps.getHicnStart());
+    assertEquals(-100001170, endProps.getClmGrpIdStart());
+    assertEquals(-100000623, endProps.getPdeIdStart());
+    assertEquals(-100000388, endProps.getCarrClmCntlNumStart());
+    assertEquals(-100000547, endProps.getClmIdStart());
+    String props = endProps.toString();
+    assertNotNull(props);
+
+    // convert DataSetManifest to a String of XML and verify that we can then re-import the string
+    // data as a DataSetManifest object.
+    String xmlString = null;
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
+      Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+      StringWriter writer = new StringWriter();
+      jaxbMarshaller.marshal(manifest, writer);
+      xmlString = writer.toString();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    assertNotNull(xmlString);
+    manifestStream = new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8));
+    assertNotNull(manifestStream);
+    try {
+      manifest = convertStreamToManifest(manifestStream);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    assertNotNull(manifest);
+  }
+
+  @Test
+  public void manifestSyntheticEndStateInvalid() {
+    InputStream manifestStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream("manifest-sample-end-state-valid.xml");
+
+    DataSetManifest manifest = null;
+    try {
+      manifest = convertStreamToManifest(manifestStream);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    assertNotNull(manifest);
+    DataSetManifest.SyntheaEndStateProperties endProps =
+        new DataSetManifest.SyntheaEndStateProperties();
+    // partially fill the new SyntheaEndStateProperties with values for the original manifest
+    // be leaving off generatedTs
+    endProps.setBeneIdStart(manifest.getSyntheaEndStateProperties().getBeneIdStart());
+    endProps.setBeneIdEnd(manifest.getSyntheaEndStateProperties().getBeneIdEnd());
+    endProps.setMbiStart(manifest.getSyntheaEndStateProperties().getMbiStart());
+    endProps.setHicnStart(manifest.getSyntheaEndStateProperties().getHicnStart());
+    endProps.setClmGrpIdStart(manifest.getSyntheaEndStateProperties().getClmGrpIdStart());
+    endProps.setPdeIdStart(manifest.getSyntheaEndStateProperties().getPdeIdStart());
+    endProps.setCarrClmCntlNumStart(
+        manifest.getSyntheaEndStateProperties().getCarrClmCntlNumStart());
+
+    endProps.setClmIdStart(manifest.getSyntheaEndStateProperties().getClmIdStart());
+    manifest.setSyntheaEndStateProperties(endProps);
+
+    // convert DataSetManifest to a String of XML and verify that we can then re-import the string
+    // data as a DataSetManifest object which should fail because we will be missing a required
+    // element.
+    String xmlString = null;
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
+      Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+      StringWriter writer = new StringWriter();
+      jaxbMarshaller.marshal(manifest, writer);
+      xmlString = writer.toString();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    assertNotNull(xmlString);
+    final InputStream manifestStream2 =
+        new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8));
+    Exception exception =
+        assertThrows(
+            javax.xml.bind.UnmarshalException.class,
+            () -> {
+              convertStreamToManifest(manifestStream2);
+            });
+    Throwable throwable = ((javax.xml.bind.JAXBException) exception).getLinkedException();
+    assertNotNull(throwable);
+    assertNotNull(throwable.getMessage());
+    assertTrue(
+        throwable.getMessage().startsWith("cvc-complex-type.2.4.a: Invalid content was found"));
+    assertTrue(throwable.getMessage().contains(":generated_ts}' is expected."));
+  }
+
   /**
    * Just a simple little app that will use JAXB to marshall a sample {@link DataSetManifest} to
    * XML. This was used as the basis for the test resources used in these tests.
@@ -265,7 +383,6 @@ public final class DataSetManifestTest {
 
     JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
     Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
     jaxbMarshaller.marshal(manifest, System.out);
   }
 }
