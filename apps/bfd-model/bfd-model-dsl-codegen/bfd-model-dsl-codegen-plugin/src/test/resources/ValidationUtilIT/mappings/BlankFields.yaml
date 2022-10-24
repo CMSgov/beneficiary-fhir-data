@@ -17,6 +17,21 @@ mappings:
           entityClass:
           joinColumnName:
           mappedBy:
+        - class: parent
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+        - class: child
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+        - class: array
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
     enumTypes:
       - name:
         values:
@@ -26,10 +41,5 @@ mappings:
       - from:
         to:
         transformer:
-    arrays:
-      - from:
-        to:
-        mapping:
-        namePrefix:
     externalTransformations:
       -

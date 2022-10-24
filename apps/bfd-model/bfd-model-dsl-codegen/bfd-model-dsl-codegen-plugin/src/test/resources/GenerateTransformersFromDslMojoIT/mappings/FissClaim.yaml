@@ -68,6 +68,13 @@ mappings:
           joinColumnName: mbiId
           joinType: ManyToOne
           fetchType: EAGER
+        - class: array
+          fieldName: procCodes
+          entityMapping: FissProcCode
+        - class: array
+          fieldName: payers
+          entityMapping: FissPayer
+          mappedBy: parentClaim
     enumTypes:
       - name: ServTypeCdMapping
         values:
@@ -130,15 +137,11 @@ mappings:
           enumClass: gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission
       - from: NOW
         to: lastUpdated
-    arrays:
       - from: fissProcCodes
         to: procCodes
-        mapping: FissProcCode
-        namePrefix: "procCode"
+        transformer: Array
       - from: fissPayers
         to: payers
-        mapping: FissPayer
-        namePrefix: "payer"
-        parentField: parentClaim
+        transformer: Array
     externalTransformations:
       - applyMbiCache

@@ -1,7 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin;
 
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
-import gov.cms.model.dsl.codegen.plugin.model.JoinBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
@@ -196,10 +195,6 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
     // this map ensures no column is included twice
     final var columns = new LinkedHashMap<String, ColumnBean>();
     final var table = mapping.getTable();
-    for (JoinBean join : table.getPrimaryKeyJoinBeans()) {
-      final var joinColumn = mapping.mapJoinToParentColumnBean(root, join);
-      joinColumn.ifPresent(c -> columns.put(c.getColumnName(), c));
-    }
     for (ColumnBean column : mapping.getTable().getPrimaryKeyColumnBeans()) {
       columns.put(column.getColumnName(), column);
     }
@@ -218,10 +213,6 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
   private List<ColumnBean> getAllColumns(RootBean root, MappingBean mapping) {
     // this map ensures no column is included twice
     final var columns = new LinkedHashMap<String, ColumnBean>();
-    for (JoinBean join : mapping.getNonArrayJoins()) {
-      final var joinColumn = mapping.mapJoinToParentColumnBean(root, join);
-      joinColumn.ifPresent(c -> columns.put(c.getColumnName(), c));
-    }
     for (ColumnBean column : mapping.getTable().getColumns()) {
       columns.put(column.getColumnName(), column);
     }
@@ -285,7 +276,9 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
     final var parent =
         root.getMappings().stream()
             .filter(
-                m -> m.getArrays().stream().anyMatch(a -> a.getMapping().equals(mapping.getId())))
+                m ->
+                    m.getArrayJoins().stream()
+                        .anyMatch(a -> a.getEntityMapping().equals(mapping.getId())))
             .findFirst();
     return parent.orElse(null);
   }

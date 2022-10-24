@@ -84,6 +84,11 @@ public class ColumnBean implements ModelBean {
    * number has been set.
    */
   @Builder.Default private int minLength = -1;
+  /**
+   * When true this column exists in the database table but is not exposed as a field in the entity
+   * class. Intended for use as the target of {@link JoinBean#joinColumnName}.
+   */
+  @Builder.Default private boolean dbOnly = false;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
   @Valid private SequenceBean sequence;
 
