@@ -50,6 +50,10 @@ ignore_list:
         - ".*ExplanationOfBenefit\\.diagnosis\\.diagnosis\\[x\\].* minimum required.*"  # Missing field (6 errors)
         - ".*ReferralRequest\\.intent.* minimum required.*"                             # Missing field (8 errors)
     # V2 specific validation issues
+    #  in V1, Eob.referral supplied a #reference to a contained ReferralRequest resource. 
+    #  In FHIR R4, the Referral Request resource was renamed/refactored to ServiceRequest and 
+    #  in V2 we changed our mapping. Eob.referral now supplies a logical reference e.g. a
+    #  provider identifier instead of a reference to another resource.
     - file_pattern: .*/v2/.*\.json
       error_patterns:
         - ".*ReferralRequest\\.intent.* minimum required.*"
