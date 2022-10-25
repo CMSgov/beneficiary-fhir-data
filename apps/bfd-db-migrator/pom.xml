@@ -85,7 +85,7 @@
 			<!-- Required by logback-jackson. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson-databind.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides utility code and dependencies that are shared by (more or
