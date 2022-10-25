@@ -254,7 +254,7 @@ module "bfd_server_metrics" {
 
 module "bfd_server_slo_alarms" {
   source = "../resources/bfd_server_slo_alarms"
-  env = var.env_config.env
+  env    = var.env_config.env
 }
 
 # TODO: purge all access.txt 
@@ -367,8 +367,7 @@ module "bfd_server_alarm_all_eob_6s-p95" {
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {
-  source              = "../resources/bfd_cw_dashboards"
-  dashboard_name      = var.dashboard_name
-  dashboard_namespace = var.dashboard_namespace
-  asg                 = module.fhir_asg.asg_id
+  source         = "../resources/bfd_cw_dashboards"
+  dashboard_name = var.dashboard_name
+  env            = var.env_config.env
 }
