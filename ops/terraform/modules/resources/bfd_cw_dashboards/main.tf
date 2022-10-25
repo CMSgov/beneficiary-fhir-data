@@ -38,7 +38,7 @@ locals {
   }
 }
 
-resource "aws_cloudwatch_dashboard" "bfd_dashboards_fhir" {
+resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
   dashboard_name = var.dashboard_name
   dashboard_body = templatefile(
     "${path.module}/templates/bfd-dashboards.tftpl",
@@ -47,5 +47,13 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboards_fhir" {
       asg_id    = var.asg_id
       env       = var.env
     }, local.client_ssls)
+  )
+}
+
+resource "aws_cloudwatch_dashboard" "bfd_dashboard_slos" {
+  dashboard_name = "${var.dashboard_name}-slos"
+  dashboard_body = templatefile(
+    "${path.module}/templates/bfd-dashboard-slos.tftpl",
+    merge({ namespace = local.namespace }, local.client_ssls)
   )
 }
