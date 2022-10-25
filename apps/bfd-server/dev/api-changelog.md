@@ -1,7 +1,6 @@
 # API Changelog
 
-## BFD-2145: Add CARIN conformant coding system in Procedure Coding list element in V2
-Removal of duplicated careteam member entries and their extensions.
+## BFD-2145: Removal of duplicated careteam member entries and their extensions.
 
 Old careteam member entry:
 ```json
