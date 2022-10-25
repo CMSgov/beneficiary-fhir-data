@@ -42,10 +42,10 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboards_fhir" {
   dashboard_name = var.dashboard_name
   dashboard_body = templatefile(
     "${path.module}/templates/bfd-dashboards.tftpl",
-    merge({ 
-      namespace = local.namespace 
-      asg_id = var.asg_id
-      env = var.env
+    merge({
+      namespace = local.namespace
+      asg_id    = var.asg_id
+      env       = var.env
     }, local.client_ssls)
   )
 }
