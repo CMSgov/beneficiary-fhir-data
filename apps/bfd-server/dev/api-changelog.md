@@ -1,6 +1,7 @@
 # API Changelog
 
 ## BFD-2145: Removal of duplicated careteam member entries and their extensions.
+Corrected an issue where duplicate entries for a provider were being supplied in the Explanation of Benefit careTeam element, making it cumbersome to process and link care team members to items.
 
 Old careteam member entry:
 ```json
