@@ -7,8 +7,11 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -143,5 +146,37 @@ public class ModelUtil {
           return Optional.empty();
         }
     }
+  }
+
+  /**
+   * Determines an appropriate java type to use for the given sql type name.
+   *
+   * @param sqlType SQL type name to map
+   * @return an {@link Optional} containing an appropriate {@link TypeName} or empty if no mapping
+   *     could be found
+   */
+  public static Optional<TypeName> mapSqlTypeToTypeName(String sqlType) {
+    if (sqlType.contains("char")) {
+      return Optional.of(ClassName.get(String.class));
+    }
+    if (sqlType.contains("smallint")) {
+      return Optional.of(ClassName.get(Short.class));
+    }
+    if (sqlType.equals("bigint")) {
+      return Optional.of(ClassName.get(Long.class));
+    }
+    if (sqlType.equals("int")) {
+      return Optional.of(ClassName.get(Integer.class));
+    }
+    if (sqlType.contains("decimal") || sqlType.contains("numeric")) {
+      return Optional.of(ClassName.get(BigDecimal.class));
+    }
+    if (sqlType.contains("date")) {
+      return Optional.of(ClassName.get(LocalDate.class));
+    }
+    if (sqlType.contains("timestamp")) {
+      return Optional.of(ClassName.get(Instant.class));
+    }
+    return Optional.empty();
   }
 }

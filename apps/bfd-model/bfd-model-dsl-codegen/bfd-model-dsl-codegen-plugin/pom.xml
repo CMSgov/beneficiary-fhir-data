@@ -48,6 +48,19 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <!-- used to validate data model before using it for code generation -->
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.0.Final</version>
+        </dependency>
+        <dependency>
+            <!-- required by hibernate-validator -->
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+
         <!-- Pulls in library of classes that are used for actual data copying so that plugin can reference them when generating code that calls them. -->
         <dependency>
             <groupId>gov.cms.bfd</groupId>
