@@ -248,11 +248,24 @@ public final class DataSetManifestTest {
         s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS));
   }
 
-  private DataSetManifest convertStreamToManifest(InputStream inStr)
+  /**
+   * Utility method to invoke {@link DataSetManifestFactory} parse factory that converts an XML stream
+   * of data into {@link DataSetManifest}.
+   * @param xmlStream
+   * @return
+   * @throws {@link SAXParseException}
+   * @throws {@link Exception
+   */
+  private DataSetManifest convertStreamToManifest(InputStream xmlStream)
       throws SAXParseException, Exception {
-    return DataSetManifestFactory.newInstance().parseManifest(inStr);
+    return DataSetManifestFactory.newInstance().parseManifest(xmlStream);
   }
 
+  /**
+   * Verifies that an XML data stream can be successully parsed into {@link DataSetManifest} object.
+   * It then marshals the java {@link DataSetManifest} object into an XML data stream that is then
+   * parsed again into a {@link DataSetManifest} object.
+   */
   @Test
   public void manifestSyntheticEndStateValid() {
     InputStream manifestStream =
@@ -303,6 +316,12 @@ public final class DataSetManifestTest {
     assertNotNull(manifest);
   }
 
+  /**
+   * Verifies that {@link DataSetManifest} content that is missing a required element of the {@link
+   * SyntheaEndStateProperties} will throw an exception {@link javax.xml.bind.UnmarshalException}
+   * when tryng to parse an XML stream. It further verifies that the primary exception contains a
+   * linked exception {@link javax.xml.bind.JAXBException}.
+   */
   @Test
   public void manifestSyntheticEndStateInvalid() {
     InputStream manifestStream =

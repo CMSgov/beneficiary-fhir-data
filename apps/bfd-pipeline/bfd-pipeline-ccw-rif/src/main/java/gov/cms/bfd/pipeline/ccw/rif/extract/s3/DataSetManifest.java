@@ -15,24 +15,79 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Represents the <code>manifest.xml</code> files that detail which specific files are included in a
  * transfer from the CMS Chronic Conditions Warehouse to the Blue Button API backend.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
+ * <pre>
+ * &lt;complexType>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="entry" maxOccurs="unbounded">
+ *           &lt;complexType>
+ *             &lt;complexContent>
+ *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *                 &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *                 &lt;attribute name="type" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *                 &lt;attribute name="exportType" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *               &lt;/restriction>
+ *             &lt;/complexContent>
+ *           &lt;/complexType>
+ *         &lt;/element>
+ *         &lt;element name="syntheaEndStateProperties" minOccurs="0">
+ *           &lt;complexType>
+ *             &lt;complexContent>
+ *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *                 &lt;sequence>
+ *                   &lt;element name="bene_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="bene_id_end" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="generated_ts" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                   &lt;element name="clm_grp_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="pde_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="carr_clm_cntl_num_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="fi_doc_cntl_num_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="hicn_start" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                   &lt;element name="clm_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                   &lt;element name="mbi_start" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                 &lt;/sequence>
+ *               &lt;/restriction>
+ *             &lt;/complexContent>
+ *           &lt;/complexType>
+ *         &lt;/element>
+ *       &lt;/sequence>
+ *       &lt;attribute name="timestamp" use="required" type="{http://www.w3.org/2001/XMLSchema}dateTime" />
+ *       &lt;attribute name="sequenceId" use="required" type="{http://www.w3.org/2001/XMLSchema}integer" />
+ *       &lt;attribute name="syntheticData" type="{http://www.w3.org/2001/XMLSchema}boolean" />
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
  */
-@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    name = "",
+    propOrder = {"entries", "syntheaEndStateProperties"})
+@XmlRootElement(name = "dataSetManifest")
 public final class DataSetManifest implements Comparable<DataSetManifest> {
-  @XmlAttribute(name = "timestamp")
+  @XmlAttribute(name = "timestamp", required = true)
   private final String timestampText;
 
-  @XmlAttribute private int sequenceId;
+  @XmlAttribute(name = "sequenceId", required = true)
+  private int sequenceId;
 
   @XmlAttribute(name = "syntheticData", required = false)
   private boolean syntheticData = false;
 
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
+
+  @XmlElement(name = "syntheaEndStateProperties", required = false)
+  protected SyntheaEndStateProperties syntheaEndStateProperties;
 
   /** Denotes the s3 key where the manifest was located when it was first read. */
   @XmlTransient private String manifestKeyIncomingLocation;
@@ -237,6 +292,24 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     return manifestKeyDoneLocation;
   }
 
+  /**
+   * Gets the value of the syntheaEndStateProperties property.
+   *
+   * @return possible object is {@link SyntheaEndStateProperties }
+   */
+  public SyntheaEndStateProperties getSyntheaEndStateProperties() {
+    return syntheaEndStateProperties;
+  }
+
+  /**
+   * Sets the value of the syntheaEndStateProperties property.
+   *
+   * @param value allowed object is {@link SyntheaEndStateProperties }
+   */
+  public void setSyntheaEndStateProperties(SyntheaEndStateProperties value) {
+    this.syntheaEndStateProperties = value;
+  }
+
   /** @see java.lang.Comparable#compareTo(java.lang.Object) */
   @Override
   public int compareTo(DataSetManifest o) {
@@ -256,6 +329,9 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     builder.append(syntheticData);
     builder.append(", entries=");
     builder.append(entries);
+    if (syntheaEndStateProperties != null) {
+      builder.append(syntheaEndStateProperties.toString());
+    }
     builder.append("]");
     return builder.toString();
   }
@@ -471,6 +547,217 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       builder.append(timestamp);
       builder.append(", sequenceId=");
       builder.append(sequenceId);
+      builder.append("]");
+      return builder.toString();
+    }
+  }
+
+  @XmlAccessorType(XmlAccessType.FIELD)
+  public static final class SyntheaEndStateProperties {
+    @XmlElement(name = "bene_id_start", required = true)
+    protected long beneIdStart;
+
+    @XmlElement(name = "bene_id_end", required = true)
+    protected long beneIdEnd;
+
+    @XmlElement(name = "generated_ts", required = true)
+    protected String generatedTs;
+
+    @XmlElement(name = "clm_grp_id_start", required = true)
+    protected long clmGrpIdStart;
+
+    @XmlElement(name = "pde_id_start", required = true)
+    protected long pdeIdStart;
+
+    @XmlElement(name = "carr_clm_cntl_num_start", required = true)
+    protected long carrClmCntlNumStart;
+
+    @XmlElement(name = "fi_doc_cntl_num_start", required = true)
+    protected long fiDocCntlNumStart;
+
+    @XmlElement(name = "hicn_start", required = true)
+    protected String hicnStart;
+
+    @XmlElement(name = "clm_id_start", required = true)
+    protected long clmIdStart;
+
+    @XmlElement(name = "mbi_start", required = true)
+    protected String mbiStart;
+
+    /** Create an instance of {@link SyntheaEndStateProperties } */
+    public SyntheaEndStateProperties() {}
+
+    /** Constructs a new {@link SyntheaEndStateProperties}. */
+    public SyntheaEndStateProperties(
+        long beneIdStart,
+        long beneIdEnd,
+        String generatedTs,
+        long clmGrpIdStart,
+        long pdeIdStart,
+        long carrClmCntlNumStart,
+        long fiDocCntlNumStart,
+        String hicnStart,
+        long clmIdStart,
+        String mbiStart) {
+      this.beneIdStart = beneIdStart;
+      this.beneIdEnd = beneIdEnd;
+      this.generatedTs = generatedTs;
+      this.clmGrpIdStart = clmGrpIdStart;
+      this.pdeIdStart = pdeIdStart;
+      this.carrClmCntlNumStart = carrClmCntlNumStart;
+      this.fiDocCntlNumStart = fiDocCntlNumStart;
+      this.hicnStart = hicnStart;
+      this.clmIdStart = clmIdStart;
+      this.mbiStart = mbiStart;
+    }
+    /** Gets the value of the beneIdStart property. */
+    public long getBeneIdStart() {
+      return beneIdStart;
+    }
+
+    /** Sets the value of the beneIdStart property. */
+    public void setBeneIdStart(long value) {
+      this.beneIdStart = value;
+    }
+
+    /** Gets the value of the beneIdEnd property. */
+    public long getBeneIdEnd() {
+      return beneIdEnd;
+    }
+
+    /** Sets the value of the beneIdStart property. */
+    public void setBeneIdEnd(long value) {
+      this.beneIdEnd = value;
+    }
+
+    /**
+     * Gets the value of the generatedTs property.
+     *
+     * @return possible object is {@link String }
+     */
+    public String getGeneratedTs() {
+      return generatedTs;
+    }
+
+    /**
+     * Sets the value of the generatedTs property.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setGeneratedTs(String value) {
+      this.generatedTs = value;
+    }
+
+    /** Gets the value of the clmGrpIdStart property. */
+    public long getClmGrpIdStart() {
+      return clmGrpIdStart;
+    }
+
+    /** Sets the value of the clmGrpIdStart property. */
+    public void setClmGrpIdStart(long value) {
+      this.clmGrpIdStart = value;
+    }
+
+    /** Gets the value of the pdeIdStart property. */
+    public long getPdeIdStart() {
+      return pdeIdStart;
+    }
+
+    /** Sets the value of the pdeIdStart property. */
+    public void setPdeIdStart(long value) {
+      this.pdeIdStart = value;
+    }
+
+    /** Gets the value of the carrClmCntlNumStart property. */
+    public long getCarrClmCntlNumStart() {
+      return carrClmCntlNumStart;
+    }
+
+    /** Sets the value of the carrClmCntlNumStart property. */
+    public void setCarrClmCntlNumStart(long value) {
+      this.carrClmCntlNumStart = value;
+    }
+
+    /** Gets the value of the fiDocCntlNumStart property. */
+    public long getFiDocCntlNumStart() {
+      return fiDocCntlNumStart;
+    }
+
+    /** Sets the value of the fiDocCntlNumStart property. */
+    public void setFiDocCntlNumStart(long value) {
+      this.fiDocCntlNumStart = value;
+    }
+
+    /**
+     * Gets the value of the hicnStart property.
+     *
+     * @return possible object is {@link String }
+     */
+    public String getHicnStart() {
+      return hicnStart;
+    }
+
+    /**
+     * Sets the value of the hicnStart property.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setHicnStart(String value) {
+      this.hicnStart = value;
+    }
+
+    /** Gets the value of the clmIdStart property. */
+    public long getClmIdStart() {
+      return clmIdStart;
+    }
+
+    /** Sets the value of the clmIdStart property. */
+    public void setClmIdStart(long value) {
+      this.clmIdStart = value;
+    }
+
+    /**
+     * Gets the value of the mbiStart property.
+     *
+     * @return possible object is {@link String }
+     */
+    public String getMbiStart() {
+      return mbiStart;
+    }
+
+    /**
+     * Sets the value of the mbiStart property.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setMbiStart(String value) {
+      this.mbiStart = value;
+    }
+
+    /** @see java.lang.Object#toString() */
+    @Override
+    public String toString() {
+      StringBuilder builder = new StringBuilder();
+      builder.append("SyntheaEndStateProperties [beneIdStart=");
+      builder.append(beneIdStart);
+      builder.append(", beneIdEnd=");
+      builder.append(beneIdEnd);
+      builder.append(", generatedTs=");
+      builder.append(generatedTs);
+      builder.append(", clmGrpIdStart=");
+      builder.append(clmGrpIdStart);
+      builder.append(", pdeIdStart=");
+      builder.append(pdeIdStart);
+      builder.append(", carrClmCntlNumStart=");
+      builder.append(carrClmCntlNumStart);
+      builder.append(", fiDocCntlNumStart=");
+      builder.append(fiDocCntlNumStart);
+      builder.append(", hicnStart=");
+      builder.append(hicnStart);
+      builder.append(", clmIdStart=");
+      builder.append(clmIdStart);
+      builder.append(", mbiStart=");
+      builder.append(mbiStart);
       builder.append("]");
       return builder.toString();
     }
