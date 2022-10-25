@@ -8,7 +8,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/all" ],
+                    [ "${namespace}", "http-requests/count/all" ],
                     [ ".", "http-requests/count/metadata" ],
                     [ ".", "http-requests/count/coverage-all" ],
                     [ ".", "http-requests/count/patient-all" ],
@@ -32,7 +32,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton All Requests Count" } ],
+                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton All Requests Count" } ],
                     [ ".", "http-requests/count/metadata", ".", ".", { "label": "BlueButton /v*/fhir/metadata Request Count" } ],
                     [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BlueButton /v*/fhir/Coverage Request Count" } ],
                     [ ".", "http-requests/count/patient-all", ".", ".", { "label": "BlueButton /v*/fhir/Patient Request Count" } ],
@@ -56,7 +56,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Count" } ],
+                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Count" } ],
                     [ ".", "http-requests/count/metadata", ".", ".", { "label": "BCDA /v*/fhir/metadata Request Count" } ],
                     [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BCDA /v*/fhir/Coverage Request Count" } ],
                     [ ".", "http-requests/count/patient-all", ".", ".", { "label": "BCDA /v*/fhir/Patient Request Count" } ],
@@ -80,7 +80,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p95" } ],
+                    [ "${namespace}", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p95" } ],
                     [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency p95" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency p95" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency p95" } ],
@@ -123,7 +123,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/500-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton 500 Response Count" } ],
+                    [ "${namespace}", "http-requests/count/500-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton 500 Response Count" } ],
                     [ "...", "${dpc_client_ssl}", { "label": "DPC 500 Response Count" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D 500 Response Count" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA 500 Response Count" } ],
@@ -145,7 +145,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/non-2xx-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton non-2xx Response Count" } ],
+                    [ "${namespace}", "http-requests/count/non-2xx-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton non-2xx Response Count" } ],
                     [ "...", "${dpc_client_ssl}", { "label": "DPC non-2xx Response Count" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D non-2xx Response Count" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA non-2xx Response Count" } ],
@@ -167,7 +167,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC All Requests Count" } ],
+                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC All Requests Count" } ],
                     [ ".", "http-requests/count/metadata", ".", ".", { "label": "DPC /v*/fhir/metadata Request Count" } ],
                     [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "DPC /v*/fhir/Coverage Request Count" } ],
                     [ ".", "http-requests/count/patient-all", ".", ".", { "label": "DPC /v*/fhir/Patient Request Count" } ],
@@ -191,7 +191,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${ab2d_client_ssl}", { "label": "AB2D All Requests Count" } ],
+                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${ab2d_client_ssl}", { "label": "AB2D All Requests Count" } ],
                     [ ".", "http-requests/count/metadata", ".", ".", { "label": "AB2D /v*/fhir/metadata Request Count" } ],
                     [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "AB2D /v*/fhir/Coverage Request Count" } ],
                     [ ".", "http-requests/count/patient-all", ".", ".", { "label": "AB2D /v*/fhir/Patient Request Count" } ],
@@ -215,7 +215,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated" } ],
+                    [ "${namespace}", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated" } ],
                     [ "...", { "color": "#ff7f0e", "stat": "p99", "label": "99th Percentile" } ],
                     [ "...", { "color": "#d62728", "label": "Maximum" } ]
                 ],
@@ -259,7 +259,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p50" } ],
+                    [ "${namespace}", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p50" } ],
                     [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency p50" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency p50" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency p50" } ],
@@ -282,7 +282,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p99" } ],
+                    [ "${namespace}", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p99" } ],
                     [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency p99" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency p99" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency p99" } ],
@@ -305,7 +305,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency" } ],
+                    [ "${namespace}", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency" } ],
                     [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency" } ],
@@ -328,7 +328,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${internal_client_ssl}", { "label": "Internal All Requests Count" } ],
+                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${internal_client_ssl}", { "label": "Internal All Requests Count" } ],
                     [ ".", "http-requests/count/metadata", ".", ".", { "label": "Internal /v*/fhir/metadata Request Count" } ],
                     [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "Internal /v*/fhir/Coverage Request Count" } ],
                     [ ".", "http-requests/count/patient-all", ".", ".", { "label": "Internal /v*/fhir/Patient Request Count" } ],
@@ -352,7 +352,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton All Requests Latency" } ],
+                    [ "${namespace}", "http-requests/latency/all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton All Requests Latency" } ],
                     [ ".", "http-requests/latency/metadata", ".", ".", { "label": "BlueButton /v*/fhir/metadata Request Latency" } ],
                     [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "BlueButton /v*/fhir/Coverage Request Latency" } ],
                     [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "BlueButton /v*/fhir/Patient Request Latency" } ],
@@ -376,7 +376,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${ab2d_client_ssl}", { "label": "AB2D All Requests Latency" } ],
+                    [ "${namespace}", "http-requests/latency/all", "client_ssl", "${ab2d_client_ssl}", { "label": "AB2D All Requests Latency" } ],
                     [ ".", "http-requests/latency/metadata", ".", ".", { "label": "AB2D /v*/fhir/metadata Request Latency" } ],
                     [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "AB2D /v*/fhir/Coverage Request Latency" } ],
                     [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "AB2D /v*/fhir/Patient Request Latency" } ],
@@ -400,7 +400,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Latency" } ],
+                    [ "${namespace}", "http-requests/latency/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Latency" } ],
                     [ ".", "http-requests/latency/metadata", ".", ".", { "label": "BCDA /v*/fhir/metadata Request Latency" } ],
                     [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "BCDA /v*/fhir/Coverage Request Latency" } ],
                     [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "BCDA /v*/fhir/Patient Request Latency" } ],
@@ -424,7 +424,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC All Requests Latency" } ],
+                    [ "${namespace}", "http-requests/latency/all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC All Requests Latency" } ],
                     [ ".", "http-requests/latency/metadata", ".", ".", { "label": "DPC /v*/fhir/metadata Request Latency" } ],
                     [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "DPC /v*/fhir/Coverage Request Latency" } ],
                     [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "DPC /v*/fhir/Patient Request Latency" } ],
@@ -448,7 +448,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${internal_client_ssl}", { "label": "Internal All Requests Latency" } ],
+                    [ "${namespace}", "http-requests/latency/all", "client_ssl", "${internal_client_ssl}", { "label": "Internal All Requests Latency" } ],
                     [ ".", "http-requests/latency/metadata", ".", ".", { "label": "Internal /v*/fhir/metadata Request Latency" } ],
                     [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "Internal /v*/fhir/Coverage Request Latency" } ],
                     [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "Internal /v*/fhir/Patient Request Latency" } ],
