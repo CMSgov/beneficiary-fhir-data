@@ -79,7 +79,8 @@
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.327</aws-java-sdk-bom.version>
-		<spring-data-jpa.version>2.7.0</spring-data-jpa.version>
+		<spring-data-jpa.version>2.7.5</spring-data-jpa.version>
+		<spring-framework.version>5.3.23</spring-framework.version>
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
 		but not all (in particular, entity-manager does not have a 6.0 version available yet).
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
@@ -205,7 +206,7 @@
 					uses the 5.3.23 version of the Spring Framework. -->
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>5.3.23</version>
+				<version>${spring-framework.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -220,6 +221,8 @@
 			<dependency>
 				<!-- Lock & harmonize the versions of the various AWS SDK components, 
 					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
+				<!-- When checking for dependencies to upgrade, java-sdk-swf-libraries will show up, however
+				the AWS SDK Bom contains an older version for unknown reasons, so it can be ignored. -->
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-bom</artifactId>
 				<version>${aws-java-sdk-bom.version}</version>
