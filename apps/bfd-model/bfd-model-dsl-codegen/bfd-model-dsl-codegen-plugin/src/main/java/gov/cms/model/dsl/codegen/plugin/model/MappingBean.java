@@ -2,7 +2,12 @@ package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,45 +23,70 @@ import lombok.Singular;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MappingBean {
+public class MappingBean implements ModelBean {
+  /**
+   * Implementation of {@link Comparator} that can be used to sort mappings by their {@link
+   * MappingBean#id} values.
+   */
+  public static final Comparator<MappingBean> IdComparator =
+      Comparator.comparing(mapping -> Strings.nullToEmpty(mapping.getId()));
+
   /** Unique identifier for the mapping. */
-  private String id;
+  @NotNull @JavaName private String id;
 
   /** Full class name for source message object. */
+  @JavaName(type = JavaNameType.Compound)
   private String messageClassName;
 
   /** Full class name for entity object. */
+  @NotNull
+  @JavaName(type = JavaNameType.Compound)
   private String entityClassName;
 
   /** Full class name for transformer object to be generated. */
+  @JavaName(type = JavaNameType.Compound)
   private String transformerClassName;
 
   /** Defines the type of objects being transformed (either GRPC or CSV). */
-  private SourceType sourceType = SourceType.Grpc;
+  @NotNull private SourceType sourceType = SourceType.Grpc;
 
   /** Defines how nullable values are passed to and from field accessor methods. */
+  @NotNull
   private NullableFieldAccessorType nullableFieldAccessorType = NullableFieldAccessorType.Standard;
 
   /** Meta data for the database table. */
-  private TableBean table;
+  @NotNull @Valid private TableBean table;
 
   /** Minimum valid string length for non-null string fields. */
   @Builder.Default private int minStringLength = 1;
 
   /** Meta data for enum types. */
-  @Singular private List<EnumTypeBean> enumTypes = new ArrayList<>();
+  @NotNull @Singular private List<@Valid EnumTypeBean> enumTypes = new ArrayList<>();
 
   /** Meta data for transformations used to copy data from message to entity. */
-  @Singular private List<TransformationBean> transformations = new ArrayList<>();
+  @NotNull @Singular private List<@Valid TransformationBean> transformations = new ArrayList<>();
 
   /** Meta data for arrays. */
-  @Singular private List<ArrayBean> arrays = new ArrayList<>();
+  @NotNull @Singular private List<@Valid ArrayBean> arrays = new ArrayList<>();
 
   /** Meta data for any external transformations used in transformer. */
-  @Singular private List<ExternalTransformationBean> externalTransformations = new ArrayList<>();
+  @NotNull @Singular
+  private List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();
 
   /** List of extra interfaces to add to the entity class. */
-  @Singular private List<String> entityInterfaces = new ArrayList<>();
+  @NotNull @Singular
+  private List<@JavaName(type = JavaNameType.Compound) String> entityInterfaces = new ArrayList<>();
+
+  /**
+   * Finds the {@link EnumTypeBean} in this mapping with the given name and returns it.
+   *
+   * @param enumName name of the enum
+   * @return {@link Optional} containing the {@link EnumTypeBean} for the given name if there was
+   *     one, empty otherwise
+   */
+  public Optional<EnumTypeBean> getEnum(String enumName) {
+    return enumTypes.stream().filter(e -> enumName.equals(e.getName())).findAny();
+  }
 
   /**
    * Finds the {@link EnumTypeBean} in this mapping with the given name and returns it.
@@ -66,9 +96,7 @@ public class MappingBean {
    * @throws IllegalArgumentException if no such enum exists
    */
   public EnumTypeBean findEnum(String enumName) {
-    return enumTypes.stream()
-        .filter(e -> enumName.equals(e.getName()))
-        .findAny()
+    return getEnum(enumName)
         .orElseThrow(
             () ->
                 new IllegalArgumentException(
@@ -225,6 +253,11 @@ public class MappingBean {
             pm -> pm.getRealOrJoinedColumnByColumnName(root, join.getJoinColumnName()));
     var noSequenceColumn = parentColumn.map(c -> c.toBuilder().sequence(null).build());
     return noSequenceColumn;
+  }
+
+  @Override
+  public String getDescription() {
+    return "mapping " + id;
   }
 
   /** Enum used to define the type of source objects for the transformations. */
