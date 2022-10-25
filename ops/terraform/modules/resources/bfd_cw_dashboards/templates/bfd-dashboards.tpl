@@ -2,125 +2,94 @@
     "widgets": [
         {
             "height": 6,
-            "width": 18,
+            "width": 12,
             "y": 0,
             "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count/metadata/all" ],
-                    [ ".", "http-requests/count/coverageAll/all" ],
-                    [ ".", "http-requests/count/patientAll/all" ],
-                    [ ".", "http-requests/count/eobAll/all" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/all" ],
+                    [ ".", "http-requests/count/metadata" ],
+                    [ ".", "http-requests/count/coverage-all" ],
+                    [ ".", "http-requests/count/patient-all" ],
+                    [ ".", "http-requests/count/eob-all" ],
+                    [ ".", "http-requests/count/claim-all" ],
+                    [ ".", "http-requests/count/claim-response-all" ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
-                "title": "Request Count All",
+                "title": "Aggregated Request Counts per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Sum",
-                "period": 300
+                "period": 60
             }
         },
         {
             "height": 6,
             "width": 6,
-            "y": 6,
+            "y": 12,
             "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count/metadata/bb" ],
-                    [ ".", "http-requests/count/coverageAll/bb" ],
-                    [ ".", "http-requests/count/patientAll/bb" ],
-                    [ ".", "http-requests/count/eobAll/bb" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton All Requests Count" } ],
+                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "BlueButton /v*/fhir/metadata Request Count" } ],
+                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BlueButton /v*/fhir/Coverage Request Count" } ],
+                    [ ".", "http-requests/count/patient-all", ".", ".", { "label": "BlueButton /v*/fhir/Patient Request Count" } ],
+                    [ ".", "http-requests/count/eob-all", ".", ".", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Request Count" } ],
+                    [ ".", "http-requests/count/claim-all", ".", ".", { "label": "BlueButton /v*/fhir/Claim Request Count" } ],
+                    [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "BlueButton /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
-                "title": "BB Request Count",
+                "title": "BlueButton Request Count per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Sum",
-                "period": 300
+                "period": 60
             }
         },
         {
             "height": 6,
             "width": 6,
-            "y": 6,
+            "y": 12,
             "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count/metadata/bcda" ],
-                    [ ".", "http-requests/count/coverageAll/bcda" ],
-                    [ ".", "http-requests/count/patientAll/bcda" ],
-                    [ ".", "http-requests/count/eobAll/bcda" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Count" } ],
+                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "BCDA /v*/fhir/metadata Request Count" } ],
+                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BCDA /v*/fhir/Coverage Request Count" } ],
+                    [ ".", "http-requests/count/patient-all", ".", ".", { "label": "BCDA /v*/fhir/Patient Request Count" } ],
+                    [ ".", "http-requests/count/eob-all", ".", ".", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Request Count" } ],
+                    [ ".", "http-requests/count/claim-all", ".", ".", { "label": "BCDA /v*/fhir/Claim Request Count" } ],
+                    [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "BCDA /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
-                "title": "BCDA Request Count",
+                "title": "BCDA Request Count per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Sum",
-                "period": 300
+                "period": 60
             }
         },
         {
             "height": 6,
             "width": 6,
-            "y": 6,
+            "y": 24,
             "x": 6,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count/metadata/mct" ],
-                    [ ".", "http-requests/count/coverageAll/mct" ],
-                    [ ".", "http-requests/count/patientAll/mct" ],
-                    [ ".", "http-requests/count/eobAll/mct" ]
-                ],
-                "view": "timeSeries",
-                "stacked": true,
-                "title": "MCT Request Count",
-                "region": "us-east-1",
-                "stat": "Sum",
-                "period": 300
-            }
-        },
-        {
-            "height": 6,
-            "width": 6,
-            "y": 12,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
-                    [ ".", "http-requests/latency/eobAll/bcda" ],
-                    [ ".", "http-requests/latency/eobAll/mct" ],
-                    [ ".", "http-requests/latency/eobAll/ab2d" ]
+                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p95" } ],
+                    [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency p95" } ],
+                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency p95" } ],
+                    [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency p95" } ],
+                    [ "...", "${internal_client_ssl}", { "label": "Internal /v*/fhir/ExplanationOfBenefit Latency p95" } ],
+                    [ ".", ".", { "label": "All /v*/fhir/ExplanationOfBenefit Latency p95" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "title": "EOB P50 Latency",
-                "region": "us-east-1",
-                "period": 300,
-                "stat": "p50"
-            }
-        },
-        {
-            "height": 6,
-            "width": 6,
-            "y": 12,
-            "x": 6,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
-                    [ ".", "http-requests/latency/eobAll/bcda" ],
-                    [ ".", "http-requests/latency/eobAll/mct" ],
-                    [ ".", "http-requests/latency/eobAll/ab2d" ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "title": "EOB P95 Latency",
+                "title": "/v*/fhir/EoB 95th Percentile Latency with 5 Minute Period",
                 "region": "us-east-1",
                 "stat": "p95",
                 "period": 300
@@ -128,79 +97,38 @@
         },
         {
             "height": 6,
-            "width": 6,
-            "y": 12,
+            "width": 12,
+            "y": 30,
             "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
-                    [ ".", "http-requests/latency/eobAll/bcda" ],
-                    [ ".", "http-requests/latency/eobAll/mct" ],
-                    [ ".", "http-requests/latency/eobAll/ab2d" ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "title": "EOB P99 Latency",
-                "region": "us-east-1",
-                "stat": "p99",
-                "period": 300
-            }
-        },
-        {
-            "height": 6,
-            "width": 6,
-            "y": 12,
-            "x": 18,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/latency/eobAll/bb" ],
-                    [ ".", "http-requests/latency/eobAll/bcda" ],
-                    [ ".", "http-requests/latency/eobAll/mct" ],
-                    [ ".", "http-requests/latency/eobAll/ab2d" ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "title": "EOB Max Latency",
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 300
-            }
-        },
-        {
-            "height": 5,
-            "width": 12,
-            "y": 23,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "AWS/EC2", "CPUUtilization", { "visible": false } ],
-                    [ ".", ".", "InstanceType", "c5.4xlarge", { "color": "#2ca02c", "stat": "Average" } ],
-                    [ "...", { "color": "#d62728" } ]
+                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "bfd-prod-fhir-274" ],
+                    [ "...", { "stat": "Minimum" } ],
+                    [ "...", { "stat": "Average" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "us-east-1",
                 "stat": "Maximum",
-                "period": 3600,
-                "title": "ASG CPU Usage"
+                "period": 60,
+                "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period"
             }
         },
         {
-            "height": 3,
+            "height": 4,
             "width": 24,
-            "y": 28,
+            "y": 36,
             "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count-500/bb" ],
-                    [ ".", "http-requests/count-500/bcda" ],
-                    [ ".", "http-requests/count-500/mct" ],
-                    [ ".", "http-requests/count-500/dpc" ],
-                    [ ".", "http-requests/count-500/ab2d" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/500-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton 500 Response Count" } ],
+                    [ "...", "${dpc_client_ssl}", { "label": "DPC 500 Response Count" } ],
+                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D 500 Response Count" } ],
+                    [ "...", "${bcda_client_ssl}", { "label": "BCDA 500 Response Count" } ],
+                    [ "...", "${internal_client_ssl}", { "label": "Internal 500 Response Count" } ],
+                    [ ".", ".", { "label": "All 500 Response Count" } ]
                 ],
                 "view": "singleValue",
                 "region": "us-east-1",
@@ -210,18 +138,19 @@
             }
         },
         {
-            "height": 3,
+            "height": 4,
             "width": 24,
-            "y": 31,
+            "y": 40,
             "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count-not-2xx/bb" ],
-                    [ ".", "http-requests/count-not-2xx/bcda" ],
-                    [ ".", "http-requests/count-not-2xx/mct" ],
-                    [ ".", "http-requests/count-not-2xx/dpc" ],
-                    [ ".", "http-requests/count-not-2xx/ab2d" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/non-2xx-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton non-2xx Response Count" } ],
+                    [ "...", "${dpc_client_ssl}", { "label": "DPC non-2xx Response Count" } ],
+                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D non-2xx Response Count" } ],
+                    [ "...", "${bcda_client_ssl}", { "label": "BCDA non-2xx Response Count" } ],
+                    [ "...", "${internal_client_ssl}", { "label": "Internal non-2xx Response Count" } ],
+                    [ ".", ".", { "label": "All non-2xx Response Count" } ]
                 ],
                 "view": "singleValue",
                 "region": "us-east-1",
@@ -233,81 +162,306 @@
         {
             "height": 6,
             "width": 6,
-            "y": 6,
+            "y": 12,
             "x": 18,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count/metadata/dpc" ],
-                    [ ".", "http-requests/count/coverageAll/dpc" ],
-                    [ ".", "http-requests/count/patientAll/dpc" ],
-                    [ ".", "http-requests/count/eobAll/dpc" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC All Requests Count" } ],
+                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "DPC /v*/fhir/metadata Request Count" } ],
+                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "DPC /v*/fhir/Coverage Request Count" } ],
+                    [ ".", "http-requests/count/patient-all", ".", ".", { "label": "DPC /v*/fhir/Patient Request Count" } ],
+                    [ ".", "http-requests/count/eob-all", ".", ".", { "label": "DPC /v*/fhir/ExplanationOfBenefit Request Count" } ],
+                    [ ".", "http-requests/count/claim-all", ".", ".", { "label": "DPC /v*/fhir/Claim Request Count" } ],
+                    [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "DPC /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
                 "region": "us-east-1",
                 "stat": "Sum",
-                "period": 300,
-                "title": "DPC Request Count"
+                "period": 60,
+                "title": "DPC Request Count per-Endpoint with 1 Minute Period"
             }
         },
         {
             "height": 6,
             "width": 6,
-            "y": 0,
-            "x": 18,
+            "y": 12,
+            "x": 6,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/count/metadata/ab2d" ],
-                    [ ".", "http-requests/count/coverageAll/ab2d" ],
-                    [ ".", "http-requests/count/patientAll/ab2d" ],
-                    [ ".", "http-requests/count/eobAll/ab2d" ]
+                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${ab2d_client_ssl}", { "label": "AB2D All Requests Count" } ],
+                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "AB2D /v*/fhir/metadata Request Count" } ],
+                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "AB2D /v*/fhir/Coverage Request Count" } ],
+                    [ ".", "http-requests/count/patient-all", ".", ".", { "label": "AB2D /v*/fhir/Patient Request Count" } ],
+                    [ ".", "http-requests/count/eob-all", ".", ".", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Request Count" } ],
+                    [ ".", "http-requests/count/claim-all", ".", ".", { "label": "AB2D /v*/fhir/Claim Request Count" } ],
+                    [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "AB2D /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": true,
                 "region": "us-east-1",
-                "title": "AB2D Request Count",
-                "period": 300,
+                "title": "AB2D Request Count per-Endpoint with 1 Minute Period",
+                "period": 60,
                 "stat": "Sum"
             }
         },
         {
-            "height": 10,
+            "height": 6,
             "width": 12,
-            "y": 18,
+            "y": 0,
             "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${dashboard_namespace}", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c" } ],
-                    [ "...", { "color": "#ff7f0e", "stat": "p99" } ],
-                    [ "...", { "color": "#d62728" } ]
+                    [ "bfd-prod/bfd-server", "http-requests/latency/all/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated" } ],
+                    [ "...", { "color": "#ff7f0e", "stat": "p99", "label": "99th Percentile" } ],
+                    [ "...", { "color": "#d62728", "label": "Maximum" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "title": "Latency Percentiles - All Requests",
+                "title": "Aggregated Latency Statistics with 1 Minute Period",
+                "region": "us-east-1",
+                "stat": "Maximum",
+                "period": 60
+            }
+        },
+        {
+            "height": 6,
+            "width": 12,
+            "y": 30,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-prod-fhir', 'Maximum', 60),1)", "id": "e2" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "us-east-1",
+                "stat": "Maximum",
+                "period": 300,
+                "title": "Instance Count in Auto Scaling Groups with 1 Minute Period",
+                "yAxis": {
+                    "left": {
+                        "label": "Percent",
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 24,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p50" } ],
+                    [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency p50" } ],
+                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency p50" } ],
+                    [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency p50" } ],
+                    [ "...", "${internal_client_ssl}", { "label": "Internal /v*/fhir/ExplanationOfBenefit Latency p50" } ],
+                    [ ".", ".", { "label": "All /v*/fhir/ExplanationOfBenefit Latency p50" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "/v*/fhir/EoB 50th Percentile Latency with 5 Minute Period",
+                "region": "us-east-1",
+                "stat": "p50",
+                "period": 300
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 24,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency p99" } ],
+                    [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency p99" } ],
+                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency p99" } ],
+                    [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency p99" } ],
+                    [ "...", "${internal_client_ssl}", { "label": "Internal /v*/fhir/ExplanationOfBenefit Latency p99" } ],
+                    [ ".", ".", { "label": "All /v*/fhir/ExplanationOfBenefit Latency p99" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "/v*/fhir/EoB 99th Percentile Latency with 5 Minute Period",
+                "region": "us-east-1",
+                "stat": "p99",
+                "period": 300
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 24,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Latency" } ],
+                    [ "...", "${dpc_client_ssl}", { "label": "DPC /v*/fhir/ExplanationOfBenefit Latency" } ],
+                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Latency" } ],
+                    [ "...", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Latency" } ],
+                    [ "...", "${internal_client_ssl}", { "label": "Internal /v*/fhir/ExplanationOfBenefit Latency" } ],
+                    [ ".", ".", { "label": "All /v*/fhir/ExplanationOfBenefit Latency" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "/v*/fhir/EoB Maximum Latency with 5 Minute Period",
                 "region": "us-east-1",
                 "stat": "Maximum",
                 "period": 300
             }
         },
         {
-            "height": 5,
+            "height": 6,
             "width": 12,
+            "y": 6,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/count/all", "client_ssl", "${internal_client_ssl}", { "label": "Internal All Requests Count" } ],
+                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "Internal /v*/fhir/metadata Request Count" } ],
+                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "Internal /v*/fhir/Coverage Request Count" } ],
+                    [ ".", "http-requests/count/patient-all", ".", ".", { "label": "Internal /v*/fhir/Patient Request Count" } ],
+                    [ ".", "http-requests/count/eob-all", ".", ".", { "label": "Internal /v*/fhir/ExplanationOfBenefit Request Count" } ],
+                    [ ".", "http-requests/count/claim-all", ".", ".", { "label": "Internal /v*/fhir/Claim Request Count" } ],
+                    [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "Internal /v*/fhir/ClaimResponse Request Count" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": true,
+                "title": "Internal Test Traffic Request Count per-Endpoint with 1 Minute Period",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 60
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
             "y": 18,
             "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "AWS/AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", "${asg_name}" ]
+                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton All Requests Latency" } ],
+                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "BlueButton /v*/fhir/metadata Request Latency" } ],
+                    [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "BlueButton /v*/fhir/Coverage Request Latency" } ],
+                    [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "BlueButton /v*/fhir/Patient Request Latency" } ],
+                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "BlueButton /v*/fhir/ExplanationOfBenefit Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-all", ".", ".", { "label": "BlueButton /v*/fhir/Claim Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "BlueButton /v*/fhir/ClaimResponse Request Latency" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": false,
+                "stacked": true,
+                "title": "BlueButton Average Request Latency per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 3600,
-                "title": "ASG Instance Counts"
+                "stat": "Average",
+                "period": 60
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 18,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${ab2d_client_ssl}", { "label": "AB2D All Requests Latency" } ],
+                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "AB2D /v*/fhir/metadata Request Latency" } ],
+                    [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "AB2D /v*/fhir/Coverage Request Latency" } ],
+                    [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "AB2D /v*/fhir/Patient Request Latency" } ],
+                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "AB2D /v*/fhir/ExplanationOfBenefit Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-all", ".", ".", { "label": "AB2D /v*/fhir/Claim Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "AB2D /v*/fhir/ClaimResponse Request Latency" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": true,
+                "region": "us-east-1",
+                "title": "AB2D Average Request Latency per-Endpoint with 1 Minute Period",
+                "period": 60,
+                "stat": "Average"
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 18,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Latency" } ],
+                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "BCDA /v*/fhir/metadata Request Latency" } ],
+                    [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "BCDA /v*/fhir/Coverage Request Latency" } ],
+                    [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "BCDA /v*/fhir/Patient Request Latency" } ],
+                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-all", ".", ".", { "label": "BCDA /v*/fhir/Claim Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "BCDA /v*/fhir/ClaimResponse Request Latency" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": true,
+                "title": "BCDA Average Request Latency per-Endpoint with 1 Minute Period",
+                "region": "us-east-1",
+                "stat": "Average",
+                "period": 60
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 18,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC All Requests Latency" } ],
+                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "DPC /v*/fhir/metadata Request Latency" } ],
+                    [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "DPC /v*/fhir/Coverage Request Latency" } ],
+                    [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "DPC /v*/fhir/Patient Request Latency" } ],
+                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "DPC /v*/fhir/ExplanationOfBenefit Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-all", ".", ".", { "label": "DPC /v*/fhir/Claim Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "DPC /v*/fhir/ClaimResponse Request Latency" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": true,
+                "region": "us-east-1",
+                "stat": "Average",
+                "period": 60,
+                "title": "DPC Average Request Latency per-Endpoint with 1 Minute Period"
+            }
+        },
+        {
+            "height": 6,
+            "width": 12,
+            "y": 6,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "bfd-prod/bfd-server", "http-requests/latency/all", "client_ssl", "${internal_client_ssl}", { "label": "Internal All Requests Latency" } ],
+                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "Internal /v*/fhir/metadata Request Latency" } ],
+                    [ ".", "http-requests/latency/coverage-all", ".", ".", { "label": "Internal /v*/fhir/Coverage Request Latency" } ],
+                    [ ".", "http-requests/latency/patient-all", ".", ".", { "label": "Internal /v*/fhir/Patient Request Latency" } ],
+                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "Internal /v*/fhir/ExplanationOfBenefit Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-all", ".", ".", { "label": "Internal /v*/fhir/Claim Request Latency" } ],
+                    [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "Internal /v*/fhir/ClaimResponse Request Latency" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": true,
+                "title": "Internal Average Request Latency per-Endpoint with 1 Minute Period",
+                "region": "us-east-1",
+                "stat": "Average",
+                "period": 60
             }
         }
     ]
