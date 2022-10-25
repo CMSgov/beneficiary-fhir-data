@@ -161,7 +161,9 @@ final class CarrierClaimTransformer {
               performingCareTeamMember,
               TransformerConstants.CODING_NPI_US,
               TransformerConstants.CODING_NPI_US,
-              TransformerUtils.retrieveNpiCodeDisplay(claimLine.getOrganizationNpi().get()),
+              transformerContext
+                  .getNPIOrgLookup()
+                  .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
               "" + claimLine.getOrganizationNpi().get());
         }
       }

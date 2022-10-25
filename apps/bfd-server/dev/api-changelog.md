@@ -1,5 +1,69 @@
 # API Changelog
 
+## BFD-1923: Add Org Name Display to Organizations in V2
+Add the display name for NPI Organizations to the contained resource for organizations.
+
+New Organization Resource Mapping Display Name in V2:
+```json
+      "contained" : [ {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+        },
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "PRN"
+            } ]
+          },
+          "value" : "999999"
+        }, {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "0000000000"
+        } ],
+        "active" : true,
+      } ],
+```
+
+Old Mapping in V2:
+```json
+      "contained" : [ {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+        },
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "PRN"
+            } ]
+          },
+          "value" : "999999"
+        }, {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "0000000000"
+        } ],
+        "active" : true,
+        "name" : "Fake ORG Name"
+      }
+```
+
 ## BFD-1895: Add CARIN conformant coding system in Procedure Coding list element in V2
 
 Add an additional coding for ICD procedure codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. .http://www.cms.gov/Medicare/Coding/ICD10).

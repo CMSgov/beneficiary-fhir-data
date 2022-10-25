@@ -971,6 +971,26 @@ final class TransformerTestUtils {
   }
 
   /**
+   * @param expectedIdentifierSystem the expected {@link Identifier#getSystem()} value
+   * @param expectedIdentifierValue the expected {@link Identifier#getValue()} value
+   * @param expectedNpiOrgDisplay the expected {@link Identifier#getValue()} value
+   * @param reference the actual {@link Reference} to verify
+   */
+  static void assertReferenceIdentifierEquals(
+      String expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      Optional<String> expectedNpiOrgDisplay,
+      Reference reference) {
+    assertTrue(reference.hasIdentifier(), "Bad reference: \" + reference");
+    assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
+    assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
+
+    if (expectedNpiOrgDisplay.isPresent()) {
+      assertEquals(expectedNpiOrgDisplay.get(), reference.getDisplay());
+    }
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedIdentifierValue the expected {@link Identifier#getValue()} of the {@link
    *     Reference#getIdentifier()}
@@ -1749,6 +1769,7 @@ final class TransformerTestUtils {
   static void assertEobCommonGroupInpOutHHAHospiceSNFEquals(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> organizationNpiDisplay,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -1763,9 +1784,15 @@ final class TransformerTestUtils {
       Optional<String> fiOriginalClaimControlNumber) {
 
     TransformerTestUtils.assertReferenceIdentifierEquals(
-        TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getOrganization());
+        TransformerConstants.CODING_NPI_US,
+        organizationNpi.get(),
+        organizationNpiDisplay,
+        eob.getOrganization());
     TransformerTestUtils.assertReferenceIdentifierEquals(
-        TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getFacility());
+        TransformerConstants.CODING_NPI_US,
+        organizationNpi.get(),
+        organizationNpiDisplay,
+        eob.getFacility());
 
     assertExtensionCodingEquals(
         CcwCodebookVariable.CLM_FAC_TYPE_CD, claimFacilityTypeCode, eob.getFacility());
