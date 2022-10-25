@@ -137,6 +137,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
     try {
       final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
+      MojoUtil.validateModel(root);
       for (MappingBean mapping : root.getMappings()) {
         if (mapping.hasTransformer()) {
           TypeSpec rootEntity = createTransformerClassForMapping(root, mapping);
