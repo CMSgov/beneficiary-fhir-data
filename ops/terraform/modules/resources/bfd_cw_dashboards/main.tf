@@ -41,7 +41,7 @@ locals {
 resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
   dashboard_name = var.dashboard_name
   dashboard_body = templatefile(
-    "${path.module}/templates/bfd-dashboards.tftpl",
+    "${path.module}/templates/bfd-dashboard.tftpl",
     merge({
       namespace = local.namespace
       asg_id    = var.asg_id
