@@ -103,7 +103,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "bfd-prod-fhir-274" ],
+                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "${asg_id}" ],
                     [ "...", { "stat": "Minimum" } ],
                     [ "...", { "stat": "Average" } ]
                 ],
@@ -176,7 +176,7 @@
                     [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "DPC /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "region": "us-east-1",
                 "stat": "Sum",
                 "period": 60,
@@ -200,7 +200,7 @@
                     [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "AB2D /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "region": "us-east-1",
                 "title": "AB2D Request Count per-Endpoint with 1 Minute Period",
                 "period": 60,
@@ -235,7 +235,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-prod-fhir', 'Maximum', 60),1)", "id": "e2" } ]
+                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "id": "e2" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -337,7 +337,7 @@
                     [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "Internal /v*/fhir/ClaimResponse Request Count" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "title": "Internal Test Traffic Request Count per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Sum",
@@ -361,7 +361,7 @@
                     [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "BlueButton /v*/fhir/ClaimResponse Request Latency" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "title": "BlueButton Average Request Latency per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Average",
@@ -385,7 +385,7 @@
                     [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "AB2D /v*/fhir/ClaimResponse Request Latency" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "region": "us-east-1",
                 "title": "AB2D Average Request Latency per-Endpoint with 1 Minute Period",
                 "period": 60,
@@ -409,7 +409,7 @@
                     [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "BCDA /v*/fhir/ClaimResponse Request Latency" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "title": "BCDA Average Request Latency per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Average",
@@ -433,7 +433,7 @@
                     [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "DPC /v*/fhir/ClaimResponse Request Latency" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "region": "us-east-1",
                 "stat": "Average",
                 "period": 60,
@@ -457,7 +457,7 @@
                     [ ".", "http-requests/latency/claim-response-all", ".", ".", { "label": "Internal /v*/fhir/ClaimResponse Request Latency" } ]
                 ],
                 "view": "timeSeries",
-                "stacked": true,
+                "stacked": false,
                 "title": "Internal Average Request Latency per-Endpoint with 1 Minute Period",
                 "region": "us-east-1",
                 "stat": "Average",
