@@ -79,6 +79,7 @@ data "aws_sns_topic" "cloudwatch_ok" {
 }
 
 # Temporary CloudWatch SLO alarms topics
+# TODO: Remove in BFD-1773
 data "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
   name = "bfd-${var.env_config.env}-cloudwatch-alarms-alert-testing"
 }
