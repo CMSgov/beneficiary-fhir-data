@@ -54,7 +54,7 @@
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
 /bfd/${env}/server/nonsensitive/data_server_v2_enabled: true
-/bfd/${env}/server/nonsensitive/pac_resources_enabled: false
+/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
 ## SERVER+MTLS CONFIGURATION
 /bfd/${env}/server/nonsensitive/data_server_appserver_keystore: 'files/prod-bluebutton-appserver-keystore.jks'
 ## NOTE: data_server_ssl_client_certificates_json stores escaped json string to be pre-processed
