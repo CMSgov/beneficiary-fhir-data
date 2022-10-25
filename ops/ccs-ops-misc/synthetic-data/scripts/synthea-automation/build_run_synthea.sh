@@ -116,9 +116,9 @@ TARGET_ENV=$(echo "$TARGET_ENV" | tr '[:upper:]' '[:lower:]')
 declare -A S3_BUCKETS
 
 # various S3 buckets used by the ETL pipeline
-PROD_S3_BUCKET="bfd-prod-etl-577373831711"
-TEST_S3_BUCKET="bfd-test-etl-577373831711"
-PROD_SBX_S3_BUCKET="bfd-prod-sbx-etl-577373831711"
+PROD_S3_BUCKET=
+TEST_S3_BUCKET=
+PROD_SBX_S3_BUCKET=
 
 # save IFS context (in case bash doesn't...)
 oIFS=${IFS}
