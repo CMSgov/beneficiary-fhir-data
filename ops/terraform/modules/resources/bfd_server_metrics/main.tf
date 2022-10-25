@@ -63,6 +63,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count" {
     namespace  = local.namespace
     value      = "1"
     dimensions = each.value.dimensions
+    unit       = "Count"
   }
 }
 
@@ -84,6 +85,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
+    unit       = "Milliseconds"
   }
 }
 
@@ -103,6 +105,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" 
     namespace  = local.namespace
     value      = "1"
     dimensions = each.value.dimensions
+    unit       = "Count"
   }
 }
 
@@ -123,6 +126,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_respons
     namespace  = local.namespace
     value      = "1"
     dimensions = each.value.dimensions
+    unit       = "Count"
   }
 }
 
@@ -148,6 +152,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_b
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
+    unit       = "Milliseconds"
   }
 }
 
@@ -173,6 +178,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_by_co
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
+    unit       = "Milliseconds"
   }
 }
 
@@ -194,6 +200,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_per_kb"
     dimensions = each.value.dimensions
+    unit       = "Milliseconds"
   }
 }
 
@@ -217,6 +224,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_re
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
+    unit       = "Milliseconds"
   }
 }
 
