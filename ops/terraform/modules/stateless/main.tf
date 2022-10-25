@@ -262,10 +262,11 @@ module "bfd_server_metrics" {
 }
 
 module "bfd_server_slo_alarms" {
-  source                 = "../resources/bfd_server_slo_alarms"
-  env                    = var.env_config.env
-  alert_notification_arn = data.aws_sns_topic.cloudwatch_alarms_alert_testing
-  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok_testing
+  source                   = "../resources/bfd_server_slo_alarms"
+  env                      = var.env_config.env
+  alert_notification_arn   = data.aws_sns_topic.cloudwatch_alarms_alert_testing
+  warning_notification_arn = data.aws_sns_topic.cloudwatch_alarms_alert_testing
+  ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing
 }
 
 # TODO: purge all access.txt 
