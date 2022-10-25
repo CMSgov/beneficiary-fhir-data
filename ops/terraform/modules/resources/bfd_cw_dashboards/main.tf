@@ -9,9 +9,9 @@ locals {
 
   partner_client_ssl_regexs = {
     internal_client_ssl = {
-      prod_sbx = ".*Internal.*"
-      prod     = ".*Internal.*"
-      test     = ".*Internal.*"
+      prod_sbx = ".*bluebutton-backend.*test.*"
+      prod     = ".*bluebutton-backend.*test.*"
+      test     = ".*bluebutton-backend.*test.*"
     }
     ab2d_client_ssl = {
       prod_sbx = ".*ab2d-sbx-client.*"
@@ -33,17 +33,19 @@ locals {
   }
 
   client_ssls = {
-    for key, client_ssl in data.external.client_ssls.result :
-    key => coalesce(client_ssl, "NOT_APPLICABLE")
+    for key in keys(local.partner_client_ssl_regexs) :
+    key => coalesce(lookup(data.external.client_ssls.result, key, null), "NONE")
   }
 }
 
-data "template_file" "dashboard-template" {
-  template = "${file("${path.module}/templates/bfd-dashboards.tpl")}"
-  vars     = merge({ namespace = local.namespace }, local.client_ssls)
-}
-
-resource "aws_cloudwatch_dashboard" "bfd-dashboards-fhir" {
+resource "aws_cloudwatch_dashboard" "bfd_dashboards_fhir" {
   dashboard_name = var.dashboard_name
-  dashboard_body = data.template_file.dashboard-template.rendered
+  dashboard_body = templatefile(
+    "${path.module}/templates/bfd-dashboards.tftpl",
+    merge({ 
+      namespace = local.namespace 
+      asg_id = var.asg_id
+      env = var.env
+    }, local.client_ssls)
+  )
 }
