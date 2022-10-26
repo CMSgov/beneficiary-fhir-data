@@ -453,7 +453,7 @@
                 "metrics": [
                     [ { "expression": "100*(m2/m1)", "label": "Error %", "id": "e1" } ],
                     [ "${namespace}", "http-requests/count/all", { "id": "m1", "visible": false } ],
-                    [ ".", "http-requests/count-500/all", { "id": "m2", "visible": false } ]
+                    [ ".", "http-requests/count/500-responses", { "id": "m2", "visible": false } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
