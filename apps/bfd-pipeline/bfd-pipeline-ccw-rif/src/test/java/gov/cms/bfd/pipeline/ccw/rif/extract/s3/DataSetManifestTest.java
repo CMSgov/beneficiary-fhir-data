@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.SyntheaEndStateProperties;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -279,8 +280,8 @@ public final class DataSetManifestTest {
       e.printStackTrace();
     }
     assertNotNull(manifest);
-    DataSetManifest.SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties();
-    assertNotNull(endProps);
+    assertFalse(manifest.getSyntheaEndStateProperties().isEmpty());
+    SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties().get();
     assertEquals(-1000010, endProps.getBeneIdStart());
     assertEquals(-1000020, endProps.getBeneIdEnd());
     assertEquals("Tue Oct 18 15:24:11 EDT 2022", endProps.getGeneratedTs());
@@ -336,21 +337,20 @@ public final class DataSetManifestTest {
       e.printStackTrace();
     }
     assertNotNull(manifest);
-    DataSetManifest.SyntheaEndStateProperties endProps =
-        new DataSetManifest.SyntheaEndStateProperties();
+    assertFalse(manifest.getSyntheaEndStateProperties().isEmpty());
+    SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties().get();
+    SyntheaEndStateProperties newProps = new SyntheaEndStateProperties();
     // partially fill the new SyntheaEndStateProperties with values for the original manifest
     // be leaving off generatedTs
-    endProps.setBeneIdStart(manifest.getSyntheaEndStateProperties().getBeneIdStart());
-    endProps.setBeneIdEnd(manifest.getSyntheaEndStateProperties().getBeneIdEnd());
-    endProps.setMbiStart(manifest.getSyntheaEndStateProperties().getMbiStart());
-    endProps.setHicnStart(manifest.getSyntheaEndStateProperties().getHicnStart());
-    endProps.setClmGrpIdStart(manifest.getSyntheaEndStateProperties().getClmGrpIdStart());
-    endProps.setPdeIdStart(manifest.getSyntheaEndStateProperties().getPdeIdStart());
-    endProps.setCarrClmCntlNumStart(
-        manifest.getSyntheaEndStateProperties().getCarrClmCntlNumStart());
-
-    endProps.setClmIdStart(manifest.getSyntheaEndStateProperties().getClmIdStart());
-    manifest.setSyntheaEndStateProperties(endProps);
+    newProps.setBeneIdStart(endProps.getBeneIdStart());
+    newProps.setBeneIdEnd(endProps.getBeneIdEnd());
+    newProps.setMbiStart(endProps.getMbiStart());
+    newProps.setHicnStart(endProps.getHicnStart());
+    newProps.setClmGrpIdStart(endProps.getClmGrpIdStart());
+    newProps.setPdeIdStart(endProps.getPdeIdStart());
+    newProps.setCarrClmCntlNumStart(endProps.getCarrClmCntlNumStart());
+    newProps.setClmIdStart(endProps.getClmIdStart());
+    manifest.setSyntheaEndStateProperties(newProps);
 
     // convert DataSetManifest to a String of XML and verify that we can then re-import the string
     // data as a DataSetManifest object which should fail because we will be missing a required

@@ -8,20 +8,24 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.SyntheaEndStateProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -136,26 +140,32 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   private final ExtractionOptions options;
   private final DataSetMonitorListener listener;
   private final S3TaskManager s3TaskManager;
+  private final PipelineApplicationState appState;
+  private final boolean isIdempotentMode;
 
   private final DataSetQueue dataSetQueue;
 
   /**
    * Constructs a new {@link CcwRifLoadJob} instance.
    *
-   * @param appMetrics the {@link MetricRegistry} for the overall application
+   * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
+   * @param isIdempotentMode the {@link boolean} TRUE if running in idenpotent mode
    */
   public CcwRifLoadJob(
-      MetricRegistry appMetrics,
+      PipelineApplicationState appState,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
-      DataSetMonitorListener listener) {
-    this.appMetrics = appMetrics;
+      DataSetMonitorListener listener,
+      boolean isIdempotentMode) {
+    this.appState = appState;
+    this.appMetrics = appState.getMetrics();
     this.options = options;
     this.s3TaskManager = s3TaskManager;
     this.listener = listener;
+    this.isIdempotentMode = isIdempotentMode;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
@@ -238,6 +248,28 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     LOGGER.info(
         "Data set syntheticData indicator is: {}",
         String.valueOf(manifestToProcess.isSyntheticData()));
+
+    /*
+     * For synthetic data, we pre-validate what we expect the pipeline to
+     * do with the RIF data by first asserting that things like bene_id(s)
+     * will not cause key or hash collisions. However, if running in idempotent
+     * mode, it will be acceptable to run since this is probably a re-run of
+     * a previous load and is not a pure INSERT(ing) of data.
+     */
+    if (manifestToProcess.isSyntheticData()) {
+      boolean syntheaEndStatePropertiesOK = checkSyntheticManifestProperties(manifestToProcess);
+      if (!syntheaEndStatePropertiesOK) {
+        if (isIdempotentMode) {
+          LOGGER.info(
+              "Synthea pre-validation failed, but running in IDEMPOTENT mode, so OK to continue");
+        } else {
+          LOGGER.info("Synthea pre-validation failed...exiting");
+          listener.noDataAvailable(); // should we be more draconian here?
+          return PipelineJobOutcome.NOTHING_TO_DO;
+        }
+      }
+    }
+
     List<S3RifFile> rifFiles =
         manifestToProcess.getEntries().stream()
             .map(
@@ -352,5 +384,82 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     }
 
     return true;
+  }
+
+  /*
+   * Function arguments derived from Synthea end state properties that are imbued in
+   * the manifest. The function returns a number representing data issues that would
+   * be created if the Synthea mainfest were to be executed.
+   * 0 (zero) : no constraint issues
+   * > 1      : should not proceed; data present in db for the Synthea paramerters
+   *
+   * p_beg_bene_id
+   * p_beg_bene_id
+   * p_clm_id
+   * p_beg_clm_grp_id
+   * p_pde_id_start
+   * p_carr_clm_cntl_num_start
+   * p_fi_doc_cntl_num_start
+   * p_hicn_start
+   * p_mbi_start
+   */
+  private static final String funcSql =
+      "{ ? = call synthea_load_pre_validate( " + "?, ?, ?, ?, ?, ?, ?, ?, ?); }";
+
+  /**
+   * @param manifest the {@link DataSetManifest} that lists the Synthea properties to verify
+   * @return <code>true</code> if all of the Synthea parameters listed in the manifest do not
+   *     introduce potential data loading issues, <code>false</code> if not
+   */
+  private boolean checkSyntheticManifestProperties(DataSetManifest manifest) {
+    LOGGER.info("Synthea data in manifest, ID: {}; verifying efficacy...", manifest.getId());
+    // we are processing synthetic data and the Synthea end state properties are either
+    // invalid or not even in the manifest; won't be able to pre-validate!
+    if (manifest.getSyntheaEndStateProperties().isEmpty()) {
+      throw new BadCodeMonkeyException();
+    }
+    SyntheaEndStateProperties endStatProps = manifest.getSyntheaEndStateProperties().get();
+    boolean okToProcess = true;
+    Connection dbConn = null;
+    CallableStatement cs = null;
+    try {
+      dbConn = appState.getPooledDataSource().getConnection();
+      cs = dbConn.prepareCall(funcSql);
+      cs.registerOutParameter(1, Types.INTEGER);
+      cs.setLong(2, endStatProps.getBeneIdStart());
+      cs.setLong(3, endStatProps.getBeneIdEnd());
+      cs.setLong(4, endStatProps.getClmIdStart());
+      cs.setLong(5, endStatProps.getClmGrpIdStart());
+      cs.setLong(6, endStatProps.getPdeIdStart());
+      cs.setLong(7, endStatProps.getCarrClmCntlNumStart());
+      cs.setLong(8, endStatProps.getFiDocCntlNumStart());
+      cs.setString(9, endStatProps.getHicnStart());
+      cs.setString(10, endStatProps.getMbiStart());
+      int result = cs.getInt(1);
+      okToProcess = (result < 1);
+      LOGGER.info("Synthea data verification returned {} issues...", result);
+    } catch (Exception e) {
+      LOGGER.error(
+          "Failed to determine efficacy of Synthea manifest {}....error: {}",
+          manifest.getId(),
+          e.getMessage(),
+          e);
+    } finally {
+      if (cs != null) {
+        try {
+          cs.close();
+          cs = null;
+        } catch (Exception e) {
+        }
+      }
+      if (dbConn != null) {
+        try {
+          dbConn.close();
+          dbConn = null;
+        } catch (Exception e) {
+        }
+      }
+    }
+    return okToProcess;
   }
 }

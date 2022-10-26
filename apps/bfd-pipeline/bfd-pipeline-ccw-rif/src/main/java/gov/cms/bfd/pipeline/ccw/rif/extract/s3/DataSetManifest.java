@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -297,8 +298,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    *
    * @return possible object is {@link SyntheaEndStateProperties }
    */
-  public SyntheaEndStateProperties getSyntheaEndStateProperties() {
-    return syntheaEndStateProperties;
+  public Optional<SyntheaEndStateProperties> getSyntheaEndStateProperties() {
+    return syntheaEndStateProperties != null && syntheaEndStateProperties.beneIdStart < 0
+        ? Optional.of(syntheaEndStateProperties)
+        : Optional.empty();
   }
 
   /**

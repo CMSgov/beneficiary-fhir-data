@@ -53,10 +53,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify that no data sets were generated.
@@ -156,10 +157,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       // Process both sets
       ccwJob.call();
       ccwJob.call();
@@ -311,10 +313,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -398,10 +401,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -478,10 +482,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -559,10 +564,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
