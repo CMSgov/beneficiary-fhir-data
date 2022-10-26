@@ -1,5 +1,129 @@
 # API Changelog
 
+## BFD-2145: Removal of duplicated careteam member entries and their extensions.
+Corrected an issue where duplicate entries for a provider were being supplied in the Explanation of Benefit careTeam element, making it cumbersome to process and link care team members to items.
+
+Old careteam member entry:
+```json
+"careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }],{
+    "sequence" : 2,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }]} 
+    }]
+```
+
+New careteam member entry:
+```json
+"careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }]}
+    }]
+```
+
+
 ## BFD-1895: Add CARIN conformant coding system in Procedure Coding list element in V2
 
 Add an additional coding for ICD procedure codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. .http://www.cms.gov/Medicare/Coding/ICD10).

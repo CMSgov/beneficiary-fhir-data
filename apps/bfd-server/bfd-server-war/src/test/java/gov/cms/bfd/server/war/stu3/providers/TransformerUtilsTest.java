@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,6 +13,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -122,6 +124,121 @@ public final class TransformerUtilsTest {
     assertEquals(identifierSystem, reference.getIdentifier().getSystem());
     assertEquals(identifierValue, reference.getIdentifier().getValue());
     assertTrue(isCodingListNullOrEmpty(reference.getIdentifier().getType().getCoding()));
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies if
+   * an extension is found
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsTrueWhenFound() {
+    String referenceUrl = "http://test.url";
+    String codeValue = "code";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtils.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
+
+    assertTrue(returnResult);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
+   * returns false when a reference url is empty.
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsFalseWithEmptyReferenceUrl() {
+    String referenceUrl = "";
+    String codeValue = "code";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtils.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
+
+    assertFalse(returnResult);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
+   * returns false when a reference url is null.
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsFalseWithNullReferenceUrl() {
+    String referenceUrl = null;
+    String codeValue = "code";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtils.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
+
+    assertFalse(returnResult);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
+   * returns false when a code value is empty.
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsFalseWithEmptyCodeValue() {
+    String referenceUrl = "http://test.url";
+    String codeValue = "";
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtils.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
+
+    assertFalse(returnResult);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
+   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
+   * returns false when a code value is null.
+   */
+  @Test
+  public void careTeamHasMatchingExtensionReturnsFalseWithNullCodeValue() {
+    String referenceUrl = "http://test.url";
+    String codeValue = null;
+    Coding coding = new Coding();
+    coding.setCode(codeValue);
+    Extension extension = new Extension(referenceUrl);
+    extension.setValue(coding);
+    CareTeamComponent careTeamComponent = new CareTeamComponent();
+    careTeamComponent.addExtension(extension);
+
+    boolean returnResult =
+        TransformerUtils.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
+
+    assertFalse(returnResult);
   }
 
   /**
