@@ -71,6 +71,38 @@ public final class CarrierClaimTransformerTest {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
+   * has two care members under the care team component and doesnt duplicate its results
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void shouldHaveTwoCareTeamMembers() throws FHIRException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+    CarrierClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit eob =
+        CarrierClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
+
+    assertEquals(2, eob.getCareTeam().size());
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
