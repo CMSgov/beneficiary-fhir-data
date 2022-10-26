@@ -78,6 +78,15 @@ data "aws_sns_topic" "cloudwatch_ok" {
   name = "bfd-${var.env_config.env}-cloudwatch-ok"
 }
 
+# Temporary CloudWatch SLO alarms topics
+# TODO: Remove in BFD-1773
+data "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
+  name = "bfd-${var.env_config.env}-cloudwatch-alarms-alert-testing"
+}
+data "aws_sns_topic" "cloudwatch_ok_testing" {
+  name = "bfd-${var.env_config.env}-cloudwatch-alarms-ok-testing"
+}
+
 # aurora security group
 data "aws_security_group" "aurora_cluster" {
   filter {
@@ -247,13 +256,19 @@ module "fhir_asg" {
 
 
 ## FHIR server metrics, per partner
-#
-
 module "bfd_server_metrics" {
   source = "../resources/bfd_server_metrics"
   env    = var.env_config.env
-  asg_id = module.fhir_asg.asg_id
 }
+
+module "bfd_server_slo_alarms" {
+  source                   = "../resources/bfd_server_slo_alarms"
+  env                      = var.env_config.env
+  alert_notification_arn   = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+  warning_notification_arn = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+  ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing.arn
+}
+
 # TODO: purge all access.txt 
 #all 
 module "bfd_server_metrics_all" {
@@ -364,8 +379,7 @@ module "bfd_server_alarm_all_eob_6s-p95" {
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {
-  source              = "../resources/bfd_cw_dashboards"
-  dashboard_name      = var.dashboard_name
-  dashboard_namespace = var.dashboard_namespace
-  asg                 = module.fhir_asg.asg_id
+  source         = "../resources/bfd_cw_dashboards"
+  dashboard_name = var.dashboard_name
+  env            = var.env_config.env
 }
