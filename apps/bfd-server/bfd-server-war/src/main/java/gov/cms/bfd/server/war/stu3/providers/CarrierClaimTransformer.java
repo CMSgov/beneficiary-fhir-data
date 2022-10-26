@@ -186,14 +186,14 @@ final class CarrierClaimTransformer {
                   String.valueOf(claimLine.getOrganizationNpi().get()));
 
           if (!performingHasMatchingExtension) {
-                 TransformerUtils.addExtensionCoding(
-              performingCareTeamMember,
-              TransformerConstants.CODING_NPI_US,
-              TransformerConstants.CODING_NPI_US,
-              transformerContext
-                  .getNPIOrgLookup()
-                  .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
-              "" + claimLine.getOrganizationNpi().get());
+            TransformerUtils.addExtensionCoding(
+                performingCareTeamMember,
+                TransformerConstants.CODING_NPI_US,
+                TransformerConstants.CODING_NPI_US,
+                transformerContext
+                    .getNPIOrgLookup()
+                    .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
+                "" + claimLine.getOrganizationNpi().get());
           }
         }
       }
