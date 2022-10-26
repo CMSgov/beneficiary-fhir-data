@@ -1,6 +1,9 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +21,11 @@ import lombok.Singular;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TableBean {
+public class TableBean implements ModelBean {
   /** Name of the table in the database. */
-  private String name;
-  /** Name of the schema containing the table. Can be null or empty to use default schema. */
-  private String schema;
+  @NotNull @JavaName private String name;
+  /** Name of the schema containing the table. Can be null to use default schema. */
+  @JavaName private String schema;
   /** Optional comment to be added to this table's entity class when it is generated. */
   private String comment;
   /** True if names should be quoted in the JPA annotation arguments for this table. */
@@ -33,23 +36,24 @@ public class TableBean {
    * Name to use for inner class used for composite primary key if this table has more than one
    * column in the key.
    */
-  @Builder.Default private String compositeKeyClassName = "PK";
+  @NotNull @JavaName @Builder.Default private String compositeKeyClassName = "PK";
   /**
    * Names of primary key components. Every name must match either a {@link ColumnBean#name} or a
    * {@link JoinBean#fieldName} from this table.
    */
-  @Singular private List<String> primaryKeyColumns = new ArrayList<>();
+  @NotNull @Singular private List<@JavaName String> primaryKeyColumns = new ArrayList<>();
   /**
    * Names of columns used for generated {@code equals} method. Every name must match a {@link
    * ColumnBean#name} from this table. Can be different than the primary key columns if necessary.
    */
-  @Singular private List<String> equalsColumns = new ArrayList<>();
+  @NotNull @Singular private List<@JavaName String> equalsColumns = new ArrayList<>();
   /** All of the {@link ColumnBean} objects for the columns of this table. */
-  @Singular private List<ColumnBean> columns = new ArrayList<>();
+  @NotNull @Singular private List<@Valid ColumnBean> columns = new ArrayList<>();
   /** All of the {@link JoinBean} objects for the joins involving this table. */
-  @Singular private List<JoinBean> joins = new ArrayList<>();
+  @NotNull @Singular private List<@Valid JoinBean> joins = new ArrayList<>();
   /** List of additional fields to add to the lombok generated {@code Fields} class. */
-  @Singular private List<AdditionalFieldName> additionalFieldNames = new ArrayList<>();
+  @NotNull @Singular
+  private List<@Valid AdditionalFieldName> additionalFieldNames = new ArrayList<>();
 
   /**
    * Finds the column with the specified name.
@@ -206,6 +210,11 @@ public class TableBean {
     return isQuoteNames() ? "`" + name + "`" : name;
   }
 
+  @Override
+  public String getDescription() {
+    return "table " + name;
+  }
+
   /**
    * Used to allow definition of extra field names for lombok to add to its auto-generated {@code
    * Fields} constant in the generated entity class.
@@ -216,13 +225,13 @@ public class TableBean {
   @Builder
   public static class AdditionalFieldName {
     /** Name of the constant added to the {@code Fields} class. */
-    private String name;
+    @JavaName private String name;
 
     /**
      * Optional value to use instead of {@code name} as the value of the constant in the {@code
      * Fields} class.
      */
-    private String value;
+    @JavaName private String value;
 
     /**
      * Gets the value to use in the generated constant. Defaults to the same as {@link

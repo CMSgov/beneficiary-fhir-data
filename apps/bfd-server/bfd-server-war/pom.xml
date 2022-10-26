@@ -319,7 +319,7 @@
 			<!-- Used for Bloom filters -->
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sketch_2.12</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
