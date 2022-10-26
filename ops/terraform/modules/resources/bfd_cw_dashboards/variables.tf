@@ -3,10 +3,6 @@ variable "dashboard_name" {
   type        = string
 }
 
-variable "asg_id" {
-  description = "The name/ID of the AutoScaling Group the dashboard will show information about"
-  type        = string
-}
 variable "env" {
   description = "The BFD Server SDLC environment the dashboard will represent"
   type        = string

@@ -103,16 +103,25 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "${asg_id}" ],
-                    [ "...", { "stat": "Minimum" } ],
-                    [ "...", { "stat": "Average" } ]
+                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Average', 60)", "label": "", "id": "e1", "period": 300 } ],
+                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Minimum', 60)", "label": "", "id": "e2", "period": 300 } ],
+                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Maximum', 60)", "label": "", "id": "e3", "period": 300 } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "us-east-1",
                 "stat": "Maximum",
-                "period": 60,
-                "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period"
+                "period": 300,
+                "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period",
+                "yAxis": {
+                    "left": {
+                        "label": "Percent",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
             }
         },
         {

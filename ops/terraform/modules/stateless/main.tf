@@ -380,7 +380,6 @@ module "bfd_server_alarm_all_eob_6s-p95" {
 #
 module "bfd_dashboards" {
   source         = "../resources/bfd_cw_dashboards"
-  asg_id         = module.fhir_asg.asg_id
   dashboard_name = var.dashboard_name
   env            = var.env_config.env
 }

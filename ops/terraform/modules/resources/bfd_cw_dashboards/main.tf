@@ -44,7 +44,6 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
     "${path.module}/templates/bfd-dashboard.tftpl",
     merge({
       namespace = local.namespace
-      asg_id    = var.asg_id
       env       = var.env
     }, local.client_ssls)
   )
