@@ -66,10 +66,7 @@ public class TimerInterceptor {
     BfdMDC.put("hapi.server_processing_completed_time_in_millis", Long.toString(currentTime));
   }
 
-  /**
-   * Pointcut to log time in milliseconds when a request in pre-processing has an outgoing
-   * exception.
-   */
+  /** Pointcut to log time in milliseconds when a request has an outgoing exception. */
   @Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
   public void preProcessOutgoingException() {
     // log current instance to MDC
