@@ -49,7 +49,7 @@ public class TimerInterceptor {
     BfdMDC.put("hapi.server_outgoing_response_time_in_millis", Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when a request has completed processing normally */
+  /** Pointcut to log time in milliseconds when a request has completed processing normally. */
   @Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
   public void processingCompletedNormally() {
     // log current instance to MDC
@@ -58,7 +58,7 @@ public class TimerInterceptor {
         "hapi.server_processing_completed_normally_time_in_millis", Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when a request has completed processing */
+  /** Pointcut to log time in milliseconds when a request has completed processing. */
   @Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
   public void serverProcessCompleted() {
     // log current instance to MDC
