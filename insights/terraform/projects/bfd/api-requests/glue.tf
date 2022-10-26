@@ -1355,21 +1355,6 @@ module "glue-table-api-requests" {
       "type"    = "string",
       "comment" = ""
     },
-    {
-      "name"    = "mdc_hapi_server_pre_process_outgoing_exception_time_in_millis",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_hapi_server_outgoing_failure_operation_outcome_time_in_millis",
-      "type"    = "string",
-      "comment" = ""
-    },
-    {
-      "name"    = "mdc_hapi_server_handle_exception_time_in_millis",
-      "type"    = "string",
-      "comment" = ""
-    },
   ]
 }
 

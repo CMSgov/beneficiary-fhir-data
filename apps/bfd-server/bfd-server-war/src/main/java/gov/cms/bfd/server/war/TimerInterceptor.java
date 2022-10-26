@@ -65,31 +65,4 @@ public class TimerInterceptor {
     Long currentTime = System.currentTimeMillis();
     BfdMDC.put("hapi.server_processing_completed_time_in_millis", Long.toString(currentTime));
   }
-
-  /** Pointcut to log time in milliseconds when a request has an outgoing exception. */
-  @Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-  public void preProcessOutgoingException() {
-    // log current instance to MDC
-    Long currentTime = System.currentTimeMillis();
-    BfdMDC.put(
-        "hapi.server_pre_process_outgoing_exception_time_in_millis", Long.toString(currentTime));
-  }
-
-  /** Pointcut to log time in milliseconds when a request has an outgoing failure. */
-  @Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-  public void serverOutgoingFailureOperationOutcome() {
-    // log current instance to MDC
-    Long currentTime = System.currentTimeMillis();
-    BfdMDC.put(
-        "hapi.server_outgoing_failure_operation_outcome_time_in_millis",
-        Long.toString(currentTime));
-  }
-
-  /** Pointcut to log time in milliseconds when a request has a server handle exception. */
-  @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-  public void serverHandleException() {
-    // log current instance to MDC
-    Long currentTime = System.currentTimeMillis();
-    BfdMDC.put("hapi.server_handle_exception_time_in_millis", Long.toString(currentTime));
-  }
 }
