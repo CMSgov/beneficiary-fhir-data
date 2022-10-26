@@ -145,19 +145,48 @@ final class CarrierClaimTransformer {
         performingCareTeamMember.setQualification(
             TransformerUtils.createCodeableConcept(
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
-        performingCareTeamMember.addExtension(
-            TransformerUtils.createExtensionCoding(
-                eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode()));
 
-        performingCareTeamMember.addExtension(
-            TransformerUtils.createExtensionCoding(
-                eob,
-                CcwCodebookVariable.PRTCPTNG_IND_CD,
-                claimLine.getProviderParticipatingIndCode()));
-        // FIXME: Following addExtensionCoding should be a new method
+        boolean performingHasMatchingExtension =
+            TransformerUtils.careTeamHasMatchingExtension(
+                performingCareTeamMember,
+                TransformerUtils.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
+                String.valueOf(claimLine.getProviderTypeCode()));
+
+        if (!performingHasMatchingExtension) {
+          // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+          performingCareTeamMember.addExtension(
+              TransformerUtils.createExtensionCoding(
+                  eob,
+                  CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
+                  claimLine.getProviderTypeCode()));
+        }
+
+        performingHasMatchingExtension =
+            (claimLine.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtils.careTeamHasMatchingExtension(
+                    performingCareTeamMember,
+                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          performingCareTeamMember.addExtension(
+              TransformerUtils.createExtensionCoding(
+                  eob,
+                  CcwCodebookVariable.PRTCPTNG_IND_CD,
+                  claimLine.getProviderParticipatingIndCode()));
+        }
+
         // addExtensionReference
         if (claimLine.getOrganizationNpi().isPresent()) {
-          TransformerUtils.addExtensionCoding(
+          performingHasMatchingExtension =
+              TransformerUtils.careTeamHasMatchingExtension(
+                  performingCareTeamMember,
+                  TransformerConstants.CODING_NPI_US,
+                  String.valueOf(claimLine.getOrganizationNpi().get()));
+
+          if (!performingHasMatchingExtension) {
+                 TransformerUtils.addExtensionCoding(
               performingCareTeamMember,
               TransformerConstants.CODING_NPI_US,
               TransformerConstants.CODING_NPI_US,
@@ -165,6 +194,7 @@ final class CarrierClaimTransformer {
                   .getNPIOrgLookup()
                   .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
               "" + claimLine.getOrganizationNpi().get());
+          }
         }
       }
 

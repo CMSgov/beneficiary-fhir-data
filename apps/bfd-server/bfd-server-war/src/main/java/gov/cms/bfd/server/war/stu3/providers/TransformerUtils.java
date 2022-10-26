@@ -6,6 +6,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Strings;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
@@ -3150,6 +3151,50 @@ public final class TransformerUtils {
     }
 
     return null;
+  }
+
+  /**
+   * Gets the reference variable
+   *
+   * @param ccwCodebookVariable the {@ CcwCodebookVariable} to get the url
+   * @return url as a string
+   */
+  static String getReferenceUrl(CcwCodebookVariable ccwCodebookVariable) {
+    return CCWUtils.calculateVariableReferenceUrl(ccwCodebookVariable);
+  }
+
+  /**
+   * Checks to see if there is a extension that already exists in the careteamcomponent so a
+   * duplicate entry for extension is not added
+   *
+   * @param careTeamComponent - Careteam component
+   * @param referenceUrl the {@link String} is the reference url to compare
+   * @param codeValue - the {@link String} is the code value to compare
+   * @return {@link Boolean} whether it was found or not
+   */
+  public static boolean careTeamHasMatchingExtension(
+      CareTeamComponent careTeamComponent, String referenceUrl, String codeValue) {
+
+    if (!Strings.isNullOrEmpty(referenceUrl)
+        && !Strings.isNullOrEmpty(codeValue)
+        && careTeamComponent.getExtension().size() > 0) {
+
+      List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
+
+      for (Extension ext : extensions) {
+        Coding coding = null;
+
+        if (ext.getValue() instanceof Coding) {
+          coding = (Coding) ext.getValue();
+        }
+
+        if (coding != null && coding.getCode().equals(codeValue)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
