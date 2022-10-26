@@ -136,7 +136,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingCarrierClaimForManyLines() throws FHIRException {
+  public void readEobForExistingCarrierClaimForManyLines() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(
