@@ -41,7 +41,7 @@ public class TimerInterceptor {
         "hapi.server_incoming_request_pre_handle_time_in_millis", Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when request has an outgoing response. */
+  /** Pointcut to log time in milliseconds when a request has an outgoing response. */
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
   public void serverOutgoingResponse() {
     // log current instance to MDC
@@ -49,7 +49,7 @@ public class TimerInterceptor {
     BfdMDC.put("hapi.server_outgoing_response_time_in_millis", Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when request has completed processing normally */
+  /** Pointcut to log time in milliseconds when a request has completed processing normally */
   @Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
   public void processingCompletedNormally() {
     // log current instance to MDC
@@ -58,7 +58,7 @@ public class TimerInterceptor {
         "hapi.server_processing_completed_normally_time_in_millis", Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when request has completed processing */
+  /** Pointcut to log time in milliseconds when a request has completed processing */
   @Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
   public void serverProcessCompleted() {
     // log current instance to MDC
@@ -78,7 +78,7 @@ public class TimerInterceptor {
         "hapi.server_pre_process_outgoing_exception_time_in_millis", Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when for outgoing failure. */
+  /** Pointcut to log time in milliseconds when a request has an outgoing failure. */
   @Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
   public void serverOutgoingFailureOperationOutcome() {
     // log current instance to MDC
@@ -88,7 +88,7 @@ public class TimerInterceptor {
         Long.toString(currentTime));
   }
 
-  /** Pointcut to log time in milliseconds when for server handle exception. */
+  /** Pointcut to log time in milliseconds when a request has a server handle exception. */
   @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
   public void serverHandleException() {
     // log current instance to MDC
