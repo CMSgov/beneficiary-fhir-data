@@ -86,6 +86,7 @@ public class FissClaimRdaSinkTest {
         Arrays.asList(
             "FissClaimRdaSink.calls",
             "FissClaimRdaSink.change.latency.millis",
+            "FissClaimRdaSink.extract.latency.millis",
             "FissClaimRdaSink.failures",
             "FissClaimRdaSink.insertCount",
             "FissClaimRdaSink.lastSeq",

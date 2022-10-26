@@ -19,6 +19,9 @@ import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -179,7 +182,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     final long maxSeq = maxSequenceInBatch(claims);
     try {
       metrics.calls.mark();
-      updateLatencyMetric(claims);
+      updateLatencyMetrics(claims);
       mergeBatch(maxSeq, claims);
       metrics.objectsMerged.mark(claims.size());
       logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
@@ -397,16 +400,24 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Updates the latency metric by adding the age of each claim to the histogram.
+   * Updates the latency metrics by adding the age of each claim to the histograms.
    *
    * @param claims claims to process
    */
-  private void updateLatencyMetric(Collection<RdaChange<TClaim>> claims) {
+  private void updateLatencyMetrics(Collection<RdaChange<TClaim>> claims) {
+    final long nowMillis = clock.millis();
     for (RdaChange<TClaim> claim : claims) {
-      final long nowMillis = clock.millis();
       final long changeMillis = claim.getTimestamp().toEpochMilli();
-      final long age = Math.max(0L, nowMillis - changeMillis);
-      metrics.changeAgeMillis.update(age);
+      final long changeAge = Math.max(0L, nowMillis - changeMillis);
+      metrics.changeAgeMillis.update(changeAge);
+
+      final LocalDate extractDate = claim.getSource().getExtractDate();
+      if (extractDate != null) {
+        final LocalDateTime extractTime = extractDate.atStartOfDay();
+        final long extractMillis = extractTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+        final long extractAge = Math.max(0L, nowMillis - extractMillis);
+        metrics.extractAgeMillis.update(extractAge);
+      }
     }
   }
 
@@ -436,6 +447,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter transformFailures;
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
+    /** Milliseconds between extract date and current time. */
+    private final Histogram extractAgeMillis;
     /** Tracks the elapsed time when we write claims to the database. */
     private final Timer dbUpdateTime;
     /** Tracks the number of updates per database transaction. */
@@ -465,6 +478,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+      extractAgeMillis =
+          appMetrics.histogram(MetricRegistry.name(base, "extract", "latency", "millis"));
       dbUpdateTime = appMetrics.timer(MetricRegistry.name(base, "writes", "elapsed"));
       dbBatchSize = appMetrics.histogram(MetricRegistry.name(base, "writes", "batchSize"));
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
