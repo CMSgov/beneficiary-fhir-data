@@ -81,7 +81,7 @@ public final class CarrierClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void shouldHaveTwoCareTeamMembers() throws FHIRException, IOException {
+  public void shouldHaveTwoCareTeamMembers() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -98,8 +98,7 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
 
     assertEquals(2, eob.getCareTeam().size());
