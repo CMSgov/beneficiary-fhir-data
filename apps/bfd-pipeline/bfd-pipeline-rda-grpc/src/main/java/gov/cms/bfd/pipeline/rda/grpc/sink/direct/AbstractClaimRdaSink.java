@@ -445,9 +445,15 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter transformSuccesses;
     /** Number of objects which failed to be transformed. */
     private final Meter transformFailures;
-    /** Milliseconds between change timestamp and current time, measures the latency between BFD ingestion and when RDA ingestion. */
+    /**
+     * Milliseconds between change timestamp and current time, measures the latency between BFD
+     * ingestion and when RDA ingestion.
+     */
     private final Histogram changeAgeMillis;
-    /** Milliseconds between extract date and current time, measures the latency between BFD ingestion and when the MAC processes the data . */
+    /**
+     * Milliseconds between extract date and current time, measures the latency between BFD
+     * ingestion and when the MAC processes the data .
+     */
     private final Histogram extractAgeMillis;
     /** Tracks the elapsed time when we write claims to the database. */
     private final Timer dbUpdateTime;
