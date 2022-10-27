@@ -179,7 +179,6 @@ final class CarrierClaimTransformer {
 
         // addExtensionReference
         if (claimLine.getOrganizationNpi().isPresent()) {
-
           performingHasMatchingExtension =
               TransformerUtils.careTeamHasMatchingExtension(
                   performingCareTeamMember,
@@ -191,7 +190,9 @@ final class CarrierClaimTransformer {
                 performingCareTeamMember,
                 TransformerConstants.CODING_NPI_US,
                 TransformerConstants.CODING_NPI_US,
-                TransformerUtils.retrieveNpiCodeDisplay(claimLine.getOrganizationNpi().get()),
+                transformerContext
+                    .getNPIOrgLookup()
+                    .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
                 "" + claimLine.getOrganizationNpi().get());
           }
         }
