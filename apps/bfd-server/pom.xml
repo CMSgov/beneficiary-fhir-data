@@ -79,6 +79,11 @@
 			<artifactId>bfd-shared-utils</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency> 
+			<groupId>gov.cms.bfd.data.npi</groupId>
+			<artifactId>bfd-data-npi</artifactId> 
+			<version>1.0-SNAPSHOT</version> 
+		</dependency>
 	</dependencies>
 
 	<build>
