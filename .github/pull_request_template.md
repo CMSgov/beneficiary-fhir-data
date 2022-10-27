@@ -101,6 +101,7 @@ I have gone through and verified that...:
     3. Any problems it causes have a small "blast radius".
     4. It'll be easier to rollback if that becomes necessary.
 * [ ] This PR includes any required documentation changes, including `README` updates and changelog / release notes entries.
+* [ ] The data dictionary has been updated with any field mapping changes, if any were made.
 * [ ] All new and modified code is appropriately commented, such that the what and why of its design would be reasonably clear to engineers, preferably ones unfamiliar with the project.
 * [ ] All tech debt and/or shortcomings introduced by this PR are detailed in `TODO` and/or `FIXME` comments, which include a JIRA ticket ID for any items that require urgent attention.
 * [ ] Reviews are requested from both:

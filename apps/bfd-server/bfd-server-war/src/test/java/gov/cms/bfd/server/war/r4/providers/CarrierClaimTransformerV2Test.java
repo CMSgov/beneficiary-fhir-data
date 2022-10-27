@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -16,6 +17,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -71,14 +73,15 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @BeforeEach
-  public void before() {
+  public void before() throws IOException {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         CarrierClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -94,7 +97,7 @@ public class CarrierClaimTransformerV2Test {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     CarrierClaim claim = generateClaim();
 
     assertMatches(
@@ -103,7 +106,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim));
   }
 
@@ -116,13 +120,14 @@ public class CarrierClaimTransformerV2Test {
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException {
+  public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
         CarrierClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
@@ -657,11 +662,11 @@ public class CarrierClaimTransformerV2Test {
     CareTeamComponent compare4 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             4,
-            "1497758544",
+            "0000000000",
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
             "Primary provider");
-    compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
+    compare4.getProvider().setDisplay("Fake ORG Name");
 
     assertTrue(compare4.equalsDeep(member4));
   }
@@ -674,7 +679,7 @@ public class CarrierClaimTransformerV2Test {
    * a total of 4 unique care team members.
    */
   @Test
-  public void shouldHaveFourCareTeamEntries() {
+  public void shouldHaveFourCareTeamEntries() throws IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -692,7 +697,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
