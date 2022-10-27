@@ -18,7 +18,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -39,7 +38,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -102,7 +100,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingCarrierClaim() throws FHIRException, IOException {
+  public void readEobForExistingCarrierClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -136,7 +134,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingCarrierClaimForManyLines() throws FHIRException, IOException {
+  public void readEobForExistingCarrierClaimForManyLines() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(
@@ -219,7 +217,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingDMEClaim() throws FHIRException, IOException {
+  public void readEobForExistingDMEClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -275,7 +273,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingHHAClaim() throws FHIRException, IOException {
+  public void readEobForExistingHHAClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -332,7 +330,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingHospiceClaim() throws FHIRException, IOException {
+  public void readEobForExistingHospiceClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -388,7 +386,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingInpatientClaim() throws FHIRException, IOException {
+  public void readEobForExistingInpatientClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -444,7 +442,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingOutpatientClaim() throws FHIRException, IOException {
+  public void readEobForExistingOutpatientClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -471,8 +469,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim),
         eob);
   }
@@ -508,7 +505,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingPartDEvent() throws FHIRException, IOException {
+  public void readEobForExistingPartDEvent() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -610,7 +607,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingSNFClaim() throws FHIRException, IOException {
+  public void readEobForExistingSNFClaim() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -665,7 +662,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatient() throws FHIRException, IOException {
+  public void searchForEobsByExistingPatient() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -843,7 +840,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException, IOException {
+  public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -912,7 +909,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException, IOException {
+  public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1475,7 +1472,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatientAndType() throws FHIRException, IOException {
+  public void searchForEobsByExistingPatientAndType() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1523,8 +1520,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             new TransformerContext(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
@@ -1869,8 +1865,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param searchResults the search results
    * @param loadedRecords the loaded records
    */
-  private static void assertEachEob(Bundle searchResults, List<Object> loadedRecords)
-      throws IOException {
+  private static void assertEachEob(Bundle searchResults, List<Object> loadedRecords) {
     compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords);
     compareEob(ClaimTypeV2.DME, searchResults, loadedRecords);
     compareEob(ClaimTypeV2.HHA, searchResults, loadedRecords);
@@ -2113,8 +2108,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param loadedRecords the loaded records
    */
   public static void compareEob(
-      ClaimTypeV2 claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords)
-      throws IOException {
+      ClaimTypeV2 claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords) {
     Object claim =
         loadedRecords.stream()
             .filter(r -> claimType.getEntityClass().isInstance(r))
@@ -2129,8 +2123,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
                 new TransformerContext(
                     PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                     Optional.of(false),
-                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                    NPIOrgLookup.createNpiOrgLookupForTesting()),
+                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
                 claim),
         searchResults);
   }
@@ -2143,7 +2136,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param loadedRecords the loaded records
    */
   public static void compareEob(
-      ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords) throws IOException {
+      ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords) {
     // Find desired claim in the bundle
     List<ExplanationOfBenefit> eobs = filterToClaimType(searchResults, claimType);
 
