@@ -42,7 +42,7 @@ public class HospiceClaimTransformerV2 {
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim, transformerContext);
+    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
 
     timer.stop();
     return eob;
@@ -53,8 +53,7 @@ public class HospiceClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      HospiceClaim claimGroup, TransformerContext transformerContext) {
+  private static ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -106,7 +105,6 @@ public class HospiceClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
@@ -143,7 +141,6 @@ public class HospiceClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

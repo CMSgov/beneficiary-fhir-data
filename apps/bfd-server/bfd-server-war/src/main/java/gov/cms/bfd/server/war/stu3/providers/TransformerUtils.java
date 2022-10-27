@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -436,36 +435,6 @@ public final class TransformerUtils {
 
   /**
    * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
-   * will be set to a {@link CodeableConcept} containing a single {@link Coding}, with the specified
-   * system and code.
-   *
-   * <p>Data Architecture Note: The {@link CodeableConcept} might seem extraneous -- why not just
-   * add the {@link Coding} directly to the {@link Extension}? The main reason for doing it this way
-   * is consistency: this is what FHIR seems to do everywhere.
-   *
-   * @param fhirElement the FHIR element to add the {@link Extension} to
-   * @param extensionUrl the {@link Extension#getUrl()} to use
-   * @param codingSystem the {@link Coding#getSystem()} to use
-   * @param codingDisplay the {@link Coding#getDisplay()} to use
-   * @param codingCode the {@link Coding#getCode()} to use
-   */
-  static void addExtensionCoding(
-      IBaseHasExtensions fhirElement,
-      String extensionUrl,
-      String codingSystem,
-      Optional<String> codingDisplay,
-      String codingCode) {
-    IBaseExtension<?, ?> extension = fhirElement.addExtension();
-    extension.setUrl(extensionUrl);
-    if (!codingDisplay.isPresent())
-      extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
-    else
-      extension.setValue(
-          new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay.get()));
-  }
-
-  /**
-   * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
    * will be set to a {@link Quantity} with the specified system and value.
    *
    * @param fhirElement the FHIR element to add the {@link Extension} to
@@ -788,25 +757,6 @@ public final class TransformerUtils {
     return new Reference()
         .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
-  }
-
-  /**
-   * Setting identifier reference when npiorgdisplay is passed in.
-   *
-   * @param identifierSystem the {@link Identifier#getSystem()} to use in {@link
-   *     Reference#getIdentifier()}
-   * @param identifierValue the {@link Identifier#getValue()} to use in {@link
-   *     Reference#getIdentifier()}
-   * @param npiOrgDisplay the {@link Identifier#getValue()} to use in {@link
-   *     Reference#getIdentifier()}
-   * @return a {@link Reference} with the specified {@link Identifier}
-   */
-  static Reference createIdentifierReference(
-      String identifierSystem, String identifierValue, String npiOrgDisplay) {
-
-    return new Reference()
-        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
-        .setDisplay(npiOrgDisplay);
   }
 
   /**
@@ -2227,7 +2177,6 @@ public final class TransformerUtils {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
-      Optional<String> organizationNpiDisplay,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -2244,16 +2193,10 @@ public final class TransformerUtils {
     if (organizationNpi.isPresent()) {
       eob.setOrganization(
           TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US,
-              organizationNpi.get(),
-              organizationNpiDisplay.get()));
-      if (organizationNpiDisplay.isPresent()) {
-        eob.setFacility(
-            TransformerUtils.createIdentifierReference(
-                TransformerConstants.CODING_NPI_US,
-                organizationNpi.get(),
-                organizationNpiDisplay.get()));
-      }
+              TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+      eob.setFacility(
+          TransformerUtils.createIdentifierReference(
+              TransformerConstants.CODING_NPI_US, organizationNpi.get()));
     }
 
     eob.getFacility()
@@ -3326,15 +3269,13 @@ public final class TransformerUtils {
       MetricRegistry metricRegistry,
       Object rifRecord,
       Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
         return claimType
             .getTransformer()
             .transform(
-                new TransformerContext(
-                    metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
+                new TransformerContext(metricRegistry, includeTaxNumbers, drugCodeDisplayLookup),
                 rifRecord);
       }
     }

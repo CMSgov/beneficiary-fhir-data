@@ -8,7 +8,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -20,7 +19,6 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -67,7 +65,7 @@ public final class HospiceClaimTransformerV2Test {
    * @throws FHIRException
    */
   @BeforeEach
-  public void generateClaim() throws FHIRException, IOException {
+  public void generateClaim() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -82,14 +80,13 @@ public final class HospiceClaimTransformerV2Test {
     createEOB(Optional.of(false));
   }
 
-  private void createEOB(Optional<Boolean> includeTaxNumber) throws IOException {
+  private void createEOB(Optional<Boolean> includeTaxNumber) {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 includeTaxNumber,
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -117,15 +114,14 @@ public final class HospiceClaimTransformerV2Test {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException, IOException {
+  public void transformSampleARecord() throws FHIRException {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim));
   }
 
@@ -208,7 +204,7 @@ public final class HospiceClaimTransformerV2Test {
 
     ident = new Identifier();
     ident
-        .setValue("0000000000")
+        .setValue("999999999")
         .setSystem("http://hl7.org/fhir/sid/us-npi")
         .getType()
         .addCoding()
