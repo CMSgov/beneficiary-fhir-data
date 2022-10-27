@@ -19,7 +19,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -253,10 +252,11 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
      * For synthetic data, we pre-validate what we expect the pipeline to
      * do with the RIF data by first asserting that things like bene_id(s)
      * will not cause key or hash collisions. However, if running in idempotent
-     * mode, it will be acceptable to run since this is probably a re-run of
-     * a previous load and is not a pure INSERT(ing) of data.
+     * mode, it will be acceptable to run as is since this is probably a re-run
+     * of a previous load and is not a pure INSERT(ing) of data.
      */
-    if (manifestToProcess.isSyntheticData()) {
+    if (manifestToProcess.isSyntheticData()
+        && manifestToProcess.getSyntheaEndStateProperties().isPresent()) {
       boolean syntheaEndStatePropertiesOK = checkSyntheticManifestProperties(manifestToProcess);
       if (!syntheaEndStatePropertiesOK) {
         if (isIdempotentMode) {
@@ -413,11 +413,6 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
    */
   private boolean checkSyntheticManifestProperties(DataSetManifest manifest) {
     LOGGER.info("Synthea data in manifest, ID: {}; verifying efficacy...", manifest.getId());
-    // we are processing synthetic data and the Synthea end state properties are either
-    // invalid or not even in the manifest; won't be able to pre-validate!
-    if (manifest.getSyntheaEndStateProperties().isEmpty()) {
-      throw new BadCodeMonkeyException();
-    }
     SyntheaEndStateProperties endStatProps = manifest.getSyntheaEndStateProperties().get();
     boolean okToProcess = true;
     Connection dbConn = null;
