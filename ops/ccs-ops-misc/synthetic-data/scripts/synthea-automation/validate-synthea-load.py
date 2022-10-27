@@ -19,6 +19,7 @@ import fileinput
 import shlex
 
 import ssmutil
+from pathlib import Path
 
 def validate_synthea_load(args):
     """
@@ -41,14 +42,22 @@ def validate_synthea_load(args):
     ## Sanity check the tables and make sure the last line of each synthea file exists in the corresponding table
     print(f"Reading data from synthea output files for validation...")
     table_ids = {}
-    table_ids['carrier'] = get_bene_id_from_last_file_line(synthea_output_folder + "carrier.csv")
-    table_ids['dme'] = get_bene_id_from_last_file_line(synthea_output_folder + "dme.csv")
-    table_ids['hha'] = get_bene_id_from_last_file_line(synthea_output_folder + "hha.csv")
-    table_ids['hospice'] = get_bene_id_from_last_file_line(synthea_output_folder + "hospice.csv")
-    table_ids['inpatient'] = get_bene_id_from_last_file_line(synthea_output_folder + "inpatient.csv")
-    table_ids['outpatient'] = get_bene_id_from_last_file_line(synthea_output_folder + "outpatient.csv")
-    table_ids['pde'] = get_bene_id_from_last_file_line(synthea_output_folder + "pde.csv")
-    table_ids['snf'] = get_bene_id_from_last_file_line(synthea_output_folder + "snf.csv")
+    if Path(synthea_output_folder + "carrier.csv").is_file():
+        table_ids['carrier'] = get_bene_id_from_last_file_line(synthea_output_folder + "carrier.csv")
+    if Path(synthea_output_folder + "dme.csv").is_file():
+        table_ids['dme'] = get_bene_id_from_last_file_line(synthea_output_folder + "dme.csv")
+    if Path(synthea_output_folder + "hha.csv").is_file():
+        table_ids['hha'] = get_bene_id_from_last_file_line(synthea_output_folder + "hha.csv")
+    if Path(synthea_output_folder + "hospice.csv").is_file():
+        table_ids['hospice'] = get_bene_id_from_last_file_line(synthea_output_folder + "hospice.csv")
+    if Path(synthea_output_folder + "inpatient.csv").is_file():
+        table_ids['inpatient'] = get_bene_id_from_last_file_line(synthea_output_folder + "inpatient.csv")
+    if Path(synthea_output_folder + "outpatient.csv").is_file():
+        table_ids['outpatient'] = get_bene_id_from_last_file_line(synthea_output_folder + "outpatient.csv")
+    if Path(synthea_output_folder + "pde.csv").is_file():
+        table_ids['pde'] = get_bene_id_from_last_file_line(synthea_output_folder + "pde.csv")
+    if Path(synthea_output_folder + "snf.csv").is_file():
+        table_ids['snf'] = get_bene_id_from_last_file_line(synthea_output_folder + "snf.csv")
 
     expected_benes = int(bene_id_start) - int(bene_id_end)
     print(f"Expecting {expected_benes}")
@@ -133,14 +142,22 @@ def check_data_loaded(bene_id_start, bene_id_end, expected_benes, table_ids, db_
     total_result = result == expected_benes
     
     ## Check each table to make sure the id within exists
-    total_result = check_table_for_bene_id(table_ids["carrier"], "carrier_claims", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["dme"], "dme_claims", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["hha"], "hha_claims", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["inpatient"], "inpatient_claims", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["hospice"], "hospice_claims", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["outpatient"], "outpatient_claims", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["pde"], "partd_events", db_string) and total_result
-    total_result = check_table_for_bene_id(table_ids["snf"], "snf_claims", db_string) and total_result
+    if "carrier" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["carrier"], "carrier_claims", db_string) and total_result
+    if "dme" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["dme"], "dme_claims", db_string) and total_result
+    if "hha" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["hha"], "hha_claims", db_string) and total_result
+    if "inpatient" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["inpatient"], "inpatient_claims", db_string) and total_result
+    if "hospice" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["hospice"], "hospice_claims", db_string) and total_result
+    if "outpatient" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["outpatient"], "outpatient_claims", db_string) and total_result
+    if "pde" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["pde"], "partd_events", db_string) and total_result
+    if "snf" in table_ids:
+        total_result = check_table_for_bene_id(table_ids["snf"], "snf_claims", db_string) and total_result
     
     return total_result
     
