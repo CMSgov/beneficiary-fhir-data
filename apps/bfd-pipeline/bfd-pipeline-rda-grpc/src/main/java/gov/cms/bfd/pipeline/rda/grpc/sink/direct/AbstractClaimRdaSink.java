@@ -20,8 +20,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -413,8 +412,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
 
       final LocalDate extractDate = claim.getSource().getExtractDate();
       if (extractDate != null) {
-        final LocalDateTime extractTime = extractDate.atStartOfDay();
-        final long extractMillis = extractTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+        final ZonedDateTime extractTime = extractDate.atStartOfDay().atZone(clock.getZone());
+        final long extractMillis = extractTime.toInstant().toEpochMilli();
         final long extractAge = Math.max(0L, nowMillis - extractMillis);
         metrics.extractAgeMillis.update(extractAge);
       }
