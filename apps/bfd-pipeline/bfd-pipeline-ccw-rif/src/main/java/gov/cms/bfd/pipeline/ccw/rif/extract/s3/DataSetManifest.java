@@ -21,53 +21,6 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * Represents the <code>manifest.xml</code> files that detail which specific files are included in a
  * transfer from the CMS Chronic Conditions Warehouse to the Blue Button API backend.
- *
- * <p>The following schema fragment specifies the expected content contained within this class.
- *
- * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="entry" maxOccurs="unbounded">
- *           &lt;complexType>
- *             &lt;complexContent>
- *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                 &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="type" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="exportType" type="{http://www.w3.org/2001/XMLSchema}string" />
- *               &lt;/restriction>
- *             &lt;/complexContent>
- *           &lt;/complexType>
- *         &lt;/element>
- *         &lt;element name="syntheaEndStateProperties" minOccurs="0">
- *           &lt;complexType>
- *             &lt;complexContent>
- *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                 &lt;sequence>
- *                   &lt;element name="bene_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="bene_id_end" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="generated_ts" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                   &lt;element name="clm_grp_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="pde_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="carr_clm_cntl_num_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="fi_doc_cntl_num_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="hicn_start" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                   &lt;element name="clm_id_start" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                   &lt;element name="mbi_start" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                 &lt;/sequence>
- *               &lt;/restriction>
- *             &lt;/complexContent>
- *           &lt;/complexType>
- *         &lt;/element>
- *       &lt;/sequence>
- *       &lt;attribute name="timestamp" use="required" type="{http://www.w3.org/2001/XMLSchema}dateTime" />
- *       &lt;attribute name="sequenceId" use="required" type="{http://www.w3.org/2001/XMLSchema}integer" />
- *       &lt;attribute name="syntheticData" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
@@ -613,7 +566,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.clmIdStart = clmIdStart;
       this.mbiStart = mbiStart;
     }
-    /** Gets the value of the beneIdStart property. */
+    /**
+     * Gets the value of the beneIdStart property.
+     *
+     * @return value {@link long }
+     */
     public long getBeneIdStart() {
       return beneIdStart;
     }
@@ -623,7 +580,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.beneIdStart = value;
     }
 
-    /** Gets the value of the beneIdEnd property. */
+    /**
+     * Gets the value of the beneIdEnd property.
+     *
+     * @return value {@link long }
+     */
     public long getBeneIdEnd() {
       return beneIdEnd;
     }
@@ -651,7 +612,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.generatedTs = value;
     }
 
-    /** Gets the value of the clmGrpIdStart property. */
+    /**
+     * Gets the value of the clmGrpIdStart property.
+     *
+     * @return value {@link long }
+     */
     public long getClmGrpIdStart() {
       return clmGrpIdStart;
     }
@@ -661,7 +626,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.clmGrpIdStart = value;
     }
 
-    /** Gets the value of the pdeIdStart property. */
+    /**
+     * Gets the value of the pdeIdStart property.
+     *
+     * @return value {@link long }
+     */
     public long getPdeIdStart() {
       return pdeIdStart;
     }
@@ -671,7 +640,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.pdeIdStart = value;
     }
 
-    /** Gets the value of the carrClmCntlNumStart property. */
+    /**
+     * Gets the value of the carrClmCntlNumStart property.
+     *
+     * @return value {@link long }
+     */
     public long getCarrClmCntlNumStart() {
       return carrClmCntlNumStart;
     }
@@ -681,7 +654,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.carrClmCntlNumStart = value;
     }
 
-    /** Gets the value of the fiDocCntlNumStart property. */
+    /**
+     * Gets the value of the fiDocCntlNumStart property.
+     *
+     * @return value {@link long }
+     */
     public long getFiDocCntlNumStart() {
       return fiDocCntlNumStart;
     }
@@ -709,7 +686,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.hicnStart = value;
     }
 
-    /** Gets the value of the clmIdStart property. */
+    /**
+     * Gets the value of the clmIdStart property.
+     *
+     * @return value {@link long }
+     */
     public long getClmIdStart() {
       return clmIdStart;
     }
