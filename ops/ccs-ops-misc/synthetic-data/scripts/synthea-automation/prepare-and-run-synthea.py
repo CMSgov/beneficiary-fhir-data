@@ -7,7 +7,8 @@
 # 2: file system location of synthea folder
 # 3: number of beneficiaries to be generated
 # 4: which environments to load/validate, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
-# 5: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
+# 5: number of months into the future that synthea should generate dates for
+# 6: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
 #
 # Example runstring (with db usernames and passwords as an env variable DB_STRING): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $DB_STRING "test,sbx"
 #
@@ -18,7 +19,7 @@
 #    - Checks if the output folder exists, and creates one if not
 # 2. Checks the supplied database has room to load the number of benes and related table data, so we dont waste time generating something that will have collisions in the target db
 #    - This validation's checks will begin at the expected generation starting point for each field, as read from the end state properties file in arg1
-#    - This is the validation that can be skipped by using optional arg5. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
+#    - This is the validation that can be skipped by using optional arg6. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
 # 3. Validates the output directory is empty
 #    - If the output folder has data from a previous run, the output directory is renamed with a timestamp and a new empty output directory is created
 #    - Since this check handles a non-empty output folder, this step wont fail unless there is an IO issue
@@ -26,6 +27,7 @@
 # 5. Run the synthea bfd-national shell script with the number of beneficiaries supplied in arg3
 #    - Output of this run will be written to a timestamped log file in the synthea directory
 #    - If this run fails (denoted by checking the output for text synthea outputs on a build failure) the synthea generation step will be considered a failure
+#    - If arg5 is greater than 0, synthea will generate claim lines that extend up to the input number of months into the future
 #
 # Example runstring: python3 prepare-and-run-synthea.py ~/Documents/end-state.properties ~/Git/synthea 100 "sbx" True
 #
@@ -66,7 +68,8 @@ def validate_and_run(args):
 
     generated_benes = args[2]
     envs = args[3].split(',')
-    skip_validation = True if len(args) > 4 and args[4].lower() == "true" else False
+    future_months = int(args[4])
+    skip_validation = True if len(args) > 5 and args[5].lower() == "true" else False
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
     
@@ -127,7 +130,7 @@ def validate_and_run(args):
     
     ## National script expects we're in the synthea directory, so swap to that before running
     os.chdir(synthea_folder_filepath)
-    run_success = run_synthea(synthea_folder_filepath, generated_benes)
+    run_success = run_synthea(synthea_folder_filepath, generated_benes, future_months)
     if not run_success:
         print("Synthea run finished with errors")
         print("Returning with exit code 1")
@@ -136,14 +139,19 @@ def validate_and_run(args):
     print("Returning with exit code 0 (No errors)")
     sys.exit(0)
 
-def run_synthea(synthea_folder_filepath, benes_to_generate):
+def run_synthea(synthea_folder_filepath, benes_to_generate, future_months):
     """
     Runs synthea using the national script and pipes the output
     to a log file.
     """
-    print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes...')
+    
     logfile_path = f'{synthea_folder_filepath}synthea-' + time.strftime("%Y_%m_%d-%I_%M_%S_%p") + '.log'
-    output = subprocess.check_output(shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}'), text=True, stderr=subprocess.STDOUT)
+    if future_months > 0:
+        print(f'Running synthea ({synthea_folder_filepath}national_bfd_v2.sh) with {benes_to_generate} benes and {future_months} future months...')
+        output = subprocess.check_output(shlex.split(f'{synthea_folder_filepath}national_bfd_v2.sh {benes_to_generate} {future_months}'), text=True, stderr=subprocess.STDOUT)
+    else:
+        print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes...')
+        output = subprocess.check_output(shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}'), text=True, stderr=subprocess.STDOUT)
     with open(logfile_path, 'w') as f:
         f.write(output)
     
