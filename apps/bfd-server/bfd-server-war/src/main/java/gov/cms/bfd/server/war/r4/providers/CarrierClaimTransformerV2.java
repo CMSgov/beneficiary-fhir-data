@@ -197,28 +197,52 @@ public class CarrierClaimTransformerV2 {
                 line.getPerformingPhysicianUpin());
       }
 
-      // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
-
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
+      if (performing.isPresent()) {
+        // Update the responsible flag
+        performing.get().setResponsible(true);
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing
+            .get()
+            .setQualification(
                 TransformerUtilsV2.createCodeableConcept(
                     eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
+        boolean performingHasMatchingExtension =
+            TransformerUtilsV2.careTeamHasMatchingExtension(
+                performing.get(),
+                TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
+                String.valueOf(line.getProviderTypeCode()));
 
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+        if (!performingHasMatchingExtension) {
+          // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
+                      line.getProviderTypeCode()));
+        }
+
+        performingHasMatchingExtension =
+            (line.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+                    performing.get(),
+                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(line.getProviderParticipatingIndCode().get()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.PRTCPTNG_IND_CD,
+                      line.getProviderParticipatingIndCode()));
+        }
+      }
 
       // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

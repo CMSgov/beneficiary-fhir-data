@@ -63,11 +63,16 @@ def validate_and_run(args):
     ## Script assumes trailing slash on this, so add it if not added
     if not synthea_folder_filepath.endswith('/'):
         synthea_folder_filepath = synthea_folder_filepath + "/"
+
     generated_benes = args[2]
     envs = args[3].split(',')
-    skip_validation = True if len(args) > 4 and args[4] == "True" else False
+    skip_validation = True if len(args) > 4 and args[4].lower() == "true" else False
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
+    
+    print (f"Synthea folder file path: {synthea_folder_filepath}")
+    print (f"Synthea folder prop path: {synthea_prop_filepath}")
+    print (f"Synthea folder output   : {synthea_output_filepath}")
     
     found_all_paths = validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_output_filepath, end_state_file_path)
     
@@ -369,9 +374,11 @@ def update_property_file(end_state_file_lines, synthea_props_file_location):
     
     replacement_lines = []
     for line in end_state_file_lines:
-        ## Avoid any accidental blank lines in the end state file
+        ## Avoid any accidental blank lines in the end state file;
+        ## also, ignore any comment lines
         if len(line.strip()) > 0:
-            replacement_lines.append(line.split("="))
+            if line[0] != '#':
+                replacement_lines.append(line.split("="))
         
     for tuple in replacement_lines:
         replace_text = tuple[0] + "=" + tuple[1]
@@ -432,4 +439,4 @@ def _execute_single_count_query(uri: str, query: str):
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
-    validate_and_run(sys.argv[1:])
+    validate_and_run(sys.argv[1:]) #get everything (slice) after the script name

@@ -175,11 +175,22 @@ final class DMEClaimTransformer {
             TransformerUtils.createCodeableConcept(
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
-        performingCareTeamMember.addExtension(
-            TransformerUtils.createExtensionCoding(
-                eob,
-                CcwCodebookVariable.PRTCPTNG_IND_CD,
-                claimLine.getProviderParticipatingIndCode()));
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        boolean performingHasMatchingExtension =
+            (claimLine.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtils.careTeamHasMatchingExtension(
+                    performingCareTeamMember,
+                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(claimLine.getProviderParticipatingIndCode()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          performingCareTeamMember.addExtension(
+              TransformerUtils.createExtensionCoding(
+                  eob,
+                  CcwCodebookVariable.PRTCPTNG_IND_CD,
+                  claimLine.getProviderParticipatingIndCode()));
+        }
       }
 
       TransformerUtils.mapHcpcs(
