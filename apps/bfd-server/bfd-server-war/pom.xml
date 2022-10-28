@@ -462,6 +462,8 @@
 								<argument>${local.pac.enabled}</argument>
 								<argument>-o</argument>
 								<argument>${local.pac.oldMbiHash.enabled}</argument>
+								<argument>-s</argument>
+								<argument>${local.pac.claimSourceTypes}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
