@@ -359,7 +359,7 @@ upload_synthea_results_to_s3(){
     echo "uploading RIF files to: ${s3_bucket}"
     python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
     
-    if [ "$GENERATE_FUTURE" ]; then
+    if [ "$GENERATE_FUTURE" == 'true' ]; then
         # for each future folder, also upload it to the environment
         curr_num=1
         for folder_name in "${FOLDERS[@]}"; do
