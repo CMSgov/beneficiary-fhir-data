@@ -2050,15 +2050,21 @@ public final class TransformerUtilsV2 {
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
             .filter(ctc -> ctc.getProvider().hasIdentifier())
-            .filter(
-                ctc ->
-                    type.getSystem().equals(ctc.getProvider().getIdentifier().getSystem())
-                        && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
             .filter(ctc -> ctc.hasRole())
             .filter(
                 ctc ->
-                    roleCode.equals(ctc.getRole().getCodingFirstRep().getCode())
-                        && roleSystem.equals(ctc.getRole().getCodingFirstRep().getSystem()))
+                    ctc.getProvider().getIdentifier().getType().getCoding().stream()
+                            .anyMatch(
+                                c ->
+                                    c.getSystem().equalsIgnoreCase(type.getSystem())
+                                        && c.getCode().equalsIgnoreCase(type.toCode()))
+                        && practitionerIdValue.equalsIgnoreCase(
+                            ctc.getProvider().getIdentifier().getValue()))
+            .filter(
+                ctc ->
+                    roleCode.equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getCode())
+                        && roleSystem.equalsIgnoreCase(
+                            ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 

@@ -679,7 +679,7 @@ public class CarrierClaimTransformerV2Test {
    * a total of 4 unique care team members.
    */
   @Test
-  public void shouldHaveFourCareTeamEntries() {
+  public void shouldHaveFourCareTeamEntries() throws IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -697,7 +697,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);

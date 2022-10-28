@@ -61,12 +61,13 @@ public class NPIOrgLookupTest {
 
   /**
    * Should not return Org Name when the parameter bfdServer.include.fake.drug.code is true and NPI
-   * Number is null.
+   * Number is empty string.
    */
   @Test
-  public void shouldNotReturnWhenNPINumberIsNullAndWhenConstructorSetToTrue() throws IOException {
+  public void shouldNotReturnWhenNPINumberIEmptyStringAndWhenConstructorSetToTrue()
+      throws IOException {
     NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
-    Optional<String> npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(null));
+    Optional<String> npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(""));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 }

@@ -3,7 +3,7 @@
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 
-New Organization Resource Mapping Display Name in V2:
+Old Organization Resource Mapping Display Name in V2:
 ```json
       "contained" : [ {
         "resourceType" : "Organization",
@@ -33,7 +33,7 @@ New Organization Resource Mapping Display Name in V2:
       } ],
 ```
 
-Old Mapping in V2:
+New Mapping in V2:
 ```json
       "contained" : [ {
         "resourceType" : "Organization",

@@ -802,11 +802,16 @@ public final class TransformerUtils {
    * @return a {@link Reference} with the specified {@link Identifier}
    */
   static Reference createIdentifierReference(
-      String identifierSystem, String identifierValue, String npiOrgDisplay) {
+      String identifierSystem, String identifierValue, Optional<String> npiOrgDisplay) {
 
-    return new Reference()
-        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
-        .setDisplay(npiOrgDisplay);
+    if (!npiOrgDisplay.isEmpty()) {
+      return new Reference()
+          .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+          .setDisplay(npiOrgDisplay.get());
+    } else {
+      return new Reference()
+          .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue));
+    }
   }
 
   /**
@@ -2244,15 +2249,11 @@ public final class TransformerUtils {
     if (organizationNpi.isPresent()) {
       eob.setOrganization(
           TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US,
-              organizationNpi.get(),
-              organizationNpiDisplay.get()));
+              TransformerConstants.CODING_NPI_US, organizationNpi.get(), organizationNpiDisplay));
       if (organizationNpiDisplay.isPresent()) {
         eob.setFacility(
             TransformerUtils.createIdentifierReference(
-                TransformerConstants.CODING_NPI_US,
-                organizationNpi.get(),
-                organizationNpiDisplay.get()));
+                TransformerConstants.CODING_NPI_US, organizationNpi.get(), organizationNpiDisplay));
       }
     }
 
