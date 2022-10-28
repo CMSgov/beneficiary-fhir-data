@@ -25,13 +25,9 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
     return ClaimTypeV2.parse(typeText);
   }
 
-  /**
-   * Returns a set of all supported resource types.
-   *
-   * @return Set of all supported resource types.
-   */
+  /** {@inheritDoc} */
   @VisibleForTesting
-  Set<ResourceTypeV2<Claim, ?>> getResourceTypes() {
+  Set<ResourceTypeV2<Claim, ?>> getDefinedResourceTypes() {
     return Sets.newHashSet(ClaimTypeV2.values());
   }
 
