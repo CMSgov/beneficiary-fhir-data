@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Throwables;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
 import io.grpc.CallOptions;
@@ -140,6 +141,29 @@ public class StandardGrpcRdaSourceTest {
             "StandardGrpcRdaSource.ints.successes",
             "StandardGrpcRdaSource.ints.uptime"),
         new ArrayList<>(appMetrics.getNames()));
+  }
+
+  /**
+   * Verifies that {@link StandardGrpcRdaSource#performSmokeTest} performs all of the expected tests
+   * and returns success.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
+  @Test
+  public void testSmokeTestPerformsExpectedActions() throws Exception {
+    GrpcResponseStream<Integer> responseStream =
+        spy(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5));
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(responseStream)
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, RdaChange.MIN_SEQUENCE_NUM);
+
+    assertTrue(source.performSmokeTest(sink));
+
+    verify(caller).callVersionService(channel, CallOptions.DEFAULT);
+    verify(sink).readMaxExistingSequenceNumber();
+    verify(caller).callService(channel, CallOptions.DEFAULT, RdaChange.MIN_SEQUENCE_NUM);
+    verify(responseStream).cancelStream(anyString());
   }
 
   /**
@@ -380,6 +404,12 @@ public class StandardGrpcRdaSourceTest {
     verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
+  /**
+   * Verify that calling close triggers a channel shutdown and that calling it multiple times is
+   * safe.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testClose() throws Exception {
     doReturn(channel).when(channel).shutdown();
