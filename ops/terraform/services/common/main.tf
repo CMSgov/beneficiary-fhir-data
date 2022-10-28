@@ -38,8 +38,8 @@ locals {
   sensitive_config    = { for key, value in local.sensitive_map : split("/", key)[5] => value }
 
   # Supports custom, YAML-encoded, environment-specific parameter groups
-  db_cluster_parameter_group_file = fileexists("${path.module}/db-parameter-group-parameters/${local.env}-cluster.yaml") ? "${path.module}/db-parameter-group-parameters/${local.env}-cluster.yaml" : "${path.module}/db-parameter-group-parameters/default-${local.rds_aurora_family}-cluster.yaml"
-  db_node_parameter_group_file    = fileexists("${path.module}/db-parameter-group-parameters/${local.env}-node.yaml") ? "${path.module}/db-parameter-group-parameters/${local.env}-node.yaml" : "${path.module}/db-parameter-group-parameters/default-${local.rds_aurora_family}-node.yaml"
+  db_cluster_parameter_group_file = fileexists("${path.module}/db-cluster-parameters/${local.env}.yaml") ? "${path.module}/db-cluster-parameters/${local.env}.yaml" : "${path.module}/db-cluster-parameters/default-${local.rds_aurora_family}.yaml"
+  db_node_parameter_group_file    = fileexists("${path.module}/db-node-parameters/${local.env}.yaml") ? "${path.module}/db-node-parameters/${local.env}.yaml" : "${path.module}/db-node-parameters/default-${local.rds_aurora_family}.yaml"
   db_cluster_parameters           = toset(yamldecode(file(local.db_cluster_parameter_group_file)))
   db_parameters                   = toset(yamldecode(file(local.db_node_parameter_group_file)))
 
