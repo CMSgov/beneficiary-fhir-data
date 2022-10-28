@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -36,49 +35,48 @@ public final class PartDEventTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException, IOException {
+  public void transformSampleARecord() throws FHIRException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         PartDEventTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
     assertMatches(claim, eob);
   }
 
   @Test
-  public void transformSampleARecordWithNPI() throws FHIRException, IOException {
+  public void transformSampleARecordWithNPI() throws FHIRException {
     String serviceProviderIdQualiferCode = "01";
     String serviceProviderCode = IdentifierType.NPI.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithUPIN() throws FHIRException, IOException {
+  public void transformSampleARecordWithUPIN() throws FHIRException {
     String serviceProviderIdQualiferCode = "06";
     String serviceProviderCode = IdentifierType.UPIN.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithNCPDP() throws FHIRException, IOException {
+  public void transformSampleARecordWithNCPDP() throws FHIRException {
     String serviceProviderIdQualiferCode = "07";
     String serviceProviderCode = IdentifierType.NCPDP.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException, IOException {
+  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "08";
     String serviceProviderCode = IdentifierType.SL.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException, IOException {
+  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "11";
     String serviceProviderCode = IdentifierType.TAX.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
@@ -90,8 +88,8 @@ public final class PartDEventTransformerTest {
    * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
    * and {@link String serviceProviderCode}.
    */
-  private void checkOrgAndFacility(String serviceProviderIdQualiferCode, String serviceProviderCode)
-      throws IOException {
+  private void checkOrgAndFacility(
+      String serviceProviderIdQualiferCode, String serviceProviderCode) {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
@@ -99,8 +97,7 @@ public final class PartDEventTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
