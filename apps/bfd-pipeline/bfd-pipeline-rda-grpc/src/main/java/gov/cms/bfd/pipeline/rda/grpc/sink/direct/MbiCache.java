@@ -204,10 +204,12 @@ public class MbiCache {
         } catch (PersistenceException ex) {
           final Throwable rootCause = Throwables.getRootCause(ex);
           log.debug(
-              "caught exception while caching MBI: retry={} class={} causeClass={}",
+              "caught exception while caching MBI: retry={} class={} message={} causeClass={} causeMessage={}",
               retryNumber,
               ex.getClass().getSimpleName(),
-              rootCause.getClass().getSimpleName());
+              ex.getMessage(),
+              rootCause.getClass().getSimpleName(),
+              rootCause.getMessage());
           retryNumber += 1;
         }
       }
