@@ -252,7 +252,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * @return possible object is {@link SyntheaEndStateProperties }
    */
   public Optional<SyntheaEndStateProperties> getSyntheaEndStateProperties() {
-    return syntheaEndStateProperties != null && syntheaEndStateProperties.beneIdStart < 0
+    return syntheaEndStateProperties != null && syntheaEndStateProperties.isValid()
         ? Optional.of(syntheaEndStateProperties)
         : Optional.empty();
   }
@@ -716,6 +716,25 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      */
     public void setMbiStart(String value) {
       this.mbiStart = value;
+    }
+
+    /**
+     * Determines the validity of the SyntheaEndStateProperties elements. Much of the detection
+     * centers on checking for negative values, which all Synthea-generated data will have for
+     * things like bene_id, clm_id, etc.
+     *
+     * @return possible object is {@link boolean }
+     */
+    boolean isValid() {
+      return (beneIdStart < 0
+          && beneIdEnd < 0
+          && clmGrpIdStart < 0
+          && pdeIdStart < 0
+          && carrClmCntlNumStart < 0
+          && fiDocCntlNumStart < 0
+          && clmIdStart < 0
+          && hicnStart != null
+          && mbiStart != null);
     }
 
     /** @see java.lang.Object#toString() */

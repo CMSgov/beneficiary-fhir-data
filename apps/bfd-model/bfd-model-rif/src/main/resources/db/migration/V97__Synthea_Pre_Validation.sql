@@ -6,9 +6,9 @@
 -- Basically it performs range-checking on all the claims tables
 -- and beneficiary-related tables. The function returns an integer
 -- value that denotes an OK to proceed (value zero) or not OK to
--- proceed (value > 0). It does this mainly by getting counts of
--- rows for various tables and summing the counts; a value of zero
--- denotes no potential duplicate rows.
+-- proceed (value > 0). It does this by getting counts of rows
+-- for various tables; when it detects a value greater than zero,
+-- subsequent querying will be skipped and return the non-zero value.
 --
 -- The Synthea manifest holds end-state information like the following:
 -- ====================================================================
@@ -316,7 +316,7 @@ ${logic.hsql-only}          set RSLT =
                                     ) as foo 
                                     group by mbi_num 
                                     having count(*) > 1
-                                )
+                                ) as s
                             );
                         END IF;
                         RETURN rslt;

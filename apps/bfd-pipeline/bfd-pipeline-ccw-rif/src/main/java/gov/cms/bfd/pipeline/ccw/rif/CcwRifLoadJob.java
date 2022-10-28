@@ -19,6 +19,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -253,7 +254,13 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
      * do with the RIF data by first asserting that things like bene_id(s)
      * will not cause key or hash collisions. However, if running in idempotent
      * mode, it will be acceptable to run as is since this is probably a re-run
-     * of a previous load and is not a pure INSERT(ing) of data.
+     * of a previous load and does represent a pure INSERT(ing) of data.
+     *
+     * NOTE:
+     * It is possible for a Synthea-generated manifest to not have embedded
+     * end state data; for example, a user could simply invoke the Synthea
+     * application and bypass the BFD value-add of imbueing the manifest wtih
+     * data elements from the Synthea end_state.properties file.
      */
     if (manifestToProcess.isSyntheticData()
         && manifestToProcess.getSyntheaEndStateProperties().isPresent()) {
@@ -263,9 +270,8 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
           LOGGER.info(
               "Synthea pre-validation failed, but running in IDEMPOTENT mode, so OK to continue");
         } else {
-          LOGGER.info("Synthea pre-validation failed...exiting");
-          listener.noDataAvailable(); // should we be more draconian here?
-          return PipelineJobOutcome.NOTHING_TO_DO;
+          // show we fail more gracefully?
+          throw new BadCodeMonkeyException("Synthea pre-validation failed!");
         }
       }
     }

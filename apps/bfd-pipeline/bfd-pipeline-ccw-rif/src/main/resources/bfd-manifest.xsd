@@ -33,6 +33,5 @@
       <xs:attribute name="sequenceId" type="xs:integer" use="required" />
       <xs:attribute name="syntheticData" type="xs:boolean" use="optional" />
     </xs:complexType>
-
   </xs:element>
 </xs:schema>
