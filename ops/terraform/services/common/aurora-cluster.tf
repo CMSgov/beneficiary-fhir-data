@@ -38,7 +38,8 @@ resource "aws_rds_cluster" "aurora_cluster" {
   backup_retention_period             = local.rds_backup_retention_period
   cluster_identifier                  = local.rds_cluster_identifier
   copy_tags_to_snapshot               = true
-  db_cluster_parameter_group_name     = "default.${local.rds_aurora_family}"
+  db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.aurora_cluster.name
+  db_instance_parameter_group_name    = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name                = aws_db_subnet_group.aurora_cluster.name
   deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
   engine                              = "aurora-postgresql"
@@ -77,6 +78,22 @@ resource "aws_rds_cluster" "aurora_cluster" {
   ]
 }
 
+resource "aws_rds_cluster_parameter_group" "aurora_cluster" {
+  description = "Sets cluster parameters for ${local.rds_aurora_family}"
+  name_prefix = "bfd-${local.env}-aurora-cluster"
+  family      = local.rds_aurora_family
+
+  dynamic "parameter" {
+    for_each = local.db_cluster_parameters
+
+    content {
+      apply_method = parameter.value["apply_method"]
+      name         = parameter.value["name"]
+      value        = parameter.value["value"]
+    }
+  }
+}
+
 resource "aws_db_parameter_group" "aurora_cluster" {
   description = "Sets node parameters for ${local.rds_aurora_family}"
   family      = local.rds_aurora_family
@@ -99,7 +116,6 @@ resource "aws_rds_cluster_instance" "nodes" {
   ca_cert_identifier              = "rds-ca-2019" # NOTE: This seems like an invariant
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true
-  db_parameter_group_name         = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name
   engine                          = aws_rds_cluster.aurora_cluster.engine
   engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
