@@ -3,8 +3,8 @@
 -- and hospice claims tables, and add the carr_clm_blg_npi_num to the carrier claims table.
 
 -- Update DRG Code from 3 to 4 characters
-ALTER TABLE public.inpatient_claims ALTER COLUMN clm_drg_cd varchar(4);
-ALTER TABLE public.snf_claims ALTER COLUMN clm_drg_cd varchar(4);
+ALTER TABLE public.inpatient_claims ALTER COLUMN clm_drg_cd ${logic.alter-column-type} varchar(4);
+ALTER TABLE public.snf_claims ALTER COLUMN clm_drg_cd ${logic.alter-column-type} varchar(4);
 
 -- Add claim query code to the HHA Claims and Hospice Claims table.
 ALTER TABLE public.hha_claims ADD claim_query_code character(1);
