@@ -11,4 +11,4 @@ ${logic.psql-only} ALTER TABLE public.hha_claims ADD claim_query_code character(
 ${logic.psql-only} ALTER TABLE public.hospice_claims ADD claim_query_code character(1) COLLATE pg_catalog."default";
 
 -- Add carrier claim blg npi number to the Carrier Claims table.
-${logic.psql-only} ALTER TABLE public.carrier_claims ADD carr_clm_blg_npi_num character varchar(10) COLLATE pg_catalog."default";
+${logic.psql-only} ALTER TABLE public.carrier_claims ADD carr_clm_blg_npi_num varchar(10) COLLATE pg_catalog."default";
