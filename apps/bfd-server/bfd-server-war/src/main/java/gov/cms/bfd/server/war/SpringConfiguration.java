@@ -29,13 +29,17 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -260,6 +264,19 @@ public class SpringConfiguration {
   }
 
   /**
+   * Determines the type of claim sources to enable for constructing PAC resources ({@link
+   * org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}.
+   *
+   * @return The {@link Set} of enabled source types (i.e. FISS/MCS).
+   */
+  public static Set<String> getEnabledPacResourceTypes() {
+    return Stream.of(System.getProperty("bfdServer.pac.claimSourceTypes", "").split(","))
+        .filter(Strings::isNotBlank)
+        .map(String::toLowerCase)
+        .collect(Collectors.toSet());
+  }
+
+  /**
    * Creates a new r4 resource provider list.
    *
    * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
@@ -282,8 +299,16 @@ public class SpringConfiguration {
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
     if (isPacResourcesEnabled()) {
-      r4ResourceProviders.add(r4ClaimResourceProvider);
-      r4ResourceProviders.add(r4ClaimResponseResourceProvider);
+      Set<String> allowedResourceTypes = getEnabledPacResourceTypes();
+
+      // If there are no enabled source types, this endpoint will never return anything, so don't
+      // add it
+      if (!allowedResourceTypes.isEmpty()) {
+        r4ClaimResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
+        r4ResourceProviders.add(r4ClaimResourceProvider);
+        r4ClaimResponseResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
+        r4ResourceProviders.add(r4ClaimResponseResourceProvider);
+      }
     }
     return r4ResourceProviders;
   }
