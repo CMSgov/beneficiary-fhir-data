@@ -397,7 +397,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
    * the manifest. The function returns a number representing data issues that would
    * be created if the Synthea mainfest were to be executed.
    * 0 (zero) : no constraint issues
-   * > 1      : should not proceed; data present in db for the Synthea paramerters
+   * > 0      : should not proceed; data present in db for the Synthea paramerters
    *
    * p_beg_bene_id
    * p_beg_bene_id
