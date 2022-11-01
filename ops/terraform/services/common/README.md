@@ -3,6 +3,7 @@
 This module represents the _common service_ responsible for defining common infrastructure within a BFD environment.
 As of this writing, _common_ is primarily concerned with defining the AWS RDS cluster hosting the `fhirdb` database.
 This is supported by a [terraform workspaces-enabled](https://www.terraform.io/language/state/workspaces) state.
+
 **If you're manipulating this state manually, you must verify that you're operating in the appropriate workspace for the targeted environment.**
 
 As stated previously, this is mainly concerned with defining the AWS RDS Cluster for hosting `fhirdb`.
@@ -11,7 +12,9 @@ Instead, this module is configured via the `base` module with AWS SSM Parameter 
 See the locals block in [`main.tf`](./main.tf) to see the expected parameters.
 
 ## Prerequisites
+
 In addition to the [Requirements (below)](#requirements), you (or the automation) will need:
+
 - sufficient AWS IAM privileges for the AWS provider [Resources and Date Sources (below)](#resources)
 - access outlined for the remote [AWS S3 Backend](https://www.terraform.io/language/settings/backends/s3#s3-bucket-permissions)
 - read/write privileges to the state-locking [AWS DynamoDB Table](https://www.terraform.io/language/settings/backends/s3#dynamodb-table-permissions)
@@ -46,6 +49,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_rds_cluster_endpoint.beta_reader](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_endpoint) | resource |
 | [aws_rds_cluster_endpoint.readers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_endpoint) | resource |
 | [aws_rds_cluster_instance.nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance) | resource |
+| [aws_rds_cluster_parameter_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_parameter_group) | resource |
 | [aws_s3_bucket.logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_acl.logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
