@@ -85,6 +85,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     if (entityManager != null && entityManager.isOpen()) {
       entityManager.close();
     }
+    resetLatencyMetrics();
   }
 
   /**
@@ -418,6 +419,16 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         metrics.extractAgeMillis.update(extractAge);
       }
     }
+  }
+
+  /**
+   * Called by {@link #close} method to reset latency metrics to zero when job has completed. This
+   * prevents the dashboard latency graphs showing the last value continuously between job
+   * executions.
+   */
+  private void resetLatencyMetrics() {
+    metrics.changeAgeMillis.update(0L);
+    metrics.extractAgeMillis.update(0L);
   }
 
   /**

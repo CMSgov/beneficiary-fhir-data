@@ -16,6 +16,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.MessageError;
@@ -29,6 +30,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -176,6 +178,32 @@ public class AbstractClaimRdaSinkTest {
     assertMeterReading(1, "transform failures", metrics.getTransformFailures());
   }
 
+  /**
+   * Verify that close method resets the latency metric histograms to zero.
+   *
+   * @throws Exception required because close can throw an exception
+   */
+  @Test
+  public void testCloseResetsLatencyMetrics() throws Exception {
+    sink.getMetrics().getChangeAgeMillis().update(100L);
+    sink.getMetrics().getExtractAgeMillis().update(250L);
+    assertEquals(List.of(100L), getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
+    assertEquals(List.of(250L), getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
+    sink.close();
+    assertEquals(List.of(0L, 100L), getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
+    assertEquals(List.of(0L, 250L), getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
+  }
+
+  /**
+   * Extracts the array of long values from the {@link Histogram} and converts them into a list of
+   * {link Long}s.
+   *
+   * @param histogram {@link Histogram} containing the values we want to extract
+   * @return a {@link List} or {@link Long} containing all of the histogram values
+   */
+  private List<Long> getHistogramValues(Histogram histogram) {
+    return Arrays.stream(histogram.getSnapshot().getValues()).boxed().collect(Collectors.toList());
+  }
   /**
    * Helper method to create a {@link RdaChange} object with the given message.
    *
