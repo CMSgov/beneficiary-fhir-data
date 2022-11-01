@@ -409,15 +409,15 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
    * p_hicn_start
    * p_mbi_start
    */
-  private static final String funcSql =
-      "{ ? = call synthea_load_pre_validate( " + "?, ?, ?, ?, ?, ?, ?, ?, ?); }";
+  private static final String FUNC_SQL =
+      "{ ? = call synthea_load_pre_validate( ?, ?, ?, ?, ?, ?, ?, ?, ?) }";
 
   /**
    * @param manifest the {@link DataSetManifest} that lists the Synthea properties to verify
    * @return <code>true</code> if all of the Synthea parameters listed in the manifest do not
    *     introduce potential data loading issues, <code>false</code> if not
    */
-  private boolean checkSyntheticManifestProperties(DataSetManifest manifest) {
+  private boolean checkSyntheticManifestProperties(DataSetManifest manifest) throws Exception {
     LOGGER.info("Synthea data in manifest, ID: {}; verifying efficacy...", manifest.getId());
     SyntheaEndStateProperties endStatProps = manifest.getSyntheaEndStateProperties().get();
     boolean okToProcess = true;
@@ -425,7 +425,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     CallableStatement cs = null;
     try {
       dbConn = appState.getPooledDataSource().getConnection();
-      cs = dbConn.prepareCall(funcSql);
+      cs = dbConn.prepareCall(FUNC_SQL);
       cs.registerOutParameter(1, Types.INTEGER);
       cs.setLong(2, endStatProps.getBeneIdStart());
       cs.setLong(3, endStatProps.getBeneIdEnd());
@@ -436,6 +436,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
       cs.setLong(8, endStatProps.getFiDocCntlNumStart());
       cs.setString(9, endStatProps.getHicnStart());
       cs.setString(10, endStatProps.getMbiStart());
+      cs.execute();
       int result = cs.getInt(1);
       okToProcess = (result < 1);
       LOGGER.info("Synthea data verification returned {} issues...", result);
@@ -445,6 +446,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
           manifest.getId(),
           e.getMessage(),
           e);
+      throw e;
     } finally {
       if (cs != null) {
         try {

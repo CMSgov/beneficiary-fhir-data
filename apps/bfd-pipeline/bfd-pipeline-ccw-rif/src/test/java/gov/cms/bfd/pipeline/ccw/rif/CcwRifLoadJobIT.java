@@ -659,7 +659,6 @@ public final class CcwRifLoadJobIT {
           expectedOutputLocation,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
-      // }
     } finally {
       if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
