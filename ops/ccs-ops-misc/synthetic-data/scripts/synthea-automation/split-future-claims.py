@@ -58,9 +58,12 @@ def split_future_synthea_load(args):
     threads = [] ## keep track of threads we spawn to wait on
     with concurrent.futures.ThreadPoolExecutor() as executor:
         for file_path in files:
-            print(f"Creating thread for {file_path}")
-            future = executor.submit(split_future_from_file, file_path, synthea_output_filepath, today)
-            threads.append(future)
+            if os.path.isfile(synthea_output_filepath + file_path):
+                print(f"Creating thread for {file_path}")
+                future = executor.submit(split_future_from_file, file_path, synthea_output_filepath, today)
+                threads.append(future)
+            else:
+                print(f"Could not find path for {synthea_output_filepath}{file_path}")
             
     concurrent.futures.wait(threads, timeout=None, return_when='ALL_COMPLETED')
     print("All files done processing.")
@@ -82,8 +85,9 @@ def split_future_synthea_load(args):
     headers = {}
     for file_path in files:
         full_path = synthea_output_filepath + file_path
-        with open(full_path) as file:
-            headers[file_path] = file.readline()
+        if os.path.isfile(full_path):
+            with open(full_path) as file:
+                headers[file_path] = file.readline()
             
     ## write the file data to the right place
     for file_data_tuple in file_data_tuples:

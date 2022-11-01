@@ -12,8 +12,9 @@ help() {
   echo "--build_root, -b        : root directory for Synthea build (default /tmp)"
   echo "--target_env, -t        : comma-separated string, combination of: 'prod', 'test', 'prod-sbx' (default test)"
   echo "--synthea_jar, -j       : boolean (true/false) indicating to use Synthea Release jar file (default true)"
-  echo "--synthea_validate, -v  : boolean (true/false) whether to perform pre-validation of previous Synthea run (default true)"
+  echo "--skip_validate, -v     : boolean (true/false) whether to skip pre-validation of previous Synthea run (default false)"
   echo "--cleanup, -c           : boolean (true/false) whether to perform 'pre' and 'post' file cleanup (default true)"
+  echo "--num_future_months, -f : number of months into the future claims can have their claim dates set to (default 0)"
   exit 1;
 }
 
@@ -30,6 +31,10 @@ NUM_GENERATED_BENES=100
 SKIP_SYNTHEA_BUILD="true"
 # boolean if we should perform pre-validation of target env(s) db to check if we can proceed
 SKIP_VALIDATION="false"
+# boolean if we should generate future claim data
+GENERATE_FUTURE="false"
+# num of months into future for future claim lines
+NUM_FUTURE_MONTHS=0
 
 # setup for args we'll handle
 args=$(getopt -l "num:build_root:target_env:synthea_jar:synthea_validate:cleanup:help" -o "n:b:t:j:v:c:h" -- "$@")
@@ -69,7 +74,7 @@ while [ $# -ge 1 ]; do
               fi
               shift
               ;;
-        -v|--synthea_validate)
+        -v|--skip_validate)
               SKIP_VALIDATION=$(echo "$2" | tr '[:upper:]' '[:lower:]')
               if [[ "${SKIP_VALIDATION}" != "true" && "${SKIP_VALIDATION}" != "false" ]]; then
                 echo "ERROR, Invalid boolean value for Synthea validation: ${SKIP_VALIDATION}" >&2; exit 1
@@ -83,6 +88,16 @@ while [ $# -ge 1 ]; do
               fi
               shift
               ;;
+        -f|--num_future_months)
+            if ! [[ $2 =~ $num_regex ]] ; then
+              echo "ERROR, non-numeric future month value specified ($2)...exiting" >&2; exit 1
+            fi
+            NUM_FUTURE_MONTHS="$2"
+            if [[ $2 -gt 0 ]] ; then
+                GENERATE_FUTURE="true"
+            fi
+            shift
+            ;;
         -h|--help)
               help
               ;;
@@ -98,6 +113,8 @@ echo "Synthea build directory     : ${BUILD_ROOT_DIR}"
 echo "Use Synthea release jar     : ${SKIP_SYNTHEA_BUILD}"
 echo "Skip Synthea pre-validation : ${SKIP_VALIDATION}"
 echo "Perform file cleanup        : ${CLEANUP}"
+echo "Generate future months      : ${NUM_FUTURE_MONTHS}"
+echo "Generate future files       : ${GENERATE_FUTURE}"
 echo ""
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
@@ -304,8 +321,23 @@ download_props_file_from_s3(){
 prepare_and_run_synthea(){
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
-  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${UNIQUE_ENVS_PARAM}" "${SKIP_VALIDATION}"
+  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${UNIQUE_ENVS_PARAM}" "${NUM_FUTURE_MONTHS}" "${SKIP_VALIDATION}"
   deactivate
+}
+
+# Function that splits the synthea future lines into their own loads; only
+# does anything if future lines were generated.
+#
+#Args:
+# 1: location of synthea git repo
+#
+split_future_loads(){
+  if [ "${GENERATE_FUTURE}" == 'true' ]; then
+      cd "${BFD_SYNTHEA_AUTO_LOCATION}"
+      source .venv/bin/activate
+      python3 split-future-claims.py "${TARGET_SYNTHEA_DIR}"
+      deactivate
+  fi
 }
 
 # Function that invokes an S3 utility to upload new generated synthetic data to an
@@ -315,12 +347,29 @@ upload_synthea_results_to_s3(){
   
   echo "upload synthea results to S3"
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
+  
+  ## list out the future folders inside the output directory
+  FOLDERS=()
+  readarray -t FOLDERS < <(find "${BFD_SYNTHEA_OUTPUT_LOCATION}" -maxdepth 1 -mindepth 1 -type d -execdir basename {} ';')
+  echo "${#FOLDERS[@]} folders to upload found"
 
   # upload the RIF (.csv) files to S3 ETL bucket(s); once per environment, passed in as arg
   source .venv/bin/activate
   for s3_bucket in "${S3_BUCKETS[@]}"; do
     echo "uploading RIF files to: ${s3_bucket}"
     python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
+    
+    if [ "$GENERATE_FUTURE" == 'true' ]; then
+        # for each future folder, also upload it to the environment
+        curr_num=1
+        for folder_name in "${FOLDERS[@]}"; do
+            echo "uploading future RIF files to: ${s3_bucket} (${curr_num}/${#FOLDERS[@]})"
+            curr_num=$(($curr_num+1))
+            python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}/${folder_name}" "upload_synthea_result_folder" "${s3_bucket}"
+        done
+    fi
+    
+    
   done
   deactivate
 }
@@ -429,6 +478,10 @@ download_props_file_from_s3
 #  1) we have all the files necessary to perform a synthea generation run.
 #  2) executes a synthea generation run
 prepare_and_run_synthea
+
+# invoke function to split future lines into separate, future loads; no-op
+# if future lines are not generated.
+split_future_loads
 
 # Invoke a function to upload the generated RIF files to the appropriate BFD
 # ETL pipeline S3 /Incoming bucket, where the ETL process will pick them up and
