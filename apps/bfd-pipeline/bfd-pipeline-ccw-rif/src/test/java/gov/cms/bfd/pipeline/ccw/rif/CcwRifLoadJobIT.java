@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -11,6 +13,7 @@ import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.SyntheaEndStateProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
@@ -77,7 +80,9 @@ public final class CcwRifLoadJobIT {
   @Test
   public void singleDataSetTest() throws Exception {
     validateLoadAtLocations(
-        CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
+        CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+        false);
   }
 
   /**
@@ -90,7 +95,8 @@ public final class CcwRifLoadJobIT {
   public void singleSyntheticDataSetTest() throws Exception {
     validateLoadAtLocations(
         CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+        false);
   }
 
   /**
@@ -513,6 +519,41 @@ public final class CcwRifLoadJobIT {
   }
 
   /**
+   * Tests {@link CcwRifLoadJob} when run twice; once against a bucket that uses synthetic data but
+   * will not have a {@link SyntheaEndStateProperties} object as part of the manifest, and a second
+   * time (same bucket) where the manifest includes a {@link SyntheaEndStateProperties} that is
+   * invalid per its XML Schema Definition (XSD).
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
+  @Test
+  public void skipDataSetTestForSyntheaPreValidationFailed() throws Exception {
+    validateLoadAtLocations(
+        CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+        false);
+
+    // job ran and now we should have some Synthea data in the db; we'll re-run
+    // the same dataset but this time specifying Synthea end-state information.
+    Exception exception =
+        assertThrows(
+            java.lang.RuntimeException.class,
+            () -> {
+              validateLoadAtLocations(
+                  CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+                  CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+                  true);
+            });
+    Throwable cause = (javax.xml.bind.UnmarshalException) exception.getCause();
+    Throwable throwable = ((javax.xml.bind.JAXBException) cause).getLinkedException();
+    assertNotNull(throwable);
+    assertNotNull(throwable.getMessage());
+    assertTrue(
+        throwable.getMessage().startsWith("cvc-complex-type.2.4.a: Invalid content was found"));
+    assertTrue(throwable.getMessage().contains(":generated_ts}' is expected."));
+  }
+
+  /**
    * Validate load given the input location to load files and output location to look for the files
    * once they're loaded.
    *
@@ -521,7 +562,8 @@ public final class CcwRifLoadJobIT {
    *     expected to be moved after processing
    * @throws Exception the exception
    */
-  private void validateLoadAtLocations(String inputLocation, String expectedOutputLocation)
+  private void validateLoadAtLocations(
+      String inputLocation, String expectedOutputLocation, boolean needSyntheaManifest)
       throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
@@ -537,15 +579,43 @@ public final class CcwRifLoadJobIT {
           s3Client.getS3AccountOwner().getDisplayName(),
           bucket.getName());
 
-      DataSetManifest manifest =
-          new DataSetManifest(
-              Instant.now(),
-              0,
-              false,
-              inputLocation,
-              expectedOutputLocation,
-              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
-              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetManifest manifest = null;
+      if (needSyntheaManifest) {
+        manifest =
+            new DataSetManifest(
+                Instant.now(),
+                0,
+                true,
+                inputLocation,
+                expectedOutputLocation,
+                new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+                new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+
+        // mangle the endStateProps on purpose
+        SyntheaEndStateProperties endStateProps =
+            manifest.getSyntheaEndStateProperties().isPresent()
+                ? manifest.getSyntheaEndStateProperties().get()
+                : new SyntheaEndStateProperties();
+        endStateProps.setBeneIdEnd(-1000006);
+        endStateProps.setBeneIdEnd(-1000018);
+        endStateProps.setClmGrpIdStart(0);
+        endStateProps.setPdeIdStart(0);
+        endStateProps.setCarrClmCntlNumStart(0);
+        endStateProps.setFiDocCntlNumStart(0);
+        endStateProps.setHicnStart("HICN_START");
+        endStateProps.setMbiStart("MBI_START");
+        manifest.setSyntheaEndStateProperties(endStateProps);
+      } else {
+        manifest =
+            new DataSetManifest(
+                Instant.now(),
+                0,
+                false,
+                inputLocation,
+                expectedOutputLocation,
+                new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+                new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      }
 
       // Add files to each location the test wants them in
       putSampleFilesInTestBucket(
@@ -569,8 +639,8 @@ public final class CcwRifLoadJobIT {
               s3TaskManager,
               listener,
               false);
-      ccwJob.call();
 
+      ccwJob.call();
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(1, listener.getDataEvents().size());
@@ -589,7 +659,7 @@ public final class CcwRifLoadJobIT {
           expectedOutputLocation,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
-
+      // }
     } finally {
       if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }

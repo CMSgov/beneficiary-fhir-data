@@ -340,8 +340,8 @@ public final class DataSetManifestTest {
     assertFalse(manifest.getSyntheaEndStateProperties().isEmpty());
     SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties().get();
     SyntheaEndStateProperties newProps = new SyntheaEndStateProperties();
-    // partially fill the new SyntheaEndStateProperties with values for the original manifest
-    // be leaving off generatedTs
+    // partially fill the new SyntheaEndStateProperties with values, purposely leaving off
+    // generatedTs
     newProps.setBeneIdStart(endProps.getBeneIdStart());
     newProps.setBeneIdEnd(endProps.getBeneIdEnd());
     newProps.setMbiStart(endProps.getMbiStart());
@@ -352,9 +352,7 @@ public final class DataSetManifestTest {
     newProps.setClmIdStart(endProps.getClmIdStart());
     manifest.setSyntheaEndStateProperties(newProps);
 
-    // convert DataSetManifest to a String of XML and verify that we can then re-import the string
-    // data as a DataSetManifest object which should fail because we will be missing a required
-    // element.
+    // convert DataSetManifest to a String of XML
     String xmlString = null;
     try {
       JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
@@ -366,6 +364,9 @@ public final class DataSetManifestTest {
       e.printStackTrace();
     }
     assertNotNull(xmlString);
+
+    // now try to re-import the XML string into a Manifest object; this should fail because
+    // we will be missing a required element.
     final InputStream manifestStream2 =
         new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8));
     Exception exception =
