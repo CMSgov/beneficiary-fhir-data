@@ -78,7 +78,7 @@ public class NPIOrgLookup {
     /*
      * Handle bad data (e.g. our random test data) if npiNumber is empty
      */
-    if (!npiNumber.isPresent() || npiOrgHashMap.isEmpty()) {
+    if (!npiNumber.isPresent()) {
       return Optional.empty();
     }
 
