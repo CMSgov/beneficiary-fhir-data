@@ -58,6 +58,11 @@ public enum StaticRifResource {
 
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
+  SAMPLE_A_CARRIER_MULTIPLE_LINES(
+      resourceUrl("rif-static-samples/sample-a-bcarrier-multiple-lines.txt"),
+      RifFileType.CARRIER,
+      7),
+
   SAMPLE_A_INPATIENT(
       resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 

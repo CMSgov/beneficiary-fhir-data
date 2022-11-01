@@ -104,6 +104,52 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   }
 
   /**
+   * {@inheritDoc}
+   *
+   * <p>This implementation reads starting sequence number from the database, gets the API version
+   * number from RDA API, then downloads several claims from the API.
+   *
+   * @param sink to process batches of objects
+   * @return true if all actions were completed successfully
+   * @throws Exception if any of the actions threw an exception
+   */
+  @Override
+  public boolean performSmokeTest(RdaSink<TMessage, TClaim> sink) throws Exception {
+    boolean successful = false;
+    log.info("smoke test: starting");
+
+    // Query the database to get a starting sequence number.  This verifies that the database is
+    // accessible.
+    final long startingSequenceNumber =
+        sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
+    log.info("smoke test: startingSequenceNumber={}", startingSequenceNumber);
+
+    // Call the RDA API version service to confirm the API is accessible.
+    final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+    log.info("smoke test: apiVersion={}", apiVersion);
+
+    // Doesn't use startingSequenceNumber because we should not block waiting for new data.
+    final GrpcResponseStream<TMessage> responseStream =
+        caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
+    try {
+      for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
+        final TMessage message = responseStream.next();
+        log.info(
+            "smoke test: successfully downloaded claim: seq={}",
+            sink.getSequenceNumberForObject(message));
+      }
+      successful = true;
+    } finally {
+      // be a nice client that lets the server know when we are leaving before the stream is done
+      if (successful && responseStream.hasNext()) {
+        responseStream.cancelStream("smoke test: finished");
+      }
+    }
+
+    return successful;
+  }
+
+  /**
    * {@inheritDoc} Calls the service through the specific implementation of GrpcStreamCaller
    * provided to our constructor. Cancels the response stream if reading from the stream is
    * interrupted.

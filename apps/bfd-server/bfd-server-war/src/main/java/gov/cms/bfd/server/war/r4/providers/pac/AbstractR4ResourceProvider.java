@@ -29,6 +29,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,6 +75,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private Class<T> resourceType;
 
+  private Set<String> enabledSourceTypes = new HashSet<>();
+
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
@@ -98,6 +101,15 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         new ClaimDao(entityManager, metricRegistry, SpringConfiguration.isPacOldMbiHashEnabled());
 
     setResourceType();
+  }
+
+  /**
+   * Sets the allowed source types for this resource provider (i.e. FISS/MCS)
+   *
+   * @param enabledSourceTypes The {@link Set} of allowed source types.
+   */
+  public void setEnabledSourceTypes(Set<String> enabledSourceTypes) {
+    this.enabledSourceTypes = enabledSourceTypes;
   }
 
   /** @see IResourceProvider#getResourceType() */
@@ -190,18 +202,30 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     return types.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().stream()
         .map(TokenParam::getValue)
         .map(String::toLowerCase)
+        .filter(enabledSourceTypes::contains)
         .map(getResourceTypeMap()::get)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
   }
 
   /**
-   * Returns a set of all supported resource types.
+   * Returns a {@link Set} of all supported resources types that are currently enabled.
    *
-   * @return Set of all supported resource types.
+   * @return {@link Set} of all supported resources types that are currently enabled.
+   */
+  private Set<ResourceTypeV2<T, ?>> getResourceTypes() {
+    return getDefinedResourceTypes().stream()
+        .filter(type -> enabledSourceTypes.contains(type.getTypeLabel()))
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns a {@link Set} of all supported resource types.
+   *
+   * @return {@link Set} of all supported resource types.
    */
   @VisibleForTesting
-  abstract Set<ResourceTypeV2<T, ?>> getResourceTypes();
+  abstract Set<ResourceTypeV2<T, ?>> getDefinedResourceTypes();
 
   /**
    * Returns implementation specific {@link ResourceTypeV2} map.

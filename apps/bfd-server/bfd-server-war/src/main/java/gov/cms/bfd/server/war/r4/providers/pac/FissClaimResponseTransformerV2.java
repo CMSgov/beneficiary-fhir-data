@@ -26,7 +26,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /**
-   * The known status codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings
+   * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
+   * mappings
    */
   private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME =
       Map.ofEntries(
