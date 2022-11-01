@@ -19,6 +19,8 @@ import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -83,6 +85,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     if (entityManager != null && entityManager.isOpen()) {
       entityManager.close();
     }
+    resetLatencyMetrics();
   }
 
   /**
@@ -179,7 +182,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     final long maxSeq = maxSequenceInBatch(claims);
     try {
       metrics.calls.mark();
-      updateLatencyMetric(claims);
+      updateLatencyMetrics(claims);
       mergeBatch(maxSeq, claims);
       metrics.objectsMerged.mark(claims.size());
       logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
@@ -397,17 +400,35 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Updates the latency metric by adding the age of each claim to the histogram.
+   * Updates the latency metrics by adding the age of each claim to the histograms.
    *
    * @param claims claims to process
    */
-  private void updateLatencyMetric(Collection<RdaChange<TClaim>> claims) {
+  private void updateLatencyMetrics(Collection<RdaChange<TClaim>> claims) {
+    final long nowMillis = clock.millis();
     for (RdaChange<TClaim> claim : claims) {
-      final long nowMillis = clock.millis();
       final long changeMillis = claim.getTimestamp().toEpochMilli();
-      final long age = Math.max(0L, nowMillis - changeMillis);
-      metrics.changeAgeMillis.update(age);
+      final long changeAge = Math.max(0L, nowMillis - changeMillis);
+      metrics.changeAgeMillis.update(changeAge);
+
+      final LocalDate extractDate = claim.getSource().getExtractDate();
+      if (extractDate != null) {
+        final ZonedDateTime extractTime = extractDate.atStartOfDay().atZone(clock.getZone());
+        final long extractMillis = extractTime.toInstant().toEpochMilli();
+        final long extractAge = Math.max(0L, nowMillis - extractMillis);
+        metrics.extractAgeMillis.update(extractAge);
+      }
     }
+  }
+
+  /**
+   * Called by {@link #close} method to reset latency metrics to zero when job has completed. This
+   * prevents the dashboard latency graphs showing the last value continuously between job
+   * executions.
+   */
+  private void resetLatencyMetrics() {
+    metrics.changeAgeMillis.update(0L);
+    metrics.extractAgeMillis.update(0L);
   }
 
   /**
@@ -434,8 +455,16 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Meter transformSuccesses;
     /** Number of objects which failed to be transformed. */
     private final Meter transformFailures;
-    /** Milliseconds between change timestamp and current time. */
+    /**
+     * Milliseconds between change timestamp and current time, measures the latency between BFD
+     * ingestion and when RDA ingestion.
+     */
     private final Histogram changeAgeMillis;
+    /**
+     * Milliseconds between extract date and current time, measures the latency between BFD
+     * ingestion and when the MAC processes the data .
+     */
+    private final Histogram extractAgeMillis;
     /** Tracks the elapsed time when we write claims to the database. */
     private final Timer dbUpdateTime;
     /** Tracks the number of updates per database transaction. */
@@ -465,6 +494,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+      extractAgeMillis =
+          appMetrics.histogram(MetricRegistry.name(base, "extract", "latency", "millis"));
       dbUpdateTime = appMetrics.timer(MetricRegistry.name(base, "writes", "elapsed"));
       dbBatchSize = appMetrics.histogram(MetricRegistry.name(base, "writes", "batchSize"));
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
