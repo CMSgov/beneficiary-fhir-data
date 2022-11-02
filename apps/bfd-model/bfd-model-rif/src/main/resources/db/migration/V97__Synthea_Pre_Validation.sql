@@ -242,9 +242,7 @@ ${logic.hsql-only}          set RSLT =
                             );
                         END IF;
 
-    -- add support for fi_cntl_num here; not the most efficient step since
-    -- fi_doc_clm_cntl_num is not an indexed field (therefore causing a
-    -- full table scan).
+    -- add support for fi_doc_cntl_num collisions
                         IF RSLT < 1 THEN
 ${logic.psql-only}          RSLT :=
 ${logic.hsql-only}          set RSLT =

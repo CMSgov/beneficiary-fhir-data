@@ -252,8 +252,8 @@ public final class DataSetManifestTest {
   /**
    * Utility method to invoke {@link DataSetManifestFactory} parse factory that converts an XML stream
    * of data into {@link DataSetManifest}.
-   * @param xmlStream
-   * @return
+   * @param xmlStream {@link InputStream} steam of XML content that will be parsed
+   * @return {@link DataSetManifest}
    * @throws {@link SAXParseException}
    * @throws {@link Exception
    */

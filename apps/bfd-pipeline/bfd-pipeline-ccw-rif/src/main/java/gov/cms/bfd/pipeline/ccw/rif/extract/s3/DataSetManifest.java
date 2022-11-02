@@ -28,18 +28,26 @@ import javax.xml.bind.annotation.XmlType;
     propOrder = {"entries", "syntheaEndStateProperties"})
 @XmlRootElement(name = "dataSetManifest")
 public final class DataSetManifest implements Comparable<DataSetManifest> {
+  /** A timestamp {@link String} that maps to an S3 bucket folder. */
   @XmlAttribute(name = "timestamp", required = true)
   private final String timestampText;
 
+  /** A numeric sequence identifier as provided by CCW for this batch of data. */
   @XmlAttribute(name = "sequenceId", required = true)
   private int sequenceId;
 
+  /** A boolean denoting if this is synthetic data (true) or not (false). */
   @XmlAttribute(name = "syntheticData", required = false)
   private boolean syntheticData = false;
 
+  /** A list of {@link DataSetManifestEntry} elements that identify a RIF file. */
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
 
+  /**
+   * A {@link SyntheaEndStateProperties} element that provides end state meta-data from a Synthea
+   * run.
+   */
   @XmlElement(name = "syntheaEndStateProperties", required = false)
   protected SyntheaEndStateProperties syntheaEndStateProperties;
 
@@ -298,12 +306,16 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    */
   @XmlAccessorType(XmlAccessType.FIELD)
   public static final class DataSetManifestEntry {
+    /** The parent {@link DataSetManifest} of this element {@link DataSetManifestEntry}. */
     @XmlTransient private DataSetManifest parentManifest;
 
+    /** The element name {@link String}. */
     @XmlAttribute private final String name;
 
+    /** The file type {@link RifFileType} of this element. */
     @XmlAttribute private final RifFileType type;
 
+    /** The file export type {@link String} of this element. */
     @XmlTransient private final String exportType;
 
     /**
@@ -383,8 +395,13 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * can be determined.
    */
   public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
+    /** a {@link String} derived {@linkDataSetManifest#getTimestamp()} value. */
     private final String timestampText;
+
+    /** an {@link Instant} object derived timestampText {@link String} value. */
     private final Instant timestamp;
+
+    /** an integer value derived from {@link DataSetManifest#getSequenceId()} value. */
     private final int sequenceId;
 
     /**
@@ -508,42 +525,92 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
   }
 
+  /**
+   * Represents information from a Synthea run end_state.properties meta-data that is imbued into a
+   * {@link DataSetManifest}, allowing for pre-validation of data that will be processed by the ETL
+   * pipeline.
+   */
   @XmlAccessorType(XmlAccessType.FIELD)
   public static final class SyntheaEndStateProperties {
+    /**
+     * a {@link long} value denoting the lower-bound of the set of beneficiary identifiers for the
+     * Synthea dataset.
+     */
     @XmlElement(name = "bene_id_start", required = true)
     protected long beneIdStart;
 
+    /**
+     * a {@link long} value denoting the upper-bound of the set of beneficiary identifiers for the
+     * Synthea dataset.
+     */
     @XmlElement(name = "bene_id_end", required = true)
     protected long beneIdEnd;
 
+    /** a {@link String} denoting the timestamp of the Synthea dataset. */
     @XmlElement(name = "generated_ts", required = true)
     protected String generatedTs;
 
+    /**
+     * a {@link long} value denoting the lower-bound of claim group identifiers for the Synthea
+     * dataset.
+     */
     @XmlElement(name = "clm_grp_id_start", required = true)
     protected long clmGrpIdStart;
 
+    /**
+     * a {@link long} value denoting the lower-bound of Part D Event identifiers for the Synthea
+     * dataset.
+     */
     @XmlElement(name = "pde_id_start", required = true)
     protected long pdeIdStart;
 
+    /**
+     * a {@link long} value denoting the lower-bound of Carrier Claim control number for the Synthea
+     * dataset.
+     */
     @XmlElement(name = "carr_clm_cntl_num_start", required = true)
     protected long carrClmCntlNumStart;
 
+    /**
+     * a {@link long} value denoting the lower-bound of FI document control number for the Synthea
+     * dataset.
+     */
     @XmlElement(name = "fi_doc_cntl_num_start", required = true)
     protected long fiDocCntlNumStart;
 
+    /**
+     * a {@link String} denoting the starting point for the HICN hash value for the Synthea dataset.
+     */
     @XmlElement(name = "hicn_start", required = true)
     protected String hicnStart;
 
+    /** a {@link long} value denoting the lower-bound of Claim ID(s) for the Synthea dataset. */
     @XmlElement(name = "clm_id_start", required = true)
     protected long clmIdStart;
 
+    /**
+     * a {@link String} denoting the starting point for the MBI hash value for the Synthea dataset.
+     */
     @XmlElement(name = "mbi_start", required = true)
     protected String mbiStart;
 
     /** Create an instance of {@link SyntheaEndStateProperties } */
     public SyntheaEndStateProperties() {}
 
-    /** Constructs a new {@link SyntheaEndStateProperties}. */
+    /**
+     * Constructs a new {@link SyntheaEndStateProperties}.
+     *
+     * @param beneIdStart lower-bound bene_id value generated by Synthea
+     * @param beneIdEnd upper-bound bene_id value generated by Synthea
+     * @param generatedTs string denoting when the end state meta-data was generated by Synthea
+     * @param clmGrpIdStart lower-bound claim group identifier generated by Synthea
+     * @param pdeIdStart lower-bound Part D event identifier generated by Synthea
+     * @param carrClmCntlNumStart lower-bound carrier claim control number generated by Synthea
+     * @param fiDocCntlNumStart lower-bound FI doc control number generated by Synthea
+     * @param hicnStart string denoting where genertated HICN hash values began for the Synthea run
+     * @param clmIdStart lower-bound claim identifier number generated by Synthea
+     * @param mbiStart string denoting where genertated HICN hash values began for the Synthea run
+     */
     public SyntheaEndStateProperties(
         long beneIdStart,
         long beneIdEnd,
@@ -575,7 +642,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return beneIdStart;
     }
 
-    /** Sets the value of the beneIdStart property. */
+    /**
+     * Sets the value of the beneIdStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setBeneIdStart(long value) {
       this.beneIdStart = value;
     }
@@ -589,7 +660,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return beneIdEnd;
     }
 
-    /** Sets the value of the beneIdStart property. */
+    /**
+     * Sets the value of the beneIdStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setBeneIdEnd(long value) {
       this.beneIdEnd = value;
     }
@@ -621,7 +696,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return clmGrpIdStart;
     }
 
-    /** Sets the value of the clmGrpIdStart property. */
+    /**
+     * Sets the value of the clmGrpIdStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setClmGrpIdStart(long value) {
       this.clmGrpIdStart = value;
     }
@@ -635,7 +714,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return pdeIdStart;
     }
 
-    /** Sets the value of the pdeIdStart property. */
+    /**
+     * Sets the value of the pdeIdStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setPdeIdStart(long value) {
       this.pdeIdStart = value;
     }
@@ -649,7 +732,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return carrClmCntlNumStart;
     }
 
-    /** Sets the value of the carrClmCntlNumStart property. */
+    /**
+     * Sets the value of the carrClmCntlNumStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setCarrClmCntlNumStart(long value) {
       this.carrClmCntlNumStart = value;
     }
@@ -663,7 +750,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return fiDocCntlNumStart;
     }
 
-    /** Sets the value of the fiDocCntlNumStart property. */
+    /**
+     * Sets the value of the fiDocCntlNumStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setFiDocCntlNumStart(long value) {
       this.fiDocCntlNumStart = value;
     }
@@ -695,7 +786,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return clmIdStart;
     }
 
-    /** Sets the value of the clmIdStart property. */
+    /**
+     * Sets the value of the clmIdStart property.
+     *
+     * @param value {@link long} to set
+     */
     public void setClmIdStart(long value) {
       this.clmIdStart = value;
     }
