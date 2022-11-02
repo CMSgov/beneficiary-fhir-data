@@ -6,7 +6,9 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterRead
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertTimerCount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -99,6 +101,31 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.writes.persisted",
             "FissClaimRdaSink.writes.total"),
         new ArrayList<>(appMetrics.getNames()));
+  }
+
+  /**
+   * Verifies that {@link FissClaimRdaSink#isValidMessage} correctly recognizes various valid and
+   * invalid DCN values.
+   */
+  @Test
+  public void testIsValidMessage() {
+    var message = FissClaimChange.newBuilder().setDcn("0").build();
+    assertFalse(sink.isValidMessage(message));
+
+    message = FissClaimChange.newBuilder().setDcn("0000").build();
+    assertFalse(sink.isValidMessage(message));
+
+    message = FissClaimChange.newBuilder().setDcn("010").build();
+    assertTrue(sink.isValidMessage(message));
+
+    message = FissClaimChange.newBuilder().setDcn("XXX").build();
+    assertFalse(sink.isValidMessage(message));
+
+    message = FissClaimChange.newBuilder().setDcn("4XXX").build();
+    assertFalse(sink.isValidMessage(message));
+
+    message = FissClaimChange.newBuilder().setDcn("XXX4").build();
+    assertTrue(sink.isValidMessage(message));
   }
 
   @Test

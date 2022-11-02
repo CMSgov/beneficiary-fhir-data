@@ -13,10 +13,19 @@ import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds FISS claim specific methods. */
 public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaFissClaim> {
+  /**
+   * Some FISS claim records received from the IDR are not real claims. These records can be
+   * recognized by their DCN values. Any FISS claim with DCN that is all zeros or ends with XXX is
+   * not a real claim and should not be written to the database. This regex is used by {@link
+   * #isValidMessage} to recognize these bad claims.
+   */
+  private static final Pattern InvalidDcnRegex = Pattern.compile("(^0+$)|(XXX$)");
+
   private final FissClaimTransformer transformer;
 
   public FissClaimRdaSink(
@@ -26,6 +35,17 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     super(appState, RdaApiProgress.ClaimType.FISS, autoUpdateLastSeq);
     this.transformer =
         transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
+  }
+
+  /**
+   * {@inheritDoc} This implementation checks the DCN of the claim against known-bad values.
+   *
+   * @param fissClaimChange Message received from the RDA API
+   * @return true if the claim should be stored, false otherwise
+   */
+  @Override
+  public boolean isValidMessage(FissClaimChange fissClaimChange) {
+    return !InvalidDcnRegex.matcher(fissClaimChange.getDcn()).find();
   }
 
   @Override

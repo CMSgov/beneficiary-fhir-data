@@ -46,6 +46,19 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   void updateLastSequenceNumber(long lastSequenceNumber);
 
   /**
+   * Hook to allow the {@link RdaSource} to avoid processing messages that are invalid and should
+   * not be stored. Specifically this is to filter out FISS claims with specific invalid DCN values.
+   * Adding the detection logic here allows it to be applied generically. Defaults to true so that
+   * no specific implementation is necessary for MCS claims.
+   *
+   * @param message Message received from the RDA API
+   * @return true if the message is valid and should be processed, false otherwise
+   */
+  default boolean isValidMessage(TMessage message) {
+    return true;
+  }
+
+  /**
    * Write the object to the data store and return the number of objects successfully written. The
    * count returned is just the most recent unreported processed count and for asynchronous sinks
    * can reflect values from previously submitted batches.
