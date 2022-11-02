@@ -2983,17 +2983,11 @@ public final class TransformerUtilsV2 {
   static void mapEobCommonGroupInpOutSNF(
       ExplanationOfBenefit eob,
       BigDecimal bloodDeductibleLiabilityAmount,
-      char claimQueryCode,
       Optional<Character> mcoPaidSw) {
 
     // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(
         eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
-
-    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
-    eob.getBillablePeriod()
-        .addExtension(
-            createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode));
 
     // CLM_MCO_PD_SW => ExplanationOfBenefit.supportingInfo.code
     if (mcoPaidSw.isPresent()) {
@@ -3040,7 +3034,16 @@ public final class TransformerUtilsV2 {
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
       Optional<String> fiDocClmControlNum,
-      Optional<LocalDate> fiClmProcDt) {
+      Optional<LocalDate> fiClmProcDt,
+      Optional<Character> claimQueryCode) {
+
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
+    claimQueryCode.ifPresent(
+        queryCode ->
+            eob.getBillablePeriod()
+                .addExtension(
+                    createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, queryCode)));
+
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
