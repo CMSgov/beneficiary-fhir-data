@@ -8,6 +8,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -33,15 +34,29 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
+  /** Used to assign claims to workers based on their claimId values. */
   private static final HashFunction Hasher = Hashing.goodFastHash(32);
 
+  /** Used to track sequence numbers to update progress table in database. */
   private final SequenceNumberTracker sequenceNumbers;
+  /** Used to perform database i/o. */
   private final RdaSink<TMessage, TClaim> sink;
+  /** Our thread pool used to execute writers. */
   private final ExecutorService threadPool;
+  /** Used to receive messages from main thread. */
   private final BlockingQueue<ReportingCallback.ProcessedBatch<TMessage>> outputQueue;
+  /** Used to update sequence number in background. */
   private final SequenceNumberWriterThread<TMessage, TClaim> sequenceNumberWriter;
+  /** Our collection of claim writers. */
   private final List<ClaimWriterThread<TMessage, TClaim>> writers;
 
+  /**
+   * Create new instance with the provided configuration.
+   *
+   * @param maxThreads size of thread pool
+   * @param batchSize number of claims per batch
+   * @param sinkFactory factory to create {@link RdaSink} instances
+   */
   public WriterThreadPool(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
     Preconditions.checkArgument(maxThreads > 0);
@@ -118,19 +133,53 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     return count;
   }
 
+  /**
+   * The primary key for the claim contained in the message. Used by callers to remove duplicates
+   * from a collection of objects prior to calling writeMessages. Callers may log this value so it
+   * must not contain any PII or PHI.
+   *
+   * @param object object to get a key from
+   * @return a unique key to dedup objects of this type
+   */
   public String getClaimIdForMessage(TMessage object) {
     return sink.getClaimIdForMessage(object);
   }
 
+  /**
+   * Extract the sequence number from the message object and return it.
+   *
+   * @param object object to get the sequence number from
+   * @return the sequence number within the message object
+   */
   public long getSequenceNumberForObject(TMessage object) {
     return sink.getSequenceNumberForObject(object);
   }
 
+  /**
+   * Use the provided RDA API message object plus the API version string to produce an appropriate
+   * entity object for writing to the database. This operation is provided by the sink because the
+   * sink has to be aware of the specific types involved and also because that allows the message
+   * transformation to be performed in worker threads rather than in the main thread.
+   *
+   * @param apiVersion appropriate string for the apiSource column of the claim table
+   * @param message an RDA API message object of the correct type for this sync
+   * @return an appropriate entity object containing the data from the message
+   * @throws DataTransformer.TransformationException if the message is invalid
+   */
   @Nonnull
   public TClaim transformMessage(String apiVersion, TMessage message) {
     return sink.transformMessage(apiVersion, message);
   }
 
+  /**
+   * The pipeline job passes a starting sequence number to the RDA API to get a stream of change
+   * objects for processing. This method allows the sink to provide the next logical starting
+   * sequence number for the call. An Optional is returned to handle the case when no records have
+   * been added to the database yet.
+   *
+   * @return Possibly empty Optional containing highest recorded sequence number.
+   * @throws ProcessingException if the operation fails
+   */
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return sink.readMaxExistingSequenceNumber();
   }
@@ -180,6 +229,13 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     closer.finish();
   }
 
+  /**
+   * Wait for thread pool to terminate.
+   *
+   * @param waitTime maximum time to wait
+   * @throws InterruptedException if wait is interrupted
+   * @throws IOException if pool never terminates
+   */
   private void awaitThreadPoolTermination(Duration waitTime)
       throws InterruptedException, IOException {
     boolean successful;
@@ -208,6 +264,12 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     closer.finish();
   }
 
+  /**
+   * Updates the sequence number in the database to the current safe value. Write takes place in the
+   * caller's thread.
+   *
+   * @throws ProcessingException if the write false
+   */
   private void updateSequenceNumberDirectly() throws ProcessingException {
     final long sequenceNumber = sequenceNumbers.getSafeResumeSequenceNumber();
     if (sequenceNumber > 0) {

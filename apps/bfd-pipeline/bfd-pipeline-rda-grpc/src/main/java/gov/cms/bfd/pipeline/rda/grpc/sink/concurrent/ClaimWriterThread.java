@@ -261,6 +261,12 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     private final List<TMessage> allMessages = new ArrayList<>();
     private final Map<String, TClaim> uniqueClaims = new LinkedHashMap<>();
 
+    /**
+     * Add a claim to the buffer.
+     *
+     * @param sink used to transform message into claim
+     * @param entry holds apiVersion and message
+     */
     void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry) {
       try {
         final String claimKey = sink.getClaimIdForMessage(entry.getObject());

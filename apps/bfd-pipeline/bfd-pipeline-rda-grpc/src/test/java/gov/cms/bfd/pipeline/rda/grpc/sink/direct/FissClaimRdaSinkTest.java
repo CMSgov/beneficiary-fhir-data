@@ -118,20 +118,22 @@ public class FissClaimRdaSinkTest {
             true,
             "XXX",
             true,
-            "4XXX",
+            "1234567890123XXX",
             true,
             "XXX4",
             true,
-            "22239999999999XXX",
-            false,
             " 00000000000 ",
+            false,
+            "22239999999999XXX",
             false,
             "22230501299999XXX4",
             false);
     for (Map.Entry<String, Boolean> e : cases.entrySet()) {
+      var claimId = e.getKey();
+      var expected = e.getValue();
       var message = FissClaimChange.newBuilder().setDcn(e.getKey()).build();
-      assertEquals(
-          e.getValue(), sink.isValidMessage(message), "incorrect result for " + e.getKey());
+      var actual = sink.isValidMessage(message);
+      assertEquals(expected, actual, "incorrect result for " + claimId);
     }
   }
 
