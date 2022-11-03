@@ -21,7 +21,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   /**
    * Some FISS claim records received from the IDR are not real claims. These records can be
    * recognized by their DCN values. Any FISS claim with DCN that is all zeros (and/or spaces) or
-   * has X in positions 15-17 is not a real claim and should not be written to the database. This
+   * has X in positions 15-17 is a claim that has been marked as deleted on FISS and should be ignored. This
    * regex is used by {@link #isValidMessage} to recognize these bad claims.
    */
   private static final Pattern InvalidDcnRegex = Pattern.compile("(^[0 ]+$)|(^.{14}XXX)");
