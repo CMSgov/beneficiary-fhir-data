@@ -113,15 +113,18 @@ def update_manifest(synthea_output_filepath, end_state_properties_file, generate
                 timestamp = line[1:]
         
     lines_to_add = []
-    lines_to_add.append("<syntheaEndStateProperties>")
+    lines_to_add.append("<preValidationProperties>")
     for tuple in replacement_lines:
         ## check tuple 1 for name, then add line in the manifest
         property_name = tuple[0].split(".bfd.")[1]
         property_value = tuple[1]
         lines_to_add.append(f"<{property_name}>{property_value}</{property_name}>")
     lines_to_add.append(f"<bene_id_end>{bene_id_end}<bene_id_end/>")
-    lines_to_add.append(f"<generated_ts>{timestamp}<generated_ts/>")
-    lines_to_add.append("</syntheaEndStateProperties>")
+    lines_to_add.append(f"<generated>{timestamp}<generated/>")
+    
+    ## TODO: grab the NEW end state and list out the ends of fields in here, replace _start with _end in the prop name
+    
+    lines_to_add.append("</preValidationProperties>")
     lines_to_add.append("</dataSetManifest>")
     write_string = '\n'.join(lines_to_add)
     
