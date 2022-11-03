@@ -87,13 +87,17 @@ def validate_and_run(args):
         sys.exit(1)
         
     new_end_state_properties_file = read_file_lines(synthea_output_filepath + "bfd/end_state.properties")
-    update_manifest(synthea_output_filepath, end_state_properties_file, generated_benes, new_end_state_properties_file)
+    update_manifest(synthea_output_filepath, end_state_properties_file, new_end_state_properties_file)
     print("Updated synthea manifest with end.state data")
     
     print("Returning with exit code 0 (No errors)")
     sys.exit(0)
 
-def update_manifest(synthea_output_filepath, end_state_properties_file, generated_benes, new_end_state_properties_file):
+def update_manifest(synthea_output_filepath, end_state_properties_file, new_end_state_properties_file):
+    '''
+    Updates the manifest with the end state property data needed to perform validation
+    in the pipeline.
+    '''
     
     manifest_file = synthea_output_filepath + "bfd/manifest.xml"
     timestamp = ''
