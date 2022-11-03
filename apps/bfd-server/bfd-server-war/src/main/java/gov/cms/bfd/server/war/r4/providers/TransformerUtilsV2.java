@@ -2979,6 +2979,7 @@ public final class TransformerUtilsV2 {
    * @param system Coding System to use, either NPI or UPIN
    * @param role The care team member's role
    * @param id The NPI or UPIN coded as a string
+   * @param id of optional string
    */
   static Optional<CareTeamComponent> addCareTeamMember(
       ExplanationOfBenefit eob,
@@ -2999,9 +3000,11 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
+   * @param item the Item component
    * @param system Coding System to use, either NPI or UPIN
    * @param role The care team member's role
    * @param id The NPI or UPIN coded as a string
+   * @param npiOrgDisplay The NPI display as a optional string
    */
   static Optional<CareTeamComponent> addCareTeamMemberWithNpiOrg(
       ExplanationOfBenefit eob,
