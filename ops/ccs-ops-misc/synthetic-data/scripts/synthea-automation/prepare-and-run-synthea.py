@@ -86,18 +86,21 @@ def validate_and_run(args):
         print("Returning with exit code 1")
         sys.exit(1)
         
-    update_manifest(synthea_output_filepath, end_state_properties_file, generated_benes)
+    new_end_state_properties_file = read_file_lines(synthea_output_filepath + "bfd/end_state.properties")
+    update_manifest(synthea_output_filepath, end_state_properties_file, generated_benes, new_end_state_properties_file)
     print("Updated synthea manifest with end.state data")
     
     print("Returning with exit code 0 (No errors)")
     sys.exit(0)
 
-def update_manifest(synthea_output_filepath, end_state_properties_file, generated_benes):
+def update_manifest(synthea_output_filepath, end_state_properties_file, generated_benes, new_end_state_properties_file):
     
     manifest_file = synthea_output_filepath + "bfd/manifest.xml"
     timestamp = ''
     week_days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    replacement_lines = []
+    
+    ## Get the end state property data BEFORE synthea generation, the start ranges of each field
+    end_state_data_start_ranges = []
     for line in end_state_properties_file:
         ## Avoid any accidental blank lines in the end state file;
         ## also, ignore any comment lines
@@ -105,22 +108,39 @@ def update_manifest(synthea_output_filepath, end_state_properties_file, generate
         if len(line.strip()) > 0:
             if line[0] != '#':
                 tuple = line.split("=")
-                replacement_lines.append(tuple)
-                if tuple[0] == 'exporter.bfd.bene_id_start':
-                    bene_id_end = int(tuple[1]) - int(generated_benes)
+                end_state_data_start_ranges.append(tuple)
             elif line[1:4] in week_days:
                 ## Grab the line minus the comment hash
                 timestamp = line[1:]
-        
+                
+    ## Get select end state property data AFTER synthea generation, the end ranges of some fields
+    end_state_data_end_ranges = []
+    for line in new_end_state_properties_file:
+        ## Avoid any accidental blank lines in the end state file;
+        ## also, ignore any comment lines
+        s3 = line[1:4]
+        if len(line.strip()) > 0 and line[0] != '#':
+            tuple = line.split("=")
+            if tuple[0] == 'exporter.bfd.bene_id_start':
+                bene_id_end = tuple[1]
+            if tuple[0] == 'exporter.bfd.clm_id_start':
+                clm_id_end = tuple[1]
+            if tuple[0] == 'exporter.bfd.pde_id_start':
+                pde_id_end = tuple[1]
+    
     lines_to_add = []
     lines_to_add.append("<preValidationProperties>")
-    for tuple in replacement_lines:
+    for tuple in end_state_data_start_ranges:
         ## check tuple 1 for name, then add line in the manifest
         property_name = tuple[0].split(".bfd.")[1]
         property_value = tuple[1]
         lines_to_add.append(f"<{property_name}>{property_value}</{property_name}>")
-    lines_to_add.append(f"<bene_id_end>{bene_id_end}<bene_id_end/>")
-    lines_to_add.append(f"<generated>{timestamp}<generated/>")
+        if property_name == "bene_id_start":
+            bene_id_start = property_value
+    lines_to_add.append(f"<bene_id_end>{bene_id_end}</bene_id_end>")
+    lines_to_add.append(f"<clm_id_end>{clm_id_end}</clm_id_end>")
+    lines_to_add.append(f"<pde_id_end>{pde_id_end}</pde_id_end>")
+    lines_to_add.append(f"<generated>{timestamp}</generated>")
     
     ## TODO: grab the NEW end state and list out the ends of fields in here, replace _start with _end in the prop name
     
@@ -129,6 +149,10 @@ def update_manifest(synthea_output_filepath, end_state_properties_file, generate
     write_string = '\n'.join(lines_to_add)
     
     replace_line_starting_with(manifest_file, "</dataSetManifest>", write_string)
+    
+    ## Do a printout to help the user know start/end bene id for characteristics file
+    print(f"Bene id start: {bene_id_start}")
+    print(f"Bene id end: {bene_id_end}")
 
 def run_synthea(synthea_folder_filepath, benes_to_generate, future_months):
     """
