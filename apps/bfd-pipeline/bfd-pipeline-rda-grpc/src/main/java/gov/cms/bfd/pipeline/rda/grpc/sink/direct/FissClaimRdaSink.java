@@ -49,7 +49,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   }
 
   @Override
-  public String getDedupKeyForMessage(FissClaimChange object) {
+  public String getClaimIdForMessage(FissClaimChange object) {
     return object.getClaim().getDcn();
   }
 

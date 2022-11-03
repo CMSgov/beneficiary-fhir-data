@@ -184,7 +184,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               final TMessage result = responseStream.next();
               metrics.getObjectsReceived().mark();
               if (sink.isValidMessage(result)) {
-                batch.put(sink.getDedupKeyForMessage(result), result);
+                batch.put(sink.getClaimIdForMessage(result), result);
                 if (batch.size() >= maxPerBatch) {
                   processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
                 }
@@ -193,7 +193,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
                 log.info(
                     "skipping invalid claim: claimType={} claimId={} seq={}",
                     claimType,
-                    sink.getDedupKeyForMessage(result),
+                    sink.getClaimIdForMessage(result),
                     sink.getSequenceNumberForObject(result));
               }
             }

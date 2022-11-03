@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
  * @param <TClaim> JPA entity class
  */
 public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TClaim> {
+  /** Used to write claims to the database in background threads. */
   private final WriterThreadPool<TMessage, TClaim> writerPool;
 
   /**
@@ -33,6 +34,11 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     this(new WriterThreadPool<>(maxThreads, batchSize, sinkFactory));
   }
 
+  /**
+   * Special constructor used for testing to allow the {@link WriterThreadPool} to be a mock.
+   *
+   * @param writerPool externally created {@link WriterThreadPool}
+   */
   @VisibleForTesting
   ConcurrentRdaSink(WriterThreadPool<TMessage, TClaim> writerPool) {
     this.writerPool = writerPool;
@@ -106,8 +112,8 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   }
 
   @Override
-  public String getDedupKeyForMessage(TMessage object) {
-    return writerPool.getDedupKeyForMessage(object);
+  public String getClaimIdForMessage(TMessage object) {
+    return writerPool.getClaimIdForMessage(object);
   }
 
   @Override

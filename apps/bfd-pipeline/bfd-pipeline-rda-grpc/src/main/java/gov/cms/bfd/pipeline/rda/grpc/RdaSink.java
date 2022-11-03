@@ -125,15 +125,14 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   }
 
   /**
-   * Used by callers to remove duplicates from a collection of objects prior to calling
-   * writeMessages. This key can be any unique string value but generally corresponds to a claim's
-   * primary key value. Callers should not depend on the exact value having any meaning outside of
-   * being unique.
+   * The primary key for the claim contained in the message. Used by callers to remove duplicates
+   * from a collection of objects prior to calling writeMessages. Callers may log this value so it
+   * must not contain any PII or PHI.
    *
    * @param object object to get a key from
    * @return a unique key to dedup objects of this type
    */
-  String getDedupKeyForMessage(TMessage object);
+  String getClaimIdForMessage(TMessage object);
 
   /**
    * Extract the sequence number from the message object and return it.

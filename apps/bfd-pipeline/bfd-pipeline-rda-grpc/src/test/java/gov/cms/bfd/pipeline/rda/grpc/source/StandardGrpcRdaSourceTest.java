@@ -125,7 +125,7 @@ public class StandardGrpcRdaSourceTest {
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     lenient().doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
-    lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
+    lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getClaimIdForMessage(any());
     metrics = source.getMetrics();
     lenient().doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
     lenient().doReturn(true).when(sink).isValidMessage(CLAIM_1);

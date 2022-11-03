@@ -78,7 +78,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    */
   public void addToQueue(String apiVersion, TMessage object) throws Exception {
     sequenceNumbers.addActiveSequenceNumber(sink.getSequenceNumberForObject(object));
-    final String key = sink.getDedupKeyForMessage(object);
+    final String key = sink.getClaimIdForMessage(object);
     final int hash = Hasher.hashString(key, StandardCharsets.UTF_8).asInt();
     final int writerIndex = Math.abs(hash) % writers.size();
     writers.get(writerIndex).add(apiVersion, object);
@@ -118,8 +118,8 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     return count;
   }
 
-  public String getDedupKeyForMessage(TMessage object) {
-    return sink.getDedupKeyForMessage(object);
+  public String getClaimIdForMessage(TMessage object) {
+    return sink.getClaimIdForMessage(object);
   }
 
   public long getSequenceNumberForObject(TMessage object) {
