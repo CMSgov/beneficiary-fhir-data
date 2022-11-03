@@ -20,11 +20,11 @@ import javax.annotation.Nonnull;
 public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaFissClaim> {
   /**
    * Some FISS claim records received from the IDR are not real claims. These records can be
-   * recognized by their DCN values. Any FISS claim with DCN that is all zeros or ends with XXX is
-   * not a real claim and should not be written to the database. This regex is used by {@link
-   * #isValidMessage} to recognize these bad claims.
+   * recognized by their DCN values. Any FISS claim with DCN that is all zeros (and/or spaces) or
+   * has X in positions 15-17 is not a real claim and should not be written to the database. This
+   * regex is used by {@link #isValidMessage} to recognize these bad claims.
    */
-  private static final Pattern InvalidDcnRegex = Pattern.compile("(^0+$)|(XXX$)");
+  private static final Pattern InvalidDcnRegex = Pattern.compile("(^[0 ]+$)|(^.{14}XXX)");
 
   private final FissClaimTransformer transformer;
 

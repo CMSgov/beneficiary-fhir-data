@@ -6,9 +6,7 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterRead
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertTimerCount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -38,6 +36,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -109,23 +108,31 @@ public class FissClaimRdaSinkTest {
    */
   @Test
   public void testIsValidMessage() {
-    var message = FissClaimChange.newBuilder().setDcn("0").build();
-    assertFalse(sink.isValidMessage(message));
-
-    message = FissClaimChange.newBuilder().setDcn("0000").build();
-    assertFalse(sink.isValidMessage(message));
-
-    message = FissClaimChange.newBuilder().setDcn("010").build();
-    assertTrue(sink.isValidMessage(message));
-
-    message = FissClaimChange.newBuilder().setDcn("XXX").build();
-    assertFalse(sink.isValidMessage(message));
-
-    message = FissClaimChange.newBuilder().setDcn("4XXX").build();
-    assertFalse(sink.isValidMessage(message));
-
-    message = FissClaimChange.newBuilder().setDcn("XXX4").build();
-    assertTrue(sink.isValidMessage(message));
+    var cases =
+        Map.of(
+            "0",
+            false,
+            "0000",
+            false,
+            "010",
+            true,
+            "XXX",
+            true,
+            "4XXX",
+            true,
+            "XXX4",
+            true,
+            "22239999999999XXX",
+            false,
+            " 00000000000 ",
+            false,
+            "22230501299999XXX4",
+            false);
+    for (Map.Entry<String, Boolean> e : cases.entrySet()) {
+      var message = FissClaimChange.newBuilder().setDcn(e.getKey()).build();
+      assertEquals(
+          e.getValue(), sink.isValidMessage(message), "incorrect result for " + e.getKey());
+    }
   }
 
   @Test
