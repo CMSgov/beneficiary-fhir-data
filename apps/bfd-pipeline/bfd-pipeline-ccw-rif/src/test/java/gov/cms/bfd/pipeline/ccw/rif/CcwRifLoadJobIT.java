@@ -82,7 +82,10 @@ public final class CcwRifLoadJobIT {
     validateLoadAtLocations(
         CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
         CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
-        false);
+        List.of(
+            StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
+            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
+        null);
   }
 
   /**
@@ -96,7 +99,10 @@ public final class CcwRifLoadJobIT {
     validateLoadAtLocations(
         CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
         CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
-        false);
+        List.of(
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()),
+        null);
   }
 
   /**
@@ -528,29 +534,122 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void skipDataSetTestForPreValidationFailed() throws Exception {
+    List<URL> filesList =
+        List.of(
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl());
+
+    DataSetManifest manifest =
+        new DataSetManifest(
+            Instant.now(),
+            0,
+            true,
+            CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+            CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+            new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+            new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+
+    // first load synthetic data in the db; no need to check manifest
+    // PreValidationProperties yes, we just want data existing prior to
+    // the real test.
     validateLoadAtLocations(
         CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
         CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
-        false);
+        filesList,
+        manifest);
 
-    // job ran and now we should have some Synthea data in the db; we'll re-run
-    // the same dataset but this time specifying Synthea end-state information.
+    // setup the preValidationProperties so that we'll try to insert values data that already exists
+    PreValidationProperties endStateProps = new PreValidationProperties();
+    endStateProps.setBeneIdStart(-1000006); // this bene_id already loaded
+    endStateProps.setBeneIdEnd(-1000018);
+    endStateProps.setClmGrpIdStart(-100000486);
+    endStateProps.setClmGrpIdStart(-100000793);
+    endStateProps.setPdeIdStart(0);
+    endStateProps.setCarrClmCntlNumStart(-100000322);
+    endStateProps.setFiDocCntlNumStart("");
+    endStateProps.setHicnStart("T01000006A");
+    endStateProps.setMbiStart("1S00E00AA06");
+    manifest.setPreValidationProperties(endStateProps);
+
+    // job ran and now we should have some Synthea data in the db; we'll re-run pretty
+    // much the same dataset but this time specifying Synthea end-state information.
     Exception exception =
         assertThrows(
-            java.lang.RuntimeException.class,
+            gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException.class,
             () -> {
               validateLoadAtLocations(
                   CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
                   CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
-                  true);
+                  filesList,
+                  manifest);
             });
-    Throwable cause = (javax.xml.bind.UnmarshalException) exception.getCause();
-    Throwable throwable = ((javax.xml.bind.JAXBException) cause).getLinkedException();
-    assertNotNull(throwable);
-    assertNotNull(throwable.getMessage());
-    assertTrue(
-        throwable.getMessage().startsWith("cvc-complex-type.2.4.a: Invalid content was found"));
-    assertTrue(throwable.getMessage().contains(":generated_ts}' is expected."));
+    assertNotNull(exception.getMessage());
+    assertTrue(exception.getMessage().contains("pre-validation failed!"));
+  }
+
+  /**
+   * Tests {@link CcwRifLoadJob} when run twice; once against a bucket that uses synthetic data but
+   * will not have a {@link PreValidationProperties} object as part of the manifest, and a second
+   * time (same bucket) where the manifest includes a {@link PreValidationProperties} that is
+   * invalid per its XML Schema Definition (XSD).
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
+  @Test
+  public void skipDataSetTestForPreValidationDocCntlNumFailed() throws Exception {
+    List<URL> filesList =
+        List.of(
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl(),
+            StaticRifResource.SAMPLE_SYNTHEA_INPATIENT.getResourceUrl());
+
+    DataSetManifest manifest =
+        new DataSetManifest(
+            Instant.now(),
+            0,
+            true,
+            CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+            CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+            new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+            new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER),
+            new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT));
+
+    // first load synthetic data in the db; no need to check manifest
+    // PreValidationProperties yes, we just want data existing prior to
+    // the real test.
+    validateLoadAtLocations(
+        CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+        filesList,
+        manifest);
+
+    // setup the preValidationProperties so that we'll try to insert values data that already exists
+    PreValidationProperties endStateProps = new PreValidationProperties();
+    endStateProps.setBeneIdStart(-1003006);
+    endStateProps.setBeneIdEnd(-1003018);
+    endStateProps.setClmGrpIdStart(-100300486);
+    endStateProps.setClmGrpIdStart(-100300793);
+    endStateProps.setPdeIdStart(0);
+    endStateProps.setCarrClmCntlNumStart(-100300322);
+    endStateProps.setFiDocCntlNumStart("dcn151"); // this should trigger an exception
+    endStateProps.setHicnStart("T01000006A");
+    endStateProps.setMbiStart("1S00E00AA06");
+    manifest.setPreValidationProperties(endStateProps);
+
+    // job ran and now we should have some Synthea data in the db; we'll re-run pretty
+    // much the same dataset but this time specifying Synthea end-state information.
+    Exception exception =
+        assertThrows(
+            gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException.class,
+            () -> {
+              validateLoadAtLocations(
+                  CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+                  CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+                  filesList,
+                  manifest);
+            });
+    assertNotNull(exception.getMessage());
+    assertTrue(exception.getMessage().contains("pre-validation failed!"));
   }
 
   /**
@@ -563,7 +662,10 @@ public final class CcwRifLoadJobIT {
    * @throws Exception the exception
    */
   private void validateLoadAtLocations(
-      String inputLocation, String expectedOutputLocation, boolean needSyntheaManifest)
+      String inputLocation,
+      String expectedOutputLocation,
+      List<URL> fileList,
+      DataSetManifest inManifest)
       throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
@@ -579,33 +681,8 @@ public final class CcwRifLoadJobIT {
           s3Client.getS3AccountOwner().getDisplayName(),
           bucket.getName());
 
-      DataSetManifest manifest = null;
-      if (needSyntheaManifest) {
-        manifest =
-            new DataSetManifest(
-                Instant.now(),
-                0,
-                true,
-                inputLocation,
-                expectedOutputLocation,
-                new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
-                new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-
-        // mangle the endStateProps on purpose
-        PreValidationProperties endStateProps =
-            manifest.getPreValidationProperties().isPresent()
-                ? manifest.getPreValidationProperties().get()
-                : new PreValidationProperties();
-        endStateProps.setBeneIdEnd(-1000006);
-        endStateProps.setBeneIdEnd(-1000018);
-        endStateProps.setClmGrpIdStart(0);
-        endStateProps.setPdeIdStart(0);
-        endStateProps.setCarrClmCntlNumStart(0);
-        endStateProps.setFiDocCntlNumStart(0);
-        endStateProps.setHicnStart("HICN_START");
-        endStateProps.setMbiStart("MBI_START");
-        manifest.setPreValidationProperties(endStateProps);
-      } else {
+      DataSetManifest manifest = inManifest;
+      if (manifest == null) {
         manifest =
             new DataSetManifest(
                 Instant.now(),
@@ -618,14 +695,7 @@ public final class CcwRifLoadJobIT {
       }
 
       // Add files to each location the test wants them in
-      putSampleFilesInTestBucket(
-          s3Client,
-          bucket,
-          inputLocation,
-          manifest,
-          List.of(
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      putSampleFilesInTestBucket(s3Client, bucket, inputLocation, manifest, fileList);
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();

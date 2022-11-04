@@ -75,7 +75,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
       "select count(clm_id) from %s " + "where fi_doc_clm_cntl_num = ? limit 1";
 
   /** SQL used to check for potential collision of MBI_NUM in various BENEFICIARY-related tables. */
-  private static final String CHECK_HICN_MBI_HASHES =
+  private static final String CHECK_MBI_DUPES =
       "select count(*) from ( "
           + "select count(*) bene_id_count from ( "
           + "select bene_id, mbi_num from public.beneficiaries "
@@ -142,6 +142,8 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
     try {
       // a dbConnection is a sparse resource...use carefully!
       dbConn = appState.getPooledDataSource().getConnection();
+      // and we only need to read data
+      dbConn.setReadOnly(true);
       // we'll wrap in a while loop to allow easy short-circuiting
       // if we hit a failure condition.
       while (isValid) {
@@ -149,13 +151,14 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         // Range check BENEFICIARIES for value constraints on BENE_ID.
         //
         if (props.getBeneIdStart() != 0 && props.getBeneIdEnd() != 0) {
+          LOGGER.debug("pre-validation starting for CHECK_PDE_CLAIMS_GROUP_ID");
           ps = dbConn.prepareStatement(CHECK_BENE_RANGE);
           ps.setLong(1, props.getBeneIdStart());
           ps.setLong(2, props.getBeneIdEnd());
           rs = ps.executeQuery();
           // we only have one possible column in the result set so we
           // can cheat using an index value of 1! True for all queries!
-          isValid = (rs.next() && (rs.getInt(1) < 1));
+          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
           ps.close();
           ps = null;
           rs = null;
@@ -167,12 +170,13 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         // Range check CARRIER_CLAIMS table for acceptable CLM_ID and CARR_CLM_CNTL_NUM
         //
         if (props.getCarrClmCntlNumStart() != 0) {
+          LOGGER.debug("pre-validation starting for CHECK_CARR_CLAIM_CNTL_NUM");
           String carr_claim_cntl_num = String.valueOf(props.getCarrClmCntlNumStart());
           ps = dbConn.prepareStatement(CHECK_CARR_CLAIM_CNTL_NUM);
           ps.setLong(1, props.getClmIdStart());
           ps.setString(2, carr_claim_cntl_num);
           rs = ps.executeQuery();
-          isValid = (rs.next() && (rs.getInt(1) < 1));
+          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
           ps.close();
           ps = null;
           rs = null;
@@ -186,11 +190,13 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         if (props.getClmGrpIdStart() != 0) {
           int i = 0;
           for (; i < CLAIMS_TABLES_GRP.length && isValid; i++) {
+            LOGGER.debug(
+                "pre-validation starting for CHECK_CLAIMS_GROUP_ID [{}]", CLAIMS_TABLES_GRP[i]);
             String sql = String.format(CHECK_CLAIMS_GROUP_ID, CLAIMS_TABLES_GRP[i], CLM_GRP_ID_END);
             ps = dbConn.prepareStatement(sql);
             ps.setLong(1, props.getClmGrpIdStart());
             rs = ps.executeQuery();
-            isValid = (rs.next() && (rs.getInt(1) < 1));
+            isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
             ps.close();
             ps = null;
             rs = null;
@@ -204,12 +210,13 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         // Check PARTD_EVENTS for collision in PDE_ID and CLM_GRP_ID.
         //
         if (props.getPdeIdStart() != 0 && props.getClmGrpIdStart() != 0) {
+          LOGGER.debug("pre-validation starting for CHECK_PDE_CLAIMS_GROUP_ID");
           ps = dbConn.prepareStatement(CHECK_PDE_CLAIMS_GROUP_ID);
           ps.setLong(1, props.getPdeIdStart());
           ps.setLong(2, props.getClmGrpIdStart());
           ps.setLong(3, CLM_GRP_ID_END);
           rs = ps.executeQuery();
-          isValid = (rs.next() && (rs.getInt(1) < 1));
+          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
           ps.close();
           ps = null;
           rs = null;
@@ -221,11 +228,12 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         // Check BENEFICIARIES table for a collision HICN_UNHASHED or MBI_NUM.
         //
         if (props.getHicnStart() != null && props.getMbiStart() != null) {
+          LOGGER.debug("pre-validation starting for CHECK_HICN_MBI_HASH");
           ps = dbConn.prepareStatement(CHECK_HICN_MBI_HASH);
           ps.setString(1, props.getHicnStart());
           ps.setString(2, props.getMbiStart());
           rs = ps.executeQuery();
-          isValid = (rs.next() && (rs.getInt(1) < 1));
+          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
           ps.close();
           ps = null;
           rs = null;
@@ -236,15 +244,16 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         }
         // Range check of FI_DOC_CLM_CNTL_NUM in a bunch of tables.
         //
-        if (props.getFiDocCntlNumStart() != 0) {
+        if (props.getFiDocCntlNumStart() != null) {
           int i = 0;
-          String fi_doc_cntl_num = String.valueOf(props.getFiDocCntlNumStart());
           for (; i < CLAIMS_TABLES_DOC_CNTL.length && isValid; i++) {
+            LOGGER.debug(
+                "pre-validation starting for CHECK_FI_DOC_CNTL [{}]", CLAIMS_TABLES_DOC_CNTL[i]);
             String sql = String.format(CHECK_FI_DOC_CNTL, CLAIMS_TABLES_DOC_CNTL[i]);
             ps = dbConn.prepareStatement(sql);
-            ps.setString(1, fi_doc_cntl_num);
+            ps.setString(1, props.getFiDocCntlNumStart());
             rs = ps.executeQuery();
-            isValid = (rs.next() && (rs.getInt(1) < 1));
+            isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
             ps.close();
             ps = null;
             rs = null;
@@ -257,16 +266,17 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         }
         // Check for HICN or MBI hash collisions
         //
-        ps = dbConn.prepareStatement(CHECK_HICN_MBI_HASHES);
+        LOGGER.debug("pre-validation starting for CHECK_MBI_DUPES");
+        ps = dbConn.prepareStatement(CHECK_MBI_DUPES);
         rs = ps.executeQuery();
-        isValid = (rs.next() && (rs.getInt(1) < 1));
+        isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
         ps.close();
         ps = null;
         rs = null;
         if (!isValid) {
           LOGGER.warn("pre-validation failed for CHECK_HICN_MBI_HASH");
-          break;
         }
+        break;
       }
     } catch (Exception e) {
       isValid = false;

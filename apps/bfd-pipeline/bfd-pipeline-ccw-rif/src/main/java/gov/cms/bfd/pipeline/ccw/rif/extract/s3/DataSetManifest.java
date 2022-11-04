@@ -550,7 +550,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * dataset.
      */
     @XmlElement(name = "fi_doc_cntl_num_start", required = true)
-    protected long fiDocCntlNumStart;
+    protected String fiDocCntlNumStart;
 
     /** a {@link String} denoting the starting point for the HICN hash value for the RIF dataset. */
     @XmlElement(name = "hicn_start", required = true)
@@ -619,7 +619,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
         long clmGrpIdStart,
         long pdeIdStart,
         long carrClmCntlNumStart,
-        long fiDocCntlNumStart,
+        String fiDocCntlNumStart,
         String hicnStart,
         long beneIdStart,
         long clmIdStart,
@@ -699,18 +699,18 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the fiDocCntlNumStart property.
      *
-     * @return value {@link long }
+     * @return value {@link String}
      */
-    public long getFiDocCntlNumStart() {
+    public String getFiDocCntlNumStart() {
       return fiDocCntlNumStart;
     }
 
     /**
      * Sets the value of the fiDocCntlNumStart property.
      *
-     * @param value {@link long} to set
+     * @param value {@link String} to set
      */
-    public void setFiDocCntlNumStart(long value) {
+    public void setFiDocCntlNumStart(String value) {
       this.fiDocCntlNumStart = value;
     }
 
@@ -862,7 +862,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      sb.append("PreValidationProperties [clmGrpIdStart=");
+      sb.append("; PreValidationProperties [clmGrpIdStart=");
       sb.append(clmGrpIdStart);
       sb.append(", pdeIdStart=");
       sb.append(pdeIdStart);

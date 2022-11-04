@@ -4,13 +4,19 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 
 /** The interface for CCW RIF Load pre-validation. */
 public interface CcwRifLoadPreValidateInterface {
-  /** implementations will need a PipelineApplicationState. */
+  /**
+   * All interfaces will need to know about application state.
+   *
+   * @param appState will need a {@link PipelineApplicationState}.
+   */
   public void init(PipelineApplicationState appState);
 
   /**
-   * Gets the CCW Codebook variable's name.
+   * Validity will be what the implementation decides.
    *
+   * @param object a {@link Object} Java class/type
    * @return {@link boolean} the validity status
+   * @throws Exception if there is an issue during validation
    */
   public boolean isValid(Object object) throws Exception;
 }
