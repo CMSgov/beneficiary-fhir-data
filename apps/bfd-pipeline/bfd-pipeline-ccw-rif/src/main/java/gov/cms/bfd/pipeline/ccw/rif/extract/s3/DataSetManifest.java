@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "",
-    propOrder = {"entries", "syntheaEndStateProperties"})
+    propOrder = {"entries", "preValidationProperties"})
 @XmlRootElement(name = "dataSetManifest")
 public final class DataSetManifest implements Comparable<DataSetManifest> {
   /** A timestamp {@link String} that maps to an S3 bucket folder. */
@@ -44,12 +44,9 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
 
-  /**
-   * A {@link SyntheaEndStateProperties} element that provides end state meta-data from a Synthea
-   * run.
-   */
-  @XmlElement(name = "syntheaEndStateProperties", required = false)
-  protected SyntheaEndStateProperties syntheaEndStateProperties;
+  /** A {@link PreValidationProperties} optional element that provides pre-validation meta-data */
+  @XmlElement(name = "preValidationProperties", required = false)
+  protected PreValidationProperties preValidationProperties;
 
   /** Denotes the s3 key where the manifest was located when it was first read. */
   @XmlTransient private String manifestKeyIncomingLocation;
@@ -257,21 +254,21 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Gets the value of the syntheaEndStateProperties property.
    *
-   * @return possible object is {@link SyntheaEndStateProperties }
+   * @return possible object is {@link PreValidationProperties }
    */
-  public Optional<SyntheaEndStateProperties> getSyntheaEndStateProperties() {
-    return syntheaEndStateProperties != null && syntheaEndStateProperties.isValid()
-        ? Optional.of(syntheaEndStateProperties)
+  public Optional<PreValidationProperties> getPreValidationProperties() {
+    return preValidationProperties != null
+        ? Optional.of(preValidationProperties)
         : Optional.empty();
   }
 
   /**
    * Sets the value of the syntheaEndStateProperties property.
    *
-   * @param value allowed object is {@link SyntheaEndStateProperties }
+   * @param value allowed object is {@link PreValidationProperties }
    */
-  public void setSyntheaEndStateProperties(SyntheaEndStateProperties value) {
-    this.syntheaEndStateProperties = value;
+  public void setPreValidationProperties(PreValidationProperties value) {
+    this.preValidationProperties = value;
   }
 
   /** @see java.lang.Comparable#compareTo(java.lang.Object) */
@@ -293,8 +290,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     builder.append(syntheticData);
     builder.append(", entries=");
     builder.append(entries);
-    if (syntheaEndStateProperties != null) {
-      builder.append(syntheaEndStateProperties.toString());
+    if (preValidationProperties != null) {
+      builder.append(preValidationProperties.toString());
     }
     builder.append("]");
     return builder.toString();
@@ -525,166 +522,124 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
   }
 
-  /**
-   * Represents information from a Synthea run end_state.properties meta-data that is imbued into a
-   * {@link DataSetManifest}, allowing for pre-validation of data that will be processed by the ETL
-   * pipeline.
-   */
+  /** Optional object that can be used to perform pre-validation during ETL pipeline processing. */
   @XmlAccessorType(XmlAccessType.FIELD)
-  public static final class SyntheaEndStateProperties {
+  public static final class PreValidationProperties {
     /**
-     * a {@link long} value denoting the lower-bound of the set of beneficiary identifiers for the
-     * Synthea dataset.
-     */
-    @XmlElement(name = "bene_id_start", required = true)
-    protected long beneIdStart;
-
-    /**
-     * a {@link long} value denoting the upper-bound of the set of beneficiary identifiers for the
-     * Synthea dataset.
-     */
-    @XmlElement(name = "bene_id_end", required = true)
-    protected long beneIdEnd;
-
-    /** a {@link String} denoting the timestamp of the Synthea dataset. */
-    @XmlElement(name = "generated_ts", required = true)
-    protected String generatedTs;
-
-    /**
-     * a {@link long} value denoting the lower-bound of claim group identifiers for the Synthea
-     * dataset.
+     * a {@link long} value denoting the lower-bound of claim group identifiers for the RIF dataset.
      */
     @XmlElement(name = "clm_grp_id_start", required = true)
     protected long clmGrpIdStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of Part D Event identifiers for the Synthea
+     * a {@link long} value denoting the lower-bound of Part D Event identifiers for the RIF
      * dataset.
      */
     @XmlElement(name = "pde_id_start", required = true)
     protected long pdeIdStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of Carrier Claim control number for the Synthea
+     * a {@link long} value denoting the lower-bound of Carrier Claim control number for the RIF
      * dataset.
      */
     @XmlElement(name = "carr_clm_cntl_num_start", required = true)
     protected long carrClmCntlNumStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of FI document control number for the Synthea
+     * a {@link long} value denoting the lower-bound of FI document control number for the RIF
      * dataset.
      */
     @XmlElement(name = "fi_doc_cntl_num_start", required = true)
     protected long fiDocCntlNumStart;
 
-    /**
-     * a {@link String} denoting the starting point for the HICN hash value for the Synthea dataset.
-     */
+    /** a {@link String} denoting the starting point for the HICN hash value for the RIF dataset. */
     @XmlElement(name = "hicn_start", required = true)
     protected String hicnStart;
 
-    /** a {@link long} value denoting the lower-bound of Claim ID(s) for the Synthea dataset. */
+    /**
+     * a {@link long} value denoting the lower-bound of the set of beneficiary identifiers for the
+     * RIF dataset.
+     */
+    @XmlElement(name = "bene_id_start", required = true)
+    protected long beneIdStart;
+
+    /** a {@link long} value denoting the lower-bound of Claim ID(s) for the RIF dataset. */
     @XmlElement(name = "clm_id_start", required = true)
     protected long clmIdStart;
 
-    /**
-     * a {@link String} denoting the starting point for the MBI hash value for the Synthea dataset.
-     */
+    /** a {@link String} denoting the starting point for the MBI hash value for the RIF dataset. */
     @XmlElement(name = "mbi_start", required = true)
     protected String mbiStart;
 
-    /** Create an instance of {@link SyntheaEndStateProperties } */
-    public SyntheaEndStateProperties() {}
+    /**
+     * a {@link long} value denoting the upper-bound of the set of beneficiary identifiers for the
+     * RIF dataset.
+     */
+    @XmlElement(name = "bene_id_end", required = true)
+    protected long beneIdEnd;
 
     /**
-     * Constructs a new {@link SyntheaEndStateProperties}.
-     *
-     * @param beneIdStart lower-bound bene_id value generated by Synthea
-     * @param beneIdEnd upper-bound bene_id value generated by Synthea
-     * @param generatedTs string denoting when the end state meta-data was generated by Synthea
-     * @param clmGrpIdStart lower-bound claim group identifier generated by Synthea
-     * @param pdeIdStart lower-bound Part D event identifier generated by Synthea
-     * @param carrClmCntlNumStart lower-bound carrier claim control number generated by Synthea
-     * @param fiDocCntlNumStart lower-bound FI doc control number generated by Synthea
-     * @param hicnStart string denoting where genertated HICN hash values began for the Synthea run
-     * @param clmIdStart lower-bound claim identifier number generated by Synthea
-     * @param mbiStart string denoting where genertated HICN hash values began for the Synthea run
+     * a {@link long} value denoting the upper-bound of the set of Claim identifiers for the RIF
+     * claims dataset.
      */
-    public SyntheaEndStateProperties(
-        long beneIdStart,
-        long beneIdEnd,
-        String generatedTs,
+    @XmlElement(name = "clm_id_end", required = true)
+    protected long clmIdEnd;
+
+    /**
+     * a {@link long} value denoting the upper-bound of the set of Part D events identifiers for the
+     * RIF claims dataset.
+     */
+    @XmlElement(name = "pde_id_end", required = true)
+    protected long pdeIdEnd;
+
+    /** a {@link String} denoting the timestamp of the RIF dataset. */
+    @XmlElement(name = "generated", required = false)
+    protected String generated;
+
+    /** Create an instance of {@link PreValidationProperties } */
+    public PreValidationProperties() {}
+
+    /**
+     * Constructs a new {@link PreValidationProperties}.
+     *
+     * @param clmGrpIdStart lower-bound bene_id range value to verify
+     * @param pdeIdStart lower-bound bene_id range value to verify
+     * @param carrClmCntlNumStart lower-bound bene_id range value to verify
+     * @param fiDocCntlNumStart lower-bound bene_id range value to verify
+     * @param hicnStart string denoting where genertated HICN hash range values begin
+     * @param beneIdStart lower-bound bene_id range value to verify
+     * @param clmIdStart lower-bound bene_id range value to verify
+     * @param mbiStart string denoting where genertated HICN hash range values begin
+     * @param beneIdEnd upper-bound bene_id range value to verify
+     * @param clmIdEnd upper-bound bene_id range value to verify
+     * @param pdeIdEnd upper-bound bene_id range value to verify
+     * @param generated string denoting when the end state meta-data was generated
+     */
+    public PreValidationProperties(
         long clmGrpIdStart,
         long pdeIdStart,
         long carrClmCntlNumStart,
         long fiDocCntlNumStart,
         String hicnStart,
+        long beneIdStart,
         long clmIdStart,
-        String mbiStart) {
-      this.beneIdStart = beneIdStart;
-      this.beneIdEnd = beneIdEnd;
-      this.generatedTs = generatedTs;
+        String mbiStart,
+        long beneIdEnd,
+        long clmIdEnd,
+        long pdeIdEnd,
+        String generated) {
       this.clmGrpIdStart = clmGrpIdStart;
       this.pdeIdStart = pdeIdStart;
       this.carrClmCntlNumStart = carrClmCntlNumStart;
       this.fiDocCntlNumStart = fiDocCntlNumStart;
       this.hicnStart = hicnStart;
+      this.beneIdStart = beneIdStart;
       this.clmIdStart = clmIdStart;
       this.mbiStart = mbiStart;
-    }
-    /**
-     * Gets the value of the beneIdStart property.
-     *
-     * @return value {@link long }
-     */
-    public long getBeneIdStart() {
-      return beneIdStart;
-    }
-
-    /**
-     * Sets the value of the beneIdStart property.
-     *
-     * @param value {@link long} to set
-     */
-    public void setBeneIdStart(long value) {
-      this.beneIdStart = value;
-    }
-
-    /**
-     * Gets the value of the beneIdEnd property.
-     *
-     * @return value {@link long }
-     */
-    public long getBeneIdEnd() {
-      return beneIdEnd;
-    }
-
-    /**
-     * Sets the value of the beneIdStart property.
-     *
-     * @param value {@link long} to set
-     */
-    public void setBeneIdEnd(long value) {
-      this.beneIdEnd = value;
-    }
-
-    /**
-     * Gets the value of the generatedTs property.
-     *
-     * @return possible object is {@link String }
-     */
-    public String getGeneratedTs() {
-      return generatedTs;
-    }
-
-    /**
-     * Sets the value of the generatedTs property.
-     *
-     * @param value allowed object is {@link String }
-     */
-    public void setGeneratedTs(String value) {
-      this.generatedTs = value;
+      this.beneIdEnd = beneIdEnd;
+      this.clmIdEnd = clmIdEnd;
+      this.pdeIdEnd = pdeIdEnd;
+      this.generated = generated;
     }
 
     /**
@@ -778,6 +733,24 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
+     * Gets the value of the beneIdStart property.
+     *
+     * @return value {@link long }
+     */
+    public long getBeneIdStart() {
+      return beneIdStart;
+    }
+
+    /**
+     * Sets the value of the beneIdStart property.
+     *
+     * @param value {@link long} to set
+     */
+    public void setBeneIdStart(long value) {
+      this.beneIdStart = value;
+    }
+
+    /**
      * Gets the value of the clmIdStart property.
      *
      * @return value {@link long }
@@ -814,50 +787,107 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Determines the validity of the SyntheaEndStateProperties elements. Much of the detection
-     * centers on checking for negative values, which all Synthea-generated data will have for
-     * things like bene_id, clm_id, etc.
+     * Gets the value of the beneIdEnd property.
      *
-     * @return possible object is {@link boolean }
+     * @return value {@link long }
      */
-    boolean isValid() {
-      return (beneIdStart < 0
-          && beneIdEnd < 0
-          && clmGrpIdStart < 0
-          && pdeIdStart < 0
-          && carrClmCntlNumStart < 0
-          && fiDocCntlNumStart < 0
-          && clmIdStart < 0
-          && hicnStart != null
-          && mbiStart != null);
+    public long getBeneIdEnd() {
+      return beneIdEnd;
+    }
+
+    /**
+     * Sets the value of the beneIdEnd property.
+     *
+     * @param value {@link long} to set
+     */
+    public void setBeneIdEnd(long value) {
+      this.beneIdEnd = value;
+    }
+
+    /**
+     * Gets the value of the clmIdEnd property.
+     *
+     * @return value {@link long }
+     */
+    public long getClmIdEnd() {
+      return clmIdEnd;
+    }
+
+    /**
+     * Sets the value of the clmIdEnd property.
+     *
+     * @param value {@link long} to set
+     */
+    public void setClmIdEnd(long value) {
+      this.clmIdEnd = value;
+    }
+
+    /**
+     * Gets the value of the pdeIdEnd property.
+     *
+     * @return value {@link long }
+     */
+    public long getPdeIdEnd() {
+      return pdeIdEnd;
+    }
+
+    /**
+     * Sets the value of the pdeIdEnd property.
+     *
+     * @param value {@link long} to set
+     */
+    public void setPdeIdEnd(long value) {
+      this.pdeIdEnd = value;
+    }
+
+    /**
+     * Gets the value of the generated property.
+     *
+     * @return possible object is {@link String }
+     */
+    public String getGenerated() {
+      return generated;
+    }
+
+    /**
+     * Sets the value of the generated property.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setGenerated(String value) {
+      this.generated = value;
     }
 
     /** @see java.lang.Object#toString() */
     @Override
     public String toString() {
-      StringBuilder builder = new StringBuilder();
-      builder.append("SyntheaEndStateProperties [beneIdStart=");
-      builder.append(beneIdStart);
-      builder.append(", beneIdEnd=");
-      builder.append(beneIdEnd);
-      builder.append(", generatedTs=");
-      builder.append(generatedTs);
-      builder.append(", clmGrpIdStart=");
-      builder.append(clmGrpIdStart);
-      builder.append(", pdeIdStart=");
-      builder.append(pdeIdStart);
-      builder.append(", carrClmCntlNumStart=");
-      builder.append(carrClmCntlNumStart);
-      builder.append(", fiDocCntlNumStart=");
-      builder.append(fiDocCntlNumStart);
-      builder.append(", hicnStart=");
-      builder.append(hicnStart);
-      builder.append(", clmIdStart=");
-      builder.append(clmIdStart);
-      builder.append(", mbiStart=");
-      builder.append(mbiStart);
-      builder.append("]");
-      return builder.toString();
+      StringBuilder sb = new StringBuilder();
+      sb.append("PreValidationProperties [clmGrpIdStart=");
+      sb.append(clmGrpIdStart);
+      sb.append(", pdeIdStart=");
+      sb.append(pdeIdStart);
+      sb.append(", carrClmCntlNumStart=");
+      sb.append(carrClmCntlNumStart);
+      sb.append(", fiDocCntlNumStart=");
+      sb.append(fiDocCntlNumStart);
+      sb.append(", hicnStart=");
+      sb.append(hicnStart);
+      sb.append(", beneIdStart=");
+      sb.append(beneIdStart);
+      sb.append(", clmIdStart=");
+      sb.append(clmIdStart);
+      sb.append(", mbiStart=");
+      sb.append(mbiStart);
+      sb.append(", beneIdEnd=");
+      sb.append(beneIdEnd);
+      sb.append(", clmIdEnd=");
+      sb.append(clmIdEnd);
+      sb.append(", pdeIdEnd=");
+      sb.append(pdeIdEnd);
+      sb.append(", generated=");
+      sb.append(generated);
+      sb.append("]");
+      return sb.toString();
     }
   }
 }

@@ -20,16 +20,17 @@
   <entry name="outpatient.csv" type="OUTPATIENT"/>
   <entry name="pde.csv" type="PDE"/>
   <entry name="snf.csv" type="SNF"/>
-  <syntheaEndStateProperties>
-    <bene_id_start>-1000010</bene_id_start>
-    <bene_id_end>-1000020</bene_id_end>
-    <generated_ts>Tue Oct 18 15:24:11 EDT 2022</generated_ts>
-    <clm_grp_id_start>-100001170</clm_grp_id_start>
-    <pde_id_start>-100000623</pde_id_start>
-    <carr_clm_cntl_num_start>-100000388</carr_clm_cntl_num_start>
-    <fi_doc_cntl_num_start>-100000159</fi_doc_cntl_num_start>
-    <hicn_start>T01000010A</hicn_start>
-    <clm_id_start>-100000547</clm_id_start>
-    <mbi_start>1S00E00AA10</mbi_start>
-  </syntheaEndStateProperties>
+  <preValidationProperties>
+	<clm_grp_id_start>-100001170</clm_grp_id_start>
+	<carr_clm_cntl_num_start>-100000388</carr_clm_cntl_num_start>
+	<fi_doc_cntl_num_start>-1000001591</fi_doc_cntl_num_start>
+	<hicn_start>T01000010A</hicn_start>
+	<bene_id_start>-1000010</bene_id_start>
+	<clm_id_start>-100000547</clm_id_start>
+	<mbi_start>1S00E00AA10</mbi_start>
+	<bene_id_end>-1000020</bene_id_end>
+	<clm_id_end>-1000005480</clm_id_end>
+	<pde_id_end>-100000640</pde_id_end>
+	<generated>Tue Oct 18 15:24:11 EDT 2022</generated>
+  </preValidationProperties>
 </dataSetManifest>

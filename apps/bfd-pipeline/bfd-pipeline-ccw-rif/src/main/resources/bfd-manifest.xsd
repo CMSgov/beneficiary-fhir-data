@@ -12,19 +12,21 @@
             <xs:attribute name="exportType" type="xs:string" use="optional" />
           </xs:complexType>
         </xs:element>
-        <xs:element name="syntheaEndStateProperties" minOccurs="0" maxOccurs="1">
+        <xs:element name="preValidationProperties" minOccurs="0" maxOccurs="1">
           <xs:complexType>
-            <xs:sequence>
-              <xs:element name="bene_id_start" type="xs:long" />
-              <xs:element name="bene_id_end" type="xs:long" />
-              <xs:element name="generated_ts" type="xs:string" />
+            <xs:sequence>            
               <xs:element name="clm_grp_id_start" type="xs:long" />
               <xs:element name="pde_id_start" type="xs:long" />
               <xs:element name="carr_clm_cntl_num_start" type="xs:long" />
               <xs:element name="fi_doc_cntl_num_start" type="xs:long" />
               <xs:element name="hicn_start" type="xs:string" />
+              <xs:element name="bene_id_start" type="xs:long" />
               <xs:element name="clm_id_start" type="xs:long" />
               <xs:element name="mbi_start" type="xs:string" />
+              <xs:element name="bene_id_end" type="xs:long" />
+              <xs:element name="clm_id_end" type="xs:long" />
+              <xs:element name="pde_id_end" type="xs:long" />
+              <xs:element name="generated" type="xs:string" minOccurs="0" maxOccurs="1" />             
             </xs:sequence>
           </xs:complexType>
         </xs:element>

@@ -12,7 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.SyntheaEndStateProperties;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -33,7 +33,7 @@ import org.xml.sax.SAXParseException;
 public final class DataSetManifestTest {
   /**
    * Verifies that {@link DataSetManifest} can be unmarshalled, as expected; the sample-a XML does
-   * not contain the syntheticData attribute whuch means that the data will not be treated as
+   * not contain the syntheticData attribute which means that the data will not be treated as
    * synthetic data.
    *
    * @throws JAXBException (indicates test failure)
@@ -272,7 +272,7 @@ public final class DataSetManifestTest {
     InputStream manifestStream =
         Thread.currentThread()
             .getContextClassLoader()
-            .getResourceAsStream("manifest-sample-end-state-valid.xml");
+            .getResourceAsStream("manifest-sample-state-valid.xml");
     DataSetManifest manifest = null;
     try {
       manifest = convertStreamToManifest(manifestStream);
@@ -280,11 +280,11 @@ public final class DataSetManifestTest {
       e.printStackTrace();
     }
     assertNotNull(manifest);
-    assertFalse(manifest.getSyntheaEndStateProperties().isEmpty());
-    SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties().get();
+    assertFalse(manifest.getPreValidationProperties().isEmpty());
+    PreValidationProperties endProps = manifest.getPreValidationProperties().get();
     assertEquals(-1000010, endProps.getBeneIdStart());
     assertEquals(-1000020, endProps.getBeneIdEnd());
-    assertEquals("Tue Oct 18 15:24:11 EDT 2022", endProps.getGeneratedTs());
+    assertEquals("Tue Oct 18 15:24:11 EDT 2022", endProps.getGenerated());
     assertEquals("1S00E00AA10", endProps.getMbiStart());
     assertEquals("T01000010A", endProps.getHicnStart());
     assertEquals(-100001170, endProps.getClmGrpIdStart());
@@ -319,68 +319,32 @@ public final class DataSetManifestTest {
 
   /**
    * Verifies that {@link DataSetManifest} content that is missing a required element of the {@link
-   * SyntheaEndStateProperties} will throw an exception {@link javax.xml.bind.UnmarshalException}
-   * when tryng to parse an XML stream. It further verifies that the primary exception contains a
-   * linked exception {@link javax.xml.bind.JAXBException}.
+   * PreValidationProperties} will throw an exception {@link javax.xml.bind.UnmarshalException} when
+   * tryng to parse an XML stream. It further verifies that the primary exception contains a linked
+   * exception {@link javax.xml.bind.JAXBException}.
    */
   @Test
   public void manifestSyntheticEndStateInvalid() {
     InputStream manifestStream =
         Thread.currentThread()
             .getContextClassLoader()
-            .getResourceAsStream("manifest-sample-end-state-valid.xml");
+            .getResourceAsStream("manifest-sample-state-invalid.xml");
 
-    DataSetManifest manifest = null;
-    try {
-      manifest = convertStreamToManifest(manifestStream);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertNotNull(manifest);
-    assertFalse(manifest.getSyntheaEndStateProperties().isEmpty());
-    SyntheaEndStateProperties endProps = manifest.getSyntheaEndStateProperties().get();
-    SyntheaEndStateProperties newProps = new SyntheaEndStateProperties();
-    // partially fill the new SyntheaEndStateProperties with values, purposely leaving off
-    // generatedTs
-    newProps.setBeneIdStart(endProps.getBeneIdStart());
-    newProps.setBeneIdEnd(endProps.getBeneIdEnd());
-    newProps.setMbiStart(endProps.getMbiStart());
-    newProps.setHicnStart(endProps.getHicnStart());
-    newProps.setClmGrpIdStart(endProps.getClmGrpIdStart());
-    newProps.setPdeIdStart(endProps.getPdeIdStart());
-    newProps.setCarrClmCntlNumStart(endProps.getCarrClmCntlNumStart());
-    newProps.setClmIdStart(endProps.getClmIdStart());
-    manifest.setSyntheaEndStateProperties(newProps);
-
-    // convert DataSetManifest to a String of XML
-    String xmlString = null;
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-      StringWriter writer = new StringWriter();
-      jaxbMarshaller.marshal(manifest, writer);
-      xmlString = writer.toString();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertNotNull(xmlString);
-
-    // now try to re-import the XML string into a Manifest object; this should fail because
-    // we will be missing a required element.
-    final InputStream manifestStream2 =
-        new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8));
     Exception exception =
         assertThrows(
             javax.xml.bind.UnmarshalException.class,
             () -> {
-              convertStreamToManifest(manifestStream2);
+              DataSetManifest manifest = convertStreamToManifest(manifestStream);
             });
-    Throwable throwable = ((javax.xml.bind.JAXBException) exception).getLinkedException();
+
+    Throwable throwable = ((javax.xml.bind.UnmarshalException) exception).getLinkedException();
     assertNotNull(throwable);
     assertNotNull(throwable.getMessage());
     assertTrue(
         throwable.getMessage().startsWith("cvc-complex-type.2.4.a: Invalid content was found"));
-    assertTrue(throwable.getMessage().contains(":generated_ts}' is expected."));
+    assertTrue(throwable.getMessage().contains(":carr_clm_cntl_num_start}'"));
+    assertTrue(throwable.getMessage().contains(":pde_id_start}'"));
+    assertTrue(throwable.getMessage().contains("is expected"));
   }
 
   /**

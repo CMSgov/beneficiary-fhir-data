@@ -8,7 +8,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.SyntheaEndStateProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
@@ -25,9 +24,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.Types;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -252,28 +248,23 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         String.valueOf(manifestToProcess.isSyntheticData()));
 
     /*
-     * For synthetic data, we pre-validate what we expect the pipeline to
-     * do with the RIF data by first asserting that things like bene_id(s)
-     * will not cause key or hash collisions. However, if running in idempotent
-     * mode, it will be acceptable to run as is since this is probably a re-run
-     * of a previous load and does represent a pure INSERT(ing) of data.
+     * The {@link DataSetManifest} can have an optional element {@link PreValidationProperties}
+     * which contains elements that can be used to preform a pre-validation of values prior
+     * to beginning the actual processing (loading) of data.
      *
-     * NOTE:
-     * It is possible for a Synthea-generated manifest to not have embedded
-     * end state data; for example, a user could simply invoke the Synthea
-     * application and bypass the BFD value-add of imbueing the manifest wtih
-     * data elements from the Synthea end_state.properties file.
+     * For example, checking if a range of bene_id(s) will cause a database key constraint
+     * violation during an INSERT operation. However, if running in idempotent
+     * mode, it will be acceptable to run 'as is' since this is probably a re-run
+     * of a previous load and does represent a pure INSERT(ing) of data.
      */
-    if (manifestToProcess.isSyntheticData()
-        && manifestToProcess.getSyntheaEndStateProperties().isPresent()) {
-      boolean syntheaEndStatePropertiesOK = checkSyntheticManifestProperties(manifestToProcess);
-      if (!syntheaEndStatePropertiesOK) {
+    if (manifestToProcess.getPreValidationProperties().isPresent()) {
+      boolean preValidationPropertiesOK = checkPreValidationProperties(manifestToProcess);
+
+      if (!preValidationPropertiesOK) {
         if (isIdempotentMode) {
-          LOGGER.info(
-              "Synthea pre-validation failed, but running in IDEMPOTENT mode, so OK to continue");
+          LOGGER.info("pre-validation failed, but running in IDEMPOTENT mode, so OK to continue");
         } else {
-          // show we fail more gracefully?
-          throw new BadCodeMonkeyException("Synthea pre-validation failed!");
+          throw new BadCodeMonkeyException("pre-validation failed!");
         }
       }
     }
@@ -390,81 +381,29 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         return false;
       }
     }
-
     return true;
   }
 
-  /*
-   * Function arguments derived from Synthea end state properties that are imbued in
-   * the manifest. The function returns a number representing data issues that would
-   * be created if the Synthea mainfest were to be executed.
-   * 0 (zero) : no constraint issues
-   * > 0      : should not proceed; data present in db for the Synthea paramerters
-   *
-   * p_beg_bene_id
-   * p_beg_bene_id
-   * p_clm_id
-   * p_beg_clm_grp_id
-   * p_pde_id_start
-   * p_carr_clm_cntl_num_start
-   * p_fi_doc_cntl_num_start
-   * p_hicn_start
-   * p_mbi_start
-   */
-  private static final String FUNC_SQL =
-      "{ ? = call synthea_load_pre_validate( ?, ?, ?, ?, ?, ?, ?, ?, ?) }";
-
   /**
-   * @param manifest the {@link DataSetManifest} that lists the Synthea properties to verify
-   * @return <code>true</code> if all of the Synthea parameters listed in the manifest do not
+   * @param manifest the {@link DataSetManifest} that lists pre-validation properties to verify
+   * @return <code>true</code> if all of the pre-validation parameters listed in the manifest do not
    *     introduce potential data loading issues, <code>false</code> if not
    */
-  private boolean checkSyntheticManifestProperties(DataSetManifest manifest) throws Exception {
-    LOGGER.info("Synthea data in manifest, ID: {}; verifying efficacy...", manifest.getId());
-    SyntheaEndStateProperties endStatProps = manifest.getSyntheaEndStateProperties().get();
-    boolean okToProcess = true;
-    Connection dbConn = null;
-    CallableStatement cs = null;
-    try {
-      dbConn = appState.getPooledDataSource().getConnection();
-      cs = dbConn.prepareCall(FUNC_SQL);
-      cs.registerOutParameter(1, Types.INTEGER);
-      cs.setLong(2, endStatProps.getBeneIdStart());
-      cs.setLong(3, endStatProps.getBeneIdEnd());
-      cs.setLong(4, endStatProps.getClmIdStart());
-      cs.setLong(5, endStatProps.getClmGrpIdStart());
-      cs.setLong(6, endStatProps.getPdeIdStart());
-      cs.setLong(7, endStatProps.getCarrClmCntlNumStart());
-      cs.setLong(8, endStatProps.getFiDocCntlNumStart());
-      cs.setString(9, endStatProps.getHicnStart());
-      cs.setString(10, endStatProps.getMbiStart());
-      cs.execute();
-      int result = cs.getInt(1);
-      okToProcess = (result < 1);
-      LOGGER.info("Synthea data verification returned {} issues...", result);
-    } catch (Exception e) {
-      LOGGER.error(
-          "Failed to determine efficacy of Synthea manifest {}....error: {}",
-          manifest.getId(),
-          e.getMessage(),
-          e);
-      throw e;
-    } finally {
-      if (cs != null) {
-        try {
-          cs.close();
-          cs = null;
-        } catch (Exception e) {
-        }
-      }
-      if (dbConn != null) {
-        try {
-          dbConn.close();
-          dbConn = null;
-        } catch (Exception e) {
-        }
-      }
+  private boolean checkPreValidationProperties(DataSetManifest manifest) throws Exception {
+    LOGGER.info(
+        "PreValidationProperties found in manifest, ID: {}; verifying efficacy...",
+        manifest.getId());
+
+    // for now only Synthea manifests will have PreValidationProperties
+    if (!manifest.isSyntheticData()) {
+      return true;
     }
-    return okToProcess;
+
+    // instantiate a pre-validation interface; in this case, CcwRifLoadPreValidateSynthea
+    CcwRifLoadPreValidateInterface preValInterface = new CcwRifLoadPreValidateSynthea();
+    // initialize the interface with the appState
+    preValInterface.init(appState);
+    // perform whatever vaidation is appropriate
+    return preValInterface.isValid(manifest);
   }
 }

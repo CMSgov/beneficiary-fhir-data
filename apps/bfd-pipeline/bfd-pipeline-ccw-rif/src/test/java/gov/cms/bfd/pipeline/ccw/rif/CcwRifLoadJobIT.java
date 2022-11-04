@@ -13,7 +13,7 @@ import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.SyntheaEndStateProperties;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
@@ -520,14 +520,14 @@ public final class CcwRifLoadJobIT {
 
   /**
    * Tests {@link CcwRifLoadJob} when run twice; once against a bucket that uses synthetic data but
-   * will not have a {@link SyntheaEndStateProperties} object as part of the manifest, and a second
-   * time (same bucket) where the manifest includes a {@link SyntheaEndStateProperties} that is
+   * will not have a {@link PreValidationProperties} object as part of the manifest, and a second
+   * time (same bucket) where the manifest includes a {@link PreValidationProperties} that is
    * invalid per its XML Schema Definition (XSD).
    *
    * @throws Exception (exceptions indicate test failure)
    */
   @Test
-  public void skipDataSetTestForSyntheaPreValidationFailed() throws Exception {
+  public void skipDataSetTestForPreValidationFailed() throws Exception {
     validateLoadAtLocations(
         CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
         CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
@@ -592,10 +592,10 @@ public final class CcwRifLoadJobIT {
                 new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
         // mangle the endStateProps on purpose
-        SyntheaEndStateProperties endStateProps =
-            manifest.getSyntheaEndStateProperties().isPresent()
-                ? manifest.getSyntheaEndStateProperties().get()
-                : new SyntheaEndStateProperties();
+        PreValidationProperties endStateProps =
+            manifest.getPreValidationProperties().isPresent()
+                ? manifest.getPreValidationProperties().get()
+                : new PreValidationProperties();
         endStateProps.setBeneIdEnd(-1000006);
         endStateProps.setBeneIdEnd(-1000018);
         endStateProps.setClmGrpIdStart(0);
@@ -604,7 +604,7 @@ public final class CcwRifLoadJobIT {
         endStateProps.setFiDocCntlNumStart(0);
         endStateProps.setHicnStart("HICN_START");
         endStateProps.setMbiStart("MBI_START");
-        manifest.setSyntheaEndStateProperties(endStateProps);
+        manifest.setPreValidationProperties(endStateProps);
       } else {
         manifest =
             new DataSetManifest(
